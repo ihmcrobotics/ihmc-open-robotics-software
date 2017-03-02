@@ -1,363 +1,288 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.GeometryTools;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-public class Ramp3d implements Shape3d
+/**
+ * Ramp where the center of ramp start side is origin.
+ * 0 to X
+ * -Y/2 +Y/2
+ * 0 to Z
+ */
+public class Ramp3d extends Shape3d<Ramp3d>
 {
-   private static final double DEFAULT_EPSILON = 1e-7;
-   protected RigidBodyTransform transform = new RigidBodyTransform();
-   private RigidBodyTransform inverseTransform = new RigidBodyTransform();
-   private RigidBodyTransform transformFromRampToAngledFrame = new RigidBodyTransform();
-   private RigidBodyTransform transformFromAngledFrameToRamp = new RigidBodyTransform();
-
-   // for these, the x-axis lies in the ramp plane, and is parallel to the ramp sides
-   private double width;
-   private double length;
-   private double height;
+   private final Size3d size;
+   
    private double rampLength;
    private double angleOfRampIncline;
+   private final Plane3d rampPlane;
 
-   private Vector3d surfaceNormal;
+   private final Point3D temporaryPoint;
 
-   private final RigidBodyTransform temporaryTransform = new RigidBodyTransform();
-   private final Point3d temporaryPoint = new Point3d();
+   public Ramp3d(Ramp3d ramp3d)
+   {
+      setPose(ramp3d);
+      size = new Size3d(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
+   }
 
    public Ramp3d(double width, double length, double height)
    {
-      this(new RigidBodyTransform(), width, length, height);
+      size = new Size3d(length, width, height);
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
    }
 
    public Ramp3d(RigidBodyTransform transform, double width, double length, double height)
    {
-      this.transform.set(transform);
-      this.width = width;
-      this.length = length;
-      this.height = height;
-      initializeRamp(transform, length, height);
+      setPose(transform);
+      size = new Size3d(length, width, height);
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
    }
 
-   public Ramp3d(Ramp3d ramp3d)
+   public Ramp3d(Pose pose, double width, double length, double height)
    {
-      this(ramp3d.transform, ramp3d.width, ramp3d.length, ramp3d.height);
+      setPose(pose);
+      size = new Size3d(length, width, height);
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
    }
 
+   @Override
    public void set(Ramp3d ramp3d)
    {
-      this.transform.set(ramp3d.transform);
-      this.width = ramp3d.width;
-      this.length = ramp3d.length;
-      this.height = ramp3d.height;
-      initializeRamp(this.transform, this.length, this.height);
+      if (this != ramp3d)
+      {
+         setPose(ramp3d);
+         size.set(ramp3d.size);
+
+         updateRamp();
+      }
    }
 
-   private void initializeRamp(RigidBodyTransform transform, double length, double height)
+   private void updateRamp()
    {
-      rampLength = Math.sqrt(height * height + length * length);
-      inverseTransform.invert(transform);
+      rampLength = Math.sqrt(size.getHeight() * size.getHeight() + size.getLength() * size.getLength());
+      
+      rampPlane.setToZero();
+      rampPlane.setNormal(-size.getZ(), 0.0, size.getX());
 
-      // additional transform where x-axis is plane of the ramp and y-axis is
-      // still perpendicular to it's length
-      angleOfRampIncline = Math.atan(height / length);
-      transformFromAngledFrameToRamp.setRotationPitchAndZeroTranslation(-angleOfRampIncline);
-
-      temporaryTransform.multiply(transform, transformFromAngledFrameToRamp);
-      surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
-      temporaryTransform.transform(surfaceNormal);
-
-      transformFromRampToAngledFrame.invert(transformFromAngledFrameToRamp);
+      angleOfRampIncline = Math.atan(size.getHeight() / size.getLength());
    }
 
    public double getWidth()
    {
-      return width;
+      return size.getWidth();
    }
 
    public void setWidth(double width)
    {
-      this.width = width;
+      size.setWidth(width);
+      updateRamp();
    }
 
    public double getHeight()
    {
-      return height;
+      return size.getHeight();
    }
 
    public void setHeight(double height)
    {
-      this.height = height;
+      size.setHeight(height);
+      updateRamp();
    }
 
    public double getLength()
    {
-      return length;
+      return size.getLength();
    }
 
    public void setLength(double length)
    {
-      this.length = length;
+      size.setLength(length);
+      updateRamp();
    }
-   
 
    public double getRampLength()
    {
-      return this.rampLength;
+      return rampLength;
    }
 
-   public RigidBodyTransform getTransform()
+   public void getSurfaceNormal(Vector3DBasics surfaceNormalToPack)
    {
-      return transform;
-   }
-
-   public void setTransform(RigidBodyTransform newTransform)
-   {
-      transform.set(newTransform);
-   }
-
-   public Vector3d getSurfaceNormal()
-   {
-      return surfaceNormal;
+      surfaceNormalToPack.set(rampPlane.getNormal());
+      transformToWorld(surfaceNormalToPack);
    }
 
    public double getRampIncline()
    {
       return angleOfRampIncline;
    }
-
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   public void applyTransform(RigidBodyTransform transform)
+   
+   @Override
+   public void applyTransform(Transform transform)
    {
-      tempTransform.set(transform);
-      tempTransform.multiply(this.transform);
-      this.transform.set(tempTransform);
-      inverseTransform.set(this.transform);
-      inverseTransform.invert();
+      applyTransformToPose(transform);
+      updateRamp();
    }
 
-   public double distance(Point3d point)
+   @Override
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
+   {
+      boolean isInsideOrOnSurface = isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, 0.0);
+      
+      closestPointToPack.set(pointInWorldToCheck);
+      
+      if (!isInsideOrOnSurface)
+      {
+         orthogonalProjectionShapeFrame(closestPointToPack);
+      }
+      
+      findClosestSurfaceNormal(closestPointToPack, normalToPack);
+      
+      return isInsideOrOnSurface;
+   }
+   
+   private void findClosestSurfaceNormal(Point3DReadOnly point, Vector3DBasics normalToPack)
+   {
+      double distanceToNegativeYSide = Math.abs(size.getY() / 2.0 + point.getY());
+      double distanceToPositiveYSide = Math.abs(size.getY() / 2.0 - point.getY());
+      double distanceToFront = Math.abs(size.getX() - point.getX());
+      double distanceToBottom = Math.abs(point.getZ());
+      double distanceToRampPlane = Math.abs(rampPlane.distance(point));
+      
+      if (firstIsLeast(distanceToNegativeYSide, distanceToPositiveYSide, distanceToFront, distanceToBottom, distanceToRampPlane))
+      {
+         normalToPack.set(0.0, -1.0, 0.0);
+      }
+      else if (firstIsLeast(distanceToPositiveYSide, distanceToFront, distanceToBottom, distanceToRampPlane, distanceToNegativeYSide))
+      {
+         normalToPack.set(0.0, 1.0, 0.0);
+      }
+      else if (firstIsLeast(distanceToFront, distanceToBottom, distanceToRampPlane, distanceToNegativeYSide, distanceToPositiveYSide))
+      {
+         normalToPack.set(1.0, 0.0, 0.0);
+      }
+      else if (firstIsLeast(distanceToBottom, distanceToRampPlane, distanceToNegativeYSide, distanceToPositiveYSide, distanceToFront))
+      {
+         normalToPack.set(0.0, 0.0, -1.0);
+      }
+      else // distanceToRampPlane is least
+      {
+         normalToPack.set(rampPlane.getNormal());
+      }
+   }
+   
+   private boolean firstIsLeast(double least, double num1, double num2, double num3, double num4)
+   {
+      return least <= num1 && least <= num2 && least <= num3 && least <= num4;
+   }
+
+   @Override
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
+   {
+      return MathTools.isPreciselyBoundedByInclusive(pointToCheck.getX(), 0.0, size.getX(), epsilon * 2.0)
+          && MathTools.isPreciselyBoundedByInclusive(pointToCheck.getY(), -size.getY() / 2.0, size.getY() / 2.0, epsilon * 2.0)
+          && MathTools.isPreciselyBoundedByInclusive(pointToCheck.getZ(), 0.0, size.getZ(), epsilon * 2.0)
+          && rampPlane.isOnOrBelow(pointToCheck, epsilon);
+   }
+
+   @Override
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
       temporaryPoint.set(point);
-      orthogonalProjection(temporaryPoint);
-
+      orthogonalProjectionShapeFrame(temporaryPoint);
       return temporaryPoint.distance(point);
    }
 
-   public boolean checkIfInside(Point3d pointInWorldToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   @Override
+   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
    {
-      boolean isInsideOrOnSurface = isInsideOrOnSurface(pointInWorldToCheck);
-      if (isInsideOrOnSurface)
+      if (!isInsideOrOnSurfaceShapeFrame(pointToCheckAndPack, Epsilons.ONE_BILLIONTH))
       {
-         closestPointToPack.set(pointInWorldToCheck);
-         surfaceNormalAtForInsideOrOnSurface(normalToPack, pointInWorldToCheck);     
-         return true;
-      }
-      
-      closestPointToPack.set(pointInWorldToCheck);
-      orthogonalProjection(closestPointToPack);
-      
-      surfaceNormalAtForProjectedToSurface(normalToPack, closestPointToPack);     
-      return false;
-   }
-
-   public boolean isInsideOrOnSurface(Point3d pointToCheck)
-   {
-      return isInsideOrOnSurface(pointToCheck, DEFAULT_EPSILON);
-   }
-
-   public boolean isInsideOrOnSurface(Point3d pointToCheck, double epsilon)
-   {
-      temporaryPoint.set(pointToCheck);
-      inverseTransform.transform(temporaryPoint);
-      transformFromRampToAngledFrame.transform(temporaryPoint);
-
-      boolean isInsideOrOnSurface = ((temporaryPoint.getZ() <= epsilon) && (Math.abs(temporaryPoint.getY()) < 0.5 * width + epsilon) && (temporaryPoint.getX() >= -epsilon)
-                                     && (temporaryPoint.getX() <= rampLength + epsilon));
-
-      transformFromAngledFrameToRamp.transform(temporaryPoint);
-
-      isInsideOrOnSurface = isInsideOrOnSurface && (temporaryPoint.getX() <= epsilon + length) && (temporaryPoint.getX() >= -epsilon)
-                            && (temporaryPoint.getZ() <= epsilon + height) && (temporaryPoint.getZ() >= -epsilon);
-
-      return isInsideOrOnSurface;
-   }
-
-   private boolean projectIntoXYRectangle(Point3d pointToCheckAndPack, double lengthToUse)
-   {
-      boolean projected = false;
-      
-      if (pointToCheckAndPack.getX() < 0.0) 
-      {
-         pointToCheckAndPack.setX(0.0);
-         projected = true;
-      }
-      else if (pointToCheckAndPack.getX() > lengthToUse) 
-      {
-         pointToCheckAndPack.setX(lengthToUse);
-         projected = true;
-      }
-
-      if (pointToCheckAndPack.getY() > width/2.0) 
-      {
-         pointToCheckAndPack.setY(width/2.0);
-         projected = true;
-      }
-      else if (pointToCheckAndPack.getY() < -width/2.0) 
-      {
-         pointToCheckAndPack.setY(-width/2.0);
-         projected = true;
-      }
-      
-      return projected;
-   }
-   
-   
-   public void orthogonalProjection(Point3d pointToCheckAndPack)
-   {
-      inverseTransform.transform(pointToCheckAndPack);
-            
-      boolean aboveRamp = pointToCheckAndPack.getZ() > this.height;
-      
-      // If below, then project to bottom and return.
-      if (pointToCheckAndPack.getZ() < 0.0) 
-      {
-         pointToCheckAndPack.setZ(0.0);
-         projectIntoXYRectangle(pointToCheckAndPack, this.length);
-         transform.transform(pointToCheckAndPack);
-         return;
-      }
-      
-      transformFromRampToAngledFrame.transform(pointToCheckAndPack);
-
-      // If above the ramp, then project to ramp and return.
-      if (aboveRamp || pointToCheckAndPack.getZ() > 0.0)
-      {
-         pointToCheckAndPack.setZ(0.0);
-         projectIntoXYRectangle(pointToCheckAndPack, this.rampLength);
-         transformFromAngledFrameToRamp.transform(pointToCheckAndPack);
-         transform.transform(pointToCheckAndPack);
-         return;
-      }
-      
-      transformFromAngledFrameToRamp.transform(pointToCheckAndPack);
-      if (projectIntoXYRectangle(pointToCheckAndPack, this.length)) return;
- 
-      // Inside. Just project up to the surface
-      transformFromRampToAngledFrame.transform(pointToCheckAndPack);
-      pointToCheckAndPack.setZ(0.0);
-
-      transformFromAngledFrameToRamp.transform(pointToCheckAndPack);
-      transform.transform(pointToCheckAndPack);
-   }
-
-   // point must be in angled frame
-   private boolean canBeProjectedDirectlyOntoFaceOfRamp(Point3d pointTransformedOntoRampCoordinates)
-   {
-      double delta = 0.002;
-      
-      boolean insideWidth = (pointTransformedOntoRampCoordinates.getY() <= 0.5 * width - delta) && (pointTransformedOntoRampCoordinates.getY() >= -0.5 * width + delta);
-      boolean insideLength = (pointTransformedOntoRampCoordinates.getX() >= delta) && (pointTransformedOntoRampCoordinates.getX() <= rampLength - delta);
-      boolean onOrAboveSurface = pointTransformedOntoRampCoordinates.getZ() > -1e-3;
-      return (insideWidth && insideLength && onOrAboveSurface);
-   }
-   
-   private boolean canBeProjectedDirectlyOntoBottomOfRamp(Point3d pointTransformedOntoRampCoordinates)
-   {
-      boolean insideWidth = Math.abs(pointTransformedOntoRampCoordinates.getY()) <= 0.5 * width;
-      boolean insideLength = (pointTransformedOntoRampCoordinates.getX() >= 0.0) && (pointTransformedOntoRampCoordinates.getX() <= length);
-      boolean onSurface = Math.abs(pointTransformedOntoRampCoordinates.getZ()) < 1e-3;
-      return (insideWidth && insideLength && onSurface);
-   }
-   
-   private boolean isPointOnFaceOfRampAlsoOnTheEdges(Point3d point)
-   {
-      return (Math.abs(point.getX()) < 1e-3) || (Math.abs(point.getX() - rampLength) < 1e-3) || (Math.abs(point.getY() - 0.5 * width) < 1e-3) || (Math.abs(point.getY() + 0.5 * width) < 1e-3);
-   }
-   
-
-   private boolean isPointOnBottomOfRampAlsoOnTheEdges(Point3d point)
-   {
-      return (Math.abs(point.getX()) < 1e-3) || (Math.abs(point.getX() - length) < 1e-3) || (Math.abs(point.getY() - 0.5 * width) < 1e-3) || (Math.abs(point.getY() + 0.5 * width) < 1e-3);
-   }
-
-   
-
-   private void surfaceNormalAtForProjectedToSurface(Vector3d normalToPack, Point3d pointToCheck)
-   {
-      surfaceNormalAtForInsideOrOnSurface(normalToPack, pointToCheck);
-   }
-
-   private void surfaceNormalAtForInsideOrOnSurface(Vector3d normalToPack, Point3d pointToCheck)
-   {
-      temporaryPoint.set(pointToCheck);
-      inverseTransform.transform(temporaryPoint);
-      transformFromRampToAngledFrame.transform(temporaryPoint);
-
-      if (canBeProjectedDirectlyOntoFaceOfRamp(temporaryPoint))
-      {
-         if (isPointOnFaceOfRampAlsoOnTheEdges(temporaryPoint))
+         if (rampPlane.isOnOrAbove(pointToCheckAndPack))
          {
-            makeNormalFromCenterOfRampToPointToCheck(normalToPack, pointToCheck);
-            return;
+            rampPlane.orthogonalProjection(pointToCheckAndPack);
          }
          
-         normalToPack.set(surfaceNormal.getX(), surfaceNormal.getY(), surfaceNormal.getZ());
-         return;
-      }
-      
-      temporaryPoint.set(pointToCheck);
-      inverseTransform.transform(temporaryPoint);
-      
-      if (canBeProjectedDirectlyOntoBottomOfRamp(temporaryPoint))
-      {
-         if (isPointOnBottomOfRampAlsoOnTheEdges(temporaryPoint))
-         {
-            makeNormalFromCenterOfRampToPointToCheck(normalToPack, pointToCheck);
-            return;
-         }
-         
-         normalToPack.set(0.0, 0.0, -1.0);
-         transform.transform(normalToPack);
-         return;
+         GeometryTools.clipToBoundingBox(pointToCheckAndPack, 0.0, getLength(), -getWidth() / 2.0, getWidth() / 2.0, 0.0, getHeight());
       }
       else
       {
-         temporaryPoint.set(pointToCheck);
-         orthogonalProjection(temporaryPoint);
-         temporaryPoint.sub(pointToCheck, temporaryPoint);
-         normalToPack.set(temporaryPoint);
-         normalToPack.normalize();
-      } 
+         double distanceToNegativeYSide = Math.abs(size.getY() / 2.0 + pointToCheckAndPack.getY());
+         double distanceToPositiveYSide = Math.abs(size.getY() / 2.0 - pointToCheckAndPack.getY());
+         double distanceToFront = Math.abs(size.getX() - pointToCheckAndPack.getX());
+         double distanceToBottom = Math.abs(pointToCheckAndPack.getZ());
+         double distanceToRampPlane = Math.abs(rampPlane.distance(pointToCheckAndPack));
+         
+         if (firstIsLeast(distanceToNegativeYSide, distanceToPositiveYSide, distanceToFront, distanceToBottom, distanceToRampPlane))
+         {
+            pointToCheckAndPack.setY(-size.getY() / 2.0);
+         }
+         else if (firstIsLeast(distanceToPositiveYSide, distanceToFront, distanceToBottom, distanceToRampPlane, distanceToNegativeYSide))
+         {
+            pointToCheckAndPack.setY(size.getY() / 2.0);
+         }
+         else if (firstIsLeast(distanceToFront, distanceToBottom, distanceToRampPlane, distanceToNegativeYSide, distanceToPositiveYSide))
+         {
+            pointToCheckAndPack.setX(size.getX());
+         }
+         else if (firstIsLeast(distanceToBottom, distanceToRampPlane, distanceToNegativeYSide, distanceToPositiveYSide, distanceToFront))
+         {
+            pointToCheckAndPack.setZ(0.0);
+         }
+         else // distanceToRampPlane is least
+         {
+            rampPlane.orthogonalProjection(pointToCheckAndPack);
+         }
+      }
    }
-   
 
-   private void makeNormalFromCenterOfRampToPointToCheck(Vector3d normalToPack, Point3d pointToCheck)
+   @Override
+   public boolean epsilonEquals(Ramp3d other, double epsilon)
    {
-      normalToPack.set(pointToCheck);
-      inverseTransform.transform(normalToPack);
-      
-      normalToPack.sub(new Vector3d(length/2.0, 0.0, height/4.0));
-      
-      transform.transform(normalToPack);
-      normalToPack.normalize();
+      return size.epsilonEquals(other.size, epsilon);
    }
- 
+
+   @Override
+   public void setToZero()
+   {
+      size.setToZero();
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      size.setToNaN();
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return size.containsNaN();
+   }
 
    @Override
    public String toString()
    {
-      return "width = " + width + ", length = " + length + ", height = " + height + ", + transform = " + transform.toString(8) + "\n";
+      return "size = " + size + ", + transform = " + getPoseString() + "\n";
    }
-
-   public void transformFromAngledToWorldFrame(Point3d pointToTransform)
-   {
-//      inverseTransform.transform(pointToTransform);
-//      transformFromRampToAngledFrame.transform(pointToTransform);
-      
-      transformFromAngledFrameToRamp.transform(pointToTransform);
-      transform.transform(pointToTransform);
-   }
-
-
 }

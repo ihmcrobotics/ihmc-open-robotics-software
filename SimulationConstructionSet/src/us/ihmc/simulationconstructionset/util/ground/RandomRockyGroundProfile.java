@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
@@ -148,7 +147,8 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
       return ((x > 0) && (x < fieldLength) && (y > 0) && (y < fieldLength));
    }
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -156,6 +156,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
    
+   @Override
    public double heightAt(double x_world, double y_world, double z_world)
    {
       int xPos1 = (int) Math.floor((x_world - boundingBox.getXMin()) / resolution);
@@ -173,7 +174,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
    }
 
 
-   public void surfaceNormalAt(double x_world, double y_world, double z_world, Vector3d normal)
+   public void surfaceNormalAt(double x_world, double y_world, double z_world, Vector3D normal)
    {
       normal.setX(0.0);
       normal.setY(0.0);
@@ -191,26 +192,26 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
       double h1 = terrainMap[xPos1][yPos1];
       double h2 = terrainMap[xPos2][yPos2];
 
-      Point3d p1 = null;
-      Point3d p2 = null;
+      Point3D p1 = null;
+      Point3D p2 = null;
 
       if (h1 > h2)
       {
-         p1 = new Point3d(xPos1, yPos1, h1);
-         p2 = new Point3d(xPos2, yPos2, h2);
+         p1 = new Point3D(xPos1, yPos1, h1);
+         p2 = new Point3D(xPos2, yPos2, h2);
       }
       else
       {
-         p1 = new Point3d(xPos1, yPos1, h2);
-         p2 = new Point3d(xPos2, yPos2, h1);
+         p1 = new Point3D(xPos1, yPos1, h2);
+         p2 = new Point3D(xPos2, yPos2, h1);
       }
 
-      Vector3d v1 = new Vector3d();
+      Vector3D v1 = new Vector3D();
       v1.sub(p1, p2);
 
       // Create a vector point away from p1
 
-      Vector3d v2 = new Vector3d(-v1.getY(), v1.getX(), 0.0);
+      Vector3D v2 = new Vector3D(-v1.getY(), v1.getX(), 0.0);
 
       normal.cross(v1, v2);
       normal.normalize();
@@ -220,6 +221,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
 
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

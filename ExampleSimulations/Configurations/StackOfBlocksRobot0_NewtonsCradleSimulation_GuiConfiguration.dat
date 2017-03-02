@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.BaseRobot.t</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -14,6 +14,12 @@
 	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>root.HybridImpulseSpringDamperCollisionHandler.kpCollision,root.HybridImpulseSpringDamperCollisionHandler.kdCollision</Entry Boxes>
+</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -31,9 +37,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.0</Camera X>
- <Camera Y>-6.0</Camera Y>
- <Camera Z>1.0</Camera Z>
+ <Camera X>2.7729446639848483</Camera X>
+ <Camera Y>-4.982916518524043</Camera Y>
+ <Camera Z>2.508224530787231</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>

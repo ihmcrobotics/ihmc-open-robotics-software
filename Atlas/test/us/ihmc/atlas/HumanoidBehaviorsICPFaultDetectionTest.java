@@ -3,9 +3,9 @@ package us.ihmc.atlas;
 
 import us.ihmc.avatar.DRCHumanoidBehaviorICPFaultDetectionTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})

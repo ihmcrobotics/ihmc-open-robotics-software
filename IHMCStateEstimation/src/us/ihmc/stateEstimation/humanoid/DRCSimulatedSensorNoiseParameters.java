@@ -2,9 +2,7 @@ package us.ihmc.stateEstimation.humanoid;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.MathTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 
@@ -68,8 +66,8 @@ public class DRCSimulatedSensorNoiseParameters
       double gazeboAngularVelocityBiasMean = 0.0000075;
       double gazeboLinearAccelerationBiasMean = 0.1;
       
-      Vector3d initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
-      Vector3d initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
+      Vector3D initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
+      Vector3D initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
 
       sensorNoiseParameters.setInitialLinearVelocityBias(initialLinearAccelerationBias);
       sensorNoiseParameters.setInitialAngularVelocityBias(initialAngularVelocityBias);
@@ -100,8 +98,8 @@ public class DRCSimulatedSensorNoiseParameters
          double gazeboLinearAccelerationBiasStandardDeviation = 0.017000;
          double gazeboLinearAccelerationBiasMean =  0.100000;
 
-         Vector3d initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
-         Vector3d initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
+         Vector3D initialLinearAccelerationBias = computeGazeboBiasVector(gazeboLinearAccelerationBiasMean, gazeboLinearAccelerationBiasStandardDeviation, random);
+         Vector3D initialAngularVelocityBias = computeGazeboBiasVector(gazeboAngularVelocityBiasMean, gazeboAngularVelocityBiasStandardDeviation, random);
 
          sensorNoiseParameters.setInitialLinearVelocityBias(initialLinearAccelerationBias);
          sensorNoiseParameters.setInitialAngularVelocityBias(initialAngularVelocityBias);
@@ -186,12 +184,12 @@ public class DRCSimulatedSensorNoiseParameters
    }
    
 
-   private static Vector3d computeGazeboBiasVector(double mean, double standardDeviation, Random random)
+   private static Vector3D computeGazeboBiasVector(double mean, double standardDeviation, Random random)
    {
-      Vector3d ret = new Vector3d();
+      Vector3D ret = new Vector3D();
       for (Direction direction : Direction.values())
       {
-         MathTools.set(ret, direction, computeGazeboBias(mean, standardDeviation, random));
+         Direction.set(ret, direction, computeGazeboBias(mean, standardDeviation, random));
       }
 
       return ret;

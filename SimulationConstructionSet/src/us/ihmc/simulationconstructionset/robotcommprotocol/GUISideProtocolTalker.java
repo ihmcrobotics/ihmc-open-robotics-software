@@ -187,7 +187,7 @@ public class GUISideProtocolTalker
       }
    }
 
-   public void sendData(int listid, ArrayList<YoVariable> vars)
+   public void sendData(int listid, ArrayList<YoVariable<?>> vars)
    {
       try
       {
@@ -198,7 +198,7 @@ public class GUISideProtocolTalker
 
          for (int i = 0; i < vars.size(); i++)
          {
-            YoVariable v = vars.get(i);
+            YoVariable<?> v = vars.get(i);
             dataOutputStream.writeFloat((float) v.getValueAsDouble());
          }
 

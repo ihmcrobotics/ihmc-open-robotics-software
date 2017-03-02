@@ -3,9 +3,9 @@ package us.ihmc.robotbuilder.model;
 import javaslang.collection.List;
 import javaslang.concurrent.Future;
 import javaslang.control.Option;
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 
 import java.io.File;
@@ -29,6 +29,6 @@ public class Loader {
                 .flatMap(modelSelector)
                 .map(selectedModel -> selectedModel
                         .flatMap((selected) -> Option.of(rawLoader[0].getGeneralizedSDFRobotModel(selected)))
-                        .map(model -> sdfLoader.loadRobotDescriptionFromSDF(model, null, true, true, true)));
+                        .map(model -> sdfLoader.loadRobotDescriptionFromSDF(model, null, true)));
     }
 }

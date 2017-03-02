@@ -2,7 +2,7 @@ package us.ihmc.avatar.sensors;
 
 import java.util.List;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.RawIMUPacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

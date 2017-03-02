@@ -1,27 +1,27 @@
 package us.ihmc.quadrupedRobotics.planning;
 
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.tools.continuousIntegration.IntegrationCategory.FAST;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
-@ContinuousIntegrationPlan(categories = FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class QuadrupedXGaitPlannerTest
 {
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testInitialForwardVelocityPlan()
    {
@@ -34,7 +34,7 @@ public class QuadrupedXGaitPlannerTest
       xGaitSettings.setEndDoubleSupportDuration(0);
       xGaitSettings.setEndPhaseShift(90);
 
-      Vector3d planarVelocity = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D planarVelocity = new Vector3D(1.0, 0.0, 0.0);
       RobotQuadrant initialStepQuadrant = RobotQuadrant.HIND_RIGHT;
       FramePoint supportCentroidAtSoS = new FramePoint(ReferenceFrame.getWorldFrame());
       supportCentroidAtSoS.set(0, 0, 0);
@@ -57,22 +57,22 @@ public class QuadrupedXGaitPlannerTest
 
       nominalSteps.get(0).setRobotQuadrant(RobotQuadrant.HIND_RIGHT);
       nominalSteps.get(0).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(0).setGoalPosition(new Point3d(-0.25, -0.125, 0.0));
+      nominalSteps.get(0).setGoalPosition(new Point3D(-0.25, -0.125, 0.0));
       nominalSteps.get(0).getTimeInterval().setInterval(0.0, 0.25);
 
       nominalSteps.get(1).setRobotQuadrant(RobotQuadrant.FRONT_RIGHT);
       nominalSteps.get(1).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(1).setGoalPosition(new Point3d(0.875, -0.125, 0.0));
+      nominalSteps.get(1).setGoalPosition(new Point3D(0.875, -0.125, 0.0));
       nominalSteps.get(1).getTimeInterval().setInterval(0.125, 0.375);
 
       nominalSteps.get(2).setRobotQuadrant(RobotQuadrant.HIND_LEFT);
       nominalSteps.get(2).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(2).setGoalPosition(new Point3d(0.0, 0.125, 0.0));
+      nominalSteps.get(2).setGoalPosition(new Point3D(0.0, 0.125, 0.0));
       nominalSteps.get(2).getTimeInterval().setInterval(0.25, 0.5);
 
       nominalSteps.get(3).setRobotQuadrant(RobotQuadrant.FRONT_LEFT);
       nominalSteps.get(3).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(3).setGoalPosition(new Point3d(1.125, 0.125, 0.0));
+      nominalSteps.get(3).setGoalPosition(new Point3D(1.125, 0.125, 0.0));
       nominalSteps.get(3).getTimeInterval().setInterval(0.375, 0.625);
 
       double epsilon = 0.00001;
@@ -82,7 +82,7 @@ public class QuadrupedXGaitPlannerTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout=300000)
    public void testOnlineForwardVelocityPlan()
    {
@@ -95,7 +95,7 @@ public class QuadrupedXGaitPlannerTest
       xGaitSettings.setEndDoubleSupportDuration(0);
       xGaitSettings.setEndPhaseShift(90);
 
-      Vector3d planarVelocity = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D planarVelocity = new Vector3D(1.0, 0.0, 0.0);
       double currentTime = 0.125;
       double currentYaw = 0.0;
 
@@ -103,13 +103,13 @@ public class QuadrupedXGaitPlannerTest
       priorSteps.set(RobotEnd.HIND, new QuadrupedTimedStep());
       priorSteps.get(RobotEnd.HIND).setRobotQuadrant(RobotQuadrant.HIND_RIGHT);
       priorSteps.get(RobotEnd.HIND).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      priorSteps.get(RobotEnd.HIND).setGoalPosition(new Point3d(-0.25, -0.125, 0.0));
+      priorSteps.get(RobotEnd.HIND).setGoalPosition(new Point3D(-0.25, -0.125, 0.0));
       priorSteps.get(RobotEnd.HIND).getTimeInterval().setInterval(0.0, 0.25);
 
       priorSteps.set(RobotEnd.FRONT, new QuadrupedTimedStep());
       priorSteps.get(RobotEnd.FRONT).setRobotQuadrant(RobotQuadrant.FRONT_RIGHT);
       priorSteps.get(RobotEnd.FRONT).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      priorSteps.get(RobotEnd.FRONT).setGoalPosition(new Point3d(0.875, -0.125, 0.0));
+      priorSteps.get(RobotEnd.FRONT).setGoalPosition(new Point3D(0.875, -0.125, 0.0));
       priorSteps.get(RobotEnd.FRONT).getTimeInterval().setInterval(0.125, 0.375);
 
       ArrayList<QuadrupedTimedStep> plannedSteps = new ArrayList<>();
@@ -127,12 +127,12 @@ public class QuadrupedXGaitPlannerTest
 
       nominalSteps.get(0).setRobotQuadrant(RobotQuadrant.HIND_LEFT);
       nominalSteps.get(0).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(0).setGoalPosition(new Point3d(0.0, 0.125, 0.0));
+      nominalSteps.get(0).setGoalPosition(new Point3D(0.0, 0.125, 0.0));
       nominalSteps.get(0).getTimeInterval().setInterval(0.25, 0.5);
 
       nominalSteps.get(1).setRobotQuadrant(RobotQuadrant.FRONT_LEFT);
       nominalSteps.get(1).setGroundClearance(xGaitSettings.getStepGroundClearance());
-      nominalSteps.get(1).setGoalPosition(new Point3d(1.125, 0.125, 0.0));
+      nominalSteps.get(1).setGoalPosition(new Point3D(1.125, 0.125, 0.0));
       nominalSteps.get(1).getTimeInterval().setInterval(0.375, 0.625);
 
       double epsilon = 0.00001;

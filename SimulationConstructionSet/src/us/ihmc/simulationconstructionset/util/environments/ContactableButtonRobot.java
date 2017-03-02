@@ -1,24 +1,24 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.SliderJoint;
 
 public class ContactableButtonRobot extends ContactableSliderJointRobot {
 
@@ -46,8 +46,8 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    private boolean buttonIsSwitchable = true;
    private double buttonSwitchLimit = 0.95;
    
-   private Vector3d buttonPushVector;
-   private Vector3d buttonOffset;
+   private Vector3D buttonPushVector;
+   private Vector3D buttonOffset;
 
    private RigidBodyTransform rootJointTransform;
 
@@ -61,12 +61,12 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    private RigidBodyTransform originalButtonTransform;
    private FramePose buttonPoseInWorld;
 
-   public ContactableButtonRobot(String name, RigidBodyTransform rootTransform, Vector3d pushVector)
+   public ContactableButtonRobot(String name, RigidBodyTransform rootTransform, Vector3D pushVector)
    {
       this(name, rootTransform, pushVector, DEFAULT_RADIUS, DEFAULT_THICKNESS, DEFAULT_MASS, DEFAULT_DAMPING, DEFAULT_KP, DEFAULT_CASEWIDTH, DEFAULT_CASEDEPTH, DEFAULT_BUTTONLIMIT);
    }
 
-   public ContactableButtonRobot(String name, RigidBodyTransform rootTransform, Vector3d pushVector, double buttonRadius, double buttonThickness, double buttonMass, double buttonDamping, double buttonKp, double caseWidth, double caseDepth, double buttonLimit)
+   public ContactableButtonRobot(String name, RigidBodyTransform rootTransform, Vector3D pushVector, double buttonRadius, double buttonThickness, double buttonMass, double buttonDamping, double buttonKp, double caseWidth, double caseDepth, double buttonLimit)
    {
       super(name);
       this.name = name;
@@ -75,7 +75,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
      
       this.name = name;
       this.rootJointTransform = rootTransform;
-      this.buttonPushVector = new Vector3d(pushVector);
+      this.buttonPushVector = new Vector3D(pushVector);
       this.buttonPushVector.normalize();
       buttonPoseInWorld = new FramePose();
       originalButtonTransform = new RigidBodyTransform(rootJointTransform); 
@@ -104,7 +104,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    public void createButtonRobot() {
 
       // Transform the button axis with the rootTransform
-      buttonOffset = new Vector3d();
+      buttonOffset = new Vector3D();
       rootJointTransform.getTranslation(buttonOffset);
 
       // Create the buttonSliderJoint
@@ -117,11 +117,11 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonLink = new Link("buttonLink");
       buttonLink.setMass(buttonMass);
 
-      Matrix3d buttonInertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(buttonMass, buttonRadius, buttonThickness, Axis.X);
+      Matrix3D buttonInertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(buttonMass, buttonRadius, buttonThickness, Axis.X);
       buttonLink.setMomentOfInertia(buttonInertiaMatrix);
 
-      Vector3d buttonComOffset = new Vector3d();
-      buttonComOffset.scale(1 / 2.0, buttonPushVector);
+      Vector3D buttonComOffset = new Vector3D();
+      buttonComOffset.setAndScale(1 / 2.0, buttonPushVector);
 
       buttonLink.setComOffset(buttonComOffset);
       buttonSliderJoint.setLink(buttonLink);
@@ -131,14 +131,14 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
 
       // Create the Graphics
       buttonLinkGraphics = new Graphics3DObject();
-      Matrix3d rotationMatrix = new Matrix3d();
+      RotationMatrix rotationMatrix = new RotationMatrix();
       rootJointTransform.getRotation(rotationMatrix);
 
       buttonLinkGraphics.rotate(rotationMatrix);
       buttonLinkGraphics.addCylinder(buttonThickness / 2.0, buttonRadius, YoAppearance.Red());
-      buttonLinkGraphics.translate(new Vector3d(0.0, 0.0, buttonThickness / 2.0));
+      buttonLinkGraphics.translate(new Vector3D(0.0, 0.0, buttonThickness / 2.0));
       buttonLinkGraphics.addCylinder(buttonThickness / 2.0 - buttonLimit, buttonRadius, YoAppearance.White());
-      buttonLinkGraphics.translate(new Vector3d(0.0, 0.0, buttonThickness / 2.0 - buttonLimit));
+      buttonLinkGraphics.translate(new Vector3D(0.0, 0.0, buttonThickness / 2.0 - buttonLimit));
       buttonLinkGraphics.addCylinder(buttonLimit, buttonRadius, YoAppearance.Black());
 
       buttonLink.setLinkGraphics(buttonLinkGraphics);
@@ -146,7 +146,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       // Create the case of the button
       caseLink = new Link("caseLink");
       
-      Vector3d caseOffset = new Vector3d(buttonPushVector);
+      Vector3D caseOffset = new Vector3D(buttonPushVector);
       caseOffset.scale(buttonThickness);
       caseOffset.add(buttonOffset);
       rootJointTransform.getRotation(rotationMatrix);
@@ -204,19 +204,20 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonPushVector.scale(buttonSliderJoint.getQYoVariable().getDoubleValue());
       sliderJointTransform.setTranslationAndIdentityRotation(buttonPushVector);
       buttonPushVector.normalize();
-      newButtonPose.multiply(originalButtonTransform, sliderJointTransform);
+      newButtonPose.set(originalButtonTransform);
+      newButtonPose.multiply(sliderJointTransform);
       buttonFrame.setPoseAndUpdate(newButtonPose);
 
       super.updateAllGroundContactPointVelocities();
    }
 
    @Override
-   public boolean isClose(Point3d pointInWorldToCheck) {
+   public boolean isClose(Point3D pointInWorldToCheck) {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
    @Override
-   public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+   public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
       FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
 
@@ -228,15 +229,9 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    }
 
    @Override
-   public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
-      //      pointToCheck.changeFrame(buttonFrame);
-
-      if (cylinderFrame.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
-      {
-         return;
-      }
+      cylinderFrame.checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override

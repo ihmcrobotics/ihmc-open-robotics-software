@@ -1,19 +1,18 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class JointWrenchSensor
 {
    private final String name;
    private final YoFrameVector jointWrenchForce, jointWrenchTorque;
-   private final Vector3d offsetFromJoint = new Vector3d();
+   private final Vector3D offsetFromJoint = new Vector3D();
 
    // FIXME offsetFromJoint is probably the offsetToJoint.
-   public JointWrenchSensor(String name, Vector3d offsetFromJoint, Robot robot)
+   public JointWrenchSensor(String name, Vector3D offsetFromJoint, Robot robot)
    {
       this.name = name;
 
@@ -23,22 +22,22 @@ public class JointWrenchSensor
       this.offsetFromJoint.set(offsetFromJoint);
    }
 
-   public void getOffsetFromJoint(Vector3d offsetFromJointToPack)
+   public void getOffsetFromJoint(Vector3D offsetFromJointToPack)
    {
       offsetFromJointToPack.set(offsetFromJoint);
    }
 
-   public void getJointForce(Tuple3d forceToPack)
+   public void getJointForce(Tuple3DBasics forceToPack)
    {
       jointWrenchForce.get(forceToPack);
    }
 
-   public void getJointTorque(Tuple3d torqueToPack)
+   public void getJointTorque(Tuple3DBasics torqueToPack)
    {
       jointWrenchTorque.get(torqueToPack);
    }
 
-   private final Vector3d tempVector = new Vector3d();
+   private final Vector3D tempVector = new Vector3D();
 
    public void setWrench(SpatialVector wrenchToSet)
    {

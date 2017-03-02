@@ -7,37 +7,38 @@ import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.soleToAnkle
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry.Sphere;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Sphere;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class ValkyrieContactPointParameters extends RobotContactPointParameters
 {
-   private final SideDependentList<ArrayList<Point2d>> footGroundContactPoints = new SideDependentList<>();
-   private final SideDependentList<List<Point2d>> handContactPoints = new SideDependentList<>();
+   private final SideDependentList<ArrayList<Point2D>> footGroundContactPoints = new SideDependentList<>();
+   private final SideDependentList<List<Point2D>> handContactPoints = new SideDependentList<>();
    private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
 
    private final DRCRobotJointMap jointMap;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap)
+   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints footContactPoints)
    {
       super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;
 
-      createDefaultControllerFootContactPoints();
-      createDefaultSimulationFootContactPoints();
+      if (footContactPoints == null)
+         createDefaultFootContactPoints();
+      else
+         createContactPoints(footContactPoints);
    }
 
    private void checkJointChildren(SDFJointHolder joint)
@@ -50,9 +51,9 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
          if (name.contains("_heel") || name.contains("_toe") || name.contains("sim_contact") || (sphere != null && Double.parseDouble(sphere.getRadius()) == 0.0))
          {
             System.out.println("Simulation contact '" + name + "'");
-            Vector3d gcOffset = new Vector3d();
+            Vector3D gcOffset = new Vector3D();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             addSimulationContactPoint(joint.getName(), gcOffset);
          }
@@ -60,9 +61,9 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
          if (name.contains("ctrl_contact"))
          {
             System.out.println("Controller contact '" + name + "'");
-            Vector3d gcOffset = new Vector3d();
+            Vector3D gcOffset = new Vector3D();
 
-            SDFConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             boolean assigned = false;
 
@@ -113,12 +114,12 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
       }
    }
 
-   private Point2d projectOnPlane(RigidBodyTransform plane, Vector3d point)
+   private Point2D projectOnPlane(RigidBodyTransform plane, Vector3D point)
    {
       RigidBodyTransform planeInv = new RigidBodyTransform(plane);
       planeInv.invert();
       planeInv.transform(point);
-      return new Point2d(point.getX(), point.getY());
+      return new Point2D(point.getX(), point.getY());
    }
 
    public void setupContactPointsFromRobotModel(GeneralizedSDFRobotModel sdf, boolean removeExistingContacts)
@@ -144,11 +145,6 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
       }
    }
 
-   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
-   {
-      addMoreSimulationFootContactPoints(nContactPointsX, nContactPointsY, edgePointsOnly, true);
-   }
-
    @Override
    public SideDependentList<RigidBodyTransform> getHandContactPointTransforms()
    {
@@ -156,7 +152,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
    }
 
    @Override
-   public SideDependentList<List<Point2d>> getHandContactPoints()
+   public SideDependentList<List<Point2D>> getHandContactPoints()
    {
       return handContactPoints;
    }

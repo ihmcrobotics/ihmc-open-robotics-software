@@ -4,8 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
+import org.ejml.data.DenseMatrix64F;
 
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.abst.fiducial.calib.ConfigChessboard;
@@ -16,10 +15,9 @@ import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.GrayF32;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-import org.ejml.data.DenseMatrix64F;
-
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class BoofCVChessboardPoseEstimator
 {
@@ -85,10 +83,10 @@ public class BoofCVChessboardPoseEstimator
          }
          detector.getFiducialToCamera(closestIndex, targetToSensor);
          Vector3D_F64 translation = targetToSensor.getT();
-         Matrix3d rotation = new Matrix3d(targetToSensor.getR().data);
+         RotationMatrix rotation = new RotationMatrix(targetToSensor.getR().data);
          
 
-         RigidBodyTransform transform=new RigidBodyTransform(rotation, new Vector3d(translation.x, translation.y, translation.z));
+         RigidBodyTransform transform=new RigidBodyTransform(rotation, new Vector3D(translation.x, translation.y, translation.z));
          return transform;
       }
 
@@ -97,7 +95,7 @@ public class BoofCVChessboardPoseEstimator
    public void drawBox(BufferedImage image, RigidBodyTransform transform, double scale)
    {
       DenseMatrix64F rotation =new DenseMatrix64F(3,3);
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       transform.getRotation(rotation);
       transform.getTranslation(translation);
       Se3_F64 targetToSensor = new Se3_F64(rotation,new Vector3D_F64(translation.getX(), translation.getY(), translation.getZ()));

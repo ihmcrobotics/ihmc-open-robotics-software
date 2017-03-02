@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual;
 
-import static us.ihmc.robotics.stateMachines.StateMachineTools.addRequestedStateTransition;
+import static us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools.addRequestedStateTransition;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -9,8 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -28,31 +26,32 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.stateMachines.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateChangedListener;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.io.printing.PrintTools;
-
-import javax.vecmath.Vector3d;
 
 public class HandControlModule
 {
@@ -256,7 +255,7 @@ public class HandControlModule
       taskspaceControlState.setWeight(weight);
    }
 
-   public void setTaskspaceWeights(Vector3d angularWeight, Vector3d linearWeight)
+   public void setTaskspaceWeights(Vector3D angularWeight, Vector3D linearWeight)
    {
       taskspaceControlState.setWeights(angularWeight, linearWeight);
    }

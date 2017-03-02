@@ -2,19 +2,18 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
 public class PlanarRegionBaseOfCliffAvoider
@@ -91,7 +90,7 @@ public class PlanarRegionBaseOfCliffAvoider
       lineSegmentsInSoleFrame.add(backToBackFurther);
       lineSegmentsInSoleFrame.add(frontToFrontFurther);
 
-      Point3d highestPointInSoleFrame = new Point3d();
+      Point3D highestPointInSoleFrame = new Point3D();
       LineSegment2d highestLineSegmentInSoleFrame = new LineSegment2d();
       maximumCliffZInSoleFrame.set(findHighestPointInOriginalSoleFrame(planarRegionsList, soleTransform, inverseSoleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame));
       maximumCliffXInSoleFrame.set(highestPointInSoleFrame.getX());
@@ -99,7 +98,7 @@ public class PlanarRegionBaseOfCliffAvoider
 
       if (maximumCliffZInSoleFrame.getDoubleValue() > cliffHeightToShiftAwayFrom)
       {
-         Vector2d shiftVectorInSoleFrame = new Vector2d(highestPointInSoleFrame.getX(), highestPointInSoleFrame.getY());
+         Vector2D shiftVectorInSoleFrame = new Vector2D(highestPointInSoleFrame.getX(), highestPointInSoleFrame.getY());
          shiftVectorInSoleFrame.sub(highestLineSegmentInSoleFrame.getFirstEndpointCopy());
 
          if (shiftVectorInSoleFrame.length() < minimumDistanceFromCliffBottoms)
@@ -131,13 +130,13 @@ public class PlanarRegionBaseOfCliffAvoider
    }
    
    private double findHighestPointInOriginalSoleFrame(PlanarRegionsList planarRegionsList, RigidBodyTransform soleTransform, RigidBodyTransform inverseSoleTransform, ArrayList<LineSegment2d> lineSegmentsInSoleFrame,
-                                                      Point3d highestPointInSoleFrameToPack, LineSegment2d highestLineSegmentInSoleFrameToPack)
+                                                      Point3D highestPointInSoleFrameToPack, LineSegment2d highestLineSegmentInSoleFrameToPack)
      {
         double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
 
         LineSegment2d lineSegmentInWorldFrame = new LineSegment2d();
-        Point3d pointOneInWorldFrame = new Point3d();
-        Point3d pointTwoInWorldFrame = new Point3d();
+        Point3D pointOneInWorldFrame = new Point3D();
+        Point3D pointTwoInWorldFrame = new Point3D();
 
         for (LineSegment2d lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
         {
@@ -153,17 +152,17 @@ public class PlanarRegionBaseOfCliffAvoider
            planarRegionsList.findPlanarRegionsIntersectingLineSegment(lineSegmentInWorldFrame, intersectingRegionsToPack);
            for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
            {
-              ArrayList<Point2d[]> intersectionsInPlaneFrameToPack = new ArrayList<>();
+              ArrayList<Point2D[]> intersectionsInPlaneFrameToPack = new ArrayList<>();
               intersectingRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegmentInWorldFrame, intersectionsInPlaneFrameToPack);
               for (int i = 0; i < intersectionsInPlaneFrameToPack.size(); i++)
               {
-                 Point2d[] points = intersectionsInPlaneFrameToPack.get(i);
+                 Point2D[] points = intersectionsInPlaneFrameToPack.get(i);
                  for (int j = 0; j < points.length; j++)
                  {
-                    Point2d point = points[j];
+                    Point2D point = points[j];
                     RigidBodyTransform regionTransformToWorld = new RigidBodyTransform();
                     intersectingRegion.getTransformToWorld(regionTransformToWorld);
-                    Point3d pointInOriginalSoleFrame = new Point3d(point.getX(), point.getY(), 0.0);
+                    Point3D pointInOriginalSoleFrame = new Point3D(point.getX(), point.getY(), 0.0);
                     regionTransformToWorld.transform(pointInOriginalSoleFrame);
                     inverseSoleTransform.transform(pointInOriginalSoleFrame);
 

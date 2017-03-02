@@ -10,25 +10,26 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JFrame;
-import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.testing.MutationTestingTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -111,7 +112,7 @@ public class PolygonWigglingTest
 
       for (int i=0; i<foot.getNumberOfVertices(); i++)
       {
-         Point2d vertex = foot.getVertex(i);
+         Point2DReadOnly vertex = foot.getVertex(i);
          double signedDistance = ConvexPolygon2dCalculator.getSignedDistance(vertex, plane);
 
          if (signedDistance > largestDistance)
@@ -461,11 +462,11 @@ public class PolygonWigglingTest
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, plane));
 
       // expected:
-      ArrayList<Point2d> expected = new ArrayList<>();
-      expected.add(new Point2d(0.7021375429674444, 0.405444343736243));
-      expected.add(new Point2d(0.901582265978714, 0.39055130969485763));
-      expected.add(new Point2d(0.8941357489580215, 0.2908289481892227));
-      expected.add(new Point2d(0.6946910259467516, 0.3057219822306081));
+      ArrayList<Point2D> expected = new ArrayList<>();
+      expected.add(new Point2D(0.7021375429674444, 0.405444343736243));
+      expected.add(new Point2D(0.901582265978714, 0.39055130969485763));
+      expected.add(new Point2D(0.8941357489580215, 0.2908289481892227));
+      expected.add(new Point2D(0.6946910259467516, 0.3057219822306081));
 
       for (int i = 0; i < foot.getNumberOfVertices(); i++)
          assertTrue(foot.getVertex(i).epsilonEquals(expected.get(i), 1.0E-10));
@@ -785,8 +786,6 @@ public class PolygonWigglingTest
 
    public static void main(String[] args)
    {
-      String targetTests = PolygonWigglingTest.class.getName();
-      String targetClassesInSamePackage = PolygonWiggler.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForClass(PolygonWiggler.class, PolygonWigglingTest.class);
    }
 }

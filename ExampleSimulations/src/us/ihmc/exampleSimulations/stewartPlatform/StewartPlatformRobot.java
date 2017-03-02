@@ -8,10 +8,9 @@ package us.ihmc.exampleSimulations.stewartPlatform;
 //import com.sun.j3d.utils.geometry.*;
 //import RigidBodyTransform;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -78,7 +77,7 @@ public class StewartPlatformRobot extends Robot
    public ExternalForcePoint[] pointb = new ExternalForcePoint[6];
    public ExternalForcePoint[] pointc = new ExternalForcePoint[6];
 
-   public Vector3d[] platform_offsets = new Vector3d[6], base_offsets = new Vector3d[6];
+   public Vector3D[] platform_offsets = new Vector3D[6], base_offsets = new Vector3D[6];
 
    // private Joint[] bJoint = new Joint[6];
 
@@ -106,19 +105,19 @@ public class StewartPlatformRobot extends Robot
 
       // Platform:
 
-      platformJoint = new FloatingJoint("platform", "platform", new Vector3d(), this);
+      platformJoint = new FloatingJoint("platform", "platform", new Vector3D(), this);
       platformJoint.setLink(platform());
       this.addRootJoint(platformJoint);
 
-      ExternalForcePoint ef_platform = new ExternalForcePoint("ef_platform", new Vector3d(), this);
+      ExternalForcePoint ef_platform = new ExternalForcePoint("ef_platform", new Vector3D(), this);
       platformJoint.addExternalForcePoint(ef_platform);
 
       // Platform External Force Points
 
       for (int i = 0; i < 6; i++)
       {
-         platform_offsets[i] = new Vector3d();
-         base_offsets[i] = new Vector3d();
+         platform_offsets[i] = new Vector3D();
+         base_offsets[i] = new Vector3D();
       }
 
       configPolar(base_offsets, platform_offsets, 0.0, 0.8 * BASE_R, BASE_ANG, 0.8 * PLAT_R, PLAT_ANG);
@@ -138,12 +137,12 @@ public class StewartPlatformRobot extends Robot
          uni.setLink(lowerLeg);
          this.addRootJoint(uni);
 
-         SliderJoint slider = new SliderJoint("act" + i, new Vector3d(), this, Axis.Z);
+         SliderJoint slider = new SliderJoint("act" + i, new Vector3D(), this, Axis.Z);
          Link upperLeg = upperLeg();
          slider.setLink(upperLeg);
          uni.addJoint(slider);
 
-         ExternalForcePoint ef = new ExternalForcePoint("ef_a" + i, new Vector3d(), this);
+         ExternalForcePoint ef = new ExternalForcePoint("ef_a" + i, new Vector3D(), this);
          slider.addExternalForcePoint(ef);
       }
 
@@ -265,7 +264,7 @@ public class StewartPlatformRobot extends Robot
    }
 */
 
-   public void configPolar(Vector3d[] b, Vector3d[] p, double shiftAng, double baseRad, double baseAng, double platRad, double platAng)
+   public void configPolar(Vector3D[] b, Vector3D[] p, double shiftAng, double baseRad, double baseAng, double platRad, double platAng)
    {
       double mirror = 1.0;
 

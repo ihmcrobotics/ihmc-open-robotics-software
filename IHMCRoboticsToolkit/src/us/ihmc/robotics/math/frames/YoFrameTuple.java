@@ -1,16 +1,17 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -18,9 +19,7 @@ import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameTuple2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
@@ -58,28 +57,22 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       this.frameTuple = createEmptyFrameTuple();
    }
 
-   public final void get(Tuple3d tuple3dToPack)
+   public final void get(Tuple3DBasics tuple3dToPack)
    {
       putYoValuesIntoFrameTuple();
       frameTuple.get(tuple3dToPack);
    }
 
-   public final void get(Tuple3f tuple3fToPack)
+   public final Vector3D getVector3dCopy()
    {
-      putYoValuesIntoFrameTuple();
-      frameTuple.get(tuple3fToPack);
-   }
-
-   public final Vector3d getVector3dCopy()
-   {
-      Vector3d vector3d = new Vector3d();
+      Vector3D vector3d = new Vector3D();
       get(vector3d);
       return vector3d;
    }
 
-   public final Point3d getPoint3dCopy()
+   public final Point3D getPoint3dCopy()
    {
-      Point3d point3d = new Point3d();
+      Point3D point3d = new Point3D();
       get(point3d);
       return point3d;
    }
@@ -203,6 +196,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    
    /**
     * Sets x, y, and z with no checks for reference frame matches.
+    * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.
     */
    public final void setWithoutChecks(FrameTuple<?, ?> frameTuple)
    {
@@ -276,7 +270,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       set(yoFrameTuple.getFrameTuple());
    }
 
-   public final void setXY(Tuple2d tuple2d)
+   public final void setXY(Tuple2DReadOnly tuple2d)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.setXY(tuple2d);
@@ -297,7 +291,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void set(Tuple3d tuple)
+   public final void set(Tuple3DReadOnly tuple)
    {
       this.frameTuple.setToZero(getReferenceFrame());
       this.frameTuple.set(tuple);
@@ -311,7 +305,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       z.set(z.getDoubleValue() + dz);
    }
 
-   public final void add(Tuple3d tuple)
+   public final void add(Tuple3DReadOnly tuple)
    {
       putYoValuesIntoFrameTuple();
       frameTuple.add(tuple);
@@ -332,7 +326,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void add(Tuple3d tuple1, Tuple3d tuple2)
+   public final void add(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.add(tuple1, tuple2);
@@ -346,7 +340,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void sub(Tuple3d tuple)
+   public final void sub(Tuple3DReadOnly tuple)
    {
       putYoValuesIntoFrameTuple();
       frameTuple.sub(tuple);
@@ -367,7 +361,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void sub(Tuple3d tuple1, Tuple3d tuple2)
+   public final void sub(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       frameTuple.sub(tuple1, tuple2);
       getYoValuesFromFrameTuple();
@@ -579,7 +573,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
-   public final void applyTransform(RigidBodyTransform transform)
+   public final void applyTransform(Transform transform)
    {
       putYoValuesIntoFrameTuple();
       frameTuple.applyTransform(transform);

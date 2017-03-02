@@ -2,15 +2,15 @@ package us.ihmc.robotics.linearAlgebra;
 
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.alg.dense.decomposition.svd.SvdImplicitQrDecompose_D64;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.SingularOps;
+
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 /**
  * Compute the singular value decomposition of a data matrix to find the three principal axes (called: principal axis, secondary axis, and third axis) and the associated variance.
@@ -32,13 +32,13 @@ public class PrincipalComponentAnalysis3D
    private final DenseMatrix64F V = new DenseMatrix64F(3, 3);
 
    /** Axis along which the data has the highest variance. It is a unit vector. */
-   private final Vector3d principalAxis = new Vector3d();
+   private final Vector3D principalAxis = new Vector3D();
    /** Axis along which the data has the highest variance after the {@link #principalAxis}. It is orthogonal to the {@link #principalAxis}. It is a unit vector. */
-   private final Vector3d secondaryAxis = new Vector3d();
+   private final Vector3D secondaryAxis = new Vector3D();
    /** Axis along which the data has the lowest variance. It is orthogonal to the {@link #principalAxis} and {@link #secondaryAxis}. It is a unit vector. */
-   private final Vector3d thirdAxis = new Vector3d();
+   private final Vector3D thirdAxis = new Vector3D();
 
-   private final Vector3d variance = new Vector3d();
+   private final Vector3D variance = new Vector3D();
 
    private final IncrementalCovariance3D covarianceCalculator = new IncrementalCovariance3D();
    private final DenseMatrix64F covariance = new DenseMatrix64F(3, 3);
@@ -65,7 +65,7 @@ public class PrincipalComponentAnalysis3D
     * Use this method before {@link #compute()} to provide the point cloud to be analyzed.
     * @param pointCloud
     */
-   public void setPointCloud(List<? extends Tuple3d> pointCloud)
+   public void setPointCloud(List<? extends Tuple3DBasics> pointCloud)
    {
       clear();
 
@@ -131,7 +131,7 @@ public class PrincipalComponentAnalysis3D
     * Pack the average of the provided point cloud.
     * @param meanToPack
     */
-   public void getMean(Point3d meanToPack)
+   public void getMean(Point3D meanToPack)
    {
       covarianceCalculator.getMean(meanToPack);
    }
@@ -140,18 +140,16 @@ public class PrincipalComponentAnalysis3D
     * Stores the three principal axes in the given Matrix3d such that it can be used as the rotation matrix describing the rotation from the principal frame to the parent coordinate system.
     * @param rotationMatrixToPack
     */
-   public void getPrincipalFrameRotationMatrix(Matrix3d rotationMatrixToPack)
+   public void getPrincipalFrameRotationMatrix(RotationMatrix rotationMatrixToPack)
    {
-      rotationMatrixToPack.setColumn(0, principalAxis);
-      rotationMatrixToPack.setColumn(1, secondaryAxis);
-      rotationMatrixToPack.setColumn(2, thirdAxis);
+      rotationMatrixToPack.setColumns(principalAxis, secondaryAxis, thirdAxis);
    }
 
    /**
     * Pack the variance along each principal axis in the given Vector3d.
     * @param principalVarianceToPack The variance is stored in the Vector3d as follows: x is the variance on the principal axis, y on the secondary axis, and z on the third axis.
     */
-   public void getVariance(Vector3d principalVarianceToPack)
+   public void getVariance(Vector3D principalVarianceToPack)
    {
       principalVarianceToPack.setX(variance.getX());
       principalVarianceToPack.setY(variance.getY());
@@ -162,7 +160,7 @@ public class PrincipalComponentAnalysis3D
     * Pack the standard deviation along each principal axis in the Vector3d.
     * @param principalStandardDeviationToPack The standard deviation is stored in the Vector3d as follows: x is the standard deviation on the principal axis, y on the secondary axis, and z on the third axis.
     */
-   public void getStandardDeviation(Vector3d principalStandardDeviationToPack)
+   public void getStandardDeviation(Vector3D principalStandardDeviationToPack)
    {
       principalStandardDeviationToPack.setX(Math.sqrt(variance.getX()));
       principalStandardDeviationToPack.setY(Math.sqrt(variance.getY()));
@@ -175,7 +173,7 @@ public class PrincipalComponentAnalysis3D
     * @param secondaryAxisToPack is set to the secondary axis of unit length, it is the axis along which the variance is the greatest after the principal axis.
     * @param thirdAxisToPack is set to the third axis of unit length, it is the axis along which the variance is the least.
     */
-   public void getPrincipalVectors(Vector3d principalAxisToPack, Vector3d secondaryAxisToPack, Vector3d thirdAxisToPack)
+   public void getPrincipalVectors(Vector3D principalAxisToPack, Vector3D secondaryAxisToPack, Vector3D thirdAxisToPack)
    {
       principalAxisToPack.set(principalAxis);
       secondaryAxisToPack.set(secondaryAxis);
@@ -186,7 +184,7 @@ public class PrincipalComponentAnalysis3D
     * Get the axis along which the variance is the greatest.
     * @param principalVectorToPack
     */
-   public void getPrincipalVector(Vector3d principalVectorToPack)
+   public void getPrincipalVector(Vector3D principalVectorToPack)
    {
       principalVectorToPack.set(principalAxis);
    }
@@ -195,7 +193,7 @@ public class PrincipalComponentAnalysis3D
     * Get the axis along which the variance is the greatest after the principal axis.
     * @param secondaryVectorToPack
     */
-   public void getSecondaryVector(Vector3d secondaryVectorToPack)
+   public void getSecondaryVector(Vector3D secondaryVectorToPack)
    {
       secondaryVectorToPack.set(secondaryAxis);
    }
@@ -204,7 +202,7 @@ public class PrincipalComponentAnalysis3D
     * Get the axis along which the variance is the least.
     * @param thirdVectorToPack
     */
-   public void getThirdVector(Vector3d thirdVectorToPack)
+   public void getThirdVector(Vector3D thirdVectorToPack)
    {
       thirdVectorToPack.set(thirdAxis);
    }
@@ -215,7 +213,7 @@ public class PrincipalComponentAnalysis3D
     * @param secondaryVectorToPack is set to the secondary axis scaled by the variance along this axis.
     * @param thirdVectorToPack is set to the third axis scaled by the third variance along this axis.
     */
-   public void getScaledPrincipalVectors(Vector3d principalVectorToPack, Vector3d secondaryVectorToPack, Vector3d thirdVectorToPack)
+   public void getScaledPrincipalVectors(Vector3D principalVectorToPack, Vector3D secondaryVectorToPack, Vector3D thirdVectorToPack)
    {
       principalVectorToPack.set(principalAxis);
       principalVectorToPack.scale(variance.getX());

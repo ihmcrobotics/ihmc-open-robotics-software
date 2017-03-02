@@ -9,8 +9,8 @@ import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 

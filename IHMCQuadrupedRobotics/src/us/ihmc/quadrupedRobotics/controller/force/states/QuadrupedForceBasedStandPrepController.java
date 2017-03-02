@@ -11,10 +11,10 @@ import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceCont
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedRuntimeEnvironment;
-import us.ihmc.quadrupedRobotics.params.BooleanParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.SoleWaypoint;
@@ -25,7 +25,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class QuadrupedForceBasedStandPrepController implements QuadrupedController
 {
@@ -66,7 +66,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
    private final QuadrupedTaskSpaceEstimator taskSpaceEstimator;
    private final QuadrupedReferenceFrames referenceFrames;
    private FramePoint solePositionSetpoint;
-   private final Vector3d zeroVelocity;
+   private final Vector3D zeroVelocity;
    private final double robotLength;
    private FullQuadrupedRobotModel fullRobotModel;
 
@@ -83,7 +83,7 @@ public class QuadrupedForceBasedStandPrepController implements QuadrupedControll
          quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());
          quadrupedSoleWaypointList.get(quadrant).add(new SoleWaypoint());
       }
-      zeroVelocity = new Vector3d(0, 0, 0);
+      zeroVelocity = new Vector3D(0, 0, 0);
       taskSpaceControllerCommands = new QuadrupedTaskSpaceController.Commands();
       taskSpaceControllerSettings = new QuadrupedTaskSpaceController.Settings();
       this.taskSpaceController = controllerToolbox.getTaskSpaceController();

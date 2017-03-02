@@ -245,6 +245,7 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
       }
    }
    
+   @Override
    public void setValueFromDouble(double value, boolean notifyListeners)
    {
       try
@@ -258,11 +259,13 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
       }
    }
 
+   @Override
    public double getValueAsDouble()
    {
       return valueOrdinal;
    }
 
+   @Override
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
@@ -278,11 +281,13 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
     *
     * @param stringBuffer StringBuffer to which the value will be appended
     */
+   @Override
    public void getValueString(StringBuffer stringBuffer)
    {
       stringBuffer.append(getStringValue());
    }
 
+   @Override
    public void getValueStringFromDouble(StringBuffer stringBuffer, double doubleValue)
    {
       int index = (int) Math.round(doubleValue);

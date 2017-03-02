@@ -41,6 +41,7 @@ public abstract class AbstractThreadedRobotController implements RobotController
 
    public abstract void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle);
 
+   @Override
    public final void initialize()
    {
       for (int i = 0; i < controllers.size(); i++)
@@ -49,21 +50,25 @@ public abstract class AbstractThreadedRobotController implements RobotController
       }
    }
 
+   @Override
    public final YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public final String getName()
    {
       return name;
    }
 
+   @Override
    public final String getDescription()
    {
       return getName();
    }
 
+   @Override
    public void doControl()
    {
 

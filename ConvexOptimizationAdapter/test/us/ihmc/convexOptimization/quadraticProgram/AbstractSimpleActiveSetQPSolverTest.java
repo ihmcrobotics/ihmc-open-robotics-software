@@ -1,6 +1,9 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
@@ -9,9 +12,10 @@ import org.ejml.ops.CommonOps;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public abstract class AbstractSimpleActiveSetQPSolverTest
 {
@@ -1105,22 +1109,22 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
       {
          solver.clear();
 
-         DenseMatrix64F costQuadraticMatrix = RandomTools.generateRandomMatrix(random, numberOfVariables, numberOfVariables);
+         DenseMatrix64F costQuadraticMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, numberOfVariables);
          DenseMatrix64F identity = CommonOps.identity(numberOfVariables, numberOfVariables); // Add n*I to make sure it is positive definite...
          CommonOps.scale(numberOfVariables, identity);
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
-         DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
-         double quadraticCostScalar = RandomTools.generateRandomDouble(random, 30.0);
+         DenseMatrix64F costLinearVector = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1);
+         double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
-         DenseMatrix64F linearEqualityConstraintsAMatrix = RandomTools.generateRandomMatrix(random, numberOfEqualityConstraints, numberOfVariables);
-         DenseMatrix64F linearEqualityConstraintsBVector = RandomTools.generateRandomMatrix(random, numberOfEqualityConstraints, 1);
+         DenseMatrix64F linearEqualityConstraintsAMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, numberOfVariables);
+         DenseMatrix64F linearEqualityConstraintsBVector = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, 1);
          solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
-         DenseMatrix64F linearInequalityConstraintsCMatrix = RandomTools.generateRandomMatrix(random, numberOfInequalityConstraints, numberOfVariables);
-         DenseMatrix64F linearInequalityConstraintsDVector = RandomTools.generateRandomMatrix(random, numberOfInequalityConstraints, 1);
+         DenseMatrix64F linearInequalityConstraintsCMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfInequalityConstraints, numberOfVariables);
+         DenseMatrix64F linearInequalityConstraintsDVector = RandomGeometry.nextDenseMatrix64F(random, numberOfInequalityConstraints, 1);
          solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector);
 
          int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers);
@@ -1140,7 +1144,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomTools.generateRandomDouble(random, 1e-4);
+            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomNumbers.nextDouble(random, 1e-4);
          }
 
          solution.zero();
@@ -1240,26 +1244,26 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          //         System.out.println("testNumber = " + testNumber);
          solver.clear();
 
-         DenseMatrix64F costQuadraticMatrix = RandomTools.generateRandomMatrix(random, numberOfVariables, numberOfVariables);
+         DenseMatrix64F costQuadraticMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, numberOfVariables);
          DenseMatrix64F identity = CommonOps.identity(numberOfVariables, numberOfVariables); // Add n*I to make sure it is positive definite...
          CommonOps.scale(numberOfVariables, identity);
          CommonOps.addEquals(costQuadraticMatrix, identity);
 
-         DenseMatrix64F costLinearVector = RandomTools.generateRandomMatrix(random, numberOfVariables, 1);
-         double quadraticCostScalar = RandomTools.generateRandomDouble(random, 30.0);
+         DenseMatrix64F costLinearVector = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1);
+         double quadraticCostScalar = RandomNumbers.nextDouble(random, 30.0);
 
          solver.setQuadraticCostFunction(costQuadraticMatrix, costLinearVector, quadraticCostScalar);
 
-         DenseMatrix64F linearEqualityConstraintsAMatrix = RandomTools.generateRandomMatrix(random, numberOfEqualityConstraints, numberOfVariables);
-         DenseMatrix64F linearEqualityConstraintsBVector = RandomTools.generateRandomMatrix(random, numberOfEqualityConstraints, 1);
+         DenseMatrix64F linearEqualityConstraintsAMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, numberOfVariables);
+         DenseMatrix64F linearEqualityConstraintsBVector = RandomGeometry.nextDenseMatrix64F(random, numberOfEqualityConstraints, 1);
          solver.setLinearEqualityConstraints(linearEqualityConstraintsAMatrix, linearEqualityConstraintsBVector);
 
-         DenseMatrix64F linearInequalityConstraintsCMatrix = RandomTools.generateRandomMatrix(random, numberOfInequalityConstraints, numberOfVariables);
-         DenseMatrix64F linearInequalityConstraintsDVector = RandomTools.generateRandomMatrix(random, numberOfInequalityConstraints, 1);
+         DenseMatrix64F linearInequalityConstraintsCMatrix = RandomGeometry.nextDenseMatrix64F(random, numberOfInequalityConstraints, numberOfVariables);
+         DenseMatrix64F linearInequalityConstraintsDVector = RandomGeometry.nextDenseMatrix64F(random, numberOfInequalityConstraints, 1);
          solver.setLinearInequalityConstraints(linearInequalityConstraintsCMatrix, linearInequalityConstraintsDVector);
 
-         DenseMatrix64F variableLowerBounds = RandomTools.generateRandomMatrix(random, numberOfVariables, 1, -5.0, -0.01);
-         DenseMatrix64F variableUpperBounds = RandomTools.generateRandomMatrix(random, numberOfVariables, 1, 0.01, 5.0);
+         DenseMatrix64F variableLowerBounds = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1, -5.0, -0.01);
+         DenseMatrix64F variableUpperBounds = RandomGeometry.nextDenseMatrix64F(random, numberOfVariables, 1, 0.01, 5.0);
          solver.setVariableBounds(variableLowerBounds, variableUpperBounds);
 
          int numberOfIterations = solver.solve(solution, lagrangeEqualityMultipliers, lagrangeInequalityMultipliers, lagrangeLowerBoundMultipliers, lagrangeUpperBoundMultipliers);
@@ -1291,7 +1295,7 @@ public abstract class AbstractSimpleActiveSetQPSolverTest
          // Verify objective is minimized by comparing to small perturbation:
          for (int i = 0; i < numberOfVariables; i++)
          {
-            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomTools.generateRandomDouble(random, 1e-4);
+            solutionWithSmallPerturbation[i] = solution.get(i, 0) + RandomNumbers.nextDouble(random, 1e-4);
          }
 
          solution.zero();

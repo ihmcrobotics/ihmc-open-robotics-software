@@ -2,19 +2,18 @@ package us.ihmc.simulationToolkit.controllers;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.GainCalculator;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -23,10 +22,10 @@ public class LockPelvisController implements RobotController
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ArrayList<ExternalForcePoint> externalForcePoints = new ArrayList<>();
-   private final ArrayList<Vector3d> efp_offsetFromRootJoint = new ArrayList<>();
+   private final ArrayList<Vector3D> efp_offsetFromRootJoint = new ArrayList<>();
    private final double dx = 0.5, dy = 0.5, dz = 0.0*1.0;
 
-   private final ArrayList<Vector3d> initialPositions = new ArrayList<>();
+   private final ArrayList<Vector3D> initialPositions = new ArrayList<>();
 
    private final DoubleYoVariable holdPelvisKp = new DoubleYoVariable("holdPelvisKp", registry);
    private final DoubleYoVariable holdPelvisKv = new DoubleYoVariable("holdPelvisKv", registry);
@@ -41,7 +40,7 @@ public class LockPelvisController implements RobotController
    public LockPelvisController(FloatingRootJointRobot robot, SimulationConstructionSet scs, FullRobotModel fullRobotModel, double desiredHeight)
    {
       this.robot = robot;
-      robotMass = robot.computeCenterOfMass(new Point3d());
+      robotMass = robot.computeCenterOfMass(new Point3D());
       robotWeight = robotMass * Math.abs(robot.getGravityZ());
       this.desiredHeight.set(desiredHeight);
 
@@ -62,14 +61,14 @@ public class LockPelvisController implements RobotController
       holdPelvisKp.set(5000.0);
       holdPelvisKv.set(GainCalculator.computeDampingForSecondOrderSystem(robotMass, holdPelvisKp.getDoubleValue(), 0.6));
 
-      efp_offsetFromRootJoint.add(new Vector3d(dx, dy, dz));
-      efp_offsetFromRootJoint.add(new Vector3d(dx, -dy, dz));
-      efp_offsetFromRootJoint.add(new Vector3d(-dx, dy, dz));
-      efp_offsetFromRootJoint.add(new Vector3d(-dx, -dy, dz));
+      efp_offsetFromRootJoint.add(new Vector3D(dx, dy, dz));
+      efp_offsetFromRootJoint.add(new Vector3D(dx, -dy, dz));
+      efp_offsetFromRootJoint.add(new Vector3D(-dx, dy, dz));
+      efp_offsetFromRootJoint.add(new Vector3D(-dx, -dy, dz));
 
       for (int i = 0; i < efp_offsetFromRootJoint.size(); i++)
       {
-         initialPositions.add(new Vector3d());
+         initialPositions.add(new Vector3D());
 
          String linkName = jointToAddExternalForcePoints.getLink().getName();
          ExternalForcePoint efp = new ExternalForcePoint("efp_" + linkName + "_" + String.valueOf(i) + "_", efp_offsetFromRootJoint.get(i),
@@ -101,9 +100,9 @@ public class LockPelvisController implements RobotController
       doControl();
    }
 
-   private final Vector3d proportionalTerm = new Vector3d();
-   private final Vector3d derivativeTerm = new Vector3d();
-   private final Vector3d pdControlOutput = new Vector3d();
+   private final Vector3D proportionalTerm = new Vector3D();
+   private final Vector3D derivativeTerm = new Vector3D();
+   private final Vector3D pdControlOutput = new Vector3D();
 
    @Override
    public void doControl()

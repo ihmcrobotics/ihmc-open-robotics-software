@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
@@ -14,8 +16,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningRe
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanningToolboxOutputStatus;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class FootstepPlanningToolboxModule extends ToolboxModule
 {
@@ -24,12 +24,14 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
 
    private final FootstepPlanningToolboxController footstepPlanningToolboxController;
 
-   public FootstepPlanningToolboxModule(FullHumanoidRobotModel desiredFullRobotModel, RobotContactPointParameters contactPointParameters, LogModelProvider modelProvider, boolean startYoVariableServer)
+   public FootstepPlanningToolboxModule(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullHumanoidRobotModel, LogModelProvider modelProvider,
+                                        boolean startYoVariableServer)
          throws IOException
    {
-      super(desiredFullRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
+      super(fullHumanoidRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
-      footstepPlanningToolboxController = new FootstepPlanningToolboxController(contactPointParameters, statusOutputManager, packetCommunicator, registry, TimeTools.milliSecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+      footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel, fullHumanoidRobotModel, statusOutputManager, packetCommunicator,
+                                                                                registry, Conversions.milliSecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
       packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, footstepPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }

@@ -3,8 +3,7 @@ package us.ihmc.ihmcPerception.chessboardDetection;
 import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
-import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class ChessboardDetector

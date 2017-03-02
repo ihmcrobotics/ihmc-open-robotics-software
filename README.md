@@ -3,13 +3,13 @@
 ## Minutiae
 
 ### Tested Platforms
-We test all of our software on OS X 10.11 El Capitan, Windows 7/8/10, and Ubuntu 14.04 LTS Desktop and Server.
+We test all of our software on OS X 10.12 Sierra, Windows 7/8/10, and Ubuntu 14.04 and 16.04 LTS, Desktop and Server. It is likely to work on other platforms but not necessarily tested.
 
 ### Branches
 This repository uses the git-flow branching model. You can find more about git-flow [here](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
 
 ### Licensing
-Individual projects all have their own license information. We use a combination of Apache 2.0 and GPLv3. Consult the license file in each project for more information.
+All of the software in IHMCOpenRoboticsSoftware is licensed under the Apache 2.0 license.
 
 ## Getting Started
 
@@ -28,12 +28,12 @@ repositories {
       url  "http://dl.bintray.com/ihmcrobotics/maven-vendor" // Third-party libraries that we have vendored for various reasons
    }
 
-   /*  Nexus instance hosted at IHMC for some legacy vendored
-    *  dependencies we have not been able to vendor on Bintray yet.
-    *  This will be going away eventually.
+   /*  Artifactory instance hosted at IHMC for some legacy vendored
+    *  dependencies without live source access that can't be uploaded
+    *  to Bintray.
    */
    maven {
-   		url "https://bengal.ihmc.us/nexus/content/repositories/thirdparty/"
+   		url "https://artifactory.ihmc.us/artifactory/thirdparty/"
    }
 
    /* You will also need to add either jcenter() or mavenCentral() or both, depending on your preference */

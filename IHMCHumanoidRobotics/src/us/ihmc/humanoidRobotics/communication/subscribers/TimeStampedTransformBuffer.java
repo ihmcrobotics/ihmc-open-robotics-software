@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.subscribers;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 

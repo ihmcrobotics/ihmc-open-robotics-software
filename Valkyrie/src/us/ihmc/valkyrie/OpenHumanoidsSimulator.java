@@ -13,7 +13,6 @@ import com.martiansoftware.jsap.JSAPException;
 import com.martiansoftware.jsap.JSAPResult;
 import com.martiansoftware.jsap.Switch;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -30,9 +29,12 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
+import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
+import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class OpenHumanoidsSimulator
 {
@@ -70,27 +72,27 @@ public class OpenHumanoidsSimulator
    public OpenHumanoidsSimulator(String model, DRCStartingLocation startingLocation, String nameSpace, String tfPrefix,
          boolean runAutomaticDiagnosticRoutine, boolean disableViz, boolean extra_sim_points, Collection<Class> additionalPacketTypes) throws IOException
    {
-	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model);
+         FootContactPoints simulationContactPoints = null;
+         if (extra_sim_points)
+         {
+            simulationContactPoints = new AdditionalSimulationContactPoints(8, 3, false, true);
+            System.out.println("Added extra foot contact points.");
+         }
+	      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(DRCRobotModel.RobotTarget.SCS, false, model, simulationContactPoints);
 
 	      //TODO: Get this stuff from the RobotDescription rather than the SDF stuff...
 	      GeneralizedSDFRobotModel generalizedSDFRobotModel = robotModel.getGeneralizedRobotModel();
 
-	      if(load_sdf_contacts)
+	      if (load_sdf_contacts)
 	      {
-	    	  ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
-		      contactPointParameters.setupContactPointsFromRobotModel(generalizedSDFRobotModel, replace_contacts);
-	      }
-	      if(extra_sim_points)
-	      {
-	        ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
-	        contactPointParameters.addMoreFootContactPointsSimOnly(8, 3, false);
-	        System.out.println("Added extra foot contact points.");
+	         ValkyrieContactPointParameters contactPointParameters = (ValkyrieContactPointParameters) robotModel.getContactPointParameters();
+	         contactPointParameters.setupContactPointsFromRobotModel(generalizedSDFRobotModel, replace_contacts);
 	      }
 
 	      environment = new SDFEnvironment();
 
-	   	  DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
-		  simulationStarter.setRunMultiThreaded(true);
+	      DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
+	      simulationStarter.setRunMultiThreaded(true);
 
 		  DRCNetworkModuleParameters networkProcessorParameters = new DRCNetworkModuleParameters();
 

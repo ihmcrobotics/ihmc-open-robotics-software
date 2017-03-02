@@ -24,6 +24,7 @@ public abstract class DispatchedSimulationIndividualToEvaluate extends Individua
       this.simulationConstructor = simulationConstructor;
    }
 
+   @Override
    public void startEvaluation()
    {
       //    System.out.println("Starting Evaluation of SliderIndividual" + this.getName());
@@ -39,6 +40,7 @@ public abstract class DispatchedSimulationIndividualToEvaluate extends Individua
 
       DispatchDoneListener listener = new DispatchDoneListener()
       {
+         @Override
          public void dispatchDone(SimulationToDispatch dispatchSim, double[] finalState)
          {
             fitness = computeFitnessAfterDispatch(finalState);
@@ -57,16 +59,19 @@ public abstract class DispatchedSimulationIndividualToEvaluate extends Individua
 
    }
 
+   @Override
    public boolean isEvaluationDone()
    {
       return evalDone;
    }
 
+   @Override
    public double computeFitness()
    {
       return fitness;
    }
    
+   @Override
    public String toString()
    {
       StringBuilder builder = new StringBuilder();

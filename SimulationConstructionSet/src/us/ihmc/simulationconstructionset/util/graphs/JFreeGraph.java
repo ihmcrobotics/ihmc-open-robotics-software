@@ -81,6 +81,7 @@ public class JFreeGraph extends JPanel
       this.graph = graph;
    }
 
+   @Override
    public JFreeGraph clone()
    {
       JFreeGraph returnGraph = new JFreeGraph(title, xLabel, yLabel, plots);
@@ -146,6 +147,7 @@ public class JFreeGraph extends JPanel
       // ChartPanel chartpanel = new ChartPanel(graph, 320, 240, 320, 240, 320, 240, true, true, true, true, true, true, true);
    }
 
+   @Override
    public void paintComponent(Graphics graphics)
    {
       image = graph.createBufferedImage(this.getWidth(), this.getHeight(), this.getWidth(), this.getHeight(), null);

@@ -4,11 +4,13 @@ public class ExceptionStoringSimulationDoneListener implements SimulationDoneLis
 {
    private Throwable throwable;
 
+   @Override
    public void simulationDone()
    {
       // empty
    }
 
+   @Override
    public void simulationDoneWithException(Throwable throwable)
    {
       this.throwable = throwable;

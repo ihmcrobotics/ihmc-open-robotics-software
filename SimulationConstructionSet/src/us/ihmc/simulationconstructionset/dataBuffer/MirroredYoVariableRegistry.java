@@ -1,19 +1,20 @@
 package us.ihmc.simulationconstructionset.dataBuffer;
 
-import com.google.common.collect.*;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-@SuppressWarnings("rawtypes")
 public class MirroredYoVariableRegistry extends YoVariableRegistry
 {
-   private final BiMap<YoVariable, YoVariable> variableMap = HashBiMap.create();
-   private final ConcurrentLinkedQueue<YoVariable> changedVariablesInMirror = new ConcurrentLinkedQueue<>();
-   private final ConcurrentLinkedQueue<YoVariable> changedVariablesInOriginal = new ConcurrentLinkedQueue<>();
+   private final BiMap<YoVariable<?>, YoVariable<?>> variableMap = HashBiMap.create();
+   private final ConcurrentLinkedQueue<YoVariable<?>> changedVariablesInMirror = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<YoVariable<?>> changedVariablesInOriginal = new ConcurrentLinkedQueue<>();
 
    private final YoVariableRegistryChangedListener mirroredChangeListener = new YoVariableRegistryChangedListener(changedVariablesInMirror);
    private final YoVariableRegistryChangedListener originalChangeListener = new YoVariableRegistryChangedListener(changedVariablesInOriginal);
@@ -62,10 +63,10 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
    /**
     * Mirrors changes from the mirror registry to the original registry
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public void updateChangedValues()
    {
-      for (YoVariable<?> changed = changedVariablesInMirror.poll(); changed != null; changed = changedVariablesInMirror.poll())
+      for (YoVariable changed = changedVariablesInMirror.poll(); changed != null; changed = changedVariablesInMirror.poll())
       {
          YoVariable originalVar = variableMap.inverse().get(changed);
          originalVar.setValue(changed, false);
@@ -76,11 +77,10 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
    /**
     * Mirrors changes from the original registry to the mirror registry
     */
-   @SuppressWarnings("unchecked")
+   @SuppressWarnings({"unchecked", "rawtypes"})
    public void updateValuesFromOriginal()
    {
-
-      for (YoVariable<?> changed = changedVariablesInOriginal.poll(); changed != null; changed = changedVariablesInOriginal.poll())
+      for (YoVariable changed = changedVariablesInOriginal.poll(); changed != null; changed = changedVariablesInOriginal.poll())
       {
          YoVariable mirroredVar = variableMap.get(changed);
          mirroredVar.setValue(changed, false);
@@ -103,13 +103,14 @@ public class MirroredYoVariableRegistry extends YoVariableRegistry
 
    private static class YoVariableRegistryChangedListener implements VariableChangedListener
    {
-      final ConcurrentLinkedQueue<YoVariable> queue;
+      final ConcurrentLinkedQueue<YoVariable<?>> queue;
 
-      private YoVariableRegistryChangedListener(ConcurrentLinkedQueue<YoVariable> queue)
+      private YoVariableRegistryChangedListener(ConcurrentLinkedQueue<YoVariable<?>> queue)
       {
          this.queue = queue;
       }
 
+      @Override
       public void variableChanged(YoVariable<?> v)
       {
          queue.add(v);

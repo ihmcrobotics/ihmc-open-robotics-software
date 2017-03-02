@@ -1,17 +1,16 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
@@ -24,7 +23,7 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    private RigidBodyTransform transform;
    private RigidBodyTransform inverseTransform;
    
-   Point3d pointToTransform=new Point3d();
+   Point3D pointToTransform=new Point3D();
    
    private Graphics3DObject linkGraphics;
 
@@ -43,18 +42,18 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       boolean slopeDown = run<0;
       double radiansYaw = Math.toRadians(degreesYaw);
       transform = new RigidBodyTransform();
-      Matrix3d a1=new Matrix3d();
-      a1.rotZ(radiansYaw + (slopeDown?Math.PI:0));
+      RotationMatrix a1=new RotationMatrix();
+      a1.setToYawMatrix(radiansYaw + (slopeDown?Math.PI:0));
       transform.setRotation(a1);
-      transform.setTranslation(new Vector3d(xCenter,yCenter,0));
+      transform.setTranslation(new Vector3D(xCenter,yCenter,0));
       inverseTransform = new RigidBodyTransform();
-      inverseTransform.invert(transform);
+      inverseTransform.setAndInvert(transform);
       
-      Point2d[] rampCorners = {
-            transformToGlobalCoordinates(new Point2d(-run/2,width/2)),
-            transformToGlobalCoordinates(new Point2d(run/2,  width/2)),
-            transformToGlobalCoordinates(new Point2d(-run/2,-width/2)),
-            transformToGlobalCoordinates(new Point2d(run/2,  -width/2))
+      Point2D[] rampCorners = {
+            transformToGlobalCoordinates(new Point2D(-run/2,width/2)),
+            transformToGlobalCoordinates(new Point2D(run/2,  width/2)),
+            transformToGlobalCoordinates(new Point2D(-run/2,-width/2)),
+            transformToGlobalCoordinates(new Point2D(run/2,  -width/2))
       };
 
       this.height = height;
@@ -79,8 +78,8 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       linkGraphics.rotate(radiansYaw +(slopeDown?Math.PI:0), Axis.Z);
       linkGraphics.addWedge(absRun, width, height, appearance);
 
-      Point3d minPoint = new Point3d(xGlobalMin, yGlobalMin, Double.NEGATIVE_INFINITY);
-      Point3d maxPoint = new Point3d(xGlobalMax, yGlobalMax, height);
+      Point3D minPoint = new Point3D(xGlobalMin, yGlobalMin, Double.NEGATIVE_INFINITY);
+      Point3D maxPoint = new Point3D(xGlobalMax, yGlobalMax, height);
 
       boundingBox = new BoundingBox3d(minPoint, maxPoint);
    }
@@ -92,39 +91,42 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
              degreesYaw, YoAppearance.Black());
      }
 
-   private Point2d transformToGlobalCoordinates(Point2d localCoordinate)
+   private Point2D transformToGlobalCoordinates(Point2D localCoordinate)
    {
       pointToTransform.setX(localCoordinate.getX());
       pointToTransform.setY(localCoordinate.getY());
       pointToTransform.setZ(0);
       transform.transform(pointToTransform);
-      return new Point2d(pointToTransform.getX(),pointToTransform.getY());
+      return new Point2D(pointToTransform.getX(),pointToTransform.getY());
    }
 
-   private Point2d transformToLocalCoordinates(Point2d globalCoordinate)
+   private Point2D transformToLocalCoordinates(Point2D globalCoordinate)
    {
       pointToTransform.setX(globalCoordinate.getX());
       pointToTransform.setY(globalCoordinate.getY());
       pointToTransform.setZ(0);
       inverseTransform.transform(pointToTransform);
-      return new Point2d(pointToTransform.getX(),pointToTransform.getY());
+      return new Point2D(pointToTransform.getX(),pointToTransform.getY());
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
    }
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = heightAt(x, y, z);
       surfaceNormalAt(x, y, heightAt, normalToPack);
       return heightAt;
    }
    
+   @Override
    public double heightAt(double xGlobal, double yGlobal, double zGlobal)
    {
-      Point2d localPoint = transformToLocalCoordinates(new Point2d(xGlobal,yGlobal));
+      Point2D localPoint = transformToLocalCoordinates(new Point2D(xGlobal,yGlobal));
       double xLocal=localPoint.getX();
       double yLocal=localPoint.getY();
 
@@ -142,9 +144,9 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       return (xLocal >= xLocalMin) && (xLocal <= xLocalMax) && (yLocal >= yLocalMin) && (yLocal <= yLocalMax);
    }
 
-   public void surfaceNormalAt(double xGlobal, double yGlobal, double z, Vector3d normal)
+   public void surfaceNormalAt(double xGlobal, double yGlobal, double z, Vector3D normal)
    {
-      Point2d localPoint = transformToLocalCoordinates(new Point2d(xGlobal,yGlobal));
+      Point2D localPoint = transformToLocalCoordinates(new Point2D(xGlobal,yGlobal));
       double xLocal=localPoint.getX();
       double yLocal=localPoint.getY();
 
@@ -203,21 +205,22 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    }
 
 
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
+   public void closestIntersectionTo(double x, double y, double z, Point3D intersection)
    {
       intersection.setX(x);    // Go Straight Up for now...
       intersection.setY(y);
       intersection.setZ(heightAt(x, y, z));
    }
 
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
+   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
    {
       closestIntersectionTo(x, y, z, intersection);
       surfaceNormalAt(x, y, z, normal);
    }
    
    
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   @Override
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       closestIntersectionTo(x, y, z, intersectionToPack);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -226,16 +229,19 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    }
 
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       return boundingBox.isXYInside(x, y);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;

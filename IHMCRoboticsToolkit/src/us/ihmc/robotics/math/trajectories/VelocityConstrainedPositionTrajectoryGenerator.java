@@ -1,8 +1,7 @@
 package us.ihmc.robotics.math.trajectories;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -160,7 +159,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       this.finalVelocity.set(finalVelocity);
    }
 
-   public void setTrajectoryParameters(double duration, Point3d initialPosition, Vector3d initialVelocity, Point3d finalPosition, Vector3d finalVelocity)
+   public void setTrajectoryParameters(double duration, Point3D initialPosition, Vector3D initialVelocity, Point3D finalPosition, Vector3D finalVelocity)
    {
       trajectoryTime.set(duration);
 
@@ -229,7 +228,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    public void compute(double time)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       xPolynomial.compute(time);
       yPolynomial.compute(time);
       zPolynomial.compute(time);
@@ -280,7 +279,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       positionToPack.set(currentPosition.getX(), currentPosition.getY());
    }
 
-   public void get(Point3d positionToPack)
+   public void get(Point3D positionToPack)
    {
       currentPosition.get(positionToPack);
    }
@@ -296,7 +295,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       velocityToPack.set(currentVelocity);
    }
 
-   public void getVelocity(Vector3d velocityToPack)
+   public void getVelocity(Vector3D velocityToPack)
    {
       currentVelocity.get(velocityToPack);
    }
@@ -312,7 +311,7 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       accelerationToPack.set(currentAcceleration);
    }
 
-   public void getAcceleration(Vector3d accelerationToPack)
+   public void getAcceleration(Vector3D accelerationToPack)
    {
       currentAcceleration.get(accelerationToPack);
    }

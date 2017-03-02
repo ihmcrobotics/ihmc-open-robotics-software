@@ -1,21 +1,21 @@
 package us.ihmc.simulationToolkit.visualizers;
 
+import java.util.ArrayList;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
 
 /*
  * Simple class that makes simpler to visualize a FullRobotModel inside the SimulationConstructionSet.
@@ -101,8 +101,8 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    }
 
    
-   private final Vector3d tempPosition = new Vector3d();
-   private final Quat4d tempOrientation = new Quat4d();
+   private final Vector3D tempPosition = new Vector3D();
+   private final Quaternion tempOrientation = new Quaternion();
    
    public void update(long timestamp)
    {

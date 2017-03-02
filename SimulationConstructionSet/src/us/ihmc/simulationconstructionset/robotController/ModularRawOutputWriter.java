@@ -50,6 +50,7 @@ public class ModularRawOutputWriter implements RawOutputWriter
       this.registry.addChild(rawOutputWriter.getYoVariableRegistry());
    }
 
+   @Override
    public void initialize()
    {
       for (int i = 0; i < rawOutputWriters.size(); i++)
@@ -58,6 +59,7 @@ public class ModularRawOutputWriter implements RawOutputWriter
       }
    }
 
+   @Override
    public void write()
    {
       for (int i = 0; i < rawOutputWriters.size(); i++)
@@ -66,16 +68,19 @@ public class ModularRawOutputWriter implements RawOutputWriter
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
    }
 
+   @Override
    public String getDescription()
    {
       return description;

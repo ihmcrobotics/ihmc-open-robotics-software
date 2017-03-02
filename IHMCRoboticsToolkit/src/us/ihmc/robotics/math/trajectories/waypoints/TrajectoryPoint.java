@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.TrajectoryPointInterface;
 
 public abstract class TrajectoryPoint<W extends GeometryObject<W>, T extends TrajectoryPoint<W, T>> implements TrajectoryPointInterface<T>

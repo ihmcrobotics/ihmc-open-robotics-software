@@ -1,8 +1,8 @@
 package us.ihmc.quadrupedRobotics.planning.stepStream;
 
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitPlanner;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
@@ -20,7 +20,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.EndDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import java.util.ArrayList;
 
 public class QuadrupedXGaitStepStream implements QuadrupedStepStream
@@ -116,7 +116,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       supportCentroid.setToZero(supportFrame);
       double initialYaw = bodyYaw.getDoubleValue();
       double initialTime = timestamp.getDoubleValue() + initialStepDelayParameter.get();
-      Vector3d initialVelocity = planarVelocityProvider.get();
+      Vector3D initialVelocity = planarVelocityProvider.get();
       RobotQuadrant initialQuadrant = (xGaitSettings.getEndPhaseShift() < 90) ? RobotQuadrant.HIND_LEFT : RobotQuadrant.FRONT_LEFT;
       xGaitStepPlanner.computeInitialPlan(xGaitPreviewSteps, initialVelocity, initialQuadrant, supportCentroid, initialTime, initialYaw, xGaitSettings);
       for (int i = 0; i < 2; i++)
@@ -149,7 +149,7 @@ public class QuadrupedXGaitStepStream implements QuadrupedStepStream
       // update xgait preview steps
       updateXGaitSettings();
       double currentYaw = bodyYaw.getDoubleValue();
-      Vector3d inputVelocity = planarVelocityProvider.get();
+      Vector3D inputVelocity = planarVelocityProvider.get();
       xGaitStepPlanner.computeOnlinePlan(xGaitPreviewSteps, xGaitCurrentSteps, inputVelocity, currentTime, currentYaw, xGaitSettings);
 
       // update step sequence

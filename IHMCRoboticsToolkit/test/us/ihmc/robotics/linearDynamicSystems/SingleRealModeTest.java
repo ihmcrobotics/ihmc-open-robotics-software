@@ -1,13 +1,14 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.dataStructures.Polynomial;
 
 public class SingleRealModeTest
 {

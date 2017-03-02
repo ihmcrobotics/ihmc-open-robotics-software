@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -24,10 +24,10 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
    private boolean rightAnkleRollSet = false;
    private boolean leftAnklePitchSet = false;
    private boolean leftAnkleRollSet = false;
-   private Vector3d rightAnklePitchTran = new Vector3d();
-   private Vector3d rightAnkleRollTran = new Vector3d();
-   private Vector3d leftAnklePitchTran = new Vector3d();
-   private Vector3d leftAnkleRollTran = new Vector3d();
+   private Vector3D rightAnklePitchTran = new Vector3D();
+   private Vector3D rightAnkleRollTran = new Vector3D();
+   private Vector3D leftAnklePitchTran = new Vector3D();
+   private Vector3D leftAnkleRollTran = new Vector3D();
    private float[] rightAnklePitchAngle = new float[3];
    private float[] rightAnkleRollAngle = new float[3];
    private float[] leftAnklePitchAngle = new float[3];
@@ -38,6 +38,7 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
       this.sim = sim;
    }
 
+   @Override
    public void constructDialog()
    {
 //    for (Robot robot : sim.getRobots())
@@ -129,7 +130,7 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
                {
                   try
                   {
-                     Vector3d translation = new Vector3d();
+                     Vector3D translation = new Vector3D();
                      joint.getTranslationToWorld(translation);
                      fileWriter.append(getJointPositionsAndTranslations(joint, (index != sim.getIndex() / 30)));    // , translation));
                   }
@@ -196,7 +197,7 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
             xAngle = (float) Math.toDegrees(rawAngle[0]);
             yAngle = (float) Math.toDegrees(rawAngle[1]);
             zAngle = (float) Math.toDegrees(rawAngle[2]);
-            Vector3d translation = new Vector3d();
+            Vector3D translation = new Vector3D();
             joint.getTranslationToWorld(translation);
             x = (float) translation.getX();
             y = (float) translation.getY();
@@ -213,7 +214,7 @@ public class ExportSimulationTo3DMaxDialogGenerator implements ExportSimulationT
             double xAngle1 = Math.toDegrees(rawAngle[0]);
             double yAngle1 = Math.toDegrees(rawAngle[1]);
             double zAngle1 = Math.toDegrees(rawAngle[2]);
-            Vector3d translation = new Vector3d();
+            Vector3D translation = new Vector3D();
             joint.getTranslationToWorld(translation);
             double x1 = translation.getX();
             double y1 = translation.getY();

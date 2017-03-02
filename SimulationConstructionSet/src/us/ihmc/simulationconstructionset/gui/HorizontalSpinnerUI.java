@@ -99,7 +99,7 @@ public class HorizontalSpinnerUI extends BasicSpinnerUI
    protected boolean isBasicSpinnerUIListener(Object listener)
    {
       boolean handler = false;
-      Class basicSpinnerClass = javax.swing.plaf.basic.BasicSpinnerUI.class;
+      Class<?> basicSpinnerClass = javax.swing.plaf.basic.BasicSpinnerUI.class;
       if (listener != null)
       {
          try
@@ -190,6 +190,7 @@ public class HorizontalSpinnerUI extends BasicSpinnerUI
    {
       private Component editor = null;
 
+      @Override
       public void addLayoutComponent(String name, Component c)
       {
          if ("East".equals(name))
@@ -206,6 +207,7 @@ public class HorizontalSpinnerUI extends BasicSpinnerUI
          }
       }
 
+      @Override
       public void removeLayoutComponent(Component c)
       {
          if (c == eastButton)
@@ -227,6 +229,7 @@ public class HorizontalSpinnerUI extends BasicSpinnerUI
          return (c == null) ? zeroSize : c.getPreferredSize();
       }
 
+      @Override
       public Dimension preferredLayoutSize(Container parent)
       {
          Dimension nextD = preferredSize(eastButton);
@@ -242,6 +245,7 @@ public class HorizontalSpinnerUI extends BasicSpinnerUI
          return size;
       }
 
+      @Override
       public Dimension minimumLayoutSize(Container parent)
       {
          return preferredLayoutSize(parent);
@@ -255,6 +259,7 @@ public class HorizontalSpinnerUI extends BasicSpinnerUI
          }
       }
 
+      @Override
       public void layoutContainer(Container parent)
       {
          int width = parent.getWidth();

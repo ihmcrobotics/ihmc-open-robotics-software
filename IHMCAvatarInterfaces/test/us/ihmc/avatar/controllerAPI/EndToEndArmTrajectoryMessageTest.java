@@ -13,16 +13,18 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -32,7 +34,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryG
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -42,14 +43,13 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static boolean DEBUG = false;
 
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -238,9 +238,9 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
             for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
             {
-               double averageVelocity = RandomTools.generateRandomDouble(random, 1.0);
+               double averageVelocity = RandomNumbers.nextDouble(random, 1.0);
                desiredJointPositions[jointIndex] += averageVelocity * timePerWaypoint;
-               desiredJointPositions[jointIndex] = MathTools.clipToMinMax(desiredJointPositions[jointIndex], joint.getJointLimitLower(), joint.getJointLimitUpper());
+               desiredJointPositions[jointIndex] = MathTools.clamp(desiredJointPositions[jointIndex], joint.getJointLimitLower(), joint.getJointLimitUpper());
                trajectoryPoint1DCalculator.appendTrajectoryPoint(waypointTime, desiredJointPositions[jointIndex]);
                waypointTime += timePerWaypoint;
             }
@@ -376,7 +376,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
-                  double desiredJointPosition = RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+                  double desiredJointPosition = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
                   trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
                }
 
@@ -512,7 +512,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
-                  double desiredJointPosition = RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+                  double desiredJointPosition = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
                   trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
                }
 
@@ -617,7 +617,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
                for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
                {
-                  double desiredJointPosition = RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+                  double desiredJointPosition = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
                   trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
                }
 
@@ -890,7 +890,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
          {
-            double desiredJointPosition = RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+            double desiredJointPosition = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
             trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
          }
 
@@ -914,7 +914,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (int i = 0; i < armJoints.length; i++)
       {
          OneDoFJoint joint = armJoints[i];
-         desiredJointPositions[i] = RandomTools.generateRandomDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         desiredJointPositions[i] = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
       }
       return desiredJointPositions;
    }

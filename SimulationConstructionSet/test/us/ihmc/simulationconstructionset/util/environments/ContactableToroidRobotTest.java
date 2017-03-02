@@ -5,14 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ContactableToroidRobotTest
 {
@@ -27,7 +26,7 @@ public class ContactableToroidRobotTest
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", new RigidBodyTransform());
 
-      Point3d testPoint = new Point3d();
+      Point3D testPoint = new Point3D();
 
       for (double x = majorRadius - minorRadius; x < majorRadius + minorRadius; x += delta)
       {
@@ -61,13 +60,13 @@ public class ContactableToroidRobotTest
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
       double delta = 5e-4;
       
-      Vector3d randomVector = RandomTools.generateRandomVector(random);
+      Vector3D randomVector = RandomGeometry.nextVector3D(random);
       RigidBodyTransform transform3d = new RigidBodyTransform();
       transform3d.setTranslation(randomVector);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", transform3d);
 
-      Point3d pt = new Point3d();
+      Point3D pt = new Point3D();
       
       for (double x = randomVector.getX() + majorRadius - minorRadius; x < randomVector.getX() + majorRadius + minorRadius; x += delta)
       {
@@ -101,13 +100,13 @@ public class ContactableToroidRobotTest
       double minorRadius = ContactableToroidRobot.DEFAULT_THICKNESS;
       double delta = 5e-4;
       
-      Vector3d vector3d = RandomTools.generateRandomVector(random);
+      Vector3D vector3d = RandomGeometry.nextVector3D(random);
       RigidBodyTransform randomTransform = new RigidBodyTransform();
       randomTransform.setTranslation(vector3d);
 
       ContactableToroidRobot bot = new ContactableToroidRobot("bot", randomTransform);
 
-      Point3d pt = new Point3d();
+      Point3D pt = new Point3D();
       
       for (double x = vector3d.getX() + majorRadius - minorRadius; x < vector3d.getX() + majorRadius + minorRadius; x += delta)
       {

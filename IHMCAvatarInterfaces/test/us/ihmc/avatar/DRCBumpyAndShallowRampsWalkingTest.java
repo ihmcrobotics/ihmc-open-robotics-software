@@ -12,21 +12,22 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -37,8 +38,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTestInterface
@@ -284,12 +283,12 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
       for (int i=0; i<numberOfBoxes; i++)
       {
-         double xStart = RandomTools.generateRandomDouble(random, xMin, xMax);
-         double yStart = RandomTools.generateRandomDouble(random, yMin, yMax);
-         double xEnd = xStart + RandomTools.generateRandomDouble(random, maxLength*0.1, maxLength);
-         double yEnd = yStart + RandomTools.generateRandomDouble(random, maxLength*0.1, maxLength);
+         double xStart = RandomNumbers.nextDouble(random, xMin, xMax);
+         double yStart = RandomNumbers.nextDouble(random, yMin, yMax);
+         double xEnd = xStart + RandomNumbers.nextDouble(random, maxLength*0.1, maxLength);
+         double yEnd = yStart + RandomNumbers.nextDouble(random, maxLength*0.1, maxLength);
          double zStart = 0.0;
-         double zEnd = zStart + RandomTools.generateRandomDouble(random, maxHeight*0.1, maxHeight);
+         double zEnd = zStart + RandomNumbers.nextDouble(random, maxHeight*0.1, maxHeight);
          combinedTerrainObject.addBox(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
       }
 

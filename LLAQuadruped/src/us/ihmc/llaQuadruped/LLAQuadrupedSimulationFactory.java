@@ -19,7 +19,7 @@ import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInforma
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.quadrupedRobotics.params.ParameterRegistry;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;

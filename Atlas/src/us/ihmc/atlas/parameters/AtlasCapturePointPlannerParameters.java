@@ -8,20 +8,13 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
    private final double scale;
    private final boolean useTwoCMPsPerSupport;
    private final AtlasPhysicalProperties atlasPhysicalProperties;
-   
+
    public AtlasCapturePointPlannerParameters(AtlasPhysicalProperties atlasPhysicalProperties)
    {
       super(atlasPhysicalProperties.getModelScale());
       scale = atlasPhysicalProperties.getModelScale();
       this.atlasPhysicalProperties = atlasPhysicalProperties;
       useTwoCMPsPerSupport = true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getDoubleSupportInitialTransferDuration()
-   {
-      return 1.0;
    }
 
    /** {@inheritDoc} */

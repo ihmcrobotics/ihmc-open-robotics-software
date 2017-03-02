@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /*
@@ -174,7 +173,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
          {
             desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
 
-            Vector3d newDesiredVelocityDirection = new Vector3d(desiredHeading.getX(), desiredHeading.getY(), 0.0);
+            Vector3D newDesiredVelocityDirection = new Vector3D(desiredHeading.getX(), desiredHeading.getY(), 0.0);
             newDesiredVelocityDirection.normalize(); // just to be sure
             RigidBodyTransform transform3D = new RigidBodyTransform();
             transform3D.setRotationYawAndZeroTranslation(-Math.PI / 4.0);
@@ -189,7 +188,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
          {
             desiredHeadingControlModule.setFinalHeadingTargetAngle(previousDesiredHeadingAngle);
 
-            Vector3d newDesiredVelocityDirection = new Vector3d(desiredHeading.getX(), desiredHeading.getY(), 0.0);
+            Vector3D newDesiredVelocityDirection = new Vector3D(desiredHeading.getX(), desiredHeading.getY(), 0.0);
             newDesiredVelocityDirection.normalize(); // just to be sure
             RigidBodyTransform transform3D = new RigidBodyTransform();
             transform3D.setRotationYawAndZeroTranslation(Math.PI / 4.0);

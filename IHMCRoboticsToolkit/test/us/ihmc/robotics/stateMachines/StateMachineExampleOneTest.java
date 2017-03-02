@@ -1,14 +1,21 @@
 package us.ihmc.robotics.stateMachines;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class StateMachineExampleOneTest
 {
@@ -439,9 +446,7 @@ public class StateMachineExampleOneTest
 
    public static void main(String[] args)
    {
-      String targetTests = StateMachineExampleOneTest.class.getName();
-      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForPackage(StateMachineExampleOneTest.class);
    }
 
 }

@@ -67,6 +67,7 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
       }
    }
 
+   @Override
    public void closeAndDispose()
    {
       frame = null;
@@ -81,12 +82,14 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
       dataFileFilter = null;
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       stateFileChooser.setCurrentDirectory(dir);
       dataFileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       dataFileChooser.setCurrentDirectory(new File(dir));
@@ -94,11 +97,13 @@ public class ExportDataDialogGenerator implements ExportDataDialogConstructor, E
    }
 
 
+   @Override
    public void constructDialog()
    {
       new ExportDataDialog(frame, varGroupList, this);
    }
 
+   @Override
    public void export(String varGroup, int dataType, SCSExportDataFormat dataFormat, int dataCompression)
    {
       // if (true) return;

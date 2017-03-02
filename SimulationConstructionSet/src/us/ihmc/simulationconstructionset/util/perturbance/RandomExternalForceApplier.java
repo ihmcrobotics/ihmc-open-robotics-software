@@ -28,6 +28,7 @@ public class RandomExternalForceApplier implements RobotController
       this.currentDisturbanceForce = new YoFrameVector("currentDisturbanceForce", "", ReferenceFrame.getWorldFrame(), registry);
    }
 
+   @Override
    public void doControl()
    {
       computeCurrentDisturbanceForce();
@@ -43,20 +44,24 @@ public class RandomExternalForceApplier implements RobotController
       currentDisturbanceForce.scale(maximalDisturbanceMagnitude.getDoubleValue());
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return this.name;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

@@ -7,17 +7,15 @@ import java.util.EnumMap;
 import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPosition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -25,6 +23,8 @@ import us.ihmc.quadrupedRobotics.geometry.supportPolygon.YoQuadrupedSupportPolyg
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedGaitCycle;
 import us.ihmc.quadrupedRobotics.planning.gait.QuadrupedSupportConfiguration;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -705,7 +705,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
       desiredFootPositions.get(robotQuadrant).setX((endX - startX) * currentPhaseCompletion + startX);
       desiredFootPositions.get(robotQuadrant).setY((endY - startY) * currentPhaseCompletion + startY);
 
-      int ballIndex = MathTools.clipToMinMax((int) Math.floor(currentPhaseCompletion * 20.0), 0, 20);
+      int ballIndex = MathTools.clamp((int) Math.floor(currentPhaseCompletion * 20.0), 0, 20);
       swingTrajectoryBagsOfBalls.get(robotQuadrant).setBall(desiredFootPositions.get(robotQuadrant).getFrameTuple(), YoAppearance.White(), ballIndex);
    }
 
@@ -956,7 +956,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
          vmcFootForces.get(robotQuadrant).setToZero();
          for (int basisIndex = 0; basisIndex < NUMBER_OF_BASIS_VECTORS; basisIndex++)
          {
-            rhoScalars.get(robotQuadrant)[basisIndex] = MathTools.clipToMinMax(rhoScalars.get(robotQuadrant)[basisIndex], 400.0); // TODO Don't clip rhos
+            rhoScalars.get(robotQuadrant)[basisIndex] = MathTools.clamp(rhoScalars.get(robotQuadrant)[basisIndex], 400.0); // TODO Don't clip rhos
             basisForceVectors.get(robotQuadrant)[basisIndex].scale(rhoScalars.get(robotQuadrant)[basisIndex]);
             vmcFootForces.get(robotQuadrant).add(basisForceVectors.get(robotQuadrant)[basisIndex]);
          }
@@ -1002,7 +1002,7 @@ public class QuadrupedVMCForceMultiGaitController implements QuadrupedController
 
          double tau = -jointAxis.dot(vmcRequestedTorqueFromJoint);
 
-         tau = MathTools.clipToMinMax(tau, 100); // TODO Implement actual torque limits
+         tau = MathTools.clamp(tau, 100); // TODO Implement actual torque limits
 
          oneDoFJoint.setTau(tau);
       }

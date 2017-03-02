@@ -1,19 +1,19 @@
 package us.ihmc.llaQuadruped;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
 
 public class LLAQuadrupedSimulationInitialPositionParameters implements QuadrupedSimulationInitialPositionParameters
 {
-   private static final Point3d INITIAL_BODY_POSITION = new Point3d(0.0, 0.0, 0.37);
+   private static final Point3D INITIAL_BODY_POSITION = new Point3D(0.0, 0.0, 0.37);
    private static final double HIP_ROLL_ANGLE = 0.0;
    private static final double HIP_PITCH_ANGLE = 0.3;
    private static final double KNEE_PITCH_ANGLE = 0.6;
    
    @Override
-   public Point3d getInitialBodyPosition()
+   public Point3D getInitialBodyPosition()
    {
       return INITIAL_BODY_POSITION;
    }

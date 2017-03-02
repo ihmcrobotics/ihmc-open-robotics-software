@@ -7,8 +7,8 @@ import javax.swing.event.ChangeListener;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
 
 public class YoVariableRegistryVarPanel extends YoVariablePanel
 {

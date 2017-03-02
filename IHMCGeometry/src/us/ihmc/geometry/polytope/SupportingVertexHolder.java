@@ -1,9 +1,10 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public interface SupportingVertexHolder
 {
-   public abstract Point3d getSupportingVertex(Vector3d supportDirection);
+   //TODO: Pack instead of return a Point3D? Or at least not return copies...
+   public abstract Point3D getSupportingVertex(Vector3D supportDirection);
 }

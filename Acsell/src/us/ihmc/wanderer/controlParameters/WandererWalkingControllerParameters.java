@@ -4,19 +4,19 @@ import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -770,7 +770,7 @@ public class WandererWalkingControllerParameters extends WalkingControllerParame
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      MomentumOptimizationSettings momentumOptimizationSettings = new MomentumOptimizationSettings();
+      MomentumOptimizationSettings momentumOptimizationSettings = new WandererMomentumOptimizationSettings();
       return momentumOptimizationSettings;
    }
 

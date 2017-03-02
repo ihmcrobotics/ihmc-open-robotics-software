@@ -2,15 +2,12 @@ package us.ihmc.simulationconstructionset.robotdefinition;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Plane;
 
 public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixedFrame>
 {
    public enum JointType {PIN_JOINT, SLIDER_JOINT, FLOATING_JOINT, FLOATING_PLANAR_JOINT}
-
-   ;
 
    private String jointName;
 
@@ -33,8 +30,8 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
    private boolean rootJoint = false;
    private LinkDefinitionFixedFrame link;
 
-   private Vector3d offset;
-   private Vector3d jointAxis;
+   private Vector3D offset;
+   private Vector3D jointAxis;
 
    private ArrayList<JointDefinitionFixedFrame> childrenJoints = new ArrayList<JointDefinitionFixedFrame>();
 
@@ -139,22 +136,22 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
       this.link = link;
    }
 
-   public Vector3d getOffset()
+   public Vector3D getOffset()
    {
       return offset;
    }
 
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
       this.offset = offset;
    }
 
-   public Vector3d getJointAxis()
+   public Vector3D getJointAxis()
    {
       return jointAxis;
    }
 
-   public void setJointAxis(Vector3d jointAxis)
+   public void setJointAxis(Vector3D jointAxis)
    {
       this.jointAxis = jointAxis;
    }
@@ -170,6 +167,7 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
    }
 
 
+   @Override
    public String toString()
    {
       String returnString = "";
@@ -276,6 +274,7 @@ public class JointDefinitionFixedFrame implements Comparable<JointDefinitionFixe
       return returnString;
    }
 
+   @Override
    public int compareTo(JointDefinitionFixedFrame o)
    {
       return o.getJointName().compareTo(getJointName());

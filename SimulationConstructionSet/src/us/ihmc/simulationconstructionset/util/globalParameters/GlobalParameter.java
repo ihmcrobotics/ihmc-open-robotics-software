@@ -9,7 +9,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public abstract class GlobalParameter
 {
-   protected YoVariable yoVariable;
+   protected YoVariable<?> yoVariable;
    private ArrayList<GlobalParameter> children;
 
    private final boolean hasParents;

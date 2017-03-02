@@ -1,11 +1,11 @@
 package us.ihmc.exampleSimulations.springBall;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -40,7 +40,7 @@ public class SpringBallRobot extends Robot
    {
       super("SpringBall");
 
-      FloatingJoint bodyJoint = new FloatingJoint("body", new Vector3d(), this);
+      FloatingJoint bodyJoint = new FloatingJoint("body", new Vector3D(), this);
       Link bodyLink = body();
       bodyJoint.setLink(bodyLink);
       this.addRootJoint(bodyJoint);
@@ -54,7 +54,7 @@ public class SpringBallRobot extends Robot
          xOffset = 1.0 - 2.0 * Math.random();
          yOffset = 1.0 - 2.0 * Math.random();
          zOffset = 1.0 - 2.0 * Math.random();
-         Vector3d offsetVector = new Vector3d(xOffset, yOffset, zOffset);
+         Vector3D offsetVector = new Vector3D(xOffset, yOffset, zOffset);
 
          // offsetVector.normalize();
          double scale = xOffset * xOffset / (R1 * R1) + yOffset * yOffset / (R2 * R2) + zOffset * zOffset / (R3 * R3);
@@ -66,7 +66,7 @@ public class SpringBallRobot extends Robot
          nextSlider.setLink(nextLink);
          bodyJoint.addJoint(nextSlider);
 
-         Vector3d gcVector = new Vector3d(offsetVector);
+         Vector3D gcVector = new Vector3D(offsetVector);
          gcVector.normalize();
          gcVector.scale(SLIDER_LENGTH);
 
@@ -106,12 +106,12 @@ public class SpringBallRobot extends Robot
    }
 
 
-   private Link sliderLink(Vector3d u_i_hat)
+   private Link sliderLink(Vector3D u_i_hat)
    {
       Link ret = new Link("slider");
       ret.setMass(SLIDER_M);
 
-      Vector3d comOff = new Vector3d(u_i_hat);
+      Vector3D comOff = new Vector3D(u_i_hat);
       comOff.normalize();
       comOff.scale(SLIDER_LENGTH / 2.0);
 
@@ -120,23 +120,23 @@ public class SpringBallRobot extends Robot
       // ret.setMomentOfInertia(SLIDER_Ixx, SLIDER_Iyy, SLIDER_Izz);
 
       // Z axis points away from camera look ray...
-      Vector3d zAxis = new Vector3d(u_i_hat);
+      Vector3D zAxis = new Vector3D(u_i_hat);
       zAxis.normalize();
 
-      Vector3d yAxis = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D yAxis = new Vector3D(0.0, 0.0, 1.0);
 
       if (yAxis.equals(zAxis))
       {
          yAxis.set(0.0, 1.0, 0.0);
       }
 
-      Vector3d xAxis = new Vector3d();
+      Vector3D xAxis = new Vector3D();
 
       xAxis.cross(yAxis, zAxis);
       xAxis.normalize();
 
       yAxis.cross(zAxis, xAxis);
-      Matrix3d rotation = new Matrix3d(xAxis.getX(), yAxis.getX(), zAxis.getX(), xAxis.getY(), yAxis.getY(), zAxis.getY(), xAxis.getZ(), yAxis.getZ(), zAxis.getZ());
+      RotationMatrix rotation = new RotationMatrix(xAxis.getX(), yAxis.getX(), zAxis.getX(), xAxis.getY(), yAxis.getY(), zAxis.getY(), xAxis.getZ(), yAxis.getZ(), zAxis.getZ());
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
@@ -145,12 +145,12 @@ public class SpringBallRobot extends Robot
 
       ret.setLinkGraphics(linkGraphics);
 
-      Matrix3d MOI = new Matrix3d(SLIDER_Ixx, 0.0, 0.0, 0.0, SLIDER_Iyy, 0.0, 0.0, 0.0, SLIDER_Izz);
+      Matrix3D MOI = new Matrix3D(SLIDER_Ixx, 0.0, 0.0, 0.0, SLIDER_Iyy, 0.0, 0.0, 0.0, SLIDER_Izz);
 
-      Matrix3d MOI_rot = new Matrix3d(rotation);
+      Matrix3D MOI_rot = new Matrix3D(rotation);
       MOI_rot.transpose();
-      MOI_rot.mul(MOI);
-      MOI_rot.mul(rotation);
+      MOI_rot.multiply(MOI);
+      MOI_rot.multiply(rotation);
 
       ret.setMomentOfInertia(MOI_rot);
 

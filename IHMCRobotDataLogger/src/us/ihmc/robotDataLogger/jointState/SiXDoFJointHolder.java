@@ -1,8 +1,8 @@
 package us.ihmc.robotDataLogger.jointState;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -11,8 +11,8 @@ public class SiXDoFJointHolder implements JointHolder
 {
    private final SixDoFJoint inverseDynamicsJoint;
    
-   private final Quat4d rotation = new Quat4d();
-   private final Vector3d translation = new Vector3d();
+   private final Quaternion rotation = new Quaternion();
+   private final Vector3D translation = new Vector3D();
    private final Twist twist = new Twist();
    
    public SiXDoFJointHolder(SixDoFJoint joint)
@@ -36,7 +36,7 @@ public class SiXDoFJointHolder implements JointHolder
       inverseDynamicsJoint.getTranslation(translation);
       inverseDynamicsJoint.getJointTwist(twist);
       
-      buffer[offset + 0]  = rotation.getW();
+      buffer[offset + 0]  = rotation.getS();
       buffer[offset + 1]  = rotation.getX();
       buffer[offset + 2]  = rotation.getY();
       buffer[offset + 3]  = rotation.getZ();

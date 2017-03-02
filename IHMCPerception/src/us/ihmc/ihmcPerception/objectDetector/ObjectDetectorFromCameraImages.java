@@ -1,40 +1,5 @@
 package us.ihmc.ihmcPerception.objectDetector;
 
-import georegression.geometry.ConvertRotation3D_F64;
-import georegression.geometry.GeometryMath_F64;
-import georegression.struct.EulerType;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.se.Se3_F64;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import us.ihmc.communication.net.NetStateListener;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.BoundingBoxesPacket;
-import us.ihmc.communication.packets.HeatMapPacket;
-import us.ihmc.communication.packets.ObjectDetectorResultPacket;
-import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -45,15 +10,50 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.geometry.GeometryMath_F64;
+import georegression.struct.EulerType;
+import georegression.struct.point.Point2D_F64;
+import georegression.struct.se.Se3_F64;
+import us.ihmc.communication.net.NetStateListener;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.communication.packets.BoundingBoxesPacket;
+import us.ihmc.communication.packets.HeatMapPacket;
+import us.ihmc.communication.packets.ObjectDetectorResultPacket;
+import us.ihmc.communication.producers.JPEGDecompressor;
+import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
+import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
+import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.thread.ThreadTools;
+
 public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDetectorResultPacket>, NetStateListener
 {
    private boolean visualize = true;
 
    private final Se3_F64 fiducialToCamera = new Se3_F64();
-   private final Matrix3d fiducialRotationMatrix = new Matrix3d();
-   private final Quat4d tempFiducialRotationQuat = new Quat4d();
+   private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
+   private final Quaternion tempFiducialRotationQuat = new Quaternion();
    private final FramePose tempFiducialDetectorFrame = new FramePose();
-   private final Vector3d cameraRigidPosition = new Vector3d();
+   private final Vector3D cameraRigidPosition = new Vector3D();
    private final double[] eulerAngles = new double[3];
    private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
 
@@ -118,18 +118,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.setM00(0.0);
-            transformToParent.setM01(0.0);
-            transformToParent.setM02(1.0);
-            transformToParent.setM03(0.0);
-            transformToParent.setM10(-1.0);
-            transformToParent.setM11(0.0);
-            transformToParent.setM12(0.0);
-            transformToParent.setM13(0.0);
-            transformToParent.setM20(0.0);
-            transformToParent.setM21(-1.0);
-            transformToParent.setM22(0.0);
-            transformToParent.setM23(0.0);
+            transformToParent.set(0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
          }
       };
 
@@ -216,7 +205,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
       });
    }
 
-   public void detect(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
+   public void detect(BufferedImage bufferedImage, Point3D cameraPositionInWorld, Quaternion cameraOrientationInWorldXForward)
    {
       synchronized (expectedFiducialSizeChangedConch)
       {
@@ -283,7 +272,7 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
             detectorEulerRotZ.set(eulerAngles[2]);
 
             fiducialRotationMatrix.set(fiducialToCamera.getR().data);
-            RotationTools.convertMatrixToQuaternion(fiducialRotationMatrix, tempFiducialRotationQuat);
+            tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
             tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
             tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);
@@ -363,14 +352,14 @@ public class ObjectDetectorFromCameraImages implements PacketConsumer<ObjectDete
    private static class DetectionParameters
    {
       final BufferedImage bufferedImage;
-      final Point3d cameraPositionInWorld;
-      final Quat4d cameraOrientationInWorldXForward;
+      final Point3D cameraPositionInWorld;
+      final Quaternion cameraOrientationInWorldXForward;
 
-      private DetectionParameters(BufferedImage bufferedImage, Point3d cameraPositionInWorld, Quat4d cameraOrientationInWorldXForward)
+      private DetectionParameters(BufferedImage bufferedImage, Point3D cameraPositionInWorld, Quaternion cameraOrientationInWorldXForward)
       {
          this.bufferedImage = bufferedImage;
-         this.cameraPositionInWorld = new Point3d(cameraPositionInWorld);
-         this.cameraOrientationInWorldXForward = new Quat4d(cameraOrientationInWorldXForward);
+         this.cameraPositionInWorld = new Point3D(cameraPositionInWorld);
+         this.cameraOrientationInWorldXForward = new Quaternion(cameraOrientationInWorldXForward);
       }
    }
 

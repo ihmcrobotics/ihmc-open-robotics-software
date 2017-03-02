@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class ValveLocationPacket extends Packet<ValveLocationPacket>
 {

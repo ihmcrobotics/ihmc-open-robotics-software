@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class RepeatingHeightMap implements HeightMapWithNormals
@@ -41,7 +40,8 @@ public class RepeatingHeightMap implements HeightMapWithNormals
       return (Math.abs(yGlobal - yMin) % yDistance) + yMin;
    }
    
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double localX = xLocal(x);
       double localY = yLocal(y);
@@ -49,11 +49,13 @@ public class RepeatingHeightMap implements HeightMapWithNormals
       return heightMap.heightAndNormalAt(localX, localY, z, normalToPack);
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {      
       return heightMap.heightAt(xLocal(x), yLocal(y), z);
    }
    
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

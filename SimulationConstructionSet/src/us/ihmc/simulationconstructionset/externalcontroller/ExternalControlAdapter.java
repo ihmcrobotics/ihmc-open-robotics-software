@@ -53,6 +53,7 @@ public class ExternalControlAdapter implements RobotController
    }
 
 
+   @Override
    public void doControl()
    {
       // System.out.println("do control start");
@@ -134,6 +135,7 @@ public class ExternalControlAdapter implements RobotController
    }
 
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
@@ -180,15 +182,18 @@ public class ExternalControlAdapter implements RobotController
 
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

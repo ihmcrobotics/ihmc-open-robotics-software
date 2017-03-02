@@ -6,16 +6,16 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 public class BookmarkedVariablesHolder
 {
-   private ArrayList<YoVariable> bookmarkedVariables = new ArrayList<YoVariable>(0);
+   private ArrayList<YoVariable<?>> bookmarkedVariables = new ArrayList<>(0);
    private ArrayList<BookmarkedVariableAddedListener> listeners = new ArrayList<BookmarkedVariableAddedListener>(0);
    private ArrayList<BookmarkedVariableRemovedListener> removedListeners = new ArrayList<BookmarkedVariableRemovedListener>(0);
 
-   public ArrayList<YoVariable> getBookMarkedVariables()
+   public ArrayList<YoVariable<?>> getBookMarkedVariables()
    {
-      return new ArrayList<YoVariable>(bookmarkedVariables);
+      return new ArrayList<YoVariable<?>>(bookmarkedVariables);
    }
 
-   public void addBookmark(YoVariable variable)
+   public void addBookmark(YoVariable<?> variable)
    {
       if (!bookmarkedVariables.contains(variable))
       {
@@ -24,7 +24,7 @@ public class BookmarkedVariablesHolder
       }
    }
 
-   public void removeBookmark(YoVariable variable)
+   public void removeBookmark(YoVariable<?> variable)
    {
       if (bookmarkedVariables.remove(variable))
       {
@@ -42,7 +42,7 @@ public class BookmarkedVariablesHolder
       removedListeners.add(listener);
    }
 
-   private void notifyBookmarkedVariableRemovedListeners(YoVariable variable)
+   private void notifyBookmarkedVariableRemovedListeners(YoVariable<?> variable)
    {
       for (BookmarkedVariableRemovedListener removedListener : removedListeners)
       {

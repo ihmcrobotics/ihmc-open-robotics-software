@@ -10,15 +10,14 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import com.esotericsoftware.minlog.Log;
 
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FLAKY})
@@ -235,7 +234,7 @@ public class KryoObjectCommunicatorTest
       NetClassList netClassList = new NetClassList();
       netClassList.registerPacketClass(TypeA.class);
       netClassList.registerPacketClass(TypeB.class);
-      netClassList.registerPacketField(Vector3d.class);
+      netClassList.registerPacketField(Vector3D.class);
       KryoObjectServer server = new KryoObjectServer(TCP_PORT, netClassList);
       KryoObjectClient client = new KryoObjectClient("127.0.0.1", TCP_PORT, netClassList);
       
@@ -263,7 +262,7 @@ public class KryoObjectCommunicatorTest
       aObjectToSend.a = "@!aedsf";
       aObjectToSend.b = 1;
       aObjectToSend.c = 0.2;
-      aObjectToSend.testVector = new Vector3d(3.2, 1.1, 2.2);
+      aObjectToSend.testVector = new Vector3D(3.2, 1.1, 2.2);
       
       final TypeB bObjectToSend = new TypeB();
       bObjectToSend.a = 0.23;
@@ -319,7 +318,7 @@ public class KryoObjectCommunicatorTest
       public String a;
       public int b;
       public double c;
-      public Vector3d testVector;
+      public Vector3D testVector;
       
       public String toString()
       {

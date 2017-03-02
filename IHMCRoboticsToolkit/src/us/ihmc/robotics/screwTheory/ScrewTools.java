@@ -3,20 +3,20 @@ package us.ihmc.robotics.screwTheory;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -24,7 +24,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ScrewTools
 {
-   public static RevoluteJoint addRevoluteJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis)
+   public static RevoluteJoint addRevoluteJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslationAndIdentityRotation(jointOffset);
@@ -32,7 +32,7 @@ public class ScrewTools
       return addRevoluteJoint(jointName, parentBody, transformToParent, jointAxis);
    }
 
-   public static RevoluteJoint addRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3d jointAxis)
+   public static RevoluteJoint addRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
    {
       String beforeJointName = "before" + jointName;
 
@@ -50,12 +50,12 @@ public class ScrewTools
       return joint;
    }
 
-   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d jointAxis, boolean isPartOfClosedKinematicLoop)
+   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       return addPassiveRevoluteJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis, isPartOfClosedKinematicLoop);
    }
 
-   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3d jointAxis, boolean isPartOfClosedKinematicLoop)
+   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis, boolean isPartOfClosedKinematicLoop)
    {
       String beforeJointName = "before" + jointName;
 
@@ -72,12 +72,12 @@ public class ScrewTools
       return new PassiveRevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis), isPartOfClosedKinematicLoop);
    }
 
-   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3d jointOffset, Vector3d parentJointAxis)
+   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D parentJointAxis)
    {
       return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), parentJointAxis);
    }
 
-   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3d jointAxis)
+   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
    {
       String beforeJointName = "before" + jointName;
 
@@ -95,7 +95,7 @@ public class ScrewTools
       return joint;
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3d momentOfInertia, double mass, Vector3d centerOfMassOffset)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, Vector3D centerOfMassOffset)
    {
       String comFrameName = name + "CoM";
       ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), centerOfMassOffset, comFrameName);
@@ -105,7 +105,7 @@ public class ScrewTools
       return ret;
    }
 
-   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3d momentOfInertia, double mass, RigidBodyTransform inertiaPose)
+   public static RigidBody addRigidBody(String name, InverseDynamicsJoint parentJoint, Matrix3D momentOfInertia, double mass, RigidBodyTransform inertiaPose)
    {
       String comFrameName = name + "CoM";
       ReferenceFrame comFrame = createOffsetFrame(parentJoint.getFrameAfterJoint(), inertiaPose, comFrameName);
@@ -115,7 +115,7 @@ public class ScrewTools
       return ret;
    }
 
-   private static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, Vector3d offset, String frameName)
+   private static ReferenceFrame createOffsetFrame(ReferenceFrame parentFrame, Vector3D offset, String frameName)
    {
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       transformToParent.setTranslationAndIdentityRotation(offset);
@@ -458,34 +458,38 @@ public class ScrewTools
    public static InverseDynamicsJoint[] cloneJointPath(InverseDynamicsJoint[] inverseDynamicsJoints, String suffix)
    {
       InverseDynamicsJoint[] cloned = new InverseDynamicsJoint[inverseDynamicsJoints.length];
+      Map<RigidBody, RigidBody> originalToClonedRigidBodies = new HashMap<>();
 
       for (int i = 0; i < inverseDynamicsJoints.length; i++)
       {
-         if (inverseDynamicsJoints[i] instanceof RevoluteJoint)
+         if (inverseDynamicsJoints[i] instanceof OneDoFJoint)
          {
-            RevoluteJoint jointOriginal = (RevoluteJoint) inverseDynamicsJoints[i];
+            OneDoFJoint jointOriginal = (OneDoFJoint) inverseDynamicsJoints[i];
 
             RigidBody predecessorOriginal = jointOriginal.getPredecessor();
-            RigidBody predecessorCopy;
+            RigidBody predecessorCopy = originalToClonedRigidBodies.get(predecessorOriginal);
 
-            if (i > 0)
+            if (predecessorCopy == null)
             {
-               predecessorCopy = cloned[i - 1].getSuccessor();
-            }
-            else
-            {
-               String predecessorNameOriginal = predecessorOriginal.getName();
-               ReferenceFrame predecessorFrameAfterParentJointOriginal = predecessorOriginal.getParentJoint().getFrameAfterJoint();
-               predecessorCopy = new RigidBody(predecessorNameOriginal + suffix, predecessorFrameAfterParentJointOriginal);
+               if (predecessorOriginal.isRootBody())
+               {
+                  predecessorCopy = predecessorOriginal;
+                  originalToClonedRigidBodies.put(predecessorOriginal, predecessorCopy);
+               }
+               else if (originalToClonedRigidBodies.isEmpty())
+               {
+                  String predecessorNameOriginal = predecessorOriginal.getName();
+                  ReferenceFrame predecessorFrameAfterParentJointOriginal = predecessorOriginal.getParentJoint().getFrameAfterJoint();
+                  predecessorCopy = new RigidBody(predecessorNameOriginal + suffix, predecessorFrameAfterParentJointOriginal);
+                  originalToClonedRigidBodies.put(predecessorOriginal, predecessorCopy);
+               }
+               else
+               {
+                  throw new RuntimeException("Unexpected state during cloning operation.");
+               }
             }
 
-            String jointNameOriginal = jointOriginal.getName();
-            RigidBodyTransform jointTransform = jointOriginal.getOffsetTransform3D();
-            Vector3d jointAxisCopy = jointOriginal.getJointAxis().getVectorCopy();
-            RevoluteJoint jointCopy = ScrewTools.addRevoluteJoint(jointNameOriginal + suffix, predecessorCopy, jointTransform, jointAxisCopy);
-            jointCopy.setJointLimitLower(jointOriginal.getJointLimitLower());
-            jointCopy.setJointLimitUpper(jointOriginal.getJointLimitUpper());
-            cloned[i] = jointCopy;
+            cloned[i] = cloneOneDoFJoint(jointOriginal, suffix, predecessorCopy);
          }
          else if (inverseDynamicsJoints[i] instanceof SixDoFJoint)
          {
@@ -498,6 +502,7 @@ public class ScrewTools
             String rootBodyNameOriginal = rootBody.getName();
             ReferenceFrame rootBodyFrame = rootBody.getBodyFixedFrame();
             RigidBody rootBodyCopy = new RigidBody(rootBodyNameOriginal + suffix, rootBodyFrame);
+            originalToClonedRigidBodies.put(rootBody, rootBodyCopy);
 
             String jointNameOriginal = jointOriginal.getName();
             SixDoFJoint jointCopy = new SixDoFJoint(jointNameOriginal + suffix, rootBodyCopy, rootBodyFrame);
@@ -508,15 +513,14 @@ public class ScrewTools
             throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
          }
 
-         FramePoint comOffset = new FramePoint();
          RigidBody successorOriginal = inverseDynamicsJoints[i].getSuccessor();
-         successorOriginal.getCoMOffset(comOffset);
-         comOffset.changeFrame(inverseDynamicsJoints[i].getFrameAfterJoint());
-         String successorNameOriginal = successorOriginal.getName();
-         Matrix3d successorMassMomentOfInertiaPartCopy = successorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
-         double successorMass = successorOriginal.getInertia().getMass();
-         Vector3d successorCoMOffsetCopy = comOffset.getVectorCopy();
-         RigidBody successorCopy = ScrewTools.addRigidBody(successorNameOriginal + suffix, cloned[i], successorMassMomentOfInertiaPartCopy, successorMass, successorCoMOffsetCopy);
+         RigidBody successorCopy = originalToClonedRigidBodies.get(successorOriginal);
+         if (successorCopy == null)
+         {
+            successorCopy = cloneRigidBody(successorOriginal, suffix, cloned[i]);
+            originalToClonedRigidBodies.put(successorOriginal, successorCopy);
+         }
+
          cloned[i].setSuccessor(successorCopy);
       }
       return cloned;
@@ -550,33 +554,57 @@ public class ScrewTools
                predecessorCopy = new RigidBody(predecessorNameOriginal + suffix, rootBodyFrame);
             }
 
-            String jointNameOriginal = jointOriginal.getName();
-            RigidBodyTransform jointTransform = jointOriginal.getOffsetTransform3D();
-            Vector3d jointAxisCopy = jointOriginal.getJointAxis().getVectorCopy();
-            RevoluteJoint jointCopy = ScrewTools.addRevoluteJoint(jointNameOriginal + suffix, predecessorCopy, jointTransform, jointAxisCopy);
-            jointCopy.setJointLimitLower(jointOriginal.getJointLimitLower());
-            jointCopy.setJointLimitUpper(jointOriginal.getJointLimitUpper());
-            cloned[i] = jointCopy;
+            cloned[i] = cloneOneDoFJoint(jointOriginal, suffix, predecessorCopy);
          }
          else
          {
             throw new RuntimeException("Not implemented for joints of the type: " + inverseDynamicsJoints[i].getClass().getSimpleName());
          }
 
-         RigidBody successorOriginal = inverseDynamicsJoints[i].getSuccessor();
-         FramePoint comOffset = new FramePoint();
-         successorOriginal.getCoMOffset(comOffset);
-         comOffset.changeFrame(inverseDynamicsJoints[i].getFrameAfterJoint());
-         String successorNameOriginal = successorOriginal.getName();
-         Matrix3d successorMassMomentOfInertiaPartCopy = successorOriginal.getInertia().getMassMomentOfInertiaPartCopy();
-         double successorMass = successorOriginal.getInertia().getMass();
-         Vector3d successorCoMOffsetCopy = comOffset.getVectorCopy();
-         RigidBody successorCopy = ScrewTools.addRigidBody(successorNameOriginal + suffix, cloned[i], successorMassMomentOfInertiaPartCopy, successorMass, successorCoMOffsetCopy);
-         cloned[i].setSuccessor(successorCopy);
+         cloneRigidBody(inverseDynamicsJoints[i].getSuccessor(), suffix, cloned[i]);
       }
       return cloned;
    }
 
+   private static OneDoFJoint cloneOneDoFJoint(OneDoFJoint original, String cloneSuffix, RigidBody clonePredecessor)
+   {
+      String jointNameOriginal = original.getName();
+      RigidBodyTransform jointTransform = original.getOffsetTransform3D();
+      Vector3D jointAxisCopy = original.getJointAxis().getVectorCopy();
+      OneDoFJoint clone;
+
+      if (original instanceof RevoluteJoint)
+         clone = ScrewTools.addRevoluteJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
+      else if (original instanceof PrismaticJoint)
+         clone = ScrewTools.addPrismaticJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
+      else
+         throw new RuntimeException("Unhandled type of " + OneDoFJoint.class.getSimpleName() + ": " + original.getClass().getSimpleName());
+         
+      clone.setJointLimitLower(original.getJointLimitLower());
+      clone.setJointLimitUpper(original.getJointLimitUpper());
+      return clone;
+   }
+
+   private static RigidBody cloneRigidBody(RigidBody original, String cloneSuffix, InverseDynamicsJoint parentJointOfClone)
+   {
+      FramePoint comOffset = new FramePoint();
+      original.getCoMOffset(comOffset);
+      comOffset.changeFrame(original.getParentJoint().getFrameAfterJoint());
+      String nameOriginal = original.getName();
+      Matrix3D massMomentOfInertiaPartCopy = original.getInertia().getMassMomentOfInertiaPartCopy();
+      double mass = original.getInertia().getMass();
+      Vector3D comOffsetCopy = comOffset.getVectorCopy();
+      RigidBody clone = ScrewTools.addRigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy,
+                                                        mass, comOffsetCopy);
+      return clone;
+   }
+
+   /**
+    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to see if each parent body is the ancestor in question.
+    * @param candidateDescendant
+    * @param ancestor
+    * @return
+    */
    public static boolean isAncestor(RigidBody candidateDescendant, RigidBody ancestor)
    {
       RigidBody currentBody = candidateDescendant;
@@ -675,8 +703,8 @@ public class ScrewTools
 
    public static SpatialAccelerationVector createGravitationalSpatialAcceleration(RigidBody rootBody, double gravity)
    {
-      Vector3d gravitationalAcceleration = new Vector3d(0.0, 0.0, gravity);
-      Vector3d zero = new Vector3d();
+      Vector3D gravitationalAcceleration = new Vector3D(0.0, 0.0, gravity);
+      Vector3D zero = new Vector3D();
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), gravitationalAcceleration, zero);
 
       return rootAcceleration;
@@ -845,14 +873,34 @@ public class ScrewTools
       return retArray;
    }
 
-   public static <T extends InverseDynamicsJoint> void filterJoints(InverseDynamicsJoint[] source, Object[] dest, Class<T> clazz)
+   @SuppressWarnings("unchecked")
+   public static <T extends InverseDynamicsJoint> void filterJoints(InverseDynamicsJoint[] source, T[] dest, Class<T> clazz)
    {
       int index = 0;
       for (InverseDynamicsJoint joint : source)
       {
          if (clazz.isAssignableFrom(joint.getClass()))
          {
-            dest[index++] = joint;
+            dest[index++] = (T) joint;
+         }
+      }
+   }
+
+   public static <T extends InverseDynamicsJoint> List<T> filterJoints(List<InverseDynamicsJoint> source, Class<T> clazz)
+   {
+      List<T> retList = new ArrayList<>();
+      filterJoints(source, retList, clazz);
+      return retList;
+   }
+
+   @SuppressWarnings("unchecked")
+   public static <T extends InverseDynamicsJoint> void filterJoints(List<InverseDynamicsJoint> source, List<T> dest, Class<T> clazz)
+   {
+      for (InverseDynamicsJoint joint : source)
+      {
+         if (clazz.isAssignableFrom(joint.getClass()))
+         {
+            dest.add((T) joint);
          }
       }
    }
