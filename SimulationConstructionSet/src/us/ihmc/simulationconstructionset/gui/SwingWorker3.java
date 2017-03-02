@@ -131,6 +131,7 @@ public abstract class SwingWorker3
    {
       final Runnable doFinished = new Runnable()
       {
+         @Override
          public void run()
          {
             finished();
@@ -139,6 +140,7 @@ public abstract class SwingWorker3
 
       Runnable doConstruct = new Runnable()
       {
+         @Override
          public void run()
          {
             try

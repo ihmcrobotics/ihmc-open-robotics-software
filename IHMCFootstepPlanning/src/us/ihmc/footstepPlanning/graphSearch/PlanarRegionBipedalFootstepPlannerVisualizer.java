@@ -2,15 +2,15 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningUtils;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPlanarRegionsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPlanarRegionsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.TickAndUpdatable;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -21,7 +21,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -315,7 +314,7 @@ public class PlanarRegionBipedalFootstepPlannerVisualizer implements BipedalFoot
       YoGraphicPolygon acceptedFootstepViz = acceptedFootstepsViz.get(robotSide);
       acceptedFootstepViz.setTransformToWorld(soleTransform);
 
-      Vector3d surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D surfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       soleTransform.transform(surfaceNormal);
       acceptedFootstepSurfaceNormals.get(robotSide).set(surfaceNormal);
 

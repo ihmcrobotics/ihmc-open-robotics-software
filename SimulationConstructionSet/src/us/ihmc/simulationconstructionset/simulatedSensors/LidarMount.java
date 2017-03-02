@@ -1,11 +1,11 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import us.ihmc.graphics3DAdapter.GPULidar;
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jMonkeyEngineToolkit.GPULidar;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulatedSensor;
-import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class LidarMount implements SimulatedSensor
 {
@@ -25,6 +25,7 @@ public class LidarMount implements SimulatedSensor
       this.lidarName = sensorName;
    }
 
+   @Override
    public void updateTransform(RigidBodyTransform transformToHere, double time)
    {
       this.transformToHere.set(transformToHere);
@@ -36,6 +37,7 @@ public class LidarMount implements SimulatedSensor
       }
    }
    
+   @Override
    public String getName()
    {
       return lidarName;
@@ -51,6 +53,7 @@ public class LidarMount implements SimulatedSensor
       return lidarScanParameters;
    }
    
+   @Override
    public void setWorld(Graphics3DAdapter graphics3dAdapter)
    {
       // TODO Auto-generated method stub
@@ -67,6 +70,7 @@ public class LidarMount implements SimulatedSensor
       return parentJoint;
    }
 
+   @Override
    public RigidBodyTransform getTransformToHere()
    {
       return transformToHere;

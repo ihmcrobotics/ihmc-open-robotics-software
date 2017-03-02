@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;

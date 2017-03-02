@@ -6,9 +6,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;

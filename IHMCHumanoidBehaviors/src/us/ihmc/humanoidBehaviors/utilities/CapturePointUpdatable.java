@@ -2,16 +2,16 @@ package us.ihmc.humanoidBehaviors.utilities;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.communication.subscribers.CapturabilityBasedStatusSubscriber;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -195,7 +195,7 @@ public class CapturePointUpdatable implements Updatable
       return icpError;
    }
 
-   private Point2d icp = new Point2d();
+   private Point2D icp = new Point2D();
 
    private void updateCapturePointDistanceToSupportPolygon()
    {
@@ -208,7 +208,7 @@ public class CapturePointUpdatable implements Updatable
       minIcpDistanceToSupportPolygon.set(distanceToClosestEdgeOfSupportPolygon);
    }
 
-   private double computeDistanceToClosestEdge(Point2d pointInsideConvexPolygon, ConvexPolygon2d convexPolygon)
+   private double computeDistanceToClosestEdge(Point2D pointInsideConvexPolygon, ConvexPolygon2d convexPolygon)
    {
       double minDistanceToEdge = Double.POSITIVE_INFINITY;
 
@@ -217,10 +217,10 @@ public class CapturePointUpdatable implements Updatable
 
       for (int i = 0; i < numberOfVertices - 1; i++)
       {
-         Point2d vertex = convexPolygon.getVertex(i);
-         Point2d vertex2 = convexPolygon.getVertex(i + 1);
+         Point2DReadOnly vertex = convexPolygon.getVertex(i);
+         Point2DReadOnly vertex2 = convexPolygon.getVertex(i + 1);
 
-         Point2d projectedPoint = projectPointOntoEdge(vertex, vertex2, pointInsideConvexPolygon);
+         Point2D projectedPoint = projectPointOntoEdge(vertex, vertex2, pointInsideConvexPolygon);
 
          distanceToEdge = pointInsideConvexPolygon.distance(projectedPoint);
 
@@ -232,9 +232,9 @@ public class CapturePointUpdatable implements Updatable
       return minDistanceToEdge;
    }
 
-   private Vector2d edgeVector = new Vector2d();
+   private Vector2D edgeVector = new Vector2D();
 
-   private Vector2d constuctEdgeFromTwoVertices(Point2d firstVertex, Point2d secondVertex)
+   private Vector2D constuctEdgeFromTwoVertices(Point2DReadOnly firstVertex, Point2DReadOnly secondVertex)
    {
       edgeVector.set(secondVertex);
       edgeVector.sub(firstVertex);
@@ -242,12 +242,12 @@ public class CapturePointUpdatable implements Updatable
       return edgeVector;
    }
 
-   private Vector2d firstVertexToPoint = new Vector2d();
-   private Point2d projectedPoint = new Point2d();
+   private Vector2D firstVertexToPoint = new Vector2D();
+   private Point2D projectedPoint = new Point2D();
 
-   private Point2d projectPointOntoEdge(Point2d firstVertex, Point2d secondVertex, Point2d point)
+   private Point2D projectPointOntoEdge(Point2DReadOnly firstVertex, Point2DReadOnly secondVertex, Point2D point)
    {
-      Vector2d edgeVector = constuctEdgeFromTwoVertices(firstVertex, secondVertex);
+      Vector2D edgeVector = constuctEdgeFromTwoVertices(firstVertex, secondVertex);
 
       projectedPoint.set(firstVertex);
 

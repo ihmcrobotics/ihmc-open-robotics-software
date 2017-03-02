@@ -58,26 +58,31 @@ public class ContactController implements RobotController
       contactModel.setFrictionCoefficients(alphaStick, alphaSlip);
    }
 
+   @Override
    public void initialize()
    {
    }
 
 
+   @Override
    public void doControl()
    {
       contactModel.doContact();
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

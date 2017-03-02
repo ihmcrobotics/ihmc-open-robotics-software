@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
@@ -10,8 +9,8 @@ public class PointPositionDataObject
 {
    protected String bodyFixedReferenceFrameName;
    protected boolean isPointPositionValid = true;
-   protected final Point3d measurementPointInBodyFrame = new Point3d();
-   protected final Point3d positionOfMeasurementPointInWorldFrame = new Point3d();
+   protected final Point3D measurementPointInBodyFrame = new Point3D();
+   protected final Point3D positionOfMeasurementPointInWorldFrame = new Point3D();
 
    public void set(FramePoint measurementPointInBodyFrame, FramePoint positionOfMeasurementPointInWorldFrame, boolean isPointPositionValid)
    {
@@ -23,12 +22,12 @@ public class PointPositionDataObject
       positionOfMeasurementPointInWorldFrame.get(this.positionOfMeasurementPointInWorldFrame);
    }
 
-   public Point3d getMeasurementPointInWorldFrame()
+   public Point3D getMeasurementPointInWorldFrame()
    {
       return positionOfMeasurementPointInWorldFrame;
    }
 
-   public Point3d getMeasurementPointInBodyFrame()
+   public Point3D getMeasurementPointInBodyFrame()
    {
       return measurementPointInBodyFrame;
    }

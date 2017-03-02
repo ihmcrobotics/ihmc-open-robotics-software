@@ -1,14 +1,14 @@
 package us.ihmc.simulationconstructionset.util.visualizers;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
+import java.util.List;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import javax.vecmath.Point3d;
-import java.util.List;
 
 public class SCSPointCloudVisualizer implements RewoundListener
 {
@@ -23,11 +23,11 @@ public class SCSPointCloudVisualizer implements RewoundListener
       this.scs = scs;
    }
 
-   public void addPoints(List<Point3d> points)
+   public void addPoints(List<Point3D> points)
    {
       if(!disableGraphics)
       {
-         for(Point3d point : points)
+         for(Point3D point : points)
          {
             Graphics3DObject testCubeGraphicObject = new Graphics3DObject();
             testCubeGraphicObject.addCube(VOXEL_SIZE, VOXEL_SIZE, VOXEL_SIZE, YoAppearance.Aqua());

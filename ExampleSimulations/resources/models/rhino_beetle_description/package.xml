@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>rhino_beetle_description</name>
+  <version>0.0.0</version>
+  <description>The rhino_beetle_description package</description>
+
+  <maintainer email="bshrewsbury@ihmc.us">shrews</maintainer>
+
+  <license>Apache</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>xacro</build_depend>
+  <run_depend>xacro</run_depend>
+
+
+  <export>
+
+  </export>
+</package>

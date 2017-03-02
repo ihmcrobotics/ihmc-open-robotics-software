@@ -1,5 +1,16 @@
 package us.ihmc.imageProcessing.sfm;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import org.ddogleg.struct.FastQueue;
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+import org.ejml.ops.MatrixFeatures;
+import org.junit.Test;
+
 import boofcv.alg.geo.PerspectiveOps;
 import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.calib.StereoParameters;
@@ -10,17 +21,7 @@ import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-import org.ddogleg.struct.FastQueue;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
-import org.junit.Test;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * @author Peter Abeles

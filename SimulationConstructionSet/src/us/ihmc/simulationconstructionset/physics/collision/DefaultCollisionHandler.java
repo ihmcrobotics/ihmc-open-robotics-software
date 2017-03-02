@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -17,15 +17,18 @@ import us.ihmc.simulationconstructionset.physics.Contacts;
 
 public class DefaultCollisionHandler implements CollisionHandler
 {
+   private double velocityForMicrocollision = 0.01; //0.1; //0.1;//0.01;
+   private int numberOfCyclesPerContactPair = 1;///4
+
    private static final boolean DEBUG = false;
 
    private final Random random;
 
-   private final Vector3d normal = new Vector3d();
-   private final Vector3d negative_normal = new Vector3d();
+   private final Vector3D normal = new Vector3D();
+   private final Vector3D negative_normal = new Vector3D();
 
-   private Point3d point1 = new Point3d();
-   private Point3d point2 = new Point3d();
+   private Point3D point1 = new Point3D();
+   private Point3D point2 = new Point3D();
 
    private List<CollisionHandlerListener> listeners = new ArrayList<CollisionHandlerListener>();
 
@@ -53,11 +56,13 @@ public class DefaultCollisionHandler implements CollisionHandler
       this.mu = mu;
    }
 
+   @Override
    public void maintenanceBeforeCollisionDetection()
    {
       shapesInContactList.clear();
    }
 
+   @Override
    public void maintenanceAfterCollisionDetection()
    {
       int numberOfCollisions = shapesInContactList.size();
@@ -80,6 +85,7 @@ public class DefaultCollisionHandler implements CollisionHandler
 
    private final ArrayList<Contacts> shapesInContactList = new ArrayList<Contacts>();
 
+   @Override
    public void handle(Contacts contacts)
    {
       shapesInContactList.add(contacts);
@@ -102,6 +108,7 @@ public class DefaultCollisionHandler implements CollisionHandler
       int numberOfContacts = contacts.getNumberOfContacts();
       indices.clear();
 
+//      System.out.println("NumberOfContacts = " + numberOfContacts);
       for (int i = 0; i < numberOfContacts; i++)
       {
          indices.add(i);
@@ -111,12 +118,11 @@ public class DefaultCollisionHandler implements CollisionHandler
       // TODO: Smarter way of doing number of cycles.
       // Perhaps prioritize based on velocities or something.
       // Or keep track of graph of collision dependencies...
-      int numberOfCycles = 4;
 
-      for (int cycle = 0; cycle < numberOfCycles; cycle++)
+      for (int cycle = 0; cycle < numberOfCyclesPerContactPair; cycle++)
       {
          // TODO: Sims won't sim same way twice, but I don't think they do anyway...
-         Collections.shuffle(indices);
+         Collections.shuffle(indices, random);
       for (int j = 0; j < numberOfContacts; j++)
       {
          int i = indices.get(j);
@@ -145,8 +151,8 @@ public class DefaultCollisionHandler implements CollisionHandler
          Link linkOne = shape1.getLink();
          Link linkTwo = shape2.getLink();
 
-         ExternalForcePoint externalForcePointOne = linkOne.ef_collision;
-         ExternalForcePoint externalForcePointTwo = linkTwo.ef_collision;
+         ExternalForcePoint externalForcePointOne = linkOne.getContactingExternalForcePoints().get(0);
+         ExternalForcePoint externalForcePointTwo = linkTwo.getContactingExternalForcePoints().get(0);
 
          // +++JEP: For now. Make more efficient later. Don't need an ef_point really...
          externalForcePointOne.setOffsetWorld(point1.getX(), point1.getY(), point1.getZ()); // Put the external force points in the right places.
@@ -166,7 +172,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          }
 
          // Resolve the collision:
-         Vector3d p_world = new Vector3d();
+         Vector3D p_world = new Vector3D();
 
          // +++JEP: epsilon, mu hardcoded on construction right now. Need to change that!
 
@@ -183,11 +189,10 @@ public class DefaultCollisionHandler implements CollisionHandler
             System.out.println("externalForcePointTwo = " + externalForcePointTwo);
          }
 
-         double velocityForMicrocollision = 0.01;
          if (shapeTwoIsGround)
          {
 //            System.out.println("shapeTwoIsGround");
-            Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
+            Vector3D velocityWorld = new Vector3D(0.0, 0.0, 0.0);
 
             if (externalForcePointOne.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
             {
@@ -205,7 +210,7 @@ public class DefaultCollisionHandler implements CollisionHandler
          else if (shapeOneIsGround)
          {
 //            System.out.println("shapeOneIsGround");
-            Vector3d velocityWorld = new Vector3d(0.0, 0.0, 0.0);
+            Vector3D velocityWorld = new Vector3D(0.0, 0.0, 0.0);
             if (externalForcePointTwo.getVelocityVector().lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
             {
                collisionOccurred = externalForcePointTwo.resolveCollision(velocityWorld, normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
@@ -223,19 +228,21 @@ public class DefaultCollisionHandler implements CollisionHandler
          else
          {
             //            System.out.println("Two ef points");
-            Vector3d velocityVectorOne = externalForcePointOne.getVelocityVector();
-            Vector3d velocityVectorTwo = externalForcePointTwo.getVelocityVector();
+            Vector3D velocityVectorOne = externalForcePointOne.getVelocityVector();
+            Vector3D velocityVectorTwo = externalForcePointTwo.getVelocityVector();
 
-            Vector3d velocityDifference = new Vector3d();
+            Vector3D velocityDifference = new Vector3D();
             velocityDifference.sub(velocityVectorTwo, velocityVectorOne);
 
             if (velocityDifference.lengthSquared() > velocityForMicrocollision * velocityForMicrocollision)
             {
+//               System.out.println("Normal Collision");
                collisionOccurred = externalForcePointOne.resolveCollision(externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
             }
 
             else
             {
+//               System.out.println("MicroCollision");
                double penetrationSquared = point1.distanceSquared(point2);
                collisionOccurred = externalForcePointOne.resolveMicroCollision(penetrationSquared, externalForcePointTwo, negative_normal, epsilon, mu, p_world); // link1.epsilon, link1.mu, p_world);
             }
@@ -256,6 +263,7 @@ public class DefaultCollisionHandler implements CollisionHandler
       }
    }
 
+   @Override
    public void addListener(CollisionHandlerListener listener)
    {
       listeners.add(listener);
@@ -264,6 +272,9 @@ public class DefaultCollisionHandler implements CollisionHandler
    @Override
    public void handleCollisions(CollisionDetectionResult results)
    {
+      //TODO: Iterate until no collisions left for stacking problems...
+//      for (int j=0; j<10; j++)
+      {
       this.maintenanceBeforeCollisionDetection();
 
       for (int i = 0; i < results.getNumberOfCollisions(); i++)
@@ -273,5 +284,11 @@ public class DefaultCollisionHandler implements CollisionHandler
       }
 
       this.maintenanceAfterCollisionDetection();
+      }
+   }
+
+   @Override
+   public void addContactingExternalForcePoints(Link link, ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints)
+   {      
    }
 }

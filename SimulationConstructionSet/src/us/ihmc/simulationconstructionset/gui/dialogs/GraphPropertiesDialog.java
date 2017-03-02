@@ -14,7 +14,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.GraphPropertiesPanel;
 import us.ihmc.simulationconstructionset.gui.VarPropertiesPanel;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
@@ -81,6 +81,7 @@ public class GraphPropertiesDialog extends JDialog implements ActionListener
 //      parentFrame.repaint();    // This is a horrible way to get the graphs to repaint...
    }
 
+   @Override
    public void actionPerformed(ActionEvent event)
    {
       if (event.getSource() == cancelButton)

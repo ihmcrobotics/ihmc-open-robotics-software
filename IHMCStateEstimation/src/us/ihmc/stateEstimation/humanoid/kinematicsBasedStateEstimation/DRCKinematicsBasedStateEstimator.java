@@ -6,13 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorModePacket.StateEstimatorMode;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -32,7 +34,6 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.imu.FusedIMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -232,7 +233,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          reinitializeStateEstimator.set(false);
          initialize();
       }
-      yoTime.set(TimeTools.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
+      yoTime.set(Conversions.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
 
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();
@@ -303,7 +304,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    }
 
    @Override
-   public void initializeEstimatorToActual(Tuple3d initialCoMPosition, Quat4d initialEstimationLinkOrientation)
+   public void initializeEstimatorToActual(Tuple3DReadOnly initialCoMPosition, QuaternionReadOnly initialEstimationLinkOrientation)
    {
       pelvisLinearStateUpdater.initializeCoMPositionToActual(initialCoMPosition);
       // Do nothing for the orientation since the IMU is trusted

@@ -3,10 +3,6 @@ package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector2d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -14,6 +10,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -60,7 +59,7 @@ public class PlaneContactStateToWrenchMatrixHelper
    private final YoMatrix yoRho;
 
    private final FrameVector contactNormalVector = new FrameVector();
-   private final AxisAngle4d normalContactVectorRotation = new AxisAngle4d();
+   private final AxisAngle normalContactVectorRotation = new AxisAngle();
 
    private final ReferenceFrame centerOfMassFrame;
    private final ReferenceFrame planeFrame;
@@ -70,12 +69,12 @@ public class PlaneContactStateToWrenchMatrixHelper
 
    private final BooleanYoVariable hasReceivedCenterOfPressureCommand;
    private final YoFramePoint2d desiredCoPCommandInSoleFrame;
-   private final Vector2d desiredCoPCommandWeightInSoleFrame = new Vector2d();
+   private final Vector2D desiredCoPCommandWeightInSoleFrame = new Vector2D();
 
    private final List<FramePoint> basisVectorsOrigin = new ArrayList<>();
    private final List<FrameVector> basisVectors = new ArrayList<>();
 
-   private final Matrix3d normalContactVectorRotationMatrix = new Matrix3d();
+   private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
    public PlaneContactStateToWrenchMatrixHelper(ContactablePlaneBody contactablePlaneBody, ReferenceFrame centerOfMassFrame, int maxNumberOfContactPoints,
          int numberOfBasisVectorsPerContactPoint, YoVariableRegistry parentRegistry)
@@ -149,7 +148,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       hasReceivedCenterOfPressureCommand.set(true);
    }
 
-   public void computeMatrices(double rhoWeight, double rhoRateWeight, Vector2d desiredCoPWeight, Vector2d copRateWeight)
+   public void computeMatrices(double rhoWeight, double rhoRateWeight, Vector2D desiredCoPWeight, Vector2D copRateWeight)
    {
       int numberOfContactPointsInContact = yoPlaneContactState.getNumberOfContactPointsInContact();
       if (numberOfContactPointsInContact > maxNumberOfContactPoints)
@@ -290,16 +289,16 @@ public class PlaneContactStateToWrenchMatrixHelper
       }
    }
 
-   private void computeNormalContactVectorRotation(Matrix3d normalContactVectorRotationMatrixToPack)
+   private void computeNormalContactVectorRotation(RotationMatrix normalContactVectorRotationMatrixToPack)
    {
       yoPlaneContactState.getContactNormalFrameVector(contactNormalVector);
       contactNormalVector.changeFrame(planeFrame);
       contactNormalVector.normalize();
-      GeometryTools.getRotationBasedOnNormal(normalContactVectorRotation, contactNormalVector.getVector());
+      GeometryTools.getAxisAngleFromZUpToVector(contactNormalVector.getVector(), normalContactVectorRotation);
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
-   private void computeBasisVector(int basisVectorIndex, Matrix3d normalContactVectorRotationMatrix, FrameVector basisVectorToPack)
+   private void computeBasisVector(int basisVectorIndex, RotationMatrix normalContactVectorRotationMatrix, FrameVector basisVectorToPack)
    {
       double angle = basisVectorIndex * basisVectorAngleIncrement;
       double mu = yoPlaneContactState.getCoefficientOfFriction();

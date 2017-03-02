@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
+import java.util.List;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-
-import javax.vecmath.Vector3d;
-import java.util.List;
 
 public class CinderBlockFieldWithFiducialEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -30,8 +30,8 @@ public class CinderBlockFieldWithFiducialEnvironment implements CommonAvatarEnvi
 
       switch (fiducialType)
       {
-      case FIDUCIAL_50: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addFiducial(new Vector3d(12.0, 0.0, 1.7), 0.0, Fiducial.FIDUCIAL50)); break;
-      case VALVE: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addValveTextureBox(new Vector3d(10.0, 0.0, 1.7), 0.0)); break;
+      case FIDUCIAL_50: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addFiducial(new Vector3D(12.0, 0.0, 1.7), 0.0, Fiducial.FIDUCIAL50)); break;
+      case VALVE: combinedTerrainObject3D.addTerrainObject(DefaultCommonAvatarEnvironment.addValveTextureBox(new Vector3D(10.0, 0.0, 1.7), 0.0)); break;
       }
    }
 

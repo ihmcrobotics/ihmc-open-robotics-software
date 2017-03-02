@@ -1,20 +1,21 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
 public class ThreeDoFAngularAccelerationCalculatorTest
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
@@ -23,7 +24,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
       Random random = new Random(1234L);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      Vector3d[] jointAxes = new Vector3d[] {X, Y, Z};
+      Vector3D[] jointAxes = new Vector3D[] {X, Y, Z};
       ScrewTestTools.createRandomChainRobot("test", joints, elevator, jointAxes, random);
 
       RigidBody base = elevator;
@@ -39,7 +40,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
       Random random = new Random(1234L);
       ArrayList<RevoluteJoint> joints = new ArrayList<RevoluteJoint>();
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      Vector3d[] jointAxes = new Vector3d[] {X, Y, Z};
+      Vector3D[] jointAxes = new Vector3D[] {X, Y, Z};
       ScrewTestTools.createRandomChainRobot("test", joints, elevator, jointAxes, random);
 
       RigidBody base = joints.get(joints.size() - 1).getSuccessor();
@@ -92,7 +93,7 @@ public class ThreeDoFAngularAccelerationCalculatorTest
       endEffectorAcceleration.getAngularPart(desiredAngularAccelerationBack);
 
       desiredAngularAccelerationBack.changeFrame(desiredAngularAcceleration.getReferenceFrame());
-      JUnitTools.assertTuple3dEquals(desiredAngularAcceleration.getVector(), desiredAngularAccelerationBack.getVector(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(desiredAngularAcceleration.getVector(), desiredAngularAccelerationBack.getVector(), 1e-12);
    }
 
 }

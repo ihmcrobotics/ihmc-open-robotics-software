@@ -1,21 +1,20 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -24,10 +23,10 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -275,8 +274,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       virtualLegTangentialFrameHipCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameHipCentered", pelvisFrame)
       {
          private static final long serialVersionUID = 8992154939350877111L;
-         private final AxisAngle4d hipPitchRotationToParentFrame = new AxisAngle4d();
-         private final Vector3d hipPitchToParentFrame = new Vector3d();
+         private final AxisAngle hipPitchRotationToParentFrame = new AxisAngle();
+         private final Vector3D hipPitchToParentFrame = new Vector3D();
          private final FramePoint tempPoint = new FramePoint();
          private final FrameVector footToHipAxis = new FrameVector();
          private final FramePoint hipPitchPosition = new FramePoint();
@@ -288,7 +287,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            GeometryTools.getRotationBasedOnNormal(hipPitchRotationToParentFrame, footToHipAxis.getVector());
+            GeometryTools.getAxisAngleFromZUpToVector(footToHipAxis.getVector(), hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
             hipPitchPosition.get(hipPitchToParentFrame);
@@ -301,8 +300,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       virtualLegTangentialFrameAnkleCentered = new ReferenceFrame(namePrefix + "VirtualLegTangentialFrameAnkleCentered", pelvisFrame)
       {
          private static final long serialVersionUID = 2338083143740929570L;
-         private final AxisAngle4d anklePitchRotationToParentFrame = new AxisAngle4d();
-         private final Vector3d anklePitchToParentFrame = new Vector3d();
+         private final AxisAngle anklePitchRotationToParentFrame = new AxisAngle();
+         private final Vector3D anklePitchToParentFrame = new Vector3D();
          private final FramePoint tempPoint = new FramePoint();
          private final FrameVector footToHipAxis = new FrameVector();
          private final FramePoint anklePitchPosition = new FramePoint();
@@ -314,7 +313,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            GeometryTools.getRotationBasedOnNormal(anklePitchRotationToParentFrame, footToHipAxis.getVector());
+            GeometryTools.getAxisAngleFromZUpToVector(footToHipAxis.getVector(), anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
             anklePitchPosition.get(anklePitchToParentFrame);
@@ -485,7 +484,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaSwingKneeMechanicalLimitAvoidance
             .set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue())
                   / (minMechanicalPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSwingKneeLimitAvoidance.getDoubleValue()));
-      alphaSwingKneeMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaSwingKneeMechanicalLimitAvoidance.set(MathTools.clamp(alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
       //      double desiredOrMinLegLength = - Math.max(desiredLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
       double correctedDesiredPositionZ = ((1.0 - alphaSwingKneeMechanicalLimitAvoidance.getDoubleValue()) * desiredLegLength.getDoubleValue()
@@ -523,7 +522,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       {
          alphaSwingHipMechanicalLimitAvoidance.set((hipPitchJoint.getQ() - hipFlexionAngleThresholdToEnableSwingHipLimitAvoidance.getDoubleValue())
                / (hipFlexionMechanicalLimit.getDoubleValue() - hipFlexionAngleThresholdToEnableSwingHipLimitAvoidance.getDoubleValue()));
-         alphaSwingHipMechanicalLimitAvoidance.set(MathTools.clipToMinMax(alphaSwingHipMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
+         alphaSwingHipMechanicalLimitAvoidance.set(MathTools.clamp(alphaSwingHipMechanicalLimitAvoidance.getDoubleValue(), 0.0, 1.0));
 
          if (alphaSwingHipMechanicalLimitAvoidance.getDoubleValue() > 1.0e-3)
          {
@@ -594,7 +593,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       alphaSwingSingularityAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
             / (maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue()
                   - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
-      alphaSwingSingularityAvoidance.set(MathTools.clipToMinMax(alphaSwingSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaSwingSingularityAvoidance.set(MathTools.clamp(alphaSwingSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
 
       double desiredOrMaxLegLength = -Math.min(desiredLegLength.getDoubleValue(),
             maxPercentOfLegLengthForSingularityAvoidanceInSwing.getDoubleValue() * maximumLegLength.getDoubleValue());
@@ -771,7 +770,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             .set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue())
                   / (maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue()
                         - percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()));
-      alphaSupportSingularityAvoidance.set(MathTools.clipToMinMax(alphaSupportSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaSupportSingularityAvoidance.set(MathTools.clamp(alphaSupportSingularityAvoidance.getDoubleValue(), 0.0, 1.0));
 
       double desiredOrMaxLegLength = Math.min(desiredLegLength.getDoubleValue(),
             maxPercentOfLegLengthForSingularityAvoidanceInSupport.getDoubleValue() * maximumLegLength.getDoubleValue());
@@ -920,7 +919,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
 
       alphaCollapseAvoidance.set((desiredPercentOfLegLength.getDoubleValue() - percentOfLegLengthThresholdForCollapseAvoidance.getDoubleValue())
             / (minPercentOfLegLengthForCollapseAvoidance.getDoubleValue() - percentOfLegLengthThresholdForCollapseAvoidance.getDoubleValue()));
-      alphaCollapseAvoidance.set(MathTools.clipToMinMax(alphaCollapseAvoidance.getDoubleValue(), 0.0, 1.0));
+      alphaCollapseAvoidance.set(MathTools.clamp(alphaCollapseAvoidance.getDoubleValue(), 0.0, 1.0));
 
       double desiredOrMinLegLength = Math.max(desiredLegLength.getDoubleValue(),
             minPercentOfLegLengthForCollapseAvoidance.getDoubleValue() * maximumLegLength.getDoubleValue());

@@ -9,7 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 /**
  * Use this class to efficiently search for closest points to various test
@@ -459,7 +459,7 @@ public class KDTree
     */
    public static double[][] loadPoints3D(BufferedReader bufferedReader)
    {
-      ArrayList<Point3d> pointArray = new ArrayList<Point3d>();
+      ArrayList<Point3D> pointArray = new ArrayList<Point3D>();
       try
       {
          String lineIn;
@@ -478,7 +478,7 @@ public class KDTree
                   System.err.println("KDTree::loadPoints3D(): extra element ");
                }
 
-               pointArray.add(new Point3d(x, y, z));
+               pointArray.add(new Point3D(x, y, z));
             }
          }
          while (lineIn != null);
@@ -635,10 +635,16 @@ public class KDTree
          while (leftMarker < rightMarker)
          {
             // Advance left marker and test
-            while (points[++leftMarker][splitDimension] < splitValue);
+            while (points[++leftMarker][splitDimension] < splitValue)
+            {
+               
+            }
 
             // Advance right marker and test
-            while (points[--rightMarker][splitDimension] > splitValue);
+            while (points[--rightMarker][splitDimension] > splitValue)
+            {
+               
+            }
 
             // Swap points and objects
             if (leftMarker < rightMarker)
@@ -908,8 +914,8 @@ public class KDTree
       double[] maxExtents = new double[3];
 
       tree.getExtents(minExtents, maxExtents);
-      Point3d minExtents3d = new Point3d(minExtents);
-      Point3d maxExtents3d = new Point3d(maxExtents);
+      Point3D minExtents3d = new Point3D(minExtents);
+      Point3D maxExtents3d = new Point3D(maxExtents);
 
       System.out.println("minExtents = " + minExtents3d);
       System.out.println("maxExtents = " + maxExtents3d);
@@ -1139,8 +1145,8 @@ public class KDTree
          double[] closestPoint = kdTree.closestPoint(points[i]);
          if (points[i] != closestPoint)
          {
-            Point3d point = new Point3d(points[i]);
-            Point3d closest = new Point3d(closestPoint);
+            Point3D point = new Point3D(points[i]);
+            Point3D closest = new Point3D(closestPoint);
             System.out.println("point " + i + " = " + point + " did not match closestPoint = " + closest);
 
 //          throw new RuntimeException("things are not working");
@@ -1196,9 +1202,9 @@ public class KDTree
          if ((points[i] != closestPoint) && (closestPoint != null))
          {
             // check if it is closer
-            Point3d adjusted = new Point3d(adjustedPoint);
-            Point3d initial = new Point3d(points[i]);
-            Point3d closest = new Point3d(closestPoint);
+            Point3D adjusted = new Point3D(adjustedPoint);
+            Point3D initial = new Point3D(points[i]);
+            Point3D closest = new Point3D(closestPoint);
             if (adjusted.distance(initial) <= adjusted.distance(closest))
             {
                System.out.println("point " + i + " = " + initial + " did not match adjustedPoint = " + adjusted + " instead it matched " + closest);

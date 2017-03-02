@@ -1,8 +1,7 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 /**
@@ -14,26 +13,26 @@ public class GilbertJohnsonKeerthiCollisionDetector
 {
    private static final double LAMBDA_STOPPING_DELTA = 1e-6;
 
-   private final Vector3d supportDirection = new Vector3d();
-   private final Vector3d negativeSupportDirection = new Vector3d();
-   private final Vector3d supportingVertexOnSimplex = new Vector3d();
-   private final Vector3d tempPVector = new Vector3d();
+   private final Vector3D supportDirection = new Vector3D();
+   private final Vector3D negativeSupportDirection = new Vector3D();
+   private final Vector3D supportingVertexOnSimplex = new Vector3D();
+   private final Vector3D tempPVector = new Vector3D();
 
    private final SimplexPolytope simplex = new SimplexPolytope();
    private GilbertJohnsonKeerthiCollisionDetectorListener listener;
 
-   private final RecyclingArrayList<Point3d> poolOfPoints = new RecyclingArrayList<Point3d>(Point3d.class);
+   private final RecyclingArrayList<Point3D> poolOfPoints = new RecyclingArrayList<Point3D>(Point3D.class);
 
-   public void computeSupportPointOnMinkowskiDifference(ConvexPolytope cubeOne, ConvexPolytope cubeTwo, Vector3d supportDirection, Point3d supportPoint)
+   public void computeSupportPointOnMinkowskiDifference(ConvexPolytope cubeOne, ConvexPolytope cubeTwo, Vector3D supportDirection, Point3D supportPoint)
    {
       // Because everything is linear and convex, the support point on the Minkowski difference is s_{a minkowskidiff b}(d) = s_a(d) - s_b(-d)
 
-      Point3d supportingVertexOne = cubeOne.getSupportingVertex(supportDirection);
+      Point3D supportingVertexOne = cubeOne.getSupportingVertex(supportDirection);
 
       negativeSupportDirection.set(supportDirection);
       negativeSupportDirection.scale(-1.0);
 
-      Point3d supportingVertexTwo = cubeTwo.getSupportingVertex(negativeSupportDirection);
+      Point3D supportingVertexTwo = cubeTwo.getSupportingVertex(negativeSupportDirection);
 
       supportPoint.set(supportingVertexOne);
       supportPoint.sub(supportingVertexTwo);
@@ -44,15 +43,15 @@ public class GilbertJohnsonKeerthiCollisionDetector
       this.listener = listener;
    }
 
-   private final Vector3d defaultInitialGuessOfSeparatingVector = new Vector3d(0.0, 0.0, 1.0);
+   private final Vector3D defaultInitialGuessOfSeparatingVector = new Vector3D(0.0, 0.0, 1.0);
 
-   public boolean arePolytopesColliding(SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public boolean arePolytopesColliding(SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB, Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       return arePolytopesColliding(defaultInitialGuessOfSeparatingVector, polytopeA, polytopeB, pointOnAToPack, pointOnBToPack);
    }
 
-   public boolean arePolytopesColliding(Vector3d initialGuessOfSeparatingVector, SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB,
-         Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public boolean arePolytopesColliding(Vector3D initialGuessOfSeparatingVector, SupportingVertexHolder polytopeA, SupportingVertexHolder polytopeB,
+         Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       poolOfPoints.clear();
 
@@ -67,12 +66,12 @@ public class GilbertJohnsonKeerthiCollisionDetector
       // initialGuessOfSeparatingVector. That will ensure that the point is on the exterior of the Minkowski Difference
       // and will allow us to speed things up by remembering the previous separating vector.
 
-      Point3d vertexOne = polytopeA.getSupportingVertex(initialGuessOfSeparatingVector);
+      Point3D vertexOne = polytopeA.getSupportingVertex(initialGuessOfSeparatingVector);
       negativeSupportDirection.set(initialGuessOfSeparatingVector);
       negativeSupportDirection.negate();
-      Point3d vertexTwo = polytopeB.getSupportingVertex(negativeSupportDirection);
+      Point3D vertexTwo = polytopeB.getSupportingVertex(negativeSupportDirection);
 
-      Point3d minkowskiDifferenceVertex = poolOfPoints.add();//new Point3d();
+      Point3D minkowskiDifferenceVertex = poolOfPoints.add();//new Point3D();
       minkowskiDifferenceVertex.sub(vertexOne, vertexTwo);
 
       simplex.addVertex(minkowskiDifferenceVertex, vertexOne, vertexTwo);
@@ -84,9 +83,9 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
       int iterations = 0;
       int metStoppingConditionsCount = 0;
-      Point3d closestPointToOrigin = poolOfPoints.add();
+      Point3D closestPointToOrigin = poolOfPoints.add();
       closestPointToOrigin.set(0.0, 0.0, 0.0);
-      Point3d origin = poolOfPoints.add();
+      Point3D origin = poolOfPoints.add();
       origin.set(0.0, 0.0, 0.0);
 
       while (true)
@@ -122,10 +121,10 @@ public class GilbertJohnsonKeerthiCollisionDetector
 
          supportDirection.set(closestPointToOrigin);
          supportDirection.negate();
-         Point3d supportingVertexOnA = polytopeA.getSupportingVertex(supportDirection);
+         Point3D supportingVertexOnA = polytopeA.getSupportingVertex(supportDirection);
 
          supportDirection.negate();
-         Point3d supportingVertexOnB = polytopeB.getSupportingVertex(supportDirection);
+         Point3D supportingVertexOnB = polytopeB.getSupportingVertex(supportDirection);
 
          if (simplex.wereMostRecentlyDiscared(supportingVertexOnA, supportingVertexOnB))
          {
@@ -199,7 +198,7 @@ public class GilbertJohnsonKeerthiCollisionDetector
          }
 
          // Step 7) Add v to Q and got to step 2.
-         Point3d pointToAddToSimplex = poolOfPoints.add();
+         Point3D pointToAddToSimplex = poolOfPoints.add();
          pointToAddToSimplex.set(supportingVertexOnSimplex);
          boolean successfullyAddedVertex = simplex.addVertex(pointToAddToSimplex, supportingVertexOnA, supportingVertexOnB);
 

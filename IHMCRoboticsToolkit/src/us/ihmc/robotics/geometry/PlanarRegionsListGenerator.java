@@ -2,10 +2,10 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
 
 public class PlanarRegionsListGenerator
@@ -46,6 +46,13 @@ public class PlanarRegionsListGenerator
       translate(0.0, 0.0, heightZ / 2.0);
       addCubeReferencedAtCenter(lengthX, widthY, heightZ);
       translate(0.0, 0.0, -heightZ / 2.0);
+   }
+   
+   public void addCubeReferencedAtBottomNegativeXEdgeCenter(double lengthX, double widthY, double heightZ)
+   {
+      translate(-lengthX / 2.0, 0.0, heightZ / 2.0);
+      addCubeReferencedAtCenter(lengthX, widthY, heightZ);
+      translate(lengthX / 2.0, 0.0, -heightZ / 2.0);
    }
 
    public void addRectangle(double lengthX, double widthY)
@@ -92,7 +99,7 @@ public class PlanarRegionsListGenerator
       transformGenerator.translate(x, y, z);
    }
 
-   public void translate(Vector3d translationVector)
+   public void translate(Vector3D translationVector)
    {
       transformGenerator.translate(translationVector);
    }
@@ -102,17 +109,17 @@ public class PlanarRegionsListGenerator
       transformGenerator.identity();
    }
 
-   public void rotateEuler(Vector3d eulerAngles)
+   public void rotateEuler(Vector3D eulerAngles)
    {
       transformGenerator.rotateEuler(eulerAngles);
    }
 
-   public void rotate(Matrix3d rotation)
+   public void rotate(RotationMatrix rotation)
    {
       transformGenerator.rotate(rotation);
    }
 
-   public void rotate(Quat4d rotation)
+   public void rotate(Quaternion rotation)
    {
       transformGenerator.rotate(rotation);
    }

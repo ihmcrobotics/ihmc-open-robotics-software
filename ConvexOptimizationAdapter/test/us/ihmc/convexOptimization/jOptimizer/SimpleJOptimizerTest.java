@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.joptimizer.functions.ConvexMultivariateRealFunction;
@@ -17,9 +16,9 @@ import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 import com.joptimizer.optimizers.OptimizationResponse;
 
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.EXCLUDE}) // Revisit JOptimzer some day and see if they ever got their act in gear...
 public class SimpleJOptimizerTest

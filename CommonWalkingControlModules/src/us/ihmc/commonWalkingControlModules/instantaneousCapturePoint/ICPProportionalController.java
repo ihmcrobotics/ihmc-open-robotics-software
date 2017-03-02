@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -176,10 +175,10 @@ public class ICPProportionalController
    {
       private static final long serialVersionUID = -1810366869361449743L;
       private final FrameVector2d xAxis;
-      private final Vector3d x = new Vector3d();
-      private final Vector3d y = new Vector3d();
-      private final Vector3d z = new Vector3d();
-      private final Matrix3d rotation = new Matrix3d();
+      private final Vector3D x = new Vector3D();
+      private final Vector3D y = new Vector3D();
+      private final Vector3D z = new Vector3D();
+      private final RotationMatrix rotation = new RotationMatrix();
 
       public Vector2dZUpFrame(String string, ReferenceFrame parentFrame)
       {
@@ -202,9 +201,7 @@ public class ICPProportionalController
          z.set(0.0, 0.0, 1.0);
          y.cross(z, x);
 
-         rotation.setColumn(0, x);
-         rotation.setColumn(1, y);
-         rotation.setColumn(2, z);
+         rotation.setColumns(x, y, z);
 
          transformToParent.setRotationAndZeroTranslation(rotation);
       }

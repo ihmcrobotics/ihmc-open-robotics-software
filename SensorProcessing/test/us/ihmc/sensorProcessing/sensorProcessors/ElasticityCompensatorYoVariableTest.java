@@ -7,11 +7,11 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class ElasticityCompensatorYoVariableTest
@@ -43,9 +43,9 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 1000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 10000000.0));
          elasticityCompensatorYoVariable.setStiffness(stiffness.getDoubleValue());
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
          elasticityCompensatorYoVariable.update(rawJointPosition.getDoubleValue(), jointTau.getDoubleValue());
          
          assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
@@ -76,8 +76,8 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 1000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 10000000.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
          elasticityCompensatorYoVariable.update(rawJointPosition.getDoubleValue(), jointTau.getDoubleValue());
          
          assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
@@ -99,9 +99,9 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 1000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 10000000.0));
          elasticityCompensatorYoVariable.setStiffness(stiffness.getDoubleValue());
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
          elasticityCompensatorYoVariable.update();
          
          assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
@@ -123,8 +123,8 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 1000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 10000000.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
          elasticityCompensatorYoVariable.update();
          
          assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
@@ -147,8 +147,8 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 1000; i++)
       {
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
-         jointTau.set(RandomTools.generateRandomDouble(random, 100.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
+         jointTau.set(RandomNumbers.nextDouble(random, 100.0));
          
          try
          {
@@ -178,9 +178,9 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 1000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 10000000.0));
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
-         jointTau.set(RandomTools.generateRandomDouble(random, 100.0));
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 10000000.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
+         jointTau.set(RandomNumbers.nextDouble(random, 100.0));
          elasticityCompensatorYoVariable.update();
          
          assertEquals(rawJointPosition.getDoubleValue(), elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
@@ -203,12 +203,12 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 10000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 100000.0));
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
-         jointTau.set(RandomTools.generateRandomDouble(random, 10000.0));
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 100000.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
+         jointTau.set(RandomNumbers.nextDouble(random, 10000.0));
          elasticityCompensatorYoVariable.update();
          
-         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clipToMinMax(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
+         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clamp(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
          
          assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
       }
@@ -230,9 +230,9 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 10000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 100000.0));
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
-         jointTau.set(RandomTools.generateRandomDouble(random, 10000.0));
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 100000.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
+         jointTau.set(RandomNumbers.nextDouble(random, 10000.0));
          elasticityCompensatorYoVariable.update();
          
          double deflectedJointPosition = rawJointPosition.getDoubleValue() - jointTau.getDoubleValue() / stiffness.getDoubleValue();
@@ -255,14 +255,14 @@ public class ElasticityCompensatorYoVariableTest
       
       for (int i = 0; i < 10000; i++)
       {
-         stiffness.set(RandomTools.generateRandomDouble(random, 1.0, 100000.0));
-         rawJointPosition.set(RandomTools.generateRandomDouble(random, 100.0));
-         jointTau.set(RandomTools.generateRandomDouble(random, 10000.0));
-         double maximumDeflection = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         stiffness.set(RandomNumbers.nextDouble(random, 1.0, 100000.0));
+         rawJointPosition.set(RandomNumbers.nextDouble(random, 100.0));
+         jointTau.set(RandomNumbers.nextDouble(random, 10000.0));
+         double maximumDeflection = RandomNumbers.nextDouble(random, 0.0, 10.0);
          elasticityCompensatorYoVariable.setMaximuDeflection(maximumDeflection);
          elasticityCompensatorYoVariable.update();
          
-         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clipToMinMax(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
+         double deflectedJointPosition = rawJointPosition.getDoubleValue() - MathTools.clamp(jointTau.getDoubleValue() / stiffness.getDoubleValue(), maximumDeflection);
          
          assertEquals(deflectedJointPosition, elasticityCompensatorYoVariable.getDoubleValue(), EPSILON);
       }

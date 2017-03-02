@@ -1,24 +1,24 @@
 package us.ihmc.robotics.kinematics;
 
-import georegression.geometry.ConvertRotation3D_F64;
-import georegression.metric.UtilAngle;
-import georegression.struct.EulerType;
+import java.util.Random;
+
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.RegionStepType;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.functions.FunctionNtoM;
 import org.ejml.data.DenseMatrix64F;
+
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.metric.UtilAngle;
+import georegression.struct.EulerType;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.util.Random;
 
 /**
  * Solver for inverse kinematics which uses DDogleg and Twan's code for forward kinematics.
@@ -36,13 +36,13 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    private double errorScalar;
 
    private final RigidBodyTransform actualTransform = new RigidBodyTransform();
-   private final Matrix3d rotationMatrix = new Matrix3d();
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
 
-   private final Vector3d actualT = new Vector3d();
-   private final Vector3d actualR = new Vector3d();
+   private final Vector3D actualT = new Vector3D();
+   private final Vector3D actualR = new Vector3D();
 
-   private final Vector3d desiredT = new Vector3d();
-   private final Vector3d desiredR = new Vector3d();
+   private final Vector3D desiredT = new Vector3D();
+   private final Vector3D desiredR = new Vector3D();
    private final DenseMatrix64F m = new DenseMatrix64F(3, 3);
 
    private int numberOfIterations;
@@ -230,7 +230,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
          double newQ = UtilAngle.bound(parameters[i]);
          if (Double.isNaN(newQ))
             continue;
-         newQ = parameters[i] = MathTools.clipToMinMax(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         newQ = parameters[i] = MathTools.clamp(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
          oneDoFJoint.setQ(newQ);
          oneDoFJoint.getFrameAfterJoint().update();
       }
@@ -292,12 +292,12 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
    }
 
 
-   private void extractTandR(RigidBodyTransform tran, Vector3d T, Vector3d R)
+   private void extractTandR(RigidBodyTransform tran, Vector3D T, Vector3D R)
    {
       tran.getTranslation(T);
       tran.getRotation(rotationMatrix);
 
-      MatrixTools.matrix3DToDenseMatrix(rotationMatrix, m, 0, 0);
+      rotationMatrix.get(m);
 
       ConvertRotation3D_F64.matrixToEuler(m, EulerType.XYZ, euler);
       R.setX(euler[0]);

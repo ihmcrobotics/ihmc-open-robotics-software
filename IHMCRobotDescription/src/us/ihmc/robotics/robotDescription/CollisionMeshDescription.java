@@ -2,21 +2,32 @@ package us.ihmc.robotics.robotDescription;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 
-public class CollisionMeshDescription
+public class CollisionMeshDescription implements CollisionMaskHolder
 {
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
    private final ArrayList<ConvexShapeDescription> convexShapeDescriptions = new ArrayList<>();
    private boolean isGround = false;
-   private int collisionGroup = 0xFFFFFFFF;
-   private int collisionMask = 0xFFFFFFFF;
+   private int collisionGroup = 0x00;
+   private int collisionMask = 0x00;
+
+   private int estimatedNumberOfContactPoints = 24;
+   
+   public void setEstimatedNumberOfContactPoints(int estimatedNumberOfContactPoints)
+   {
+      this.estimatedNumberOfContactPoints = estimatedNumberOfContactPoints;
+   }
+
+   public int getEstimatedNumberOfContactPoints()
+   {
+      return estimatedNumberOfContactPoints;
+   }
 
    public void addConvexShape(ConvexShapeDescription convexShapeDescription)
    {
@@ -91,11 +102,13 @@ public class CollisionMeshDescription
      return isGround;
    }
 
+   @Override
    public int getCollisionGroup()
    {
       return collisionGroup;
    }
 
+   @Override
    public int getCollisionMask()
    {
       return collisionMask;
@@ -106,11 +119,13 @@ public class CollisionMeshDescription
       this.isGround = isGround;
    }
 
+   @Override
    public void setCollisionGroup(int collisionGroup)
    {
       this.collisionGroup = collisionGroup;
    }
 
+   @Override
    public void setCollisionMask(int collisionMask)
    {
       this.collisionMask = collisionMask;
@@ -121,7 +136,7 @@ public class CollisionMeshDescription
       transformGenerator.translate(x, y, z);
    }
 
-   public void translate(Vector3d translationVector)
+   public void translate(Vector3D translationVector)
    {
       transformGenerator.translate(translationVector);
    }
@@ -131,14 +146,19 @@ public class CollisionMeshDescription
       transformGenerator.identity();
    }
 
-   public void rotateEuler(Vector3d eulerAngles)
+   public void rotateEuler(Vector3D eulerAngles)
    {
       transformGenerator.rotateEuler(eulerAngles);
    }
 
-   public void rotate(Matrix3d rotation)
+   public void rotate(RotationMatrix rotation)
    {
       transformGenerator.rotate(rotation);
+   }
+
+   public void rotate(double rotationAngle, Axis axis)
+   {
+      transformGenerator.rotate(rotationAngle, axis);
    }
 
    public void scale(double factor)

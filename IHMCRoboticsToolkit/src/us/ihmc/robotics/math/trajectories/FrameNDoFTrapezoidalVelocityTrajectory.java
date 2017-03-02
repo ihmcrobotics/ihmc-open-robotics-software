@@ -2,7 +2,6 @@ package us.ihmc.robotics.math.trajectories;
 
 
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.math.trajectories.NDoFTrapezoidalVelocityTrajectory.AlphaToAlphaType;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 

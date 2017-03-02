@@ -2,12 +2,11 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.ConvexPolytopeConstructor;
 import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.CapsuleDescriptionReadOnly;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ConvexShapeDescription;
@@ -53,7 +52,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    @Override
    public CollisionShapeDescription<?> createSphere(double radius)
    {
-      return new SphereShapeDescription(radius, new Point3d());
+      return new SphereShapeDescription(radius, new Point3D());
    }
 
    @Override
@@ -68,10 +67,12 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
    }
 
    @Override
-   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int collisionGroup, int collisionMask)
+   public CollisionShape addShape(Link link, RigidBodyTransform shapeToLink, CollisionShapeDescription<?> description, boolean isGround, int groupMask, int collisionMask)
    {
       SimpleCollisionShapeWithLink collisionShape = new SimpleCollisionShapeWithLink(link, description, shapeToLink);
       collisionShape.setIsGround(isGround);
+      collisionShape.setCollisionGroup(groupMask);
+      collisionShape.setCollisionMask(collisionMask);
       detector.addShape(collisionShape);
 
       return collisionShape;

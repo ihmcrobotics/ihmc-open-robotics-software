@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.taskExecutor;
 
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
@@ -35,7 +34,7 @@ public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
 
       super(stateEnum, chestOrientationBehavior);
       this.chestOrientationBehavior = chestOrientationBehavior;
-      Quat4d chestOrientation = new Quat4d();
+      Quaternion chestOrientation = new Quaternion();
       desiredChestOrientation.getQuaternion(chestOrientation);
       chestOrientationPacket = new ChestTrajectoryMessage(trajectoryTime, chestOrientation);
    }

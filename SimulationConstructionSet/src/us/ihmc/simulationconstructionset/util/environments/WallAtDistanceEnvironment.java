@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;

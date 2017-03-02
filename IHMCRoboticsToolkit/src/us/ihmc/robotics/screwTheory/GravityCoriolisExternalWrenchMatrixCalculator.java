@@ -105,7 +105,7 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
          if (!doVelocityTerms)
             tempTwist.setToZero();
          spatialAccelerationCalculator.getAccelerationOfBody(tempAcceleration, body);
-         body.getInertia().computeDynamicWrenchInBodyCoordinates(netWrench, tempAcceleration, tempTwist);
+         body.getInertia().computeDynamicWrenchInBodyCoordinates(tempAcceleration, tempTwist, netWrench);
       }
    }
 

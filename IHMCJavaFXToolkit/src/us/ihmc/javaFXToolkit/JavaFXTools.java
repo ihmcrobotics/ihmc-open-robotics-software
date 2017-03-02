@@ -1,22 +1,21 @@
 package us.ihmc.javaFXToolkit;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector3d;
-
-import javafx.geometry.Point3D;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Transform;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import javafx.scene.transform.Translate;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 
 public abstract class JavaFXTools
 {
-   public static void convertRotationMatrixToAffine(Matrix3d rotation, Affine affineToModify)
+   public static void convertRotationMatrixToAffine(RotationMatrix rotation, Affine affineToModify)
    {
       affineToModify.setMxx(rotation.getM00());
       affineToModify.setMxy(rotation.getM01());
@@ -29,22 +28,14 @@ public abstract class JavaFXTools
       affineToModify.setMzz(rotation.getM22());
    }
 
-   public static void convertTransformToRotationMatrix(Transform transform, Matrix3d rotationToPack)
+   public static void convertTransformToRotationMatrix(Transform transform, RotationMatrix rotationToPack)
    {
-      rotationToPack.setM00(transform.getMxx());
-      rotationToPack.setM01(transform.getMxy());
-      rotationToPack.setM02(transform.getMxz());
-      rotationToPack.setM10(transform.getMyx());
-      rotationToPack.setM11(transform.getMyy());
-      rotationToPack.setM12(transform.getMyz());
-      rotationToPack.setM20(transform.getMzx());
-      rotationToPack.setM21(transform.getMzy());
-      rotationToPack.setM22(transform.getMzz());
+      rotationToPack.set(transform.getMxx(), transform.getMxy(), transform.getMxz(), transform.getMyx(), transform.getMyy(), transform.getMyz(), transform.getMzx(), transform.getMzy(), transform.getMzz());
    }
 
-   public static void convertAxisAngleToAffine(AxisAngle4d axisAngle, Affine affineToPack)
+   public static void convertAxisAngleToAffine(AxisAngle axisAngle, Affine affineToPack)
    {
-      Matrix3d intermediateMatrix = new Matrix3d();
+      RotationMatrix intermediateMatrix = new RotationMatrix();
       intermediateMatrix.set(axisAngle);
       convertRotationMatrixToAffine(intermediateMatrix, affineToPack);
    }
@@ -73,7 +64,7 @@ public abstract class JavaFXTools
       affineToPack.setTz(rigidBodyTransform.getM23());
    }
 
-   public static Affine createAffineFromQuaternionAndTuple(Quat4d quaternion, Tuple3d translation)
+   public static Affine createAffineFromQuaternionAndTuple(Quaternion quaternion, Tuple3DBasics translation)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotation(quaternion);
@@ -81,7 +72,7 @@ public abstract class JavaFXTools
       return convertRigidBodyTransformToAffine(transform);
    }
 
-   public static Affine createAffineFromQuaternionAndTuple(Quat4f quaternion, Tuple3f translation)
+   public static Affine createAffineFromQuaternionAndTuple(Quaternion32 quaternion, Tuple3DBasics translation)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotation(quaternion);
@@ -89,21 +80,28 @@ public abstract class JavaFXTools
       return convertRigidBodyTransformToAffine(transform);
    }
 
-   public static Affine createAffineFromAxisAngle(AxisAngle4d axisAngle)
+   public static Affine createAffineFromAxisAngle(AxisAngle axisAngle)
    {
       Affine affine = new Affine();
       convertAxisAngleToAffine(axisAngle, affine);
       return affine;
    }
 
-   public static void applyTranform(Transform transform, Vector3d vectorToTransform)
+   public static void applyTranform(Transform transform, Vector3D vectorToTransform)
    {
-      Point3D temporaryVector = transform.deltaTransform(vectorToTransform.getX(), vectorToTransform.getY(), vectorToTransform.getZ());
+      javafx.geometry.Point3D temporaryVector = transform.deltaTransform(vectorToTransform.getX(), vectorToTransform.getY(), vectorToTransform.getZ());
       vectorToTransform.set(temporaryVector.getX(), temporaryVector.getY(), temporaryVector.getZ());
    }
-   public static void applyInvertTranform(Transform transform, Vector3d vectorToTransform)
+
+   public static void applyTranform(Transform transform, Point3D pointToTransform)
    {
-      Point3D temporaryVector = new Point3D(vectorToTransform.getX(), vectorToTransform.getY(), vectorToTransform.getZ());
+      javafx.geometry.Point3D temporaryVector = transform.transform(pointToTransform.getX(), pointToTransform.getY(), pointToTransform.getZ());
+      pointToTransform.set(temporaryVector.getX(), temporaryVector.getY(), temporaryVector.getZ());
+   }
+
+   public static void applyInvertTranform(Transform transform, Vector3D vectorToTransform)
+   {
+      javafx.geometry.Point3D temporaryVector = new javafx.geometry.Point3D(vectorToTransform.getX(), vectorToTransform.getY(), vectorToTransform.getZ());
       try
       {
          transform.inverseDeltaTransform(temporaryVector);
@@ -115,8 +113,17 @@ public abstract class JavaFXTools
       vectorToTransform.set(temporaryVector.getX(), temporaryVector.getY(), temporaryVector.getZ());
    }
 
-   public static void addEquals(Point3D pointToModify, Tuple3d tupleToAdd)
+   public static void addEquals(Translate translateToModify, Tuple3DBasics offset)
    {
-      pointToModify.add(tupleToAdd.getX(), tupleToAdd.getY(), tupleToAdd.getZ());
+      translateToModify.setX(translateToModify.getX() + offset.getX());
+      translateToModify.setY(translateToModify.getY() + offset.getY());
+      translateToModify.setZ(translateToModify.getZ() + offset.getZ());
+   }
+   
+   public static void subEquals(Translate translateToModify, Tuple3DBasics offset)
+   {
+      translateToModify.setX(translateToModify.getX() - offset.getX());
+      translateToModify.setY(translateToModify.getY() - offset.getY());
+      translateToModify.setZ(translateToModify.getZ() - offset.getZ());
    }
 }

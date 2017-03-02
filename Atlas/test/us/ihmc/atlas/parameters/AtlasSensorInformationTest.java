@@ -4,8 +4,7 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class AtlasSensorInformationTest
 {

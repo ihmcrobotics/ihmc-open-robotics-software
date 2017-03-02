@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -40,6 +39,7 @@ class DataExporterOptionsDialog
       dialog = new JDialog(frame, "What would you like to do?", true);
       dialog.addWindowListener(new WindowAdapter()
       {
+         @Override
          public void windowClosing(WindowEvent e)
          {
             isCancelled = true;
@@ -115,6 +115,7 @@ class DataExporterOptionsDialog
       JButton okButton = new JButton("OK");
       okButton.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent ae)
          {
             isCancelled = false;
@@ -129,6 +130,7 @@ class DataExporterOptionsDialog
       JButton cancelButton = new JButton("CANCEL");
       cancelButton.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent ae)
          {
             isCancelled = true;

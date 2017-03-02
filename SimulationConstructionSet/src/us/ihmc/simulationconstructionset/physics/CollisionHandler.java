@@ -1,5 +1,9 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import java.util.ArrayList;
+
+import us.ihmc.simulationconstructionset.ContactingExternalForcePoint;
+import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener;
 
@@ -37,5 +41,7 @@ public interface CollisionHandler
    public abstract void handle(Contacts contacts);
 
    public abstract void handleCollisions(CollisionDetectionResult results);
+
+   public abstract void addContactingExternalForcePoints(Link link, ArrayList<ContactingExternalForcePoint> contactingExternalForcePoints);
 
 }

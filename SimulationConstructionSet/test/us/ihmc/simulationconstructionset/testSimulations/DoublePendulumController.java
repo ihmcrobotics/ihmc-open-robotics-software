@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.testSimulations;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.commons.Conversions;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
@@ -33,6 +33,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       this.doublePendulum = doublePendulum;
    }
 
+   @Override
    public void initialize()
    {
       this.kp.set(100.0);
@@ -41,6 +42,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       doublePendulum.getJ1().setQ(0.1);
    }
 
+   @Override
    public void read(long currentClockTime)
    {
       q_j1.set(doublePendulum.getJ1().getQYoVariable().getDoubleValue());
@@ -49,6 +51,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       qd_j2.set(doublePendulum.getJ2().getQDYoVariable().getDoubleValue());
    }
 
+   @Override
    public void run()
    {
       q_j1_d.set(q_j1_d.getDoubleValue() + 0.1);
@@ -60,33 +63,38 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       tick.increment();
       
       long start = System.nanoTime();
-      while(System.nanoTime() - start < TimeTools.milliSecondsToNanoSeconds(10))
+      while(System.nanoTime() - start < Conversions.milliSecondsToNanoSeconds(10))
       {
          // Busy wait
       }
    }
 
+   @Override
    public void write(long timestamp)
    {
       doublePendulum.getJ1().setTau(tau_j1.getDoubleValue());
       doublePendulum.getJ2().setTau(tau_j2.getDoubleValue());
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return getClass().getSimpleName();
    }
 
+   @Override
    public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
    {
       return null;
    }
 
+   @Override
    public long nextWakeupTime()
    {
       return 0;

@@ -7,17 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-
 import org.junit.Test;
 
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.ConvexHullFootstepSnapper;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepValueFunction;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.random.RandomGeometry;
 
 
 /**
@@ -32,14 +28,14 @@ public class ConvexHullFootstepSnapperTest
 	{
       FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
-      List<Point2d> pointsToCrop = new ArrayList<Point2d>();
-      pointsToCrop.add(new Point2d(1,1));
-      pointsToCrop.add(new Point2d(-1,1));
-      pointsToCrop.add(new Point2d(-1,-1));
-      pointsToCrop.add(new Point2d(1,-1));
-      pointsToCrop.add(new Point2d(1.1,0));
+      List<Point2D> pointsToCrop = new ArrayList<Point2D>();
+      pointsToCrop.add(new Point2D(1,1));
+      pointsToCrop.add(new Point2D(-1,1));
+      pointsToCrop.add(new Point2D(-1,-1));
+      pointsToCrop.add(new Point2D(1,-1));
+      pointsToCrop.add(new Point2D(1.1,0));
 
-      List<Point2d> finalPoints = footstepSnapper.reduceListOfPointsByArea(pointsToCrop, 4);
+      List<Point2DReadOnly> finalPoints = footstepSnapper.reduceListOfPointsByArea(pointsToCrop, 4);
       assertTrue(finalPoints.size() == 4.0);
       ConvexPolygon2d endPolygon = new ConvexPolygon2d(finalPoints);
       assertEquals(4.0, endPolygon.getArea(), 1e-15);
@@ -51,13 +47,13 @@ public class ConvexHullFootstepSnapperTest
 	{
       FootstepSnappingParameters snappingParameters = new GenericFootstepSnappingParameters();
       ConvexHullFootstepSnapper footstepSnapper = new ConvexHullFootstepSnapper(new SimpleFootstepValueFunction(snappingParameters), snappingParameters);
-      List<Point2d> pointsToCrop = new ArrayList<Point2d>();
+      List<Point2D> pointsToCrop = new ArrayList<Point2D>();
       Random random = new Random(82368L);
       double maxX = 10;
       double maxY = 10;
       int numPoints = 100;
       for (int i = 0; i < numPoints; i++){
-         pointsToCrop.add(RandomTools.generateRandomPoint2d(random, maxX, maxY));
+         pointsToCrop.add(RandomGeometry.nextPoint2D(random, maxX, maxY));
       }
 
       ConvexPolygon2d startPolygon = new ConvexPolygon2d(pointsToCrop);

@@ -1,8 +1,8 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Vector3f;
-
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine.TurnValveBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.examples.GetUserValidationBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
@@ -22,11 +22,10 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
 public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValveBehaviorState> implements CoactiveDataListenerInterface
@@ -44,8 +43,8 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       BACK_AWAY_FROM_VALVE
    }
 
-   private Vector3f valveWalkOffsetPoint1 = new Vector3f(-0.39f, 0.0f, 0.85f);
-   private Vector3f valveWalkOffsetPoint2 = new Vector3f(-0.38f, 0.0f, 0.75f);
+   private Vector3D32 valveWalkOffsetPoint1 = new Vector3D32(-0.39f, 0.0f, 0.85f);
+   private Vector3D32 valveWalkOffsetPoint2 = new Vector3D32(-0.38f, 0.0f, 0.75f);
 
    private final SearchForValveBehavior searchForValveBehavior;
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
@@ -216,12 +215,12 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
 
    }
 
-   private FramePoint offsetPointFromValve(Vector3f point)
+   private FramePoint offsetPointFromValve(Vector3D32 point)
    {
       PoseReferenceFrame valvePose = new PoseReferenceFrame("valveFrame", ReferenceFrame.getWorldFrame());
       valvePose.setPoseAndUpdate(new RigidBodyTransform(searchForValveBehavior.getLocation()));
 
-      FramePoint point1 = new FramePoint(valvePose, point.x, point.y, point.z);
+      FramePoint point1 = new FramePoint(valvePose, point);
       return point1;
    }
 

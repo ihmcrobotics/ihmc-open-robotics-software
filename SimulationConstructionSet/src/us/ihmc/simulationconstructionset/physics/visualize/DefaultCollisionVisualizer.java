@@ -3,11 +3,11 @@ package us.ihmc.simulationconstructionset.physics.visualize;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -31,11 +31,13 @@ public class DefaultCollisionVisualizer implements CollisionHandlerListener
 
    private double impulseScale = 0.1;
    private double forceScale = 0.005;
+   private double collisionBallRadius = 0.01;
 
-   public DefaultCollisionVisualizer(double forceScale, double impulseScale, SimulationConstructionSet scs, int numberOfVectorsToCreate)
+   public DefaultCollisionVisualizer(double forceScale, double impulseScale, double collisionBallRadius, SimulationConstructionSet scs, int numberOfVectorsToCreate)
    {
       this.forceScale = forceScale;
       this.impulseScale = impulseScale;
+      this.collisionBallRadius = collisionBallRadius;
       initialize(scs, numberOfVectorsToCreate);
    }
 
@@ -47,8 +49,8 @@ public class DefaultCollisionVisualizer implements CollisionHandlerListener
       registry = new YoVariableRegistry(getClass().getSimpleName());
       rootRegistry.addChild(registry);
 
-      collisionPositionsVizOne = new BagOfBalls(50, 0.01, "CollisionOne", YoAppearance.Red(), registry, yoGraphicsListRegistry);
-      collisionPositionsVizTwo = new BagOfBalls(50, 0.01, "CollisionTwo", YoAppearance.Blue(), registry, yoGraphicsListRegistry);
+      collisionPositionsVizOne = new BagOfBalls(50, collisionBallRadius, "CollisionOne", YoAppearance.Red(), registry, yoGraphicsListRegistry);
+      collisionPositionsVizTwo = new BagOfBalls(50, collisionBallRadius, "CollisionTwo", YoAppearance.Blue(), registry, yoGraphicsListRegistry);
 
       for (int i = 0; i < numberOfVectorsToCreate; i++)
       {
@@ -73,6 +75,7 @@ public class DefaultCollisionVisualizer implements CollisionHandlerListener
       total = 0;
    }
 
+   @Override
    public void collision(CollisionShape shapeA, CollisionShape shapeB, ExternalForcePoint forceA, ExternalForcePoint forceB, ExternalTorque torqueA,
          ExternalTorque torqueB)
    {

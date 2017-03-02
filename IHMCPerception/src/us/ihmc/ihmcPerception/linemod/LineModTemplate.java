@@ -5,9 +5,8 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.vecmath.Point2d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 
 
 
@@ -17,7 +16,7 @@ public class LineModTemplate implements Serializable
    private static final long serialVersionUID = 3777236270651224168L;
    public byte[] buf;
    public int numberFeatures;
-   public Point2d[] features;
+   public Point2D[] features;
    public long[] modality;
    public Rectangle region;
    public RigidBodyTransform transform;
@@ -28,13 +27,13 @@ public class LineModTemplate implements Serializable
       ByteBuffer reader = ByteBuffer.wrap(buf);
       reader.order(ByteOrder.LITTLE_ENDIAN);
       numberFeatures = reader.getInt();
-      features = new Point2d[numberFeatures];
+      features = new Point2D[numberFeatures];
       modality = new long[numberFeatures];
       for(int i=0;i<numberFeatures;i++)
       {
          int x=reader.getInt();
          int y=reader.getInt();
-         features[i]=new Point2d(x,y);
+         features[i]=new Point2D(x,y);
          modality[i]=reader.getLong();
          reader.get();
       }

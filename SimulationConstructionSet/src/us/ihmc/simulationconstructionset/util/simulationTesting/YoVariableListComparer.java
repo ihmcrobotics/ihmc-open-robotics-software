@@ -24,6 +24,7 @@ public class YoVariableListComparer
 
       Comparator<YoVariable<?>> alphabeticOrderComparator = new Comparator<YoVariable<?>>()
       {
+      @Override
       public int compare(YoVariable<?> arg0, YoVariable<?> arg1) 
       {
          return arg0.getFullNameWithNameSpace().compareTo(arg1.getFullNameWithNameSpace());
@@ -114,6 +115,7 @@ public class YoVariableListComparer
       return differences;
    }
 
+   @Override
    public String toString()
    {
       StringBuffer buf = new StringBuffer();

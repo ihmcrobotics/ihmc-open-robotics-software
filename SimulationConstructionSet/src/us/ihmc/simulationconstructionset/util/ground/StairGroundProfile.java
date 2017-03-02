@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
@@ -42,7 +41,8 @@ public class StairGroundProfile extends GroundProfileFromHeightMap
       this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -50,6 +50,7 @@ public class StairGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       int stairNumber = (int) Math.ceil((x - startStairsAtX / groundXStep));    // the ceil ensures that the fist step is always at x = 0.0, which simplifies initial robot setup
@@ -61,11 +62,12 @@ public class StairGroundProfile extends GroundProfileFromHeightMap
 
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       normal.set(0.0, 0.0, 1.0);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

@@ -4,9 +4,9 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class SimulationConstructionSetProcessDataCallTest
 {   
@@ -259,6 +259,7 @@ public class SimulationConstructionSetProcessDataCallTest
          copyVariable = new DoubleYoVariable("copyVariable", registry);
       }
       
+      @Override
       public void processData()
       {
          double holderDouble;
@@ -290,6 +291,7 @@ public class SimulationConstructionSetProcessDataCallTest
          countVariable = new DoubleYoVariable("countVariable", registry);
       }
       
+      @Override
       public void processData()
       {
          countVariable.set(count);         

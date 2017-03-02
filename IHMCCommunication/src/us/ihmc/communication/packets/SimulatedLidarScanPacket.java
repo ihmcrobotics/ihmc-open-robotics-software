@@ -2,8 +2,8 @@ package us.ihmc.communication.packets;
 
 import java.util.Random;
 
-import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.lidar.LidarScanParameters;
 
 public class SimulatedLidarScanPacket extends Packet<SimulatedLidarScanPacket>
 {

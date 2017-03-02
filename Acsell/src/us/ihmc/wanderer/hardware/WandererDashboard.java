@@ -46,7 +46,7 @@ public class WandererDashboard extends JPanel implements PlaybackListener
    public static void createDashboard(final SimulationConstructionSet scs, YoVariableRegistry registry)
    {
       final WandererDashboard wandererDashboard = new WandererDashboard(registry);
-      scs.addExtraJpanel(wandererDashboard, "Dashboard");
+      scs.addExtraJpanel(wandererDashboard, "Dashboard", true);
       scs.attachPlaybackListener(wandererDashboard);
       
       final WandererExpoFrame wandererExpoFrame = new WandererExpoFrame(registry,false);
@@ -65,8 +65,6 @@ public class WandererDashboard extends JPanel implements PlaybackListener
       });
       
       scs.addButton(showDashboard);
-      scs.getStandardSimulationGUI().selectPanel("Dashboard");
-      
    }
    
    private WandererDashboard(YoVariableHolder yoVariableHolder)

@@ -1,20 +1,19 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 @RosMessagePacket(documentation =
       "This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -41,7 +40,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage(Random random)
    {
       super(random);
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -65,7 +64,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     * @param desiredPosition desired foot position expressed in world frame.
     * @param desiredOrientation desired foot orientation expressed in world frame.
     */
-   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
+   public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
       super(trajectoryTime, desiredPosition, desiredOrientation);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
@@ -74,7 +73,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3d, Quat4d, Vector3d, Vector3d)} for each trajectory point afterwards.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which foot is performing the trajectory.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.

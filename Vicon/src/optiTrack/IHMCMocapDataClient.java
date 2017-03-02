@@ -2,12 +2,11 @@ package optiTrack;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class IHMCMocapDataClient extends MocapDataClient
@@ -63,23 +62,23 @@ public class IHMCMocapDataClient extends MocapDataClient
       ArrayList<MocapRigidBody> convertedListOfMocapRigidBodies = new ArrayList<MocapRigidBody>();
       for (MocapRigidBody mocapRigidBody : lisftOfRigidbodies)
       {
-         mocapRbToMocapOrigin = new RigidBodyTransform(new Quat4d(mocapRigidBody.qx, mocapRigidBody.qy, mocapRigidBody.qz, mocapRigidBody.qw),
-                 new Vector3d(mocapRigidBody.xPosition, mocapRigidBody.yPosition, mocapRigidBody.zPosition));
+         mocapRbToMocapOrigin = new RigidBodyTransform(new Quaternion(mocapRigidBody.qx, mocapRigidBody.qy, mocapRigidBody.qz, mocapRigidBody.qw),
+                 new Vector3D(mocapRigidBody.xPosition, mocapRigidBody.yPosition, mocapRigidBody.zPosition));
          mocapRbFrame.update();
          mocapOriginFrame.update();
          mocapRbZUpFrame.update();
          
-         FramePose pose = new FramePose(mocapRbZUpFrame, new Point3d(),
-                                        new Quat4d());
+         FramePose pose = new FramePose(mocapRbZUpFrame, new Point3D(),
+                                        new Quaternion());
          pose.changeFrame(ReferenceFrame.getWorldFrame());
 
          RigidBodyTransform r = new RigidBodyTransform();
          pose.getRigidBodyTransform(r);
 
-         Vector3d position = new Vector3d();
+         Vector3D position = new Vector3D();
          r.getTranslation(position);
 
-         Quat4d rotation = new Quat4d();
+         Quaternion rotation = new Quaternion();
          r.getRotation(rotation);
 
          convertedListOfMocapRigidBodies.add(new MocapRigidBody(mocapRigidBody.getId(), position, rotation, mocapRigidBody.getListOfAssociatedMarkers(),

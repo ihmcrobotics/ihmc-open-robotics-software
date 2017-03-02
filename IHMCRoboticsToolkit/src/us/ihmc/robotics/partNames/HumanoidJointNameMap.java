@@ -2,7 +2,7 @@ package us.ihmc.robotics.partNames;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface HumanoidJointNameMap extends JointNameMap

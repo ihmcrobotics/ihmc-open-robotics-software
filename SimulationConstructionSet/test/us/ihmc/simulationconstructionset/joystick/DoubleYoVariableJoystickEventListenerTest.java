@@ -4,14 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import net.java.games.input.Component;
-import net.java.games.input.Event;
-
 import org.junit.Test;
 
+import net.java.games.input.Component;
+import net.java.games.input.Event;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class DoubleYoVariableJoystickEventListenerTest
@@ -62,31 +61,37 @@ public class DoubleYoVariableJoystickEventListenerTest
       private Identifier identifier;
       private float deadZone;
 
+      @Override
       public boolean isRelative()
       {
          return isRelative;
       }
 
+      @Override
       public boolean isAnalog()
       {
          return isAnalog;
       }
 
+      @Override
       public float getPollData()
       {
          return pollData;
       }
 
+      @Override
       public String getName()
       {
          return name;
       }
 
+      @Override
       public Identifier getIdentifier()
       {
          return identifier;
       }
 
+      @Override
       public float getDeadZone()
       {
          return deadZone;

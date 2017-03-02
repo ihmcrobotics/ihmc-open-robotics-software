@@ -15,12 +15,20 @@ ihmc_msgs/FootstepDataRosMessage[] footstep_data_list
 uint8 execution_mode
 
 # swingTime is the time spent in single-support when stepping  - Queueing does not support varying
-# swing times. If execution mode is QUEUE, all queued footsteps' swingTime will be overwritten
-float64 swing_time
+# swing times. If execution mode is QUEUE, all queued footsteps' swingTime will be overwritten  - The
+# value can be overwritten by specifying a swing time in the FootstepDataMessage for each individual
+# step.
+float64 default_swing_time
 
 # transferTime is the time spent in double-support between steps  - Queueing does not support varying
-# transfer times. If execution mode is QUEUE, all queued footsteps' transferTime will be overwritten
-float64 transfer_time
+# transfer times. If execution mode is QUEUE, all queued footsteps' transferTime will be overwritten 
+# - The value can be overwritten by specifying a transfer time in the FootstepDataMessage for each
+# individual step.
+float64 default_transfer_time
+
+# Specifies the transfer time to go to standing after the execution of the footstep list is finished.
+# If the value is negative the defaultTransfer time will be used.
+float64 final_transfer_time
 
 # A unique id for the current message. This can be a timestamp or sequence number. Only the unique id
 # in the top level message is used, the unique id in nested messages is ignored. Use

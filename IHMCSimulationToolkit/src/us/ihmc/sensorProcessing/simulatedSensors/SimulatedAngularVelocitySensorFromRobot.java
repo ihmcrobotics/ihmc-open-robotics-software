@@ -1,21 +1,20 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.IMUMount;
 
-public class SimulatedAngularVelocitySensorFromRobot extends SimulatedSensor<Tuple3d>
+public class SimulatedAngularVelocitySensorFromRobot extends SimulatedSensor<Tuple3DBasics>
 {
    private final IMUMount imuMount;
    
-   private final Vector3d angularVelocity = new Vector3d();
+   private final Vector3D angularVelocity = new Vector3D();
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
    
-   private final ControlFlowOutputPort<Vector3d> angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
+   private final ControlFlowOutputPort<Vector3D> angularVelocityOutputPort = createOutputPort("angularVelocityOutputPort");
 
    public SimulatedAngularVelocitySensorFromRobot(String name, IMUMount imuMount, YoVariableRegistry registry)
    {
@@ -41,7 +40,7 @@ public class SimulatedAngularVelocitySensorFromRobot extends SimulatedSensor<Tup
       // empty
    }
 
-   public ControlFlowOutputPort<Vector3d> getAngularVelocityOutputPort()
+   public ControlFlowOutputPort<Vector3D> getAngularVelocityOutputPort()
    {
       return angularVelocityOutputPort;
    }

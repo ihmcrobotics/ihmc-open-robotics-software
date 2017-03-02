@@ -1,5 +1,14 @@
 package us.ihmc.ihmcPerception;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import javax.swing.JFrame;
+
+import org.ros.RosCore;
+
 import boofcv.abst.fiducial.FiducialDetector;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
@@ -13,20 +22,13 @@ import boofcv.struct.calib.IntrinsicParameters;
 import boofcv.struct.image.GrayF32;
 import georegression.metric.UtilAngle;
 import georegression.struct.se.Se3_F64;
-import org.ros.RosCore;
-import us.ihmc.robotics.geometry.Transform3d;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
 import us.ihmc.utilities.ros.subscriber.RosCameraInfoSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosImageSubscriber;
-
-import javax.swing.*;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class RosFiducialDetector extends RosImageSubscriber
 {
@@ -101,9 +103,9 @@ public class RosFiducialDetector extends RosImageSubscriber
 
             VisualizeFiducial.drawCube(targetToSensor, intrinsicParameters, fiducialWidth, lineThicknessPixels, graphics2D);
 
-            Matrix3d rotation = new Matrix3d(targetToSensor.getRotation().getData());
-            Vector3d translation = new Vector3d(targetToSensor.getTranslation().getX(),targetToSensor.getTranslation().getY(),targetToSensor.getTranslation().getZ());
-            Transform3d transform = new Transform3d(rotation, translation);
+            RotationMatrix rotation = new RotationMatrix(targetToSensor.getRotation().getData());
+            Vector3D translation = new Vector3D(targetToSensor.getTranslation().getX(),targetToSensor.getTranslation().getY(),targetToSensor.getTranslation().getZ());
+            RigidBodyTransform transform = new RigidBodyTransform(rotation, translation);
 
             tfPublisher.publish(transform, timeStamp, "fiducial" + id, "camera");
          }

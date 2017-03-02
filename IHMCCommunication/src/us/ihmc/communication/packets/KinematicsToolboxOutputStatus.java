@@ -3,15 +3,14 @@ package us.ihmc.communication.packets;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -20,8 +19,8 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
    public int jointNameHash;
    public float[] desiredJointAngles;
 
-   public Vector3f desiredRootTranslation = new Vector3f();
-   public Quat4f desiredRootOrientation = new Quat4f();
+   public Vector3D32 desiredRootTranslation = new Vector3D32();
+   public Quaternion32 desiredRootOrientation = new Quaternion32();
 
    /** Below 5.0e-3 seems to represent a good solution. */
    public double solutionQuality = Double.NaN;
@@ -38,8 +37,8 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
          desiredJointAngles[i] = random.nextFloat();
       }
 
-      desiredRootTranslation = RandomTools.generateRandomVector3f(random);
-      desiredRootOrientation = RandomTools.generateRandomQuaternion4f(random);
+      desiredRootTranslation = RandomGeometry.nextVector3D32(random);
+      desiredRootOrientation = RandomGeometry.nextQuaternion32(random);
    }
 
    public KinematicsToolboxOutputStatus()
@@ -102,12 +101,12 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
          desiredJointAngles[i] = (float) newJointData.get(i).getqDesired();
    }
 
-   public void setRootTranslation(Vector3d rootTranslation)
+   public void setRootTranslation(Vector3D rootTranslation)
    {
       this.desiredRootTranslation.set(rootTranslation);
    }
 
-   public void setRootOrientation(Quat4d rootOrientation)
+   public void setRootOrientation(Quaternion rootOrientation)
    {
       this.desiredRootOrientation.set(rootOrientation);
    }
@@ -122,12 +121,12 @@ public class KinematicsToolboxOutputStatus extends StatusPacket<KinematicsToolbo
       return desiredJointAngles;
    }
 
-   public Vector3f getPelvisTranslation()
+   public Vector3D32 getPelvisTranslation()
    {
       return desiredRootTranslation;
    }
 
-   public Quat4f getPelvisOrientation()
+   public Quaternion32 getPelvisOrientation()
    {
       return desiredRootOrientation;
    }

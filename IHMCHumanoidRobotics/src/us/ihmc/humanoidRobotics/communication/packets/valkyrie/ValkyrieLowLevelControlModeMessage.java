@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.packets.valkyrie;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.robotics.random.RandomTools;
 
 @RosMessagePacket(documentation = "Request a Valkyrie low-level control mode, which is either: stand-prep, calibration, or high-level control.",
       rosPackage = "ihmc_valkyrie_ros",
@@ -58,6 +58,6 @@ public class ValkyrieLowLevelControlModeMessage extends Packet<ValkyrieLowLevelC
 
    public ValkyrieLowLevelControlModeMessage(Random random)
    {
-      requestedControlMode = RandomTools.generateRandomEnum(random, ControlMode.class);
+      requestedControlMode = RandomNumbers.nextEnum(random, ControlMode.class);
    }
 }

@@ -1,38 +1,46 @@
 package us.ihmc.ihmcPerception.objectDetector;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import java.awt.image.BufferedImage;
+
 import org.junit.Test;
+
+import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.communication.net.AtomicSettableTimestampProvider;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.RenderedSceneHandler;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.CameraMount;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.FloatingObjectBoxRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.awt.image.BufferedImage;
 
 public class ObjectDetectorFromCameraImagesTest
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
-   @ContinuousIntegrationTest(estimatedDuration = 5.0)
+   @ContinuousIntegrationTest(estimatedDuration = 5.0, categoriesOverride = IntegrationCategory.IN_DEVELOPMENT)
    @Test(timeout = 300000)
    public void testUsingSimulationConstructionSet() throws Exception
    {
@@ -72,12 +80,12 @@ public class ObjectDetectorFromCameraImagesTest
       RenderedSceneHandler videoDataServer = new RenderedSceneHandler()
       {
          @Override
-         public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, IntrinsicParameters intrinsicParameters)
+         public void updateImage(RobotSide robotSide, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
          {
             FloatingJoint cameraJoint = (FloatingJoint) simpleRobotWithCamera.getRootJoints().get(0);
 
-            Point3d cameraPositionInWorld = new Point3d();
-            Quat4d cameraOrientationInWorldXForward = new Quat4d();
+            Point3D cameraPositionInWorld = new Point3D();
+            Quaternion cameraOrientationInWorldXForward = new Quaternion();
 
             cameraJoint.getPosition(cameraPositionInWorld);
             cameraJoint.getRotationToWorld(cameraOrientationInWorldXForward);
@@ -152,10 +160,10 @@ public class ObjectDetectorFromCameraImagesTest
             double vY = ampY * Math.sin(2.0 * Math.PI * freqY * t);
             double vZ = ampZ * Math.sin(2.0 * Math.PI * freqZ * t);
 
-            Vector3d linearVelocityInWorld = new Vector3d(vX, vY, vZ);
+            Vector3D linearVelocityInWorld = new Vector3D(vX, vY, vZ);
             floatingObjectBoxRobot.setLinearVelocity(linearVelocityInWorld);
 
-            Vector3d angularVelocityInBody = new Vector3d(wX, wY, wZ);
+            Vector3D angularVelocityInBody = new Vector3D(wX, wY, wZ);
             floatingObjectBoxRobot.setAngularVelocity(angularVelocityInBody);
          }
       });
@@ -185,7 +193,7 @@ public class ObjectDetectorFromCameraImagesTest
    private Robot createCameraRobot(double fieldOfView)
    {
       final Robot simpleRobotWithCamera = new Robot("SimpleRobotWithCamera");
-      FloatingJoint cameraJoint = new FloatingJoint("camera", "camera", new Vector3d(), simpleRobotWithCamera);
+      FloatingJoint cameraJoint = new FloatingJoint("camera", "camera", new Vector3D(), simpleRobotWithCamera);
       Link cameraLink = new Link("camera");
       cameraLink.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
       Graphics3DObject cameraLinkGraphics = new Graphics3DObject();

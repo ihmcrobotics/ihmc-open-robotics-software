@@ -3,8 +3,8 @@ package us.ihmc.valkyrie.fingers;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -16,10 +16,10 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 
 public class ValkyrieFingerSetController implements RobotController
 {
@@ -327,11 +327,11 @@ public class ValkyrieFingerSetController implements RobotController
       if (!isStopped.getBooleanValue())
       {
          currentTrajectoryTime.set(yoTime.getDoubleValue() - startTrajectoryTime.getDoubleValue());
-         currentTrajectoryTime.set(MathTools.clipToMinMax(currentTrajectoryTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue()));
+         currentTrajectoryTime.set(MathTools.clamp(currentTrajectoryTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue()));
       }
 
       yoPolynomial.compute(currentTrajectoryTime.getDoubleValue());
-      double alpha = MathTools.clipToMinMax(yoPolynomial.getPosition(), 0.0, 1.0);
+      double alpha = MathTools.clamp(yoPolynomial.getPosition(), 0.0, 1.0);
 
       for (ValkyrieRealRobotFingerJoint controllableJoint : ValkyrieRealRobotFingerJoint.values)
       {

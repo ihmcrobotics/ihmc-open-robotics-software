@@ -7,14 +7,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.math.trajectories.YoParabolicTrajectoryGenerator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class YoParabolicTrajectoryGeneratorTest
 {
@@ -38,13 +37,13 @@ public class YoParabolicTrajectoryGeneratorTest
       FramePoint positionToPack = new FramePoint(referenceFrame);
 
       trajectoryGenerator.getPosition(positionToPack, 0.0);
-      JUnitTools.assertTuple3dEquals(initialPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
 
       trajectoryGenerator.getPosition(positionToPack, intermediateParameter);
-      JUnitTools.assertTuple3dEquals(intermediatePosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(intermediatePosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
 
       trajectoryGenerator.getPosition(positionToPack, 1.0);
-      JUnitTools.assertTuple3dEquals(finalPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(finalPosition.getVectorCopy(), positionToPack.getVectorCopy(), delta);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -146,9 +145,9 @@ public class YoParabolicTrajectoryGeneratorTest
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
       {
-         FramePoint initialPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
-         FramePoint intermediatePosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
-         FramePoint finalPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
+         FramePoint initialPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
+         FramePoint intermediatePosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
+         FramePoint finalPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
          double intermediateParameter = random.nextDouble();
          trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
 
@@ -169,7 +168,7 @@ public class YoParabolicTrajectoryGeneratorTest
          trajectoryGenerator.getVelocity(velocityFromTrajectoryGenerator, parameter);
 
          double delta = 1e-4;
-         JUnitTools.assertTuple3dEquals(numericalVelocity.getVectorCopy(), velocityFromTrajectoryGenerator.getVectorCopy(), delta);
+         EuclidCoreTestTools.assertTuple3DEquals(numericalVelocity.getVectorCopy(), velocityFromTrajectoryGenerator.getVectorCopy(), delta);
       }
    }
 
@@ -182,9 +181,9 @@ public class YoParabolicTrajectoryGeneratorTest
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
 
-      FramePoint initialPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
-      FrameVector initialVelocity = new FrameVector(referenceFrame, RandomTools.generateRandomVector(random));
-      FramePoint finalPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
+      FramePoint initialPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
+      FrameVector initialVelocity = new FrameVector(referenceFrame, RandomGeometry.nextVector3D(random));
+      FramePoint finalPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
       trajectoryGenerator.initialize(initialPosition, initialVelocity, finalPosition);
 
       FramePoint initialPositionBack = new FramePoint(referenceFrame);
@@ -197,8 +196,8 @@ public class YoParabolicTrajectoryGeneratorTest
       trajectoryGenerator.getPosition(finalPositionBack, 1.0);
 
       double delta = 0.0;
-      JUnitTools.assertTuple3dEquals(initialPosition.getPoint(), initialPositionBack.getPoint(), delta);
-      JUnitTools.assertTuple3dEquals(initialVelocity.getVector(), initialVelocityBack.getVector(), delta);
-      JUnitTools.assertTuple3dEquals(finalPosition.getPoint(), finalPositionBack.getPoint(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), initialPositionBack.getPoint(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(initialVelocity.getVector(), initialVelocityBack.getVector(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(finalPosition.getPoint(), finalPositionBack.getPoint(), delta);
    }
 }

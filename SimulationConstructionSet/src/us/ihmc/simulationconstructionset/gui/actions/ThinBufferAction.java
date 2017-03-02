@@ -23,6 +23,7 @@ public class ThinBufferAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       executor.thinBuffer(2);

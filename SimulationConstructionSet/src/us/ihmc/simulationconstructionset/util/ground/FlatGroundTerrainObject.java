@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 
 public class FlatGroundTerrainObject extends FlatGroundProfile implements TerrainObject3D
 {
@@ -13,6 +13,7 @@ public class FlatGroundTerrainObject extends FlatGroundProfile implements Terrai
       groundGraphics.addCube(20.0, 20.0, 0.03);
    }
    
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return groundGraphics;

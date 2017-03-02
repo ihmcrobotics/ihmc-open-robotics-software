@@ -12,7 +12,7 @@ public class VisualizerRobot extends FloatingRootJointRobot
 
    public VisualizerRobot(RobotDescription robotDescription)
    {
-      super(robotDescription);
+      super(robotDescription, false, false);
       this.reducedRegistry = new YoVariableRegistry(robotDescription.getName());
 
       reducedRegistry.registerVariable(getRootJoint().getQx());

@@ -1,14 +1,9 @@
-
-/**
- *
- */
 package us.ihmc.simulationconstructionset.gui;
 
 import java.util.ArrayList;
 
 /**
  * @author jcarff
- *
  */
 public class KeyPoints
 {
@@ -16,8 +11,6 @@ public class KeyPoints
 	ArrayList<Integer> cameraKeyPoints = new ArrayList<Integer>();
 	boolean toggleKeyPoints = false;
 	boolean DEBUG = false;
-	private int cameraKeyPointIndex = 0;
-	private boolean toggleCameraKeyPoints = false;
 
 	public KeyPoints()
 	{

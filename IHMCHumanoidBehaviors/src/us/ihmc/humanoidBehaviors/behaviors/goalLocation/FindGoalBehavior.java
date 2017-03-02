@@ -1,14 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.goalLocation;
 
-import javax.vecmath.*;
-
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.goalLocation.FindGoalBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -19,7 +18,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 
 public class FindGoalBehavior extends AbstractBehavior
 {
@@ -29,7 +28,7 @@ public class FindGoalBehavior extends AbstractBehavior
    private final FullHumanoidRobotModel fullRobotModel;
    private final HumanoidReferenceFrames referenceFrames;
 
-   private final YoTimer headTrajectorySentTimer;
+   private final YoStopwatch headTrajectorySentTimer;
 
    private final BooleanYoVariable foundFiducial = new BooleanYoVariable(prefix + "FoundGoal", registry);
    private final IntegerYoVariable behaviorEnteredCount = new IntegerYoVariable(prefix + "BehaviorEnteredCount", registry);
@@ -53,7 +52,7 @@ public class FindGoalBehavior extends AbstractBehavior
 
       headPitchToFindFucdicial.set(0.6);
 
-      headTrajectorySentTimer = new YoTimer(yoTime);
+      headTrajectorySentTimer = new YoStopwatch(yoTime);
       headTrajectorySentTimer.start();
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(robotConfigurationDataQueue, RobotConfigurationData.class);
       //      behaviorCommunicationBridge.attachNetworkListeningQueue(footstepStatusQueue, FootstepStatus.class);
@@ -69,7 +68,7 @@ public class FindGoalBehavior extends AbstractBehavior
          fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(foundFiducialPose);
          foundFiducialYoFramePose.set(foundFiducialPose);
          foundFiducial.set(true);
-         Point3d position = new Point3d();
+         Point3D position = new Point3D();
          foundFiducialPose.getPosition(position);
          sendTextToSpeechPacket("Target object located at " + position);
       } else {
@@ -106,9 +105,9 @@ public class FindGoalBehavior extends AbstractBehavior
    private void pitchHeadToFindFiducial()
    {
       headPitchToFindFucdicial.mul(-1.0);
-      AxisAngle4d axisAngleOrientation = new AxisAngle4d(new Vector3d(0.0, 1.0, 0.0), headPitchToFindFucdicial.getDoubleValue());
+      AxisAngle axisAngleOrientation = new AxisAngle(new Vector3D(0.0, 1.0, 0.0), headPitchToFindFucdicial.getDoubleValue());
 
-      Quat4d headOrientation = new Quat4d();
+      Quaternion headOrientation = new Quaternion();
       headOrientation.set(axisAngleOrientation);
       sendHeadTrajectoryMessage(1.0, headOrientation);
    }
@@ -123,7 +122,7 @@ public class FindGoalBehavior extends AbstractBehavior
       //      sendHeadTrajectoryMessage(1.0, headOrientation);
    }
 
-   private void sendHeadTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
+   private void sendHeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
 

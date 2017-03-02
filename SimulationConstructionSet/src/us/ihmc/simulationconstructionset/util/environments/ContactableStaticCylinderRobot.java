@@ -3,35 +3,34 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.awt.Color;
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DAddMeshDataInstruction;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.NullJoint;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 
 public class ContactableStaticCylinderRobot extends ContactableStaticRobot implements SelectableObject, SelectedListener
 {
-   private static final long serialVersionUID = -9222718517284272299L;
-
    private static final double DEFAULT_MASS = 1000000.0;
 
    private final FrameCylinder3d cylinder;
@@ -48,7 +47,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    private final double selectTransparency = 0.0;
    private final double unselectTransparency = 0.0;
    
-   private Graphics3DAddMeshDataInstruction cylinderGraphic;
+   private CylinderGraphics3DInstruction cylinderGraphic;
    
    private final ArrayList<SelectableObjectListener> selectedListeners = new ArrayList<SelectableObjectListener>();
 
@@ -57,8 +56,8 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       super(name);
       cylinder = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), cylinderTransform, cylinderHeight, cylinderRadius);
       
-      Matrix3d rotation = new Matrix3d();
-      Vector3d offset = new Vector3d();
+      RotationMatrix rotation = new RotationMatrix();
+      Vector3D offset = new Vector3D();
       cylinderTransform.getTranslation(offset);
       cylinderTransform.getRotation(rotation);
       
@@ -66,7 +65,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       cylinderCenter.changeFrame(ReferenceFrame.getWorldFrame());
       cylinderCenterTransformToWorld.set(rotation, cylinderCenter.getVectorCopy());
       
-      Vector3d axis = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
       rotationTransform.setRotation(rotation);
       rotationTransform.transform(axis);
@@ -75,7 +74,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
 
       cylinderLink = new Link(name + "Link");
       cylinderLink.setMassAndRadiiOfGyration(DEFAULT_MASS, 1.0, 1.0, 1.0);
-      cylinderLink.setComOffset(new Vector3d());
+      cylinderLink.setComOffset(new Vector3D());
       
       linkGraphics = new Graphics3DObject();
       linkGraphics.rotate(rotation);
@@ -133,30 +132,35 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       transformToWorld.set(cylinderCenterTransformToWorld);
    }
 
-   public synchronized boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+   @Override
+   public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
       return cylinder.getCylinder3d().isInsideOrOnSurface(pointInWorldToCheck);
    }
    
-   public boolean isClose(Point3d pointInWorldToCheck)
+   @Override
+   public boolean isClose(Point3D pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
-   public synchronized void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   @Override
+   public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
       cylinder.getCylinder3d().checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
-         Quat4d cameraRotation)
+   @Override
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+         QuaternionReadOnly cameraRotation)
    {
       if (!modifierKeyInterface.isKeyPressed(Key.N))
          return;
       select();
    }
 
+   @Override
    public void select()
    {
       unSelect(false);
@@ -166,12 +170,14 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       notifySelectedListenersThisWasSelected(this);
    }
 
+   @Override
    public void unSelect(boolean reset)
    {
       cylinderGraphic.setAppearance(new YoAppearanceRGBColor(defaultColor, unselectTransparency));
       
    }
 
+   @Override
    public void addSelectedListeners(SelectableObjectListener selectedListener)
    {
       this.selectedListeners.add(selectedListener);

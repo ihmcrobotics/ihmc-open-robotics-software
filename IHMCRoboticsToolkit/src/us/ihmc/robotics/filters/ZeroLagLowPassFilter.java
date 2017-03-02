@@ -32,7 +32,7 @@ public class ZeroLagLowPassFilter
       if (arrayToFilter.length < 3)
          return Arrays.copyOf(arrayToFilter, arrayToFilter.length);
       
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       ArrayList<Double> arrayListToFilter = new ArrayList<>(Arrays.asList(ArrayUtils.toObject(arrayToFilter)));
       

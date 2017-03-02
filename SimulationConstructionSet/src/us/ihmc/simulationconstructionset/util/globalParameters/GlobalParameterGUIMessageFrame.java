@@ -39,7 +39,7 @@ public class GlobalParameterGUIMessageFrame extends GUIMessageFrame
             + padWithSpacesOrTrim(Integer.toString(newValue), CHARACTERS_IN_VALUE_STRING) + " " + comment);
    }
 
-   public void enumValueChanged(GlobalParameter globalParameter, String comment, Enum previousValue, Enum newValue)
+   public void enumValueChanged(GlobalParameter globalParameter, String comment, Enum<?> previousValue, Enum<?> newValue)
    {
       appendParameterMessage(globalParameter.getShortName() + " GlobalParameter changed from   "
             + padWithSpacesOrTrim(previousValue.toString(), CHARACTERS_IN_VALUE_STRING) + " to   "

@@ -107,11 +107,11 @@ public class AccelerationLimitedYoVariable extends DoubleYoVariable
 
       double positionError = input - this.getDoubleValue();
       double acceleration = -velocityGain.getDoubleValue() * smoothedRate.getDoubleValue() + positionGain.getDoubleValue() * positionError;
-      acceleration = MathTools.clipToMinMax(acceleration, -maximumAcceleration.getDoubleValue(), maximumAcceleration.getDoubleValue());
+      acceleration = MathTools.clamp(acceleration, -maximumAcceleration.getDoubleValue(), maximumAcceleration.getDoubleValue());
 
       smoothedAcceleration.set(acceleration);
       smoothedRate.add(smoothedAcceleration.getDoubleValue() * dt);
-      smoothedRate.set(MathTools.clipToMinMax(smoothedRate.getDoubleValue(), maximumRate.getDoubleValue()));
+      smoothedRate.set(MathTools.clamp(smoothedRate.getDoubleValue(), maximumRate.getDoubleValue()));
       this.add(smoothedRate.getDoubleValue() * dt);
    }
 

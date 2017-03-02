@@ -6,26 +6,25 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.vecmath.Color3f;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceRGBColor;
-import us.ihmc.graphics3DDescription.yoGraphics.RemoteYoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicFactory;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.plotting.artifact.Artifact;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic.RemoteGraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicFactory;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -257,7 +256,7 @@ public class YoVariableHandshakeParser
       AppearanceDefinition appearance = new YoAppearanceRGBColor(Color.red, 0.0);
       if (msg.hasAppearance())
       {
-         appearance = new YoAppearanceRGBColor(new Color3f((float) msg.getAppearance().getX(), (float) msg.getAppearance().getY(), (float) msg.getAppearance()
+         appearance = new YoAppearanceRGBColor(new MutableColor((float) msg.getAppearance().getX(), (float) msg.getAppearance().getY(), (float) msg.getAppearance()
                .getZ()), msg.getAppearance().getTransparency());
       }
    

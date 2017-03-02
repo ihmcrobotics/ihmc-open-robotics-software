@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
@@ -14,12 +15,13 @@ public class Simulator implements java.io.Serializable
    private static final long serialVersionUID = -3492879446149849938L;
 
    private final SimulationSynchronizer simulationSynchronizer;
-   private final Robot[] robots;
+   private Robot[] robots;
 
    private double DT;
    private ArrayList<Script> scripts = null;
 
    private ScsCollisionDetector collisionDetector;
+   private CollisionArbiter collisionArbiter;
    private CollisionHandler collisionHandler;
    private DefaultCollisionVisualizer collisionVisualizer;
    protected ArrayList<WrenchContactPoint> forceSensor = new ArrayList<WrenchContactPoint>();
@@ -33,6 +35,11 @@ public class Simulator implements java.io.Serializable
       this.DT = dt;
 
       //    this.time = time;
+   }
+
+   public void setRobots(Robot[] robots)
+   {
+      this.robots = robots;
    }
 
    public void setDT(double simulateDT)
@@ -69,7 +76,7 @@ public class Simulator implements java.io.Serializable
       doDynamicsAndIntegrate();
    }
 
-   private final CollisionDetectionResult results = new CollisionDetectionResult();
+   private final CollisionDetectionResult newCollisions = new CollisionDetectionResult();
 
    private void updateState()
    {
@@ -109,9 +116,12 @@ public class Simulator implements java.io.Serializable
             if (collisionVisualizer != null)
                collisionVisualizer.callBeforeCollisionDetection();
 
-            results.clear();
-            collisionDetector.performCollisionDetection(results);
-            collisionHandler.handleCollisions(results);
+            newCollisions.clear();
+            collisionDetector.performCollisionDetection(newCollisions);
+            collisionArbiter.processNewCollisions(newCollisions);
+            CollisionDetectionResult cachedCollisions = collisionArbiter.getCollisions();
+
+            collisionHandler.handleCollisions(cachedCollisions);
          }
       }
 
@@ -152,9 +162,10 @@ public class Simulator implements java.io.Serializable
       //
    }
 
-   public void setCollisions(ScsCollisionDetector collisionDetector, CollisionHandler collisionHandler, DefaultCollisionVisualizer visulize)
+   public void setCollisions(ScsCollisionDetector collisionDetector, CollisionArbiter collisionArbiter, CollisionHandler collisionHandler, DefaultCollisionVisualizer visulize)
    {
       this.collisionDetector = collisionDetector;
+      this.collisionArbiter = collisionArbiter;
       this.collisionHandler = collisionHandler;
       this.collisionVisualizer = visulize;
    }

@@ -139,7 +139,7 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
 
       double alpha = 1.0 - breakFrequencyInHertz * 2.0 * Math.PI * dt;
 
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       return alpha;
    }
@@ -151,7 +151,7 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
 
       double omega = 2.0 * Math.PI * breakFrequencyInHertz;
       double alpha = (1.0 - omega * dt / 2.0) / (1.0 + omega * dt / 2.0);
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       return alpha;
    }
 

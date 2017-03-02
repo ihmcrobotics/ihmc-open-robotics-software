@@ -64,6 +64,7 @@ public class BooleanGlobalParameter extends GlobalParameter
    }
 
 
+   @Override
    public String getValueInStringFormat()
    {
       String ret = Boolean.toString(((BooleanYoVariable)yoVariable).getBooleanValue());

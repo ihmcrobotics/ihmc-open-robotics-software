@@ -2,17 +2,16 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.camera.CameraMountInterface;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
-import us.ihmc.robotics.kinematics.CommonJoint;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 
@@ -44,7 +43,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
 
    public Joint parentJoint;
 
-   public final Vector3d offset = new Vector3d();    // Offset from the previous joint
+   public final Vector3D offset = new Vector3D();    // Offset from the previous joint
 
    public Link link;
    protected String name;
@@ -78,7 +77,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     * @param rob Robot which this joint is a member of.
     * @param numDOF Number of degrees of freedom held by this joint.
     */
-   protected Joint(String name, Vector3d offsetVec, Robot rob, int numDOF)
+   protected Joint(String name, Vector3D offsetVec, Robot rob, int numDOF)
    {
       this.name = name;
       this.rob = rob;
@@ -176,7 +175,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param newOffsetVector Vector3d representing this new offset.
     */
-   public void changeOffsetVector(Vector3d newOffsetVector)
+   public void changeOffsetVector(Vector3D newOffsetVector)
    {
       changeOffsetVector(newOffsetVector.getX(), newOffsetVector.getY(), newOffsetVector.getZ());
    }
@@ -286,7 +285,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    public String toString()
    {
       StringBuffer retBuffer = new StringBuffer();
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       retBuffer.append("Joint: " + name + "\n");
       if (parentJoint != null)
          retBuffer.append("  Parent Joint: " + this.parentJoint.name + "\n");
@@ -637,13 +636,13 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param offset New offset vector.
     */
-   private void setOffset(Vector3d offset)
+   private void setOffset(Vector3D offset)
    {
       this.offset.set(offset);
       this.offsetTransform3D.setTranslation(offset);
    }
 
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
       offsetToPack.set(offset);
    }
@@ -768,7 +767,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     * @param rotation Quat4d representation of the rotational component.
     * @param translation Vector3d representation of the traslational component.
     */
-   public void getTransformToWorld(Quat4d rotation, Vector3d translation)
+   public void getTransformToWorld(Quaternion rotation, Vector3D translation)
    {
       transformToNext.get(rotation, translation);
    }
@@ -779,7 +778,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param rotation Matrix3d containing the rotational component.
     */
-   public void getRotationToWorld(Matrix3d rotation)
+   public void getRotationToWorld(RotationMatrix rotation)
    {
       transformToNext.getRotation(rotation);
    }
@@ -790,7 +789,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param rotation Quat4d to store the rotational transform.
     */
-   public void getRotationToWorld(Quat4d rotation)
+   public void getRotationToWorld(Quaternion rotation)
    {
       transformToNext.getRotation(rotation);
    }
@@ -801,13 +800,13 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
     *
     * @param translation Vector3d representing the translation between world and joint space.
     */
-   public void getTranslationToWorld(Vector3d translation)
+   public void getTranslationToWorld(Vector3D translation)
    {
       transformToNext.getTranslation(translation);
    }
 
-   private Vector3d tempVector3d = new Vector3d();
-   private Quat4d tempQuat4d = new Quat4d();
+   private Vector3D tempVector3d = new Vector3D();
+   private Quaternion tempQuat4d = new Quaternion();
 
    /**
     * Stores the x, y, and z components of the translation between world space and joint space
@@ -836,7 +835,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    public void getYawPitchRollToWorld(DoubleYoVariable yaw, DoubleYoVariable pitch, DoubleYoVariable roll)
    {
       getRotationToWorld(tempQuat4d);
-      double q_x = tempQuat4d.getX(), q_y = tempQuat4d.getY(), q_z = tempQuat4d.getZ(), q_w = tempQuat4d.getW();
+      double q_x = tempQuat4d.getX(), q_y = tempQuat4d.getY(), q_z = tempQuat4d.getZ(), q_w = tempQuat4d.getS();
 
       yaw.set(Math.atan2(2.0 * q_x * q_y + 2.0 * q_z * q_w, 1.0 - 2.0 * q_y * q_y - 2.0 * q_z * q_z));
       pitch.set(Math.asin(-2.0 * q_x * q_z + 2.0 * q_w * q_y));
@@ -849,7 +848,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       double[] rotation = new double[3];
 
       getRotationToWorld(tempQuat4d);
-      double q_x = tempQuat4d.getX(), q_y = tempQuat4d.getY(), q_z = tempQuat4d.getZ(), q_w = tempQuat4d.getW();
+      double q_x = tempQuat4d.getX(), q_y = tempQuat4d.getY(), q_z = tempQuat4d.getZ(), q_w = tempQuat4d.getS();
 
       rotation[2] = Math.atan2(2.0 * q_x * q_y + 2.0 * q_z * q_w, 1.0 - 2.0 * q_y * q_y - 2.0 * q_z * q_z);
       rotation[1] = Math.asin(-2.0 * q_x * q_z + 2.0 * q_w * q_y);
@@ -885,7 +884,7 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
       return rob;
    }
 
-   public void getJointAxis(Vector3d axisToPack)
+   public void getJointAxis(Vector3D axisToPack)
    {
       physics.getJointAxis(axisToPack);
    }
@@ -909,4 +908,37 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       return physics.getExternalForcePoints();
    }
+
+   public ExternalForcePoint recursiveGetExternalForcePoint(String name)
+   {
+      ExternalForcePoint externalForcePoint = physics.getExternalForcePoint(name);
+      if (externalForcePoint != null) 
+         return externalForcePoint;
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         Joint child = childrenJoints.get(i);
+         externalForcePoint = child.recursiveGetExternalForcePoint(name);
+         if (externalForcePoint != null) 
+            return externalForcePoint;
+      }
+
+      return null;
+   }
+
+   public Joint recursivelyGetJoint(String name)
+   {
+      if (this.getName().equals(name)) return this;
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         Joint child = childrenJoints.get(i);
+         Joint jointToReturn = child.recursivelyGetJoint(name);
+         if (jointToReturn != null) 
+            return jointToReturn;
+      }
+
+      return null;
+   }
+
 }

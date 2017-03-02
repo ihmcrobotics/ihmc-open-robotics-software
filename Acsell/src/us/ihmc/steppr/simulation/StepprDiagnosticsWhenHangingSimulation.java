@@ -5,14 +5,14 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import us.ihmc.avatar.diagnostics.HumanoidDiagnosticsWhenHangingSimulation;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
@@ -189,17 +189,17 @@ public class StepprDiagnosticsWhenHangingSimulation
          Joint joint = robot.getJoint("back_ubz");
          if (joint == null) throw new RuntimeException();
          
-         ArrayList<Vector3d> attachmentLocations = new ArrayList<Vector3d>();
+         ArrayList<Vector3D> attachmentLocations = new ArrayList<Vector3D>();
              
-         attachmentLocations.add(new Vector3d(0.0, 0.15, 0.412));
-         attachmentLocations.add(new Vector3d(0.0, -0.15, 0.412));
+         attachmentLocations.add(new Vector3D(0.0, 0.15, 0.412));
+         attachmentLocations.add(new Vector3D(0.0, -0.15, 0.412));
          
          double updateDT = 0.0001;
          VirtualHoist virtualHoist = new VirtualHoist(joint, robot, attachmentLocations, updateDT);
          robot.setController(virtualHoist, 1);
           
          virtualHoist.turnHoistOn();
-         virtualHoist.setTeepeeLocation(new Point3d(0.0, 0.0, 2.5));
+         virtualHoist.setTeepeeLocation(new Point3D(0.0, 0.0, 2.5));
          virtualHoist.setHoistStiffness(20000.0);
          virtualHoist.setHoistDamping(5000.0);
          

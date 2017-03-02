@@ -1,9 +1,8 @@
 package us.ihmc.exampleSimulations.selfStablePlanarRunner;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -65,31 +64,31 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	shinMass    .set(  2.0);
 	
 
-	bodyJoint_T1 = new SliderJoint("x"    , new Vector3d(0.0, q_y0, 0.0), this, Axis.X);
-	bodyJoint_T2 = new SliderJoint("z"    , new Vector3d(), this, Axis.Z);
-	bodyJoint_R  = new PinJoint   ("pitch", new Vector3d(), this, Axis.Y);
+	bodyJoint_T1 = new SliderJoint("x"    , new Vector3D(0.0, q_y0, 0.0), this, Axis.X);
+	bodyJoint_T2 = new SliderJoint("z"    , new Vector3D(), this, Axis.Z);
+	bodyJoint_R  = new PinJoint   ("pitch", new Vector3D(), this, Axis.Y);
 
-	pendulumJoint = new SliderJoint("pendulum", new Vector3d(), this, Axis.Z);
+	pendulumJoint = new SliderJoint("pendulum", new Vector3D(), this, Axis.Z);
 	
-	leftUpperHip  = new PinJoint("l_uhip", new Vector3d(0, 0.15, 0), this, Axis.Y);
-	rightUpperHip = new PinJoint("r_uhip", new Vector3d(0,-0.15, 0), this, Axis.Y);
+	leftUpperHip  = new PinJoint("l_uhip", new Vector3D(0, 0.15, 0), this, Axis.Y);
+	rightUpperHip = new PinJoint("r_uhip", new Vector3D(0,-0.15, 0), this, Axis.Y);
 
-	leftMidHip  = new SliderJoint("l_mhip", new Vector3d(), this, Axis.Z);
-	rightMidHip = new SliderJoint("r_mhip", new Vector3d(), this, Axis.Z);
+	leftMidHip  = new SliderJoint("l_mhip", new Vector3D(), this, Axis.Z);
+	rightMidHip = new SliderJoint("r_mhip", new Vector3D(), this, Axis.Z);
 
-	wheelOnLLeg = new ExternalForcePoint("efp_wheelOnLLeg", new Vector3d(0, 0, -bodyToWheel.getDoubleValue()), this);
-	wheelOnRLeg = new ExternalForcePoint("efp_wheelOnRLeg", new Vector3d(0, 0, -bodyToWheel.getDoubleValue()), this);
+	wheelOnLLeg = new ExternalForcePoint("efp_wheelOnLLeg", new Vector3D(0, 0, -bodyToWheel.getDoubleValue()), this);
+	wheelOnRLeg = new ExternalForcePoint("efp_wheelOnRLeg", new Vector3D(0, 0, -bodyToWheel.getDoubleValue()), this);
 
-	drivingWheel = new PinJoint("driving_wheel", new Vector3d(0, 0, -bodyToWheel.getDoubleValue()), this, Axis.Y);
+	drivingWheel = new PinJoint("driving_wheel", new Vector3D(0, 0, -bodyToWheel.getDoubleValue()), this, Axis.Y);
 
-	lLegOnWheel = new ExternalForcePoint("efp_lLegOnWheel", new Vector3d(0, 0, -wheelR.getDoubleValue()), this);
-	rLegOnWheel = new ExternalForcePoint("efp_rLegOnWheel", new Vector3d(0, 0,  wheelR.getDoubleValue()), this);
+	lLegOnWheel = new ExternalForcePoint("efp_lLegOnWheel", new Vector3D(0, 0, -wheelR.getDoubleValue()), this);
+	rLegOnWheel = new ExternalForcePoint("efp_rLegOnWheel", new Vector3D(0, 0,  wheelR.getDoubleValue()), this);
 
-	leftKnee  = new SliderJoint("l_knee", new Vector3d(0, 0, -thighLength.getDoubleValue()), this, Axis.Z);
-	rightKnee = new SliderJoint("r_knee", new Vector3d(0, 0, -thighLength.getDoubleValue()), this, Axis.Z);
+	leftKnee  = new SliderJoint("l_knee", new Vector3D(0, 0, -thighLength.getDoubleValue()), this, Axis.Z);
+	rightKnee = new SliderJoint("r_knee", new Vector3D(0, 0, -thighLength.getDoubleValue()), this, Axis.Z);
 
-	leftGC  = new GroundContactPoint( "leftGC", new Vector3d(0, 0, -shinLength.getDoubleValue()), this);
-	rightGC = new GroundContactPoint("rightGC", new Vector3d(0, 0, -shinLength.getDoubleValue()), this);
+	leftGC  = new GroundContactPoint( "leftGC", new Vector3D(0, 0, -shinLength.getDoubleValue()), this);
+	rightGC = new GroundContactPoint("rightGC", new Vector3D(0, 0, -shinLength.getDoubleValue()), this);
 	
 	bodyJoint_T1.setQd(3.);
 	bodyJoint_R .setQ(Math.toRadians(3));
@@ -263,7 +262,7 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	
 	double K = 20000.0, B = 700.0;
 
-	Vector3d force = new Vector3d();
+	Vector3D force = new Vector3D();
 	
 	force.setX(K * (lLegOnWheel.getX() - wheelOnLLeg.getX()) + B * (lLegOnWheel.getXVelocity() - wheelOnLLeg.getXVelocity()));
 	force.setY(K * (lLegOnWheel.getY() - wheelOnLLeg.getY()) + B * (lLegOnWheel.getYVelocity() - wheelOnLLeg.getYVelocity()));

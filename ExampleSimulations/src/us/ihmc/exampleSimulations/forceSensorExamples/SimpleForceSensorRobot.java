@@ -1,9 +1,8 @@
 package us.ihmc.exampleSimulations.forceSensorExamples;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -19,14 +18,14 @@ public class SimpleForceSensorRobot extends Robot
    {
       super("SimpleForceSensorRobot");
 
-      FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
+      FloatingJoint baseJoint = new FloatingJoint("base", new Vector3D(), this);
 
       double width = 0.2;
       
-      GroundContactPoint gcOne = new GroundContactPoint("gcOne", new Vector3d(width, width, 0.0), this);
-      GroundContactPoint gcTwo = new GroundContactPoint("gcTwo", new Vector3d(width, -width, 0.0), this);
-      GroundContactPoint gcThree = new GroundContactPoint("gcThree", new Vector3d(-width, -width, 0.0), this);
-      GroundContactPoint gcFour = new GroundContactPoint("gcFour", new Vector3d(-width, width, 0.0), this);
+      GroundContactPoint gcOne = new GroundContactPoint("gcOne", new Vector3D(width, width, 0.0), this);
+      GroundContactPoint gcTwo = new GroundContactPoint("gcTwo", new Vector3D(width, -width, 0.0), this);
+      GroundContactPoint gcThree = new GroundContactPoint("gcThree", new Vector3D(-width, -width, 0.0), this);
+      GroundContactPoint gcFour = new GroundContactPoint("gcFour", new Vector3D(-width, width, 0.0), this);
       
       baseJoint.addGroundContactPoint(gcOne);
       baseJoint.addGroundContactPoint(gcTwo);
@@ -46,9 +45,9 @@ public class SimpleForceSensorRobot extends Robot
       addRootJoint(baseJoint);
 
       
-      SliderJoint sliderJoint = new SliderJoint("slider", new Vector3d(), this, Axis.Z);
+      SliderJoint sliderJoint = new SliderJoint("slider", new Vector3D(), this, Axis.Z);
       
-      JointWrenchSensor jointWrenchSensor = new JointWrenchSensor("jointWrench", new Vector3d(), this);
+      JointWrenchSensor jointWrenchSensor = new JointWrenchSensor("jointWrench", new Vector3D(), this);
       sliderJoint.addJointWrenchSensor(jointWrenchSensor);     
       
       

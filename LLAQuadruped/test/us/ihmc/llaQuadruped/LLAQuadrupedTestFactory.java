@@ -2,11 +2,8 @@ package us.ihmc.llaQuadruped;
 
 import java.io.IOException;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.communication.net.NetClassList;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.llaQuadruped.simulation.LLAQuadrupedGroundContactParameters;
 import us.ihmc.llaQuadrupedController.model.LLAQuadrupedModelFactory;
 import us.ihmc.llaQuadrupedController.model.LLAQuadrupedPhysicalProperties;
@@ -21,13 +18,16 @@ import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedSensorInforma
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
 import us.ihmc.quadrupedRobotics.model.QuadrupedSimulationInitialPositionParameters;
-import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.quadrupedRobotics.simulation.GroundContactParameters;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedParameterSet;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.OutputWriter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterRegistry;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
 import us.ihmc.tools.factories.FactoryTools;
@@ -57,8 +57,6 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
    public GoalOrientedTestConductor createTestConductor() throws IOException
    {
       useStateEstimator.setDefaultValue(USE_STATE_ESTIMATOR);
-      groundContactModelType.setDefaultValue(null);
-      providedGroundProfile3D.setDefaultValue(null);
       usePushRobotController.setDefaultValue(false);
 
       FactoryTools.checkAllFactoryFieldsAreSet(this);
@@ -103,11 +101,11 @@ public class LLAQuadrupedTestFactory implements QuadrupedTestFactory
       simulationFactory.setReferenceFrames(referenceFrames);
       simulationFactory.setNetClassList(netClassList);
       simulationFactory.setControlMode(controlMode.get());
-      if (groundContactModelType.get() != null)
+      if (groundContactModelType.hasValue())
       {
          simulationFactory.setGroundContactModelType(groundContactModelType.get());
       }
-      if (providedGroundProfile3D.get() != null)
+      if (providedGroundProfile3D.hasValue())
       {
          simulationFactory.setGroundProfile3D(providedGroundProfile3D.get());
       }

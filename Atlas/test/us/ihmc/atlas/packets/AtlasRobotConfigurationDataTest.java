@@ -4,17 +4,19 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 
-import javax.vecmath.Matrix3d;
-
 import org.junit.Test;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Output;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.AtlasAuxiliaryRobotData;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -23,9 +25,6 @@ import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class AtlasRobotConfigurationDataTest
@@ -53,7 +52,7 @@ public class AtlasRobotConfigurationDataTest
          joints[i] = new RevoluteJoint("noot", body, ReferenceFrame.getWorldFrame(), new FrameVector(ReferenceFrame.getWorldFrame(), 1, 0, 0));
       }
       
-      RigidBody body2 = new RigidBody("mies", new RigidBodyInertia(ReferenceFrame.getWorldFrame(), new Matrix3d(), 10.0), joints[0]);
+      RigidBody body2 = new RigidBody("mies", new RigidBodyInertia(ReferenceFrame.getWorldFrame(), new Matrix3D(), 10.0), joints[0]);
       IMUDefinition imuSensorDefinitions[] = new IMUDefinition[3];
       for (int i = 0; i < imuSensorDefinitions.length; i++)
       {

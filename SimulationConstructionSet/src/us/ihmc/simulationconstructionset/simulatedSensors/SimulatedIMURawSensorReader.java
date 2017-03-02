@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -32,10 +31,10 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame bodyFrame;
 
-   private final Matrix3d orientation = new Matrix3d();
+   private final RotationMatrix orientation = new RotationMatrix();
    private final FrameVector acceleration = new FrameVector(worldFrame);
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Vector3d compass = new Vector3d();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Vector3D compass = new Vector3D();
 
    private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
@@ -146,12 +145,14 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
       compassList = new NoisyDoubleYoVariable[]{compassX, compassY, compassZ};
    }
 
+   @Override
    public void initialize()
    {
       initializeNoise();
       read();
    }
 
+   @Override
    public void read()
    {
       twistCalculator.compute();
@@ -233,16 +234,19 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    
    protected abstract void simulateIMU();
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
 
+   @Override
    public String getDescription()
    {
       return name;

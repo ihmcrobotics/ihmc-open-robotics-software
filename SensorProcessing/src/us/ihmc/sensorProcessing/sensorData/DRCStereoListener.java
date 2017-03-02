@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.sensorData;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 /**
  * Listens for stereo images

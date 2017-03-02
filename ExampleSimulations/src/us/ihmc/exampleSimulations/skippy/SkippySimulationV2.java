@@ -1,11 +1,10 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -38,7 +37,9 @@ public class SkippySimulationV2
 
       skippy.setController(new SkippyICPAndIDBasedController(skippy, yoGraphicsListRegistry));
 
-      VisualizerUtils.createOverheadPlotter(sim, showOverheadView, yoGraphicsListRegistry);
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = sim.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
       sim.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       blockingSimulationRunner = new BlockingSimulationRunner(sim, 10.0 * 60.0);
@@ -75,8 +76,8 @@ public class SkippySimulationV2
       @Override
       public void doControl()
       {
-         Point3d footLocation = skippy.getFootLocation();
-         Point3d com = new Point3d();
+         Point3D footLocation = skippy.getFootLocation();
+         Point3D com = new Point3D();
          skippy.computeCenterOfMass(com);
 
          boolean skippyFalling = com.getZ() < footLocation.getZ() + 0.1;

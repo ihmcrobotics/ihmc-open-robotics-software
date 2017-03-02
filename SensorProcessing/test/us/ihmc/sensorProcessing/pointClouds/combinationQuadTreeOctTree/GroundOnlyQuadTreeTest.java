@@ -10,25 +10,26 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.AbstractHeightMapTest;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.BoundingBox2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -37,8 +38,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
@@ -57,7 +56,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       double resolution = 0.01;
       GroundOnlyQuadTree tree = new GroundOnlyQuadTree(new BoundingBox2d(-1, -1, 1, 1), resolution, resolution/10, Integer.MAX_VALUE);
 
-      Collection<Point3d> points = new ArrayList<>();
+      Collection<Point3D> points = new ArrayList<>();
 
       // ensure
       double z=0;
@@ -65,7 +64,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       {
          for (double y = -0.5; y < 0.5; y += resolution * 2)
          {
-            Point3d p = new Point3d(x, y, z);
+            Point3D p = new Point3D(x, y, z);
             points.add(p);
             tree.addPoint(p.getX(), p.getY(),p.getZ()); //create significant Z difference so points won't be filtered.
             z+=0.1;
@@ -73,18 +72,18 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
 
       //make sure retrievedPoins
-      ArrayList<Point3d> retrievedPoints = new ArrayList<>();
+      ArrayList<Point3D> retrievedPoints = new ArrayList<>();
       tree.getStoredPoints(retrievedPoints);
       assertSameCollection(points, retrievedPoints);
    }
    
-   private void assertSameCollection(Collection<? extends Tuple3d>pointsA, Collection<? extends Tuple3d> pointsB)
+   private void assertSameCollection(Collection<? extends Tuple3DBasics>pointsA, Collection<? extends Tuple3DBasics> pointsB)
    {
-      for(Tuple3d pointA:pointsA)
+      for(Tuple3DBasics pointA:pointsA)
       {
          double minError = Double.MAX_VALUE;
-         Tuple3d minPoint=null;
-         for(Tuple3d pointB: pointsB)
+         Tuple3DBasics minPoint=null;
+         for(Tuple3DBasics pointB: pointsB)
          {
             double err = Math.abs(pointA.getX()-pointB.getX()) + Math.abs(pointA.getY()-pointB.getY())+Math.abs(pointA.getZ()-pointB.getZ());
             if(err<minError)
@@ -852,12 +851,12 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
    @Test(timeout = 150000)
    public void testOnALineOfPoints()
    {
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
-      points.add(new Point3d(0.0, 0.0, 0.0));
-      points.add(new Point3d(0.1, 0.0, 0.0));
-      points.add(new Point3d(0.2, 0.0, 0.2));
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
+      points.add(new Point3D(0.0, 0.0, 0.0));
+      points.add(new Point3D(0.1, 0.0, 0.0));
+      points.add(new Point3D(0.2, 0.0, 0.2));
 
-//    points.add(new Point3d(0.3, 0.0, 0.2));
+//    points.add(new Point3D(0.3, 0.0, 0.2));
 
       double resolution = 0.02;
 
@@ -874,16 +873,16 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       double halfWidth = 0.5;
       double resolution = 0.1;
 
-      Point3d center = new Point3d(0.0, 0.0, 0.3);
-      Vector3d normal = new Vector3d(0.1, 0.2, 0.8);
+      Point3D center = new Point3D(0.0, 0.0, 0.3);
+      Vector3D normal = new Vector3D(0.1, 0.2, 0.8);
       testOnASlope(center, normal, halfWidth, resolution);
 
-      center = new Point3d(0.0, 0.0, 0.3);
-      normal = new Vector3d(1.0, 1.0, 1.0);
+      center = new Point3D(0.0, 0.0, 0.3);
+      normal = new Vector3D(1.0, 1.0, 1.0);
       testOnASlope(center, normal, halfWidth, resolution);
 
-      center = new Point3d(0.0, 0.0, 0.3);
-      normal = new Vector3d(-1.0, 1.0, 1.0);
+      center = new Point3D(0.0, 0.0, 0.3);
+      normal = new Vector3D(-1.0, 1.0, 1.0);
       testOnASlope(center, normal, halfWidth, resolution);
 
 //    ThreadTools.sleepForever();
@@ -896,11 +895,11 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       double halfWidth = 0.6;
       double resolution = 0.02;
 
-      Point3d center = new Point3d(0.0, 0.0, 0.3);
+      Point3D center = new Point3D(0.0, 0.0, 0.3);
       double stairSeparation = 0.2;
       double oneStairLandingHeight = 0.0;
 
-      Vector3d normal = new Vector3d(0.3, -0.3, 1.0);
+      Vector3D normal = new Vector3D(0.3, -0.3, 1.0);
       testOnAStaircase(center, normal, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
 
 //    normal = new Vector3d(0.3, 0.3, 1.0);
@@ -939,7 +938,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       QuadTreeTestHelper testHelper = new QuadTreeTestHelper(boundingBox);
       testHelper.setResolutionParameters(resolution, heightThreshold, maxNodes);
 
-      ArrayList<Point3d> points = testHelper.createAListOfPointsFromAGroundProfile(groundProfile, minX, minY, maxX, maxY, resolution);
+      ArrayList<Point3D> points = testHelper.createAListOfPointsFromAGroundProfile(groundProfile, minX, minY, maxX, maxY, resolution);
       testHelper.doATest(points);
 
       // TODO: Get this to pass!
@@ -948,30 +947,30 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       ThreadTools.sleepForever();
    }
 
-   private void testOnAStaircase(Point3d center, Vector3d normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight)
+   private void testOnAStaircase(Point3D center, Vector3D normal, double halfWidth, double resolution, double stairSeparation, double oneStairLandingHeight)
    {
       normal.normalize();
 
       BoundingBox2d boundingBox = new BoundingBox2d(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
       Plane3d plane3d = new Plane3d(center, normal);
-      ArrayList<Point3d> points = generatePointsForStairs(plane3d, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
+      ArrayList<Point3D> points = generatePointsForStairs(plane3d, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
 
 //    Collections.shuffle(points);
 
       testOnAListOfPoints(points, boundingBox, resolution);
    }
 
-   private void testOnASlope(Point3d center, Vector3d normal, double halfWidth, double resolution)
+   private void testOnASlope(Point3D center, Vector3D normal, double halfWidth, double resolution)
    {
       normal.normalize();
 
       BoundingBox2d boundingBox = new BoundingBox2d(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
       Plane3d plane3d = new Plane3d(center, normal);
-      ArrayList<Point3d> points = generatePointsForSlope(plane3d, halfWidth, resolution);
+      ArrayList<Point3D> points = generatePointsForSlope(plane3d, halfWidth, resolution);
       testOnAListOfPoints(points, boundingBox, resolution);
    }
 
-   private void testOnAListOfPoints(ArrayList<Point3d> points, BoundingBox2d rangeOfPoints, double resolution)
+   private void testOnAListOfPoints(ArrayList<Point3D> points, BoundingBox2d rangeOfPoints, double resolution)
    {
       double heightThreshold = 0.002;
       int maxNodes = 1000000;
@@ -987,41 +986,41 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
 
 
-   private static ArrayList<Point3d> generatePointsForStairs(Plane3d plane3d, double halfWidth, double stepSize, double stairSeparation,
+   private static ArrayList<Point3D> generatePointsForStairs(Plane3d plane3d, double halfWidth, double stepSize, double stairSeparation,
            double oneStairLandingHeight)
    {
-      ArrayList<Point3d> ret = generatePointsForSlope(plane3d, halfWidth, stepSize);
+      ArrayList<Point3D> ret = generatePointsForSlope(plane3d, halfWidth, stepSize);
       formStaircaseWithPointsOnAPlane(ret, stairSeparation, oneStairLandingHeight);
 
       return ret;
    }
 
-   private static ArrayList<Point3d> generatePointsForSlope(Plane3d plane3d, double halfWidth, double stepSize)
+   private static ArrayList<Point3D> generatePointsForSlope(Plane3d plane3d, double halfWidth, double stepSize)
    {
-      Point3d centerPoint = plane3d.getPointCopy();
+      Point3D centerPoint = plane3d.getPointCopy();
 
       double minX = centerPoint.getX() - halfWidth;
       double minY = centerPoint.getY() - halfWidth;
       double maxX = centerPoint.getX() + halfWidth;
       double maxY = centerPoint.getY() + halfWidth;
 
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
 
       for (double x = minX; x < maxX; x = x + stepSize)
       {
          for (double y = minY; y < maxY; y = y + stepSize)
          {
             double z = plane3d.getZOnPlane(x, y);
-            points.add(new Point3d(x, y, z));
+            points.add(new Point3D(x, y, z));
          }
       }
 
       return points;
    }
 
-   private static void formStaircaseWithPointsOnAPlane(ArrayList<Point3d> pointsList, double stairSeparation, double oneStairLandingHeight)
+   private static void formStaircaseWithPointsOnAPlane(ArrayList<Point3D> pointsList, double stairSeparation, double oneStairLandingHeight)
    {
-      for (Point3d point3d : pointsList)
+      for (Point3D point3d : pointsList)
       {
          double z = point3d.getZ();
 
@@ -1058,7 +1057,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          return heightMap;
       }
 
-      public void doATest(ArrayList<Point3d> points)
+      public void doATest(ArrayList<Point3D> points)
       {
          Robot robot = new Robot("TestQuadTree");
          SimulationConstructionSet scs = new SimulationConstructionSet(robot);
@@ -1085,26 +1084,26 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
          scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
-         Point2d centerPoint = new Point2d();
+         Point2D centerPoint = new Point2D();
          rangeOfPointsToTest.getCenterPointCopy(centerPoint);
-         List<Point3d> allPointsWithinArea = heightMap.getAllPointsWithinArea(centerPoint.getX(), centerPoint.getY(), 10.0, 10.0);
-         for (Point3d point3d : allPointsWithinArea)
+         List<Point3D> allPointsWithinArea = heightMap.getAllPointsWithinArea(centerPoint.getX(), centerPoint.getY(), 10.0, 10.0);
+         for (Point3D point3d : allPointsWithinArea)
          {
             Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-            staticLinkGraphics.translate(new Vector3d(point3d.getX(), point3d.getY(), point3d.getZ() + 0.001));
+            staticLinkGraphics.translate(new Vector3D(point3d.getX(), point3d.getY(), point3d.getZ() + 0.001));
 
             double cubeSize = resolution * 0.5;
-            staticLinkGraphics.translate(new Vector3d(0.0, 0.0, -cubeSize / 2.0));
+            staticLinkGraphics.translate(new Vector3D(0.0, 0.0, -cubeSize / 2.0));
             staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize, YoAppearance.Chartreuse());
             scs.addStaticLinkGraphics(staticLinkGraphics);
          }
 
-         for (Point3d point : points)
+         for (Point3D point : points)
          {
             double z = heightMap.getHeightAtPoint(point.getX(), point.getY());
 
             Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-            staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), z + 0.001));
+            staticLinkGraphics.translate(new Vector3D(point.getX(), point.getY(), z + 0.001));
 
             double cubeSize = resolution * 0.35;
             staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Purple());
@@ -1115,11 +1114,11 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          scs.startOnAThread();
       }
 
-      public void assertPointsLieOnHeightMap(ArrayList<Point3d> points)
+      public void assertPointsLieOnHeightMap(ArrayList<Point3D> points)
       {
          if (DO_ASSERTS)
          {
-            for (Point3d point : points)
+            for (Point3D point : points)
             {
                double heightMapZ = heightMap.getHeightAtPoint(point.getX(), point.getY());
                assertEquals(point.getZ(), heightMapZ, 1e-7);
@@ -1128,7 +1127,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       }
 
 
-      public ArrayList<Point3d> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, BoundingBox2d testingRange, double resolution)
+      public ArrayList<Point3D> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, BoundingBox2d testingRange, double resolution)
       {
          double minX = testingRange.getMinPoint().getX();
          double maxX = testingRange.getMaxPoint().getX();
@@ -1138,16 +1137,16 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          return createAListOfPointsFromAGroundProfile(groundProfile, minX, minY, maxX, maxY, resolution);
       }
 
-      public ArrayList<Point3d> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, double minX, double minY, double maxX, double maxY,
+      public ArrayList<Point3D> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, double minX, double minY, double maxX, double maxY,
               double resolution)
       {
-         ArrayList<Point3d> points = new ArrayList<Point3d>();
+         ArrayList<Point3D> points = new ArrayList<Point3D>();
          for (double x = minX; x < maxX; x = x + resolution)
          {
             for (double y = minY; y < maxY; y = y + resolution)
             {
                double z = groundProfile.getHeightMapIfAvailable().heightAt(x, y, 0.0);
-               points.add(new Point3d(x, y, z));
+               points.add(new Point3D(x, y, z));
             }
          }
 
@@ -1156,7 +1155,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
 
       public HeightMapWithPoints createHeightMapFromAListOfPoints(YoFramePoint queryPoint, BagOfBalls bagOfBalls, SimulationConstructionSet scs,
-              ArrayList<Point3d> points, BoundingBox2d testingRange, double resolution, double heightThreshold, int maxNodes)
+              ArrayList<Point3D> points, BoundingBox2d testingRange, double resolution, double heightThreshold, int maxNodes)
       {
          double minX = testingRange.getMinPoint().getX();
          double maxX = testingRange.getMaxPoint().getX();
@@ -1172,14 +1171,14 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
          GroundOnlyQuadTree heightMap = new GroundOnlyQuadTree(testingRange, resolution, heightThreshold, maxNodes);
 
 
-         for (Point3d point : points)
+         for (Point3D point : points)
          {
             queryPoint.set(point);
 
             heightMap.addPoint(point.getX(), point.getY(), point.getZ());
 
             Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-            staticLinkGraphics.translate(new Vector3d(point.getX(), point.getY(), point.getZ() + 0.001));
+            staticLinkGraphics.translate(new Vector3D(point.getX(), point.getY(), point.getZ() + 0.001));
 
             double cubeSize = resolution * 0.35;
             staticLinkGraphics.addCube(cubeSize, cubeSize, cubeSize / 3.0, YoAppearance.Blue());
@@ -1190,7 +1189,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
                bagOfBalls.reset();
 
-               for (Point3d checkPoint : points)
+               for (Point3D checkPoint : points)
                {
                   double z2 = heightMap.getHeightAtPoint(checkPoint.getX(), checkPoint.getY());
                   bagOfBalls.setBall(checkPoint.getX(), checkPoint.getY(), z2);
@@ -1257,7 +1256,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3d(x, y, height / 2));
+      location.setTranslation(new Vector3D(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }

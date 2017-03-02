@@ -1,17 +1,19 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.math.Epsilons;
 
 public class Sphere3d extends Shape3d<Sphere3d>
 {
    private double radius;
    
-   private final Vector3d temporaryVector;
+   private final Vector3D temporaryVector;
 
    public Sphere3d()
    {
@@ -28,9 +30,9 @@ public class Sphere3d extends Shape3d<Sphere3d>
       this(sphere3d.getX(), sphere3d.getY(), sphere3d.getZ(), sphere3d.getRadius());
    }
 
-   public Sphere3d(Point3d center, double radius)
+   public Sphere3d(Point3DReadOnly center, double radius)
    {
-      this(center.x, center.y, center.z, radius);
+      this(center.getX(), center.getY(), center.getZ(), radius);
    }
 
    public Sphere3d(double x, double y, double z, double radius)
@@ -38,7 +40,7 @@ public class Sphere3d extends Shape3d<Sphere3d>
       this.radius = radius;
       setPosition(x, y, z);
       
-      temporaryVector = new Vector3d();
+      temporaryVector = new Vector3D();
    }
 
    public double getRadius()
@@ -56,49 +58,34 @@ public class Sphere3d extends Shape3d<Sphere3d>
       setPosition(x, y, z);
    }
 
-   public void getCenter(Point3d centerToPack)
+   public void getCenter(Point3DBasics centerToPack)
    {
       getPosition(centerToPack);
-   }
-
-   public double getX()
-   {
-      return getTransformUnsafe().getM03();
-   }
-
-   public double getY()
-   {
-      return getTransformUnsafe().getM13();
-   }
-
-   public double getZ()
-   {
-      return getTransformUnsafe().getM23();
    }
 
    @Override
    public void set(Sphere3d sphere3d)
    {
-      setTransform(sphere3d.getTransformUnsafe());
+      setPose(sphere3d);
       radius = sphere3d.radius;
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3d pointToCheck, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
    {
       temporaryVector.set(pointToCheck);
       return temporaryVector.length() <= radius + epsilon;
    }
 
    @Override
-   protected double distanceShapeFrame(Point3d point)
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
       temporaryVector.set(point);
       return temporaryVector.length() - radius;
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3d point)
+   protected void orthogonalProjectionShapeFrame(Point3DBasics point)
    {
       temporaryVector.set(point);
 
@@ -114,7 +101,7 @@ public class Sphere3d extends Shape3d<Sphere3d>
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3d pointInWorldToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
       boolean isInside = isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, Epsilons.ONE_TRILLIONTH);
 
@@ -128,7 +115,7 @@ public class Sphere3d extends Shape3d<Sphere3d>
       return isInside;
    }
 
-   private void surfaceNormalAt(Point3d pointToCheck, Vector3d normalToPack)
+   private void surfaceNormalAt(Point3DReadOnly pointToCheck, Vector3DBasics normalToPack)
    {
       normalToPack.set(pointToCheck);
       GeometryTools.normalizeSafelyZUp(normalToPack);
@@ -162,5 +149,11 @@ public class Sphere3d extends Shape3d<Sphere3d>
    public String toString()
    {
       return "radius = " + radius + "\n";
+   }
+
+   @Override
+   public void applyTransform(Transform transform)
+   {
+      applyTransformToPose(transform);
    }
 }

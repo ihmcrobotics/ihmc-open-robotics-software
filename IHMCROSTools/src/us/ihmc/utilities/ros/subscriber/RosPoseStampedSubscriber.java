@@ -1,16 +1,15 @@
 package us.ihmc.utilities.ros.subscriber;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 
 public abstract class RosPoseStampedSubscriber extends AbstractRosTopicSubscriber<geometry_msgs.PoseStamped>
 {
    private long timeStamp;
    private String frameID;
-   private Vector3d pos;
-   private Quat4d rot;
+   private Vector3D pos;
+   private Quaternion rot;
       
    public RosPoseStampedSubscriber()
    {
@@ -27,7 +26,7 @@ public abstract class RosPoseStampedSubscriber extends AbstractRosTopicSubscribe
       Double posy = received.getPose().getPosition().getY();
       Double posz = received.getPose().getPosition().getZ();
       
-      pos = new Vector3d(posx, posy, posz);
+      pos = new Vector3D(posx, posy, posz);
       
       // get Rotation
       Double rotx = received.getPose().getOrientation().getX();
@@ -35,7 +34,7 @@ public abstract class RosPoseStampedSubscriber extends AbstractRosTopicSubscribe
       Double rotz = received.getPose().getOrientation().getZ();
       Double rotw = received.getPose().getOrientation().getW();
       
-      rot = new Quat4d(rotx, roty, rotz, rotw);
+      rot = new Quaternion(rotx, roty, rotz, rotw);
       
       // get frameID
       frameID = received.getHeader().getFrameId();
@@ -48,12 +47,12 @@ public abstract class RosPoseStampedSubscriber extends AbstractRosTopicSubscribe
       newPose(frameID, transform);
    }
    
-   public synchronized Vector3d getPoint()
+   public synchronized Vector3D getPoint()
    {
       return pos;     
    }
    
-   public synchronized Quat4d getRotation()
+   public synchronized Quaternion getRotation()
    {
       return rot;
    }

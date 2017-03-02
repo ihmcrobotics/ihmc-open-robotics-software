@@ -14,14 +14,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import javax.vecmath.Point3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DoubleHashHeightMapTest extends AbstractHeightMapTest
 {
@@ -80,7 +79,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
             0, 0, 0, 0, 8, 1, 0, 
             0, 0, 0, 0, 0, 0, 0 });
       DataGridTools.fillMapWithMatrixCentered(map, matrix, gridResolution);
-      List<Point3d> points = map.getAllPointsWithinArea(0.0, 0.0, 2, 2);
+      List<Point3D> points = map.getAllPointsWithinArea(0.0, 0.0, 2, 2);
       System.out.println("DoubleHashHeightMapTest points" + points);
       assertEquals(9, points.size());
       assertEquals(-1, points.get(0).getX(), eps);
@@ -156,7 +155,7 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
    {
       HeightMapWithPoints simpleMap = new DoubleHashHeightMap(RESOLUTION);
       simpleMap.addPoint(5 * RESOLUTION, 0 * RESOLUTION, 1.3);
-      List<Point3d> points = simpleMap.getAllPointsWithinArea(0, 0, 1000, 1000);
+      List<Point3D> points = simpleMap.getAllPointsWithinArea(0, 0, 1000, 1000);
       assertEquals(5 * RESOLUTION, points.get(0).getX(), eps);
       assertEquals(0 * RESOLUTION, points.get(0).getY(), eps);
       assertEquals(1.3, points.get(0).getZ(), eps);
@@ -312,9 +311,9 @@ public class DoubleHashHeightMapTest extends AbstractHeightMapTest
       });
       HeightMapWithPoints lidarMap = new DoubleHashHeightMap(gridResolution);
       DataGridTools.fillMapWithMatrixCentered(lidarMap, matrix, gridResolution);
-      List<Point3d> points = lidarMap.getAllPointsWithinArea(0.0, 0.0, 0.1, 0.1, new InclusionFunction<Point3d>(){
+      List<Point3D> points = lidarMap.getAllPointsWithinArea(0.0, 0.0, 0.1, 0.1, new InclusionFunction<Point3D>(){
 
-         public boolean isIncluded(Point3d test)
+         public boolean isIncluded(Point3D test)
          {
             return test.getZ()<20;
          }

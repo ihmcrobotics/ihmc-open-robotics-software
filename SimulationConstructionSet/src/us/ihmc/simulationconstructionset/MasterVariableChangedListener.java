@@ -22,7 +22,8 @@ public class MasterVariableChangedListener implements VariableChangedListener
       slaves.add(slave);
    }
 
-   public void variableChanged(YoVariable master)
+   @Override
+   public void variableChanged(YoVariable<?> master)
    {
       for (DoubleYoVariable slave : slaves)
       {

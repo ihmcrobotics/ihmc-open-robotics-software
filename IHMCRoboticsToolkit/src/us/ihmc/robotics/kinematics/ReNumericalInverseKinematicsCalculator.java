@@ -1,26 +1,25 @@
 package us.ihmc.robotics.kinematics;
 
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-import java.util.Random;
 
 /**
  * @author twan
@@ -44,11 +43,11 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
 
    private final RigidBodyTransform actualTransform = new RigidBodyTransform();
    private final RigidBodyTransform errorTransform = new RigidBodyTransform();
-   private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
-   private final Matrix3d errorRotationMatrix = new Matrix3d();
-   private final Vector3d errorRotationVector = new Vector3d();
-   private final Vector3d axis = new Vector3d();
-   private final Vector3d errorTranslationVector = new Vector3d();
+   private final AxisAngle errorAxisAngle = new AxisAngle();
+   private final RotationMatrix errorRotationMatrix = new RotationMatrix();
+   private final Vector3D errorRotationVector = new Vector3D();
+   private final Vector3D axis = new Vector3D();
+   private final Vector3D errorTranslationVector = new Vector3D();
 
    private final DenseMatrix64F error = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F correction;
@@ -165,21 +164,20 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
 
       jacobian.getEndEffectorFrame().getTransformToDesiredFrame(actualTransform, jacobian.getBaseFrame());
 
-      errorTransform.invert(desiredTransform);
+      errorTransform.setAndInvert(desiredTransform);
       errorTransform.multiply(actualTransform);
 
       errorTransform.getRotation(errorRotationMatrix);
-//      errorAxisAngle.set(errorRotationMatrix);
-      RotationTools.convertMatrixToAxisAngle(errorRotationMatrix, errorAxisAngle);
+      errorAxisAngle.set(errorRotationMatrix);
 
       axis.set(errorAxisAngle.getX(), errorAxisAngle.getY(), errorAxisAngle.getZ());
       errorRotationVector.set(axis);
       errorRotationVector.scale(errorAxisAngle.getAngle());
 
       errorTransform.getTranslation(errorTranslationVector);
-
-      MatrixTools.setDenseMatrixFromTuple3d(error, errorRotationVector, 0, 0);
-      MatrixTools.setDenseMatrixFromTuple3d(error, errorTranslationVector, 3, 0);
+      
+      errorRotationVector.get(0, error);
+      errorTranslationVector.get(3, error);
 
       errorScalar = NormOps.normP2(error);
 
@@ -189,9 +187,9 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
    private boolean exponentialCoordinatesOK()
    {
       Twist twist = new Twist(jacobian.getEndEffectorFrame(), jacobian.getBaseFrame(), jacobian.getJacobianFrame(), error);
-      Matrix3d rotationCheck = new Matrix3d();
+      RotationMatrix rotationCheck = new RotationMatrix();
       rotationCheck.setIdentity();
-      Vector3d positionCheck = new Vector3d();
+      Vector3D positionCheck = new Vector3D();
       ScrewTestTools.integrate(rotationCheck, positionCheck, 1.0, twist);
       RigidBodyTransform transformCheck = new RigidBodyTransform(rotationCheck, positionCheck);
 
@@ -216,12 +214,12 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
          //         System.err.println("IK solver internal solve failed!");
       }
       solver.solve(error, correction);
-      double correctionScale = RandomTools.generateRandomDouble(random, minRandomSearchScalar, maxRandomSearchScalar);
+      double correctionScale = RandomNumbers.nextDouble(random, minRandomSearchScalar, maxRandomSearchScalar);
       CommonOps.scale(correctionScale, correction);
 
       for (int i = 0; i < correction.getNumRows(); i++)
       {
-         correction.set(i, 0, MathTools.clipToMinMax(correction.get(i, 0), -maxStepSize, maxStepSize));
+         correction.set(i, 0, MathTools.clamp(correction.get(i, 0), -maxStepSize, maxStepSize));
       }
    }
 
@@ -239,7 +237,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
             oneDoFJoint = oneDoFJoints[i];
          }
          double newQ = oneDoFJoint.getQ() - correction.get(i, 0);
-         newQ = MathTools.clipToMinMax(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         newQ = MathTools.clamp(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
          oneDoFJoint.setQ(newQ);
          oneDoFJoint.getFrameAfterJoint().update();
       }

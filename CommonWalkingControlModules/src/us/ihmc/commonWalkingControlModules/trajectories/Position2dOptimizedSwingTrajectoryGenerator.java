@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -293,7 +293,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    @Override
    public void compute(double time)
    {
-      time = MathTools.clipToMinMax(time, 0.0, 1.0);
+      time = MathTools.clamp(time, 0.0, 1.0);
       isDone.set(time == 1.0);
 
       int activeSegment = 0;
@@ -380,6 +380,20 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
       if (trajectoryViz == null)
          return;
       trajectoryViz.hideAll();
+   }
+
+   @Override
+   public double getMaxSpeed()
+   {
+      // TODO Auto-generated method stub
+      return Double.NaN;
+   }
+
+   @Override
+   public void computeMaxSpeed()
+   {
+      // TODO Auto-generated method stub
+
    }
 
 }

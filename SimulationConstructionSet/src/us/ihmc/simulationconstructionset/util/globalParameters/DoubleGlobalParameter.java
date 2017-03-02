@@ -62,6 +62,7 @@ public class DoubleGlobalParameter extends GlobalParameter
       setDoubleValue(value, comment);
    }
 
+   @Override
    public String getValueInStringFormat()
    {
       String ret = Double.toString( ((DoubleYoVariable)yoVariable).getDoubleValue());

@@ -1,19 +1,19 @@
 package us.ihmc.ihmcPerception;
 
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DAdapter;
-import us.ihmc.graphics3DAdapter.jme.JMEGraphics3DWorld;
-import us.ihmc.graphics3DAdapter.jme.JMERenderer;
-import us.ihmc.graphics3DAdapter.jme.util.JMELidarSpriteGenerator;
+import java.util.ArrayList;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiverInterface;
 import us.ihmc.ihmcPerception.depthData.PointCloudSource;
 import us.ihmc.ihmcPerception.depthData.RosPointCloudReceiver;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DWorld;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMELidarSpriteGenerator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.utilities.ros.RosMainNode;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import java.util.ArrayList;
 
 public class RosPointCloudVisualizer
 {
@@ -63,16 +63,16 @@ public class RosPointCloudVisualizer
    class PointCloudReceiver implements PointCloudDataReceiverInterface
    {
       @Override
-      public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3d> points,
+      public void receivedPointCloudData(ReferenceFrame scanFrame, ReferenceFrame lidarFrame, long[] timestamps, ArrayList<Point3D> points,
             PointCloudSource... sources)
       {
-         Point3f[] point3fs = new Point3f[points.size()];
+         Point3D32[] point3fs = new Point3D32[points.size()];
          for(int i = 0; i < points.size(); i++)
          {
-            Point3d point = points.get(i);
+            Point3D point = points.get(i);
             if(sensorTransform != null)
                sensorTransform.transform(point);
-            point3fs[i] = new Point3f(point);
+            point3fs[i] = new Point3D32(point);
          }
 
          lidarSpriteGenerator.updatePoints(point3fs);

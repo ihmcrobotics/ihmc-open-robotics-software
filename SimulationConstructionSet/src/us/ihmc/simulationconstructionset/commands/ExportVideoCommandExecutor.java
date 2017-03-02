@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.commands;
 import java.awt.Dimension;
 import java.io.File;
 
-import us.ihmc.graphics3DAdapter.camera.CameraController;
-import us.ihmc.graphics3DAdapter.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
 
 public interface ExportVideoCommandExecutor
 {

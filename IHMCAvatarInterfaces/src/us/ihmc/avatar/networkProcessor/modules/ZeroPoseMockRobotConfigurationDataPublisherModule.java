@@ -2,18 +2,17 @@ package us.ihmc.avatar.networkProcessor.modules;
 
 import java.io.IOException;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
@@ -52,16 +51,16 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
       for(int sensorNumber = 0; sensorNumber <  imuDefinitions.length; sensorNumber++)
       {
          IMUPacket imuPacket = robotConfigurationData.getImuPacketForSensor(sensorNumber);
-         Vector3f linearAcceleration = new Vector3f();
-         Vector3f angularVelocity = new Vector3f();
-         Quat4f orientation = new Quat4f();
+         Vector3D32 linearAcceleration = new Vector3D32();
+         Vector3D32 angularVelocity = new Vector3D32();
+         Quaternion32 orientation = new Quaternion32();
          imuPacket.set(linearAcceleration, orientation, angularVelocity);
       }
       
       robotConfigurationData.setRobotMotionStatus(RobotMotionStatus.STANDING);
       robotConfigurationData.setTimestamp(totalNsecs);
-      Vector3d translation = new Vector3d();
-      Quat4d orientation = new Quat4d();
+      Vector3D translation = new Vector3D();
+      Quaternion orientation = new Quaternion();
       robotConfigurationData.setRootTranslation(translation);
       robotConfigurationData.setRootOrientation(orientation);
       

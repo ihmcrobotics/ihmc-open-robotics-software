@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
@@ -23,7 +22,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
    public AlternatingSlopesGroundProfile(double[][] xSlopePairs, double xMin, double xMax, double yMin, double yMax)
    {
       this.xSlopePairs = xSlopePairs;
-      boundingBox = new BoundingBox3d(new Point3d(xMin, yMin, Double.NEGATIVE_INFINITY), new Point3d(xMax, yMax, Double.MAX_VALUE));
+      boundingBox = new BoundingBox3d(new Point3D(xMin, yMin, Double.NEGATIVE_INFINITY), new Point3D(xMax, yMax, Double.MAX_VALUE));
 
       modifyXMinMaxIfNecessary();
 
@@ -123,7 +122,8 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       return ret;
    }
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -131,6 +131,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
    
+   @Override
    public double heightAt(double x, double y, double z)
    {
       int indexOnLeft = findIndexOnLeft(xzPairs, x);
@@ -167,7 +168,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       return pairs.length - 1;
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       int indexOnLeft = findIndexOnLeft(xSlopePairs, x);
 
@@ -193,6 +194,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       }
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

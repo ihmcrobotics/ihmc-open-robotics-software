@@ -14,6 +14,7 @@ public class ResizeViewportDialogGenerator implements ResizeViewportDialogConstr
       this.frame = frame;
    }
 
+   @Override
    public void constructDialog()
    {
       String width = JOptionPane.showInputDialog("Enter Viewport Width");
