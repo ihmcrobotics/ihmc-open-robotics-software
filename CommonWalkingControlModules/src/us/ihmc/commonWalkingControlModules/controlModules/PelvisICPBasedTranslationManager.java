@@ -5,11 +5,9 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -190,12 +188,9 @@ public class PelvisICPBasedTranslationManager
       computeDesiredICPOffset();
    }
 
-   public void handleGoHomeCommand(GoHomeCommand command)
+   public boolean isEnabled()
    {
-      if (isEnabled.getBooleanValue() && command.getRequest(BodyPart.PELVIS))
-      {
-         goToHome();
-      }
+      return isEnabled.getBooleanValue();
    }
 
    public void goToHome()

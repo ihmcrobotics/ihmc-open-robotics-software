@@ -37,11 +37,13 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class WalkingCommandConsumer
@@ -135,11 +137,24 @@ public class WalkingCommandConsumer
          return;
 
       GoHomeCommand command = commandInputManager.pollAndCompileCommands(GoHomeCommand.class);
-      manipulationControlModule.handleGoHomeCommand(command);
-      pelvisOrientationManager.handleGoHomeCommand(command);
-      balanceManager.handleGoHomeCommand(command);
-      comHeightManager.handleGoHomeCommand(command);
-      chestManager.handleGoHomeCommand(command);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (command.getRequest(robotSide, BodyPart.ARM))
+            manipulationControlModule.goToDefaultState(robotSide, command.getTrajectoryTime());
+      }
+
+      if (command.getRequest(BodyPart.PELVIS))
+      {
+         pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
+         balanceManager.goHome();
+         comHeightManager.goHome(command.getTrajectoryTime());
+      }
+
+      if (command.getRequest(BodyPart.CHEST))
+      {
+         chestManager.goHome(command.getTrajectoryTime());
+      }
    }
 
    public void consumePelvisCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)

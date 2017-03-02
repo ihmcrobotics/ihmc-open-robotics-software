@@ -13,12 +13,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -925,17 +923,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
       this.lastCommandId.set(lastCommandId);
    }
 
-   public void handleGoHomeCommand(GoHomeCommand command)
+   public void goHome(double trajectoryTime)
    {
       if (!PROCESS_GO_HOME_COMMANDS)
-         return;
-      if (!command.getRequest(BodyPart.PELVIS))
          return;
 
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       offsetHeightTrajectoryGenerator.clear();
       offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
-      offsetHeightTrajectoryGenerator.appendWaypoint(command.getTrajectoryTime(), 0.0, 0.0);
+      offsetHeightTrajectoryGenerator.appendWaypoint(trajectoryTime, 0.0, 0.0);
       offsetHeightTrajectoryGenerator.initialize();
       isTrajectoryOffsetStopped.set(false);
    }

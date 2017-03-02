@@ -11,12 +11,10 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -269,12 +267,6 @@ public class PelvisOrientationManager
    public void goToHomeFromCurrentDesired()
    {
       goToHomeFromCurrentDesired(defaultTrajectoryTime);
-   }
-
-   public void handleGoHomeCommand(GoHomeCommand command)
-   {
-      if (command.getRequest(BodyPart.PELVIS))
-         goToHomeFromCurrentDesired(command.getTrajectoryTime());
    }
 
    public void goToHomeFromCurrentDesired(double trajectoryTime)
