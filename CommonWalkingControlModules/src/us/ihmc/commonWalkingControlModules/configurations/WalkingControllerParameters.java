@@ -138,22 +138,42 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
-   /** The gains used when the spine joints are controlled directly instead of the chest orientation */
-   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
-   {
-      return null;
-   }
-
+   /**
+    * The map returned contains all controller gains for tracking jointspace trajectories. The key of
+    * the map is the joint name as defined in the robot joint map. If a joint is not contained in the
+    * map, jointspace control is not supported for that joint.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing jointspace PID gains by joint name
+    */
    public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
    {
       return new HashMap<String, YoPIDGains>();
    }
 
+   /**
+    * The map returned contains all controller gains for tracking taskspace orientation trajectories
+    * (or the orientation part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * orientation or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace orientation PID gains by rigid body name
+    */
    public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
    {
       return new HashMap<String, YoOrientationPIDGainsInterface>();
    }
 
+   /**
+    * The map returned contains all controller gains for tracking taskspace position trajectories
+    * (or the position part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * position or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace position PID gains by rigid body name
+    */
    public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
    {
       return new HashMap<String, YoPositionPIDGainsInterface>();

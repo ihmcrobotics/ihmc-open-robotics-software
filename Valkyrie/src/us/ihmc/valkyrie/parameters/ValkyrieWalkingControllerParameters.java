@@ -629,9 +629,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       return gains;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
    {
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 

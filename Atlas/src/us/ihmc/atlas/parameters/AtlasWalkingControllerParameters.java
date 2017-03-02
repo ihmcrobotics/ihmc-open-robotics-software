@@ -619,9 +619,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
    {
       double kp = runningOnRealRobot ? 40.0 : 80.0;
       double zeta = runningOnRealRobot ? 0.3 : 0.6;

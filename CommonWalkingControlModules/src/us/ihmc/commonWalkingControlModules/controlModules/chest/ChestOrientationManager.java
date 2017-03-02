@@ -65,7 +65,7 @@ public class ChestOrientationManager
       initialJointPositions = new double[jointsOriginal.length];
 
       YoOrientationPIDGainsInterface taskspaceGains = walkingControllerParameters.createChestControlGains(registry);
-      YoPIDGains jointspaceGains = walkingControllerParameters.createSpineControlGains(registry);
+      YoPIDGains jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry).get(jointsOriginal[0].getName());
 
       taskspaceChestControlState = new TaskspaceChestControlState(humanoidControllerToolbox, taskspaceGains, registry);
       jointspaceChestControlState = new JointspaceChestControlState(jointsOriginal, jointspaceGains, yoTime, registry);
