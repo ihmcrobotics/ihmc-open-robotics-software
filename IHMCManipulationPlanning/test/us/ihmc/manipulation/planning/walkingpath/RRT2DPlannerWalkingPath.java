@@ -2,6 +2,7 @@ package us.ihmc.manipulation.planning.walkingpath;
 
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTPlanner;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class RRT2DPlannerWalkingPath extends RRTPlanner
 {
@@ -15,7 +16,7 @@ public class RRT2DPlannerWalkingPath extends RRTPlanner
    {
       double branchRootData[] = new double[2];
       double branchNewData[] = new double[2];
-      
+
       if (rrtTree.expandTree() == true)
       {
          for (int i = 0; i < rrtTree.getNewNode().getDimensionOfNodeData(); i++)

@@ -18,7 +18,6 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -30,6 +29,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.walkingpath.RRT2DNodeWalkingPath;
+import us.ihmc.manipulation.planning.walkingpath.RRT2DNodeWalkingPath.BoxInfo;
 import us.ihmc.manipulation.planning.walkingpath.RRT2DPlannerWalkingPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -40,9 +40,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
@@ -68,12 +65,8 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    private HumanoidFloatingRootJointRobot robot;
    private static final boolean DEBUG = false;
 
-   SimpleCollisionDetector collisionDetector = new SimpleCollisionDetector();
-   CollisionDetectionResult collisionDetectionResult = new CollisionDetectionResult();
+   
 
-   SimpleCollisionShapeFactory shapeFactory;
-
-   BoxInfo[] boxes;
    
    Vector3d goalState;
    Vector3d initialState;
@@ -115,9 +108,9 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       {
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
 
-         for(int i=0;i<boxes.length;i++)
+         for(int i=0;i<RRT2DNodeWalkingPath.boxes.length;i++)
          {
-            addBoxEnvironment(boxes[i]);
+            addBoxEnvironment(RRT2DNodeWalkingPath.boxes[i]);
          }
          
          EnvSet.addBox(goalState.x + 0.5, goalState.y -0.6, goalState.x + 0.6, goalState.y +0.6, 2, YoAppearance.Gray());
@@ -125,7 +118,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          EnvSet.addSphere(goalState.x, goalState.y, goalState.z, 0.1, YoAppearance.Blue());
       }
       
-      public void addBoxEnvironment(BoxInfo box)
+      public void addBoxEnvironment(RRT2DNodeWalkingPath.BoxInfo box)
       {
          EnvSet.addBox(box.centerX - box.sizeX/2, box.centerY - box.sizeY/2,
                        box.centerX + box.sizeX/2, box.centerY + box.sizeY/2, box.sizeZ, YoAppearance.Red());
@@ -187,13 +180,12 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
       initialState = new Vector3d(0.0, 0.0, 0.0);
       goalState = new Vector3d(8.0, -4.0, 0.0);
-      
-      setUpEnvironment();
-      
+            
       RRTNode startNode = new RRT2DNodeWalkingPath(0.0, 0.0);
       RRTNode goalNode = new RRT2DNodeWalkingPath(3.0, 2.0);
+      
       RRT2DPlannerWalkingPath rrtPlanner = new RRT2DPlannerWalkingPath(startNode, goalNode, 0.3);
-
+      
       RRTNode upperBoundNode = new RRT2DNodeWalkingPath(12.0, 3.0);
       RRTNode lowerBoundNode = new RRT2DNodeWalkingPath(-2.0, -7.0);
       
@@ -215,19 +207,19 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-
       // ******************************** //
       // RRT Planning ******************* //
       // ******************************** //
-//      RRTNode nodeOne = new RRT2DNodeWalkingPath(1.0, 1.0);
-//      RRTNode nodeTwo = new RRT2DNodeWalkingPath(1.2, 1.2);
-      RRTNode nodeOne = new RRT2DNodeWalkingPath(0,0);
-      RRTNode nodeTwo = new RRT2DNodeWalkingPath(0,0);
+      RRTNode nodeOne = new RRT2DNodeWalkingPath(0, 0);
+      RRTNode nodeTwo = new RRT2DNodeWalkingPath(0, 0);
+
+      RRTNode nodeRobot = new RRT2DNodeWalkingPath(1.0, 0);
+      nodeRobot.isValidNode();      
       
       for (int i = 0; i < 500; i++)
-      {  
+      {
          boolean isConnected = rrtPlanner.expandTreeGoal(nodeOne, nodeTwo);
-         simulationConstructionSet.addStaticLinkGraphics(getNodeConnection(nodeOne, nodeTwo));         
+         simulationConstructionSet.addStaticLinkGraphics(getNodeConnection(nodeOne, nodeTwo));
          
          if (isConnected == true)
          {            
@@ -236,6 +228,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          }
       }
       
+
       
       
       // ******************************** //
@@ -301,49 +294,10 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    }
    // ******************************** //
 
-   class BoxInfo
-   {
-      double centerX;
-      double centerY;
-      double sizeX;
-      double sizeY;
-      double sizeZ;
-      Point3D center;
 
-      public BoxInfo(Point3D center, double[] size)
-      {
-         this.center = center;
-         centerX = center.getX();
-         centerY = center.getY();
-         
-         sizeX = size[0];
-         sizeY = size[1];
-         sizeZ = size[2];
-      }
-   }
       
    
-   private void setUpEnvironment()
-   {            
-      boxes = new BoxInfo[5];
-      boxes[0] = new BoxInfo(new Point3D(1.5, -0.5, 0), new double[]{0.2, 1.0, 0.5});
-      boxes[1] = new BoxInfo(new Point3D(1.0, -2.0, 0), new double[]{0.5, 0.5, 0.5});
-      boxes[2] = new BoxInfo(new Point3D(4.0,  2.0, 0), new double[]{1.0, 1.0, 0.5});
-      boxes[3] = new BoxInfo(new Point3D(4.5, -1.5, 0), new double[]{1.8, 1.0, 0.5});
-      boxes[4] = new BoxInfo(new Point3D(3.5, -5.5, 0), new double[]{1.5, 1.5, 0.5});  
-            
-      shapeFactory = (SimpleCollisionShapeFactory) collisionDetector.getShapeFactory();
-            
-      for (int i =0;i<boxes.length;i++)
-      {
-         shapeFactory.addShape(shapeFactory.createBox(boxes[i].sizeX/2, boxes[i].sizeY/2, boxes[i].sizeZ/2));
-         
-         RigidBodyTransform transform;
-         transform = new RigidBodyTransform();
-         transform.setTranslation(boxes[i].center);
-         collisionDetector.getCollisionObjects().get(i).setTransformToWorld(transform);
-      }      
-   }
+
 
    public ArrayList<Graphics3DObject> getNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
    {
