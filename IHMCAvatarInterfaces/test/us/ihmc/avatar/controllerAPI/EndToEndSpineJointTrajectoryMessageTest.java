@@ -44,7 +44,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
@@ -223,7 +222,9 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          }
 
          message.setUniqueId(msgIdx + 1);
-         message.setExecutionMode(ExecutionMode.QUEUE, msgIdx);
+         if (msgIdx != 0)
+            message.setExecutionMode(ExecutionMode.QUEUE, msgIdx);
+
          messages[msgIdx] = message;
       }
 
@@ -642,7 +643,6 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       public double getMaxSpeed()
       {
-         PrintTools.info("Max Speed: " + maxSpeed.getDoubleValue());
          return maxSpeed.getDoubleValue();
       }
 
