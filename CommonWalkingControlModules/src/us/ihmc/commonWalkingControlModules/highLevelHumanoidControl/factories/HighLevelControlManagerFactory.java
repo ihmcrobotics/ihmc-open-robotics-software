@@ -149,14 +149,14 @@ public class HighLevelControlManagerFactory
 
       // Gains
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
-      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceAngularControlGains(registry).get(bodyName);
-      YoPositionPIDGainsInterface taskspacePositionGains = null; // TODO
+      YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(bodyName);
+      YoPositionPIDGainsInterface taskspacePositionGains = walkingControllerParameters.getOrCreateTaskspacePositionControlGains(registry).get(bodyName);
 
       // Weights
       TObjectDoubleHashMap<String> jointspaceWeights = momentumOptimizationSettings.getJointspaceWeights();
       TObjectDoubleHashMap<String> userModeWeights = momentumOptimizationSettings.getUserModeWeights();
       Vector3D taskspaceAngularWeight = momentumOptimizationSettings.getTaskspaceAngularWeights().get(bodyName);
-      Vector3D taskspaceLinearWeight = null; // TODO
+      Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
