@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -57,8 +56,8 @@ public class RigidBodyControlManager
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame rootFrame;
 
-   public RigidBodyControlManager(RigidBody bodyToControl, RigidBody rootBody, HighLevelHumanoidControllerToolbox humanoidControllerToolbox,
-         WalkingControllerParameters walkingControllerParameters, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame,
+   public RigidBodyControlManager(RigidBody bodyToControl, RigidBody rootBody, TObjectDoubleHashMap<String> homeConfiguration,
+         HighLevelHumanoidControllerToolbox humanoidControllerToolbox, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame,
          YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
@@ -79,7 +78,7 @@ public class RigidBodyControlManager
       initialJointPositions = new double[jointsOriginal.length];
 
       RigidBody elevator = humanoidControllerToolbox.getFullRobotModel().getElevator();
-      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, yoTime, registry);
+      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, rootBody, elevator, controlFrameMap, rootFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
@@ -249,15 +248,15 @@ public class RigidBodyControlManager
 
    public void goToHomeFromCurrent(double trajectoryTime)
    {
-      // TODO: chest
-      // go to some default configuration starting from the current measured in taskspace
+      jointspaceControlState.goHomeFromCurrent(trajectoryTime);
+      requestState(RigidBodyControlMode.JOINTSPACE);
    }
 
    public void goHome(double trajectoryTime)
    {
-      // TODO: hand
-      // go to some default configuration
-      // hand: jointspace
+      computeDesiredJointPositions(initialJointPositions);
+      jointspaceControlState.goHome(trajectoryTime, initialJointPositions);
+      requestState(RigidBodyControlMode.JOINTSPACE);
    }
 
    public void requestLoadBearing()

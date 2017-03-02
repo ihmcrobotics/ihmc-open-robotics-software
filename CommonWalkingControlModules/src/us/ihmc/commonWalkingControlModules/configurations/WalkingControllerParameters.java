@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -177,6 +178,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
    {
       return new HashMap<String, YoPositionPIDGainsInterface>();
+   }
+
+   /**
+    * The map returned contains the default home joint angles. The key of the map is the joint name
+    * as defined in the robot joint map.
+    *
+    * @return map containing home joint angles by joint name
+    */
+   public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
+   {
+      return new TObjectDoubleHashMap<String>();
    }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
