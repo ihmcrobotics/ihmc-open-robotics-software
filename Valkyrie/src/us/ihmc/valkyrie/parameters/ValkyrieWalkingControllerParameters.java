@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -21,6 +22,7 @@ import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -49,6 +51,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
+   private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
@@ -688,6 +691,37 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
 
       return taskspaceAngularGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
+   {
+      if (jointHomeConfiguration != null)
+         return jointHomeConfiguration;
+
+      jointHomeConfiguration = new TObjectDoubleHashMap<String>();
+
+      jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
+      jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
+
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_YAW), 0.0);
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.DISTAL_NECK_PITCH), 0.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-1.2));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), -0.2);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.7);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), robotSide.negateIfRightSide(-1.5));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), 1.3);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), 0.0);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), 0.0);
+      }
+
+      return jointHomeConfiguration;
    }
 
    @Override

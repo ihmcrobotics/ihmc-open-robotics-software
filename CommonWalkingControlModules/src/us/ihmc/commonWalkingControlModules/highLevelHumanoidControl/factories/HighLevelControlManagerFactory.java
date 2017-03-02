@@ -158,7 +158,8 @@ public class HighLevelControlManagerFactory
       Vector3D taskspaceAngularWeight = momentumOptimizationSettings.getTaskspaceAngularWeights().get(bodyName);
       Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, momentumBasedController, walkingControllerParameters, controlFrameMap, rootFrame, registry);
+      TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, homeConfiguration, momentumBasedController, controlFrameMap, rootFrame, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 

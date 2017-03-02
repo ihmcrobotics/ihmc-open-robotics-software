@@ -48,9 +48,11 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    private final FeedbackControlCommandList feedbackControlCommand = new FeedbackControlCommandList();
 
    private final OneDoFJoint[] jointsOriginal;
+   private final double[] jointsHomeConfiguration;
    private final int numberOfJoints;
 
-   public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
+         DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime);
 
@@ -60,10 +62,11 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       String prefix = bodyName + "Jointspace";
       hasWeights = new BooleanYoVariable(prefix + "HasWeights", registry);
       hasGains = new BooleanYoVariable(prefix + "HasGains", registry);
+      jointsHomeConfiguration = new double[numberOfJoints];
 
-      for (int i = 0; i < jointsToControl.length; i++)
+      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
       {
-         OneDoFJoint joint = jointsToControl[i];
+         OneDoFJoint joint = jointsToControl[jointIdx];
          String jointName = joint.getName();
          jointTrajectoryGenerators.add(new MultipleWaypointsTrajectoryGenerator(jointName, maxPointsInGenerator, registry));
 
@@ -80,6 +83,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          numberOfPoints.add(new IntegerYoVariable(prefix + "_" + jointName + "_numberOfPoints", registry));
 
          weights.add(new DoubleYoVariable(prefix + "_" + jointName + "_weight", registry));
+
+         if (!homeConfiguration.contains(jointName))
+            throw new RuntimeException(warningPrefix + "Can not create control manager since joint home configuration is not defined.");
+         jointsHomeConfiguration[jointIdx] = homeConfiguration.get(jointName);
       }
 
       parentRegistry.addChild(registry);
@@ -142,6 +149,37 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          OneDoFJoint joint = jointsOriginal[jointIdx];
          queueInitialPoint(joint.getQ(), jointIdx);
+      }
+
+      trajectoryStopped.set(false);
+      trajectoryDone.set(false);
+   }
+
+   public void goHome(double trajectoryTime, double[] initialJointPositions)
+   {
+      overrideTrajectory();
+      resetLastCommandId();
+
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
+         queuePoint(jointsHomeConfiguration[jointIdx], 0.0, trajectoryTime, jointIdx);
+      }
+
+      trajectoryStopped.set(false);
+      trajectoryDone.set(false);
+   }
+
+   public void goHomeFromCurrent(double trajectoryTime)
+   {
+      overrideTrajectory();
+      resetLastCommandId();
+
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         OneDoFJoint joint = jointsOriginal[jointIdx];
+         queueInitialPoint(joint.getQ(), jointIdx);
+         queuePoint(jointsHomeConfiguration[jointIdx], 0.0, trajectoryTime, jointIdx);
       }
 
       trajectoryStopped.set(false);
@@ -274,6 +312,17 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
       SimpleTrajectoryPoint1D point = pointQueue.addLast();
       point.set(trajectoryPoint);
+      return true;
+   }
+
+   private boolean queuePoint(double q, double qd, double t, int jointIdx)
+   {
+      RecyclingArrayDeque<SimpleTrajectoryPoint1D> pointQueue = pointQueues.get(jointIdx);
+      if (atCapacityLimit(pointQueue))
+         return false;
+
+      SimpleTrajectoryPoint1D point = pointQueue.addLast();
+      point.set(t, q, qd);
       return true;
    }
 
