@@ -3,9 +3,10 @@ package us.ihmc.footstepPlanning.graphSearch;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -18,9 +19,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -41,6 +39,8 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    private final FramePose tempFramePose = new FramePose();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+
+   private boolean clear = false;
 
    public SimplePlanarRegionBipedalAnytimeFootstepPlanner(BipedalFootstepPlannerParameters parameters, YoVariableRegistry parentRegistry)
    {
@@ -199,6 +199,13 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
       while (!stopRequested)
       {
+         if (clear)
+         {
+            setPlanarRegions(new PlanarRegionsList());
+            getBestPlanYet();
+            clear = false;
+         }
+
          stackSize.set(stack.size());
 
          replaceStartNode();
@@ -224,7 +231,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
          // If stepping in place on first step, don't...
          if (parentOfStartNode != null)
          {
-            if (parentOfStartNode.epsilonEquals(nodeToExpand, 0.01))
+            if (parentOfStartNode.epsilonEquals(nodeToExpand, 0.04))
                continue;
          }
 
@@ -282,7 +289,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
             stack.clear();
 
          long timeInNano = System.nanoTime();
-         if (TimeTools.nanoSecondstoSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
+         if (Conversions.nanoSecondstoSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
             stack.clear();
       }
 
@@ -303,9 +310,9 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
 
    private void setNodesCostsAndRememberIfClosestYet(BipedalFootstepPlannerNode nodeToSetCostOf)
    {
-      Point3d currentPosition = nodeToSetCostOf.getSolePosition();
-      Point3d goalPosition = planarRegionPotentialNextStepCalculator.getGoalPosition(nodeToSetCostOf.getRobotSide());
-      Vector3d currentToGoalVector = new Vector3d();
+      Point3D currentPosition = nodeToSetCostOf.getSolePosition();
+      Point3D goalPosition = planarRegionPotentialNextStepCalculator.getGoalPosition(nodeToSetCostOf.getRobotSide());
+      Vector3D currentToGoalVector = new Vector3D();
       currentToGoalVector.sub(goalPosition, currentPosition);
 
       double euclideanDistanceToGoal = currentToGoalVector.length();
@@ -333,4 +340,15 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlanner extends PlanarRegio
       stopRequested = false;
       plan();
    }
+
+   public void clear()
+   {
+      this.clear = true;
+   }
+
+   public boolean isClear()
+   {
+      return !clear;
+   }
+
 }

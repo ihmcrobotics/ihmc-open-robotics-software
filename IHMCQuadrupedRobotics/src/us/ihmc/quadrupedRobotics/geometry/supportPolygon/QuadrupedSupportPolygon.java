@@ -8,10 +8,10 @@ import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrant;
 
 import java.io.Serializable;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -49,8 +49,8 @@ public class QuadrupedSupportPolygon implements Serializable
    private final FramePoint tempIntersection = new FramePoint();
    
    private final FrameVector[] tempVectorsForCommonSupportPolygon = new FrameVector[] {new FrameVector(), new FrameVector()};
-   private final Point2d[] tempPointsForCornerCircle = new Point2d[] {new Point2d(), new Point2d(), new Point2d(), new Point2d()};
-   private final Vector2d tempVectorForCornerCircle = new Vector2d();
+   private final Point2D[] tempPointsForCornerCircle = new Point2D[] {new Point2D(), new Point2D(), new Point2D(), new Point2D()};
+   private final Vector2D tempVectorForCornerCircle = new Vector2D();
    
    private final FrameLineSegment2d tempLineSegment2d = new FrameLineSegment2d();
    private final FramePoint2d tempFramePoint2dOne = new FramePoint2d();
@@ -345,7 +345,7 @@ public class QuadrupedSupportPolygon implements Serializable
    /**
     * Translates this polygon in X and Y.
     */
-   public void translate(Vector3d translateBy)
+   public void translate(Vector3D translateBy)
    {
       for (RobotQuadrant robotQuadrant : getSupportingQuadrantsInOrder())
       {
@@ -744,7 +744,7 @@ public class QuadrupedSupportPolygon implements Serializable
     * @param minToPack Point2d  Minimum x and y value contained in footsteps list
     * @param maxToPack Point2d  Maximum x and y value contained in footsteps list
     */
-   public void getBounds(Point2d minToPack, Point2d maxToPack)
+   public void getBounds(Point2D minToPack, Point2D maxToPack)
    {
       minToPack.setX(Double.POSITIVE_INFINITY);
       minToPack.setY(Double.POSITIVE_INFINITY);
@@ -846,7 +846,7 @@ public class QuadrupedSupportPolygon implements Serializable
       {
          FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
          FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
-         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX(), pointTwo.getY()));
+         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX() - pointOne.getX(), pointTwo.getY() - pointOne.getY()));
       }
       else
       {
@@ -1033,7 +1033,7 @@ public class QuadrupedSupportPolygon implements Serializable
       v3p.normalize();
 
       // find intersection point of the two bisecting vectors
-      GeometryTools.getIntersectionBetweenTwoLines2d(intersectionToPack, tempPointListForInCirclePoint[1], v2p, tempPointListForInCirclePoint[2], v3p);
+      GeometryTools.getIntersectionBetweenTwoLines2d(tempPointListForInCirclePoint[1], v2p, tempPointListForInCirclePoint[2], v3p, intersectionToPack);
    }
 
    /**
@@ -1335,7 +1335,7 @@ public class QuadrupedSupportPolygon implements Serializable
       
       commonPolygonToPack.clear();
       FramePoint intersection = commonPolygonToPack.reviveFootstep(quadrantToAssignToIntersection);
-      GeometryTools.getIntersectionBetweenTwoLines2d(intersection, getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2);
+      GeometryTools.getIntersectionBetweenTwoLines2d(getFootstep(compareSwingLeg), direction1, polygonToCompare.getFootstep(thisSwingLeg), direction2, intersection);
       
       commonPolygonToPack.setFootstep(thisSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(thisSwingLeg.getDiagonalOppositeQuadrant()));
       commonPolygonToPack.setFootstep(compareSwingLeg.getDiagonalOppositeQuadrant(), getFootstep(compareSwingLeg.getDiagonalOppositeQuadrant()));
@@ -1462,8 +1462,8 @@ public class QuadrupedSupportPolygon implements Serializable
          shrunkenShrinkEdgeFoot.add(shrinkDirection);
          shrunkenNextEdgeFoot.add(shrinkDirection);
          
-         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot);
-         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot);
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenNextEdgeFoot, shrunkenShrinkEdgeFoot, originalPreviousEdgeFoot, originalShrinkEdgeFoot, shrunkenShrinkEdgeFoot);
+         GeometryTools.getIntersectionBetweenTwoLines2d(shrunkenShrinkEdgeFoot, shrunkenNextEdgeFoot, originalPreviousEdgeFoot, originalNextEdgeFoot, shrunkenNextEdgeFoot);
       }
       else if (size() == 2)
       {
@@ -1657,7 +1657,7 @@ public class QuadrupedSupportPolygon implements Serializable
     */
    public double getDistanceFromP1ToTrotLineInDirection2d(RobotQuadrant trotQuadrant, FramePoint p1, FramePoint p2)
    {
-      boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(tempIntersection, p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()));
+      boolean intersectionExists = GeometryTools.getIntersectionBetweenTwoLines2d(p1, p2, getFootstep(trotQuadrant), getFootstep(trotQuadrant.getDiagonalOppositeQuadrant()), tempIntersection);
 
       if (intersectionExists)
       {
@@ -1729,9 +1729,9 @@ public class QuadrupedSupportPolygon implements Serializable
    
             double theta = GeometryTools.getUnknownTriangleAngleByLawOfCosine(cornerToA, cornerToB, aToB);
             
-            Point2d tempCorner = tempPointsForCornerCircle[0];
-            Point2d tempA = tempPointsForCornerCircle[1];
-            Point2d tempB = tempPointsForCornerCircle[2];
+            Point2D tempCorner = tempPointsForCornerCircle[0];
+            Point2D tempA = tempPointsForCornerCircle[1];
+            Point2D tempB = tempPointsForCornerCircle[2];
             
             cornerPoint.getPoint2d(tempCorner);
             pointA.getPoint2d(tempA);
@@ -1740,10 +1740,10 @@ public class QuadrupedSupportPolygon implements Serializable
             double bisectTheta = 0.5 * theta;
    
             double radiusOffsetAlongBisector = cornerCircleRadius * (Math.sin(Math.PI / 2.0) / Math.sin(bisectTheta));
-            Point2d adjacentBisector = tempPointsForCornerCircle[3];
+            Point2D adjacentBisector = tempPointsForCornerCircle[3];
             GeometryTools.getTriangleBisector(tempA, tempCorner, tempB, adjacentBisector);
    
-            Vector2d bisectorVector = tempVectorForCornerCircle;
+            Vector2D bisectorVector = tempVectorForCornerCircle;
             bisectorVector.set(adjacentBisector.getX() - cornerPoint.getX(), adjacentBisector.getY() - cornerPoint.getY());
             double scalar = radiusOffsetAlongBisector / bisectorVector.length();
    

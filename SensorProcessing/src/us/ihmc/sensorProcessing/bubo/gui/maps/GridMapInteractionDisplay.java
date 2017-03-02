@@ -18,7 +18,7 @@
 
 package us.ihmc.sensorProcessing.bubo.gui.maps;
 
-import java.awt.*;
+import java.awt.Dimension;
 
 import us.ihmc.sensorProcessing.bubo.gui.ScrollableSpacialPane;
 import us.ihmc.sensorProcessing.bubo.maps.d2.grid.GridMapSpacialInfo;

@@ -20,6 +20,7 @@ public class SelectGUIConfigFromFileAction extends AbstractAction
       this.executor = executor;
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       executor.selectGUIConfigFromFile(fullPath);

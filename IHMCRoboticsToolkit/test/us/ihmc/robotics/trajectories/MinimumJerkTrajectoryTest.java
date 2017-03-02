@@ -1,10 +1,10 @@
 package us.ihmc.robotics.trajectories;
 
+import static junit.framework.Assert.assertEquals;
+
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import static junit.framework.Assert.assertEquals;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class MinimumJerkTrajectoryTest
 {

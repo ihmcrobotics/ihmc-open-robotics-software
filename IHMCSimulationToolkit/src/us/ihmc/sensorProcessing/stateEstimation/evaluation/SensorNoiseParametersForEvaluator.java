@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation.evaluation;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 
 public class SensorNoiseParametersForEvaluator
@@ -20,8 +19,8 @@ public class SensorNoiseParametersForEvaluator
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.003);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.01);
 
-      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3d());
-      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3d());
+      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3D());
+      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3D());
 
       return sensorNoiseParameters;
    }
@@ -40,8 +39,8 @@ public class SensorNoiseParametersForEvaluator
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(1e-6);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(1e-6);
 
-      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3d());
-      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3d());
+      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3D());
+      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3D());
 
       return sensorNoiseParameters;
    }
@@ -60,8 +59,8 @@ public class SensorNoiseParametersForEvaluator
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.003);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.003);
 
-      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3d());
-      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3d());
+      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3D());
+      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3D());
 
       return sensorNoiseParameters;
    }
@@ -80,8 +79,8 @@ public class SensorNoiseParametersForEvaluator
       sensorNoiseParameters.setAngularVelocityBiasProcessNoiseStandardDeviation(0.001);
       sensorNoiseParameters.setLinearAccelerationBiasProcessNoiseStandardDeviation(0.001);
 
-      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3d());
-      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3d());
+      sensorNoiseParameters.setInitialLinearVelocityBias(new Vector3D());
+      sensorNoiseParameters.setInitialAngularVelocityBias(new Vector3D());
 
       return sensorNoiseParameters;
    }

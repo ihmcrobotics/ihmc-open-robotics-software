@@ -18,9 +18,9 @@
           <x>0.01089603089710632</x>
           <y>0.011168108411801552</y>
           <z>-1.2150622143424915E-4</z>
-          <w>0.9998782601404181</w>
+          <s>0.9998782601404181</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
@@ -37,9 +37,9 @@
           <x>-1.2961171578895604E-4</x>
           <y>8.301744138303921E-4</y>
           <z>3.000606007459321E-6</z>
-          <w>0.9999996470010588</w>
+          <s>0.9999996470010588</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
@@ -56,9 +56,9 @@
           <x>0.030387169822316887</x>
           <y>3.5479184805830953E-4</y>
           <z>-7.827287139449682E-6</z>
-          <w>0.999538140328656</w>
+          <s>0.999538140328656</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
@@ -75,9 +75,9 @@
           <x>-1.2961178576678534E-4</x>
           <y>8.301744029050385E-4</y>
           <z>2.9163131120500995E-6</z>
-          <w>0.9999996470013082</w>
+          <s>0.9999996470013082</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>

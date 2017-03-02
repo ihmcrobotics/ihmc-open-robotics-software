@@ -1,10 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.shapes.Plane3d;
-
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 import java.util.List;
+
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 public interface PlaneFitter
 {
@@ -14,7 +14,7 @@ public interface PlaneFitter
     * @param planeToPack the plane to pack
     * @return the average error of the points to the plane fit
     */
-   public abstract double fitPlaneToPoints(List<Point3d> pointList, Plane3d planeToPack);
+   public abstract double fitPlaneToPoints(List<Point3D> pointList, Plane3d planeToPack);
 
    /**
     *
@@ -23,5 +23,5 @@ public interface PlaneFitter
     * @param planeToPack the plane to pack
     * @return the average error of the points to the plane fit
     */
-   public abstract double fitPlaneToPoints(Point2d center, List<Point3d> pointList, Plane3d planeToPack);
+   public abstract double fitPlaneToPoints(Point2D center, List<Point3D> pointList, Plane3d planeToPack);
 }

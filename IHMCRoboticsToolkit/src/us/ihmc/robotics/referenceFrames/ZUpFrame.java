@@ -1,18 +1,16 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 public class ZUpFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = 8615028266128433328L;
-   private final Vector3d euler = new Vector3d();
-   private final Vector3d translation = new Vector3d();
+   private final Vector3D euler = new Vector3D();
+   private final Vector3D translation = new Vector3D();
    private final ReferenceFrame worldFrame;
    private final FramePoint origin;
 
@@ -31,17 +29,18 @@ public class ZUpFrame extends ReferenceFrame
       this.update();
    }
 
-   private final Matrix3d nonZUpToWorldRotation = new Matrix3d();
-   private final Point3d originPoint3d = new Point3d();
+   private final RotationMatrix nonZUpToWorldRotation = new RotationMatrix();
+   private final Point3D originPoint3d = new Point3D();
    private final RigidBodyTransform nonZUpToWorld = new RigidBodyTransform();
 
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
+      //TODO: Combine with RotationTools.removePitchAndRollFromTransform(). 
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
       nonZUpToWorld.getRotation(nonZUpToWorldRotation);
 
-      double yaw = RotationTools.computeYaw(nonZUpToWorldRotation);
+      double yaw = nonZUpToWorldRotation.getYaw();
       euler.set(0.0, 0.0, yaw);
       transformToParent.setRotationEulerAndZeroTranslation(euler);
 

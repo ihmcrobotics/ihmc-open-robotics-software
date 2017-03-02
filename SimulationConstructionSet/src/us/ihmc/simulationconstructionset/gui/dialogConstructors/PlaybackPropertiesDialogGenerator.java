@@ -21,6 +21,7 @@ public class PlaybackPropertiesDialogGenerator implements PlaybackPropertiesDial
       this.parentContainer = parentContainer;
    }
 
+   @Override
    public void constructDialog()
    {
       new PlaybackPropertiesDialog(parentContainer, frame, sim);

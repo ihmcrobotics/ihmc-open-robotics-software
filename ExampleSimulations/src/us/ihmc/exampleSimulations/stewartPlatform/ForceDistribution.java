@@ -1,9 +1,9 @@
 package us.ihmc.exampleSimulations.stewartPlatform;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ForceDistribution
 {
@@ -54,8 +54,8 @@ public class ForceDistribution
    private DenseMatrix64F aMatrix66 = new DenseMatrix64F(6, 6);
 
 
-   public void solveActuatorForcesSingleLeg(double[] act_force, double Fx, double Fy, double Fz, double Nx, double Ny, double Nz, Vector3d[] a_hat,
-           Vector3d[] b)
+   public void solveActuatorForcesSingleLeg(double[] act_force, double Fx, double Fy, double Fz, double Nx, double Ny, double Nz, Vector3D[] a_hat,
+           Vector3D[] b)
    {
       for (int i = 0; i < 6; i++)
       {

@@ -4,18 +4,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class AlphaFilteredYoFrameQuaternionTest
 {
@@ -28,16 +26,16 @@ public class AlphaFilteredYoFrameQuaternionTest
 
       // set measurement randomly
       Random random = new Random(12351235L);
-      Quat4d qMeasured = RandomTools.generateRandomQuaternion(random);
+      Quaternion qMeasured = RandomGeometry.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qMeasured);
 
       // call update once
       q.update();
-      Quat4d qFiltered = new Quat4d();
+      Quaternion qFiltered = new Quaternion();
       q.get(qFiltered);
 
       // verify measurement equals filtered
-      JUnitTools.assertQuaternionsEqual(qMeasured, qFiltered, 1e-12);
+      EuclidCoreTestTools.assertQuaternionEquals(qMeasured, qFiltered, 1e-12);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -50,7 +48,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       Random random = new Random(73464L);
 
       // update once
-      Quat4d qInitial = RandomTools.generateRandomQuaternion(random);
+      Quaternion qInitial = RandomGeometry.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qInitial);
       q.update();
 
@@ -58,10 +56,10 @@ public class AlphaFilteredYoFrameQuaternionTest
       int nUpdates = 100;
       doRandomUpdates(q, random, nUpdates);
 
-      Quat4d qFiltered = new Quat4d();
+      Quaternion qFiltered = new Quaternion();
       q.get(qFiltered);
 
-      JUnitTools.assertQuaternionsEqualUsingDifference(qInitial, qFiltered, 1e-12);
+      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(qInitial, qFiltered, 1e-12);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -78,14 +76,14 @@ public class AlphaFilteredYoFrameQuaternionTest
       doRandomUpdates(q, random, nUpdates);
 
       // update one more time
-      Quat4d qFinal = RandomTools.generateRandomQuaternion(random);
+      Quaternion qFinal = RandomGeometry.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qFinal);
       q.update();
 
-      Quat4d qFiltered = new Quat4d();
+      Quaternion qFiltered = new Quaternion();
       q.get(qFiltered);
 
-      JUnitTools.assertQuaternionsEqualUsingDifference(qFinal, qFiltered, 1e-12);
+      EuclidCoreTestTools.assertQuaternionEqualsUsingDifference(qFinal, qFiltered, 1e-12);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -99,19 +97,19 @@ public class AlphaFilteredYoFrameQuaternionTest
       Random random = new Random(12525123L);
 
       // update once
-      Quat4d qInitial = RandomTools.generateRandomQuaternion(random);
+      Quaternion qInitial = RandomGeometry.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qInitial);
       q.update();
 
       // update a whole bunch of times using the same quaternion
-      Quat4d qFinal = RandomTools.generateRandomQuaternion(random);
+      Quaternion qFinal = RandomGeometry.nextQuaternion(random);
       q.getUnfilteredQuaternion().set(qFinal);
 
       double angleDifference = getAngleDifference(qInitial, qFinal);
       double epsilon = 1e-3;
 
       int nUpdates = 100;
-      Quat4d qFiltered = new Quat4d();
+      Quaternion qFiltered = new Quaternion();
       for (int i = 0; i < nUpdates; i++)
       {
          q.update();
@@ -129,7 +127,7 @@ public class AlphaFilteredYoFrameQuaternionTest
       for (int i = 0; i < nUpdates; i++)
       {
          // set measurement randomly and updated filtered version
-         Quat4d qMeasured = RandomTools.generateRandomQuaternion(random);
+         Quaternion qMeasured = RandomGeometry.nextQuaternion(random);
          q.getUnfilteredQuaternion().set(qMeasured);
          q.update();
       }
@@ -145,11 +143,11 @@ public class AlphaFilteredYoFrameQuaternionTest
       return q;
    }
 
-   private static double getAngleDifference(Quat4d q1, Quat4d q2)
+   private static double getAngleDifference(Quaternion q1, Quaternion q2)
    {
-      Quat4d qDifference = new Quat4d();
-      qDifference.mulInverse(q1, q2);
-      AxisAngle4d axisAngle = new AxisAngle4d();
+      Quaternion qDifference = new Quaternion(q1);
+      qDifference.multiplyConjugateOther(q2);
+      AxisAngle axisAngle = new AxisAngle();
       axisAngle.set(qDifference);
       return axisAngle.getAngle();
    }

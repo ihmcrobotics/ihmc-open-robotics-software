@@ -1,7 +1,6 @@
 package us.ihmc.avatar.initialSetup;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -15,6 +14,6 @@ public interface DRCRobotInitialSetup<T extends Robot>
    public abstract void setInitialGroundHeight(double groundHeight);
    public abstract double getInitialGroundHeight();
 
-   public abstract void setOffset(Vector3d additionalOffset);
-   public abstract void getOffset(Vector3d offsetToPack);
+   public abstract void setOffset(Vector3D additionalOffset);
+   public abstract void getOffset(Vector3D offsetToPack);
 }

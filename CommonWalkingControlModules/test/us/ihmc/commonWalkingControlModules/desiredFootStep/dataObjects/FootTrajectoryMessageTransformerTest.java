@@ -5,21 +5,22 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,8 +42,8 @@ public class FootTrajectoryMessageTransformerTest
       RobotSide robotSide;
       for (int i = 0; i < numberOfTests; i++)
       {
-         AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
-         Quat4d quat = new Quat4d();
+         AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
+         Quaternion quat = new Quaternion();
          quat.set(axisAngle);
 
          if (i % 2 == 0)
@@ -50,13 +51,13 @@ public class FootTrajectoryMessageTransformerTest
          else
             robotSide = RobotSide.RIGHT;
 
-         Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point3D point3d = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
 
-         double trajectoryTime = RandomTools.generateRandomDouble(random, 0.6, 5.0);
+         double trajectoryTime = RandomNumbers.nextDouble(random, 0.6, 5.0);
 
          FootTrajectoryMessage starting = new FootTrajectoryMessage(robotSide, trajectoryTime, point3d, quat);
 
-         transform3D = RigidBodyTransform.generateRandomTransform(random);
+         transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
          FootTrajectoryMessage ending = starting.transform(transform3D);
 
@@ -75,18 +76,18 @@ public class FootTrajectoryMessageTransformerTest
          SE3TrajectoryPointMessage startingWaypoint = starting.getTrajectoryPoint(i);
          SE3TrajectoryPointMessage endingWaypoint = ending.getTrajectoryPoint(i);
 
-         // Point3d position;
+         // Point3D position;
          double distance = getDistanceBetweenPoints(startingWaypoint.position, transform3D, endingWaypoint.position);
          assertEquals("not equal", 0.0, distance, 1e-6);
          
          // Quat4d orientation;
-         Quat4d startQuat = startingWaypoint.orientation;
-         Quat4d endQuat = endingWaypoint.orientation;
+         Quaternion startQuat = startingWaypoint.orientation;
+         Quaternion endQuat = endingWaypoint.orientation;
          assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
       }
    }
 
-   private static double getDistanceBetweenPoints(Point3d startingPoint, RigidBodyTransform transform3D, Point3d endPoint)
+   private static double getDistanceBetweenPoints(Point3D startingPoint, RigidBodyTransform transform3D, Point3D endPoint)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -99,7 +100,7 @@ public class FootTrajectoryMessageTransformerTest
       return end.distance(start);
    }
 
-   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, RigidBodyTransform transform3D, Quat4d orientationEnd)
+   private static boolean areOrientationsEqualWithTransform(Quaternion orientationStart, RigidBodyTransform transform3D, Quaternion orientationEnd)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);

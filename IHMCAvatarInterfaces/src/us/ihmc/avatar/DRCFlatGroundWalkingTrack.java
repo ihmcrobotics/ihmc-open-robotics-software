@@ -9,15 +9,15 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.graphics3DDescription.HeightMap;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -33,11 +33,11 @@ public class DRCFlatGroundWalkingTrack
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
       this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model, 
-            WalkingProvider.VELOCITY_HEADING_COMPONENT); // should always be committed as VELOCITY_HEADING_COMPONENT
+            WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters()); // should always be committed as VELOCITY_HEADING_COMPONENT
    }
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model, WalkingProvider walkingProvider)
+         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
 
@@ -63,6 +63,8 @@ public class DRCFlatGroundWalkingTrack
             feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
              HighLevelState.WALKING);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
+      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
+      
 
       
       HeightMap heightMapForFootstepZ = null;
@@ -82,8 +84,16 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-
+      initialize();
       avatarSimulation.start();
+   }
+   
+   /**
+    * used to inject anything you need into scs before the sim starts
+    */
+   public void initialize()
+   {
+	   
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
@@ -107,6 +117,5 @@ public class DRCFlatGroundWalkingTrack
       {
          avatarSimulation.dispose();
       }
-      GlobalTimer.clearTimers();
    }
 }

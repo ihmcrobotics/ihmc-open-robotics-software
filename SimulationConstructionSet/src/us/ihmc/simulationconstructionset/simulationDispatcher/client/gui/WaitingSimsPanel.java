@@ -16,12 +16,14 @@ public class WaitingSimsPanel extends SimulationToDispatchPanel
       super(dispatcher);
    }
 
+   @Override
    public void simulationsChanged()
    {
       SimulationToDispatch[] waitingSimulations = dispatcher.getSimulationsToDispatch();
       setSimulationsToDisplay(waitingSimulations);
    }
 
+   @Override
    public void paintComponent(Graphics graphics)
    {
       super.paintComponent(graphics);

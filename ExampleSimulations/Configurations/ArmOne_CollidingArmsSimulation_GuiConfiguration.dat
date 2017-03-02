@@ -1,0 +1,154 @@
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.ArmOne.CollidingArmController.q_d_base,root.ArmOne.q_base</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ArmTwo.CollidingArmController.q_d_base,root.ArmTwo.q_base</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ArmOne.CollidingArmController.q_d_shoulder,root.ArmOne.q_shoulder</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ArmTwo.CollidingArmController.q_d_shoulder,root.ArmTwo.q_shoulder</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ArmOne.CollidingArmController.q_d_elbow,root.ArmOne.q_elbow</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ArmTwo.CollidingArmController.q_d_elbow,root.ArmTwo.q_elbow</Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.ArmOne.qd_base</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.GroundAsABoxRobot.t</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>root.ArmOne.CollidingArmController.q_d_base,root.ArmOne.CollidingArmController.q_d_shoulder,root.ArmOne.CollidingArmController.q_d_elbow,root.ArmTwo.CollidingArmController.q_d_base,root.ArmTwo.CollidingArmController.q_d_shoulder,root.ArmTwo.CollidingArmController.q_d_elbow</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>0</Graph Array Window Size>
+
+
+<Extra Panels>
+<Main Viewport>
+
+</Main Viewport></Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>0.0</Camera X>
+ <Camera Y>-8.0</Camera Y>
+ <Camera Z>1.4</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>false</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>false</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>0.0</Fix X>
+<Fix Y>0.0</Fix Y>
+<Fix Z>0.8</Fix Z>
+</Fix Position>
+</Canvas 1>

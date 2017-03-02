@@ -4,7 +4,6 @@ public class TwoWaypointTrajectoryGeneratorParameters
 {
    private static final double MINIMUM_GROUND_CLEARANCE = 0.05;
    private static final double DEFAULT_GROUND_CLEARANCE = 0.10; //0.08; //0.12;
-   private static final double MINIMUM_HEIGHT_DIFFERENCE_FOR_STEP_ON_OR_OFF = 0.04;
    private static final double MINIMUM_DESIRED_PROPORTION_OF_ARC_LENGTH_TAKEN_AT_CONSTANT_SPEED = 0.35;
    private static final double[] DEFAULT_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {0.15, 1.0 - 0.15};
    private static final double[] STEP_OR_OFF_PROPORTIONS_THROUGH_TRAJECTORY_FOR_GROUND_CLEARANCE = new double[] {0.15, 0.85};
@@ -31,11 +30,6 @@ public class TwoWaypointTrajectoryGeneratorParameters
    public static double getDefaultGroundClearance()
    {
       return DEFAULT_GROUND_CLEARANCE;
-   }
-
-   public static double getMinimumHeightDifferenceForStepOnOrOff()
-   {
-      return MINIMUM_HEIGHT_DIFFERENCE_FOR_STEP_ON_OR_OFF;
    }
 
    public static double getMinimumDesiredProportionOfArcLengthTakenAtConstantSpeed()

@@ -15,8 +15,6 @@ public abstract class InterruptableWorker implements Runnable
       UNINITIALIZED, INITIALIZED, WORKING, SUCCESSFULLY_COMPLETED, UNSUCCESSFULLY_COMPLETED, PENDING_INTERRUPTION, INTERRUPTED
    }
 
-   ;
-
    private STATE currentState = STATE.UNINITIALIZED;
 
 
@@ -84,6 +82,7 @@ public abstract class InterruptableWorker implements Runnable
       run();
    }
 
+   @Override
    public void run()
    {
       STATE state = doWork();

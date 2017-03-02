@@ -1,14 +1,14 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.robotics.geometry.transformables.Pose;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.shapes.Plane3d;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 /**
  * @author agrabertilton
@@ -16,29 +16,29 @@ import java.util.List;
 public class HullFace
 {
    private Plane3d plane = new Plane3d();
-   private List<Point3d> facePoints = new ArrayList<Point3d>();
+   private List<Point3D> facePoints = new ArrayList<Point3D>();
    private double slopeAngle;
    private double area;
 
-   public HullFace(List<Point3d> points)
+   public HullFace(List<Point3D> points)
    {
       setPoints(points);
       computeAndUpdate();
    }
 
-   public HullFace(Point3d[] points)
+   public HullFace(Point3D[] points)
    {
       setPoints(Arrays.asList(points));
       computeAndUpdate();
    }
 
-   public HullFace(Point3d[] points, int[] vertexIndices)
+   public HullFace(Point3D[] points, int[] vertexIndices)
    {
       setPoints(points, vertexIndices);
       computeAndUpdate();
    }
 
-   public HullFace(List<Point3d> points, int[] vertexIndices)
+   public HullFace(List<Point3D> points, int[] vertexIndices)
    {
       setPoints(points, vertexIndices);
       computeAndUpdate();
@@ -46,17 +46,20 @@ public class HullFace
 
    private void computeAndUpdate()
    {
-      if (facePoints == null || facePoints.size() < 3) { return; }
+      if (facePoints == null || facePoints.size() < 3)
+      {
+         return;
+      }
 
       plane.setToNaN();
-      Point3d faceCenter = new Point3d();
-      Vector3d planeNormal = new Vector3d();
+      Point3D faceCenter = new Point3D();
+      Vector3D planeNormal = new Vector3D();
 
       //find the fan of the points, which should be ordered
-      Point3d p0 = facePoints.get(0);
-      Vector3d edge01 = new Vector3d();
-      Vector3d edge02 = new Vector3d();
-      Vector3d singleCross = new Vector3d();
+      Point3D p0 = facePoints.get(0);
+      Vector3D edge01 = new Vector3D();
+      Vector3D edge02 = new Vector3D();
+      Vector3D singleCross = new Vector3D();
       int numPoints = facePoints.size();
       for (int i = 1; i < numPoints - 1; i++)
       {
@@ -83,17 +86,32 @@ public class HullFace
       plane.setNormal(planeNormal);
    }
 
-   public double getSlopeAngle() {return slopeAngle;}
+   public double getSlopeAngle()
+   {
+      return slopeAngle;
+   }
 
-   public double getArea() {return area;}
+   public double getArea()
+   {
+      return area;
+   }
 
-   public void getPlane(Plane3d planeToPack) {planeToPack.set(plane);}
+   public void getPlane(Plane3d planeToPack)
+   {
+      planeToPack.set(plane);
+   }
 
-   public List<Point3d> getPoints() {return facePoints;}
+   public List<Point3D> getPoints()
+   {
+      return facePoints;
+   }
 
-   private void setPoints(List<Point3d> points) { this.facePoints = points;}
+   private void setPoints(List<Point3D> points)
+   {
+      this.facePoints = points;
+   }
 
-   public void setPoints(Point3d[] points, int[] vertexIndecies)
+   public void setPoints(Point3D[] points, int[] vertexIndecies)
    {
       int index;
       for (int i = 0; i < vertexIndecies.length; i++)
@@ -109,7 +127,7 @@ public class HullFace
       }
    }
 
-   public void setPoints(List<Point3d> points, int[] vertexIndecies)
+   public void setPoints(List<Point3D> points, int[] vertexIndecies)
    {
       int index;
       int maxIndex = points.size();
@@ -133,38 +151,34 @@ public class HullFace
          return;
       }
 
-      List<Point3d> projectedPoints = new ArrayList<>();
-      Point3d projectedPoint;
-      Point3d averagePoint = new Point3d();
-      for (Point3d point3d : facePoints)
+      List<Point3D> projectedPoints = new ArrayList<>();
+      Point3D projectedPoint;
+      Point3D averagePoint = new Point3D();
+      for (Point3D point3d : facePoints)
       {
          projectedPoint = plane.orthogonalProjectionCopy(point3d);
          averagePoint.add(projectedPoint);
          projectedPoints.add(projectedPoint);
       }
       averagePoint.scale(1.0 / facePoints.size());
-      polygonPose.getPoint().set(averagePoint);
+      polygonPose.setPosition(averagePoint);
 
-      Vector3d xVec = new Vector3d(projectedPoints.get(0));
+      Vector3D xVec = new Vector3D(projectedPoints.get(0));
       xVec.sub(averagePoint);
       xVec.normalize();
 
-      Vector3d zVec = plane.getNormalCopy();
-      Vector3d yVec = new Vector3d();
+      Vector3D zVec = plane.getNormalCopy();
+      Vector3D yVec = new Vector3D();
       yVec.cross(zVec, xVec);
       yVec.normalize();
 
-      Matrix3d rotationMatrix = new Matrix3d();
-      rotationMatrix.setColumn(0, xVec);
-      rotationMatrix.setColumn(1, yVec);
-      rotationMatrix.setColumn(2, zVec);
-      RotationTools.convertMatrixToQuaternion(rotationMatrix, polygonPose.getOrientation());
-      // The Quat4d.set(Matrix3d) is buggy
-//      polygonPose.getOrientation().set(rotationMatrix);
+      RotationMatrix rotationMatrix = new RotationMatrix();
+      rotationMatrix.setColumns(xVec, yVec, zVec);
+      polygonPose.setOrientation(rotationMatrix);
 
       rotationMatrix.transpose();
       polygonToPack.clear();
-      for (Point3d point : projectedPoints)
+      for (Point3D point : projectedPoints)
       {
          point.sub(averagePoint);
          rotationMatrix.transform(point);

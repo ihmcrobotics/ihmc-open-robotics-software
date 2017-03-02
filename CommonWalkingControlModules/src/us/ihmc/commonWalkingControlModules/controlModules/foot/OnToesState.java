@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -17,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -27,6 +26,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -63,6 +63,7 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint2d exitCMP2d = new FramePoint2d();
    private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
    private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
+   private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithRayIntersector2d;
 
    private final TwistCalculator twistCalculator;
 
@@ -104,10 +105,12 @@ public class OnToesState extends AbstractFootControlState
 
       orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       orientationFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      orientationFeedbackControlCommand.setPrimaryBase(pelvis);
       orientationFeedbackControlCommand.setGains(gains.getOrientationGains());
 
       pointFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       pointFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      pointFeedbackControlCommand.setPrimaryBase(pelvis);
       pointFeedbackControlCommand.setGains(gains.getPositionGains());
 
       feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
@@ -129,6 +132,7 @@ public class OnToesState extends AbstractFootControlState
       privilegedWeight.set(jointPrivilegedConfigurationParameters.getOnToesKneeWeight());
       privilegedConfigurationGain.set(jointPrivilegedConfigurationParameters.getOnToesKneeConfigurationGain());
       privilegedVelocityGain.set(jointPrivilegedConfigurationParameters.getOnToesKneeVelocityGain());
+      frameConvexPolygonWithRayIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
    }
 
    public void setWeight(double weight)
@@ -137,7 +141,7 @@ public class OnToesState extends AbstractFootControlState
       orientationFeedbackControlCommand.setWeightForSolver(weight);
    }
 
-   public void setWeights(Vector3d angular, Vector3d linear)
+   public void setWeights(Vector3D angular, Vector3D linear)
    {
       pointFeedbackControlCommand.setWeightsForSolver(linear);
       orientationFeedbackControlCommand.setWeightsForSolver(angular);
@@ -237,8 +241,8 @@ public class OnToesState extends AbstractFootControlState
          rayOrigin = footPolygon.getCentroid();
 
       rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
-      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRayCopy(rayThroughExitCMP);
-      toeOffContactPoint2d.set(intersectionWithRay[0]);
+      frameConvexPolygonWithRayIntersector2d.intersectWithRay(footPolygon, rayThroughExitCMP);
+      toeOffContactPoint2d.set(frameConvexPolygonWithRayIntersector2d.getIntersectionPointOne());
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());

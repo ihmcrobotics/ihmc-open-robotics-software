@@ -7,8 +7,9 @@ import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -42,9 +43,10 @@ public class BonoFlatGroundWalkingTrack
       boolean useVelocityAndHeadingScript = !USE_JOYSTICK_CONTROLLER;
       boolean cheatWithGroundHeightAtForFootstep = false;
 
+      HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = new HeadingAndVelocityEvaluationScriptParameters();
       DRCFlatGroundWalkingTrack flatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
                                                             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotModel,
-                                                            WalkingProvider.VELOCITY_HEADING_COMPONENT);
+                                                            WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters);
 
 
       SimulationConstructionSet scs = flatGroundWalkingTrack.getSimulationConstructionSet();

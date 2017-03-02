@@ -2,10 +2,10 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class SimpleTriangleMesh
 {
-   public final ArrayList<Point3d> positions = new ArrayList<Point3d>();
+   public final ArrayList<Point3D> positions = new ArrayList<Point3D>();
    public final ArrayList<Integer> triangleIndices = new ArrayList<Integer>();
 }

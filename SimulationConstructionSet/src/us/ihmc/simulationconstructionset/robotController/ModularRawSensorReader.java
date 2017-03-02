@@ -50,28 +50,33 @@ public class ModularRawSensorReader implements RawSensorReader
       this.registry.addChild(rawSensorReader.getYoVariableRegistry());
    }
 
+   @Override
    public void initialize()
    {
       for (RawSensorReader rawSensorReader : rawSensorReaders)
          rawSensorReader.initialize();
    }
 
+   @Override
    public void read()
    {
       for (RawSensorReader rawSensorReader : rawSensorReaders)
          rawSensorReader.read();
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return registry.getName();
    }
 
+   @Override
    public String getDescription()
    {
       return description;

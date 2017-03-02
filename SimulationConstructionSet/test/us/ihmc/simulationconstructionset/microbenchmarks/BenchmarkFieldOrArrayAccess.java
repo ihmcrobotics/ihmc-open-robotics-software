@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.commons.Conversions;
 
 public class BenchmarkFieldOrArrayAccess
 {
@@ -66,8 +66,8 @@ public class BenchmarkFieldOrArrayAccess
             System.out.println("Test " + i + " returned " + testValue);
          }
          
-         res += "Writing " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + TimeTools.nanoSecondstoSeconds(writeTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
-         res += "Reading " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + TimeTools.nanoSecondstoSeconds(readTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
+         res += "Writing " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanoSecondstoSeconds(writeTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
+         res += "Reading " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanoSecondstoSeconds(readTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
          
       }
       
@@ -146,11 +146,13 @@ public class BenchmarkFieldOrArrayAccess
    {
       private long value;
 
+      @Override
       public void setValue(long value)
       {
          this.value = value;
       }
 
+      @Override
       public long getValue()
       {
          return value;
@@ -162,11 +164,13 @@ public class BenchmarkFieldOrArrayAccess
       private int index = 0;
       private long[] value = new long[1];
 
+      @Override
       public void setValue(long value)
       {
          this.value[index] = value;
       }
 
+      @Override
       public long getValue()
       {
          return value[index];

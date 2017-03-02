@@ -1,0 +1,394 @@
+<?xml version = "1.0" ?>
+<robot name="rhinoBeetle" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<joint name="FRONT_RIGHT_YAW" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.103213 -0.036628 -0.025503" />
+    <axis xyz="0 0 1" />
+    <parent link="BODY" />
+    <child link="FRONT_RIGHT_UPPER_YAW_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="FRONT_RIGHT_UPPER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0 0 0" />
+    <axis xyz="1 0 0" />
+    <parent link="FRONT_RIGHT_UPPER_YAW_LIMB" />
+    <child link="FRONT_RIGHT_UPPER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="FRONT_RIGHT_LOWER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.001606 -0.084435 0.000157" />
+    <axis xyz="1 0 0" />
+    <parent link="FRONT_RIGHT_UPPER_PITCH_LIMB" />
+    <child link="FRONT_RIGHT_LOWER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="MIDDLE_RIGHT_YAW" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.044806 -0.043041 -0.018062" />
+    <axis xyz="0 0 1" />
+    <parent link="BODY" />
+    <child link="MIDDLE_RIGHT_UPPER_YAW_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="MIDDLE_RIGHT_UPPER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0 0 0" />
+    <axis xyz="1 0 0" />
+    <parent link="MIDDLE_RIGHT_UPPER_YAW_LIMB" />
+    <child link="MIDDLE_RIGHT_UPPER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="MIDDLE_RIGHT_LOWER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.004055 -0.082052 0.000825" />
+    <axis xyz="1 0 0" />
+    <parent link="MIDDLE_RIGHT_UPPER_PITCH_LIMB" />
+    <child link="MIDDLE_RIGHT_LOWER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="HIND_RIGHT_YAW" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="-0.046486 -0.045496 -0.030929" />
+    <axis xyz="0 0 1" />
+    <parent link="BODY" />
+    <child link="HIND_RIGHT_UPPER_YAW_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="HIND_RIGHT_UPPER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0 0 0" />
+    <axis xyz="1 0 0" />
+    <parent link="HIND_RIGHT_UPPER_YAW_LIMB" />
+    <child link="HIND_RIGHT_UPPER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="HIND_RIGHT_LOWER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="-0.005543 -0.083124 -0.002321" />
+    <axis xyz="1 0 0" />
+    <parent link="HIND_RIGHT_UPPER_PITCH_LIMB" />
+    <child link="HIND_RIGHT_LOWER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="FRONT_LEFT_YAW" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.103213 0.036628 -0.025503" />
+    <axis xyz="0 0 1" />
+    <parent link="BODY" />
+    <child link="FRONT_LEFT_UPPER_YAW_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="FRONT_LEFT_UPPER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0 0 0" />
+    <axis xyz="1 0 0" />
+    <parent link="FRONT_LEFT_UPPER_YAW_LIMB" />
+    <child link="FRONT_LEFT_UPPER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="FRONT_LEFT_LOWER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.001606 0.084435 0.000157" />
+    <axis xyz="1 0 0" />
+    <parent link="FRONT_LEFT_UPPER_PITCH_LIMB" />
+    <child link="FRONT_LEFT_LOWER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="MIDDLE_LEFT_YAW" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.044806 0.043041 -0.018062" />
+    <axis xyz="0 0 1" />
+    <parent link="BODY" />
+    <child link="MIDDLE_LEFT_UPPER_YAW_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="MIDDLE_LEFT_UPPER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0 0 0" />
+    <axis xyz="1 0 0" />
+    <parent link="MIDDLE_LEFT_UPPER_YAW_LIMB" />
+    <child link="MIDDLE_LEFT_UPPER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="MIDDLE_LEFT_LOWER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0.004055 0.082052 0.000825" />
+    <axis xyz="1 0 0" />
+    <parent link="MIDDLE_LEFT_UPPER_PITCH_LIMB" />
+    <child link="MIDDLE_LEFT_LOWER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="HIND_LEFT_YAW" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="-0.046486 0.045496 -0.030929" />
+    <axis xyz="0 0 1" />
+    <parent link="BODY" />
+    <child link="HIND_LEFT_UPPER_YAW_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="HIND_LEFT_UPPER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="0 0 0" />
+    <axis xyz="1 0 0" />
+    <parent link="HIND_LEFT_UPPER_YAW_LIMB" />
+    <child link="HIND_LEFT_UPPER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<joint name="HIND_LEFT_LOWER_PITCH" type="revolute">
+    <origin rpy="0.0 0.0 0.0" xyz="-0.005543 0.083124 -0.002321" />
+    <axis xyz="1 0 0" />
+    <parent link="HIND_LEFT_UPPER_PITCH_LIMB" />
+    <child link="HIND_LEFT_LOWER_PITCH_LIMB" />
+    <limit effort="100" lower="-1.570796" upper="1.570796" velocity = "20" />
+    <dynamics damping="0.05" friction="0.0"/>
+</joint>
+<link name="BODY">
+  <inertial>
+    <mass value="2"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <inertia ixx="0.008" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/body.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="FRONT_RIGHT_UPPER_YAW_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/none.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="FRONT_RIGHT_UPPER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 -0.02 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="5E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/frontRightUpperLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="FRONT_RIGHT_LOWER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 -0.03 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="4E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/frontRightLowerLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="MIDDLE_RIGHT_UPPER_YAW_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/none.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="MIDDLE_RIGHT_UPPER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 -0.02 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="5E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/middleRightUpperLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="MIDDLE_RIGHT_LOWER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 -0.03 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="4E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/middleRightLowerLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="HIND_RIGHT_UPPER_YAW_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/none.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="HIND_RIGHT_UPPER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 -0.02 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="5E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/hindRightUpperLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="HIND_RIGHT_LOWER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 -0.03 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="4E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/hindRightLowerLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="FRONT_LEFT_UPPER_YAW_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/none.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="FRONT_LEFT_UPPER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0.02 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="5E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/frontLeftUpperLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="FRONT_LEFT_LOWER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0.03 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="4E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/frontLeftLowerLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="MIDDLE_LEFT_UPPER_YAW_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/none.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="MIDDLE_LEFT_UPPER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0.02 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="5E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/middleLeftUpperLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="MIDDLE_LEFT_LOWER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0.03 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="4E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/middleLeftLowerLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="HIND_LEFT_UPPER_YAW_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="0.0002" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/none.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="HIND_LEFT_UPPER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0.02 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="5E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/hindLeftUpperLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+<link name="HIND_LEFT_LOWER_PITCH_LIMB">
+  <inertial>
+    <mass value="0.25"/>
+    <origin rpy="0 0 0" xyz="0 0.03 0"/>
+    <inertia ixx="0.0002" ixy="0" ixz="0" iyy="4E-05" iyz="0" izz="0.0002" />
+  </inertial>
+  <visual>
+    <geometry>
+      <mesh filename="package://rhino_beetle_description/model/meshes/hindLeftLowerLimb.obj"/>
+    </geometry>
+    <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0"/>
+  </visual>
+</link>
+</robot>

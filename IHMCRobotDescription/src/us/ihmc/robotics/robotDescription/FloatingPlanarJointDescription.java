@@ -1,7 +1,6 @@
 package us.ihmc.robotics.robotDescription;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Plane;
 
 public class FloatingPlanarJointDescription extends JointDescription
@@ -10,7 +9,7 @@ public class FloatingPlanarJointDescription extends JointDescription
 
    public FloatingPlanarJointDescription(String name, Plane plane)
    {
-      super(name, new Vector3d());
+      super(name, new Vector3D());
       this.setType(plane);
    }
 

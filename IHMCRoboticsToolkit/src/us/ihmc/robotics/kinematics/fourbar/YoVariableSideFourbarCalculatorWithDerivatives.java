@@ -1,15 +1,17 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.min;
+import static java.lang.Math.sin;
+import static us.ihmc.robotics.MathTools.checkIfInRange;
+import static us.ihmc.robotics.MathTools.clamp;
+import static us.ihmc.robotics.MathTools.square;
+import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
+
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-import static java.lang.Math.*;
-import static java.lang.Math.sin;
-import static us.ihmc.robotics.MathTools.checkIfInRange;
-import static us.ihmc.robotics.MathTools.clipToMinMax;
-import static us.ihmc.robotics.MathTools.square;
-import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
 
 public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
 {
@@ -69,7 +71,7 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       checkIfInRange(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
       checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
-      double cosAngle = MathTools.clipToMinMax((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0,
+      double cosAngle = MathTools.clamp((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0,
                                                1.0);
 
       return cosAngle;
@@ -78,7 +80,7 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
    public boolean updateAnglesGivenAngleDAB(double angleDABInRadians)
    {
       // Solve angles
-      double A = clipToMinMax(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
+      double A = clamp(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
       double e = getUnknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);
       double C = getAngleWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), e);
       double angleDBA = getAngleWithCosineLaw(lengthBA.getDoubleValue(), e, lengthAD.getDoubleValue());
@@ -139,7 +141,7 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       boolean isAHittingBounds = updateAnglesGivenAngleDAB(angleDABInRadians);
 
       // Solve angular velocity
-      double A = clipToMinMax(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
+      double A = clamp(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
       double dAdT = angularVelocityDAB;
       double e = getUnknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);
       double eDot = lengthAD.getDoubleValue() * lengthBA.getDoubleValue() * sin(A) * dAdT / e;
@@ -162,7 +164,7 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       boolean isAHittingBounds = updateAnglesAndVelocitiesGivenAngleDAB(angleDABInRadians, angularVelocityDAB);
 
       // Solve angular acceleration
-      double A = clipToMinMax(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
+      double A = clamp(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
       double dAdT = angularVelocityDAB;
       double dAdT2 = angularAccelerationDAB;
       double e = getUnknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);

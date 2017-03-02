@@ -4,9 +4,9 @@ import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.DRCInverseDynamicsCalculatorTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class AtlasInverseDynamicsCalculatorTest extends DRCInverseDynamicsCalculatorTest
 {

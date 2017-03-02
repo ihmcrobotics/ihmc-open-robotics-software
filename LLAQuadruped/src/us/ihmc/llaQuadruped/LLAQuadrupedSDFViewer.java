@@ -1,6 +1,6 @@
 package us.ihmc.llaQuadruped;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.llaQuadrupedController.model.LLAQuadrupedModelFactory;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -12,7 +12,7 @@ public class LLAQuadrupedSDFViewer
    {
       LLAQuadrupedModelFactory modelFactory = new LLAQuadrupedModelFactory();
       FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.createSdfRobot());
-      sdfRobot.setPositionInWorld(new Vector3d(0.0, 0.0, 0.6));
+      sdfRobot.setPositionInWorld(new Vector3D(0.0, 0.0, 0.6));
       SimulationConstructionSet scs = new SimulationConstructionSet(sdfRobot);
       scs.startOnAThread();
    }

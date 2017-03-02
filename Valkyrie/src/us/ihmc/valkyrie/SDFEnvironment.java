@@ -7,21 +7,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Color3f;
-import javax.vecmath.Vector3d;
 import javax.xml.bind.JAXBException;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.SDFWorldLoader;
-import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.SdfLoader.xmlDescription.SDFVisual;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceMaterial;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFWorldLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -117,9 +117,9 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
         	   {
         		   List<Collision> cols = link.getCollisions();
         		   YoAppearanceMaterial mat = new YoAppearanceMaterial();
-        		   mat.setAmbientColor(new Color3f(0.5f,0.5f,0.5f));
-                   mat.setDiffuseColor(new Color3f(0.5f,0.5f,0.5f));
-                   mat.setSpecularColor(new Color3f(0.5f,0.5f,0.5f));
+        		   mat.setAmbientColor(new MutableColor(0.5f,0.5f,0.5f));
+                   mat.setDiffuseColor(new MutableColor(0.5f,0.5f,0.5f));
+                   mat.setSpecularColor(new MutableColor(0.5f,0.5f,0.5f));
                    
         		   if(link.getVisuals().size()>0)
         		   {
@@ -128,9 +128,9 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
         			   {
         				   if(tmpvis.getMaterial().getScript()==null)
         				   {
-        					   mat.setAmbientColor(SDFConversionsHelper.stringToColor(tmpvis.getMaterial().getAmbient()));
-        					   mat.setDiffuseColor(SDFConversionsHelper.stringToColor(tmpvis.getMaterial().getDiffuse()));
-        					   mat.setSpecularColor(SDFConversionsHelper.stringToColor(tmpvis.getMaterial().getSpecular()));
+        					   mat.setAmbientColor(ModelFileLoaderConversionsHelper.stringToColor(tmpvis.getMaterial().getAmbient()));
+        					   mat.setDiffuseColor(ModelFileLoaderConversionsHelper.stringToColor(tmpvis.getMaterial().getDiffuse()));
+        					   mat.setSpecularColor(ModelFileLoaderConversionsHelper.stringToColor(tmpvis.getMaterial().getSpecular()));
         				   }
         			   }
         		   }
@@ -138,7 +138,7 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
         		   {
         			   RigidBodyTransform transformToModel = new RigidBodyTransform(model.getTransformToRoot());
         		       transformToModel.multiply(link.getTransformFromModelReferenceFrame());
-        		       transformToModel.multiply(SDFConversionsHelper.poseToTransform(col.getPose()));
+        		       transformToModel.multiply(ModelFileLoaderConversionsHelper.poseToTransform(col.getPose()));
     				   
         			   SDFGeometry geo =col.getGeometry(); 
         			   if (geo.getMesh()!=null) System.out.println("    Mesh geometry is unsupported - SKIPPING!");
@@ -149,7 +149,7 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
         			   
         			   if (geo.getBox()!=null)
         			   {
-        				   Vector3d sz = SDFConversionsHelper.stringToVector3d(geo.getBox().getSize());
+        				   Vector3D sz = ModelFileLoaderConversionsHelper.stringToVector3d(geo.getBox().getSize());
         				   RotatableBoxTerrainObject obj = new RotatableBoxTerrainObject(transformToModel,sz.getX(),sz.getY(),sz.getZ(), mat);
         				   combinedTerrainObject3D.addTerrainObject(obj);
         			   }
@@ -172,7 +172,7 @@ public class SDFEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3d(0, 0, -0.5));
+      location.setTranslation(new Vector3D(0, 0, -0.5));
 
       RotatableBoxTerrainObject newBox2 = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), YoAppearance.DarkGray());
       combinedTerrainObject.addTerrainObject(newBox2);

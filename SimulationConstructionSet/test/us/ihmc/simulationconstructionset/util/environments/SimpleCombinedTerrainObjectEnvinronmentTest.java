@@ -2,19 +2,20 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.Test;
 
-import us.ihmc.graphics3DDescription.input.SelectedListener;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNode;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.graphicsDescription.input.SelectedListener;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.simulationconstructionset.DoNothingController;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class SimpleCombinedTerrainObjectEnvinronmentTest
@@ -174,8 +175,9 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 
          scs.attachSelectedListener(new SelectedListener()
          {
-            public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
-                  Quat4d cameraRotation)
+            @Override
+            public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+                  QuaternionReadOnly cameraRotation)
             {              
                System.out.println("Clicked on Point " + location);
             }

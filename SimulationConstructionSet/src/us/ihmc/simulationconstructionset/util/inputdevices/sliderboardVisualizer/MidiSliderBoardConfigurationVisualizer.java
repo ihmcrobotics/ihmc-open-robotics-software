@@ -1,13 +1,17 @@
 package us.ihmc.simulationconstructionset.util.inputdevices.sliderboardVisualizer;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Hashtable;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiControl.SliderType;
 
+@SuppressWarnings("serial")
 public class MidiSliderBoardConfigurationVisualizer extends JFrame
 {
    private Hashtable<Integer, MidiControl> controlsHashTable = new Hashtable<Integer, MidiControl>(40);
@@ -223,6 +227,6 @@ public class MidiSliderBoardConfigurationVisualizer extends JFrame
 
    public static void main(String[] args)
    {
-      MidiSliderBoardConfigurationVisualizer visualizer = new MidiSliderBoardConfigurationVisualizer(null);
+      new MidiSliderBoardConfigurationVisualizer(null);
    }
 }

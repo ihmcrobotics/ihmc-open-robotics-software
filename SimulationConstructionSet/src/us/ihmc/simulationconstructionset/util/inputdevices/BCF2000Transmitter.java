@@ -37,6 +37,7 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
       }
    }
 
+   @Override
    public void moveControl(MidiControl midiControl)
    {
       if (midiOut != null)
@@ -47,6 +48,7 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
       }
    }
 
+   @Override
    public void moveControl(MidiControl midiControl, int sliderValue)
    {
       if (midiOut != null)
@@ -57,6 +59,7 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
       }
    }
    
+   @Override
    public void closeAndDispose()
    {
       printIfDebug("Closing and Disposing Message Senders!");
@@ -106,6 +109,7 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
          }
       }
       
+      @Override
       public void run()
       {
          while (isRunning)
@@ -180,6 +184,7 @@ public class BCF2000Transmitter implements SliderBoardTransmitterInterface
 
    public class LightShow implements Runnable
    {
+      @Override
       public void run()
       {
          int valueToMoveTo = 0;

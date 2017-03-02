@@ -1,0 +1,762 @@
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.OmniWrist.t</Variables>
+		<GraphConfiguration>
+			<Name>config1</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.OmniWristController.q_d_jointOneA,root.OmniWrist.q_jointOneA</Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.OmniWristController.q_d_jointOneB,root.OmniWrist.q_jointOneB</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.tau_jointOneA,root.OmniWrist.forceSensorOneA_tY</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.qd_jointOneA,root.OmniWrist.qd_jointOneB</Variables>
+		<GraphConfiguration>
+			<Name>config5</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config6</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>root.OmniWrist.q_jointOneA,root.OmniWrist.q_jointOneB,root.OmniWrist.qd_jointOneA,root.OmniWrist.qd_jointOneB</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+Controller
+</Title>
+<Entry Boxes>root.OmniWrist.OmniWristController.q_d_jointOneA,root.OmniWrist.OmniWristController.q_d_jointOneB,root.OmniWrist.OmniWristController.kp_ControllerA,root.OmniWrist.OmniWristController.kp_ControllerB,root.OmniWrist.OmniWristController.kd_ControllerA,root.OmniWrist.OmniWristController.kd_ControllerB</Entry Boxes>
+</EntryBoxTab>
+<EntryBoxTab>
+<Title>
+WeldJoints
+</Title>
+<Entry Boxes>root.OmniWrist.weldB1.weldB1_Stiffness,root.OmniWrist.weldC1.weldC1_Stiffness,root.OmniWrist.weldD1.weldD1_Stiffness,root.OmniWrist.weldB2.weldB2_Stiffness,root.OmniWrist.weldC2.weldC2_Stiffness,root.OmniWrist.weldD2.weldD2_Stiffness,root.OmniWrist.weldB1.weldB1_Damping,root.OmniWrist.weldC1.weldC1_Damping,root.OmniWrist.weldD1.weldD1_Damping,root.OmniWrist.weldB2.weldB2_Damping,root.OmniWrist.weldC2.weldC2_Damping,root.OmniWrist.weldD2.weldD2_Damping</Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>2</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+<Viewport1>
+<Visible>true</Visible>
+<Canvas Number>1</Canvas Number>
+<Canvas1>
+<Viewport Camera X>0.04641180449432916</Viewport Camera X>
+<Viewport Camera Y>-1.3763221775307344</Viewport Camera Y>
+<Viewport Camera Z>0.6893913443959119</Viewport Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>false</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>false</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>-0.004110638421662607</Fix X>
+<Fix Y>-0.0836055501192563</Fix Y>
+<Fix Z>0.2353030838295962</Fix Z>
+</Fix Position>
+</Canvas1>
+</Viewport1>
+
+<Graph Array Window Size>4</Graph Array Window Size>
+<Graph Array Window1>
+<ScreenID>2</ScreenID>
+<WindowLocation>5752.0, -8.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.OmniWrist.ef_B1_x,root.OmniWrist.ef_matchB1_x</Variables>
+		<GraphConfiguration>
+			<Name>config7</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_B1_y,root.OmniWrist.ef_matchB1_y</Variables>
+		<GraphConfiguration>
+			<Name>config8</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_B1_z,root.OmniWrist.ef_matchB1_z</Variables>
+		<GraphConfiguration>
+			<Name>config9</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_B2_x,root.OmniWrist.ef_matchB2_x</Variables>
+		<GraphConfiguration>
+			<Name>config10</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_B2_y,root.OmniWrist.ef_matchB2_y</Variables>
+		<GraphConfiguration>
+			<Name>config11</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_B2_z,root.OmniWrist.ef_matchB2_z</Variables>
+		<GraphConfiguration>
+			<Name>config12</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_C1_x,root.OmniWrist.ef_matchC1_x</Variables>
+		<GraphConfiguration>
+			<Name>config13</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_C1_y,root.OmniWrist.ef_matchC1_y</Variables>
+		<GraphConfiguration>
+			<Name>config14</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_C1_z,root.OmniWrist.ef_matchC1_z</Variables>
+		<GraphConfiguration>
+			<Name>config15</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_C2_x,root.OmniWrist.ef_matchC2_x</Variables>
+		<GraphConfiguration>
+			<Name>config16</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_C2_y,root.OmniWrist.ef_matchC2_y</Variables>
+		<GraphConfiguration>
+			<Name>config17</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_C2_z,root.OmniWrist.ef_matchC2_z</Variables>
+		<GraphConfiguration>
+			<Name>config18</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_D1_x,root.OmniWrist.ef_matchD1_x</Variables>
+		<GraphConfiguration>
+			<Name>config19</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_D1_y,root.OmniWrist.ef_matchD1_y</Variables>
+		<GraphConfiguration>
+			<Name>config20</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_D1_z,root.OmniWrist.ef_matchD1_z</Variables>
+		<GraphConfiguration>
+			<Name>config21</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_D2_x,root.OmniWrist.ef_matchD2_x</Variables>
+		<GraphConfiguration>
+			<Name>config22</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_D2_y,root.OmniWrist.ef_matchD2_y</Variables>
+		<GraphConfiguration>
+			<Name>config23</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.ef_D2_z,root.OmniWrist.ef_matchD2_z</Variables>
+		<GraphConfiguration>
+			<Name>config24</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window1><Graph Array Window2>
+<ScreenID>1</ScreenID>
+<WindowLocation>1912.0, -8.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneA_fX,root.OmniWrist.forceSensorOneA_fY,root.OmniWrist.forceSensorOneA_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config25</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoA_fX,root.OmniWrist.forceSensorTwoA_fY,root.OmniWrist.forceSensorTwoA_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config26</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeA_fX,root.OmniWrist.forceSensorThreeA_fY,root.OmniWrist.forceSensorThreeA_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config27</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneB_fX,root.OmniWrist.forceSensorOneB_fY,root.OmniWrist.forceSensorOneB_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config28</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoB_fX,root.OmniWrist.forceSensorTwoB_fY,root.OmniWrist.forceSensorTwoB_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config29</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeB_fX,root.OmniWrist.forceSensorThreeB_fY,root.OmniWrist.forceSensorThreeB_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config30</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneC_fX,root.OmniWrist.forceSensorOneC_fY,root.OmniWrist.forceSensorOneC_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config31</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoC_fX,root.OmniWrist.forceSensorTwoC_fY,root.OmniWrist.forceSensorTwoC_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config32</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeC_fX,root.OmniWrist.forceSensorThreeC_fY,root.OmniWrist.forceSensorThreeC_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config33</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneD_fX,root.OmniWrist.forceSensorOneD_fY,root.OmniWrist.forceSensorOneD_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config34</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoD_fX,root.OmniWrist.forceSensorTwoD_fY,root.OmniWrist.forceSensorTwoD_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config35</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeD_fX,root.OmniWrist.forceSensorThreeD_fY,root.OmniWrist.forceSensorThreeD_fZ</Variables>
+		<GraphConfiguration>
+			<Name>config36</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window2><Graph Array Window3>
+<ScreenID>1</ScreenID>
+<WindowLocation>1912.0, -8.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>3</Cols>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneA_tX,root.OmniWrist.forceSensorOneA_tY,root.OmniWrist.forceSensorOneA_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config37</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoA_tX,root.OmniWrist.forceSensorTwoA_tY,root.OmniWrist.forceSensorTwoA_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config38</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeA_tX,root.OmniWrist.forceSensorThreeA_tY,root.OmniWrist.forceSensorThreeA_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config39</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneB_tX,root.OmniWrist.forceSensorOneB_tY,root.OmniWrist.forceSensorOneB_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config40</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoB_tX,root.OmniWrist.forceSensorTwoB_tY,root.OmniWrist.forceSensorTwoB_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config41</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeB_tX,root.OmniWrist.forceSensorThreeB_tY,root.OmniWrist.forceSensorThreeB_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config42</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneC_tX,root.OmniWrist.forceSensorOneC_tY,root.OmniWrist.forceSensorOneC_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config43</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoC_tX,root.OmniWrist.forceSensorTwoC_tY,root.OmniWrist.forceSensorTwoC_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config44</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeC_tX,root.OmniWrist.forceSensorThreeC_tY,root.OmniWrist.forceSensorThreeC_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config45</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorOneD_tX,root.OmniWrist.forceSensorOneD_tY,root.OmniWrist.forceSensorOneD_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config46</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorTwoD_tX,root.OmniWrist.forceSensorTwoD_tY,root.OmniWrist.forceSensorTwoD_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config47</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.forceSensorThreeD_tX,root.OmniWrist.forceSensorThreeD_tY,root.OmniWrist.forceSensorThreeD_tZ</Variables>
+		<GraphConfiguration>
+			<Name>config48</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window3><Graph Array Window4>
+<ScreenID>2</ScreenID>
+<WindowLocation>5752.0, -8.0</WindowLocation>
+<WindowSize>1936.0, 1176.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.OmniWrist.tau_jointOneA</Variables>
+		<GraphConfiguration>
+			<Name>config49</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.tau_jointOneB</Variables>
+		<GraphConfiguration>
+			<Name>config50</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.qd_jointOneA</Variables>
+		<GraphConfiguration>
+			<Name>config51</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.OmniWrist.qd_jointOneB</Variables>
+		<GraphConfiguration>
+			<Name>config52</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window4>
+
+<Extra Panels>
+<Main Viewport>
+
+</Main Viewport>
+<Viewport1>
+
+</Viewport1>
+</Extra Panels>
+
+<Current View>Normal View</Current View>
+ <Canvas 1> 
+ <Camera X>0.0</Camera X>
+ <Camera Y>-0.4</Camera Y>
+ <Camera Z>0.13</Camera Z>
+ <Dolly data> 
+ <Position X>2.0</Position X>
+ <Position Y>12.0</Position Y>
+ <Position Z>0.0</Position Z>
+<Dolly Booleans>
+<Dolly>false</Dolly>
+<Dolly X>true</Dolly X>
+<Dolly Y>true</Dolly Y>
+<Dolly Z>true</Dolly Z>
+</Dolly Booleans>
+</Dolly data>
+ <Track data> 
+ <Position X>0.0</Position X>
+ <Position Y>0.0</Position Y>
+ <Position Z>0.0</Position Z>
+ <Track Booleans>
+<Track>false</Track>
+<Track X>true</Track X>
+<Track Y>true</Track Y>
+<Track Z>false</Track Z>
+</Track Booleans>
+</Track data>
+<Fix Position>
+<Fix X>0.0</Fix X>
+<Fix Y>0.15</Fix Y>
+<Fix Z>0.0</Fix Z>
+</Fix Position>
+</Canvas 1>

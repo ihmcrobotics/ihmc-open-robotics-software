@@ -2,13 +2,15 @@ package us.ihmc.robotics.geometry.transformables;
 
 import java.text.NumberFormat;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.geometry.interfaces.SE3WaypointInterface;
 import us.ihmc.robotics.geometry.interfaces.SO3WaypointInterface;
 import us.ihmc.robotics.math.trajectories.waypoints.WaypointToStringTools;
@@ -24,30 +26,30 @@ public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInte
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       euclideanWaypoint.setPosition(position);
    }
 
    @Override
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(QuaternionReadOnly orientation)
    {
       so3Waypoint.setOrientation(orientation);
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       euclideanWaypoint.setLinearVelocity(linearVelocity);
    }
 
    @Override
-   public void setAngularVelocity(Vector3d angularVelocity)
+   public void setAngularVelocity(Vector3DReadOnly angularVelocity)
    {
       so3Waypoint.setAngularVelocity(angularVelocity);
    }
 
-   public void set(Point3d position, Quat4d orientation, Vector3d linearVelocity, Vector3d angularVelocity)
+   public void set(Point3DReadOnly position, QuaternionReadOnly orientation, Vector3DReadOnly linearVelocity, Vector3DReadOnly angularVelocity)
    {
       euclideanWaypoint.set(position, linearVelocity);
       so3Waypoint.set(orientation, angularVelocity);
@@ -147,30 +149,30 @@ public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInte
    }
 
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       euclideanWaypoint.getPosition(positionToPack);
    }
 
    @Override
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(QuaternionBasics orientationToPack)
    {
       so3Waypoint.getOrientation(orientationToPack);
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       euclideanWaypoint.getLinearVelocity(linearVelocityToPack);
    }
 
    @Override
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       so3Waypoint.getAngularVelocity(angularVelocityToPack);
    }
 
-   public void get(Point3d positionToPack, Quat4d orientationToPack, Vector3d linearVelocityToPack, Vector3d angularVelocityToPack)
+   public void get(Point3DBasics positionToPack, QuaternionBasics orientationToPack, Vector3DBasics linearVelocityToPack, Vector3DBasics angularVelocityToPack)
    {
       getPosition(positionToPack);
       getOrientation(orientationToPack);
@@ -187,7 +189,7 @@ public class SE3Waypoint implements GeometryObject<SE3Waypoint>, SE3WaypointInte
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       euclideanWaypoint.applyTransform(transform);
       so3Waypoint.applyTransform(transform);

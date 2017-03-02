@@ -37,6 +37,7 @@ public class ExportSnapshotAction extends AbstractAction
       constructor.setCurrentDirectory(directory);
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
      constructor.constructDialog();

@@ -3,13 +3,13 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -21,7 +21,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.InverseJacobianSolver;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities;
@@ -112,9 +111,9 @@ public class TaskspaceToJointspaceCalculator
    private final FramePoint baseParentJointFramePosition = new FramePoint();
    private final FrameOrientation baseParentJointFrameOrientation = new FrameOrientation();
 
-   private final AxisAngle4d errorAxisAngle = new AxisAngle4d();
-   private final Vector3d errorRotationVector = new Vector3d();
-   private final Vector3d errorTranslationVector = new Vector3d();
+   private final AxisAngle errorAxisAngle = new AxisAngle();
+   private final Vector3D errorRotationVector = new Vector3D();
+   private final Vector3D errorTranslationVector = new Vector3D();
    private final DenseMatrix64F spatialVelocityFromError = new DenseMatrix64F(maxNumberOfConstraints, 1);
    private final DenseMatrix64F subspaceSpatialError = new DenseMatrix64F(maxNumberOfConstraints, 1);
    private final DenseMatrix64F spatialDesiredVelocity = new DenseMatrix64F(maxNumberOfConstraints, 1);
@@ -420,7 +419,7 @@ public class TaskspaceToJointspaceCalculator
       computeJointAnglesAndVelocities(desiredControlFramePose, desiredControlFrameTwist);
    }
    
-   private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
+   private final AxisAngle tempAxisAngle = new AxisAngle();
    
    public boolean computeIteratively(FramePose desiredPose, Twist desiredTwist, double maxIterations, double epsilon)
    {
@@ -482,9 +481,8 @@ public class TaskspaceToJointspaceCalculator
          errorTranslationVector.scale(kpTaskspaceLinearError.getDoubleValue());
       }
 
-      MatrixTools.setDenseMatrixFromTuple3d(spatialVelocityFromError, errorRotationVector, 0, 0);
-      MatrixTools.setDenseMatrixFromTuple3d(spatialVelocityFromError, errorTranslationVector, 3, 0);
-
+      errorRotationVector.get(0, spatialVelocityFromError);
+      errorTranslationVector.get(3, spatialVelocityFromError);
       CommonOps.scale(1.0 / controlDT, spatialVelocityFromError);
 
       computeDesiredSpatialVelocityToSolveFor(spatialDesiredVelocity, spatialVelocityFromError, desiredControlFrameTwist);
@@ -507,13 +505,13 @@ public class TaskspaceToJointspaceCalculator
       for (int i = 0; i < numberOfDoF; i++)
       {
          OneDoFJoint joint = localJoints[i];
-         double qDotDesired = MathTools.clipToMinMax(desiredJointVelocities.get(i, 0), maximumJointVelocity.getDoubleValue());
+         double qDotDesired = MathTools.clamp(desiredJointVelocities.get(i, 0), maximumJointVelocity.getDoubleValue());
          double qDotDotDesired = (qDotDesired - joint.getQd()) / controlDT;
-         qDotDotDesired = MathTools.clipToMinMax(qDotDotDesired, maximumJointAcceleration.getDoubleValue());
+         qDotDotDesired = MathTools.clamp(qDotDotDesired, maximumJointAcceleration.getDoubleValue());
          qDotDesired = joint.getQd() + qDotDotDesired * controlDT;
 
          double qDesired = joint.getQ() + qDotDesired * controlDT;
-         qDesired = MathTools.clipToMinMax(qDesired, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         qDesired = MathTools.clamp(qDesired, joint.getJointLimitLower(), joint.getJointLimitUpper());
          qDotDesired = (qDesired - joint.getQ()) / controlDT;
          qDotDotDesired = (qDotDesired - joint.getQd()) / controlDT;
 
@@ -740,7 +738,7 @@ public class TaskspaceToJointspaceCalculator
       tempSpatialError.reshape(SpatialMotionVector.SIZE, 1);
       tempSubspaceError.reshape(selectionMatrix.getNumRows(), 1);
 
-      MatrixTools.insertTuple3dIntoEJMLVector(errorRotationVector, tempSpatialError, 0);
+      errorRotationVector.get(tempSpatialError);
       CommonOps.mult(selectionMatrix, tempSpatialError, tempSubspaceError);
 
       return NormOps.normP2(tempSubspaceError);

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -10,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -102,7 +101,7 @@ public class FeetManager
       }
    }
 
-   public void setWeights(Vector3d highAngularFootWeight, Vector3d highLinearFootWeight, Vector3d defaultAngularFootWeight, Vector3d defaultLinearFootWeight)
+   public void setWeights(Vector3D highAngularFootWeight, Vector3D highLinearFootWeight, Vector3D defaultAngularFootWeight, Vector3D defaultLinearFootWeight)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -312,12 +311,12 @@ public class FeetManager
    }
 
    /**
-    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(RobotSide, boolean)}
+    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(Footstep, FramePoint2d, FramePoint2d, FramePoint2d, boolean)}.
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafeSingleSupport(RobotSide trailingLeg, boolean isOnExitCMP)
+   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
    {
-      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(trailingLeg, isOnExitCMP);
+      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(nextFootstep, desiredECMP, currentICP, desiredICP, isOnExitCMP);
 
       return walkOnTheEdgesManager.doToeOff();
    }

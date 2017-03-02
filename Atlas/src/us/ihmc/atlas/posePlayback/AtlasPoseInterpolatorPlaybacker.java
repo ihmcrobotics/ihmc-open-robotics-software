@@ -3,8 +3,6 @@ package us.ihmc.atlas.posePlayback;
 import java.io.Reader;
 import java.io.StringReader;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,6 +11,8 @@ import us.ihmc.avatar.posePlayback.PlaybackPoseSequence;
 import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceReader;
 import us.ihmc.avatar.posePlayback.PoseCheckerCallback;
 import us.ihmc.avatar.posePlayback.PoseInterpolatorPlaybacker;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 
 public class AtlasPoseInterpolatorPlaybacker
 {

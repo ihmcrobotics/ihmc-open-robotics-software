@@ -1,13 +1,14 @@
 package us.ihmc.robotics.quadTree;
 
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class QuadTreeForGroundLeaf
 {
    private final ArrayList<QuadTreeForGroundPoint> points = new ArrayList<QuadTreeForGroundPoint>();
-   private Point3d averagePoint = null; // To mark as dirty set to NaN.
+   private Point3D averagePoint = null; // To mark as dirty set to NaN.
    
    private final QuadTreeForGroundNode node;
    private final QuadTreeForGroundPointLimiter pointLimiter;
@@ -18,11 +19,11 @@ public class QuadTreeForGroundLeaf
       this.pointLimiter = pointLimiter;
    }
 
-   public Point3d getAveragePoint()
+   public Point3D getAveragePoint()
    {
       if (averagePoint == null)
       {
-         averagePoint = new Point3d(Double.NaN, Double.NaN, Double.NaN);
+         averagePoint = new Point3D(Double.NaN, Double.NaN, Double.NaN);
       }
 
       if (Double.isNaN(averagePoint.getX()))
@@ -101,7 +102,7 @@ public class QuadTreeForGroundLeaf
 
    public void getClosestPointAndDistanceUsingAverage(double x, double y, PointAndDistance closestPointAndDistance)
    {
-      Point3d averagePoint = getAveragePoint();
+      Point3D averagePoint = getAveragePoint();
 
       double distanceSquared = distanceXYSquared(x, y, averagePoint);
       double bestDistanceSquared = closestPointAndDistance.getDistance() * closestPointAndDistance.getDistance();
@@ -117,8 +118,8 @@ public class QuadTreeForGroundLeaf
    {
       double bestDistanceSquared = closestPointAndDistance.getDistance() * closestPointAndDistance.getDistance();
 
-      Point3d betterPoint = null;
-      for (Point3d point : points)
+      Point3D betterPoint = null;
+      for (Point3D point : points)
       {
          double distanceSquared = distanceXYSquared(x, y, point);
          if (distanceSquared < bestDistanceSquared)
@@ -130,7 +131,7 @@ public class QuadTreeForGroundLeaf
 
       if (betterPoint != null)
       {
-         Point3d averagePoint = getAveragePoint();
+         Point3D averagePoint = getAveragePoint();
          closestPointAndDistance.setPoint(betterPoint);
          closestPointAndDistance.setPointZ(averagePoint.getZ()); // Use the average for z to do some filtering...
 
@@ -138,7 +139,7 @@ public class QuadTreeForGroundLeaf
       }
    }
 
-   private double distanceXYSquared(double x, double y, Point3d point)
+   private double distanceXYSquared(double x, double y, Point3D point)
    {
       if (point == null)
          return Double.POSITIVE_INFINITY;
@@ -146,14 +147,14 @@ public class QuadTreeForGroundLeaf
       return ((x - point.getX()) * (x - point.getX()) + (y - point.getY()) * (y - point.getY()));
    }
 
-   public void getAllPoints(Collection<Point3d> pointsToPack)
+   public void getAllPoints(Collection<Point3D> pointsToPack)
    {
       pointsToPack.addAll(points);
    }
 
-   public void getAllPointsWithinBounds(Box bounds, ArrayList<Point3d> pointsToPack)
+   public void getAllPointsWithinBounds(Box bounds, ArrayList<Point3D> pointsToPack)
    {
-      for (Point3d point : points)
+      for (Point3D point : points)
       {
          if (bounds.containsOrEquals(point.getX(), point.getY()))
          {
@@ -162,14 +163,14 @@ public class QuadTreeForGroundLeaf
       }
    }
 
-   public void getAllPointsWithinDistance(double x, double y, double maxDistance, ArrayList<Point3d> pointsWithinDistanceToPack)
+   public void getAllPointsWithinDistance(double x, double y, double maxDistance, ArrayList<Point3D> pointsWithinDistanceToPack)
    {
       if (maxDistance < 0.0)
          return;
 
       double maxDistanceSquared = maxDistance * maxDistance;
 
-      for (Point3d point : points)
+      for (Point3D point : points)
       {
          double distanceSquared = ((point.getX() - x) * (point.getX() - x)) + ((point.getY() - y) * (point.getY() - y));
 
@@ -189,7 +190,7 @@ public class QuadTreeForGroundLeaf
 
       if ((points != null) && (!points.isEmpty()))
       {
-         for (Point3d point : points)
+         for (Point3D point : points)
          {
             if (!bounds.containsOrEquals(point.getX(), point.getY()))
                throw new RuntimeException();
@@ -198,7 +199,7 @@ public class QuadTreeForGroundLeaf
 
       if ((averagePoint != null) && (Double.isNaN(averagePoint.getX())))
       {
-         Point3d averageCheck = new Point3d(averagePoint);
+         Point3D averageCheck = new Point3D(averagePoint);
          averagePoint.set(Double.NaN, Double.NaN, Double.NaN);
          if (averageCheck.distance(this.getAveragePoint()) > 1e-7)
             throw new RuntimeException();

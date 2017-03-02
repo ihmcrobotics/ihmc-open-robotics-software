@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateChangeStatusMessage;
@@ -52,6 +53,7 @@ public abstract class ControllerAPIDefinition
       commands.add(NeckTrajectoryCommand.class);
       commands.add(NeckDesiredAccelerationsCommand.class);
       commands.add(ChestTrajectoryCommand.class);
+      commands.add(SpineTrajectoryCommand.class);
       commands.add(PelvisTrajectoryCommand.class);
       commands.add(PelvisOrientationTrajectoryCommand.class);
       commands.add(PelvisHeightTrajectoryCommand.class);

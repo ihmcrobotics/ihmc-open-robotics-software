@@ -20,6 +20,11 @@ public class ExecutionTimer
 
    private long startTime;
 
+   public ExecutionTimer(String name, YoVariableRegistry registry)
+   {
+      this(name, 0.0, registry);
+   }
+   
    public ExecutionTimer(String name, double measurementDelayInSeconds, YoVariableRegistry registry)
    {
       this.measurementDelay = (long) (measurementDelayInSeconds * 1e9);
@@ -67,7 +72,6 @@ public class ExecutionTimer
             maximum.set(timeTaken);
          }
       }
-
    }
 
    public DoubleYoVariable getCurrentTime()
@@ -94,5 +98,4 @@ public class ExecutionTimer
    {
       return maximum;
    }
-
 }

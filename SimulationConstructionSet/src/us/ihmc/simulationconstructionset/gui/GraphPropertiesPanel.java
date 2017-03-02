@@ -17,13 +17,9 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 
+@SuppressWarnings("serial")
 public class GraphPropertiesPanel extends JPanel implements ActionListener
 {
-   /**
-    *
-    */
-   private static final long serialVersionUID = -8691205074287883807L;
-
    private final static java.text.NumberFormat numFormat = new java.text.DecimalFormat(" 0.00000;-0.00000");
 
    private final JTextField minTextField, maxTextField, baseLineTextField;
@@ -320,6 +316,7 @@ public class GraphPropertiesPanel extends JPanel implements ActionListener
 
    }
 
+   @Override
    public void actionPerformed(ActionEvent event)
    {
       if (event.getSource() == maxTextField)

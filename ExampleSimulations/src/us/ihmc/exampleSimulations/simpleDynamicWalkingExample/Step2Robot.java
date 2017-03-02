@@ -1,10 +1,9 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -40,7 +39,7 @@ public class Step2Robot extends Robot {
 		this.setGravity(-9.81);
 
 		// Body (2DOF = Z + Pitch)
-		bodyJoint1 = new SliderJoint("bodyZ", new Vector3d(0.0, 0.0, 0.0),
+		bodyJoint1 = new SliderJoint("bodyZ", new Vector3D(0.0, 0.0, 0.0),
 				this, Axis.Z);
 		bodyJoint1.setDynamic(true);
 		Link bodyLinkSlider = setNullLink();
@@ -48,7 +47,7 @@ public class Step2Robot extends Robot {
 		this.addRootJoint(bodyJoint1);
 		bodyJoint1.setInitialState(legHeight, 0.0);
 
-		bodyJoint2 = new PinJoint("bodyPitch", new Vector3d(0.0, 0.0, 0.0),
+		bodyJoint2 = new PinJoint("bodyPitch", new Vector3D(0.0, 0.0, 0.0),
 				this, Axis.Y);
 		bodyJoint2.setDynamic(true);
 		Link bodyLinkPitch = body();
@@ -56,7 +55,7 @@ public class Step2Robot extends Robot {
 		bodyJoint1.addJoint(bodyJoint2);
 
 		// Upper Joint
-		hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, 0.0), this,
+		hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, 0.0), this,
 				Axis.Y);
 		hipJoint.setDynamic(true);
 		hipJoint.setLimitStops(0.0, 1.0, 1e6, 1e3);
@@ -65,7 +64,7 @@ public class Step2Robot extends Robot {
 		bodyJoint2.addJoint(hipJoint);
 
 		// Lower Joint
-		kneeJoint = new SliderJoint("knee", new Vector3d(0.0, 0.0,
+		kneeJoint = new SliderJoint("knee", new Vector3D(0.0, 0.0,
 				-upperLinkLength), this, Axis.Z);
 		kneeJoint.setDynamic(true);
 		kneeJoint.setLimitStops(0.0, 0.6, 1e9, 1e2);
@@ -74,7 +73,7 @@ public class Step2Robot extends Robot {
 		hipJoint.addJoint(kneeJoint);
 
 		// Visible ground contact point
-		GroundContactPoint contactPoint = new GroundContactPoint("Foot", new Vector3d(0.0, 0.0, gcOffset), this);
+		GroundContactPoint contactPoint = new GroundContactPoint("Foot", new Vector3D(0.0, 0.0, gcOffset), this);
 		kneeJoint.addGroundContactPoint(contactPoint);
 		Graphics3DObject graphics = kneeJoint.getLink().getLinkGraphics();
 		graphics.identity();

@@ -13,8 +13,8 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerReques
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.QuadrupedTaskSpaceEstimator;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.input.value.InputValueIntegrator;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
@@ -123,7 +123,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       packetCommunicator.send(comPositionPacket);
 
       double deltaTrigger = (channels.get(XBoxOneMapping.LEFT_TRIGGER) - channels.get(XBoxOneMapping.RIGHT_TRIGGER));
-      xGaitSettings.setEndDoubleSupportDuration(MathTools.clipToMinMax(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0.1, 1));
+      xGaitSettings.setEndDoubleSupportDuration(MathTools.clamp(xGaitSettings.getEndDoubleSupportDuration() + deltaTrigger * deltaDoubleSupportParameter.get(), 0.1, 1));
       QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
       packetCommunicator.send(settingsPacket);
    }
@@ -177,7 +177,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       case LEFT_BUMPER:
          if (event.getValue() > 0.5)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
+            xGaitSettings.setEndPhaseShift(MathTools.clamp(xGaitSettings.getEndPhaseShift() + deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }
@@ -185,7 +185,7 @@ public class QuadrupedXGaitTeleopMode implements QuadrupedTeleopMode
       case RIGHT_BUMPER:
          if (event.getValue() > 0.5)
          {
-            xGaitSettings.setEndPhaseShift(MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
+            xGaitSettings.setEndPhaseShift(MathTools.clamp(xGaitSettings.getEndPhaseShift() - deltaPhaseShiftParameter.get(), 0, 359));
             QuadrupedXGaitSettingsPacket settingsPacket = new QuadrupedXGaitSettingsPacket(xGaitSettings);
             packetCommunicator.send(settingsPacket);
          }

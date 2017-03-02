@@ -3,13 +3,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
-import javax.vecmath.Quat4d;
-
 import optiTrack.MocapDataClient;
 import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
@@ -47,9 +46,9 @@ public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
             return;
          for (MocapRigidBody rigidBody : listOfRigidbodies)
          {
-            Transform3d tmpTransform = new Transform3d();
+            RigidBodyTransform tmpTransform = new RigidBodyTransform();
             tmpTransform.setTranslation(rigidBody.xPosition,rigidBody.yPosition,rigidBody.zPosition);
-            tmpTransform.setRotation(new Quat4d(rigidBody.qx, rigidBody.qy, rigidBody.qz, rigidBody.qw));           
+            tmpTransform.setRotation(new Quaternion(rigidBody.qx, rigidBody.qy, rigidBody.qz, rigidBody.qw));           
             tfPublisher.publish(tmpTransform, mainNode.getCurrentTime().totalNsecs(), "/mocap_world", "mocap/rigidBody"+rigidBody.getId());
          }
 

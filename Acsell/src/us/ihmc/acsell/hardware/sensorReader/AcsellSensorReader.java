@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.util.EnumMap;
 import java.util.List;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.acsell.hardware.AcsellJoint;
 import us.ihmc.acsell.hardware.state.AcsellJointState;
 import us.ihmc.acsell.hardware.state.AcsellState;
 import us.ihmc.acsell.hardware.state.AcsellXSensState;
 import us.ihmc.acsell.hardware.state.UDPAcsellStateReader;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,9 +46,9 @@ public class AcsellSensorReader<JOINT extends Enum<JOINT> & AcsellJoint> impleme
 
    private final IMUDefinition pelvisIMU;
 
-   private final Quat4d quaternion = new Quat4d();
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Vector3d linearAcceleration = new Vector3d();
+   private final Quaternion quaternion = new Quaternion();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Vector3D linearAcceleration = new Vector3D();
 
    private final LongYoVariable corruptedPackets;
    

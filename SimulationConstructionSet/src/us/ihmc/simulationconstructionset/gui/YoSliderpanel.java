@@ -16,9 +16,10 @@ import javax.swing.event.ChangeListener;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
+@SuppressWarnings("serial")
 public class YoSliderpanel extends JPanel implements MouseListener, VariableChangedListener
 {
-   private YoVariable var;
+   private YoVariable<?> var;
    private double min = 0.0;
    private double max = 0.0;
    private JTextField maxField;
@@ -30,7 +31,7 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
 
    double precision = 1000;
 
-   public YoSliderpanel(YoVariable var)
+   public YoSliderpanel(YoVariable<?> var)
    {
       this.var = var;
       this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -58,11 +59,6 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
       return new Integer(newVal);
    }
 
-   private double convertIntToPrecisionDouble(int value)
-   {
-      return 0.0;
-   }
-
    private void setup()
    {
       name = new JLabel(var.getShortName());
@@ -78,6 +74,7 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
 
       slider.addChangeListener(new ChangeListener()
       {
+         @Override
          public void stateChanged(ChangeEvent e)
          {
             double actualSliderValue = (new Double(slider.getValue()) / precision);
@@ -97,6 +94,7 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
       maxField = new JTextField(max + "");
       maxField.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             double newValue = new Double(maxField.getText());
@@ -120,6 +118,7 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
       minField = new JTextField(min + "");
       minField.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             double newValue = new Double(minField.getText());
@@ -139,30 +138,35 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
    }
 
 
+   @Override
    public void mouseClicked(MouseEvent e)
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void mousePressed(MouseEvent e)
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void mouseReleased(MouseEvent e)
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void mouseEntered(MouseEvent e)
    {
       // TODO Auto-generated method stub
 
    }
 
+   @Override
    public void mouseExited(MouseEvent e)
    {
       // TODO Auto-generated method stub
@@ -189,7 +193,8 @@ public class YoSliderpanel extends JPanel implements MouseListener, VariableChan
       slider.setValue(convertDoubleToPrecisionInt(var.getValueAsDouble()));
    }
 
-   public void variableChanged(YoVariable v)
+   @Override
+   public void variableChanged(YoVariable<?> v)
    {
       value.setText(v.getValueAsDouble() + "");
       setSliderValueOnVariableChange();

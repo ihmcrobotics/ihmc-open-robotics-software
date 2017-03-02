@@ -33,6 +33,7 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
    }
 
 
+   @Override
    public void hostsChanged()
    {
       dispatchHosts.clear();
@@ -68,6 +69,7 @@ public class AliveDispatchHostPanel extends DispatchHostPanel
       this.updateUI();
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);

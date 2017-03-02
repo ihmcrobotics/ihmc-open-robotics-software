@@ -16,16 +16,19 @@ public class YoGraphTransferHandler extends TransferHandler
 
    }
 
+   @Override
    public boolean canImport(TransferSupport transferSupport)
    {
       return false;
    }
 
+   @Override
    public boolean importData(TransferHandler.TransferSupport transferSupport)
    {
       return false;
    }
 
+   @Override
    public int getSourceActions(JComponent c)
    {
       if (c instanceof YoGraph)
@@ -36,6 +39,7 @@ public class YoGraphTransferHandler extends TransferHandler
       return TransferHandler.NONE;
    }
 
+   @Override
    public Transferable createTransferable(JComponent c)
    {
       if (c instanceof YoGraph)
@@ -48,6 +52,7 @@ public class YoGraphTransferHandler extends TransferHandler
       return null;
    }
 
+   @Override
    public void exportDone(JComponent c, Transferable t, int action)
    {
 

@@ -2,10 +2,10 @@ package us.ihmc.footstepPlanning.testTools;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AnytimeFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -13,20 +13,19 @@ import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.SimpleFootstep;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -166,7 +165,7 @@ public class PlanningTestTools
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
-      goal.setXYGoal(new Point2d(goalPose.getX(), goalPose.getY()), 0.5);
+      goal.setXYGoal(new Point2D(goalPose.getX(), goalPose.getY()), 0.5);
 
       return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
    }
@@ -216,13 +215,13 @@ public class PlanningTestTools
       RobotSide stepSide = footstep.getRobotSide();
 
       double midFeetOffset = stepSide.negateIfLeftSide(0.125);
-      Vector3d goalOffset = new Vector3d(0.0, midFeetOffset , 0.0);
+      Vector3D goalOffset = new Vector3D(0.0, midFeetOffset , 0.0);
       RigidBodyTransform soleToWorld = new RigidBodyTransform();
       stepPose.getRigidBodyTransform(soleToWorld);
       soleToWorld.transform(goalOffset);
 
       FramePose achievedGoal = new FramePose(stepPose);
-      Point3d goalPosition = new Point3d();
+      Point3D goalPosition = new Point3D();
       achievedGoal.getPosition(goalPosition);
       goalPosition.add(goalOffset);
       achievedGoal.setPosition(goalPosition);

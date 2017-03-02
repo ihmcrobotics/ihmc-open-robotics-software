@@ -1,9 +1,8 @@
 package us.ihmc.exampleSimulations.flyballGovernor;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -31,7 +30,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
    
    private final ExternalForcePoint constraint1A, constraint1B, constraint2A, constraint2B;
 
-   public FlyballGovernorRobot(String nameSuffix, FlyballGovernorCommonControllerParameters controllerParameters, Vector3d baseWorldOffset)
+   public FlyballGovernorRobot(String nameSuffix, FlyballGovernorCommonControllerParameters controllerParameters, Vector3D baseWorldOffset)
    {
       super("FlyballGovernor" + nameSuffix);
 
@@ -43,7 +42,7 @@ public class FlyballGovernorRobot extends Robot implements RobotController
 
       // One of the flyballs
 
-      PinJoint upperPivot1 = new PinJoint("upperPivot1", new Vector3d(R1, 0.0, L1), this, Axis.Y);
+      PinJoint upperPivot1 = new PinJoint("upperPivot1", new Vector3D(R1, 0.0, L1), this, Axis.Y);
       upperPivot1.setInitialState(-0.3, 0.0);
       upperPivot1.setDamping(DAMPING2);
       upperPivot1.setLimitStops(-Math.PI / 2.0, -0.2, 100, 10);
@@ -51,18 +50,18 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       upperPivot1.setLink(flyBall1);
       rotation.addJoint(upperPivot1);
 
-      PinJoint lowerPivot1 = new PinJoint("lowerPivot1", new Vector3d(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis.Y);
+      PinJoint lowerPivot1 = new PinJoint("lowerPivot1", new Vector3D(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis.Y);
       lowerPivot1.setInitialState(0.5, 0.0);
       Link loopLink1 = loopLink();
       lowerPivot1.setLink(loopLink1);
       upperPivot1.addJoint(lowerPivot1);
 
-      constraint1A = new ExternalForcePoint("constraint1A", new Vector3d(0.0, 0.0, -L3), this);
+      constraint1A = new ExternalForcePoint("constraint1A", new Vector3D(0.0, 0.0, -L3), this);
       lowerPivot1.addExternalForcePoint(constraint1A);
 
       // The other flyball
 
-      PinJoint upperPivot2 = new PinJoint("upperPivot2", new Vector3d(-R1, 0.0, L1), this, Axis.Y);
+      PinJoint upperPivot2 = new PinJoint("upperPivot2", new Vector3D(-R1, 0.0, L1), this, Axis.Y);
       upperPivot2.setInitialState(0.3, 0.0);
       upperPivot2.setDamping(DAMPING2);
       upperPivot2.setLimitStops(0.2, Math.PI / 2.0, 100, 10);
@@ -70,13 +69,13 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       upperPivot2.setLink(flyBall2);
       rotation.addJoint(upperPivot2);
 
-      PinJoint lowerPivot2 = new PinJoint("lowerPivot2", new Vector3d(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis.Y);
+      PinJoint lowerPivot2 = new PinJoint("lowerPivot2", new Vector3D(0.0, 0.0, -2.0 / 3.0 * L2), this, Axis.Y);
       lowerPivot2.setInitialState(-0.5, 0.0);
       Link loopLink2 = loopLink();
       lowerPivot2.setLink(loopLink2);
       upperPivot2.addJoint(lowerPivot2);
 
-      constraint2A = new ExternalForcePoint("constraint2A", new Vector3d(0.0, 0.0, -L3), this);
+      constraint2A = new ExternalForcePoint("constraint2A", new Vector3D(0.0, 0.0, -L3), this);
       lowerPivot2.addExternalForcePoint(constraint2A);
 
 
@@ -88,8 +87,8 @@ public class FlyballGovernorRobot extends Robot implements RobotController
       cylinderJoint.setLink(cylinderLink);
       this.addRootJoint(cylinderJoint);
 
-      constraint1B = new ExternalForcePoint("constraint1B", new Vector3d(R4, 0.0, L4 / 2.0), this);
-      constraint2B = new ExternalForcePoint("constraint2B", new Vector3d(-R4, 0.0, L4 / 2.0), this);
+      constraint1B = new ExternalForcePoint("constraint1B", new Vector3D(R4, 0.0, L4 / 2.0), this);
+      constraint2B = new ExternalForcePoint("constraint2B", new Vector3D(-R4, 0.0, L4 / 2.0), this);
       cylinderJoint.addExternalForcePoint(constraint1B);
       cylinderJoint.addExternalForcePoint(constraint2B);
 

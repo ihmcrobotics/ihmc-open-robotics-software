@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class SensorNoiseParameters
 {
@@ -23,8 +23,8 @@ public class SensorNoiseParameters
 
    private double imuYawDriftAcceleration = 0.0;
 
-   private final Vector3d initialLinearVelocityBias = new Vector3d();
-   private final Vector3d initialAngularVelocityBias = new Vector3d();
+   private final Vector3D initialLinearVelocityBias = new Vector3D();
+   private final Vector3D initialAngularVelocityBias = new Vector3D();
 
    public double getJointPositionMeasurementStandardDeviation()
    {
@@ -91,7 +91,7 @@ public class SensorNoiseParameters
       return angularVelocityMeasurmentLatency;
    }
 
-   public void getInitialAngularVelocityBias(Vector3d vectorToPack)
+   public void getInitialAngularVelocityBias(Vector3D vectorToPack)
    {
       vectorToPack.set(initialAngularVelocityBias);
    }
@@ -106,7 +106,7 @@ public class SensorNoiseParameters
       return linearAccelerationBiasProcessNoiseStandardDeviation;
    }
 
-   public void getInitialLinearVelocityBias(Vector3d vectorToPack)
+   public void getInitialLinearVelocityBias(Vector3D vectorToPack)
    {
       vectorToPack.set(initialLinearVelocityBias);
    }
@@ -146,12 +146,12 @@ public class SensorNoiseParameters
       this.linearAccelerationBiasProcessNoiseStandardDeviation = linearAccelerationBiasProcessNoiseStandardDeviation;
    }
 
-   public void setInitialLinearVelocityBias(Vector3d initialLinearVelocityBias)
+   public void setInitialLinearVelocityBias(Vector3D initialLinearVelocityBias)
    {
       this.initialLinearVelocityBias.set(initialLinearVelocityBias);
    }
 
-   public void setInitialAngularVelocityBias(Vector3d initialAngularVelocityBias)
+   public void setInitialAngularVelocityBias(Vector3D initialAngularVelocityBias)
    {
       this.initialAngularVelocityBias.set(initialAngularVelocityBias);
    }

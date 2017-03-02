@@ -2,14 +2,14 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegionsListExamples
 {
@@ -24,12 +24,18 @@ public class PlanarRegionsListExamples
 
    public static PlanarRegionsList generateStairCase()
    {
-      return generateStairCase(new Vector3d());
+      return generateStairCase(new Vector3D(), new Vector3D());
    }
 
-   public static PlanarRegionsList generateStairCase(Vector3d rotationVector)
+   public static PlanarRegionsList generateStairCase(Vector3D rotationVector)
+   {
+      return generateStairCase(new Vector3D(), rotationVector);
+   }
+
+   public static PlanarRegionsList generateStairCase(Vector3D translationVector, Vector3D rotationVector)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(translationVector);
 
       int numberOfSteps = 5;
 
@@ -41,6 +47,7 @@ public class PlanarRegionsListExamples
       generator.addRectangle(1.2 * length * numberOfSteps, 1.2 * width);
 
       generator.identity();
+      generator.translate(translationVector);
       generator.translate(length, 0.0, 0.0);
       generator.rotateEuler(rotationVector);
       for (int i = 0; i < numberOfSteps; i++)
@@ -54,17 +61,15 @@ public class PlanarRegionsListExamples
       return planarRegionsList;
    }
    
-   public static PlanarRegionsList generateCinderBlockField(double startX, double startY, double cinderBlockSize, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks)
+   public static PlanarRegionsList generateCinderBlockField(double startX, double startY, double cinderBlockSize, double cinderBlockHeight, int courseWidthXInNumberOfBlocks, int courseLengthYInNumberOfBlocks, double heightVariation)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      
-      double cinderBlockHeight = 0.15;
       double courseWidth = courseLengthYInNumberOfBlocks * cinderBlockSize;
       
       generator.translate(startX, startY, 0.001); // avoid graphical issue
       generator.addRectangle(0.6, courseWidth); // standing platform
       generator.translate(0.5, 0.0, 0.0); // forward to first row
-      generator.translate(0.0, -2.5 * cinderBlockSize, 0.0); // over to grid origin
+      generator.translate(0.0, -0.5 * (courseLengthYInNumberOfBlocks - 1) * cinderBlockSize, 0.0); // over to grid origin
       
       Random random = new Random(1231239L);
       for (int x = 0; x < courseWidthXInNumberOfBlocks; x++)
@@ -81,18 +86,18 @@ public class PlanarRegionsListExamples
          
          if ((x / 2) % 2 == 0)
          {
-            generator.translate(0.0, 0.0, 0.1);
+            generator.translate(0.0, 0.0, heightVariation);
          }
          else
          {
-            generator.translate(0.0, 0.0, -0.1);
+            generator.translate(0.0, 0.0, - heightVariation);
          }
             
-         generator.translate(cinderBlockSize, -cinderBlockSize * 6, 0.0);
+         generator.translate(cinderBlockSize, -cinderBlockSize * courseLengthYInNumberOfBlocks, 0.0);
       }
       
       generator.identity();
-      generator.translate(9.0, 0.0, 0.001);
+      generator.translate(0.6 + courseWidthXInNumberOfBlocks * cinderBlockSize, 0.0, 0.001);
       generator.addRectangle(0.6, courseWidth);
       
       return generator.getPlanarRegionsList();
@@ -135,18 +140,18 @@ public class PlanarRegionsListExamples
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      double length = RandomTools.generateRandomDouble(random, 0.2, 1.0);
-      double width = RandomTools.generateRandomDouble(random, 0.2, 1.0);
-      double height = RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double length = RandomNumbers.nextDouble(random, 0.2, 1.0);
+      double width = RandomNumbers.nextDouble(random, 0.2, 1.0);
+      double height = RandomNumbers.nextDouble(random, 0.2, 1.0);
 
       for (int i = 0; i < numberOfRandomObjects; i++)
       {
          generator.identity();
 
-         Vector3d translationVector = RandomTools.generateRandomVector(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
+         Vector3D translationVector = RandomGeometry.nextVector3D(random, -maxX, -maxY, 0.0, maxX, maxY, maxZ);
          generator.translate(translationVector);
 
-         Quat4d rotation = RandomTools.generateRandomQuaternion(random);
+         Quaternion rotation = RandomGeometry.nextQuaternion(random);
          generator.rotate(rotation);
 
          generator.addCubeReferencedAtBottomMiddle(length, width, height);
@@ -177,7 +182,7 @@ public class PlanarRegionsListExamples
          for (int j=0; j<sizeX; j++)
          {
             generator.translate(length, 0.0, 0.0);
-            double height = RandomTools.generateRandomDouble(random, 0.01, maxZ);
+            double height = RandomNumbers.nextDouble(random, 0.01, maxZ);
             generator.addCubeReferencedAtBottomMiddle(length, width, height + random.nextDouble() * 0.1);
          }
       }

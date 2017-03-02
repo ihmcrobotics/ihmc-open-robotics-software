@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.linemod;
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class OrganizedPointCloud implements Serializable
 {
@@ -33,10 +33,10 @@ public class OrganizedPointCloud implements Serializable
             
    }
    
-   public Point3d getPoint(int w, int h)
+   public Point3D getPoint(int w, int h)
    {
       int base=4*(h*width+w);
-      return new Point3d(xyzrgb[base+0], xyzrgb[base+1], xyzrgb[base+2]);
+      return new Point3D(xyzrgb[base+0], xyzrgb[base+1], xyzrgb[base+2]);
    }
    
    public BufferedImage getRGBImage()

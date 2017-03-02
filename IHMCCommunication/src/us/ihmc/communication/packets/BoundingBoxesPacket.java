@@ -1,9 +1,9 @@
 package us.ihmc.communication.packets;
 
-import us.ihmc.robotics.random.RandomTools;
-
 import java.util.Arrays;
 import java.util.Random;
+
+import us.ihmc.commons.RandomNumbers;
 
 /**
  *
@@ -58,10 +58,10 @@ public class BoundingBoxesPacket extends Packet<BoundingBoxesPacket>
          boundingBoxWidths = new int[boxesToGenerate];
          boundingBoxHeights = new int[boxesToGenerate];
 
-         boundingBoxXCoordinates[i] = RandomTools.generateRandomInt(random, -1000, 1000);
-         boundingBoxYCoordinates[i] = RandomTools.generateRandomInt(random, -1000, 1000);
-         boundingBoxWidths[i] = RandomTools.generateRandomInt(random, 0, 1000);
-         boundingBoxHeights[i] = RandomTools.generateRandomInt(random, 0, 1000);
+         boundingBoxXCoordinates[i] = RandomNumbers.nextInt(random, -1000, 1000);
+         boundingBoxYCoordinates[i] = RandomNumbers.nextInt(random, -1000, 1000);
+         boundingBoxWidths[i] = RandomNumbers.nextInt(random, 0, 1000);
+         boundingBoxHeights[i] = RandomNumbers.nextInt(random, 0, 1000);
       }
    }
 

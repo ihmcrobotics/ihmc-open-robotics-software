@@ -10,6 +10,8 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.modules.MultisenseMocapManualCalibrationTestModule;
 import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
+import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
+import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -19,6 +21,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.KryoObjectServer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -29,7 +32,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class DRCNetworkProcessor
 {
@@ -49,7 +51,7 @@ public class DRCNetworkProcessor
          setupHandModules(robotModel, params);
          setupRosModule(robotModel, params);
          setupROSAPIModule(params);
-         setupMocapModule(params);
+         setupMocapModule(robotModel, params);
          setupZeroPoseRobotConfigurationPublisherModule(robotModel, params);
          setupMultisenseManualTestModule(robotModel, params);
          setupDrillDetectionModule(params);
@@ -60,6 +62,7 @@ public class DRCNetworkProcessor
          setupRobotEnvironmentAwarenessModule(params);
          setupHeightQuadTreeToolboxModule(robotModel, params);
          setupLidarScanLogger();
+         setupRemoteObjectDetectionFeedbackEndpoint(params);
       }
       catch (IOException e)
       {
@@ -148,12 +151,32 @@ public class DRCNetworkProcessor
       }
    }
 
+   private void setupRemoteObjectDetectionFeedbackEndpoint(DRCNetworkModuleParameters params)
+   {
+      if (params.isRemoteObjectDetectionFeedbackEnabled())
+      {
+         PacketCommunicator objectDetectionFeedbackCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.VALVE_DETECTOR_FEEDBACK_PORT, NET_CLASS_LIST);
+         packetRouter.attachPacketCommunicator(PacketDestination.OBJECT_DETECTOR, objectDetectionFeedbackCommunicator);
+         try
+         {
+            objectDetectionFeedbackCommunicator.connect();
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+
+         String methodName = "setupRemoteObjectDetectionFeedbackEndpoint";
+         printModuleConnectedDebugStatement(PacketDestination.OBJECT_DETECTOR, methodName);
+      }
+   }
+
    private void setupKinematicsToolboxModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params) throws IOException
    {
       if (!params.isKinematicsToolboxEnabled())
          return;
 
-      new KinematicsToolboxModule(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), params.isKinematicsToolboxVisualizerEnabled());
+      new KinematicsToolboxModule(robotModel, params.isKinematicsToolboxVisualizerEnabled());
 
       PacketCommunicator kinematicsToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, kinematicsToolboxCommunicator);
@@ -168,9 +191,9 @@ public class DRCNetworkProcessor
       if (!params.isFootstepPlanningToolboxEnabled())
          return;
 
-      RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      new FootstepPlanningToolboxModule(fullRobotModel, contactPointParameters, null, params.isFootstepPlanningToolboxVisualizerEnabled());
+
+      new FootstepPlanningToolboxModule(robotModel, fullRobotModel, null, params.isFootstepPlanningToolboxVisualizerEnabled());
 
       PacketCommunicator footstepPlanningToolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.FOOTSTEP_PLANNING_TOOLBOX_MODULE_PORT, NET_CLASS_LIST);
       packetRouter.attachPacketCommunicator(PacketDestination.FOOTSTEP_PLANNING_TOOLBOX_MODULE, footstepPlanningToolboxCommunicator);
@@ -201,19 +224,24 @@ public class DRCNetworkProcessor
          printModuleConnectedDebugStatement(PacketDestination.MULTISENSE_TEST_MODULE, methodName);
       }
    }
-
-   private void setupMocapModule(DRCNetworkModuleParameters params)  throws IOException
+   
+   private void setupMocapModule(DRCRobotModel robotModel, DRCNetworkModuleParameters params)  throws IOException
    {
      if (params.isMocapModuleEnabled())
      {
-//        new MocapDetectedObjectModule(null, null, null);
-
-        PacketCommunicator mocapModuleCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
-        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, mocapModuleCommunicator);
-        mocapModuleCommunicator.connect();
-
+        PacketCommunicator mocapVizPacketCommunicator = PacketCommunicator.createTCPPacketCommunicatorServer(NetworkPorts.MOCAP_MODULE_VIZ, NET_CLASS_LIST);
+        MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
+        mocapVizPacketCommunicator.attachListener(PlanarRegionsListMessage.class, planarRegionsListManager);
+        mocapVizPacketCommunicator.connect();
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE_VIZ, mocapVizPacketCommunicator);        
+        
+        new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
+        PacketCommunicator packetCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.MOCAP_MODULE, NET_CLASS_LIST);
+        packetRouter.attachPacketCommunicator(PacketDestination.MOCAP_MODULE, packetCommunicator);
+        packetCommunicator.connect();
+        
         String methodName = "setupMocapModule";
-        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);
+        printModuleConnectedDebugStatement(PacketDestination.MOCAP_MODULE, methodName);        
      }
    }
 
@@ -294,7 +322,6 @@ public class DRCNetworkProcessor
          PacketCommunicator sensorSuiteManagerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, NET_CLASS_LIST);
          packetRouter.attachPacketCommunicator(PacketDestination.SENSOR_MANAGER, sensorSuiteManagerCommunicator);
          sensorSuiteManagerCommunicator.connect();
-
 
          String methodName = "setupSensorModule ";
          printModuleConnectedDebugStatement(PacketDestination.SENSOR_MANAGER, methodName);

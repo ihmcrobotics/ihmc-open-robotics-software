@@ -4,9 +4,8 @@ import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTraj
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -103,13 +102,13 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
       switchTrajectoryFrame(referenceFrame);
    }
 
-   public void appendWaypoint(double timeAtWaypoint, Point3d position, Vector3d linearVelocity)
+   public void appendWaypoint(double timeAtWaypoint, Point3D position, Vector3D linearVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, position, linearVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, Point3d position, Vector3d linearVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, Point3D position, Vector3D linearVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, position, linearVelocity);
       numberOfWaypoints.increment();
@@ -150,7 +149,7 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
          appendWaypointUnsafe(timeAtWaypoints[i], positions[i], linearVelocities[i]);
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, Point3d[] positions, Vector3d[] linearVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, Point3D[] positions, Vector3D[] linearVelocities)
    {
       if (timeAtWaypoints.length != positions.length || positions.length != linearVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");

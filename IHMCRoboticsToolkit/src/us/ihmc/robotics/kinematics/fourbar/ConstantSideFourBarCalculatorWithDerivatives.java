@@ -1,10 +1,14 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import us.ihmc.robotics.MathTools;
-
-import static java.lang.Math.*;
-import static us.ihmc.robotics.MathTools.clipToMinMax;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.cos;
+import static java.lang.Math.min;
+import static java.lang.Math.sin;
+import static us.ihmc.robotics.MathTools.clamp;
 import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
+
+import us.ihmc.robotics.MathTools;
 
 public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
 {
@@ -75,7 +79,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
    public boolean updateAnglesGivenAngleDAB(double angleDABInRadians)
    {
       // Solve angles
-      double A = clipToMinMax(angleDABInRadians, minA, maxA);
+      double A = clamp(angleDABInRadians, minA, maxA);
       double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
       double C = FourbarCalculatorTools.getAngleWithCosineLaw(c, d, e);
       double angleDBA = FourbarCalculatorTools.getAngleWithCosineLaw(b, e, a);
@@ -144,7 +148,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
       boolean isAHittingBounds = updateAnglesGivenAngleDAB(angleDABInRadians);
 
       // Solve angular velocity
-      double A = clipToMinMax(angleDABInRadians, minA, maxA);
+      double A = clamp(angleDABInRadians, minA, maxA);
       double dAdT = angularVelocityDAB;
       double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
       double eDot = a * b * sin(A) * dAdT / e;
@@ -174,7 +178,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
       boolean isAHittingBounds = updateAnglesAndVelocitiesGivenAngleDAB(angleDABInRadians, angularVelocityDAB);
 
       // Solve angular acceleration
-      double A = clipToMinMax(angleDABInRadians, minA, maxA);
+      double A = clamp(angleDABInRadians, minA, maxA);
       double dAdT = angularVelocityDAB;
       double dAdT2 = angularAccelerationDAB;
       double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
