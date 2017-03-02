@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -4261,14 +4262,7 @@ public class GeometryTools
     */
    public static void rotateTuple2d(double yaw, Tuple2DBasics tupleToRotate)
    {
-      double cos = Math.cos(yaw);
-      double sin = Math.sin(yaw);
-      
-      double x = tupleToRotate.getX();
-      double y = tupleToRotate.getY();
-      
-      tupleToRotate.setX(cos * x - sin * y);
-      tupleToRotate.setY(sin * x + cos * y);
+      RotationMatrixTools.applyYawRotation(yaw, tupleToRotate, tupleToRotate);
    }
 
    /**
@@ -4280,11 +4274,7 @@ public class GeometryTools
     */
    public static void rotateTuple2d(double yaw, Tuple2DReadOnly tupleOriginal, Tuple2DBasics tupleTransformed)
    {
-      double cos = Math.cos(yaw);
-      double sin = Math.sin(yaw);
-
-      tupleTransformed.setX(cos * tupleOriginal.getX() - sin * tupleOriginal.getY());
-      tupleTransformed.setY(sin * tupleOriginal.getX() + cos * tupleOriginal.getY());
+      RotationMatrixTools.applyYawRotation(yaw, tupleOriginal, tupleTransformed);
    }
 
    /**
