@@ -1,24 +1,25 @@
 package us.ihmc.atlas.calib;
 
-import georegression.geometry.ConvertRotation3D_F64;
-import georegression.struct.so.Rodrigues_F64;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.so.Rodrigues_F64;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 public class CalibUtil
 {
-   protected static final Quat4d quat0 = new Quat4d(0, 0, 0, 1);
+   protected static final Quaternion quat0 = new Quaternion(0, 0, 0, 1);
    protected static final ReferenceFrame world = ReferenceFrame.getWorldFrame();
 
    public static Map<String, Double> addQ(Map<String, Double> q1, Map<String, Double> q2)
@@ -93,26 +94,26 @@ public class CalibUtil
       }
    }
 
-   public static Vector3d matrix3dToAxisAngle3d(Matrix3d m)
+   public static Vector3D matrix3dToAxisAngle3d(RotationMatrix m)
    {
       DenseMatrix64F md = new DenseMatrix64F(3, 3);
-      MatrixTools.matrix3DToDenseMatrix(m, md, 0, 0);
+      m.get(md);
       return matrix3dToAxisAngle3d(md);
    }
 
-   public static Vector3d matrix3dToAxisAngle3d(DenseMatrix64F md)
+   public static Vector3D matrix3dToAxisAngle3d(DenseMatrix64F md)
    {
       Rodrigues_F64 r = ConvertRotation3D_F64.matrixToRodrigues(md, (Rodrigues_F64)null);
       r.unitAxisRotation.scale(r.theta);
-      Vector3d angleAxis = new Vector3d(r.unitAxisRotation.x, r.unitAxisRotation.y, r.unitAxisRotation.z);
+      Vector3D angleAxis = new Vector3D(r.unitAxisRotation.x, r.unitAxisRotation.y, r.unitAxisRotation.z);
       return angleAxis;
    }
 
-   public static Vector3d rotationDiff(Matrix3d r1, Matrix3d r2)
+   public static Vector3D rotationDiff(RotationMatrix r1, RotationMatrix r2)
    {
       DenseMatrix64F m1 = new DenseMatrix64F(3, 3), m2 = new DenseMatrix64F(3, 3);
-      MatrixTools.matrix3DToDenseMatrix(r1, m1, 0, 0);
-      MatrixTools.matrix3DToDenseMatrix(r2, m2, 0, 0);
+      r1.get(m1);
+      r2.get(m2);
 
       DenseMatrix64F mDiff = new DenseMatrix64F(3, 3);
       CommonOps.multTransB(m1, m2, mDiff);

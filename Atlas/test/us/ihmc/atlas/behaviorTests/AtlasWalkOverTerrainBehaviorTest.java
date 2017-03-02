@@ -1,14 +1,15 @@
 package us.ihmc.atlas.behaviorTests;
 
 import org.junit.Test;
+
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.behaviorTests.AvatarWalkOverTerrainBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 
 public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehaviorTest
 {
@@ -25,7 +26,7 @@ public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehav
    }
 
    @Override
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 63.6, categoriesOverride = IntegrationCategory.EXCLUDE)
+   @ContinuousIntegrationTest(estimatedDuration = 63.6, categoriesOverride = IntegrationCategory.EXCLUDE)
    @Test(timeout = 320000)
    public void testWalkOverCinderBlocks() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

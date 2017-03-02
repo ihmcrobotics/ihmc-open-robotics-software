@@ -10,6 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
+@SuppressWarnings("serial")
 public class YoVariableToggleButton extends JButton implements YoVariableToggleContainer
 {
    private final int MILLIS_TO_WAIT_FOR_RESPONSE = 2000;
@@ -24,6 +25,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 
       this.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent arg0)
          {
             buttonToggleState.toggle();
@@ -31,6 +33,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
       });
    }
 
+   @Override
    public void handleStateChange()
    {
       this.setText(buttonToggleState.getNextStateString());
@@ -39,11 +42,13 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 //    setEnabled(true);
    }
 
+   @Override
    public NewDataListener getDataListener()
    {
       return buttonToggleState;
    }
 
+   @Override
    public void processingStateChange(boolean endStateValue)
    {
       stateChanged = false;
@@ -62,6 +67,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 
       new Thread(new Runnable()
       {
+         @Override
          public void run()
          {
             setEnabled(false);
@@ -99,6 +105,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 
    }
 
+   @Override
    public void registerWithVariableChangedListener(VariableChangedListener changedListener)
    {
       buttonToggleState.registerWithVariableChangedListener(changedListener);

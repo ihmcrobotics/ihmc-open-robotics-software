@@ -1,19 +1,18 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowInputPort;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 
 public class LinearAccelerationMeasurementModelJacobianAssembler
 {
@@ -23,28 +22,28 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
    private final ReferenceFrame measurementFrame;
    private final ReferenceFrame estimationFrame;
 
-   private final Matrix3d rotationFromWorldToMeasurement = new Matrix3d();
+   private final RotationMatrix rotationFromWorldToMeasurement = new RotationMatrix();
 
-   private final Matrix3d omegaTilde = new Matrix3d();
-   private final Matrix3d vTilde = new Matrix3d();
-   private final Matrix3d pTilde = new Matrix3d();
-   private final Matrix3d omegadTilde = new Matrix3d();
-   private final Matrix3d zTildeRMP = new Matrix3d();
+   private final Matrix3D omegaTilde = new Matrix3D();
+   private final Matrix3D vTilde = new Matrix3D();
+   private final Matrix3D pTilde = new Matrix3D();
+   private final Matrix3D omegadTilde = new Matrix3D();
+   private final Matrix3D zTildeRMP = new Matrix3D();
 
-   private final Vector3d omega = new Vector3d();
-   private final Vector3d v = new Vector3d();
+   private final Vector3D omega = new Vector3D();
+   private final Vector3D v = new Vector3D();
    private final FramePoint p = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final Vector3d omegad = new Vector3d();
+   private final Vector3D omegad = new Vector3D();
 
    private final Twist twistOfMeasurementLink = new Twist();
    private final SpatialAccelerationVector spatialAccelerationOfMeasurementLink = new SpatialAccelerationVector();
 
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final Matrix3d tempMatrix = new Matrix3d();
-   private final Matrix3d tempMatrix2 = new Matrix3d();
+   private final Matrix3D tempMatrix = new Matrix3D();
+   private final Matrix3D tempMatrix2 = new Matrix3D();
 
    public LinearAccelerationMeasurementModelJacobianAssembler(ControlFlowInputPort<FullInverseDynamicsStructure> inverseDynamicsStructureInputPort,
-           RigidBody measurementLink, ReferenceFrame measurementFrame, ReferenceFrame estimationFrame)
+                                                              RigidBody measurementLink, ReferenceFrame measurementFrame, ReferenceFrame estimationFrame)
    {
       this.inverseDynamicsStructureInputPort = inverseDynamicsStructureInputPort;
       this.measurementLink = measurementLink;
@@ -52,7 +51,7 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       this.estimationFrame = estimationFrame;
    }
 
-   public void preCompute(Vector3d unbiasedEstimatedMeasurement)
+   public void preCompute(Vector3D unbiasedEstimatedMeasurement)
    {
       FullInverseDynamicsStructure inverseDynamicsStructure = inverseDynamicsStructureInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructure.getTwistCalculator();
@@ -69,18 +68,18 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
 
       // \tilde{\omega}, \tilde{v}
       twistOfMeasurementLink.getAngularPart(omega);
-      MatrixTools.toTildeForm(omegaTilde, omega);
+      omegaTilde.setToTildeForm(omega);
       twistOfMeasurementLink.getLinearPart(v);
-      MatrixTools.toTildeForm(vTilde, v);
+      vTilde.setToTildeForm(v);
 
       // \tilde{p}
       p.setToZero(measurementFrame);
       p.changeFrame(elevatorFrame);
-      MatrixTools.toTildeForm(pTilde, p.getPoint());
+      pTilde.setToTildeForm(p.getPoint());
 
       // \tilde{\omegad}
       spatialAccelerationOfMeasurementLink.getAngularPart(omegad);
-      MatrixTools.toTildeForm(omegadTilde, omegad);
+      omegadTilde.setToTildeForm(omegad);
 
       // rotation matrix
       elevatorFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
@@ -89,42 +88,47 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       // z
       estimationFrame.getTransformToDesiredFrame(tempTransform, measurementFrame);
       tempTransform.getRotation(tempMatrix);
-      MatrixTools.toTildeForm(zTildeRMP, unbiasedEstimatedMeasurement);
-      zTildeRMP.mul(tempMatrix);
+      zTildeRMP.setToTildeForm(unbiasedEstimatedMeasurement);
+      zTildeRMP.multiply(tempMatrix);
    }
 
-   public void assembleMeasurementJacobian(Matrix3d ret, Matrix3d jPhi, Matrix3d jOmega, Matrix3d jV, Matrix3d jOmegad, Matrix3d jVd, Matrix3d jP)
+   public void assembleMeasurementJacobian(Matrix3D ret, Matrix3D jPhi, Matrix3D jOmega, Matrix3D jV, Matrix3D jOmegad, Matrix3D jVd, Matrix3D jP)
    {
-      ret.setZero();
+      ret.setToZero();
 
       if (jP != null)
       {
-         tempMatrix.mul(omegaTilde, omegaTilde);
+         tempMatrix.set(omegaTilde);
+         tempMatrix.multiply(omegaTilde);
          tempMatrix.add(omegadTilde);
-         tempMatrix.mul(jP);
+         tempMatrix.multiply(jP);
          ret.add(tempMatrix);
       }
 
       if (jOmega != null)
       {
-         tempMatrix.mul(omegaTilde, pTilde);
-         tempMatrix.mul(2.0);
-         tempMatrix2.mul(pTilde, omegaTilde);
+         tempMatrix.set(omegaTilde);
+         tempMatrix.multiply(pTilde);
+         tempMatrix.scale(2.0);
+         tempMatrix2.set(pTilde);
+         tempMatrix2.multiply(omegaTilde);
          tempMatrix.sub(tempMatrix2);
          tempMatrix.add(vTilde);
-         tempMatrix.mul(jOmega);
+         tempMatrix.multiply(jOmega);
          ret.sub(tempMatrix);
       }
 
       if (jV != null)
       {
-         tempMatrix.mul(omegaTilde, jV);
+         tempMatrix.set(omegaTilde);
+         tempMatrix.multiply(jV);
          ret.add(tempMatrix);
       }
 
       if (jOmegad != null)
       {
-         tempMatrix.mul(pTilde, jOmegad);
+         tempMatrix.set(pTilde);
+         tempMatrix.multiply(jOmegad);
          ret.sub(tempMatrix);
       }
 
@@ -133,11 +137,12 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
          ret.add(jVd);
       }
 
-      ret.mul(rotationFromWorldToMeasurement, ret);
+      ret.preMultiply(rotationFromWorldToMeasurement);
 
       if (jPhi != null)
       {
-         tempMatrix.mul(zTildeRMP, jPhi);
+         tempMatrix.set(zTildeRMP);
+         tempMatrix.multiply(jPhi);
          ret.add(tempMatrix);
       }
    }

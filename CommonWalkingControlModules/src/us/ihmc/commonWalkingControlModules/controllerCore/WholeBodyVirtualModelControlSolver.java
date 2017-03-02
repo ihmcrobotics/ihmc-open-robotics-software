@@ -1,8 +1,22 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
@@ -17,7 +31,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -26,10 +40,17 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.SpatialForceVector;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.io.printing.PrintTools;
-
-import java.util.*;
 
 public class WholeBodyVirtualModelControlSolver
 {
@@ -97,8 +118,8 @@ public class WholeBodyVirtualModelControlSolver
       virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controlRootBody, controlledOneDoFJoints, registry,
             toolbox.getYoGraphicsListRegistry());
 
-      yoDesiredMomentumRateAngular = new YoFrameVector("desiredMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
-      yoAchievedMomentumRateAngular = new YoFrameVector("achievedMomentumRateAngular", toolbox.getCenterOfMassFrame(), registry);
+      yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
+      yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
 
       if (toolbox.getControlledBodies() != null)
       {
@@ -354,7 +375,7 @@ public class WholeBodyVirtualModelControlSolver
 
       tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
 
-      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(tmpWrench, accelerationVector, tmpTwist);
+      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(accelerationVector, tmpTwist, tmpWrench);
 
       tmpWrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
       tmpWrench.changeFrame(ReferenceFrame.getWorldFrame());

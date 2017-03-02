@@ -1,18 +1,17 @@
 package us.ihmc.simulationconstructionset.robotdefinition;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class LinkDefinitionFixedFrame
 {
    private String name;
    private double mass;
-   private Vector3d comOffset = new Vector3d();
-   private Matrix3d momentOfInertia = new Matrix3d();
+   private Vector3D comOffset = new Vector3D();
+   private Matrix3D momentOfInertia = new Matrix3D();
    private Graphics3DObject graphicsDefinition = new Graphics3DObject();
 
 
@@ -36,22 +35,22 @@ public class LinkDefinitionFixedFrame
       this.mass = mass;
    }
 
-   public Vector3d getComOffset()
+   public Vector3D getComOffset()
    {
       return comOffset;
    }
 
-   public void setComOffset(Vector3d comOffset)
+   public void setComOffset(Vector3D comOffset)
    {
       this.comOffset = comOffset;
    }
 
-   public Matrix3d getInertia()
+   public Matrix3D getInertia()
    {
       return momentOfInertia;
    }
 
-   public void setInertia(Matrix3d inertia)
+   public void setInertia(Matrix3D inertia)
    {
       momentOfInertia = inertia;
    }
@@ -66,6 +65,7 @@ public class LinkDefinitionFixedFrame
       this.graphicsDefinition = graphicsDefinition;
    }
 
+   @Override
    public String toString()
    {
       String returnString = "\t<Link>\n";

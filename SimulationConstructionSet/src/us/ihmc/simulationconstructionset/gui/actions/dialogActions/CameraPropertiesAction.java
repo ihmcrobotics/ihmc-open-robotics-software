@@ -31,6 +31,7 @@ public class CameraPropertiesAction extends AbstractAction
       this.dollyCheckBox = dollyCheckBox;
    }
    
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       constructor.constructCameraPropertiesDialog(trackCheckBox, dollyCheckBox);

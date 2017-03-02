@@ -7,20 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepValidityMetric;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnapper;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
@@ -28,20 +29,18 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationToolkit.visualizers.FootstepVisualizer;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FootstepGeneratorsTest
 {
    private static final ReferenceFrame WORLD_FRAME = ReferenceFrame.getWorldFrame();
    private static final double GROUND_HEIGHT = 0.0;
-   private static final Vector3d PLANE_NORMAL = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D PLANE_NORMAL = new Vector3D(0.0, 0.0, 1.0);
 
    double xToAnkle = -0.15;
    double yToAnkle = 0.02;
@@ -1610,13 +1609,13 @@ public class FootstepGeneratorsTest
 
       for (int i = 0; i < 100; i++)
       {
-         double startX = RandomTools.generateRandomDouble(random, 1.0);
-         double startY = RandomTools.generateRandomDouble(random, 1.0);
-         double startYaw = RandomTools.generateRandomDouble(random, Math.PI);
-         double pathYaw = RandomTools.generateRandomDouble(random, Math.PI);
-         double endX = RandomTools.generateRandomDouble(random, 1.0);
-         double endY = RandomTools.generateRandomDouble(random, 1.0);
-         double endYaw = RandomTools.generateRandomDouble(random, Math.PI);
+         double startX = RandomNumbers.nextDouble(random, 1.0);
+         double startY = RandomNumbers.nextDouble(random, 1.0);
+         double startYaw = RandomNumbers.nextDouble(random, Math.PI);
+         double pathYaw = RandomNumbers.nextDouble(random, Math.PI);
+         double endX = RandomNumbers.nextDouble(random, 1.0);
+         double endY = RandomNumbers.nextDouble(random, 1.0);
+         double endYaw = RandomNumbers.nextDouble(random, Math.PI);
 
          String testDescription = String.format("RTR random, (x,y,t):t:(x,y,t) = (%.2f,%.2f,%.2f):%.2f:(%.2f,%.2f,%.2f)", startX, startY, startYaw, pathYaw,
                endX, endY, endYaw);
@@ -1946,9 +1945,9 @@ public class FootstepGeneratorsTest
    private ArrayList<Footstep> testTranslationFootstepGenerator(String testDescription, double startX, double startY, double startYaw,
          RobotSide startStanceSide, double endX, double endY, Visualization visualize)
    {
-      Point2d startWorldPoint = new Point2d(startX, startY);
+      Point2D startWorldPoint = new Point2D(startX, startY);
       double startWorldYaw = startYaw;
-      Point2d endWorldPoint = new Point2d(endX, endY);
+      Point2D endWorldPoint = new Point2D(endX, endY);
 
       FramePoint2d endPoint = new FramePoint2d(WORLD_FRAME, endWorldPoint);
 
@@ -2012,11 +2011,11 @@ public class FootstepGeneratorsTest
    private ArrayList<Footstep> testRotateTranslateRotateFootstepGenerator(String testDescription, double startX, double startY, double startYaw,
          double pathYaw, double endX, double endY, double endYaw, Visualization visualize)
    {
-      Point2d startWorldPoint = new Point2d(startX, startY);
+      Point2D startWorldPoint = new Point2D(startX, startY);
 
       FrameOrientation2d pathOrientation = new FrameOrientation2d(WORLD_FRAME, pathYaw);
 
-      Point2d endWorldPoint = new Point2d(endX, endY);
+      Point2D endWorldPoint = new Point2D(endX, endY);
       FramePoint2d endPoint = new FramePoint2d(WORLD_FRAME, endWorldPoint);
       FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
       FramePose2d endPose = new FramePose2d(endPoint, endOrientation);
@@ -2051,9 +2050,9 @@ public class FootstepGeneratorsTest
    private ArrayList<Footstep> testTurnStraightFootstepGenerator(String testDescription, double startX, double startY, double startYaw,
          RobotSide startStanceSide, PathOrientation pathDirection, double endX, double endY, Visualization visualize)
    {
-      Point2d startWorldPoint = new Point2d(startX, startY);
+      Point2D startWorldPoint = new Point2D(startX, startY);
       double startWorldYaw = startYaw;
-      Point2d endWorldPoint = new Point2d(endX, endY);
+      Point2D endWorldPoint = new Point2D(endX, endY);
 
       FramePoint2d endPoint = new FramePoint2d(WORLD_FRAME, endWorldPoint);
 
@@ -2093,8 +2092,8 @@ public class FootstepGeneratorsTest
    private ArrayList<Footstep> testTurnStraightTurnFootstepGenerator(String testDescription, double startX, double startY, double startYaw,
          RobotSide startStanceSide, PathOrientation pathDirection, double endX, double endY, double endYaw, Visualization visualize)
    {
-      Point2d startWorldPoint = new Point2d(startX, startY);
-      Point2d endWorldPoint = new Point2d(endX, endY);
+      Point2D startWorldPoint = new Point2D(startX, startY);
+      Point2D endWorldPoint = new Point2D(endX, endY);
       FramePoint2d endPoint = new FramePoint2d(WORLD_FRAME, endWorldPoint);
       FrameOrientation2d endOrientation = new FrameOrientation2d(WORLD_FRAME, endYaw);
 
@@ -2129,9 +2128,9 @@ public class FootstepGeneratorsTest
          RobotSide startStanceSide, PathOrientation pathDirection1, double midX, double midY, RobotSide midStanceStartSide, PathOrientation pathDirection2,
          double endX, double endY, Visualization visualize)
    {
-      Point2d startWorldPoint = new Point2d(startX, startY);
-      Point2d midWorldPoint = new Point2d(midX, midY);
-      Point2d endWorldPoint = new Point2d(endX, endY);
+      Point2D startWorldPoint = new Point2D(startX, startY);
+      Point2D midWorldPoint = new Point2D(midX, midY);
+      Point2D endWorldPoint = new Point2D(endX, endY);
 
       FramePoint2d startPoint = new FramePoint2d(WORLD_FRAME, startWorldPoint);
       FramePoint2d midPoint = new FramePoint2d(WORLD_FRAME, midWorldPoint);
@@ -2179,9 +2178,9 @@ public class FootstepGeneratorsTest
       double leftYFactor = initialDeltaFeetLocalX / 2 * Math.sin(startYaw) + initialDeltaFeetLocalY / 2 * Math.cos(startYaw);
       FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
-      Point2d leftFootStartPoint = new Point2d(startX + leftXFactor, startY + leftYFactor);
+      Point2D leftFootStartPoint = new Point2D(startX + leftXFactor, startY + leftYFactor);
       FramePose2d leftFootPose2d = new FramePose2d(WORLD_FRAME, leftFootStartPoint, startYaw + initialDeltaFeetYaw / 2);
-      Point2d rightFootStartPoint = new Point2d(startX - leftXFactor, startY - leftYFactor);
+      Point2D rightFootStartPoint = new Point2D(startX - leftXFactor, startY - leftYFactor);
       FramePose2d rightFootPose2d = new FramePose2d(WORLD_FRAME, rightFootStartPoint, startYaw - initialDeltaFeetYaw / 2);
 
       FramePoint leftPosition = new FramePoint(WORLD_FRAME, leftFootStartPoint.getX(), leftFootStartPoint.getY(), 0);
@@ -2201,7 +2200,7 @@ public class FootstepGeneratorsTest
       return startFeet;
    }
 
-   private void assertFootstepsValid(String testDescription, Visualization visualize, Point2d startWorldPoint, double startWorldYaw, Point2d endWorldPoint,
+   private void assertFootstepsValid(String testDescription, Visualization visualize, Point2D startWorldPoint, double startWorldYaw, Point2D endWorldPoint,
          SideDependentList<Footstep> startFeet, ArrayList<Footstep> footsteps)
    {
       showFootstepsIfVisualize(testDescription, footsteps, startFeet, visualize);
@@ -2280,23 +2279,23 @@ public class FootstepGeneratorsTest
       return footstepQueue;
    }
 
-   private void assertLastTwoStepsArePathAlignedWithOffset(String testDescription, ArrayList<Footstep> footsteps, Point2d startWorldPoint,
-         Point2d endWorldPoint, double startWorldYaw, double pathYaw)
+   private void assertLastTwoStepsArePathAlignedWithOffset(String testDescription, ArrayList<Footstep> footsteps, Point2D startWorldPoint,
+         Point2D endWorldPoint, double startWorldYaw, double pathYaw)
    {
       assertTrue(testDescription + " should have at least two footsteps", footsteps.size() >= 2);
 
-      Point2d pathVector = new Point2d(endWorldPoint);
+      Point2D pathVector = new Point2D(endWorldPoint);
       pathVector.sub(startWorldPoint);
 
       assertStepIsPathAlignedWithOffset(testDescription + " Second to last footstep.", footsteps.get(footsteps.size() - 2), pathVector, startWorldYaw, pathYaw);
       assertStepIsPathAlignedWithOffset(testDescription + " Last footstep.", footsteps.get(footsteps.size() - 1), pathVector, startWorldYaw, pathYaw);
    }
 
-   private static void assertStepIsPathAlignedWithOffset(String message, Footstep footstep, Point2d destinationVector, double startWorldYaw,
+   private static void assertStepIsPathAlignedWithOffset(String message, Footstep footstep, Point2D destinationVector, double startWorldYaw,
          double pathRelativeYaw)
    {
       FrameOrientation2d endOrientation;
-      if (destinationVector.distance(new Point2d(0, 0)) < 1e-14)
+      if (destinationVector.distance(new Point2D(0, 0)) < 1e-14)
       {
          endOrientation = new FrameOrientation2d(WORLD_FRAME, startWorldYaw);
       }
@@ -2369,21 +2368,21 @@ public class FootstepGeneratorsTest
       assertEquals(message + " Foot yaw and desired yaw difference should be 0.", 0.0, yawDiff, 1e-10);
    }
 
-   private void assertLastTwoStepsCenterAroundEndPoint(String testDescription, ArrayList<Footstep> footsteps, Point2d endWorldPoint)
+   private void assertLastTwoStepsCenterAroundEndPoint(String testDescription, ArrayList<Footstep> footsteps, Point2D endWorldPoint)
    {
       int numSteps = footsteps.size();
       Footstep lastStep = footsteps.get(numSteps - 1);
       Footstep nextLastStep = footsteps.get(numSteps - 2);
 
-      Vector3d lastStepPosition = new Vector3d();
-      Vector3d nextLastStepPosition = new Vector3d();
-      Vector3d positionInFrame = new Vector3d();
+      Vector3D lastStepPosition = new Vector3D();
+      Vector3D nextLastStepPosition = new Vector3D();
+      Vector3D positionInFrame = new Vector3D();
 
 
       lastStep.getSoleReferenceFrame().getTransformToWorldFrame().getTranslation(lastStepPosition);
       nextLastStep.getSoleReferenceFrame().getTransformToWorldFrame().getTranslation(nextLastStepPosition);
       positionInFrame.interpolate(nextLastStepPosition, lastStepPosition, 0.5);
-      Point2d positionInFrame2d = new Point2d(positionInFrame.getX(), positionInFrame.getY());
+      Point2D positionInFrame2d = new Point2D(positionInFrame.getX(), positionInFrame.getY());
 
       double endPositionOffset = endWorldPoint.distance(positionInFrame2d);
       assertEquals(testDescription + " footsteps must end near desired end", 0.0, endWorldPoint.distance(positionInFrame2d), endPositionTolerance);

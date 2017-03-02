@@ -1,13 +1,12 @@
 package us.ihmc.robotics.robotDescription;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class JointWrenchSensorDescription extends SensorDescription
 {
 
-   public JointWrenchSensorDescription(String name, Vector3d offsetFromJoint)
+   public JointWrenchSensorDescription(String name, Vector3D offsetFromJoint)
    {
       super(name, offsetFromJoint);
    }

@@ -2,22 +2,22 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -25,7 +25,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -127,8 +126,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-0.09807959403314585, 0.002501752329158081, 0.7867972043876718);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
+      Point3D center = new Point3D(-0.09807959403314585, 0.002501752329158081, 0.7867972043876718);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
@@ -140,8 +139,8 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
    private void setupCameraForElvisPelvis()
    {
-      Point3d cameraFix = new Point3d(0.0, 0.0, 0.9);
-      Point3d cameraPosition = new Point3d(0.0, -1.8, 0.9);
+      Point3D cameraFix = new Point3D(0.0, 0.0, 0.9);
+      Point3D cameraPosition = new Point3D(0.0, -1.8, 0.9);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }

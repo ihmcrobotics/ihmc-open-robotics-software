@@ -9,10 +9,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
@@ -27,7 +28,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 
@@ -169,7 +169,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    @Override
    public void tickAndUpdate(double timeToSetInSeconds)
    {
-      this.update(TimeTools.secondsToNanoSeconds(timeToSetInSeconds));   
+      this.update(Conversions.secondsToNanoSeconds(timeToSetInSeconds));   
    }
 
    /**

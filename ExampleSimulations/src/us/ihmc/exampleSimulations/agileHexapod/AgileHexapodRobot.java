@@ -1,10 +1,9 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -136,15 +135,15 @@ public class AgileHexapodRobot extends Robot
       this.setGravity(0.0, 0.0, -9.81);
 
       // Body:
-      floatingJoint = new FloatingJoint("floating", new Vector3d(), this);
+      floatingJoint = new FloatingJoint("floating", new Vector3D(), this);
       Link body = body();
       floatingJoint.setLink(body);
       this.addRootJoint(floatingJoint);
 
-      GroundContactPoint bodyContact1 = new GroundContactPoint("gc_body1", new Vector3d(BODY_TOT * 0.35, -BODY_Y / 2.0, -BODY_Z / 2.0), this);
-      GroundContactPoint bodyContact2 = new GroundContactPoint("gc_body2", new Vector3d(BODY_TOT * 0.35, BODY_Y / 2.0, -BODY_Z / 2.0), this);
-      GroundContactPoint bodyContact3 = new GroundContactPoint("gc_body3", new Vector3d(-BODY_TOT * 0.35, BODY_Y / 2.0, -BODY_Z / 2.0), this);
-      GroundContactPoint bodyContact4 = new GroundContactPoint("gc_body4", new Vector3d(-BODY_TOT * 0.35, -BODY_Y / 2.0, -BODY_Z / 2.0), this);
+      GroundContactPoint bodyContact1 = new GroundContactPoint("gc_body1", new Vector3D(BODY_TOT * 0.35, -BODY_Y / 2.0, -BODY_Z / 2.0), this);
+      GroundContactPoint bodyContact2 = new GroundContactPoint("gc_body2", new Vector3D(BODY_TOT * 0.35, BODY_Y / 2.0, -BODY_Z / 2.0), this);
+      GroundContactPoint bodyContact3 = new GroundContactPoint("gc_body3", new Vector3D(-BODY_TOT * 0.35, BODY_Y / 2.0, -BODY_Z / 2.0), this);
+      GroundContactPoint bodyContact4 = new GroundContactPoint("gc_body4", new Vector3D(-BODY_TOT * 0.35, -BODY_Y / 2.0, -BODY_Z / 2.0), this);
 
       floatingJoint.addGroundContactPoint(bodyContact1);
       floatingJoint.addGroundContactPoint(bodyContact2);
@@ -152,26 +151,26 @@ public class AgileHexapodRobot extends Robot
       floatingJoint.addGroundContactPoint(bodyContact4);
 
       // Legs:
-      buildLeg(RIGHT, "hip1_z", "hip1_x", "knee1", "gc_foot1", new Vector3d(PX1, PY1, PZ1));
-      buildLeg(LEFT, "hip2_z", "hip2_x", "knee2", "gc_foot2", new Vector3d(PX2, PY2, PZ2));
-      buildLeg(LEFT, "hip3_z", "hip3_x", "knee3", "gc_foot3", new Vector3d(PX3, PY3, PZ3));
-      buildLeg(LEFT, "hip4_z", "hip4_x", "knee4", "gc_foot4", new Vector3d(PX4, PY4, PZ4));
-      buildLeg(RIGHT, "hip5_z", "hip5_x", "knee5", "gc_foot5", new Vector3d(PX5, PY5, PZ5));
-      buildLeg(RIGHT, "hip6_z", "hip6_x", "knee6", "gc_foot6", new Vector3d(PX6, PY6, PZ6));
+      buildLeg(RIGHT, "hip1_z", "hip1_x", "knee1", "gc_foot1", new Vector3D(PX1, PY1, PZ1));
+      buildLeg(LEFT, "hip2_z", "hip2_x", "knee2", "gc_foot2", new Vector3D(PX2, PY2, PZ2));
+      buildLeg(LEFT, "hip3_z", "hip3_x", "knee3", "gc_foot3", new Vector3D(PX3, PY3, PZ3));
+      buildLeg(LEFT, "hip4_z", "hip4_x", "knee4", "gc_foot4", new Vector3D(PX4, PY4, PZ4));
+      buildLeg(RIGHT, "hip5_z", "hip5_x", "knee5", "gc_foot5", new Vector3D(PX5, PY5, PZ5));
+      buildLeg(RIGHT, "hip6_z", "hip6_x", "knee6", "gc_foot6", new Vector3D(PX6, PY6, PZ6));
 
 
       // Pendulum:
-      PinJoint pend1 = new PinJoint("pend1", new Vector3d(), this, Axis.Y);
+      PinJoint pend1 = new PinJoint("pend1", new Vector3D(), this, Axis.Y);
       Link pinLink = pinLink();
       pend1.setLink(pinLink);
       floatingJoint.addJoint(pend1);
 
-      PinJoint pend2 = new PinJoint("pend2", new Vector3d(), this, Axis.X);
+      PinJoint pend2 = new PinJoint("pend2", new Vector3D(), this, Axis.X);
       Link rodLink = rodLink();
       pend2.setLink(rodLink);
       pend1.addJoint(pend2);
 
-      GroundContactPoint pend_end = new GroundContactPoint("gc_pend_end", new Vector3d(0.0, 0.0, PEND_L), this);
+      GroundContactPoint pend_end = new GroundContactPoint("gc_pend_end", new Vector3D(0.0, 0.0, PEND_L), this);
       pend2.addGroundContactPoint(pend_end);
 
       // Set controller and ground contact model:
@@ -212,7 +211,7 @@ public class AgileHexapodRobot extends Robot
       this.setController(new AgileHexapodController(this, profile.getHeightMapIfAvailable(), "agileHexapodController"));
    }
 
-   private void buildLeg(int side, String hipzName, String hipxName, String kneeName, String footName, Vector3d legOffset)
+   private void buildLeg(int side, String hipzName, String hipxName, String kneeName, String footName, Vector3D legOffset)
    {
       /* Building Leg */
       PinJoint hip_z = new PinJoint(hipzName, legOffset, this, Axis.Z);
@@ -223,13 +222,13 @@ public class AgileHexapodRobot extends Robot
       hip_z.setLink(pinLink);
       floatingJoint.addJoint(hip_z);
 
-      PinJoint hip_x = new PinJoint(hipxName, new Vector3d(), this, Axis.X);
+      PinJoint hip_x = new PinJoint(hipxName, new Vector3D(), this, Axis.X);
       Link thighLink = thighLink();
       hip_x.setLink(thighLink);
       hip_x.setDamping(0.005);
       hip_z.addJoint(hip_x);
 
-      PinJoint knee = new PinJoint(kneeName, new Vector3d(0.0, 0.0, -THIGH_Z), this, Axis.X);
+      PinJoint knee = new PinJoint(kneeName, new Vector3D(0.0, 0.0, -THIGH_Z), this, Axis.X);
 
       // if (side == LEFT) knee.setLimitStops(0.0,0.9*Math.PI, K_KNEE_STOP, B_KNEE_STOP);
       // else knee.setLimitStops(-0.9*Math.PI,0.0, K_KNEE_STOP, B_KNEE_STOP);
@@ -239,7 +238,7 @@ public class AgileHexapodRobot extends Robot
       knee.setLink(shinLink);
       hip_x.addJoint(knee);
 
-      GroundContactPoint foot = new GroundContactPoint(footName, new Vector3d(0.0, 0.0, -CONTACT_Z), this);
+      GroundContactPoint foot = new GroundContactPoint(footName, new Vector3D(0.0, 0.0, -CONTACT_Z), this);
       knee.addGroundContactPoint(foot);
 
    }

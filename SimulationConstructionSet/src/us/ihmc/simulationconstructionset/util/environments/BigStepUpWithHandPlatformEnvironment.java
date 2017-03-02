@@ -3,11 +3,10 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
@@ -55,11 +54,11 @@ public class BigStepUpWithHandPlatformEnvironment implements CommonAvatarEnviron
       double yCenter = 0.4;
       
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3d(xCenter, -yCenter, height/2.0));
+      location.setTranslation(new Vector3D(xCenter, -yCenter, height/2.0));
       combinedTerrainObject.addCylinder(location, height, radius, appearance);
       
       location = new RigidBodyTransform();
-      location.setTranslation(new Vector3d(xCenter, yCenter, height/2.0));
+      location.setTranslation(new Vector3D(xCenter, yCenter, height/2.0));
       combinedTerrainObject.addCylinder(location, height, radius, appearance);
       
       return combinedTerrainObject;

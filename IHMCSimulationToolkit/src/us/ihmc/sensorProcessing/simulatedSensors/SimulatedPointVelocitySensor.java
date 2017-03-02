@@ -1,8 +1,7 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -13,7 +12,7 @@ import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 
-public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
+public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3D>
 {
    private final RigidBody rigidBody;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -24,12 +23,12 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
 
    private final Twist twist = new Twist();
 
-   private final Vector3d pointVelocity = new Vector3d();
+   private final Vector3D pointVelocity = new Vector3D();
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
 
    private final TwistCalculator twistCalculator;
 
-   private final ControlFlowOutputPort<Vector3d> pointVelocityOutputPort = createOutputPort("pointVelocityOutputPort");
+   private final ControlFlowOutputPort<Vector3D> pointVelocityOutputPort = createOutputPort("pointVelocityOutputPort");
 
    public SimulatedPointVelocitySensor(String name, RigidBody rigidBody, FramePoint pointToMeasureVelocityOf,
            TwistCalculator twistCalculator, YoVariableRegistry registry)
@@ -73,7 +72,7 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3d>
       // empty
    }
 
-   public ControlFlowOutputPort<Vector3d> getPointVelocityOutputPort()
+   public ControlFlowOutputPort<Vector3D> getPointVelocityOutputPort()
    {
       return pointVelocityOutputPort;
    }

@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class DetectedObjectSubscriber implements PacketConsumer<DetectedObjectPacket>

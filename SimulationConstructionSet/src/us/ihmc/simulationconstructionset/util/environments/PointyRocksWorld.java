@@ -4,15 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -75,7 +74,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
    {
       addStartBlock();
 
-      Vector2d linePosition = new Vector2d(0.4, -0.16);
+      Vector2D linePosition = new Vector2D(0.4, -0.16);
       addLine(linePosition, 0.0);
    }
 
@@ -84,8 +83,8 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       addStartBlock();
       double step = 0.5;
 
-      Vector2d position = new Vector2d(length/2.0 + step/2.0, 0.15);
-      Vector2d dimensions = new Vector2d(0.02, 0.02);
+      Vector2D position = new Vector2D(length/2.0 + step/2.0, 0.15);
+      Vector2D dimensions = new Vector2D(0.04, 0.04);
 
       addBlock(0.0, position, dimensions);
       stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));
@@ -99,15 +98,15 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       for (int i = 0; i < steps; i++)
       {
          double y = i%2 == 0 ? -0.15 : 0.15;
-         addLine(new Vector2d(step*i + length/2.0 + step/2.0, y), (random.nextDouble()-0.5) * 180.0);
+         addLine(new Vector2D(step*i + length/2.0 + step/2.0, y), (random.nextDouble()-0.5) * 180.0);
       }
       addFinalBlock(step*steps + length);
    }
 
    private void addFinalBlock(double distance)
    {
-      Vector3d position = new Vector3d(distance, 0.0, -height/2.0);
-      Vector3d dimensions = new Vector3d(length, 0.6, height);
+      Vector3D position = new Vector3D(distance, 0.0, -height/2.0);
+      Vector3D dimensions = new Vector3D(length, 0.6, height);
       addBlock(0.0, position, dimensions, blockColor);
 
       double y = steps%2 == 0 ? -0.15 : 0.15;
@@ -117,40 +116,40 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
 
    private void addGround()
    {
-      Vector3d position = new Vector3d(0.0, 0.0, -0.05-height);
-      Vector3d dimensions = new Vector3d(30.0, 30.0, 0.1);
+      Vector3D position = new Vector3D(0.0, 0.0, -0.05-height);
+      Vector3D dimensions = new Vector3D(30.0, 30.0, 0.1);
       addBlock(0.0, position, dimensions, groundColor);
    }
 
    private void addStartBlock()
    {
-      Vector3d position = new Vector3d(0.0, 0.0, -height/2.0);
-      Vector3d dimensions = new Vector3d(length, 0.6, height);
+      Vector3D position = new Vector3D(0.0, 0.0, -height/2.0);
+      Vector3D dimensions = new Vector3D(length, 0.6, height);
       addBlock(0.0, position, dimensions, blockColor);
    }
 
-   private void addLine(Vector2d position, double yawDegree)
+   private void addLine(Vector2D position, double yawDegree)
    {
       double yaw = yawDegree * Math.PI/180.0;
       double blockLength = (step+0.1) / Math.max(Math.sin(Math.abs(yaw)), Math.cos(yaw));
 
-      Vector3d position3d = new Vector3d(position.getX(), position.getY(), -height/2.0);
-      Vector3d dimensions = new Vector3d(blockLength, linbeWidth, height);
+      Vector3D position3d = new Vector3D(position.getX(), position.getY(), -height/2.0);
+      Vector3D dimensions = new Vector3D(blockLength, linbeWidth, height);
       addBlock(yaw, position3d, dimensions, blockColor);
 
       stepLocations.add(new FramePoint(worldFrame, position.getX(), position.getY(), 0.0));
    }
 
-   private void addBlock(double yaw, Vector2d position, Vector2d dimensions)
+   private void addBlock(double yaw, Vector2D position, Vector2D dimensions)
    {
-      Vector3d position3d = new Vector3d(position.getX(), position.getY(), -height/2.0);
-      Vector3d dimensions3d = new Vector3d(dimensions.getX(), dimensions.getY(), height);
+      Vector3D position3d = new Vector3D(position.getX(), position.getY(), -height/2.0);
+      Vector3D dimensions3d = new Vector3D(dimensions.getX(), dimensions.getY(), height);
       addBlock(yaw, position3d, dimensions3d, blockColor);
    }
 
-   private void addBlock(double yaw, Vector3d position, Vector3d dimensions, AppearanceDefinition color)
+   private void addBlock(double yaw, Vector3D position, Vector3D dimensions, AppearanceDefinition color)
    {
-      AxisAngle4d orientation = new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), yaw);
+      AxisAngle orientation = new AxisAngle(new Vector3D(0.0, 0.0, 1.0), yaw);
       RigidBodyTransform blockPose = new RigidBodyTransform(orientation, position);
       Box3d block = new Box3d(blockPose, dimensions.getX(), dimensions.getY(), dimensions.getZ());
       terrainObject.addTerrainObject(new RotatableBoxTerrainObject(block, color));
@@ -161,7 +160,7 @@ public class PointyRocksWorld implements CommonAvatarEnvironmentInterface
       return stepLocations;
    }
 
-   public void setupCamera(Point3d cameraFixToPack, Point3d cameraPositionToPack)
+   public void setupCamera(Point3D cameraFixToPack, Point3D cameraPositionToPack)
    {
       switch (type)
       {

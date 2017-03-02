@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.perturbance;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -29,9 +28,10 @@ public class ForcePerturbance implements DirectedPerturbance
          parentRegistry.addChild(registry);
    }
 
-   public void perturb(Vector3d direction)
+   @Override
+   public void perturb(Vector3D direction)
    {
-      Vector3d force = new Vector3d(direction);
+      Vector3D force = new Vector3D(direction);
       if (direction.lengthSquared() > 0.0)
       {
          force.normalize();
@@ -40,11 +40,13 @@ public class ForcePerturbance implements DirectedPerturbance
       }
    }
 
+   @Override
    public double getBallVelocityMagnitude()
    {
       return ballVelocityMagnitude;
    }
 
+   @Override
    public double getBallMass()
    {
       return impulse() / getBallVelocityMagnitude();
@@ -55,11 +57,13 @@ public class ForcePerturbance implements DirectedPerturbance
       return disturbanceMagnitude.getDoubleValue() * disturbanceDuration.getDoubleValue();
    }
 
+   @Override
    public void doEveryTick()
    {
       forcePerturbable.resetPerturbanceForceIfNecessary();
    }
    
+   @Override
    public String toString()
    {
       return name + ": Magnitude=" + disturbanceMagnitude.getDoubleValue() + ", Duration="+disturbanceDuration.getDoubleValue();

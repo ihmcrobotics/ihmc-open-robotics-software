@@ -2,18 +2,17 @@ package us.ihmc.commonWalkingControlModules.sensors;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class ProvidedMassMatrixToolRigidBodyTest
 {
@@ -41,7 +40,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
 
       toolWrench.changeFrame(ReferenceFrame.getWorldFrame());
 
-      assertTrue(toolWrench.getLinearPart().epsilonEquals(new Vector3d(0.0, 0.0, -mass * gravity), 10e-5));
+      assertTrue(toolWrench.getLinearPart().epsilonEquals(new Vector3D(0.0, 0.0, -mass * gravity), 10e-5));
    }
 
    public abstract FullHumanoidRobotModel getFullRobotModel();

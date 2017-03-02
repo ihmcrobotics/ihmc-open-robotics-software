@@ -1,9 +1,8 @@
 package us.ihmc.steppr.parameters;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.drcRobot.DRCRobotPhysicalProperties;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -47,7 +46,7 @@ public class BonoPhysicalProperties implements DRCRobotPhysicalProperties
    {
       for (RobotSide robotSide : RobotSide.values())
       {
-         RigidBodyTransform soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3d(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0 * 0.18704));
+         RigidBodyTransform soleToAnkleFrame = TransformTools.yawPitchDegreesTransform(new Vector3D(footLength / 2.0 - footBack, 0.0, -ankleHeight), 0.0, Math.toDegrees(0.0 * 0.18704));
          soleToAnkleFrameTransforms.put(robotSide, soleToAnkleFrame);
       }
    }

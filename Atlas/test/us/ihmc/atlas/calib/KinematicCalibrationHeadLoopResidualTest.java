@@ -13,33 +13,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
-import boofcv.abst.fiducial.calib.ConfigChessboard;
-import boofcv.factory.calib.FactoryCalibrationTarget;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.UtilOptimize;
 import org.junit.Test;
 
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
 import boofcv.alg.geo.PerspectiveOps;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import boofcv.io.UtilIO;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.point.Point2D_F64;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 /**
@@ -86,13 +85,14 @@ public class KinematicCalibrationHeadLoopResidualTest
    {
       intrinsic = loadXML("/us/ihmc/atlas/calib/intrinsic_ros.xml");
 
-      Vector3d tran = new Vector3d(targetToEE_param[0], targetToEE_param[1], targetToEE_param[2]);
-      AxisAngle4d axisY = new AxisAngle4d(new Vector3d(0, 1, 0), targetToEE_param[3]);
-      Matrix3d matAxisY = new Matrix3d();
+      Vector3D tran = new Vector3D(targetToEE_param[0], targetToEE_param[1], targetToEE_param[2]);
+      AxisAngle axisY = new AxisAngle(new Vector3D(0, 1, 0), targetToEE_param[3]);
+      RotationMatrix matAxisY = new RotationMatrix();
       matAxisY.set(axisY);
 
-      Matrix3d rotFull = new Matrix3d();
-      rotFull.mul(matAxisY, KinematicCalibrationHeadLoopResidual.TARGET_LEFT_ROT);
+      RotationMatrix rotFull = new RotationMatrix();
+      rotFull.set(matAxisY);
+      rotFull.multiply(KinematicCalibrationHeadLoopResidual.TARGET_LEFT_ROT);
 
       targetToEE = new RigidBodyTransform();
       targetToEE.setTranslation(tran);
@@ -312,7 +312,7 @@ public class KinematicCalibrationHeadLoopResidualTest
       {
          Point2D_F64 p = calibGrid.getLayout().get(i);
          // convert to camera frame
-         Point3d p3 = new Point3d(p.x, p.y, 0);
+         Point3D p3 = new Point3D(p.x, p.y, 0);
          targetToCamera.transform(p3);
 
          Point2D_F64 observationPixel = new Point2D_F64();

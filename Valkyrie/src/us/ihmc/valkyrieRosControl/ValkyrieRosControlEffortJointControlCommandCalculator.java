@@ -72,7 +72,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
       double jointLimitUpper = joint.getJointLimitUpper();
       if (Double.isNaN(q) || Double.isInfinite(q))
          q = standPrepAngle.getDoubleValue();
-      q = MathTools.clipToMinMax(q, jointLimitLower, jointLimitUpper);
+      q = MathTools.clamp(q, jointLimitLower, jointLimitUpper);
 
       initialAngle.set(q);
    }
@@ -81,7 +81,7 @@ public class ValkyrieRosControlEffortJointControlCommandCalculator
    {
       double standPrepFactor = 1.0 - factor;
 
-      factor = MathTools.clipToMinMax(factor, 0.0, 1.0);
+      factor = MathTools.clamp(factor, 0.0, 1.0);
       if (ENABLE_TAU_SCALE)
          factor *= tauScale.getDoubleValue();
 

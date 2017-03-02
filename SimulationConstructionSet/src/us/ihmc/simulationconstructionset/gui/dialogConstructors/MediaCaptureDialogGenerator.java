@@ -12,7 +12,6 @@ import us.ihmc.simulationconstructionset.videos.VideoSaveDialog;
 
 public class MediaCaptureDialogGenerator implements MediaCaptureDialogConstructor
 {
-   private ViewportSelectorCommandExecutor viewportSelector;
    private GUIEnablerAndDisabler guiEnablerAndDisabler;
    private StopCommandExecutor stopCommandExecutor;
    private ExportVideoCommandExecutor exportVideoCommandExecutor;
@@ -28,18 +27,19 @@ public class MediaCaptureDialogGenerator implements MediaCaptureDialogConstructo
       this.exportVideoCommandExecutor = exportVideoCommandExecutor;
       this.guiEnablerAndDisabler = guiEnablerAndDisabler;
       this.stopCommandExecutor = stopCommandExecutor;
-      this.viewportSelector = viewportSelector;
       
       this.myGUI = myGUI;
       this.standardGUIActions = standardGUIActions;
       this.activeCanvas3DHolder = activeCanvas3DHolder;
    }
 
+   @Override
    public void createVideo(File file)
    {
       exportVideoCommandExecutor.createVideo(file);
    }
 
+   @Override
    public void constructDialog()
    {
       stopCommandExecutor.stop();
@@ -49,7 +49,6 @@ public class MediaCaptureDialogGenerator implements MediaCaptureDialogConstructo
 
    public void closeAndDispose()
    {
-      viewportSelector = null;
       guiEnablerAndDisabler = null;
       stopCommandExecutor = null;
       exportVideoCommandExecutor = null;

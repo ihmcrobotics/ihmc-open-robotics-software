@@ -1,14 +1,15 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ConstantPositionProviderTest
 {
@@ -21,7 +22,7 @@ public class ConstantPositionProviderTest
    {
       Random random = new Random();
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      double[] xyz = RandomTools.generateRandomDoubleArray(random, 3, Double.MAX_VALUE);
+      double[] xyz = RandomNumbers.nextDoubleArray(random, 3, Double.MAX_VALUE);
       FramePoint positionExpected = new FramePoint(worldFrame, xyz);
       FramePoint positionActual = new FramePoint(positionExpected);
       ConstantPositionProvider constantPositionProvider = new ConstantPositionProvider(positionActual);

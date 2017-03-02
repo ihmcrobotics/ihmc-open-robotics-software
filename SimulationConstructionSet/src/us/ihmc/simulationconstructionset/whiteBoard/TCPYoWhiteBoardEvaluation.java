@@ -242,6 +242,7 @@ public class TCPYoWhiteBoardEvaluation
    private static class PauseDoSomeWorker implements DoSomeWorker
    {
 
+      @Override
       public void doSomeWork()
       {
          try

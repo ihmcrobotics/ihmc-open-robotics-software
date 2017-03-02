@@ -7,7 +7,8 @@ import java.util.List;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.commons.Conversions;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
@@ -20,7 +21,6 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -66,8 +66,8 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
-      this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getEstimatorDT());
+      this.controlDTInNS = Conversions.secondsToNanoSeconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = Conversions.secondsToNanoSeconds(robotModel.getEstimatorDT());
       sendFingerJointGains.set(true);
 
       if(globalDataProducer != null)
@@ -196,11 +196,11 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       if (threadDataSynchronizer != null)
       {
          timestamp = threadDataSynchronizer.getTimestamp();
-         handControllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+         handControllerTime.set(Conversions.nanoSecondstoSeconds(timestamp));
       }
       else
       {
-         handControllerTime.add(TimeTools.nanoSecondstoSeconds(controlDTInNS));
+         handControllerTime.add(Conversions.nanoSecondstoSeconds(controlDTInNS));
       }
 
       if(jointAngleProducer != null)

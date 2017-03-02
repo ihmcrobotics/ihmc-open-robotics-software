@@ -1,9 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class PrismaticJoint extends OneDoFJoint
 {
@@ -13,7 +12,7 @@ public class PrismaticJoint extends OneDoFJoint
    {
       super(name, predecessor, beforeJointFrame, new PrismaticJointReferenceFrame(name, beforeJointFrame, jointAxis));
       this.jointAxis = new FrameVector(jointAxis);
-      this.unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3d());
+      this.unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3D());
    }
 
    @Override
@@ -24,7 +23,7 @@ public class PrismaticJoint extends OneDoFJoint
       ReferenceFrame predecessorFrame = getPredecessor().getBodyFixedFrame();
       ReferenceFrame successorFrame = getSuccessor().getBodyFixedFrame();
 
-      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3d());
+      unitJointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3D());
 
       unitSuccessorTwist = new Twist(unitJointTwist);
       unitSuccessorTwist.changeBaseFrameNoRelativeTwist(predecessorFrame);
@@ -35,7 +34,7 @@ public class PrismaticJoint extends OneDoFJoint
       unitPredecessorTwist.invert();
       unitPredecessorTwist.changeFrame(predecessorFrame);
 
-      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3d());
+      unitJointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame, jointAxis.getVector(), new Vector3D());
 
       unitSuccessorAcceleration = new SpatialAccelerationVector(unitJointAcceleration);
       unitSuccessorAcceleration.changeBaseFrameNoRelativeAcceleration(predecessorFrame);
@@ -47,6 +46,18 @@ public class PrismaticJoint extends OneDoFJoint
       unitPredecessorAcceleration.changeFrameNoRelativeMotion(predecessorFrame); // actually, there is relative motion, but not in the directions that matter
 
       setMotionSubspace(unitSuccessorTwist);
+   }
+
+   @Override
+   public FrameVector getJointAxis()
+   {
+      return new FrameVector(jointAxis);
+   }
+
+   @Override
+   public void getJointAxis(FrameVector axisToPack)
+   {
+      axisToPack.setIncludingFrame(jointAxis);
    }
 
    @Override

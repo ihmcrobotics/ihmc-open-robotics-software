@@ -16,7 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.ManualHandCon
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
-import us.ihmc.robotiq.data.RobotiqHandSensorDizzata;
+import us.ihmc.robotiq.data.RobotiqHandSensorData;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -29,7 +29,7 @@ public class RobotiqControlThread extends HandControlThread
    private final HandDesiredConfigurationMessageSubscriber handDesiredConfigurationMessageSubscriber;
    private final ManualHandControlProvider manualHandControlProvider;
    private final HandJointAngleCommunicator jointAngleCommunicator;
-   private RobotiqHandSensorDizzata handStatus;
+   private RobotiqHandSensorData handStatus;
 
    public RobotiqControlThread(RobotSide robotSide, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {

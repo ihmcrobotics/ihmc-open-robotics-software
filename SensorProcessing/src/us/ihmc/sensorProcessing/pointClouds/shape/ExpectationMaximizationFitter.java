@@ -1,17 +1,17 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.apache.commons.math3.distribution.NormalDistribution;
+
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.metric.Distance3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import org.apache.commons.math3.distribution.NormalDistribution;
 
 public class ExpectationMaximizationFitter
 {

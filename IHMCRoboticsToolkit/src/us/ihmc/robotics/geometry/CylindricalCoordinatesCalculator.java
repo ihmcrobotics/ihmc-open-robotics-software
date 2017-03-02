@@ -1,10 +1,9 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import javax.vecmath.Matrix3d;
 
 /**
  * @author twan
@@ -14,11 +13,8 @@ public class CylindricalCoordinatesCalculator
 {
 
    private FramePoint position = new FramePoint();
-   private final Matrix3d preRotation = new Matrix3d();
-   private final Matrix3d rotX = new Matrix3d();
-   private final Matrix3d rotZ = new Matrix3d();
-   private final Matrix3d rotY = new Matrix3d();
-   private final Matrix3d rotation = new Matrix3d();
+   private final RotationMatrix preRotation = new RotationMatrix();
+   private final RotationMatrix rotation = new RotationMatrix();
    private final FrameOrientation orientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
 
    public FramePose getPoseFromCylindricalCoordinates(RobotSide robotSide, ReferenceFrame frame, double radiansFromYAxis, double radius, double z,
@@ -27,15 +23,12 @@ public class CylindricalCoordinatesCalculator
       getPosition(position, frame, radiansFromYAxis, radius, z);
 
 
-      RotationTools.convertYawPitchRollToMatrix(0.0, Math.PI / 2.0, -Math.PI / 2.0, preRotation);
+      preRotation.setYawPitchRoll(0.0, Math.PI / 2.0, -Math.PI / 2.0);
 
-      rotX.rotX(robotSide.negateIfRightSide(Math.PI / 2.0) - radiansFromYAxis);
-      rotZ.rotZ(robotSide.negateIfRightSide(outwardRotation));
-      rotY.rotY(pitchRotation);
-
-      rotation.mul(preRotation, rotX);
-      rotation.mul(rotZ);
-      rotation.mul(rotY);
+      rotation.set(preRotation);
+      rotation.appendRollRotation(robotSide.negateIfRightSide(Math.PI / 2.0) - radiansFromYAxis);
+      rotation.appendYawRotation(robotSide.negateIfRightSide(outwardRotation));
+      rotation.appendPitchRotation(pitchRotation);
 
       orientation.setIncludingFrame(frame, rotation);
 

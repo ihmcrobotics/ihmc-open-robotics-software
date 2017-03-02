@@ -1,10 +1,9 @@
 package us.ihmc.vicon;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ViconReferenceFrame extends ReferenceFrame
 {
@@ -14,8 +13,8 @@ public class ViconReferenceFrame extends ReferenceFrame
    private boolean dataValid = false;
    private long lastUpdateTimeStamp = 0;
 
-   private final Quat4d bodyToWorldQuaternion = new Quat4d();
-   private final Vector3d bodyToWorldTranslation = new Vector3d();
+   private final Quaternion bodyToWorldQuaternion = new Quaternion();
+   private final Vector3D bodyToWorldTranslation = new Vector3D();
    private final RigidBodyTransform bodyToWorldTransform = new RigidBodyTransform();
 
    public ViconReferenceFrame(String bodyName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, ViconClient viconClient)

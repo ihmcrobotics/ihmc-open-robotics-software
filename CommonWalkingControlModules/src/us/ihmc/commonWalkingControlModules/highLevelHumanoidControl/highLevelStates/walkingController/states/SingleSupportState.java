@@ -1,14 +1,14 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -19,7 +19,7 @@ public abstract class SingleSupportState extends WalkingState
    protected final RobotSide supportSide;
    
    private final BooleanYoVariable hasMinimumTimePassed = new BooleanYoVariable("hasMinimumTimePassed", registry);
-   private final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
+   protected final DoubleYoVariable minimumSwingFraction = new DoubleYoVariable("minimumSwingFraction", registry);
 
    protected final WalkingMessageHandler walkingMessageHandler;
    protected final SideDependentList<FootSwitchInterface> footSwitches;
@@ -70,16 +70,7 @@ public abstract class SingleSupportState extends WalkingState
       return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
    }
 
-   private boolean hasMinimumTimePassed()
-   {
-      double minimumSwingTime;
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-         minimumSwingTime = 0.15;
-      else
-         minimumSwingTime = walkingMessageHandler.getSwingTime() * minimumSwingFraction.getDoubleValue();
-
-      return getTimeInCurrentState() > minimumSwingTime;
-   }
+   protected abstract boolean hasMinimumTimePassed();
 
    @Override
    public void doTransitionIntoAction()

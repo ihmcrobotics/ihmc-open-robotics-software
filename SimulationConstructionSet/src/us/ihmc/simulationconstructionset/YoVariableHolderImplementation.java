@@ -29,6 +29,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
    {
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getAllVariables()
    {
       ArrayList<YoVariable<?>> ret = new ArrayList<YoVariable<?>>();
@@ -46,6 +47,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return ret;
    }
 
+   @Override
    public YoVariable<?>[] getAllVariablesArray()
    {
       ArrayList<YoVariable<?>> variables = getAllVariables();
@@ -120,6 +122,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return null;
    }
 
+   @Override
    public YoVariable<?> getVariable(String fullname)
    {
       String name = NameSpace.stripOffNameSpaceToGetVariableName(fullname);      
@@ -155,6 +158,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return foundVariable;
    }
 
+   @Override
    public YoVariable<?> getVariable(String nameSpaceEnding, String name)
    {
       if (name.contains("."))
@@ -189,6 +193,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return foundVariable;
    }
 
+   @Override
    public boolean hasUniqueVariable(String fullname)
    {
       String name = NameSpace.stripOffNameSpaceToGetVariableName(fullname);
@@ -219,6 +224,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return foundVariable;
    }
 
+   @Override
    public boolean hasUniqueVariable(String nameSpaceEnding, String name)
    {
       if (name.contains("."))
@@ -252,6 +258,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return foundVariable;
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String nameSpaceEnding, String name)
    {
       if (name.contains("."))
@@ -280,6 +287,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return ret;
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(String fullname)
    {
       String name = NameSpace.stripOffNameSpaceToGetVariableName(fullname);
@@ -305,6 +313,7 @@ public class YoVariableHolderImplementation implements YoVariableHolder
       return ret;
    }
 
+   @Override
    public ArrayList<YoVariable<?>> getVariables(NameSpace nameSpace)
    {
       ArrayList<YoVariable<?>> ret = new ArrayList<YoVariable<?>>();

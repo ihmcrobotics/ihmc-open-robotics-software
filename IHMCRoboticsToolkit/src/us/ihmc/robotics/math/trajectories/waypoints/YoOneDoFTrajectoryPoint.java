@@ -5,10 +5,10 @@ import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.OneDoFTrajectoryPointInterface;
 
 public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<YoOneDoFTrajectoryPoint>
@@ -156,7 +156,7 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointInterface<Y
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       waypoint1d.applyTransform(transform);
    }

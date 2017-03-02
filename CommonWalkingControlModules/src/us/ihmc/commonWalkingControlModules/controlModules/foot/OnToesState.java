@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -16,23 +14,21 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class OnToesState extends AbstractFootControlState
 {
@@ -96,10 +92,12 @@ public class OnToesState extends AbstractFootControlState
 
       orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       orientationFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      orientationFeedbackControlCommand.setPrimaryBase(pelvis);
       orientationFeedbackControlCommand.setGains(gains.getOrientationGains());
 
       pointFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
       pointFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      pointFeedbackControlCommand.setPrimaryBase(pelvis);
       pointFeedbackControlCommand.setGains(gains.getPositionGains());
 
       feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
@@ -117,7 +115,7 @@ public class OnToesState extends AbstractFootControlState
       orientationFeedbackControlCommand.setWeightForSolver(weight);
    }
 
-   public void setWeights(Vector3d angular, Vector3d linear)
+   public void setWeights(Vector3D angular, Vector3D linear)
    {
       pointFeedbackControlCommand.setWeightsForSolver(linear);
       orientationFeedbackControlCommand.setWeightsForSolver(angular);

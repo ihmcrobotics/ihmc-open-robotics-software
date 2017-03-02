@@ -5,6 +5,8 @@ import org.opencv.core.*;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
@@ -12,7 +14,7 @@ import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.vecmath.Point2d;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -212,7 +214,7 @@ public class OpenCVColoredCircularBlobDetector
       for (int i = 0; i < houghCirclesOutputMat.cols(); i++)
       {
          double[] circleData = houghCirclesOutputMat.get(0, i);
-         Point2d circleCenter = new Point2d(circleData[0], circleData[1]);
+         Point2D circleCenter = new Point2D(circleData[0], circleData[1]);
          double circleRadius = circleData[2];
 
          circles.add(new HoughCircleResult(circleCenter, circleRadius));

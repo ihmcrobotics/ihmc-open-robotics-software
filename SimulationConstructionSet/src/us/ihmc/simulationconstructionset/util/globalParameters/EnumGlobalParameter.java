@@ -72,6 +72,7 @@ public class EnumGlobalParameter extends GlobalParameter
          setEnumValue(value, comment);
    }
 
+   @Override
    public String getValueInStringFormat()
    {
       String ret = ((EnumYoVariable<?>)yoVariable).getEnumValue().toString();

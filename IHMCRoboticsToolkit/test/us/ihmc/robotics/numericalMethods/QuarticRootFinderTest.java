@@ -5,8 +5,8 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.MutationTestingTools;
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class QuarticRootFinderTest
 {
@@ -112,8 +112,6 @@ public class QuarticRootFinderTest
 
    public static void main(String[] args)
    {
-      String targetTests = QuarticRootFinderTest.class.getName();
-      String targetClass = QuarticRootFinder.class.getName();
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClass);
+      MutationTestFacilitator.facilitateMutationTestForClass(QuarticRootFinder.class, QuarticRootFinderTest.class);
    }
 }

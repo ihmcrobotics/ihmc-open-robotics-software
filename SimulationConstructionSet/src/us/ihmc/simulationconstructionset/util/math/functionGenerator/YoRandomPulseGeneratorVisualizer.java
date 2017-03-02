@@ -18,21 +18,25 @@ public class YoRandomPulseGeneratorVisualizer implements RobotController
       this.yoRandomPulseGenerator = yoRandomPulseGenerator;
    }
 
+   @Override
    public void initialize()
    {
 
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
    }
 
+   @Override
    public String getName()
    {
       return null;
    }
 
+   @Override
    public String getDescription()
    {
       return null;
@@ -40,6 +44,7 @@ public class YoRandomPulseGeneratorVisualizer implements RobotController
 
 
 
+   @Override
    public void doControl()
    {
      this.yoRandomPulseGenerator.getValue();

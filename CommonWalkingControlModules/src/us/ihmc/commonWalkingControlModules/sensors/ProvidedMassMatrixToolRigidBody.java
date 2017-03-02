@@ -3,15 +3,14 @@ package us.ihmc.commonWalkingControlModules.sensors;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Matrix3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -78,7 +77,7 @@ public class ProvidedMassMatrixToolRigidBody
       this.elevatorFrame = fullRobotModel.getElevatorFrame();
       toolFrame = new PoseReferenceFrame(name + "Frame", elevatorFrame);
 
-      RigidBodyInertia inertia = new RigidBodyInertia(toolFrame, new Matrix3d(), 0.0);
+      RigidBodyInertia inertia = new RigidBodyInertia(toolFrame, new Matrix3D(), 0.0);
 
       this.toolJoint = new SixDoFJoint(name + "Joint", fullRobotModel.getElevator(), fullRobotModel.getElevator().getBodyFixedFrame());
       this.toolBody = new RigidBody(name + "Body", inertia, toolJoint);

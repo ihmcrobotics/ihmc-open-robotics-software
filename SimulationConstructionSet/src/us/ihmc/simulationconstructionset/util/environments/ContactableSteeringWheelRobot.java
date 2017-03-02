@@ -2,30 +2,30 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
+import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
 
 public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 {
@@ -48,7 +48,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    private final DoubleYoVariable steeringWheelAngleAsAbsolutePercentageOfRangeOfMotion;
 
    private double mass;
-   private Matrix3d inertiaMatrix;
+   private Matrix3D inertiaMatrix;
 
    private FrameTorus3d steeringWheelTorus;
    protected ArrayList<FrameCylinder3d> spokesCylinders = new ArrayList<FrameCylinder3d>();
@@ -121,7 +121,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       double xHandle = distanceFromCenter * Math.cos(angleOnSteeringWheel);
       double yHandle = distanceFromCenter * Math.sin(angleOnSteeringWheel);
 
-      Vector3d translation = new Vector3d(xHandle, yHandle, distanceFromWheel);
+      Vector3D translation = new Vector3D(xHandle, yHandle, distanceFromWheel);
       transform.setTranslation(translation);
       
       FrameCylinder3d spinnerHandleCylinder = new FrameCylinder3d(steeringWheelFrame, transform, handleLength, handleRadius);
@@ -146,7 +146,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       FramePose crossBar = new FramePose(steeringWheelFrame);
       crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0);
       crossBar.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0);
-      crossBar.setPosition(new Vector3d(-height/2.0, 0.0, heightAboveWheel));
+      crossBar.setPosition(new Vector3D(-height/2.0, 0.0, heightAboveWheel));
       
       RigidBodyTransform transform = new RigidBodyTransform();
       crossBar.getPose(transform);
@@ -169,19 +169,19 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       steeringWheelFrame.getPose(originalSteeringWheelPose);
 
       //creating the pinJoint 
-      Vector3d jointAxisVector = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D jointAxisVector = new Vector3D(0.0, 0.0, 1.0);
       RigidBodyTransform steeringWheelTransformToWorld = new RigidBodyTransform();
       steeringWheelFrame.getTransformToDesiredFrame(steeringWheelTransformToWorld, worldFrame);
       steeringWheelTransformToWorld.transform(jointAxisVector);
 
-      Vector3d steeringWheelPositionInWorld = new Vector3d();
+      Vector3D steeringWheelPositionInWorld = new Vector3D();
       steeringWheelPoseInWorld.getPosition(steeringWheelPositionInWorld);
       steeringWheelPinJoint = new PinJoint("steeringWheelPinJoint", steeringWheelPositionInWorld, this, jointAxisVector);
       steeringWheelPinJoint.setLimitStops(-totalNumberOfPossibleTurns * Math.PI, totalNumberOfPossibleTurns * Math.PI, 1000, 100);
       steeringWheelPinJoint.setDamping(steeringDamping.getDoubleValue());
 
       //put the graphics frame in the proper orientation
-      Matrix3d rotationMatrix = new Matrix3d();
+      RotationMatrix rotationMatrix = new RotationMatrix();
       steeringWheelPoseInWorld.getOrientation(rotationMatrix);
       steeringWheelLinkGraphics.rotate(rotationMatrix);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
@@ -190,7 +190,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       //Creating the physical link for the simulation
       steeringWheelLink = new Link("steerinWheelLink");
       steeringWheelLink.setMass(mass);
-      steeringWheelLink.setComOffset(new Vector3d(0.0, 0.0, 0.0));
+      steeringWheelLink.setComOffset(new Vector3D(0.0, 0.0, 0.0));
 
       inertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfTorus(mass, steeringWheelRadius, steeringWheelThickness);
       steeringWheelLink.setMomentOfInertia(inertiaMatrix);
@@ -212,17 +212,17 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       steeringWheelLinkGraphics.translate(0.0, 0.0, steeringColunmLength);
       steeringWheelLinkGraphics.transform(invertTransform);
 
-      Quat4d quat = new Quat4d();
+      Quaternion quat = new Quaternion();
       //spokes
       for (int i = 0; i < 3; i++)
       {
-         RotationTools.convertYawPitchRollToQuaternion(0.0, Math.PI / 2.0, i * 2.0 * Math.PI / 4.0 + Math.PI / 2.0, quat);
+         quat.setYawPitchRoll(0.0, Math.PI / 2.0, i * 2.0 * Math.PI / 4.0 + Math.PI / 2.0);
          transform.setRotation(quat);
          invertTransform.set(transform);
          invertTransform.invert();
 
-         RigidBodyTransform yoGraphicTransform = new RigidBodyTransform();
-         yoGraphicTransform.multiply(rotationTransform, transform);
+         RigidBodyTransform yoGraphicTransform = new RigidBodyTransform(rotationTransform);
+         yoGraphicTransform.multiply(transform);
 
          FrameCylinder3d spokeCylinder = new FrameCylinder3d(steeringWheelFrame, transform, steeringWheelRadius, spokesThickness / 2.0);
          spokesCylinders.add(spokeCylinder);
@@ -255,7 +255,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newPose = new RigidBodyTransform();
       pinJointTransform.setRotationYawAndZeroTranslation(steeringWheelPinJoint.getQYoVariable().getDoubleValue());
-      newPose.multiply(originalSteeringWheelPose, pinJointTransform);
+      newPose.set(originalSteeringWheelPose);
+      newPose.multiply(pinJointTransform);
       steeringWheelFrame.setPoseAndUpdate(newPose);
 
       super.updateAllGroundContactPointVelocities();
@@ -264,7 +265,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    private final FramePoint pointToCheck = new FramePoint();
 
    @Override
-   public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+   public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
       pointToCheck.setIncludingFrame(worldFrame, pointInWorldToCheck);
       pointToCheck.changeFrame(steeringWheelFrame);
@@ -280,22 +281,22 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    }
 
    @Override
-   public boolean isClose(Point3d pointInWorldToCheck)
+   public boolean isClose(Point3D pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
    @Override
-   public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
       FramePoint pointToCheck = new FramePoint(worldFrame, pointInWorldToCheck);
       pointToCheck.changeFrame(steeringWheelFrame);
 
-      if (steeringWheelTorus.checkIfInside(pointToCheck, intersectionToPack, normalToPack))
+      if (steeringWheelTorus.checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))
          return;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
-         if (spokesCylinders.get(i).checkIfInside(pointToCheck, intersectionToPack, normalToPack))
+         if (spokesCylinders.get(i).checkIfInside(pointToCheck.getPoint(), intersectionToPack, normalToPack))
             return;
       }
    }

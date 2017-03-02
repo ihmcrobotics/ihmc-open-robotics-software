@@ -17,7 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JToolBar;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfigurationList;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfigurationList;
+import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGUIConfigFromFileCommandExecutor;
 import us.ihmc.simulationconstructionset.commands.SelectGraphConfigurationCommandExecutor;
@@ -576,6 +577,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       exitMenuItem = new JMenuItem("Exit");
       exitMenuItem.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             exitActionListenerNotifier.notifyExitActionListeners();
@@ -916,6 +918,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             setupConfigurationMenuThreadUnsafe(configurationList, configurationSelector, selectGUIConfigFromFileCommandExecutor);
@@ -1006,6 +1009,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             graphGroupsMenu.removeAll();
@@ -1026,6 +1030,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             entryBoxGroupsMenu.removeAll();
@@ -1150,10 +1155,10 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    protected void setupExtraPanelsMenu(ExtraPanelConfigurationList extraPanelConfigurationList, ExtraPanelSelector panelSelector)
    {
       extraPanelsMenu.removeAll();
-      String[] names = extraPanelConfigurationList.getExtraPanelConfigurationNames();
-      for (String name : names)
+      for (ExtraPanelConfiguration extraPanelConfiguration : extraPanelConfigurationList.getConfigurationList())
       {
-         JCheckBoxMenuItem myItem = new JCheckBoxMenuItem(new SelectExtraPanelAction(panelSelector, name));
+         JCheckBoxMenuItem myItem = new JCheckBoxMenuItem(new SelectExtraPanelAction(panelSelector, extraPanelConfiguration));
+         myItem.setSelected(extraPanelConfiguration.showOnStart());
          extraPanelsMenu.add(myItem);
       }
    }
@@ -1170,12 +1175,14 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       }
    }
 
+   @Override
    public void disableGUIComponents()
    {
       if (guiActions != null)
       {
          EventDispatchThreadHelper.invokeAndWait(new Runnable()
          {
+            @Override
             public void run()
             {
                for (Action action : guiActions)
@@ -1187,10 +1194,12 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       }
    }
 
+   @Override
    public void enableGUIComponents()
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             if (guiActions != null)
@@ -1221,6 +1230,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    {
       EventDispatchThreadHelper.invokeLater(new Runnable()
       {
+         @Override
          public void run()
          {
             simulateAction.setEnabled(true);

@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.simulationconstructionset.ViewportConfiguration;
 
 public class StandardViewSetup

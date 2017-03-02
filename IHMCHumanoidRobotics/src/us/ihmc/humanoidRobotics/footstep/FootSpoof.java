@@ -3,17 +3,17 @@ package us.ihmc.humanoidRobotics.footstep;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -41,22 +41,22 @@ public class FootSpoof implements ContactablePlaneBody
       this(name, -0.15, 0.02, 0.21, 0.1, 0.05, 0.05, 0.0);
    }
 
-   public FootSpoof(String name, double xToAnkle, double yToAnkle, double zToAnkle, List<Point2d> contactPoints2dInSoleFrame,
+   public FootSpoof(String name, double xToAnkle, double yToAnkle, double zToAnkle, List<Point2D> contactPoints2dInSoleFrame,
                     double coefficientOfFriction)
    {
       RigidBodyTransform transformToAnkle = new RigidBodyTransform();
-      transformToAnkle.setTranslation(new Vector3d(-xToAnkle, -yToAnkle, -zToAnkle));
+      transformToAnkle.setTranslation(new Vector3D(-xToAnkle, -yToAnkle, -zToAnkle));
 
 //    if(FootstepUtilsTest.DEBUG_TESTS)
 //       System.out.println("FootSpoof: making transform from plane to ankle equal to "+transformToAnkle);
       
       shinFrame = new PoseReferenceFrame(name + "ShinFrame", ReferenceFrame.getWorldFrame());
       this.shin = new RigidBody(name, shinFrame);
-      this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3d(0.0, 1.0, 0.0));
-      this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3d(), 1.0, new RigidBodyTransform());
+      this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
+      this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
       soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
 
-      for (Point2d contactPointInSoleFrame : contactPoints2dInSoleFrame)
+      for (Point2D contactPointInSoleFrame : contactPoints2dInSoleFrame)
       {
          FramePoint point = new FramePoint(soleFrame, contactPointInSoleFrame.getX(), contactPointInSoleFrame.getY(), 0.0);
          contactPoints.add(point);
@@ -72,20 +72,20 @@ public class FootSpoof implements ContactablePlaneBody
                     double coefficientOfFriction)
    {
       RigidBodyTransform transformToAnkle = new RigidBodyTransform();
-      transformToAnkle.setTranslation(new Vector3d(-xToAnkle, -yToAnkle, -zToAnkle));
+      transformToAnkle.setTranslation(new Vector3D(-xToAnkle, -yToAnkle, -zToAnkle));
 
 //    if(FootstepUtilsTest.DEBUG_TESTS)
 //       System.out.println("FootSpoof: making transform from plane to ankle equal to "+transformToAnkle);
       
       shinFrame = new PoseReferenceFrame(name + "ShinFrame", ReferenceFrame.getWorldFrame());
       this.shin = new RigidBody(name, shinFrame);
-      this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3d(0.0, 1.0, 0.0));
-      this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3d(), 1.0, new RigidBodyTransform());
+      this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
+      this.foot = ScrewTools.addRigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
       soleFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
-      FramePoint point1 = new FramePoint(soleFrame, new Point3d(footForward, footHalfWidth, 0.0));
-      FramePoint point2 = new FramePoint(soleFrame, new Point3d(footForward, -footHalfWidth, 0.0));
-      FramePoint point3 = new FramePoint(soleFrame, new Point3d(-footBack, -footHalfWidth, 0.0));
-      FramePoint point4 = new FramePoint(soleFrame, new Point3d(-footBack, footHalfWidth, 0.0));
+      FramePoint point1 = new FramePoint(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
+      FramePoint point2 = new FramePoint(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));
+      FramePoint point3 = new FramePoint(soleFrame, new Point3D(-footBack, -footHalfWidth, 0.0));
+      FramePoint point4 = new FramePoint(soleFrame, new Point3D(-footBack, footHalfWidth, 0.0));
       contactPoints.add(point1);
       contactPoints.add(point2);
       contactPoints.add(point3);
@@ -125,7 +125,8 @@ public class FootSpoof implements ContactablePlaneBody
       newSolePoseInWorldFrame.getPose(transformFromSoleToWorld);
 
       RigidBodyTransform transformFromShinToWorld = new RigidBodyTransform();
-      transformFromShinToWorld.multiply(transformFromSoleToWorld, shinFrame.getTransformToDesiredFrame(soleFrame));
+      transformFromShinToWorld.set(transformFromSoleToWorld);
+      transformFromShinToWorld.multiply(shinFrame.getTransformToDesiredFrame(soleFrame));
 
       shinFrame.setPoseAndUpdate(transformFromShinToWorld);
    }

@@ -3,22 +3,20 @@ package us.ihmc.quadrupedRobotics.controller.position.states;
 import java.awt.Color;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactOval;
-import us.ihmc.graphics3DDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactOval;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.controller.ControllerEvent;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedController;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -35,6 +33,8 @@ import us.ihmc.quadrupedRobotics.planning.trajectory.QuadrupedSwingTrajectoryGen
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPlanarVelocityInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProvider;
 import us.ihmc.quadrupedRobotics.providers.QuadrupedPostureInputProviderInterface;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PIDController;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -49,8 +49,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredWrappingYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -70,13 +68,17 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.Twist;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachines.State;
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
-import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.trajectories.MinimumJerkTrajectory;
 
 public class QuadrupedPositionBasedCrawlController implements QuadrupedController
@@ -140,14 +142,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector desiredCoMVelocity = new YoFrameVector("desiredCoMVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-   private final GlobalTimer calculateNextThreeFootstepsTimer = new GlobalTimer("calculateNextThreeFootstepsTimer", registry);
-   private final GlobalTimer doTransitionIntoQuadrupleSupportTimer = new GlobalTimer("doTransitionIntoQuadrupleSupportTimer", registry);
-   private final GlobalTimer doTransitionIntoTripleSupportTimer = new GlobalTimer("doTransitionIntoTripleSupportTimer", registry);
-   private final GlobalTimer doActionTripleSupportTimer = new GlobalTimer("doActionTripleSupportTimer", registry);
-   private final GlobalTimer doActionQuadrupleSupportTimer = new GlobalTimer("doActionQuadrupleSupportTimer", registry);
-   private final GlobalTimer doActionTimer = new GlobalTimer("doActionTimer", registry);
-   private final GlobalTimer calculateNextCoMTargetTimer = new GlobalTimer("calculateNextCoMTargetTimer", registry);
-   private final GlobalTimer calculateNextThreeFootStepsOneOffTimer = new GlobalTimer("calculateNextThreeFootStepsOneOffTimer", registry);
+   private final ExecutionTimer calculateNextThreeFootstepsTimer = new ExecutionTimer("calculateNextThreeFootstepsTimer", registry);
+   private final ExecutionTimer doTransitionIntoQuadrupleSupportTimer = new ExecutionTimer("doTransitionIntoQuadrupleSupportTimer", registry);
+   private final ExecutionTimer doTransitionIntoTripleSupportTimer = new ExecutionTimer("doTransitionIntoTripleSupportTimer", registry);
+   private final ExecutionTimer doActionTripleSupportTimer = new ExecutionTimer("doActionTripleSupportTimer", registry);
+   private final ExecutionTimer doActionQuadrupleSupportTimer = new ExecutionTimer("doActionQuadrupleSupportTimer", registry);
+   private final ExecutionTimer doActionTimer = new ExecutionTimer("doActionTimer", registry);
+   private final ExecutionTimer calculateNextCoMTargetTimer = new ExecutionTimer("calculateNextCoMTargetTimer", registry);
+   private final ExecutionTimer calculateNextThreeFootStepsOneOffTimer = new ExecutionTimer("calculateNextThreeFootStepsOneOffTimer", registry);
    private boolean oneOffHappened = false;
 
    private final OneDoFJoint[] oneDoFJointsFeedforward;
@@ -242,7 +244,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
    private final QuadrantDependentList<YoFrameVector> desiredFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
    private final QuadrantDependentList<YoFrameVector> actualFeetPositionsInLegAttachmentFrame = new QuadrantDependentList<YoFrameVector>();
-   private final Vector3d desiredFootPositionForInverseKinematics = new Vector3d();
+   private final Vector3D desiredFootPositionForInverseKinematics = new Vector3D();
 
    private final YoFrameConvexPolygon2d supportPolygon = new YoFrameConvexPolygon2d("quadPolygon", "", ReferenceFrame.getWorldFrame(), 4, registry);
    private final YoFrameConvexPolygon2d currentTriplePolygon = new YoFrameConvexPolygon2d("currentTriplePolygon", "", ReferenceFrame.getWorldFrame(), 3, registry);
@@ -274,7 +276,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private final FramePoint centerOfMassInBody = new FramePoint();
    private final FramePoint desiredRootJointPosition = new FramePoint();
    private final FrameVector vectorToSubtractHolder = new FrameVector();
-   private final Vector3d linearVelocityHolder = new Vector3d();
+   private final Vector3D linearVelocityHolder = new Vector3D();
 
    private final BooleanYoVariable isCoMInsideTriangleForSwingLeg = new BooleanYoVariable("isCoMInsideTriangleForSwingLeg", registry);
    private final BooleanYoVariable isCoMCloseToFinalDesired = new BooleanYoVariable("isCoMCloseToFinalDesired", registry);
@@ -720,7 +722,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    @Override
    public ControllerEvent process()
    {
-      doActionTimer.startTimer();
+      doActionTimer.startMeasurement();
 
       referenceFrames.updateFrames();
       updateEstimates();
@@ -744,7 +746,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       updateFeedForwardModelAndFrames();
 
-      doActionTimer.stopTimer();
+      doActionTimer.stopMeasurement();
       return null;
    }
 
@@ -885,14 +887,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          postureProvider.getComVelocityInput();// support z up
 
          //body velocity
-         Vector3d planarVelocityInput = planarVelocityProvider.get();//Frame up to controller - feedForwardBodyFrame
+         Vector3D planarVelocityInput = planarVelocityProvider.get();//Frame up to controller - feedForwardBodyFrame
          desiredVelocity.setVector(planarVelocityInput);
          desiredVelocity.setY(0.0);
          desiredVelocity.setZ(0.0);
 
          //yaw rate
          double providedDesiredYawRate = planarVelocityInput.getZ();
-         providedDesiredYawRate = MathTools.clipToMinMax(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
+         providedDesiredYawRate = MathTools.clamp(providedDesiredYawRate, minYawRate.getDoubleValue(), maxYawRate.getDoubleValue());
          if (providedDesiredYawRate != lastProvidedDesiredYawRate)
          {
             desiredYawRate.set(providedDesiredYawRate);
@@ -900,26 +902,26 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          }
 
          //body orientation
-         Quat4d bodyOrientationInput = postureProvider.getBodyOrientationInput();// support z up
+         Quaternion bodyOrientationInput = postureProvider.getBodyOrientationInput();// support z up
 //            double providedDesiredYawInPlace = desiredYawInPlaceProvider.getValue();
-         double providedDesiredYawInPlace = RotationTools.computeYaw(bodyOrientationInput);
-         providedDesiredYawInPlace = MathTools.clipToMinMax(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
+         double providedDesiredYawInPlace = bodyOrientationInput.getYaw();
+         providedDesiredYawInPlace = MathTools.clamp(providedDesiredYawInPlace, -MAX_YAW_IN_PLACE, MAX_YAW_IN_PLACE);
          if (isDesiredVelocityAndYawRateZero())
          {
             desiredYawInPlace.set(providedDesiredYawInPlace);
          }
 
-         desiredCoMOrientation.setPitch(RotationTools.computePitch(bodyOrientationInput));
-         desiredCoMOrientation.setRoll(RotationTools.computeRoll(bodyOrientationInput));
+         desiredCoMOrientation.setPitch(bodyOrientationInput.getPitch());
+         desiredCoMOrientation.setRoll(bodyOrientationInput.getRoll());
 
          //com height
-         Point3d comPositionInput = postureProvider.getComPositionInput();// support z up
+         Point3D comPositionInput = postureProvider.getComPositionInput();// support z up
          desiredCoMHeight.set(comPositionInput.getZ());
       }
    }
 
    private final double[] yawPitchRollArray = new double[3];
-   private final Point3d centerOfMassOffset = new Point3d();
+   private final Point3D centerOfMassOffset = new Point3D();
    private final FramePoint actualFootLocation = new FramePoint();
    private final FrameVector tempFrameVector = new FrameVector();
 
@@ -1120,7 +1122,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       desiredCoMPosition.setZ(zHeight);
    }
 
-   private final Vector3d bodyOrienation = new Vector3d();
+   private final Vector3D bodyOrienation = new Vector3D();
    private void updateDesiredBodyOrientation()
    {
       filteredDesiredCoMYaw.update();
@@ -1443,7 +1445,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       @Override
       public void doAction()
       {
-         doActionQuadrupleSupportTimer.startTimer();
+         doActionQuadrupleSupportTimer.startMeasurement();
 
          processVelocityChanges();
 
@@ -1459,7 +1461,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          computeCurrentSupportPolygonAndDistanceInside(null);
 
-         doActionQuadrupleSupportTimer.stopTimer();
+         doActionQuadrupleSupportTimer.stopMeasurement();
       }
 
       /**
@@ -1701,18 +1703,18 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       @Override
       public void doTransitionIntoAction()
       {
-         doTransitionIntoQuadrupleSupportTimer.startTimer();
+         doTransitionIntoQuadrupleSupportTimer.startMeasurement();
 
          if(!isDesiredVelocityAndYawRateZero() && !isDesiredVelocityReversing())
          {
             swingLegUpdatedOnTransition.set(true);
             calculateNextSwingLeg();
-            calculateNextCoMTargetTimer.startTimer();
+            calculateNextCoMTargetTimer.startMeasurement();
             calculateNextCoMTarget(false);
-            calculateNextCoMTargetTimer.stopTimer();
+            calculateNextCoMTargetTimer.stopMeasurement();
          }
 
-         doTransitionIntoQuadrupleSupportTimer.stopTimer();
+         doTransitionIntoQuadrupleSupportTimer.stopMeasurement();
       }
 
       public void calculateNextThreeFootSteps2(RobotQuadrant firstSwingLeg)
@@ -1772,7 +1774,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
       public void calculateNextThreeFootSteps(RobotQuadrant firstSwingLeg)
       {
-         calculateNextThreeFootstepsTimer.startTimer();
+         calculateNextThreeFootstepsTimer.startMeasurement();
 
          // 1.7 MS START
          FrameVector desiredVelocityVector = desiredVelocity.getFrameTuple();
@@ -1810,14 +1812,14 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          }
 
          // 5.1/7.2 MS 71% START
-         if (!oneOffHappened) calculateNextThreeFootStepsOneOffTimer.startTimer();
+         if (!oneOffHappened) calculateNextThreeFootStepsOneOffTimer.startMeasurement();
          updateAndDrawCommonTriangle(tripleStateWithFirstStepSwinging, tripleStateAfterFirstStepWithSecondSwinging, firstSwingLeg, secondSwingLeg, shrunkenPolygonOffset);
          updateAndDrawCommonTriangle(tripleStateAfterFirstStepWithSecondSwinging, tripleStateAfterSecondStepWithThirdSwinging, secondSwingLeg, thirdSwingLeg, shrunkenPolygonOffset);
          updateAndDrawCommonTriangle(tripleStateAfterSecondStepWithThirdSwinging, tripleStateAfterThirdStepWithFourthSwinging, thirdSwingLeg, fourthSwingLeg, shrunkenPolygonOffset);
-         if (!oneOffHappened) calculateNextThreeFootStepsOneOffTimer.stopTimer();
+         if (!oneOffHappened) calculateNextThreeFootStepsOneOffTimer.stopMeasurement();
          // 5.1/7.2 MS 71% STOP
 
-         calculateNextThreeFootstepsTimer.stopTimer();
+         calculateNextThreeFootstepsTimer.stopMeasurement();
 
          oneOffHappened = true;
       }
@@ -2011,7 +2013,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       @Override
       public void doAction()
       {
-         doActionTripleSupportTimer.startTimer();
+         doActionTripleSupportTimer.startMeasurement();
 
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
 
@@ -2029,7 +2031,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
 
          distanceToTrotLine.set(computeDistanceToTrotLine2d(swingQuadrant));
 
-         doActionTripleSupportTimer.stopTimer();
+         doActionTripleSupportTimer.stopMeasurement();
       }
 
       FramePoint tempCOMTarget = new FramePoint(ReferenceFrame.getWorldFrame());
@@ -2037,7 +2039,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
       @Override
       public void doTransitionIntoAction()
       {
-         doTransitionIntoTripleSupportTimer.startTimer();
+         doTransitionIntoTripleSupportTimer.startMeasurement();
 
          RobotQuadrant swingQuadrant = swingLeg.getEnumValue();
          swingTarget.setToZero(ReferenceFrame.getWorldFrame());
@@ -2048,7 +2050,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
          finalSwingTarget.set(swingTarget);
 
          initializeSwingTrajectory(swingQuadrant, yoDesiredFootPosition.getFrameTuple(), swingTarget, swingDuration.getDoubleValue());
-         doTransitionIntoTripleSupportTimer.stopTimer();
+         doTransitionIntoTripleSupportTimer.stopMeasurement();
 
          //Determine if we need to slow down body motion
          distanceToTrotLine.set(computeDistanceToTrotLine2d(swingQuadrant));

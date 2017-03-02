@@ -2,12 +2,10 @@ package us.ihmc.exampleSimulations.groundTruthinator;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GroundTruthinator
@@ -22,7 +20,7 @@ public class GroundTruthinator
       this.sensors.add(sensor);
    }
 
-   public void addSensor(Point3d sensorPosition, Point3d attachmentPosition)
+   public void addSensor(Point3D sensorPosition, Point3D attachmentPosition)
    {
       GroundTruthinatorSensor sensor = new GroundTruthinatorSensor(sensorPosition, attachmentPosition);
       addSensor(sensor);
@@ -105,9 +103,9 @@ public class GroundTruthinator
    }
 
 
-   private final Point3d sensorPositionInWorldFrame = new Point3d();
-   private final Point3d attachmentPositionInRobotFrame = new Point3d();
-   private final Point3d attachmentPositionInWorldFrame = new Point3d();
+   private final Point3D sensorPositionInWorldFrame = new Point3D();
+   private final Point3D attachmentPositionInRobotFrame = new Point3D();
+   private final Point3D attachmentPositionInWorldFrame = new Point3D();
    private final RigidBodyTransform transform = new RigidBodyTransform();
 
    public void computeEstimatedCableLengthsFromObjectPose(FramePose estimatedObjectPoseInWorld)

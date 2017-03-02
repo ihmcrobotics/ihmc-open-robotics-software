@@ -10,7 +10,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import us.ihmc.simulationconstructionset.commands.ExportVideoCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
@@ -92,6 +99,7 @@ public class VideoSaveDialog implements TickUpdateListener
 
       resolutions.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             setResolution((Dimension) ((JComboBox) e.getSource()).getSelectedItem());
@@ -114,6 +122,7 @@ public class VideoSaveDialog implements TickUpdateListener
       JButton export = new JButton("Export");
       export.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             selectVideoLoction();
@@ -123,6 +132,7 @@ public class VideoSaveDialog implements TickUpdateListener
       JButton close = new JButton("Close");
       close.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             close();
@@ -198,6 +208,7 @@ public class VideoSaveDialog implements TickUpdateListener
       this.dimension.setSize(dimension);
    }
 
+   @Override
    public void update(int tick)
    {
       if (viewportPanel != null)

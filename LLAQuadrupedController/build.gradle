@@ -41,23 +41,27 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
 
-   compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
    compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCCommunication")
-   compile ihmc.getProjectDependency(":SDFLoader")
+   compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":IHMCStateEstimation")
-   compile ihmc.getProjectDependency(":IHMCGraphics3DDescription")
+   compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
    compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
    compile ihmc.getProjectDependency(":SensorProcessing")
    compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotModels")
    
-   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
    
 }
 
@@ -66,7 +70,7 @@ dependencies {
 afterEvaluate {
 	project.configurations.runtime.each {
 	
-		if(it.name.contains("SimulationConstructionSet"))
+		if(it.name.contains("SimulationConstructionSet") || it.name.contains("IHMCJMonkeyEngineToolkit") )
 		{
 			throw new GradleException("LLAQuardupedController cannot depend on SimulationConstructionSet in order to optimize Ahead-of-Time compilation. Please fix your dependency graph. Note that testCompile dependencies are fine.")
 		}

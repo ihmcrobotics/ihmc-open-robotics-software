@@ -16,11 +16,13 @@ public class PrintGraphsDialogGenerator implements PrintGraphsDialogConstructor
    }
 
    
+   @Override
    public void closeAndDispose()
    {
       myGraphArrayPanel = null;
    }
    
+   @Override
    public void constructDialog()
    {
       // System.out.println("Printing..");
@@ -30,6 +32,7 @@ public class PrintGraphsDialogGenerator implements PrintGraphsDialogConstructor
       // format.setPaper(paper);
       Thread t = new Thread(new Runnable()
       {
+         @Override
          public void run()
          {
             PrinterJob printerJob = PrinterJob.getPrinterJob();

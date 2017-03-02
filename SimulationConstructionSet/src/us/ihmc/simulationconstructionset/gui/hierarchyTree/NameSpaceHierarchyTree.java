@@ -1,26 +1,42 @@
 package us.ihmc.simulationconstructionset.gui.hierarchyTree;
 
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
-import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
-import us.ihmc.simulationconstructionset.gui.RegularExpression;
-import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
-import us.ihmc.simulationconstructionset.robotcommprotocol.CreatedNewRegistriesListener;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RegistrySettingsChangedListener;
-import us.ihmc.simulationconstructionset.util.SimpleFileReader;
-import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.tree.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.StringTokenizer;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
+import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
+import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
+import us.ihmc.simulationconstructionset.gui.RegularExpression;
+import us.ihmc.simulationconstructionset.robotcommprotocol.CreatedNewRegistriesListener;
+import us.ihmc.simulationconstructionset.robotcommprotocol.RegistrySettingsChangedListener;
+import us.ihmc.simulationconstructionset.util.SimpleFileReader;
+import us.ihmc.simulationconstructionset.util.SimpleFileWriter;
 
 public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener, FocusListener, CreatedNewRegistriesListener
 {
@@ -82,6 +98,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
    private boolean needToSetupTree = true;
    private YoVariableRegistry topOfTreeRegistry;
    
+   @Override
    public void paintComponent(Graphics g)
    {
       if (needToSetupTree)
@@ -119,6 +136,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem toggleVaribleSend = new JMenuItem("Toggle Variable Send");
       toggleVaribleSend.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             toggleVariableSend(e);
@@ -130,6 +148,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem recursiveToggleVaribleSend = new JMenuItem("Recursive Toggle Variable Send");
       recursiveToggleVaribleSend.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             recursiveToggleVariableSend(e);
@@ -141,6 +160,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem toggleVariableLog = new JMenuItem("Toggle Variable Log");
       toggleVariableLog.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             toggleVariableLog(e);
@@ -152,6 +172,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem recursiveToggleVariableLog = new JMenuItem("Recursive Toggle Variable Log");
       recursiveToggleVariableLog.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             recursiveToggleVariableLog(e);
@@ -164,6 +185,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       exportBinaryRegistryData.addActionListener(new ActionListener()
       {
          
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             exportRegistryData(e, true);
@@ -176,6 +198,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       exportASCIIRegistryData.addActionListener(new ActionListener()
       {
          
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             exportRegistryData(e, false);
@@ -188,6 +211,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem save = new JMenuItem("Save Configuration");
       save.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             saveConfiguration();
@@ -199,6 +223,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       JMenuItem load = new JMenuItem("Load Configuration");
       load.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             loadConfiguration();
@@ -263,6 +288,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       }
    }
 
+   @Override
    public void mouseClicked(MouseEvent arg0)
    {
       if (arg0.getClickCount() == 2)
@@ -280,14 +306,17 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
 
    }
 
+   @Override
    public void mouseEntered(MouseEvent arg0)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent arg0)
    {
    }
 
+   @Override
    public void mousePressed(MouseEvent arg0)
    {
       if (arg0.isPopupTrigger())
@@ -296,6 +325,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       }
    }
 
+   @Override
    public void mouseReleased(MouseEvent arg0)
    {
       if (arg0.isPopupTrigger())
@@ -377,6 +407,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       FileFilter filterFilter = new FileFilter()
       {
 
+         @Override
          public String getDescription()
          {
             if (binary)
@@ -385,6 +416,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
                return ".m";
          }
 
+         @Override
          public boolean accept(File f)
          {
             if (f.isDirectory())
@@ -446,10 +478,12 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
    }
   
 
+   @Override
    public void focusGained(FocusEvent e)
    {
    }
 
+   @Override
    public void focusLost(FocusEvent e)
    {
 //    popupMenu.setVisible(false);
@@ -572,6 +606,7 @@ public class NameSpaceHierarchyTree extends JScrollPane implements MouseListener
       }
    }
 
+   @Override
    public void createdNewRegistries()
    {
       top.removeAllChildren();

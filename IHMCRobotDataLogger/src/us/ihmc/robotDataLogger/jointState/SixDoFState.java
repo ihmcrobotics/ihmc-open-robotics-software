@@ -2,10 +2,9 @@ package us.ihmc.robotDataLogger.jointState;
 
 import java.nio.LongBuffer;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
 import us.ihmc.robotics.screwTheory.Twist;
 
@@ -13,9 +12,9 @@ public class SixDoFState extends JointState
 {
    public static final int numberOfStateVariables = 13;
    
-   private final Quat4d rotation = new Quat4d();
+   private final Quaternion rotation = new Quaternion();
    
-   private final Vector3d translation = new Vector3d();
+   private final Vector3D translation = new Vector3D();
    private final Twist twist = new Twist();
    
 
@@ -27,7 +26,7 @@ public class SixDoFState extends JointState
 
    public void get(double[] array)
    {
-      array[0] = rotation.getW();
+      array[0] = rotation.getS();
       array[1] = rotation.getX();
       array[2] = rotation.getY();
       array[3] = rotation.getZ();
@@ -42,10 +41,11 @@ public class SixDoFState extends JointState
    public void update(LongBuffer buffer)
    {
       
-      rotation.setW(Double.longBitsToDouble(buffer.get()));
-      rotation.setX(Double.longBitsToDouble(buffer.get()));
-      rotation.setY(Double.longBitsToDouble(buffer.get()));
-      rotation.setZ(Double.longBitsToDouble(buffer.get()));
+      double qs = Double.longBitsToDouble(buffer.get());
+      double qx = Double.longBitsToDouble(buffer.get());
+      double qy = Double.longBitsToDouble(buffer.get());
+      double qz = Double.longBitsToDouble(buffer.get());
+      rotation.set(qx, qy, qz, qs);
       translation.setX(Double.longBitsToDouble(buffer.get()));
       translation.setY(Double.longBitsToDouble(buffer.get()));
       translation.setZ(Double.longBitsToDouble(buffer.get()));
@@ -66,24 +66,24 @@ public class SixDoFState extends JointState
    }
 
 
-   public void getRotation(Matrix3d rotationMatrix)
+   public void getRotation(RotationMatrix rotationMatrix)
    {
       rotationMatrix.set(rotation);
    }
 
 
-   public void getTranslation(Vector3d tempVector)
+   public void getTranslation(Vector3D tempVector)
    {
       tempVector.set(translation);
    }
 
 
-   public void getTwistAngularPart(Vector3d tempVector)
+   public void getTwistAngularPart(Vector3D tempVector)
    {
       twist.getAngularPart(tempVector);
    }
    
-   public void getTwistLinearPart(Vector3d tempVector)
+   public void getTwistLinearPart(Vector3D tempVector)
    {
       twist.getLinearPart(tempVector);
    }

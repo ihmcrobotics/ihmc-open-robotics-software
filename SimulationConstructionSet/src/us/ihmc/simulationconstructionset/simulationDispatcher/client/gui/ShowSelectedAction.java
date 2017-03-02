@@ -45,6 +45,7 @@ public class ShowSelectedAction extends AbstractAction implements Runnable
       anim.start();
    }
 
+   @Override
    public void actionPerformed(ActionEvent evt)
    {
       if (isPlaying)
@@ -139,6 +140,7 @@ public class ShowSelectedAction extends AbstractAction implements Runnable
 
    private boolean isPlaying = false;
 
+   @Override
    public void run()
    {
       while (true)

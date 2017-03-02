@@ -2,22 +2,21 @@ package us.ihmc.commonWalkingControlModules.corruptors;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -92,7 +91,7 @@ public class FullRobotModelCorruptor
                ReferenceFrame frameBeforeJoint = hipYawJoint.getFrameBeforeJoint();
 
                RigidBodyTransform postCorruptionTransform = new RigidBodyTransform();
-               Vector3d offsetVector = hipYawOffset.getVector3dCopy();
+               Vector3D offsetVector = hipYawOffset.getVector3dCopy();
                offsetVector.setY(robotSide.negateIfRightSide(offsetVector.getY()));
                postCorruptionTransform.setTranslation(offsetVector);
                frameBeforeJoint.corruptTransformToParentPostMultiply(postCorruptionTransform);
@@ -131,7 +130,7 @@ public class FullRobotModelCorruptor
    {
       name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
       final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
-      final Vector3d jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
+      final Vector3D jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
 
       final RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
 
@@ -142,7 +141,7 @@ public class FullRobotModelCorruptor
          @Override
          public void variableChanged(YoVariable<?> v)
          {
-            AxisAngle4d axisAngle = new AxisAngle4d(jointAxis, offset.getDoubleValue());
+            AxisAngle axisAngle = new AxisAngle(jointAxis, offset.getDoubleValue());
             preCorruptionTransform.setRotationAndZeroTranslation(axisAngle);
             frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
          }

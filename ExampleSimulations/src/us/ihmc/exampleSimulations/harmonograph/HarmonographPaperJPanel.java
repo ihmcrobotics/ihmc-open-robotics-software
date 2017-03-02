@@ -5,12 +5,13 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
-import javax.vecmath.Point3d;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class HarmonographPaperJPanel extends JPanel
 {
    private static final long serialVersionUID = 6882880982176035832L;
-   private final ArrayList<Point3d> points = new ArrayList<Point3d>();
+   private final ArrayList<Point3D> points = new ArrayList<Point3D>();
    private final int maxPoints = 64000;
    private final int[] xPoints = new int[maxPoints];
    private final int[] yPoints = new int[maxPoints];
@@ -25,16 +26,16 @@ public class HarmonographPaperJPanel extends JPanel
       points.clear();
    }
    
-   public synchronized void addPoint(Point3d point)
+   public synchronized void addPoint(Point3D point)
    {
       if (points.size() >= maxPoints) return;
       if (!points.isEmpty())
       {
-         Point3d previousPoint = points.get(points.size()-1);
+         Point3D previousPoint = points.get(points.size()-1);
          if ((previousPoint.distance(point)) < 0.05 * HarmonographRobot.INCHES) return;
       }
       
-      this.points.add(new Point3d(point));
+      this.points.add(new Point3D(point));
 //      System.out.println("addPoint: " + point);
 //      if (points.size() % 1000 == 0) System.out.println("points.size() = " + points.size());
       
@@ -47,7 +48,7 @@ public class HarmonographPaperJPanel extends JPanel
    
    
    
-   private int[] convertPoint3dToIntArray(Point3d point)
+   private int[] convertPoint3dToIntArray(Point3D point)
    {
       double width = 600.0;
       double scale =  12.0 * HarmonographRobot.INCHES;

@@ -2,11 +2,10 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -141,7 +140,7 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
+      location.setTranslation(new Vector3D(xCenter, yCenter, stairTopHeight - thickness / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
@@ -156,7 +155,7 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
       tilt.setRotationPitchAndZeroTranslation(-slopeRadians);
       location.multiply(tilt);
 
-      location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
+      location.setTranslation(new Vector3D(xCenter, yCenter, zCenter));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }
@@ -165,7 +164,7 @@ public class AdjustableStairsEnvironment implements CommonAvatarEnvironmentInter
          double radius, double slopeRadians, double yawDegrees, AppearanceDefinition app)
    {
       double pitchDownDegrees = Math.toDegrees(-slopeRadians + Math.PI / 2);
-      Vector3d center = new Vector3d(xCenter, yCenter, zCenter);
+      Vector3D center = new Vector3D(xCenter, yCenter, zCenter);
 
       CylinderTerrainObject newCylinder = new CylinderTerrainObject(center, pitchDownDegrees, yawDegrees, xLength, radius, app);
       combinedTerrainObject.addTerrainObject(newCylinder);

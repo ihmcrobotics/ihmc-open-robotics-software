@@ -9,19 +9,19 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import javax.vecmath.Point2d;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.plotting.artifact.PolygonArtifact;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.plotting.artifact.PolygonArtifact;
-import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.BoundingBoxKDTree2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dIntersectionSetCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
 /**
  * <p>Title: </p>
@@ -57,16 +57,16 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       int numberOfPolygons = 200;
       for (int i = 0; i < numberOfPolygons; i++)
       {
-         Point2d randomPoint1 = new Point2d(generateRandomDouble(random, -100.0, 200.0), generateRandomDouble(random, -100.0, 100.0));
-         Point2d randomPoint2 = new Point2d(generateRandomDouble(random, randomPoint1.getX(), 200.0), generateRandomDouble(random, randomPoint1.getY(), 100.0));
-         ArrayList<Point2d> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 10);
+         Point2D randomPoint1 = new Point2D(generateRandomDouble(random, -100.0, 200.0), generateRandomDouble(random, -100.0, 100.0));
+         Point2D randomPoint2 = new Point2D(generateRandomDouble(random, randomPoint1.getX(), 200.0), generateRandomDouble(random, randomPoint1.getY(), 100.0));
+         ArrayList<Point2D> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 10);
          ConvexPolygon2d polygon = new ConvexPolygon2d(points);
          convexPolygon2ds.add(polygon);
 
          polygon1.add(new PolygonArtifact("polygon" + i, false, Color.BLACK, polygon));
       }
 
-      ArrayList<Point2d> points = generateRandomCircularPoints(-50.0, 50.0, -50.0, 50.0, 7);
+      ArrayList<Point2D> points = generateRandomCircularPoints(-50.0, 50.0, -50.0, 50.0, 7);
       ConvexPolygon2d captureRegionPolygon = new ConvexPolygon2d(points);
 
       polygon1.add(new PolygonArtifact("captureRegionPolygon", false, Color.red, captureRegionPolygon));
@@ -150,22 +150,22 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
       ArrayList<PolygonArtifact> polygon1 = new ArrayList<PolygonArtifact>();
 
-      ArrayList<Point2d> points1 = new ArrayList<Point2d>();
-      ArrayList<Point2d> points2 = new ArrayList<Point2d>();
+      ArrayList<Point2D> points1 = new ArrayList<Point2D>();
+      ArrayList<Point2D> points2 = new ArrayList<Point2D>();
 
-      points1.add(new Point2d(-6.0, -2.0));
-      points1.add(new Point2d(-6.0, 2.0));
-      points1.add(new Point2d(6.0, 2.0));
-      points1.add(new Point2d(6.0, -2.0));
+      points1.add(new Point2D(-6.0, -2.0));
+      points1.add(new Point2D(-6.0, 2.0));
+      points1.add(new Point2D(6.0, 2.0));
+      points1.add(new Point2D(6.0, -2.0));
       ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d(points1);
 
       polygon1.add(new PolygonArtifact("polygon" + 1, false, Color.BLACK, points1));
       convexPolygon2ds.add(convexPolygon2d);
 
-      points2.add(new Point2d(-5.0, -5.0));
-      points2.add(new Point2d(-5.0, 5.0));
-      points2.add(new Point2d(5.0, 5.0));
-      points2.add(new Point2d(5.0, -5.0));
+      points2.add(new Point2D(-5.0, -5.0));
+      points2.add(new Point2D(-5.0, 5.0));
+      points2.add(new Point2D(5.0, 5.0));
+      points2.add(new Point2D(5.0, -5.0));
 
       ConvexPolygon2d captureRegionPolygon = new ConvexPolygon2d(points2);
 
@@ -208,11 +208,11 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       ArrayList<ConvexPolygon2d> intersectingPolygon2ds = new ArrayList<ConvexPolygon2d>();
       ArrayList<PolygonArtifact> polygon1 = new ArrayList<PolygonArtifact>();
 
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
-      points.add(new Point2d(-0.5, -0.5));
-      points.add(new Point2d(-0.5, 0.5));
-      points.add(new Point2d(0.5, 0.5));
-      points.add(new Point2d(0.5, -0.5));
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      points.add(new Point2D(-0.5, -0.5));
+      points.add(new Point2D(-0.5, 0.5));
+      points.add(new Point2D(0.5, 0.5));
+      points.add(new Point2D(0.5, -0.5));
       ConvexPolygon2d convexPolygon2d = new ConvexPolygon2d(points);
 
       SteppingStones steppingStones = new SteppingStones();
@@ -225,10 +225,10 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       }
 
       points.clear();
-      points.add(new Point2d(-5.0, -5.0));
-      points.add(new Point2d(-5.0, 5.0));
-      points.add(new Point2d(5.0, 5.0));
-      points.add(new Point2d(5.0, -5.0));
+      points.add(new Point2D(-5.0, -5.0));
+      points.add(new Point2D(-5.0, 5.0));
+      points.add(new Point2D(5.0, 5.0));
+      points.add(new Point2D(5.0, -5.0));
 
       ConvexPolygon2d captureRegionPolygon = new ConvexPolygon2d(points);
       polygon1.add(new PolygonArtifact("captureRegionPolygon", false, Color.blue, points));
@@ -310,9 +310,9 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
       for (int i = 0; i < 200; i++)
       {
-         Point2d randomPoint1 = new Point2d(generateRandomDouble(random, -200.0, 200.0), generateRandomDouble(random, -200.0, 200.0));
-         Point2d randomPoint2 = new Point2d(generateRandomDouble(random, randomPoint1.getX(), 200.0), generateRandomDouble(random, randomPoint1.getY(), 200.0));
-         ArrayList<Point2d> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 15);
+         Point2D randomPoint1 = new Point2D(generateRandomDouble(random, -200.0, 200.0), generateRandomDouble(random, -200.0, 200.0));
+         Point2D randomPoint2 = new Point2D(generateRandomDouble(random, randomPoint1.getX(), 200.0), generateRandomDouble(random, randomPoint1.getY(), 200.0));
+         ArrayList<Point2D> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 15);
          ConvexPolygon2d polygon = new ConvexPolygon2d(points);
          convexPolygon2ds.add(polygon);
       }
@@ -341,9 +341,9 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
       int numTests = 10000;
       for (int i = 0; i < numTests; i++)
       {
-         Point2d randomPoint1 = new Point2d(generateRandomDouble(random, -50.0, 50.0), generateRandomDouble(random, -50.0, 50.0));
-         Point2d randomPoint2 = new Point2d(generateRandomDouble(random, randomPoint1.getX(), 50.0), generateRandomDouble(random, randomPoint1.getY(), 50.0));
-         ArrayList<Point2d> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 10);
+         Point2D randomPoint1 = new Point2D(generateRandomDouble(random, -50.0, 50.0), generateRandomDouble(random, -50.0, 50.0));
+         Point2D randomPoint2 = new Point2D(generateRandomDouble(random, randomPoint1.getX(), 50.0), generateRandomDouble(random, randomPoint1.getY(), 50.0));
+         ArrayList<Point2D> points = generateRandomCircularPoints(randomPoint1.getX(), randomPoint2.getX(), randomPoint1.getY(), randomPoint2.getY(), 10);
          captureRegionPolygon.add(new ConvexPolygon2d(points));
       }
 
@@ -396,27 +396,27 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 	@Test(timeout=300000)
    public void testBadCase()
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
-      points.add(new Point2d(47.213206532573494, 33.6934385384089));
-      points.add(new Point2d(47.184403978806806, 33.6901486028859));
-      points.add(new Point2d(47.18629896969355, 33.945259199418715));
-      points.add(new Point2d(47.1996820005182, 37.28788526977694));
-      points.add(new Point2d(47.20659834223872, 36.93933424308558));
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      points.add(new Point2D(47.213206532573494, 33.6934385384089));
+      points.add(new Point2D(47.184403978806806, 33.6901486028859));
+      points.add(new Point2D(47.18629896969355, 33.945259199418715));
+      points.add(new Point2D(47.1996820005182, 37.28788526977694));
+      points.add(new Point2D(47.20659834223872, 36.93933424308558));
 
       new ConvexPolygon2d(points);
    }
 
-   private ArrayList<Point2d> generateRandomCircularPoints(double xMin, double xMax, double yMin, double yMax, int numberOfPoints)
+   private ArrayList<Point2D> generateRandomCircularPoints(double xMin, double xMax, double yMin, double yMax, int numberOfPoints)
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
 
       Random random = new Random(1972L);
 
-      Point2d zeroPoint = new Point2d((xMax + xMin) / 2.0, (yMax + yMin) / 2.0);
+      Point2D zeroPoint = new Point2D((xMax + xMin) / 2.0, (yMax + yMin) / 2.0);
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2d randomPoint = new Point2d(generateRandomDouble(random, xMin, xMax), generateRandomDouble(random, yMin, yMax));
+         Point2D randomPoint = new Point2D(generateRandomDouble(random, xMin, xMax), generateRandomDouble(random, yMin, yMax));
 
          if (randomPoint.distance(zeroPoint) > (Math.max((xMax - xMin) / 2.0, (yMax - yMin) / 2.0)))
             continue;
@@ -459,6 +459,7 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
          JFrame f = new JFrame("Plotter Panel");
          f.addWindowListener(new WindowAdapter()
          {
+            @Override
             public void windowClosing(WindowEvent e)
             {
                System.exit(0);

@@ -1,5 +1,12 @@
 package us.ihmc.communication.streamingData;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
@@ -8,13 +15,6 @@ import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.streamingData.AtomicLastPacketHolder.LastPacket;
 import us.ihmc.tools.thread.ThreadTools;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class GlobalDataProducer
 {

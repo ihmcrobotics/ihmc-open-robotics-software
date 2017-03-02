@@ -46,7 +46,7 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
       double jointLimitUpper = joint.getJointLimitUpper();
       if (Double.isNaN(q) || Double.isInfinite(q))
          q = standPrepAngle.getDoubleValue();
-      q = MathTools.clipToMinMax(q, jointLimitLower, jointLimitUpper);
+      q = MathTools.clamp(q, jointLimitLower, jointLimitUpper);
 
       initialAngle.set(q);
    }
@@ -55,7 +55,7 @@ public class ValkyrieRosControlPositionJointControlCommandCalculator
    {
       double standPrepFactor = 1.0 - factor;
 
-      factor = MathTools.clipToMinMax(factor, 0.0, 1.0);
+      factor = MathTools.clamp(factor, 0.0, 1.0);
 
       double currentJointAngle = yoPositionJointHandleHolder.getQ();
       double standPrepDesired = (1.0 - ramp) * initialAngle.getDoubleValue() + ramp * standPrepAngle.getDoubleValue();

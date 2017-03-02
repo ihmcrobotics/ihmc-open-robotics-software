@@ -4,6 +4,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
@@ -15,13 +18,10 @@ import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
@@ -31,17 +31,19 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
    private static final boolean visualize = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 300000)
    public void testOverCinderBlockFieldWithGoalTooFarAway()
    {
       double startX = 0.0;
       double startY = 0.0;
+      double cinderBlockHeight = 0.15;
       double cinderBlockSize = 0.4;
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
+      double heightVariation = 0.1;
 
-      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
+      PlanarRegionsList cinderBlockField = PlanarRegionsListExamples.generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
 
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, -0.7, 0.0);
@@ -76,16 +78,18 @@ public class AnytimeFootstepPlannerOnRoughTerrainTest implements PlanningTest
       }
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.5)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 300000)
    public void testOverCinderBlockFieldWithIncrementalKnowledgeOfTerrain()
    {
+      double cinderBlockHeight = 0.15;
       double cinderBlockSize = 0.4;
       int courseLengthYInNumberOfBlocks = 6;
+      double heightVariation = 0.1;
 
-      PlanarRegionsList cinderBlockFieldOneThird = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockSize, 7, courseLengthYInNumberOfBlocks);
-      PlanarRegionsList cinderBlockFieldTwoThirds = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockSize, 14, courseLengthYInNumberOfBlocks);
-      PlanarRegionsList cinderBlockEntireField = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockSize, 21, courseLengthYInNumberOfBlocks);
+      PlanarRegionsList cinderBlockFieldOneThird = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockHeight, cinderBlockSize, 7, courseLengthYInNumberOfBlocks, heightVariation);
+      PlanarRegionsList cinderBlockFieldTwoThirds = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockHeight, cinderBlockSize, 14, courseLengthYInNumberOfBlocks, heightVariation);
+      PlanarRegionsList cinderBlockEntireField = PlanarRegionsListExamples.generateCinderBlockField(0.0, 0.0, cinderBlockHeight, cinderBlockSize, 21, courseLengthYInNumberOfBlocks, heightVariation);
 
       FramePose initialStanceFootPose = new FramePose(worldFrame);
       initialStanceFootPose.setPosition(0.0, -0.7, 0.0);

@@ -92,7 +92,7 @@ public class VelocityElasticityCompensatorYoVariable extends DoubleYoVariable im
          throw new RuntimeException("Joint stiffness is zero or negative!");
 
       double deflection = jointTau / stiffness.getDoubleValue();
-      deflection = MathTools.clipToMinMax(deflection, maximumDeflection.getDoubleValue());
+      deflection = MathTools.clamp(deflection, maximumDeflection.getDoubleValue());
       jointDeflection.set(deflection);
 
       double newDeflectionDot = (jointDeflection.getDoubleValue() - jointDeflectionPrevious.getDoubleValue()) / updateDT;

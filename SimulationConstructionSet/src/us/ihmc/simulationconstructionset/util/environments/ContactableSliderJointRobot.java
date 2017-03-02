@@ -1,18 +1,16 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public abstract class ContactableSliderJointRobot extends Robot implements Contactable
 {
-   private static final long serialVersionUID = -337148945439165270L;
    private final InternalSingleJointArticulatedContactable articulatedContactable;
 
    public ContactableSliderJointRobot(String name)
@@ -39,21 +37,25 @@ public abstract class ContactableSliderJointRobot extends Robot implements Conta
          this.contactableRobot = robot;
       }
 
-      public boolean isClose(Point3d pointInWorldToCheck)
+      @Override
+      public boolean isClose(Point3D pointInWorldToCheck)
       {
          return contactableRobot.isClose(pointInWorldToCheck);
       }
 
-      public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+      @Override
+      public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
       {
          return contactableRobot.isPointOnOrInside(pointInWorldToCheck);
       }
 
-      public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+      @Override
+      public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
       {
          contactableRobot.closestIntersectionAndNormalAt(intersectionToPack, normalToPack, pointInWorldToCheck);
       }
 
+      @Override
       public Joint getJoint()
       {
          return contactableRobot.getSliderJoint();
@@ -65,21 +67,25 @@ public abstract class ContactableSliderJointRobot extends Robot implements Conta
       articulatedContactable.createAvailableContactPoints(groupIdentifier, totalContactPointsAvailable, forceVectorScale, addDynamicGraphicForceVectorsForceVectors);
    }
 
+   @Override
    public int getAndLockAvailableContactPoint()
    {
       return articulatedContactable.getAndLockAvailableContactPoint();
    }
 
+   @Override
    public void unlockContactPoint(GroundContactPoint groundContactPoint)
    {
       articulatedContactable.unlockContactPoint(groundContactPoint);
    }
 
+   @Override
    public GroundContactPoint getLockedContactPoint(int contactPointIndex)
    {
       return articulatedContactable.getLockedContactPoint(contactPointIndex);
    }
 
+   @Override
    public void updateContactPoints()
    {
       articulatedContactable.updateContactPoints();

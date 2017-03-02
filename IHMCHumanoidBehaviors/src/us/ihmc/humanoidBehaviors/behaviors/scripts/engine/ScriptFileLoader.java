@@ -1,40 +1,44 @@
 package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class ScriptFileLoader
 {
-
-   private final FileReader fileReader;
+   private final BufferedReader reader;
    private ObjectInputStream inputStream;
-
-   public ScriptFileLoader(String filename) throws IOException, StreamException
+   
+   public ScriptFileLoader(Path scriptFilePath) throws IOException, StreamException
    {
-      File file = new File(filename);
-      if (!file.exists())
+      PrintTools.info("Working directory: " + System.getProperty("user.dir"));
+      if (!Files.exists(scriptFilePath))
       {
-         throw new IOException("Unknown file " + filename);
+         throw new IOException("!Files.exists(path): " + scriptFilePath.toString());
       }
       XStream xStream = new XStream()
       {
+         @Override
          protected MapperWrapper wrapMapper(MapperWrapper next)
          {
             return new MapperWrapper(next)
             {
+               @Override
                public boolean shouldSerializeMember(@SuppressWarnings("rawtypes") Class definedIn, String fieldName)
                {
                   return definedIn != Object.class ? super.shouldSerializeMember(definedIn, fieldName) : false;
@@ -43,8 +47,8 @@ public class ScriptFileLoader
          }
       };
 
-      fileReader = new FileReader(file.getAbsoluteFile());
-      inputStream = xStream.createObjectInputStream(fileReader);
+      reader = Files.newBufferedReader(scriptFilePath);
+      inputStream = xStream.createObjectInputStream(reader);
    }
    
    
@@ -57,12 +61,14 @@ public class ScriptFileLoader
    {
 	   XStream xStream = new XStream()
 	      {
-	         protected MapperWrapper wrapMapper(MapperWrapper next)
+	         @Override
+            protected MapperWrapper wrapMapper(MapperWrapper next)
 	         {
 	            return new MapperWrapper(next)
 	            {
 
-	               public boolean shouldSerializeMember(@SuppressWarnings("rawtypes") Class definedIn, String fieldName)
+	               @Override
+                  public boolean shouldSerializeMember(@SuppressWarnings("rawtypes") Class definedIn, String fieldName)
 	               {
 	                  return definedIn != Object.class ? super.shouldSerializeMember(definedIn, fieldName) : false;
 	               }
@@ -70,7 +76,7 @@ public class ScriptFileLoader
 	         }
 	      };
 	      
-	      fileReader = null;
+	      reader = null;
 	      inputStream = xStream.createObjectInputStream(scriptInputStream);
    }
 
@@ -78,9 +84,9 @@ public class ScriptFileLoader
    {
       try
       {
-    	  if(fileReader != null)
+    	  if(reader != null)
     	  {
-    		  fileReader.close();    		  
+    		  reader.close();    		  
     	  }
          inputStream.close();
       }

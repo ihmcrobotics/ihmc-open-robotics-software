@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
+import java.util.Arrays;
+import java.util.Random;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.ArrayTools;
 import us.ihmc.tools.FormattingTools;
-
-import java.util.Arrays;
-import java.util.Random;
 
 public class JointAnglesPacket extends Packet<JointAnglesPacket> implements VisualizablePacket
 {
@@ -186,7 +186,7 @@ public class JointAnglesPacket extends Packet<JointAnglesPacket> implements Visu
       //      this.trajectoryTime = trajectoryTime;
 
       // limiting motor speed for safe joint speed. if the arms exceed (700 rad / sec) / (100 gear ratio) = 7 rad/sec we are in trouble
-      this.trajectoryTime = MathTools.clipToMinMax(trajectoryTime, 2.0, Double.MAX_VALUE);
+      this.trajectoryTime = MathTools.clamp(trajectoryTime, 2.0, Double.MAX_VALUE);
    }
    
    /////////////////////////////////////////////////////////////////////////////////////////////////////

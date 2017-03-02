@@ -32,6 +32,7 @@ public class TypicalTorqueSpeedCurve implements TorqueSpeedCurve
       this.maxSpeedAtMaxTorque = maxSpeedAtMaxTorque;
    }
 
+   @Override
    public double limitTorque(double torque, double speed)
    {
       if ((speed < 0.0) && (torque > 0.0))
@@ -50,13 +51,13 @@ public class TypicalTorqueSpeedCurve implements TorqueSpeedCurve
 
       if (absoluteSpeed < maxSpeedAtMaxTorque)
       {
-         return MathTools.clipToMinMax(torque, -maxTorque, maxTorque);
+         return MathTools.clamp(torque, -maxTorque, maxTorque);
       }
 
       double percent = 1.0 - (absoluteSpeed - maxSpeedAtMaxTorque) / (maxSpeed - maxSpeedAtMaxTorque);
       double maxScaledTorque = percent * maxTorque;
 
-      return MathTools.clipToMinMax(torque, -maxScaledTorque, maxScaledTorque);
+      return MathTools.clamp(torque, -maxScaledTorque, maxScaledTorque);
    }
 
 }

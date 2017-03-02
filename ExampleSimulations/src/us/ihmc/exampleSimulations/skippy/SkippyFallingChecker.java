@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.skippy;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 
@@ -19,8 +18,8 @@ public class SkippyFallingChecker extends SimpleRobotController
    @Override
    public void doControl()
    {
-      Point3d footLocation = skippyRobot.computeFootLocation();
-      Point3d com = new Point3d();
+      Point3D footLocation = skippyRobot.computeFootLocation();
+      Point3D com = new Point3D();
       skippyRobot.computeCenterOfMass(com);
 
       boolean skippyFalling = com.getZ() < footLocation.getZ() + 0.1;

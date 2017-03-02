@@ -1,27 +1,30 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import georegression.geometry.ConvertRotation3D_F64;
-import georegression.struct.EulerType;
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.se.Se3_F64;
-import georegression.transform.se.SePointOps_F64;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Random;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
+
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.EulerType;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.se.Se3_F64;
+import georegression.transform.se.SePointOps_F64;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Point3d;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
-
-import static org.junit.Assert.*;
 
 public class MatrixToolsTest
 {
@@ -131,7 +134,7 @@ public class MatrixToolsTest
       MatrixTools.tranformSe3IntoTransform3D(a, b);
 
       Point3D_F64 p0 = new Point3D_F64(-1, 2, 3);
-      Point3d p1 = new Point3d(p0.x, p0.y, p0.z);
+      Point3D p1 = new Point3D(p0.x, p0.y, p0.z);
 
       SePointOps_F64.transform(a, p0, p0);
 
@@ -149,10 +152,10 @@ public class MatrixToolsTest
       Random random = new Random(3216516L);
       for (int i = 0; i < 20; i++)
       {
-         int numRows = RandomTools.generateRandomInt(random, 1, 100);
-         int numCols = RandomTools.generateRandomInt(random, 1, 100);
+         int numRows = RandomNumbers.nextInt(random, 1, 100);
+         int numCols = RandomNumbers.nextInt(random, 1, 100);
          DenseMatrix64F randomMatrix = RandomMatrices.createRandom(numRows, numCols, 1.0, 100.0, random);
-         int indexOfRowToRemove = RandomTools.generateRandomInt(random, 0, randomMatrix.getNumRows() - 1);
+         int indexOfRowToRemove = RandomNumbers.nextInt(random, 0, randomMatrix.getNumRows() - 1);
          DenseMatrix64F expectedMatrix = new DenseMatrix64F(numRows - 1, numCols);
          
          for (int rowIndex = 0; rowIndex < numRows - 1; rowIndex++)
@@ -181,11 +184,11 @@ public class MatrixToolsTest
       Random random = new Random(3216516L);
       for (int i = 0; i < 200; i++)
       {
-         int numRows = RandomTools.generateRandomInt(random, 1, 100);
-         int numCols = RandomTools.generateRandomInt(random, 1, 100);
+         int numRows = RandomNumbers.nextInt(random, 1, 100);
+         int numCols = RandomNumbers.nextInt(random, 1, 100);
          DenseMatrix64F randomMatrix = RandomMatrices.createRandom(numRows, numCols, 1.0, 100.0, random);
-         int randomNumberOfZeroRows = RandomTools.generateRandomInt(random, 0, 5);
-         int[] indicesOfZeroRows = RandomTools.generateRandomIntArray(random, randomNumberOfZeroRows, 0, randomMatrix.getNumRows() - 1);
+         int randomNumberOfZeroRows = RandomNumbers.nextInt(random, 0, 5);
+         int[] indicesOfZeroRows = RandomNumbers.nextIntArray(random, randomNumberOfZeroRows, 0, randomMatrix.getNumRows() - 1);
 
          // Switching to a set to remove duplicates
          HashSet<Integer> filterForDuplicate = new HashSet<>();
@@ -225,10 +228,10 @@ public class MatrixToolsTest
       Random random = new Random(165156L);
       for (int i = 0; i < 200; i++)
       {
-         int numRows = RandomTools.generateRandomInt(random, 1, 100);
-         int numCols = RandomTools.generateRandomInt(random, 1, 100);
+         int numRows = RandomNumbers.nextInt(random, 1, 100);
+         int numCols = RandomNumbers.nextInt(random, 1, 100);
          DenseMatrix64F randomMatrix = RandomMatrices.createRandom(numRows, numCols, 1.0, 100.0, random);
-         double randomAlpha = RandomTools.generateRandomDouble(random, 100.0);
+         double randomAlpha = RandomNumbers.nextDouble(random, 100.0);
          DenseMatrix64F expectedMatrix = new DenseMatrix64F(numCols, numRows);
          DenseMatrix64F actualMatrix = new DenseMatrix64F(numCols, numRows);
 
@@ -249,10 +252,10 @@ public class MatrixToolsTest
       Random random = new Random(3216516L);
       for (int i = 0; i < 1000; i++)
       {
-         int numRows = RandomTools.generateRandomInt(random, 3, 100);
+         int numRows = RandomNumbers.nextInt(random, 3, 100);
          DenseMatrix64F matrixToTest = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
          FramePoint framePointToInsert = FramePoint.generateRandomFramePoint(random, ReferenceFrame.getWorldFrame(), 100.0, 100.0, 100.0);
-         int startRowToInsertFrameTuple = RandomTools.generateRandomInt(random, 0, numRows - 3);
+         int startRowToInsertFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
          MatrixTools.insertFrameTupleIntoEJMLVector(framePointToInsert, matrixToTest, startRowToInsertFrameTuple);
 
          assertEquals(framePointToInsert.getX(), matrixToTest.get(startRowToInsertFrameTuple + 0, 0), 1.0e-10);
@@ -268,10 +271,10 @@ public class MatrixToolsTest
       Random random = new Random(3216516L);
       for (int i = 0; i < 1000; i++)
       {
-         int numRows = RandomTools.generateRandomInt(random, 3, 100);
+         int numRows = RandomNumbers.nextInt(random, 3, 100);
          DenseMatrix64F matrixToExtractFrom = RandomMatrices.createRandom(numRows, 1, 1.0, 100.0, random);
          FramePoint framePointToTest = new FramePoint(null, -1.0, -1.0, -1.0);
-         int startRowToExtractFrameTuple = RandomTools.generateRandomInt(random, 0, numRows - 3);
+         int startRowToExtractFrameTuple = RandomNumbers.nextInt(random, 0, numRows - 3);
          MatrixTools.extractFrameTupleFromEJMLVector(framePointToTest, matrixToExtractFrom, ReferenceFrame.getWorldFrame(), startRowToExtractFrameTuple);
 
          assertEquals(framePointToTest.getReferenceFrame(), ReferenceFrame.getWorldFrame());
