@@ -97,7 +97,7 @@ import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTre
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotConnectionGUIUpdater;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
