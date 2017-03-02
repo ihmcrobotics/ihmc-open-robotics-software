@@ -3,17 +3,15 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -48,17 +46,17 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
 
    public IndustrialDebrisEnvironment()
    {
-      this(new Vector3d(0.0, 0.0, 0.0), 0.0);
+      this(new Vector3D(0.0, 0.0, 0.0), 0.0);
    }
 
-   public IndustrialDebrisEnvironment(Tuple3d robotInitialPosition, double robotInitialYaw)
+   public IndustrialDebrisEnvironment(Tuple3DBasics robotInitialPosition, double robotInitialYaw)
    {
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
-      Quat4d robotInitialOrientation = new Quat4d();
-      RotationTools.convertYawPitchRollToQuaternion(robotInitialYaw, 0.0, 0.0, robotInitialOrientation);
-      Point3d robotPosition = new Point3d(robotInitialPosition);
+      Quaternion robotInitialOrientation = new Quaternion();
+      robotInitialOrientation.setYawPitchRoll(robotInitialYaw, 0.0, 0.0);
+      Point3D robotPosition = new Point3D(robotInitialPosition);
       FramePose robotInitialPose = new FramePose(constructionWorldFrame, robotPosition, robotInitialOrientation);
 
       this.robotInitialPoseReferenceFrame = new PoseReferenceFrame("robotInitialPoseReferenceFrame", robotInitialPose);
@@ -66,12 +64,12 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
 
    public void addStandingDebris(double xRelativeToRobot, double yRelativeToRobot, double debrisYaw)
    {
-      Point3d tempPosition = new Point3d(xRelativeToRobot, yRelativeToRobot, debrisLength / 2.0);
+      Point3D tempPosition = new Point3D(xRelativeToRobot, yRelativeToRobot, debrisLength / 2.0);
       FramePose debrisPose = generateDebrisPose(tempPosition, debrisYaw, 0.0, 0.0);
       debrisRobots.add(createDebrisRobot(debrisPose));
    }
 
-   public void addHorizontalDebrisLeaningOnTwoBoxes(Point3d positionOfCenterOfDebrisWithRespectToRobot, double debrisYaw, double debrisRoll)
+   public void addHorizontalDebrisLeaningOnTwoBoxes(Point3D positionOfCenterOfDebrisWithRespectToRobot, double debrisYaw, double debrisRoll)
    {
       double supportWidth = 0.1;
       double supportLength = 0.2;
@@ -120,7 +118,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
 
    public void addVerticalDebrisLeaningAgainstAWall(double xRelativeToRobot, double yRelativeToRobot, double debrisYaw, double debrisPitch)
    {
-      Point3d tempPosition = new Point3d(xRelativeToRobot, yRelativeToRobot, debrisLength / 2.0 * Math.cos(debrisPitch));
+      Point3D tempPosition = new Point3D(xRelativeToRobot, yRelativeToRobot, debrisLength / 2.0 * Math.cos(debrisPitch));
       FramePose debrisPose = generateDebrisPose(tempPosition, debrisYaw, debrisPitch, 0.0);
       debrisRobots.add(createDebrisRobot(debrisPose));
 
@@ -149,11 +147,11 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       combinedTerrainObject.addRotatableBox(supportTransform, supportWidth, supportLength, supportHeight, YoAppearance.AliceBlue());
    }
 
-   private FramePose generateDebrisPose(Point3d positionWithRespectToRobot, double debrisYaw, double debrisPitch, double debrisRoll)
+   private FramePose generateDebrisPose(Point3D positionWithRespectToRobot, double debrisYaw, double debrisPitch, double debrisRoll)
    {
       FramePose debrisPose = new FramePose(robotInitialPoseReferenceFrame);
-      Quat4d orientation = new Quat4d();
-      RotationTools.convertYawPitchRollToQuaternion(debrisYaw, debrisPitch, debrisRoll, orientation);
+      Quaternion orientation = new Quaternion();
+      orientation.setYawPitchRoll(debrisYaw, debrisPitch, debrisRoll);
       debrisPose.setPose(positionWithRespectToRobot, orientation);
       debrisPose.changeFrame(constructionWorldFrame);
       return debrisPose;

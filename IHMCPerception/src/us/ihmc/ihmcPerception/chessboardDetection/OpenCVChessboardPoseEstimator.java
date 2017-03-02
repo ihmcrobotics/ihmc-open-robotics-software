@@ -5,17 +5,24 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.opencv.calib3d.Calib3d;
-import org.opencv.core.*;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.Point;
+import org.opencv.core.Point3;
+import org.opencv.core.Size;
+import org.opencv.core.TermCriteria;
 import org.opencv.imgproc.Imgproc;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 public class OpenCVChessboardPoseEstimator
@@ -150,22 +157,22 @@ public class OpenCVChessboardPoseEstimator
 
    public static RigidBodyTransform opencvTRtoRigidBodyTransform(Mat rvec, Mat tvec)
    {
-      Vector3d translation = new Vector3d(tvec.get(0, 0)[0], tvec.get(1, 0)[0], tvec.get(2, 0)[0]);
-      Vector3d axis = new Vector3d(rvec.get(0, 0)[0], rvec.get(1, 0)[0], rvec.get(2, 0)[0]);
+      Vector3D translation = new Vector3D(tvec.get(0, 0)[0], tvec.get(1, 0)[0], tvec.get(2, 0)[0]);
+      Vector3D axis = new Vector3D(rvec.get(0, 0)[0], rvec.get(1, 0)[0], rvec.get(2, 0)[0]);
       double angle = axis.length();
       axis.normalize();
-      AxisAngle4d rotation = new AxisAngle4d(axis, angle);
+      AxisAngle rotation = new AxisAngle(axis, angle);
       RigidBodyTransform transform = new RigidBodyTransform(rotation, translation);
       return transform;
    }
 
    public static void rigidBodyTransformToOpenCVTR(RigidBodyTransform transform, Mat tvec, Mat rvec)
    {
-      Point3d translation = new Point3d();
+      Point3D translation = new Point3D();
       transform.getTranslation(translation);
-      AxisAngle4d axisAngle = new AxisAngle4d();
+      AxisAngle axisAngle = new AxisAngle();
       transform.getRotation(axisAngle);
-      Vector3d rotVector = new Vector3d(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ());
+      Vector3D rotVector = new Vector3D(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ());
       rotVector.normalize();
       rotVector.scale(axisAngle.getAngle());
 
@@ -186,7 +193,7 @@ public class OpenCVChessboardPoseEstimator
       drawAxis(image, rvec, tvec, scale);
    }
 
-   public javax.vecmath.Point2d getCheckerBoardImageOrigin(RigidBodyTransform transform)
+   public us.ihmc.euclid.tuple2D.Point2D getCheckerBoardImageOrigin(RigidBodyTransform transform)
    {
       Point3 origin = new Point3();
       Mat tvec = new Mat(3, 1, CvType.CV_32F);
@@ -194,7 +201,7 @@ public class OpenCVChessboardPoseEstimator
       rigidBodyTransformToOpenCVTR(transform, tvec, rvec);
       MatOfPoint2f imagePoints = new MatOfPoint2f();
       Calib3d.projectPoints(new MatOfPoint3f(origin), rvec, tvec, cameraMatrix, distCoeffs, imagePoints);
-      return new javax.vecmath.Point2d(imagePoints.get(0, 0));
+      return new us.ihmc.euclid.tuple2D.Point2D(imagePoints.get(0, 0));
    }
 
    private void drawAxis(BufferedImage image, Mat rvec, Mat tvec, double scale)
@@ -245,17 +252,17 @@ public class OpenCVChessboardPoseEstimator
 
    public void drawImagePoints(BufferedImage image, Mat imagePoints, Color color)
    {
-      Point2d[] point2dArray = new Point2d[imagePoints.rows()];
+      Point2D[] point2dArray = new Point2D[imagePoints.rows()];
       for (int i = 0; i < point2dArray.length; i++)
       {
          double[] v = imagePoints.get(i, 0);
-         point2dArray[i] = new Point2d(v[0], v[1]);
+         point2dArray[i] = new Point2D(v[0], v[1]);
       }
       drawImagePoints(image, point2dArray, color);
 
    }
 
-   public void drawImagePoints(BufferedImage image, Point2d[] imagePoints, Color color)
+   public void drawImagePoints(BufferedImage image, Point2D[] imagePoints, Color color)
    {
       Graphics2D g2 = image.createGraphics();
       g2.setStroke(new BasicStroke(4));

@@ -11,6 +11,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
+@SuppressWarnings("serial")
 public class YoVariableStatusDisplay extends JLabel implements YoVariableToggleContainer
 {
    private YoVariableToggler buttonToggleState;
@@ -42,6 +43,7 @@ public class YoVariableStatusDisplay extends JLabel implements YoVariableToggleC
 //    this.setEnabled(false);
    }
 
+   @Override
    public void handleStateChange()
    {
       this.setText(buttonToggleState.getNextStateString());
@@ -65,11 +67,13 @@ public class YoVariableStatusDisplay extends JLabel implements YoVariableToggleC
 //    setEnabled(true);
    }
 
+   @Override
    public NewDataListener getDataListener()
    {
       return buttonToggleState;
    }
 
+   @Override
    public void processingStateChange(boolean endStateValue)
    {
       try
@@ -119,6 +123,7 @@ public class YoVariableStatusDisplay extends JLabel implements YoVariableToggleC
 
    }
 
+   @Override
    public void registerWithVariableChangedListener(VariableChangedListener changedListener)
    {
       buttonToggleState.registerWithVariableChangedListener(changedListener);

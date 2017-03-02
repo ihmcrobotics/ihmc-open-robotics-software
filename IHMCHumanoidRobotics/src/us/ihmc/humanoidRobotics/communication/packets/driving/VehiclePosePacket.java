@@ -2,23 +2,23 @@ package us.ihmc.humanoidRobotics.communication.packets.driving;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.FormattingTools;
 
 public class VehiclePosePacket extends Packet<VehiclePosePacket> implements TransformableDataObject<VehiclePosePacket>
 {
-   public Point3d position;
-   public Quat4d orientation;
+   public Point3D position;
+   public Quaternion orientation;
 
    public int index = 0;
 
@@ -27,7 +27,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
       // Empty constructor for deserialization
    }
 
-   public VehiclePosePacket(Point3d position, Quat4d orientation)
+   public VehiclePosePacket(Point3D position, Quaternion orientation)
    {
       this.position = position;
       this.orientation = orientation;
@@ -35,22 +35,22 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
 
    public VehiclePosePacket(RigidBodyTransform transformFromVehicleToWorld)
    {
-      Matrix3d rotationMatrix = new Matrix3d();
+      RotationMatrix rotationMatrix = new RotationMatrix();
       transformFromVehicleToWorld.getRotation(rotationMatrix);
-      orientation = new Quat4d();
-      RotationTools.convertMatrixToQuaternion(rotationMatrix, orientation);
+      orientation = new Quaternion();
+      orientation.set(rotationMatrix);
 
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       transformFromVehicleToWorld.getTranslation(translation);
-      position = new Point3d(translation);
+      position = new Point3D(translation);
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
@@ -59,7 +59,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
    {
       VehiclePosePacket ret = new VehiclePosePacket();
 
-      // Point3d position;
+      // Point3D position;
       ret.position = TransformTools.getTransformedPoint(this.getPosition(), transform);
 
       // Quat4d orientation;
@@ -79,7 +79,7 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
    public String toString()
    {
       double[] ypr = new double[3];
-      RotationTools.convertQuaternionToYawPitchRoll(orientation, ypr);
+      YawPitchRollConversion.convertQuaternionToYawPitchRoll(orientation, ypr);
       String ret = ("Car= (" + FormattingTools.getFormattedDecimal3D(position.getX()) + "," + FormattingTools.getFormattedDecimal3D(position.getY()) + ","
                     + FormattingTools.getFormattedDecimal3D(position.getZ()) + ")," + " (" + FormattingTools.getFormattedDecimal3D(ypr[0]) + ","
                     + FormattingTools.getFormattedDecimal3D(ypr[1]) + "," + FormattingTools.getFormattedDecimal3D(ypr[2]) + ")");
@@ -89,11 +89,11 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Tran
 
    public VehiclePosePacket(Random random)
    {
-      Point3d point = new Point3d();
-      Quat4d quat = new Quat4d();
+      Point3D point = new Point3D();
+      Quaternion quat = new Quaternion();
 
-      point.set(RandomTools.generateRandomPoint(random, 0.288, 0.288, 0.288));    // magic numbers so point will not exceed XYZ_MIN / MAX in PelvisOrientationPacketSerializer
-      quat.set(RandomTools.generateRandomRotation(random));
+      point.set(RandomGeometry.nextPoint3D(random, 0.288, 0.288, 0.288));    // magic numbers so point will not exceed XYZ_MIN / MAX in PelvisOrientationPacketSerializer
+      quat.set(RandomGeometry.nextAxisAngle(random));
 
       this.position = point;
       this.orientation = quat;

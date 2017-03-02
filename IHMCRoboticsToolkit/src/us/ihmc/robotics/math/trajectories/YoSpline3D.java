@@ -293,17 +293,50 @@ public class YoSpline3D
       }
    }
 
+   /**
+    * GC-free but unsafe accessor.
+    */
    public FramePoint getPosition()
+   {
+      return position.getFrameTuple();
+   }
+
+   /**
+    * GC-free but unsafe accessor.
+    */
+   public FrameVector getVelocity()
+   {
+      return velocity.getFrameTuple();
+   }
+
+   /**
+    * GC-free but unsafe accessor.
+    */
+   public FrameVector getAcceleration()
+   {
+      return acceleration.getFrameTuple();
+   }
+
+   /**
+    * @deprecated Creates garbage.
+    */
+   public FramePoint getPositionCopy()
    {
       return position.getFramePointCopy();
    }
 
-   public FrameVector getVelocity()
+   /**
+    * @deprecated Creates garbage.
+    */
+   public FrameVector getVelocityCopy()
    {
       return velocity.getFrameVectorCopy();
    }
-
-   public FrameVector getAcceleration()
+   
+   /**
+    * @deprecated Creates garbage.
+    */
+   public FrameVector getAccelerationCopy()
    {
       return acceleration.getFrameVectorCopy();
    }

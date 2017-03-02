@@ -1,18 +1,22 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import static org.junit.Assert.assertEquals;
 
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.ejml.data.DenseMatrix64F;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.RigidBodyTransformGeneratorTest;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.random.RandomGeometryTest;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalculatorTest
 {
@@ -40,15 +44,15 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       random = new Random(1982L);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
 
-      sixDoFJoint.setPositionAndRotation(RigidBodyTransform.generateRandomTransform(random));
+      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
-      sixDoFJointTwist.setLinearPart(RandomTools.generateRandomVector(random));
-      sixDoFJointTwist.setAngularPart(RandomTools.generateRandomVector(random));
+      sixDoFJointTwist.setLinearPart(RandomGeometry.nextVector3D(random));
+      sixDoFJointTwist.setAngularPart(RandomGeometry.nextVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
-      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, RandomTools.generateRandomDiagonalMatrix3d(random), random.nextDouble(),
-            RandomTools.generateRandomVector(random));
+      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, RandomGeometry.nextDiagonalMatrix3D(random), random.nextDouble(),
+            RandomGeometry.nextVector3D(random));
 
       MassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(elevator);
       massMatrixCalculator.compute();
@@ -69,15 +73,15 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
       random = new Random(1982L);
       SixDoFJoint sixDoFJoint = new SixDoFJoint("sixDoFJoint", elevator, elevator.getBodyFixedFrame());
 
-      sixDoFJoint.setPositionAndRotation(RigidBodyTransform.generateRandomTransform(random));
+      sixDoFJoint.setPositionAndRotation(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       Twist sixDoFJointTwist = new Twist();
       sixDoFJoint.getJointTwist(sixDoFJointTwist);
-      sixDoFJointTwist.setLinearPart(RandomTools.generateRandomVector(random));
-      sixDoFJointTwist.setAngularPart(RandomTools.generateRandomVector(random));
+      sixDoFJointTwist.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random));
+      sixDoFJointTwist.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random));
       sixDoFJoint.setJointTwist(sixDoFJointTwist);
 
-      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, RandomTools.generateRandomDiagonalMatrix3d(random), random.nextDouble(),
-                                                   RandomTools.generateRandomVector(random));
+      RigidBody floating = ScrewTools.addRigidBody("floating", sixDoFJoint, EuclidCoreRandomTools.generateRandomDiagonalMatrix3D(random), random.nextDouble(),
+                                                   EuclidCoreRandomTools.generateRandomVector3D(random));
 
       random = new Random(1986L);
       setUpRandomTree(floating);
@@ -96,13 +100,13 @@ public class CompositeRigidBodyMassMatrixCalculatorTest extends MassMatrixCalcul
    {
       joints = new ArrayList<RevoluteJoint>();
 
-      Vector3d[] jointAxes1 = {X, Y, Z, Y, X};
+      Vector3D[] jointAxes1 = {X, Y, Z, Y, X};
       ScrewTestTools.createRandomChainRobot("chainA", joints, elevator, jointAxes1, random);
 
-      Vector3d[] jointAxes2 = {Z, X, Y, X, X};
+      Vector3D[] jointAxes2 = {Z, X, Y, X, X};
       ScrewTestTools.createRandomChainRobot("chainB", joints, elevator, jointAxes2, random);
 
-      Vector3d[] jointAxes3 = {Y, Y, X, X, X};
+      Vector3D[] jointAxes3 = {Y, Y, X, X, X};
       ScrewTestTools.createRandomChainRobot("chainC", joints, elevator, jointAxes3, random);
    }
 }

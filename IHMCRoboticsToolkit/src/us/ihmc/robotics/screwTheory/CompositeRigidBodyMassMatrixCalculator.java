@@ -2,13 +2,12 @@ package us.ihmc.robotics.screwTheory;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
-import java.util.List;
+
 
 public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalculator
 {

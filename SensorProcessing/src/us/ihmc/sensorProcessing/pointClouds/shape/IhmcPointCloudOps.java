@@ -1,13 +1,13 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import java.util.List;
+
 import georegression.geometry.UtilPoint3D_F64;
 import georegression.metric.ClosestPoint3D_F64;
 import georegression.struct.line.LineParametric3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
-
-import java.util.List;
 
 /**
  * @author Peter Abeles

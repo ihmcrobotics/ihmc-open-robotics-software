@@ -6,8 +6,6 @@ import java.net.URL;
 
 import javax.swing.JOptionPane;
 
-import us.ihmc.simulationconstructionset.Robot;
-
 public class DataExporterDirectoryFinder
 {
    public static File findSimulationRootLocation(Class<?> rootClassForDirectory)

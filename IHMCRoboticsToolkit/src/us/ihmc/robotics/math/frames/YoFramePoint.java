@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -64,12 +63,12 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
    }
 
    @Override
-   public void getPoint(Point3d pointToPack)
+   public void getPoint(Point3D pointToPack)
    {
       this.get(pointToPack);
    }
 
-   private final Point3d tempPoint = new Point3d();
+   private final Point3D tempPoint = new Point3D();
    
    @Override
    public void setPoint(PointInterface pointInterface)
@@ -79,7 +78,7 @@ public class YoFramePoint extends YoFrameTuple<YoFramePoint, FramePoint> impleme
    }
 
    @Override
-   public void setPoint(Point3d point)
+   public void setPoint(Point3D point)
    {
       this.set(point);
    }

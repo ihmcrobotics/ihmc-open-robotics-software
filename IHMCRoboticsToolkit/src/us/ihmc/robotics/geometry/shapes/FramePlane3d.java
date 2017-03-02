@@ -1,15 +1,16 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameLine;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 public class FramePlane3d extends AbstractReferenceFrameHolder
 {
@@ -17,12 +18,12 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
    private Plane3d plane3d;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
-   private final Vector3d temporaryVector = new Vector3d();
-   private final Point3d temporaryPoint = new Point3d();
+   private final Vector3D temporaryVector = new Vector3D();
+   private final Point3D temporaryPoint = new Point3D();
    
-   private final Point3d temporaryPointA = new Point3d();
-   private final Point3d temporaryPointB = new Point3d();
-   private final Point3d temporaryPointC = new Point3d();
+   private final Point3D temporaryPointA = new Point3D();
+   private final Point3D temporaryPointB = new Point3D();
+   private final Point3D temporaryPointC = new Point3D();
 
    public FramePlane3d()
    {
@@ -54,7 +55,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       this.plane3d = new Plane3d(point.getPoint(), normal.getVector());
    }
 
-   public FramePlane3d(ReferenceFrame referenceFrame, Point3d point, Vector3d normal)
+   public FramePlane3d(ReferenceFrame referenceFrame, Point3DReadOnly point, Vector3DReadOnly normal)
    {
       this.referenceFrame = referenceFrame;
       this.plane3d = new Plane3d(point, normal);
@@ -80,7 +81,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       return returnVector;
    }
    
-   public Vector3d getNormal()
+   public Vector3D getNormal()
    {
       return plane3d.getNormal();
    }
@@ -90,7 +91,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       plane3d.setNormal(x, y, z);
    }
 
-   public void setNormal(Vector3d normal)
+   public void setNormal(Vector3DReadOnly normal)
    {
       plane3d.setNormal(normal);
    }
@@ -109,7 +110,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       return pointToReturn;
    }
    
-   public Point3d getPoint()
+   public Point3D getPoint()
    {
       return plane3d.getPoint();
    }
@@ -119,7 +120,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
       plane3d.setPoint(x, y, z);
    }
 
-   public void setPoint(Point3d point)
+   public void setPoint(Point3DReadOnly point)
    {
       plane3d.setPoint(point);
    }
@@ -162,17 +163,50 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 
       return plane3d.isOnOrBelow(pointToTest.getPoint());
    }
-   
-   public boolean isParallel(FramePlane3d otherPlane, double epsilon)
+
+   /**
+    * Tests if the two planes are parallel by testing if their normals are collinear.
+    * The latter is done given a tolerance on the angle between the two normal axes in the range ]0; <i>pi</i>/2[.
+    * 
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param otherPlane the other plane to do the test with. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians.
+    * @return {@code true} if the two planes are parallel, {@code false} otherwise.
+    */
+   public boolean isParallel(FramePlane3d otherPlane, double angleEpsilon)
    {
       checkReferenceFrameMatch(otherPlane);
-      return plane3d.isParallel(otherPlane.plane3d, epsilon);
+      return plane3d.isParallel(otherPlane.plane3d, angleEpsilon);
    }
-   
-   public boolean isCoplanar(FramePlane3d otherPlane, double epsilon)
+
+   /**
+    * Tests if this plane and the given plane are coincident:
+    * <ul>
+    *    <li> {@code this.normal} and {@code otherPlane.normal} are collinear given the tolerance {@code angleEpsilon}.
+    *    <li> the distance of {@code otherPlane.point} from the this plane is less than {@code distanceEpsilon}.
+    * </ul>
+    * <p>
+    * Edge cases:
+    * <ul>
+    *    <li> if the length of either normal is below {@code 1.0E-7}, this method fails and returns {@code false}.
+    * </ul>
+    * </p>
+    * 
+    * @param otherPlane the other plane to do the test with. Not modified.
+    * @param angleEpsilon tolerance on the angle in radians to determine if the plane normals are collinear. 
+    * @param distanceEpsilon tolerance on the distance to determine if {@code otherPlane.point} belongs to this plane.
+    * @return {@code true} if the two planes are coincident, {@code false} otherwise.
+    */
+   public boolean isCoincident(FramePlane3d otherPlane, double angleEpsilon, double distanceEpsilon)
    {
       checkReferenceFrameMatch(otherPlane);
-      return plane3d.isCoplanar(otherPlane.plane3d, epsilon);
+      return plane3d.isCoincident(otherPlane.plane3d, angleEpsilon, distanceEpsilon);
    }
 
    public FramePoint orthogonalProjectionCopy(FramePoint point)
@@ -234,7 +268,7 @@ public class FramePlane3d extends AbstractReferenceFrameHolder
 	   checkReferenceFrameMatch(line.getReferenceFrame());
 	   checkReferenceFrameMatch(pointToPack.getReferenceFrame());
 	   
-	   Point3d intersectionToPack = new Point3d();
+	   Point3D intersectionToPack = new Point3D();
 	   plane3d.getIntersectionWithLine(intersectionToPack, line.getPoint(), line.getNormalizedVector());
 	   pointToPack.set(intersectionToPack);
    }

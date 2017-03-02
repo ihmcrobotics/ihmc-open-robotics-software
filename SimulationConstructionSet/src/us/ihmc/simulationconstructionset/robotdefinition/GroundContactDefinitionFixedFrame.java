@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset.robotdefinition;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class GroundContactDefinitionFixedFrame
 {
    String name = null;
 
-   Vector3d offset = null;
+   Vector3D offset = null;
 
 
    public String getName()
@@ -19,12 +19,12 @@ public class GroundContactDefinitionFixedFrame
       this.name = name;
    }
 
-   public Vector3d getOffset()
+   public Vector3D getOffset()
    {
       return offset;
    }
 
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
       this.offset = offset;
    }

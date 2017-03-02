@@ -1,15 +1,15 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class RandomPointCloudGenerator implements Runnable
 {
@@ -42,22 +42,22 @@ public class RandomPointCloudGenerator implements Runnable
    public void run()
    {
       timestamps[0] = System.nanoTime();
-      Point3d[] pointCloud = new Point3d[70000];
+      Point3D[] pointCloud = new Point3D[70000];
 
       //TODO: move this to RandomTools
       for(int i = 0; i < pointCloud.length; i++)
       {
-         double distanceFromCamera = RandomTools.generateRandomDouble(random, 0.0, coneHeight);
-         double angle = RandomTools.generateRandomDouble(random, Math.PI);
-         double distanceFromConeCenter = RandomTools.generateRandomDouble(random, distanceFromCamera * (coneBaseRadius / coneHeight));
+         double distanceFromCamera = RandomNumbers.nextDouble(random, 0.0, coneHeight);
+         double angle = RandomNumbers.nextDouble(random, Math.PI);
+         double distanceFromConeCenter = RandomNumbers.nextDouble(random, distanceFromCamera * (coneBaseRadius / coneHeight));
 
          double coneY = distanceFromConeCenter * Math.sin(angle);
          double coneZ = distanceFromConeCenter * Math.cos(angle);
 
-         pointCloud[i] = new Point3d(distanceFromCamera, coneY, coneZ);
+         pointCloud[i] = new Point3D(distanceFromCamera, coneY, coneZ);
       }
 
-      ArrayList<Point3d> pointCloudArrayList = new ArrayList<>();
+      ArrayList<Point3D> pointCloudArrayList = new ArrayList<>();
       pointCloudArrayList.addAll(Arrays.asList(pointCloud));
       pointCloudDataReceiver.receivedPointCloudData(scanFrame, lidarFrame, timestamps, pointCloudArrayList, PointCloudSource.NEARSCAN);
    }

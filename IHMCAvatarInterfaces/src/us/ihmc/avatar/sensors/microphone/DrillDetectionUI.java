@@ -13,7 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
-import javax.vecmath.Point2d;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -24,9 +23,10 @@ import org.jfree.data.time.Millisecond;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.plotting.artifact.PointListArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.plotting.artifact.PointListArtifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.gui.FFTPlotter;
@@ -158,7 +158,7 @@ public class DrillDetectionUI
       int x = dataSize++;
       double rawValue = result.isOn ? 150.0 : 0.0;
 
-      Point2d pRaw = new Point2d(x, rawValue);
+      Point2D pRaw = new Point2D(x, rawValue);
       PointListArtifact paRaw = new PointListArtifact("drillOn_" + x, pRaw);
       boolPlotter.addArtifact(paRaw);
 

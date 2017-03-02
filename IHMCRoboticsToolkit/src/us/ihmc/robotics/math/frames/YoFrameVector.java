@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -72,12 +71,12 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> impl
    }
 
    @Override
-   public void getVector(Vector3d VectorToPack)
+   public void getVector(Vector3D VectorToPack)
    {
       this.get(VectorToPack);
    }
 
-   private final Vector3d tempVector = new Vector3d();
+   private final Vector3D tempVector = new Vector3D();
 
    @Override
    public void setVector(VectorInterface vectorInterface)
@@ -87,7 +86,7 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> impl
    }
 
    @Override
-   public void setVector(Vector3d vector)
+   public void setVector(Vector3D vector)
    {
       this.set(vector);
    }

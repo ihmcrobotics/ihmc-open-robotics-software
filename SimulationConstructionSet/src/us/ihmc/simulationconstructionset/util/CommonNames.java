@@ -13,7 +13,6 @@ package us.ihmc.simulationconstructionset.util;
  * </ul>
  * </p>
  *
- * @author Peter Abeles
  */
 public enum CommonNames
 {

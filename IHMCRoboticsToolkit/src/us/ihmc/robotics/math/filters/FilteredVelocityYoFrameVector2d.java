@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameTuple2d;
@@ -62,7 +61,7 @@ public class FilteredVelocityYoFrameVector2d extends YoFrameVector2d
       yDot.update();
    }
 
-   public void update(Vector2d vector)
+   public void update(Vector2D vector)
    {
       xDot.update(vector.getX());
       yDot.update(vector.getY());

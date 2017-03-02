@@ -17,6 +17,7 @@ public class SimpleRewindabilityComparisonScript implements SimulationComparison
       this.nTicksFinal = nTicksFinal;
    }
 
+   @Override
    public void doInitialAction(SimulationConstructionSet scs0, SimulationConstructionSet scs1)
    {
       if (scs0.getRecordFreq() != scs1.getRecordFreq())
@@ -41,6 +42,7 @@ public class SimpleRewindabilityComparisonScript implements SimulationComparison
       }
    }
 
+   @Override
    public void doFinalAction(SimulationConstructionSet scs0, SimulationConstructionSet scs1)
    {
       if (scs0.getRecordFreq() != scs1.getRecordFreq())

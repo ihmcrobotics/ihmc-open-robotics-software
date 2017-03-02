@@ -1,20 +1,32 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.TransferHandler;
+
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 
 public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListener, FocusListener
 {
    public interface YoEntryContainer
    {
-      void bindToVariable(YoVariable variable);
+      void bindToVariable(YoVariable<?> variable);
 
       void focusGained(FocusEvent evt);
 
@@ -36,7 +48,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
       private JTextField jTextField;
       private JLabel label;
       private NumberFormat numFormat;
-      private YoVariable variableInThisBox;
+      private YoVariable<?> variableInThisBox;
 
       public YoTextEntryBox(YoEntryBoxNew entryBox, String label)
       {
@@ -57,6 +69,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
          entryBox.add(jTextField);
       }
 
+      @Override
       public void actionPerformed(ActionEvent evt)
       {
          String text = jTextField.getText();
@@ -93,7 +106,8 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
       }
 
-      public void bindToVariable(YoVariable variable)
+      @Override
+      public void bindToVariable(YoVariable<?> variable)
       {
          String textName = variable.getName();
 
@@ -102,6 +116,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
       }
 
+      @Override
       public void focusGained(FocusEvent evt)
       {
          if (variableInThisBox != null)
@@ -112,6 +127,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
       }
 
+      @Override
       public void focusLost(FocusEvent evt)
       {
          if (evt.getSource().equals(jTextField))
@@ -135,11 +151,13 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
          return label;
       }
 
+      @Override
       public String getToolTipText()
       {
          return label.getText();
       }
 
+      @Override
       public void removeVariable()
       {
          variableInThisBox = null;
@@ -157,6 +175,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
          this.label = label;
       }
 
+      @Override
       public void update()
       {
          setTextField();
@@ -220,9 +239,6 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
    private EntryBoxArrayPanel entryBoxArrayPanel;
 
 
-   private NumberFormat numFormat;
-
-
    private JPopupMenu popupMenu;
 
 
@@ -230,7 +246,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 // private JTextField jTextField;
    private SelectedVariableHolder selectedVariableHolder;
 
-   private YoVariable variableInThisBox;
+   private YoVariable<?> variableInThisBox;
 
    public YoEntryBoxNew(EntryBoxArrayPanel entryBoxArrayPanel, SelectedVariableHolder holder)
    {
@@ -269,6 +285,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
       JMenuItem delete = new JMenuItem("Delete Entry Box");
       delete.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             if (variableInThisBox != null)
@@ -279,6 +296,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
       this.setToolTipText(activeEntryContainer.getToolTipText());
    }
 
+   @Override
    public void actionPerformed(ActionEvent evt)
    {
       // JTextField textField = (JTextField) evt.getSource();
@@ -288,15 +306,13 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
    }
 
-   public void addVariable(YoVariable variable)
+   public void addVariable(YoVariable<?> variable)
    {
       if ((entryBoxArrayPanel != null) && entryBoxArrayPanel.isHoldingVariable(variable))
          return;
 
       activeEntryContainer.bindToVariable(variable);
       variableInThisBox = variable;
-
-      String textName = variable.getName();
 
 //    label.setText(textName);
       String toolTip = variableInThisBox.getDescription();
@@ -311,6 +327,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 
    }
 
+   @Override
    public void focusGained(FocusEvent evt)
    {
       activeEntryContainer.focusGained(evt);
@@ -321,6 +338,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
          this.getParent().requestFocus();
    }
 
+   @Override
    public void focusLost(FocusEvent evt)
    {
       activeEntryContainer.focusLost(evt);
@@ -347,24 +365,27 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
       return selectedVariableHolder;
    }
 
-   public YoVariable getVariableInThisBox()
+   public YoVariable<?> getVariableInThisBox()
    {
       return variableInThisBox;
    }
 
-   public boolean isHoldingVariable(YoVariable v)
+   public boolean isHoldingVariable(YoVariable<?> v)
    {
       return (this.variableInThisBox == v);
    }
 
+   @Override
    public void mouseClicked(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseEntered(MouseEvent evt)
    {
    }
 
+   @Override
    public void mouseExited(MouseEvent evt)
    {
    }
@@ -373,6 +394,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
    {
 	   activeEntryContainer.update();
    }
+   @Override
    public void mousePressed(MouseEvent evt)
    {
       this.requestFocus();
@@ -391,7 +413,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
          {
             // YoVariable v = VarPanel.selectedVariable;
 
-            YoVariable v = selectedVariableHolder.getSelectedVariable();
+            YoVariable<?> v = selectedVariableHolder.getSelectedVariable();
             if (v != null)
                this.addVariable(v);
          }
@@ -452,12 +474,13 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
 // }
 
 
+   @Override
    public void mouseReleased(MouseEvent evt)
    {
    }
 
 
-   public void removeVariable(YoVariable variable)
+   public void removeVariable(YoVariable<?> variable)
    {
       if (variableInThisBox == variable)
       {
@@ -480,7 +503,7 @@ public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListen
    }
 
 
-   public void setVariableInThisBox(YoVariable variableInThisBox)
+   public void setVariableInThisBox(YoVariable<?> variableInThisBox)
    {
       activeEntryContainer.bindToVariable(variableInThisBox);
 

@@ -2,22 +2,21 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
+import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.Transformable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3TrajectoryMessage<T>> extends TrackablePacket<T>
@@ -54,7 +53,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(random);
       }
 
-      executionMode = RandomTools.generateRandomEnum(random, ExecutionMode.class);
+      executionMode = RandomNumbers.nextEnum(random, ExecutionMode.class);
    }
 
    public AbstractSE3TrajectoryMessage(T se3TrajectoryMessage)
@@ -69,10 +68,10 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       previousMessageId = se3TrajectoryMessage.previousMessageId;
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
-      Vector3d zeroLinearVelocity = new Vector3d();
-      Vector3d zeroAngularVelocity = new Vector3d();
+      Vector3D zeroLinearVelocity = new Vector3D();
+      Vector3D zeroAngularVelocity = new Vector3D();
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {
             new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
    }
@@ -116,15 +115,15 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
     * @param linearVelocity define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.
     * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3d position, Quat4d orientation, Vector3d linearVelocity,
-         Vector3d angularVelocity)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
+         Vector3D angularVelocity)
    {
       rangeCheck(trajectoryPointIndex);
       taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i].applyTransform(transform);

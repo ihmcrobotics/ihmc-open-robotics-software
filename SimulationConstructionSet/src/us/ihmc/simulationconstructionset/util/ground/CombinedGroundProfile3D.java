@@ -2,12 +2,11 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.CombinedHeightMapWithNormals;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.CombinedHeightMapWithNormals;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class CombinedGroundProfile3D implements GroundProfile3D
@@ -66,13 +65,14 @@ public class CombinedGroundProfile3D implements GroundProfile3D
       return groundProfiles;
    }
 
-   private final Point3d tempPointToCheck = new Point3d();
+   private final Point3D tempPointToCheck = new Point3D();
 
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   @Override
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
-      Point3d localIntersection = new Point3d();
-      Vector3d localNormal = new Vector3d();
+      Point3D localIntersection = new Point3D();
+      Vector3D localNormal = new Vector3D();
       boolean isInside = false;
 
       tempPointToCheck.set(x, y, z);
@@ -103,6 +103,7 @@ public class CombinedGroundProfile3D implements GroundProfile3D
       return isInside;
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       if (boundingBox == null) return false;
@@ -110,11 +111,13 @@ public class CombinedGroundProfile3D implements GroundProfile3D
       return boundingBox.isInside(x, y, z);
    }
    
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return heightMap;

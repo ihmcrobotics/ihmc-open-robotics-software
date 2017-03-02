@@ -1,11 +1,11 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * Computes joint torques based on desired joint accelerations.
@@ -123,7 +123,7 @@ public class InverseDynamicsCalculator
          if (!doVelocityTerms)
             tempTwist.setToZero();
          spatialAccelerationCalculator.getAccelerationOfBody(tempAcceleration, body);
-         body.getInertia().computeDynamicWrenchInBodyCoordinates(netWrench, tempAcceleration, tempTwist);
+         body.getInertia().computeDynamicWrenchInBodyCoordinates(tempAcceleration, tempTwist, netWrench);
       }
    }
 

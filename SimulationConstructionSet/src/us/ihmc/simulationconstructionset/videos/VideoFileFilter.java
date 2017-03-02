@@ -8,6 +8,7 @@ public class VideoFileFilter extends javax.swing.filechooser.FileFilter implemen
    private final String[] extensions = { "mov", "mp4", "mpeg", "avi", "flv" };
    
    
+   @Override
    public boolean accept(File file)
    {
       if(file.isDirectory())
@@ -26,11 +27,13 @@ public class VideoFileFilter extends javax.swing.filechooser.FileFilter implemen
       return false;
    }
 
+   @Override
    public String getDescription()
    {
       return "Video: .mov, .mp4, mpeg, .avi, .flv";
    }
 
+   @Override
    public boolean accept(File dir, String name)
    {
       return accept(new File(dir, name));

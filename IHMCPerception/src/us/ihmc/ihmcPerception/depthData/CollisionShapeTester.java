@@ -3,10 +3,9 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -46,7 +45,7 @@ public class CollisionShapeTester
       }
    }
    
-   public boolean contains(Point3d point)
+   public boolean contains(Point3D point)
    {
       for (int i = 0; i < trackingCollisionShapes.size(); i++)
       {

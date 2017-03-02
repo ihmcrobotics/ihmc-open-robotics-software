@@ -22,6 +22,7 @@ class FloatingPlanarJointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public double[] getMessageValues()
    {
       return new double[]
@@ -33,6 +34,7 @@ class FloatingPlanarJointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public String getYoVariableOrder()
    {
       String variableOrder = q_t1.getName() + "," + q_t2.getName() + "," + qd_t1.getName() + "," + qd_t2.getName() + "," + q_rot.getName() + ","
@@ -42,12 +44,14 @@ class FloatingPlanarJointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public int getNumberOfVariables()
    {
       // TODO Auto-generated method stub
       return 9;
    }
 
+   @Override
    public void setTau(double tau)
    {
    }

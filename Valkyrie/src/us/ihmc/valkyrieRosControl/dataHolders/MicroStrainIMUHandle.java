@@ -2,12 +2,11 @@ package us.ihmc.valkyrieRosControl.dataHolders;
 
 import java.io.IOException;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import com.esotericsoftware.minlog.Log;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.rosControl.wholeRobot.IMUHandle;
 import us.ihmc.valkyrie.imu.MicroStrainData;
 import us.ihmc.valkyrie.imu.MicroStrainData.MicrostrainFilterType;
@@ -22,16 +21,16 @@ public class MicroStrainIMUHandle implements IMUHandle
    private final MicrostrainUDPPacketListener imuListener;
    private MicroStrainData microStrainData;
 
-   private final Vector3d linearAcceleration = new Vector3d();
-   private final Vector3d angularRate = new Vector3d();
-   private final Quat4d orientation = new Quat4d();
+   private final Vector3D linearAcceleration = new Vector3D();
+   private final Vector3D angularRate = new Vector3D();
+   private final Quaternion orientation = new Quaternion();
    
    private boolean isLinearAccelerationValid = false;
    private boolean isAngularRateValid = false;
    private boolean isOrientationQuaternionValid = false;
 
-   private Matrix3d quaternionConversionMatrix = new Matrix3d();
-   private final Matrix3d orientationMatrix = new Matrix3d();
+   private RotationMatrix quaternionConversionMatrix = new RotationMatrix();
+   private final RotationMatrix orientationMatrix = new RotationMatrix();
    
    private MicrostrainFilterType filterTypeToReturn = MicrostrainFilterType.COMPLIMENTARY_FILTER;
 
@@ -140,7 +139,7 @@ public class MicroStrainIMUHandle implements IMUHandle
    @Override
    public double getQ_w()
    {
-      return orientation.getW();
+      return orientation.getS();
    }
 
    @Override

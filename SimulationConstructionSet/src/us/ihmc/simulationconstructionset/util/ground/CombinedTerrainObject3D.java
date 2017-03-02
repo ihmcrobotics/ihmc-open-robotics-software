@@ -2,16 +2,15 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.HeightMap;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNormals
 {
@@ -22,7 +21,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
    private final String name;
 
-   private final Point3d tempPointToCheck = new Point3d();
+   private final Point3D tempPointToCheck = new Point3D();
 
    public CombinedTerrainObject3D(String name)
    {
@@ -151,15 +150,17 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return terrainObjects;
    }
 
+   @Override
    public Graphics3DObject getLinkGraphics()
    {
       return this.linkGraphics;
    }
 
-   private final Point3d localIntersection = new Point3d();
-   private final Vector3d localNormal = new Vector3d();
+   private final Point3D localIntersection = new Point3D();
+   private final Vector3D localNormal = new Vector3D();
 
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   @Override
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
       boolean isInside = false;
@@ -193,6 +194,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return isInside;
    }
 
+   @Override
    public boolean isClose(double x, double y, double z)
    {
       if (boundingBox == null)
@@ -201,6 +203,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return boundingBox.isInside(x, y, z);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;
@@ -264,11 +267,13 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       }
    }
 
+   @Override
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       double heightAt = Double.NEGATIVE_INFINITY;
@@ -294,7 +299,8 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return heightAt;
    }
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = Double.NEGATIVE_INFINITY;
 

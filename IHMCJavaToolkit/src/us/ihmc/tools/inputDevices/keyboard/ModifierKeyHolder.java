@@ -6,6 +6,7 @@ public class ModifierKeyHolder implements ModifierKeyInterface
 {
    private final EnumMap<Key, Boolean> pressedModifierKeys = new EnumMap<Key, Boolean>(Key.class);
  
+   @Override
    public boolean isKeyPressed(Key key)
    {
       Boolean isPressed = pressedModifierKeys.get(key);

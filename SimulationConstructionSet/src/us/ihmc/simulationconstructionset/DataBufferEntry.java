@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 
 public class DataBufferEntry implements DataEntry
 {
@@ -30,11 +30,13 @@ public class DataBufferEntry implements DataEntry
       reCalcMinMax();
    }
 
+   @Override
    public void setInverted(boolean inverted)
    {
       this.inverted = inverted;
    }
    
+   @Override
    public boolean getInverted()
    {
       return inverted;
@@ -45,16 +47,19 @@ public class DataBufferEntry implements DataEntry
       return data.length;
    }
    
+   @Override
    public double[] getData()
    {
       return this.data;
    }
 
+   @Override
    public void enableAutoScale(boolean autoScale)
    {
       this.autoScale = autoScale;
    }
 
+   @Override
    public void setManualScaling(double minScaling, double maxScaling)
    {
       this.variable.setManualScalingMinMax(minScaling, maxScaling);
@@ -63,31 +68,37 @@ public class DataBufferEntry implements DataEntry
       // this.manualMaxScaling = maxScaling;
    }
 
+   @Override
    public boolean isAutoScaleEnabled()
    {
       return this.autoScale;
    }
 
+   @Override
    public double getManualMinScaling()
    {
       return variable.getManualScalingMin();
    } // this.manualMinScaling;}
 
+   @Override
    public double getManualMaxScaling()
    {
       return variable.getManualScalingMax();
    } // this.manualMaxScaling;}
 
+   @Override
    public YoVariable<?> getVariable()
    {
       return this.variable;
    }
    
+   @Override
    public String getVariableName()
    {
       return variable.getName();
    }
 
+   @Override
    public String getFullVariableNameWithNameSpace()
    {
      return variable.getFullNameWithNameSpace();
@@ -300,6 +311,7 @@ public class DataBufferEntry implements DataEntry
       variable.setValueFromDouble(doubleValue);
    }
 
+   @Override
    public synchronized void resetMinMaxChanged()
 
    // public void resetMinMaxChanged()
@@ -314,6 +326,7 @@ public class DataBufferEntry implements DataEntry
       minMaxChanged = true;
    }
 
+   @Override
    public synchronized boolean minMaxChanged()
 
    // public boolean minMaxChanged()
@@ -359,6 +372,7 @@ public class DataBufferEntry implements DataEntry
       return ret;
    }
 
+   @Override
    public double getMax()
    {
       if (minMaxStale)
@@ -367,6 +381,7 @@ public class DataBufferEntry implements DataEntry
       return this.max;
    }
 
+   @Override
    public double getMin()
    {
       if (minMaxStale)
@@ -430,6 +445,7 @@ public class DataBufferEntry implements DataEntry
       return ret;
    }
 
+   @Override
    public double getMax(int leftIndex, int rightIndex, int leftPlotIndex, int rightPlotIndex)
    {
       reCalcMinMaxforSetPoint(leftIndex, rightIndex, leftPlotIndex, rightPlotIndex);
@@ -437,6 +453,7 @@ public class DataBufferEntry implements DataEntry
       return this.max;
    }
 
+   @Override
    public double getMin(int leftIndex, int rightIndex, int leftPlotIndex, int rightPlotIndex)
    {
       reCalcMinMaxforSetPoint(leftIndex, rightIndex, leftPlotIndex, rightPlotIndex);
@@ -538,11 +555,13 @@ public class DataBufferEntry implements DataEntry
       return ret;
    }
 
+   @Override
    public void getVariableNameAndValue(StringBuffer stringBuffer)
    {
       variable.getNameAndValueString(stringBuffer);
    }
 
+   @Override
    public void getVariableNameAndValueAtIndex(StringBuffer stringBuffer, int index)
    {
       variable.getNameAndValueStringFromDouble(stringBuffer, data[index]);

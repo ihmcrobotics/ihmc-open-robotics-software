@@ -2,23 +2,18 @@ package us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath;
 
 import static org.junit.Assert.assertEquals;
 
-import javax.vecmath.Point2d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.StraightLineOverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnStraightTurnOverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurnThenStraightOverheadPath;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.TurningOverheadPath;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.tools.MemoryTools;
 
 public class OverheadPathTest
 {
@@ -372,7 +367,7 @@ public class OverheadPathTest
       double eps = 1e-14;
 
       FramePose2d startPose = new FramePose2d(WORLD_FRAME);
-      Point2d position = new Point2d(1.0, 0.0);
+      Point2D position = new Point2D(1.0, 0.0);
       FramePoint2d endPosition = new FramePoint2d(WORLD_FRAME, position);
       StraightLineOverheadPath p = new StraightLineOverheadPath(startPose, endPosition);
       

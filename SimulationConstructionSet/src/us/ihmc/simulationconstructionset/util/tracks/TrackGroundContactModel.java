@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.util.tracks;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 
 public class TrackGroundContactModel implements GroundContactModel
@@ -33,8 +32,9 @@ public class TrackGroundContactModel implements GroundContactModel
       this.baseModel = baseModel;
    }
 
-   private final Vector3d tempVelocity = new Vector3d();
-   private final Vector3d tempTrackVelocity = new Vector3d();
+   private final Vector3D tempVelocity = new Vector3D();
+   private final Vector3D tempTrackVelocity = new Vector3D();
+   @Override
    public void doGroundContact()
    {
       // Change the velocities to take into account the track.
@@ -85,11 +85,13 @@ public class TrackGroundContactModel implements GroundContactModel
        */
    }
 
+   @Override
    public GroundProfile3D getGroundProfile3D()
    {
       return baseModel.getGroundProfile3D();
    }
    
+   @Override
    public void setGroundProfile3D(GroundProfile3D groundProfile3D)
    {
       baseModel.setGroundProfile3D(groundProfile3D);

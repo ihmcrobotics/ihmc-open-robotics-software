@@ -2,9 +2,14 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -23,7 +28,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
 
    public FrameLine2d(ReferenceFrame referenceFrame)
    {
-      this(referenceFrame, new Line2d(new Point2d(), new Vector2d(1.0, 0.0)));
+      this(referenceFrame, new Line2d(new Point2D(), new Vector2D(1.0, 0.0)));
    }
 
    public FrameLine2d(ReferenceFrame referenceFrame, Line2d line2d)
@@ -32,12 +37,12 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       this.line = getGeometryObject();
    }
 
-   public FrameLine2d(ReferenceFrame referenceFrame, Point2d point2d, Vector2d vector2d)
+   public FrameLine2d(ReferenceFrame referenceFrame, Point2DReadOnly point2d, Vector2DReadOnly vector2d)
    {
       this(referenceFrame, new Line2d(point2d, vector2d));
    }
 
-   public FrameLine2d(ReferenceFrame referenceFrame, Point2d firstPointOnLine, Point2d secondPointOnLine)
+   public FrameLine2d(ReferenceFrame referenceFrame, Point2DReadOnly firstPointOnLine, Point2DReadOnly secondPointOnLine)
    {
       this(referenceFrame, new Line2d(firstPointOnLine, secondPointOnLine));
    }
@@ -74,7 +79,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       return new Line2d(line);
    }
 
-   public void getPoint2d(Point2d origin)
+   public void getPoint2d(Point2DBasics origin)
    {
       line.getPoint(origin);
    }
@@ -85,7 +90,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
       line.getPoint(framePoint2d.tuple);
    }
 
-   public void getNormalizedFrameVector(Vector2d vector2dToPack)
+   public void getNormalizedFrameVector(Vector2DBasics vector2dToPack)
    {
       vector2dToPack.set(line.normalizedVector);
    }
@@ -252,13 +257,13 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    }
 
    @Override
-   public void applyTransformAndProjectToXYPlane(RigidBodyTransform transform)
+   public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       line.applyTransformAndProjectToXYPlane(temporaryTransformToDesiredFrame);
    }
 
    @Override
-   public FrameLine2d applyTransformCopy(RigidBodyTransform transform)
+   public FrameLine2d applyTransformCopy(Transform transform)
    {
       FrameLine2d copy = new FrameLine2d(this);
       copy.applyTransform(transform);
@@ -266,7 +271,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    }
 
    @Override
-   public FrameLine2d applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform)
+   public FrameLine2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       FrameLine2d copy = new FrameLine2d(this);
       copy.applyTransformAndProjectToXYPlane(transform);
@@ -306,12 +311,12 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
     * @param requirePlanarTransform boolean
     * @return FrameConvexPolygon2d
     */
-   public FrameLine2d applyTransformCopy(RigidBodyTransform transform, ReferenceFrame newFrame)
+   public FrameLine2d applyTransformCopy(Transform transform, ReferenceFrame newFrame)
    {
       return new FrameLine2d(newFrame, this.line.applyTransformCopy(transform));
    }
 
-   public FrameLine2d applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform, ReferenceFrame newFrame)
+   public FrameLine2d applyTransformAndProjectToXYPlaneCopy(Transform transform, ReferenceFrame newFrame)
    {
       return new FrameLine2d(newFrame, this.line.applyTransformAndProjectToXYPlaneCopy(transform));
    }
@@ -326,7 +331,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    public void orthogonalProjection(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
-      Point2d projected = line.orthogonalProjectionCopy(point.getPoint());
+      Point2D projected = line.orthogonalProjectionCopy(point.getPoint());
       point.set(projected.getX(), projected.getY());
    }
 
@@ -334,7 +339,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    public FramePoint2d orthogonalProjectionCopy(FramePoint2d point)
    {
       checkReferenceFrameMatch(point);
-      Point2d projected = line.orthogonalProjectionCopy(point.getPoint());
+      Point2D projected = line.orthogonalProjectionCopy(point.getPoint());
 
       return new FramePoint2d(point.getReferenceFrame(), projected);
    }
@@ -351,7 +356,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    public FramePoint2d intersectionWith(FrameLine2d secondLine)
    {
       checkReferenceFrameMatch(secondLine);
-      Point2d intersection = this.line.intersectionWith(secondLine.line);
+      Point2D intersection = this.line.intersectionWith(secondLine.line);
 
       return new FramePoint2d(secondLine.getReferenceFrame(), intersection);
    }
@@ -360,7 +365,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    public FramePoint2d intersectionWith(FrameLineSegment2d lineSegment)
    {
       checkReferenceFrameMatch(lineSegment);
-      Point2d intersection = this.line.intersectionWith(lineSegment.lineSegment);
+      Point2D intersection = this.line.intersectionWith(lineSegment.lineSegment);
 
       return new FramePoint2d(lineSegment.getReferenceFrame(), intersection);
    }
@@ -369,7 +374,7 @@ public class FrameLine2d extends FrameGeometry2d<FrameLine2d, Line2d>
    public FramePoint2d[] intersectionWith(FrameConvexPolygon2d convexPolygon)
    {
       checkReferenceFrameMatch(convexPolygon);
-      Point2d[] intersection = this.line.intersectionWith(convexPolygon.convexPolygon);
+      Point2D[] intersection = this.line.intersectionWith(convexPolygon.convexPolygon);
       if (intersection == null)
       {
          return null;

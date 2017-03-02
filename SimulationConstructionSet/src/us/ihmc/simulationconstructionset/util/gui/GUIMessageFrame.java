@@ -54,6 +54,7 @@ public class GUIMessageFrame
          // jTabbedPane.setSize(100, 100);
          lockBox.addActionListener(new ActionListener()
          {
+            @Override
             public void actionPerformed(ActionEvent e)
             {
                if (locked)

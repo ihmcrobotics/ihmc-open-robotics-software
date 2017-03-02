@@ -24,7 +24,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ArrayToolsTest
 {
@@ -277,11 +277,13 @@ public class ArrayToolsTest
    {
       BufferedReader mockBufferedReader = new BufferedReader(new Reader()
       {
+         @Override
          public int read(char[] cbuf, int off, int len) throws IOException
          {
             throw new IOException();
          }
 
+         @Override
          public void close() throws IOException
          {
             return;

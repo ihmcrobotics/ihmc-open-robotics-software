@@ -1,10 +1,9 @@
 package us.ihmc.wholeBodyController.parameters;
 
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.robotics.controllers.MatrixUpdater;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-
-import javax.vecmath.Matrix3d;
 
 public class YoLinearAccelerationWeights
 {
@@ -24,9 +23,9 @@ public class YoLinearAccelerationWeights
       zAccelerationWeight.set(0);
    }
 
-   public Matrix3d createLinearAccelerationWeightMatrix()
+   public Matrix3D createLinearAccelerationWeightMatrix()
    {
-      Matrix3d weightMatrix = new Matrix3d();
+      Matrix3D weightMatrix = new Matrix3D();
 
       xAccelerationWeights.addVariableChangedListener(new MatrixUpdater(0, 0, weightMatrix));
       yAccelerationWeights.addVariableChangedListener(new MatrixUpdater(1, 1, weightMatrix));

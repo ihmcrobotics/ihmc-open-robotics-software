@@ -1,10 +1,9 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 
 public interface MovingGroundProfile extends GroundProfile3D
 {
-   public abstract void velocityAt(double x, double y, double z, Vector3d normal);
+   public abstract void velocityAt(double x, double y, double z, Vector3D normal);
 }

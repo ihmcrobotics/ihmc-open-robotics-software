@@ -1,16 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+
 public class MassMatrixCalculatorComparer
 {
-   private static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   private static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   private static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   private static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   private static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   private static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
    private final Random random = new Random(1776L);
    private final ArrayList<MassMatrixCalculator> massMatrixCalculators = new ArrayList<MassMatrixCalculator>();
@@ -24,7 +24,7 @@ public class MassMatrixCalculatorComparer
    {
       joints = new ArrayList<RevoluteJoint>();
       elevator = new RigidBody("elevator", worldFrame);
-      Vector3d[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
+      Vector3D[] jointAxes = {X, Y, Z, Z, X, Z, Z, X, Y, Y};
       ScrewTestTools.createRandomChainRobot("", joints, elevator, jointAxes, random);
 
 

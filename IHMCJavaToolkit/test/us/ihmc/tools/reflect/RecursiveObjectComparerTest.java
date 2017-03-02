@@ -9,24 +9,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 
-import us.ihmc.tools.ArrayTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.reflect.RecursiveObjectComparer;
-import us.ihmc.tools.reflect.StringFieldMatcher;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class RecursiveObjectComparerTest
 {
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStringEqual() throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
    {
       String string1 = "abcd";
@@ -38,8 +31,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(string1, string2, true, fieldsToIgnore);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testStringNotEqual() throws IllegalArgumentException, IllegalAccessException
    {
       String string1 = "abcd";
@@ -48,78 +41,78 @@ public class RecursiveObjectComparerTest
       compareAndAssert(string1, string2, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testDifferentTypesNotEqual() throws IllegalArgumentException, IllegalAccessException
    {
-	boolean b = true;
-	char c = 'a';
-	double d = 1.5;
-	String s = "hello";
-	ArrayList<Double> listOfDoubles = new ArrayList<Double>();
-	ArrayList<Integer> listOfIntegers = new ArrayList<Integer>();
+      boolean b = true;
+      char c = 'a';
+      double d = 1.5;
+      String s = "hello";
+      ArrayList<Double> listOfDoubles = new ArrayList<Double>();
+      ArrayList<Integer> listOfIntegers = new ArrayList<Integer>();
 
-	compareAndAssert(b, c, false);
-	compareAndAssert(b, d, false);
-	compareAndAssert(b, s, false);
-	compareAndAssert(b, listOfDoubles, false);
-	compareAndAssert(b, listOfIntegers, false);
+      compareAndAssert(b, c, false);
+      compareAndAssert(b, d, false);
+      compareAndAssert(b, s, false);
+      compareAndAssert(b, listOfDoubles, false);
+      compareAndAssert(b, listOfIntegers, false);
 
-	compareAndAssert(c, b, false);
-	compareAndAssert(c, d, false);
-	compareAndAssert(c, s, false);
-	compareAndAssert(c, listOfDoubles, false);
-	compareAndAssert(c, listOfIntegers, false);
+      compareAndAssert(c, b, false);
+      compareAndAssert(c, d, false);
+      compareAndAssert(c, s, false);
+      compareAndAssert(c, listOfDoubles, false);
+      compareAndAssert(c, listOfIntegers, false);
 
-	compareAndAssert(d, b, false);
-	compareAndAssert(d, c, false);
-	compareAndAssert(d, s, false);
-	compareAndAssert(d, listOfDoubles, false);
-	compareAndAssert(d, listOfIntegers, false);
+      compareAndAssert(d, b, false);
+      compareAndAssert(d, c, false);
+      compareAndAssert(d, s, false);
+      compareAndAssert(d, listOfDoubles, false);
+      compareAndAssert(d, listOfIntegers, false);
 
-	compareAndAssert(s, b, false);
-	compareAndAssert(s, c, false);
-	compareAndAssert(s, d, false);
-	compareAndAssert(s, listOfDoubles, false);
-	compareAndAssert(s, listOfIntegers, false);
+      compareAndAssert(s, b, false);
+      compareAndAssert(s, c, false);
+      compareAndAssert(s, d, false);
+      compareAndAssert(s, listOfDoubles, false);
+      compareAndAssert(s, listOfIntegers, false);
 
-	compareAndAssert(listOfDoubles, b, false);
-	compareAndAssert(listOfDoubles, c, false);
-	compareAndAssert(listOfDoubles, d, false);
-	compareAndAssert(listOfDoubles, s, false);
-	// Empty ArrayLists of different types are the same! compareAndAssert(listOfDoubles, listOfIntegers, false);
+      compareAndAssert(listOfDoubles, b, false);
+      compareAndAssert(listOfDoubles, c, false);
+      compareAndAssert(listOfDoubles, d, false);
+      compareAndAssert(listOfDoubles, s, false);
+      // Empty ArrayLists of different types are the same! compareAndAssert(listOfDoubles, listOfIntegers, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testDoubleArraysDifferentInObject() throws IllegalArgumentException, IllegalAccessException
    {
-      Object objectOne = new ObjectWithADoubleArray(new double[]{1.0, 2.0, 3.0});
-      Object objectTwo = new ObjectWithADoubleArray(new double[]{4.0, 5.0, 6.0});
-      Object objectThree = new ObjectWithADoubleArray(new double[]{1.0, 2.0, 3.0});
+      Object objectOne = new ObjectWithADoubleArray(new double[] {1.0, 2.0, 3.0});
+      Object objectTwo = new ObjectWithADoubleArray(new double[] {4.0, 5.0, 6.0});
+      Object objectThree = new ObjectWithADoubleArray(new double[] {1.0, 2.0, 3.0});
 
-//      System.out.println("testDoubleArraysDifferentInObject: " + compareAndAssert(objectOne, objectTwo, false));
+      //      System.out.println("testDoubleArraysDifferentInObject: " + compareAndAssert(objectOne, objectTwo, false));
       compareAndAssert(objectTwo, objectOne, false);
       compareAndAssert(objectOne, objectThree, true);
       compareAndAssert(objectThree, objectOne, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testBuriedDoubleArraysDifferentInObject() throws IllegalArgumentException, IllegalAccessException
    {
-      Object objectOne = new ObjectWithADoubleArrayBuried(new double[]{1.0, 2.0, 3.0});
-      Object objectTwo = new ObjectWithADoubleArrayBuried(new double[]{4.0, 5.0, 6.0});
-      Object objectThree = new ObjectWithADoubleArrayBuried(new double[]{1.0, 2.0, 3.0});
+      Object objectOne = new ObjectWithADoubleArrayBuried(new double[] {1.0, 2.0, 3.0});
+      Object objectTwo = new ObjectWithADoubleArrayBuried(new double[] {4.0, 5.0, 6.0});
+      Object objectThree = new ObjectWithADoubleArrayBuried(new double[] {1.0, 2.0, 3.0});
 
-//      System.out.println("testBuriedDoubleArraysDifferentInObject: " + compareAndAssert(objectOne, objectTwo, false));
+      //      System.out.println("testBuriedDoubleArraysDifferentInObject: " + compareAndAssert(objectOne, objectTwo, false));
       compareAndAssert(objectTwo, objectOne, false);
       compareAndAssert(objectOne, objectThree, true);
       compareAndAssert(objectThree, objectOne, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMapEqual() throws IllegalArgumentException, IllegalAccessException
    {
       HashMap<String, Double> map1 = new HashMap<String, Double>();
@@ -131,8 +124,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(map1, map2, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMapEqualDifferentOrder() throws IllegalArgumentException, IllegalAccessException
    {
       HashMap<String, Double> map1 = new HashMap<String, Double>();
@@ -146,8 +139,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(map1, map2, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMapKeysNotEqual() throws IllegalArgumentException, IllegalAccessException
    {
       HashMap<String, Double> map1 = new HashMap<String, Double>();
@@ -161,8 +154,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(map1, map2, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testMapValuesNotEqual() throws IllegalArgumentException, IllegalAccessException
    {
       HashMap<String, Double> map1 = new HashMap<String, Double>();
@@ -176,8 +169,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(map1, map2, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testClearEqualInitially() throws IllegalArgumentException, IllegalAccessException
    {
       double[] array1 = new double[1];
@@ -195,8 +188,8 @@ public class RecursiveObjectComparerTest
       assertEquals(false, comparer.compare(array1, array2));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testClearNotEqualInitially() throws IllegalArgumentException, IllegalAccessException
    {
       double[] array1 = new double[1];
@@ -214,8 +207,8 @@ public class RecursiveObjectComparerTest
       assertEquals(true, comparer.compare(array1, array2));
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLoopsEqual() throws IllegalArgumentException, IllegalAccessException
    {
       LoopCloser loopCloser1 = createLoop();
@@ -224,8 +217,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(loopCloser1, loopCloser2, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLoopsNotEqual() throws IllegalArgumentException, IllegalAccessException
    {
       LoopCloser loopCloser1 = createLoop();
@@ -235,8 +228,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(loopCloser1, loopCloser2, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLoopsNotEqual2() throws IllegalArgumentException, IllegalAccessException
    {
       LoopCloser loopCloser1 = createLoop();
@@ -246,8 +239,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(loopCloser1, loopCloser2, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testLoopsNotEqual3() throws IllegalArgumentException, IllegalAccessException
    {
       LoopCloser loopCloser1 = createLoop();
@@ -257,8 +250,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(loopCloser1, loopCloser2, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testArrayOfPrimitives() throws IllegalArgumentException, IllegalAccessException
    {
       double[] array1 = {2.0, 3.0};
@@ -269,8 +262,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(array1, array3, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testArrayOfStrings() throws IllegalArgumentException, IllegalAccessException
    {
       String string1 = "abcd";
@@ -285,8 +278,8 @@ public class RecursiveObjectComparerTest
       compareAndAssert(array1, array3, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testSomePrimitives() throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
    {
       SomePrimitives somePrimitives1 = new SomePrimitives();
@@ -299,21 +292,21 @@ public class RecursiveObjectComparerTest
       compareAndAssert(somePrimitives1, somePrimitives2, true, fieldsToIgnore);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
-   public void testTree()  throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testTree() throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
    {
-	   Tree tree1 = new Tree(1, 1);
-	   Tree tree2 = tree1.inneficientCopy();
+      Tree tree1 = new Tree(1, 1);
+      Tree tree2 = tree1.inneficientCopy();
 
-	   ArrayList<Field> fieldsToIgnore = new ArrayList<Field>();
+      ArrayList<Field> fieldsToIgnore = new ArrayList<Field>();
 
-	   fieldsToIgnore.add(AbstractList.class.getDeclaredField("modCount"));
-	   compareAndAssert(tree1, tree2, true, fieldsToIgnore);
+      fieldsToIgnore.add(AbstractList.class.getDeclaredField("modCount"));
+      compareAndAssert(tree1, tree2, true, fieldsToIgnore);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testNaN() throws IllegalArgumentException, IllegalAccessException
    {
       Double d1 = Double.NaN;
@@ -321,70 +314,70 @@ public class RecursiveObjectComparerTest
       compareAndAssert(d1, d2, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testNaNVector() throws IllegalArgumentException, IllegalAccessException
    {
-      Vector3d object1 = new Vector3d(Double.NaN, Double.NaN, Double.NaN);
-      Vector3d object2 = new Vector3d(Double.NaN, Double.NaN, Double.NaN);
+      Vector3D object1 = new Vector3D(Double.NaN, Double.NaN, Double.NaN);
+      Vector3D object2 = new Vector3D(Double.NaN, Double.NaN, Double.NaN);
       compareAndAssert(object1, object2, true);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOneNull() throws IllegalArgumentException, IllegalAccessException
    {
       Object object1 = null;
       Object object2 = null;
       compareAndAssert(object1, object2, true);
-      
+
       object2 = new Object();
       compareAndAssert(object1, object2, false);
-      
+
       object1 = new Object();
       object2 = null;
       String compareString = compareAndAssert(object1, object2, false);
       System.err.println("testOneNull: " + compareString);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testOneNullTwo() throws IllegalArgumentException, IllegalAccessException
    {
       ImmutablePair<Object, Object> pair1 = new ImmutablePair<Object, Object>(null, new Object());
       ImmutablePair<Object, Object> pair2 = new ImmutablePair<Object, Object>(null, new Object());
       compareAndAssert(pair1, pair2, true);
-      
+
       pair1 = new ImmutablePair<Object, Object>(new Object(), new Object());
       pair2 = new ImmutablePair<Object, Object>(null, new Object());
       compareAndAssert(pair1, pair2, false);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIgnoreSomeFields() throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
    {
-      Vector3d firstObject = new Vector3d(0.1, 0.2, 0.3);
-      Vector3d secondObject = new Vector3d(0.1, 0.5, 0.3);
-      
-//      StringAndRegularExpressionMatcher fieldsToIgnore = new StringAndRegularExpressionMatcher();
-//      fieldsToIgnore.addExactStringToMatch("public double javax.vecmath.Tuple3d.y");
-//      
-      Field yField = Tuple3d.class.getDeclaredField("y");
+      Vector3D firstObject = new Vector3D(0.1, 0.2, 0.3);
+      Vector3D secondObject = new Vector3D(0.1, 0.5, 0.3);
+
+      //      StringAndRegularExpressionMatcher fieldsToIgnore = new StringAndRegularExpressionMatcher();
+      //      fieldsToIgnore.addExactStringToMatch("public double javax.vecmath.Tuple3d.y");
+      //      
+      Field yField = Vector3D.class.getDeclaredField("y");
       ArrayList<Field> fieldsToIgnore = new ArrayList<Field>();
       fieldsToIgnore.add(yField);
-      
+
       compareAndAssert(firstObject, secondObject, false);
       compareAndAssert(firstObject, secondObject, true, fieldsToIgnore);
    }
 
-	@ContinuousIntegrationTest(estimatedDuration = 0.0)
-	@Test(timeout = 30000)
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
    public void testIgnoreSomeNamedFields() throws IllegalArgumentException, IllegalAccessException, SecurityException, NoSuchFieldException
    {
       ObjectWithAName objectOne = new ObjectWithAName("MyName", 1.1);
       ObjectWithAName objectTwo = new ObjectWithAName("MyName", 1.1);
-      
+
       compareAndAssert(objectOne, objectTwo, true);
       objectTwo = new ObjectWithAName("MyName", 1.9);
       compareAndAssert(objectOne, objectTwo, false);
@@ -392,29 +385,29 @@ public class RecursiveObjectComparerTest
       Field valueField = ObjectWithAName.class.getDeclaredField("value");
       ArrayList<Field> fieldsToIgnore = new ArrayList<Field>();
       fieldsToIgnore.add(valueField);
-      
+
       compareAndAssert(objectOne, objectTwo, true, fieldsToIgnore);
 
       Field nameField = ObjectWithAName.class.getDeclaredField("name");
 
       StringFieldMatcher matcher = new StringFieldMatcher();
       matcher.addStringFieldToMatchExactly(ObjectWithAName.class, nameField, "MyName");
-            
+
       compareAndAssert(objectOne, objectTwo, true, matcher);
    }
-  
 
    private class ObjectWithAName
    {
       private final String name;
       private final double value;
-      
+
       public ObjectWithAName(String name, double value)
       {
          this.name = name;
          this.value = value;
       }
-      
+
+      @Override
       public String toString()
       {
          return "name = " + name + ", value = " + value;
@@ -435,17 +428,21 @@ public class RecursiveObjectComparerTest
       return compareAndAssert(object1, object2, expected, new ArrayList<Field>(), null);
    }
 
-   private String compareAndAssert(Object objectOne, Object objectTwo, boolean expected, StringFieldMatcher matcherToIgnore) throws IllegalArgumentException, IllegalAccessException
+   private String compareAndAssert(Object objectOne, Object objectTwo, boolean expected, StringFieldMatcher matcherToIgnore)
+         throws IllegalArgumentException, IllegalAccessException
    {
       return compareAndAssert(objectOne, objectTwo, expected, new ArrayList<Field>(), matcherToIgnore);
    }
-   
-   private String compareAndAssert(Object objectOne, Object objectTwo, boolean expected, ArrayList<Field> fieldsToIgnore) throws IllegalArgumentException, IllegalAccessException
+
+   private String compareAndAssert(Object objectOne, Object objectTwo, boolean expected, ArrayList<Field> fieldsToIgnore)
+         throws IllegalArgumentException, IllegalAccessException
    {
       return compareAndAssert(objectOne, objectTwo, expected, fieldsToIgnore, null);
    }
-   
-   private String compareAndAssert(Object object1, Object object2, boolean expected, ArrayList<Field> fieldsToIgnore, StringFieldMatcher stringFieldMatcherToIgnore) throws IllegalArgumentException, IllegalAccessException
+
+   private String compareAndAssert(Object object1, Object object2, boolean expected, ArrayList<Field> fieldsToIgnore,
+                                   StringFieldMatcher stringFieldMatcherToIgnore)
+         throws IllegalArgumentException, IllegalAccessException
    {
       int maxDepth = Integer.MAX_VALUE;
       int maxSize = Integer.MAX_VALUE;
@@ -461,15 +458,15 @@ public class RecursiveObjectComparerTest
       {
          comparer.addStringFieldsToIgnore(stringFieldMatcherToIgnore);
       }
-      
+
       boolean result = comparer.compare(object1, object2);
       if (expected != result)
       {
          System.out.println("Differences:");
-    	  System.out.println(comparer.toString());
+         System.out.println(comparer.toString());
       }
       assertEquals(expected, result);
-      
+
       return comparer.toString();
    }
 
@@ -516,61 +513,63 @@ public class RecursiveObjectComparerTest
       }
    }
 
-
    private static class Tree
    {
-	   private ArrayList<Tree> children = new ArrayList<Tree>();
-	   private double value;
-	   private final int breadth, depth;
+      private ArrayList<Tree> children = new ArrayList<Tree>();
+      private double value;
+      private final int breadth, depth;
 
-	   public Tree(int breadth, int depth)
-	   {
-		   value = Math.random();
-		   this.breadth = breadth;
-		   this.depth = depth;
+      public Tree(int breadth, int depth)
+      {
+         value = Math.random();
+         this.breadth = breadth;
+         this.depth = depth;
 
-		   if (depth == 0) return;
-		   for (int i=0; i<breadth; i++)
-		   {
-			   children.add(new Tree(breadth, depth-1));
-		   }
-	   }
+         if (depth == 0)
+            return;
+         for (int i = 0; i < breadth; i++)
+         {
+            children.add(new Tree(breadth, depth - 1));
+         }
+      }
 
-	   public Tree inneficientCopy()
-	   {
-		   Tree ret = new Tree(this.breadth, this.depth);
-		   ret.value = this.value;
+      public Tree inneficientCopy()
+      {
+         Tree ret = new Tree(this.breadth, this.depth);
+         ret.value = this.value;
 
-		   ret.children.clear();
+         ret.children.clear();
 
-		   if (depth > 0)
-		   {
-			   for (int i=0; i<breadth; i++)
-			   {
-				   Tree childToCopy = this.children.get(i);
-				   Tree copy = childToCopy.inneficientCopy();
-				   ret.children.add(copy);
-			   }
-		   }
+         if (depth > 0)
+         {
+            for (int i = 0; i < breadth; i++)
+            {
+               Tree childToCopy = this.children.get(i);
+               Tree copy = childToCopy.inneficientCopy();
+               ret.children.add(copy);
+            }
+         }
 
-		   return ret;
-	   }
+         return ret;
+      }
    }
-   
+
    private class ObjectWithADoubleArrayBuried
    {
+      @SuppressWarnings("unused")
       private ObjectWithADoubleArray grave;
-      
+
       public ObjectWithADoubleArrayBuried(double[] xToSet)
       {
          grave = new ObjectWithADoubleArray(xToSet);
       }
    }
-   
+
    private class ObjectWithADoubleArray
    {
+      @SuppressWarnings("unused")
       private double[] x;
-      
+
       public ObjectWithADoubleArray(double[] xToSet)
       {
          x = Arrays.copyOf(xToSet, xToSet.length);

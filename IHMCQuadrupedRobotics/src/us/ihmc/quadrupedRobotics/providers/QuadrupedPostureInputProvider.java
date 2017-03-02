@@ -2,20 +2,21 @@ package us.ihmc.quadrupedRobotics.providers;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import us.ihmc.quadrupedRobotics.communication.packets.*;
+import us.ihmc.communication.net.PacketConsumer;
+import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyAngularRatePacket;
+import us.ihmc.quadrupedRobotics.communication.packets.BodyOrientationPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComPositionPacket;
+import us.ihmc.quadrupedRobotics.communication.packets.ComVelocityPacket;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
 import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
 import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
-import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.communication.streamingData.GlobalDataProducer;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProviderInterface
 {
@@ -46,10 +47,10 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
    private final DoubleYoVariable yoBodyAngularRateInputX;
    private final DoubleYoVariable yoBodyAngularRateInputY;
    private final DoubleYoVariable yoBodyAngularRateInputZ;
-   private final Point3d comPositionInput;
-   private final Vector3d comVelocityInput;
-   private final Quat4d bodyOrientationInput;
-   private final Vector3d bodyAngularRateInput;
+   private final Point3D comPositionInput;
+   private final Vector3D comVelocityInput;
+   private final Quaternion bodyOrientationInput;
+   private final Vector3D bodyAngularRateInput;
 
    public QuadrupedPostureInputProvider(GlobalDataProducer globalDataProducer, YoVariableRegistry registry)
    {
@@ -69,10 +70,10 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
       yoBodyAngularRateInputX = new DoubleYoVariable("bodyAngularRateInputX", registry);
       yoBodyAngularRateInputY = new DoubleYoVariable("bodyAngularRateInputY", registry);
       yoBodyAngularRateInputZ = new DoubleYoVariable("bodyAngularRateInputZ", registry);
-      comPositionInput = new Point3d();
-      comVelocityInput = new Vector3d();
-      bodyOrientationInput = new Quat4d();
-      bodyAngularRateInput = new Vector3d();
+      comPositionInput = new Point3D();
+      comVelocityInput = new Vector3D();
+      bodyOrientationInput = new Quaternion();
+      bodyAngularRateInput = new Vector3D();
 
       // initialize com height
       yoComPositionInputZ.set(comHeightNominalParameter.get());
@@ -86,11 +87,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             {
                comPositionPacket.set(packet);
                yoComPositionInputX.set(
-                     MathTools.clipToMinMax(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.get(0), comPositionUpperLimitsParameter.get(0)));
+                     MathTools.clamp(comPositionPacket.get().getX(), comPositionLowerLimitsParameter.get(0), comPositionUpperLimitsParameter.get(0)));
                yoComPositionInputY.set(
-                     MathTools.clipToMinMax(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.get(1), comPositionUpperLimitsParameter.get(1)));
+                     MathTools.clamp(comPositionPacket.get().getY(), comPositionLowerLimitsParameter.get(1), comPositionUpperLimitsParameter.get(1)));
                yoComPositionInputZ.set(
-                     MathTools.clipToMinMax(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.get(2), comPositionUpperLimitsParameter.get(2)));
+                     MathTools.clamp(comPositionPacket.get().getZ(), comPositionLowerLimitsParameter.get(2), comPositionUpperLimitsParameter.get(2)));
             }
          });
 
@@ -101,11 +102,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             {
                comVelocityPacket.set(packet);
                yoComVelocityInputX.set(
-                     MathTools.clipToMinMax(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.get(0), comVelocityUpperLimitsParameter.get(0)));
+                     MathTools.clamp(comVelocityPacket.get().getX(), comVelocityLowerLimitsParameter.get(0), comVelocityUpperLimitsParameter.get(0)));
                yoComVelocityInputY.set(
-                     MathTools.clipToMinMax(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.get(1), comVelocityUpperLimitsParameter.get(1)));
+                     MathTools.clamp(comVelocityPacket.get().getY(), comVelocityLowerLimitsParameter.get(1), comVelocityUpperLimitsParameter.get(1)));
                yoComVelocityInputZ.set(
-                     MathTools.clipToMinMax(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.get(2), comVelocityUpperLimitsParameter.get(2)));
+                     MathTools.clamp(comVelocityPacket.get().getZ(), comVelocityLowerLimitsParameter.get(2), comVelocityUpperLimitsParameter.get(2)));
             }
          });
 
@@ -115,11 +116,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             public void receivedPacket(BodyOrientationPacket packet)
             {
                bodyOrientationPacket.set(packet);
-               yoBodyOrientationInputYaw.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0),
+               yoBodyOrientationInputYaw.set(MathTools.clamp(bodyOrientationPacket.get().getYaw(), bodyOrientationLowerLimitsParameter.get(0),
                      bodyOrientationUpperLimitsParameter.get(0)));
-               yoBodyOrientationInputPitch.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1),
+               yoBodyOrientationInputPitch.set(MathTools.clamp(bodyOrientationPacket.get().getPitch(), bodyOrientationLowerLimitsParameter.get(1),
                      bodyOrientationUpperLimitsParameter.get(1)));
-               yoBodyOrientationInputRoll.set(MathTools.clipToMinMax(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2),
+               yoBodyOrientationInputRoll.set(MathTools.clamp(bodyOrientationPacket.get().getRoll(), bodyOrientationLowerLimitsParameter.get(2),
                      bodyOrientationUpperLimitsParameter.get(2)));
             }
          });
@@ -130,11 +131,11 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
             public void receivedPacket(BodyAngularRatePacket packet)
             {
                bodyAngularRatePacket.set(packet);
-               yoBodyAngularRateInputX.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0),
+               yoBodyAngularRateInputX.set(MathTools.clamp(bodyAngularRatePacket.get().getX(), bodyAngularRateLowerLimitsParameter.get(0),
                      bodyAngularRateUpperLimitsParameter.get(0)));
-               yoBodyAngularRateInputY.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1),
+               yoBodyAngularRateInputY.set(MathTools.clamp(bodyAngularRatePacket.get().getY(), bodyAngularRateLowerLimitsParameter.get(1),
                      bodyAngularRateUpperLimitsParameter.get(1)));
-               yoBodyAngularRateInputZ.set(MathTools.clipToMinMax(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2),
+               yoBodyAngularRateInputZ.set(MathTools.clamp(bodyAngularRatePacket.get().getZ(), bodyAngularRateLowerLimitsParameter.get(2),
                      bodyAngularRateUpperLimitsParameter.get(2)));
             }
          });
@@ -142,28 +143,28 @@ public class QuadrupedPostureInputProvider implements QuadrupedPostureInputProvi
    }
 
    @Override
-   public Point3d getComPositionInput()
+   public Point3D getComPositionInput()
    {
       comPositionInput.set(yoComPositionInputX.getDoubleValue(), yoComPositionInputY.getDoubleValue(), yoComPositionInputZ.getDoubleValue());
       return comPositionInput;
    }
 
    @Override
-   public Vector3d getComVelocityInput()
+   public Vector3D getComVelocityInput()
    {
       comVelocityInput.set(yoComVelocityInputX.getDoubleValue(), yoComVelocityInputY.getDoubleValue(), yoComVelocityInputZ.getDoubleValue());
       return comVelocityInput;
    }
 
    @Override
-   public Quat4d getBodyOrientationInput()
+   public Quaternion getBodyOrientationInput()
    {
-      RotationTools.convertYawPitchRollToQuaternion(yoBodyOrientationInputYaw.getDoubleValue(), yoBodyOrientationInputPitch.getDoubleValue(), yoBodyOrientationInputRoll.getDoubleValue(), bodyOrientationInput);
+      bodyOrientationInput.setYawPitchRoll(yoBodyOrientationInputYaw.getDoubleValue(), yoBodyOrientationInputPitch.getDoubleValue(), yoBodyOrientationInputRoll.getDoubleValue());
       return bodyOrientationInput;
    }
 
    @Override
-   public Vector3d getBodyAngularRateInput()
+   public Vector3D getBodyAngularRateInput()
    {
       bodyAngularRateInput.set(yoBodyAngularRateInputX.getDoubleValue(), yoBodyAngularRateInputY.getDoubleValue(), yoBodyAngularRateInputZ.getDoubleValue());
       return bodyAngularRateInput;

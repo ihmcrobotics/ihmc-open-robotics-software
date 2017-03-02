@@ -1,9 +1,9 @@
 package us.ihmc.robotiq.communication.registers;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotiq.communication.registers.GripperOptionRegister.rICF;
 import us.ihmc.robotiq.communication.registers.GripperOptionRegister.rICS;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GripperOptionRegisterTest extends RobotiqOutputRegisterTest

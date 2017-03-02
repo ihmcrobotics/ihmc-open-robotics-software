@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.robotController;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 
@@ -20,6 +20,7 @@ public interface MultiThreadedRobotControlElement extends Runnable
    /**
     * Do control. This method is called from the controller thread.
     */
+   @Override
    public void run();
    
    /**

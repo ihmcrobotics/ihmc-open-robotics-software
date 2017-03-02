@@ -1,22 +1,21 @@
 package us.ihmc.avatar;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
-import us.ihmc.avatar.DRCFlatGroundWalkingTrack;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.BoundingBox3d;
@@ -29,7 +28,6 @@ import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInterface
@@ -94,7 +92,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       double forceMagnitude = 400.0;
       double forceDuration = 0.15;
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -126,7 +124,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       double forceMagnitude = 400.0;
       double forceDuration = 0.15;
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -166,7 +164,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       //TODO: Increase the force magnitude and do more agressive pushes.
       double forceMagnitude = 400.0; //350.0;
       double forceDuration = 0.15;
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -210,7 +208,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
       double forceMagnitude = -400.0;
       double forceDuration = 0.15;
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -249,7 +247,7 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
       //TODO: Increase the force magnitude and do more agressive pushes.
       double forceMagnitude = -400.0; //-400.0;
       double forceDuration = 0.15;
-      Vector3d forceDirection = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
 
       blockingSimulationRunner = new BlockingSimulationRunner(scs, 1000.0);
 
@@ -323,8 +321,8 @@ public abstract class DRCPushRecoveryStandingTest implements MultiRobotTestInter
 
    public void assertRobotDidNotFall()
    {
-      Point3d center = new Point3d(0.0, 0.0, 0.8882009563211146);
-      Vector3d plusMinusVector = new Vector3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
+      Point3D center = new Point3D(0.0, 0.0, 0.8882009563211146);
+      Vector3D plusMinusVector = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.5);
       BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       DRCSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox, drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot());
    }

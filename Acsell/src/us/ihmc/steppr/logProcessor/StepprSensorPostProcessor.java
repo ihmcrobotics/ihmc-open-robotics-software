@@ -10,21 +10,20 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.logProcessor.LogDataProcessorFunction;
 import us.ihmc.avatar.logProcessor.LogDataProcessorHelper;
 import us.ihmc.avatar.logProcessor.LogDataRawSensorMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -38,11 +37,11 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -315,17 +314,17 @@ public class StepprSensorPostProcessor implements LogDataProcessorFunction
    {
    }
 
-   private final Vector3d translation = new Vector3d();
-   private final Quat4d orientation = new Quat4d();
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Vector3d linearAcceleration = new Vector3d();
+   private final Vector3D translation = new Vector3D();
+   private final Quaternion orientation = new Quaternion();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Vector3D linearAcceleration = new Vector3D();
    private final Twist twist = new Twist();
    private final FrameVector linearFrameVelocity = new FrameVector();
    private final FrameVector angularFrameVelocity = new FrameVector();
 
-   private final Matrix3d processedOrientation = new Matrix3d();
-   private final Vector3d processedAngularVelocity = new Vector3d();
-   private final Vector3d processedLinearAcceleration = new Vector3d();
+   private final RotationMatrix processedOrientation = new RotationMatrix();
+   private final Vector3D processedAngularVelocity = new Vector3D();
+   private final Vector3D processedLinearAcceleration = new Vector3D();
 
    @Override
    public void processDataAtStateEstimatorRate()

@@ -1,11 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,10 +12,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket>
 {
    public RobotSide initialStanceSide;
-   public Point3f stanceFootPositionInWorld;
-   public Quat4f stanceFootOrientationInWorld;
-   public Point3f goalPositionInWorld;
-   public Quat4f goalOrientationInWorld;
+   public Point3D32 stanceFootPositionInWorld;
+   public Quaternion32 stanceFootOrientationInWorld;
+   public Point3D32 goalPositionInWorld;
+   public Quaternion32 goalOrientationInWorld;
    public boolean assumeFlatGround = true;
 
    public FootstepPlanningRequestPacket()
@@ -33,18 +32,18 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       this.initialStanceSide = initialStanceSide;
 
-      Point3d tempPoint = new Point3d();
-      Quat4d tempOrientation = new Quat4d();
+      Point3D tempPoint = new Point3D();
+      Quaternion tempOrientation = new Quaternion();
 
       initialStanceFootPose.getPosition(tempPoint);
       initialStanceFootPose.getOrientation(tempOrientation);
-      stanceFootPositionInWorld = new Point3f(tempPoint);
-      stanceFootOrientationInWorld = new Quat4f(tempOrientation);
+      stanceFootPositionInWorld = new Point3D32(tempPoint);
+      stanceFootOrientationInWorld = new Quaternion32(tempOrientation);
 
       goalPose.getPosition(tempPoint);
       goalPose.getOrientation(tempOrientation);
-      goalPositionInWorld = new Point3f(tempPoint);
-      goalOrientationInWorld = new Quat4f(tempOrientation);
+      goalPositionInWorld = new Point3D32(tempPoint);
+      goalOrientationInWorld = new Quaternion32(tempOrientation);
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)

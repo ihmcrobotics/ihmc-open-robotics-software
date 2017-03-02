@@ -27,6 +27,6 @@ public class FootStepDataListForwarder extends AbstractRosTopicSubscriber<ihmc_m
       FootStepDataMessageConverter.convertFootStepDataList(footStepDataList, footStepDataArrayList);
       ExecutionMode executionMode = ExecutionMode.values[(int) message.getExecutionMode()];
       
-      controllerCommunicator.send(new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage(footStepDataArrayList,message.getSwingTime(),message.getTransferTime(),executionMode));
+      controllerCommunicator.send(new us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage(footStepDataArrayList,message.getDefaultSwingTime(),message.getDefaultTransferTime(),executionMode));
    }
 }

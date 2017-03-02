@@ -1,9 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
+import java.util.Random;
+
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-
-import java.util.Random;
 
 /**
  * Created by agrabertilton on 4/28/15.

@@ -98,7 +98,7 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       }
 
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       parameterPolynomial.compute(time);
       differenceVector.sub(finalPosition, initialPosition);
 

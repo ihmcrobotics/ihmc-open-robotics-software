@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.simulatedSensors;
 
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public interface WrenchCalculatorInterface
 {

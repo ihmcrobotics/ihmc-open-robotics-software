@@ -1,14 +1,13 @@
 package us.ihmc.utilities.ros.publisher;
 
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
 import org.ros.message.Time;
 
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import std_msgs.Header;
 import us.ihmc.communication.packets.IMUPacket;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 
 public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
 {
@@ -18,7 +17,7 @@ public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
       super(sensor_msgs.Imu._TYPE,latched);
    }
    
-   public void publish(long timestamp, Vector3f linearAcceleration, Quat4f orientation, Vector3f angularVelocity, String frameId)
+   public void publish(long timestamp, Vector3D32 linearAcceleration, Quaternion32 orientation, Vector3D32 angularVelocity, String frameId)
    {
       sensor_msgs.Imu message = getMessage();
 
@@ -28,7 +27,7 @@ public class RosImuPublisher extends RosTopicPublisher<sensor_msgs.Imu>
       localLinearAcceleration.setZ(linearAcceleration.getZ());
       
       Quaternion localOrientation = newMessageFromType(Quaternion._TYPE);
-      localOrientation.setW(orientation.getW());
+      localOrientation.setW(orientation.getS());
       localOrientation.setX(orientation.getX());
       localOrientation.setY(orientation.getY());
       localOrientation.setZ(orientation.getZ());

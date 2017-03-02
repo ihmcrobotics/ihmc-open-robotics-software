@@ -44,6 +44,7 @@ public class Event
       return comment;
    }
 
+   @Override
    public String toString()
    {
       String ret = "Event" + "\n" + "Type: " + type + "\n";

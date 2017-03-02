@@ -1,7 +1,8 @@
 package us.ihmc.robotModels;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.sensors.ContactSensorDefinition;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
-import javax.vecmath.Vector3d;
 import java.util.*;
 
 public class FullRobotModelTestTools
@@ -20,9 +20,9 @@ public class FullRobotModelTestTools
    {
       private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      private static final Vector3d roll = new Vector3d(1.0, 0.0, 0.0);
-      private static final Vector3d pitch = new Vector3d(0.0, 1.0, 0.0);
-      private static final Vector3d yaw = new Vector3d(0.0, 0.0, 1.0);
+      private static final Vector3D roll = new Vector3D(1.0, 0.0, 0.0);
+      private static final Vector3D pitch = new Vector3D(0.0, 1.0, 0.0);
+      private static final Vector3D yaw = new Vector3D(0.0, 0.0, 1.0);
 
       private final RigidBody elevator;
       private final RigidBody pelvis;

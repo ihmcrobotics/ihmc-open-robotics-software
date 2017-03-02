@@ -47,7 +47,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       selectionMatrix.set(2, 5, 1.0);
 
       momentumRate.reshape(selectionMatrix.getNumCols(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(momentumRate, linearMomentumRateOfChange.getVector(), 3, 0);
+      linearMomentumRateOfChange.getVector().get(3, 0, momentumRate);
    }
 
    public void setAngularMomentumRateOfChange(FrameVector angularMomentumRateOfChange)
@@ -56,7 +56,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       CommonOps.setIdentity(selectionMatrix);
 
       momentumRate.reshape(selectionMatrix.getNumCols(), 1);
-      MatrixTools.setDenseMatrixFromTuple3d(momentumRate, angularMomentumRateOfChange.getVector(), 0, 0);
+      angularMomentumRateOfChange.getVector().get(0, 0, momentumRate);
    }
 
    public void setLinearMomentumXYRateOfChange(FrameVector2d linearMomentumRateOfChange)
@@ -66,7 +66,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       selectionMatrix.set(1, 4, 1.0);
 
       momentumRate.reshape(selectionMatrix.getNumCols(), 1);
-      MatrixTools.setDenseMatrixFromTuple2d(momentumRate, linearMomentumRateOfChange.getVector(), 3, 0);
+      linearMomentumRateOfChange.getVector().get(3, 0, momentumRate);
    }
 
    public void setEmpty()
@@ -111,16 +111,16 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
    public void setLinearAlphaTaskPriority(double linearX, double linearY, double linearZ)
    {
-      alphaTaskPriorityVector.set(3, 0, MathTools.clipToMinMax(linearX, 0.0, 1.0));
-      alphaTaskPriorityVector.set(4, 0, MathTools.clipToMinMax(linearY, 0.0, 1.0));
-      alphaTaskPriorityVector.set(5, 0, MathTools.clipToMinMax(linearZ, 0.0, 1.0));
+      alphaTaskPriorityVector.set(3, 0, MathTools.clamp(linearX, 0.0, 1.0));
+      alphaTaskPriorityVector.set(4, 0, MathTools.clamp(linearY, 0.0, 1.0));
+      alphaTaskPriorityVector.set(5, 0, MathTools.clamp(linearZ, 0.0, 1.0));
    }
 
    public void setAngularAlphasTaskPriority(double angularX, double angularY, double angularZ)
    {
-      alphaTaskPriorityVector.set(0, 0, MathTools.clipToMinMax(angularX, 0.0, 1.0));
-      alphaTaskPriorityVector.set(1, 0, MathTools.clipToMinMax(angularY, 0.0, 1.0));
-      alphaTaskPriorityVector.set(2, 0, MathTools.clipToMinMax(angularZ, 0.0, 1.0));
+      alphaTaskPriorityVector.set(0, 0, MathTools.clamp(angularX, 0.0, 1.0));
+      alphaTaskPriorityVector.set(1, 0, MathTools.clamp(angularY, 0.0, 1.0));
+      alphaTaskPriorityVector.set(2, 0, MathTools.clamp(angularZ, 0.0, 1.0));
    }
 
    public void resetAlphaTaskPriority()

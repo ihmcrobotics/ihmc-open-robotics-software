@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -17,7 +16,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
    private final YoFrameVector yoConnectionPositionIntegratedError;
    private final FrameVector integralForce;
 
-   private final Vector3d tempForce = new Vector3d();
+   private final Vector3D tempForce = new Vector3D();
 
    public ExternalForcePointPIDConstraintToIntegrate(String name, ExternalForcePoint connectionPointA, ExternalForcePoint connectionPointB,
          YoVariableRegistry parentRegistry)
@@ -35,6 +34,7 @@ public class ExternalForcePointPIDConstraintToIntegrate extends ExternalForcePoi
       this.integralStiffness.set(integralStiffness);
    }
 
+   @Override
    protected void updateClosedJoint()
    {
       super.updateClosedJoint();

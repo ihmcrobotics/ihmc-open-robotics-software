@@ -18,11 +18,12 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
-import georegression.struct.point.Point3D_F64;
-import org.ddogleg.fitting.modelset.ModelFitter;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ddogleg.fitting.modelset.ModelFitter;
+
+import georegression.struct.point.Point3D_F64;
 
 /**
  * Converts a {@link Point3D_F64} based {@link ModelFitter} into a {@link PointVectorNN} based one.

@@ -1,9 +1,8 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class CylinderSupportingVertexHolder implements SupportingVertexHolder
 {
@@ -40,14 +39,14 @@ public class CylinderSupportingVertexHolder implements SupportingVertexHolder
 
    public void applyTransform(RigidBodyTransform transform)
    {
-      this.transform.multiply(transform, this.transform);
+      this.transform.preMultiply(transform);
    }
 
-   private final Vector3d tempVectorForSupportingVertex = new Vector3d();
+   private final Vector3D tempVectorForSupportingVertex = new Vector3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    @Override
-   public Point3d getSupportingVertex(Vector3d supportDirection)
+   public Point3D getSupportingVertex(Vector3D supportDirection)
    {
       tempTransform.set(transform);
       tempTransform.invert();
@@ -80,7 +79,7 @@ public class CylinderSupportingVertexHolder implements SupportingVertexHolder
          tempVectorForSupportingVertex.setZ(-height / 2.0);
       }
 
-      Point3d supportingVertex = new Point3d(tempVectorForSupportingVertex);
+      Point3D supportingVertex = new Point3D(tempVectorForSupportingVertex);
 
       transform.transform(supportingVertex);
       return supportingVertex;

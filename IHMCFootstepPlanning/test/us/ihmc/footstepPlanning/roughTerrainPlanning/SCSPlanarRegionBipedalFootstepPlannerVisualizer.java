@@ -1,9 +1,8 @@
 package us.ihmc.footstepPlanning.roughTerrainPlanning;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlannerVisualizer;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -14,10 +13,10 @@ public class SCSPlanarRegionBipedalFootstepPlannerVisualizer
 {
    public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, YoVariableRegistry registryToAdd)
    {
-      return createWithSimulationConstructionSet(dtForViz, new Point3d(0.0, 0.0, 0.0), new Point3d(-5.0, 0.0, 5.0), footPolygonsInSoleFrame, registryToAdd);
+      return createWithSimulationConstructionSet(dtForViz, new Point3D(0.0, 0.0, 0.0), new Point3D(-5.0, 0.0, 5.0), footPolygonsInSoleFrame, registryToAdd);
    }
 
-   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, Point3d cameraFix, Point3d cameraPosition, 
+   public static PlanarRegionBipedalFootstepPlannerVisualizer createWithSimulationConstructionSet(double dtForViz, Point3D cameraFix, Point3D cameraPosition, 
                                                                                                   SideDependentList<ConvexPolygon2d> footPolygonsInSoleFrame, 
                                                                                                   YoVariableRegistry registryToAdd)
    {

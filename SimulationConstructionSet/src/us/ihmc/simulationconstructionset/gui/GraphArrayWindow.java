@@ -218,6 +218,7 @@ public class GraphArrayWindow implements SelectGraphConfigurationCommandExecutor
    @SuppressWarnings("unused")
    private String selectedConfigurationName, selectedGraphGroupName;
 
+   @Override
    public void selectGraphConfiguration(String name)
    {
       // if (rob == null) return;
@@ -234,6 +235,7 @@ public class GraphArrayWindow implements SelectGraphConfigurationCommandExecutor
       // selectEntryBoxGroup(config.getEntryBoxGroupName());
    }
 
+   @Override
    public void selectGraphGroup(String name)
    {
       selectedGraphGroupName = name;

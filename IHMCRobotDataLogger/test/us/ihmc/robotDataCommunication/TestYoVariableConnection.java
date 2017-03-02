@@ -1,5 +1,6 @@
 package us.ihmc.robotDataCommunication;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
@@ -8,7 +9,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 
@@ -89,7 +89,7 @@ public class TestYoVariableConnection
             gc.set(false);
          }
          
-         timestamp += TimeTools.milliSecondsToNanoSeconds(1);
+         timestamp += Conversions.milliSecondsToNanoSeconds(1);
          server.update(timestamp);
          ThreadTools.sleep(timeout.getIntegerValue());
       }

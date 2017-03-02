@@ -8,14 +8,14 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class YoConcatenatedSplinesTest
 {
@@ -174,7 +174,7 @@ public class YoConcatenatedSplinesTest
       double[] times = new double[number];
       for (int i = 0; i < number; i++)
       {
-         times[i] = RandomTools.generateRandomDoubleInRange(random, 0.0, 5.0);
+         times[i] = RandomNumbers.nextDouble(random, 0.0, 5.0);
       }
 
       Arrays.sort(times);
@@ -198,7 +198,7 @@ public class YoConcatenatedSplinesTest
 
          for (Direction direction : Direction.values())
          {
-            positions[i].set(direction, RandomTools.generateRandomDoubleInRange(random, -5.0, 5.0));
+            positions[i].set(direction, RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 
@@ -214,7 +214,7 @@ public class YoConcatenatedSplinesTest
 
          for (Direction direction : Direction.values())
          {
-            velocities[i].set(direction, RandomTools.generateRandomDoubleInRange(random, -5.0, 5.0));
+            velocities[i].set(direction, RandomNumbers.nextDouble(random, -5.0, 5.0));
          }
       }
 

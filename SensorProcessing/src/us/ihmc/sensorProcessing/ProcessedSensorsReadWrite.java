@@ -1,9 +1,8 @@
 package us.ihmc.sensorProcessing;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -46,23 +45,22 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
       }
    }
 
-   public void setRotation(Matrix3d rotationMatrix, int imuIndex)
+   public void setRotation(RotationMatrix rotationMatrix, int imuIndex)
    {
-      Quat4d q = new Quat4d();
-      RotationTools.convertMatrixToQuaternion(rotationMatrix, q);
-      RotationTools.checkQuaternionNormalized(q);
+      Quaternion q = new Quaternion();
+      q.set(rotationMatrix);
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
 //      q.set(rotationMatrix);
 
-      p_qs.set(q.getW());
+      p_qs.set(q.getS());
       p_qx.set(q.getX());
       p_qy.set(q.getY());
       p_qz.set(q.getZ());
 
-      p_yaw.set(RotationTools.computeYaw(rotationMatrix));
-      p_pitch.set(RotationTools.computePitch(rotationMatrix));
-      p_roll.set(RotationTools.computeRoll(rotationMatrix));
+      p_yaw.set(rotationMatrix.getYaw());
+      p_pitch.set(rotationMatrix.getPitch());
+      p_roll.set(rotationMatrix.getRoll());
    }
 
    public void setAcceleration(FrameVector accelerationInWorld, int imuIndex)
@@ -70,19 +68,19 @@ public class ProcessedSensorsReadWrite implements ProcessedIMUSensorsReadOnlyInt
       pdd_world.set(accelerationInWorld);
    }
 
-   public void setAngularVelocityInBody(Vector3d angularVelocityInBody, int imuIndex)
+   public void setAngularVelocityInBody(Vector3D angularVelocityInBody, int imuIndex)
    {
       pd_w.set(angularVelocityInBody);
    }
 
-   public void setAngularAccelerationInBody(Vector3d angularAccelerationInBody, int imuIndex)
+   public void setAngularAccelerationInBody(Vector3D angularAccelerationInBody, int imuIndex)
    {
       throw new RuntimeException("Not supported");
    }
 
-   public Quat4d getQuaternion(int imuIndex)
+   public Quaternion getQuaternion(int imuIndex)
    {
-      return new Quat4d(p_qx.getDoubleValue(), p_qy.getDoubleValue(), p_qz.getDoubleValue(),
+      return new Quaternion(p_qx.getDoubleValue(), p_qy.getDoubleValue(), p_qz.getDoubleValue(),
                         p_qs.getDoubleValue());
    }
 

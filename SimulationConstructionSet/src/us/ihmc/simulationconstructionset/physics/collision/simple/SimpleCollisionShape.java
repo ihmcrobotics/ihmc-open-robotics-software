@@ -1,7 +1,8 @@
 
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
@@ -11,6 +12,9 @@ public class SimpleCollisionShape implements CollisionShape
    private final CollisionShapeDescription transformedCollisionShapeDescription;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
+   private int groupMask = 0x00;
+   private int collisionMask = 0x00;
+   
    private boolean isGround = false;
 
    public SimpleCollisionShape(CollisionShapeDescription collisionShapeDescription)
@@ -25,6 +29,7 @@ public class SimpleCollisionShape implements CollisionShape
       return isGround;
    }
    
+   @Override
    public void setIsGround(boolean isGround)
    {
       this.isGround = isGround;
@@ -37,15 +42,27 @@ public class SimpleCollisionShape implements CollisionShape
    }
 
    @Override
-   public int getGroupMask()
+   public int getCollisionGroup()
    {
-      return 0xFFFF;
+      return groupMask;
    }
 
    @Override
    public int getCollisionMask()
    {
-      return 0xFFFF;
+      return collisionMask;
+   }
+   
+   @Override
+   public void setCollisionGroup(int groupMask)
+   {
+      this.groupMask = groupMask; 
+   }
+
+   @Override
+   public void setCollisionMask(int collisionMask)
+   {
+      this.collisionMask = collisionMask;
    }
 
    @Override
@@ -72,6 +89,12 @@ public class SimpleCollisionShape implements CollisionShape
       transformedCollisionShapeDescription.setFrom(collisionShapeDescription);
       this.getTransformToWorld(transformToWorld);
       transformedCollisionShapeDescription.applyTransform(transformToWorld);
+   }
+
+   @Override
+   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+   {
+      transformedCollisionShapeDescription.getBoundingBox(boundingBoxToPack);
    }
 
 }

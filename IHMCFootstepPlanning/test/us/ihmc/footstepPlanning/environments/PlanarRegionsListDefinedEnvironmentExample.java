@@ -1,17 +1,19 @@
 package us.ihmc.footstepPlanning.environments;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListExamples;
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.structure.Graphics3DNodeType;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,9 +21,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -48,13 +47,13 @@ public class PlanarRegionsListDefinedEnvironmentExample
             YoFrameVector surfaceNormal = new YoFrameVector("NormalVector" + i, ReferenceFrame.getWorldFrame(), robotsYoVariableRegistry);
 
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            Point3d translation = new Point3d();
+            Point3D translation = new Point3D();
             planarRegion.getTransformToWorld(transformToWorld);
             transformToWorld.getTranslation(translation);
             planarRegionPointInWorld.set(translation);
 
-            Vector3d normal = new Vector3d();
-            terrainObject3D.getHeightMapIfAvailable().heightAndNormalAt(translation.x, translation.y, translation.z, normal);
+            Vector3D normal = new Vector3D();
+            terrainObject3D.getHeightMapIfAvailable().heightAndNormalAt(translation.getX(), translation.getY(), translation.getZ(), normal);
             surfaceNormal.setVector(normal);
 
             YoGraphicVector surfaceNormalGraphic = new YoGraphicVector("PlanarRegionSurfaceNormalGraphic" + i, planarRegionPointInWorld, surfaceNormal,
@@ -71,7 +70,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
          {
             PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
-            Point3d translation = new Point3d();
+            Point3D translation = new Point3D();
             planarRegion.getTransformToWorld(transformToWorld);
 
             Graphics3DObject boundingBoxVisualization = new Graphics3DObject();
@@ -82,7 +81,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
             double lz = boundingBox3dInWorld.getZMax() - boundingBox3dInWorld.getZMin();
 
             transformToWorld.getTranslation(translation);
-            translation.setZ(translation.z - (lz / 2.0));
+            translation.setZ(translation.getZ() - (lz / 2.0));
             boundingBoxVisualization.translate(translation);
             boundingBoxVisualization.addCube(lx, ly, lz, YoAppearance.RGBColor(1.0, 0, 0, 0.5));
 
@@ -111,12 +110,14 @@ public class PlanarRegionsListDefinedEnvironmentExample
       double startX = 0.0;
       double startY = 0.0;
       double cinderBlockSize = 0.4;
+      double cinderBlockHeight = 0.15;
       int courseWidthXInNumberOfBlocks = 21;
       int courseLengthYInNumberOfBlocks = 6;
+      double heightVariation = 0.1;
       //      Random random = new Random(1776L);
 
       PlanarRegionsList planarRegionsList = PlanarRegionsListExamples
-            .generateCinderBlockField(startX, startY, cinderBlockSize, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks);
+            .generateCinderBlockField(startX, startY, cinderBlockSize, cinderBlockHeight, courseWidthXInNumberOfBlocks, courseLengthYInNumberOfBlocks, heightVariation);
 
       startEnvironmentVisualizationForPlanarRegionsList(planarRegionsList, true, true, true, true);
    }

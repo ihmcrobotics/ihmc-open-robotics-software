@@ -5,19 +5,19 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.TorusPosePacket;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,15 +41,15 @@ public class TorusPosePacketTransformerTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Point3d point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point3D point3d = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
 
-         AxisAngle4d axisAngle = RandomTools.generateRandomRotation(random);
-         Quat4d quat = new Quat4d();
+         AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
+         Quaternion quat = new Quaternion();
          quat.set(axisAngle);
 
          TorusPosePacket starting = new TorusPosePacket(point3d, quat, radius);
 
-         transform3D = RigidBodyTransform.generateRandomTransform(random);
+         transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
          TorusPosePacket ending = starting.transform(transform3D);
 
@@ -59,16 +59,16 @@ public class TorusPosePacketTransformerTest
 
    private static void performEqualsTest(TorusPosePacket starting, RigidBodyTransform transform3D, TorusPosePacket ending)
    {
-      // Point3d position;
+      // Point3D position;
       double distance = getDistanceBetweenPoints(starting.getPosition(), transform3D, ending.getPosition());
       assertEquals("not equal", 0.0, distance, 1e-6);
 
-      Quat4d startQuat = starting.getOrientation();
-      Quat4d endQuat = ending.getOrientation();
+      Quaternion startQuat = starting.getOrientation();
+      Quaternion endQuat = ending.getOrientation();
       assertTrue(areOrientationsEqualWithTransform(startQuat, transform3D, endQuat));
    }
 
-   private static double getDistanceBetweenPoints(Point3d startingPoint, RigidBodyTransform transform3D, Point3d endPoint)
+   private static double getDistanceBetweenPoints(Point3D startingPoint, RigidBodyTransform transform3D, Point3D endPoint)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);
@@ -81,7 +81,7 @@ public class TorusPosePacketTransformerTest
       return end.distance(start);
    }
 
-   private static boolean areOrientationsEqualWithTransform(Quat4d orientationStart, RigidBodyTransform transform3D, Quat4d orientationEnd)
+   private static boolean areOrientationsEqualWithTransform(Quaternion orientationStart, RigidBodyTransform transform3D, Quaternion orientationEnd)
    {
       ReferenceFrame ending = ReferenceFrame.constructARootFrame("ending", false, true, true);
       ReferenceFrame starting = ReferenceFrame.constructFrameWithUnchangingTransformToParent("starting", ending, transform3D, false, true, true);

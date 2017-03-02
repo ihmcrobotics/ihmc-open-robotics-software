@@ -3,15 +3,14 @@ package us.ihmc.simulationconstructionset.util.ground.steppingStones;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -44,17 +43,17 @@ public class SteppingStone
       this.height = height;
       this.convexPolygon2d = new ConvexPolygon2d(convexPolygon2d);
       polygonToShrink = new ConvexPolygon2d(footPolygon);
-      shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2d(0.0, 0.0), convexPolygon2d);
+      shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d);
    }
 
-   public SteppingStone(String name, double baseZ, double height, ArrayList<Point2d> points, ConvexPolygon2d footPolygon)
+   public SteppingStone(String name, double baseZ, double height, ArrayList<Point2D> points, ConvexPolygon2d footPolygon)
    {
       this.name = name;
       this.baseZ = baseZ;
       this.height = height;
       convexPolygon2d = new ConvexPolygon2d(points);
       polygonToShrink = new ConvexPolygon2d(footPolygon);
-      shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2d(0.0, 0.0), convexPolygon2d);
+      shrunkenPolygon = ConvexPolygonTools.shrinkInto(polygonToShrink, new Point2D(0.0, 0.0), convexPolygon2d);
    }
 
    public String getName()
@@ -82,7 +81,7 @@ public class SteppingStone
    {
       Graphics3DObject ret = new Graphics3DObject();
       double polygonExtrusionHeight = height-baseZ;
-      ret.translate(new Vector3d(0.0, 0.0, baseZ));
+      ret.translate(new Vector3D(0.0, 0.0, baseZ));
       ret.addExtrudedPolygon(convexPolygon2d, polygonExtrusionHeight, yoAppearance);
             
       if (this.shrunkenPolygon != null)
@@ -107,7 +106,7 @@ public class SteppingStone
    public static SteppingStone generateRandomCicularStone(String name, Random random, double xCenter, double yCenter, double baseZ, double height,
            double radius, ConvexPolygon2d shrunkenPolygon)
    {
-      ArrayList<Point2d> points = generateRandomCircularPoints(xCenter, yCenter, radius, 40);
+      ArrayList<Point2D> points = generateRandomCircularPoints(xCenter, yCenter, radius, 40);
       ConvexPolygon2d polygon2d = new ConvexPolygon2d(points);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, polygon2d, shrunkenPolygon);
 
@@ -117,7 +116,7 @@ public class SteppingStone
    public static SteppingStone createRectangularStone(String name, double xMin, double xMax, double yMin, double yMax, double baseZ, double height,
            ConvexPolygon2d shrunkenPolygon)
    {
-      ArrayList<Point2d> points = generateRectangularPoints(xMin, xMax, yMin, yMax);
+      ArrayList<Point2D> points = generateRectangularPoints(xMin, xMax, yMin, yMax);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, points, shrunkenPolygon);
 
       return steppingStone;
@@ -127,7 +126,7 @@ public class SteppingStone
    public static SteppingStone generateRandomPolygonalStone(String name, Random random, double xCenter, double yCenter, double baseZ, double height,
            double radius, int numSides, ConvexPolygon2d shrunkenPolygon)
    {
-      ArrayList<Point2d> points = generateRandomPolygonalPoints(random, xCenter, yCenter, radius, numSides);
+      ArrayList<Point2D> points = generateRandomPolygonalPoints(random, xCenter, yCenter, radius, numSides);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, points, shrunkenPolygon);
 
       return steppingStone;
@@ -136,25 +135,25 @@ public class SteppingStone
    public static SteppingStone generateRegularPolygonalStone(String name, double xCenter, double yCenter, double baseZ, double height, double radius,
            int numSides, ConvexPolygon2d shrunkenPolygon)
    {
-      ArrayList<Point2d> points = generateRegularPolygonalPoints(xCenter, yCenter, radius, numSides);
+      ArrayList<Point2D> points = generateRegularPolygonalPoints(xCenter, yCenter, radius, numSides);
       SteppingStone steppingStone = new SteppingStone(name, baseZ, height, points, shrunkenPolygon);
 
       return steppingStone;
    }
 
-   private static ArrayList<Point2d> generateRegularPolygonalPoints(double xCenter, double yCenter, double radius, int numberOfPoints)
+   private static ArrayList<Point2D> generateRegularPolygonalPoints(double xCenter, double yCenter, double radius, int numberOfPoints)
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
       double alpha = (2.0 * Math.PI) / (numberOfPoints);
-      Point2d zeroPoint = new Point2d(xCenter, yCenter);
-      Point2d firstPoint = new Point2d(xCenter + radius, yCenter);
+      Point2D zeroPoint = new Point2D(xCenter, yCenter);
+      Point2D firstPoint = new Point2D(xCenter + radius, yCenter);
       points.add(firstPoint);
 
       for (int i = 1; i < numberOfPoints; i++)
       {
          double x = Math.cos(alpha) * (firstPoint.getX() - zeroPoint.getX()) - Math.sin(alpha) * (firstPoint.getY() - zeroPoint.getY()) + zeroPoint.getX();
          double y = Math.sin(alpha) * (firstPoint.getX() - zeroPoint.getX()) + Math.cos(alpha) * (firstPoint.getY() - zeroPoint.getY()) + zeroPoint.getY();
-         Point2d nextPoint = new Point2d(x, y);
+         Point2D nextPoint = new Point2D(x, y);
          points.add(nextPoint);
          firstPoint = nextPoint;
       }
@@ -162,12 +161,12 @@ public class SteppingStone
       return points;
    }
 
-   private static ArrayList<Point2d> generateRandomPolygonalPoints(Random random, double xCenter, double yCenter, double radius, int numberOfPoints)
+   private static ArrayList<Point2D> generateRandomPolygonalPoints(Random random, double xCenter, double yCenter, double radius, int numberOfPoints)
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
       double alpha = (2.0 * Math.PI) / (numberOfPoints);
-      Point2d zeroPoint = new Point2d(xCenter, yCenter);
-      Point2d firstPoint = new Point2d(xCenter + radius, yCenter);
+      Point2D zeroPoint = new Point2D(xCenter, yCenter);
+      Point2D firstPoint = new Point2D(xCenter + radius, yCenter);
       points.add(firstPoint);
       double minAngle = 0.0, maxAngle = alpha;
 
@@ -178,7 +177,7 @@ public class SteppingStone
                     + zeroPoint.getX();
          double y = Math.sin(randonAngle) * (firstPoint.getX() - zeroPoint.getX()) + Math.cos(randonAngle) * (firstPoint.getY() - zeroPoint.getY())
                     + zeroPoint.getY();
-         Point2d nextPoint = new Point2d(x, y);
+         Point2D nextPoint = new Point2D(x, y);
          points.add(nextPoint);
          minAngle = maxAngle;
          maxAngle = maxAngle + alpha;
@@ -187,13 +186,13 @@ public class SteppingStone
       return points;
    }
 
-   private static ArrayList<Point2d> generateRandomCircularPoints(double xCenter, double yCenter, double radius, int numberOfPoints)
+   private static ArrayList<Point2D> generateRandomCircularPoints(double xCenter, double yCenter, double radius, int numberOfPoints)
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
 
       Random random = new Random(1972L);
 
-      Point2d zeroFramePoint = new Point2d(xCenter, yCenter);
+      Point2D zeroFramePoint = new Point2D(xCenter, yCenter);
 
       double xMin = xCenter - radius;
       double xMax = xCenter + radius;
@@ -202,7 +201,7 @@ public class SteppingStone
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2d randomPoint = FramePoint2d.generateRandomFramePoint2d(random, ReferenceFrame.getWorldFrame(), xMin, xMax, yMin, yMax).getPointCopy();
+         Point2D randomPoint = FramePoint2d.generateRandomFramePoint2d(random, ReferenceFrame.getWorldFrame(), xMin, xMax, yMin, yMax).getPointCopy();
 
          if (randomPoint.distance(zeroFramePoint) > radius)
             continue;
@@ -214,16 +213,16 @@ public class SteppingStone
    }
 
 
-   private static ArrayList<Point2d> generateRectangularPoints(double xMin, double xMax, double yMin, double yMax)
+   private static ArrayList<Point2D> generateRectangularPoints(double xMin, double xMax, double yMin, double yMax)
    {
-      ArrayList<Point2d> points = new ArrayList<Point2d>();
-      Point2d randomPoint = new Point2d(xMin, yMin);
+      ArrayList<Point2D> points = new ArrayList<Point2D>();
+      Point2D randomPoint = new Point2D(xMin, yMin);
       points.add(randomPoint);
-      randomPoint = new Point2d(xMin, yMax);
+      randomPoint = new Point2D(xMin, yMax);
       points.add(randomPoint);
-      randomPoint = new Point2d(xMax, yMax);
+      randomPoint = new Point2D(xMax, yMax);
       points.add(randomPoint);
-      randomPoint = new Point2d(xMax, yMin);
+      randomPoint = new Point2D(xMax, yMin);
       points.add(randomPoint);
 
       return points;
