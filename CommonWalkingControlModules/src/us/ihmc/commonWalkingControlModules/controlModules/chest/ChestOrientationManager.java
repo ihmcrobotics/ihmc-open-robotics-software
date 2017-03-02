@@ -71,7 +71,7 @@ public class ChestOrientationManager
       jointspaceChestControlState = new JointspaceChestControlState(jointsOriginal, jointspaceGains, yoTime, registry);
 
       taskspaceChestControlState.setWeights(walkingControllerParameters.getMomentumOptimizationSettings().getChestAngularWeight());
-      jointspaceChestControlState.setWeight(walkingControllerParameters.getMomentumOptimizationSettings().getDefaultJointspaceWeight());
+      jointspaceChestControlState.setWeight(walkingControllerParameters.getMomentumOptimizationSettings().getJointspaceWeights().get(jointsOriginal[0].getName()));
 
       setupStateMachine();
       parentRegistry.addChild(registry);

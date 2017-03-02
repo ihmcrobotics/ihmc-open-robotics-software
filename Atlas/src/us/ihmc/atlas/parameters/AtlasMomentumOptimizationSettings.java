@@ -41,8 +41,6 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector2D copWeight = new Vector2D(100.0, 200.0);
    private final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0);
    private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
-   private final Vector3D handAngularTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
-   private final Vector3D handLinearTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
 
    private final double rhoWeight;
    private final double rhoMin;
@@ -61,7 +59,11 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    private final Vector3D headAngularWeight = new Vector3D(1.0, 1.0, 1.0);
    private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
+   private final Vector3D handAngularWeight = new Vector3D(1.0, 1.0, 1.0);
    private final Map<String, Vector3D> taskspaceAngularWeights = new HashMap<>();
+
+   private final Vector3D handLinearWeight = new Vector3D(1.0, 1.0, 1.0);
+   private final Map<String, Vector3D> taskspaceLinearWeights = new HashMap<>();
 
    public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap)
    {
@@ -99,6 +101,11 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
       taskspaceAngularWeights.put(jointMap.getChestName(), chestAngularWeight);
       taskspaceAngularWeights.put(jointMap.getHeadName(), headAngularWeight);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         taskspaceAngularWeights.put(jointMap.getJointBeforeHandName(robotSide), handAngularWeight);
+         taskspaceLinearWeights.put(jointMap.getJointBeforeHandName(robotSide), handLinearWeight);
+      }
    }
 
    /** @inheritDoc */
@@ -273,14 +280,14 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    @Override
    public Vector3D getHandAngularTaskspaceWeight()
    {
-      return handAngularTaskspaceWeight;
+      return handAngularWeight;
    }
 
    /** @inheritDoc */
    @Override
    public Vector3D getHandLinearTaskspaceWeight()
    {
-      return handLinearTaskspaceWeight;
+      return handLinearWeight;
    }
 
    /** @inheritDoc */
@@ -330,5 +337,12 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    public Map<String, Vector3D> getTaskspaceAngularWeights()
    {
       return taskspaceAngularWeights;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public Map<String, Vector3D> getTaskspaceLinearWeights()
+   {
+      return taskspaceLinearWeights;
    }
 }

@@ -270,8 +270,17 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
       return null;
    }
 
+   /** @inheritDoc */
    @Override
    public Map<String, Vector3D> getTaskspaceAngularWeights()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public Map<String, Vector3D> getTaskspaceLinearWeights()
    {
       // TODO Auto-generated method stub
       return null;

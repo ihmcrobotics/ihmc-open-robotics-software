@@ -32,20 +32,6 @@ public abstract class MomentumOptimizationSettings
 
    public abstract Vector2D getCoPRateHighWeight();
 
-   public abstract Vector3D getPelvisAngularWeight();
-
-   public abstract Vector3D getDefaultLinearFootWeight();
-
-   public abstract Vector3D getDefaultAngularFootWeight();
-
-   public abstract Vector3D getHighLinearFootWeight();
-
-   public abstract Vector3D getHighAngularFootWeight();
-
-   public abstract Vector3D getHandAngularTaskspaceWeight();
-
-   public abstract Vector3D getHandLinearTaskspaceWeight();
-
    public abstract int getNumberOfBasisVectorsPerContactPoint();
 
    public abstract int getNumberOfContactPointsPerContactableBody();
@@ -54,37 +40,57 @@ public abstract class MomentumOptimizationSettings
 
    public abstract int getRhoSize();
 
+   /**
+    * The map returned contains all optimization weights for jointspace objectives. The key of the map
+    * is the joint name as defined in the robot joint map. If a joint is not contained in the map,
+    * jointspace control is not supported for that joint.
+    *
+    * @return map containing jointspace QP weights by joint name
+    */
    public abstract TObjectDoubleHashMap<String> getJointspaceWeights();
 
+   /**
+    * The map returned contains all optimization weights for user desired acceleration objectives. The
+    * key of the map is the joint name as defined in the robot joint map. If a joint is not contained
+    * in the map, user desired acceleration commands are not supported for that joint.
+    *
+    * @return map containing user desired acceleration QP weights by joint name
+    */
    public abstract TObjectDoubleHashMap<String> getUserModeWeights();
 
+   /**
+    * The map returned contains all optimization weights for taskspace orientation objectives. The key
+    * of the map is the rigid body name as defined in the robot joint map. If a rigid body is not
+    * contained in the map, taskspace orientation objectives are not supported for that body.
+    *
+    * @return map containing taskspace orientation QP weights by rigid body name
+    */
    public abstract Map<String, Vector3D> getTaskspaceAngularWeights();
 
-   // TODO: nuke this once all managers support individual joint weights
+   /**
+    * The map returned contains all optimization weights for taskspace position objectives. The key
+    * of the map is the rigid body name as defined in the robot joint map. If a rigid body is not
+    * contained in the map, taskspace position objectives are not supported for that body.
+    *
+    * @return map containing taskspace position QP weights by rigid body name
+    */
+   public abstract Map<String, Vector3D> getTaskspaceLinearWeights();
+
+   // TODO: nuke this once the rigid body manager stuff is done and these weights are contained in the maps above
    public abstract double getHandJointspaceWeight();
-
-   // TODO: nuke this once all managers support individual joint weights
    public abstract double getHeadJointspaceWeight();
-
-   // TODO: nuke this once all managers support individual joint weights
-   public double getDefaultJointspaceWeight()
-   {
-      return 1.0;
-   }
-
-   // TODO: nuke this once all managers support individual joint weights
    public abstract double getChestUserModeWeight();
-
-   // TODO: nuke this once all managers support individual joint weights
    public abstract double getHandUserModeWeight();
-
-   // TODO: nuke this once all managers support individual joint weights
    public abstract double getHeadUserModeWeight();
-
-   // TODO: nuke this once all managers support individual joint weights
    public abstract Vector3D getHeadAngularWeight();
-
-   // TODO: nuke this once all managers support individual joint weights
    public abstract Vector3D getChestAngularWeight();
+   public abstract Vector3D getPelvisAngularWeight();
+   public abstract Vector3D getHandAngularTaskspaceWeight();
+   public abstract Vector3D getHandLinearTaskspaceWeight();
 
+   // TODO: figure out how to handle these with the maps:
+   public abstract Vector3D getDefaultLinearFootWeight();
+   public abstract Vector3D getDefaultAngularFootWeight();
+   public abstract Vector3D getHighLinearFootWeight();
+   public abstract Vector3D getHighAngularFootWeight();
 }
