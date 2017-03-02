@@ -1,6 +1,7 @@
 package us.ihmc.manipulation.planning.walkingpath;
 
 import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.tools.io.printing.PrintTools;
 
 public class RRT2DNodeWalkingPath extends RRTNode
 {
@@ -25,6 +26,7 @@ public class RRT2DNodeWalkingPath extends RRTNode
    @Override
    public RRTNode createNode()
    {
+      PrintTools.info("CommitTest");
       return  new RRT2DNodeWalkingPath();
    }
 
