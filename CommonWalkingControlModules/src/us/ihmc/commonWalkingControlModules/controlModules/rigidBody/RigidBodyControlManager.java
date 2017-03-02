@@ -224,7 +224,7 @@ public class RigidBodyControlManager
 
       if (jointspaceControlState.handleTrajectoryCommand(command, initialJointPositions))
       {
-         requestState(RigidBodyControlMode.JOINTSPACE);
+         requestState(jointspaceControlState.getStateEnum());
       }
       else
       {
@@ -237,7 +237,7 @@ public class RigidBodyControlManager
    {
       if (userControlState.handleDesiredAccelerationsCommand(command))
       {
-         requestState(RigidBodyControlMode.USER);
+         requestState(userControlState.getStateEnum());
       }
       else
       {
@@ -249,14 +249,14 @@ public class RigidBodyControlManager
    public void goToHomeFromCurrent(double trajectoryTime)
    {
       jointspaceControlState.goHomeFromCurrent(trajectoryTime);
-      requestState(RigidBodyControlMode.JOINTSPACE);
+      requestState(jointspaceControlState.getStateEnum());
    }
 
    public void goHome(double trajectoryTime)
    {
       computeDesiredJointPositions(initialJointPositions);
       jointspaceControlState.goHome(trajectoryTime, initialJointPositions);
-      requestState(RigidBodyControlMode.JOINTSPACE);
+      requestState(jointspaceControlState.getStateEnum());
    }
 
    public void requestLoadBearing()
