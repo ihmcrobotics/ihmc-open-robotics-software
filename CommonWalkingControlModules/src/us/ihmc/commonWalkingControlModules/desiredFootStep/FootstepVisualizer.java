@@ -3,12 +3,11 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -24,7 +23,7 @@ public class FootstepVisualizer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int maxNumberOfContactPoints = 4;
+   private static final int maxNumberOfContactPoints = 6;
 
    private final YoFramePose yoFootstepPose;
    private final YoFrameConvexPolygon2d yoFoothold;
@@ -33,7 +32,7 @@ public class FootstepVisualizer
    private final ConvexPolygon2d foothold = new ConvexPolygon2d();
 
    private final RobotSide robotSide;
-   private final List<Point2d> defaultContactPointsInSoleFrame = new ArrayList<>();
+   private final List<Point2D> defaultContactPointsInSoleFrame = new ArrayList<>();
 
    private final YoGraphicCoordinateSystem poseViz;
    private final YoGraphicPolygon footholdViz;
@@ -62,8 +61,8 @@ public class FootstepVisualizer
       footstep.getSolePose(footstepPose);
       yoFootstepPose.setAndMatchFrame(footstepPose);
 
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
-      List<Point2d> contactPointsToVisualize;
+      List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> contactPointsToVisualize;
       if (predictedContactPoints == null || predictedContactPoints.isEmpty())
          contactPointsToVisualize = defaultContactPointsInSoleFrame;
       else
@@ -80,7 +79,6 @@ public class FootstepVisualizer
    public void hide()
    {
       yoFootstepPose.setToNaN();
-      yoFoothold.hide();
    }
 
    public RobotSide getRobotSide()

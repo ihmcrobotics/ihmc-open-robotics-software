@@ -80,6 +80,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       trajectory = new YoSpline3D(3, 3, referenceFrame, registry, namePrefix + "Trajectory");
    }
 
+   @Override
    public void initialize()
    {
 	  setInitialTimePositionsAndVelocities();
@@ -87,6 +88,7 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
       trajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, p0, pd0, pdd0);
    }
 
+   @Override
    public void compute(double time)
    {
       timeIntoTouchdown.set(time - startTime.getDoubleValue());
@@ -113,26 +115,31 @@ public class SoftTouchdownPositionTrajectoryGenerator implements PositionTraject
 	   pdd0.changeFrame(referenceFrame);
    }
 
+   @Override
    public boolean isDone()
    {
       return false;
    }
 
+   @Override
    public void getPosition(FramePoint positionToPack)
    {
       desiredPosition.getFrameTupleIncludingFrame(positionToPack);
    }
 
+   @Override
    public void getVelocity(FrameVector velocityToPack)
    {
       desiredVelocity.getFrameTupleIncludingFrame(velocityToPack);
    }
 
+   @Override
    public void getAcceleration(FrameVector accelerationToPack)
    {
       desiredAcceleration.getFrameTupleIncludingFrame(accelerationToPack);
    }
 
+   @Override
    public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
    {
       getPosition(positionToPack);

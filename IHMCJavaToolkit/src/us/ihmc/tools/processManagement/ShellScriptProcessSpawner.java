@@ -4,8 +4,6 @@ import java.io.File;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import us.ihmc.tools.io.printing.PrintTools;
-
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */

@@ -4,14 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.hyperCubeTree.HyperCubeTreeListener;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGround;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundPutResult;
-import us.ihmc.robotics.geometry.InclusionFunction;
 
 public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements QuadTreeHeightMapInterface
 {
@@ -65,17 +64,17 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
    }
 
    @Override
-   public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent)
+   public List<Point3D> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent)
    {
       return getAllPointsWithinArea(xCenter, yCenter, xExtent, yExtent, null);
    }
 
    @Override
-   public List<Point3d> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent,
-           InclusionFunction<Point3d> maskFunctionAboutCenter)
+   public List<Point3D> getAllPointsWithinArea(double xCenter, double yCenter, double xExtent, double yExtent,
+           InclusionFunction<Point3D> maskFunctionAboutCenter)
    {
-      ArrayList<Point3d> pointsWithinBoundsToPack = new ArrayList<Point3d>();
-      ArrayList<Point3d> filteredPoints = new ArrayList<Point3d>();
+      ArrayList<Point3D> pointsWithinBoundsToPack = new ArrayList<Point3D>();
+      ArrayList<Point3D> filteredPoints = new ArrayList<Point3D>();
 
       lock();
       Box bounds = new Box(xCenter - xExtent, yCenter - yExtent, xCenter + xExtent, yCenter + yExtent);
@@ -91,15 +90,15 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
 
       // If not enough raw points, then use the heightAt function to do the best you can
       filteredPoints.clear();
-      ArrayList<Point3d> pointsAtGridResolution = getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
+      ArrayList<Point3D> pointsAtGridResolution = getPointsAtGridResolution(xCenter, yCenter, xExtent, yExtent);
       maskList(pointsAtGridResolution, maskFunctionAboutCenter, filteredPoints);
       unlock();
       return filteredPoints;
    }
 
-   private ArrayList<Point3d> getPointsAtGridResolution(double centerX, double centerY, double extentX, double extentY)
+   private ArrayList<Point3D> getPointsAtGridResolution(double centerX, double centerY, double extentX, double extentY)
    {
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
 
       lock();
       for (double x = centerX - extentX; x <= centerX + extentX; x += getQuadTreeParameters().getResolution())
@@ -109,7 +108,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
             double height = getHeightAtPoint(x, y);
             if (!Double.isNaN(height))
             {
-               points.add(new Point3d(x, y, height));
+               points.add(new Point3D(x, y, height));
             }
          }
       }
@@ -118,7 +117,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       return points;
    }
 
-   private static void maskList(ArrayList<Point3d> originalPoints, InclusionFunction<Point3d> maskFunctionAboutCenter, ArrayList<Point3d> maskedPointsToPack)
+   private static void maskList(ArrayList<Point3D> originalPoints, InclusionFunction<Point3D> maskFunctionAboutCenter, ArrayList<Point3D> maskedPointsToPack)
    {
       if (maskFunctionAboutCenter == null)
       {
@@ -127,7 +126,7 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
 
       else
       {
-         for (Point3d point : originalPoints)
+         for (Point3D point : originalPoints)
          {
             if (maskFunctionAboutCenter.isIncluded(point))
             {

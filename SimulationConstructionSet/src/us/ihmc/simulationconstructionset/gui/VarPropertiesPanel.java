@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 
 
 public class VarPropertiesPanel extends JPanel implements ActionListener

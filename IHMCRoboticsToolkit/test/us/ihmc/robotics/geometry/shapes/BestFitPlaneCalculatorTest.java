@@ -3,13 +3,13 @@ package us.ihmc.robotics.geometry.shapes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.DataGridTools;
 import us.ihmc.robotics.dataStructures.DoubleHashHeightMap;
@@ -18,7 +18,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.HeightMapBestFitPlaneCalculator;
 import us.ihmc.robotics.geometry.InsufficientDataException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class BestFitPlaneCalculatorTest
 {
@@ -44,8 +43,8 @@ public class BestFitPlaneCalculatorTest
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
       Plane3d plane = calculator.calculatePlane(map, footCenterPoint.getPoint(), 2.0, 2.0);
       System.out.println("BestFitPlaneCalculatorTest: calculator.getPointList() = " + calculator.getPointList());
-      Point3d point = plane.getPointCopy();
-      Vector3d normal = plane.getNormalCopy();
+      Point3D point = plane.getPointCopy();
+      Vector3D normal = plane.getNormalCopy();
       assertEquals(1.0, point.getZ(), eps);
       assertEquals(footCenterPoint.getX(), point.getX(), eps);
       assertEquals(footCenterPoint.getY(), point.getY(), eps);
@@ -74,9 +73,9 @@ public class BestFitPlaneCalculatorTest
       DataGridTools.fillMapWithMatrix(map, matrix, gridResolution);
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
       double xyCenter = 3.0;
-      Plane3d plane = calculator.calculatePlane(map, new Point2d(xyCenter, xyCenter), 2, 2);
-      Point3d point = plane.getPointCopy();
-      Vector3d normal = plane.getNormalCopy();
+      Plane3d plane = calculator.calculatePlane(map, new Point2D(xyCenter, xyCenter), 2, 2);
+      Point3D point = plane.getPointCopy();
+      Vector3D normal = plane.getNormalCopy();
       if (!(MathTools.epsilonEquals(normal.getX(), Math.sqrt(2) / 2.0, 1e-7) && MathTools.epsilonEquals(normal.getZ(), -Math.sqrt(2) / 2.0, 1e-7))
             && !(MathTools.epsilonEquals(normal.getX(), -Math.sqrt(2) / 2.0, 1e-7) && MathTools.epsilonEquals(normal.getZ(), Math.sqrt(2) / 2.0, 1e-7)))
       {

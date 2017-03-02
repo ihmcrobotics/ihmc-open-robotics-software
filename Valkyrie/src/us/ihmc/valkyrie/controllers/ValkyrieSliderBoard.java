@@ -3,7 +3,6 @@ package us.ihmc.valkyrie.controllers;
 import java.io.IOException;
 
 import net.java.games.input.Component;
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
@@ -13,7 +12,6 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;

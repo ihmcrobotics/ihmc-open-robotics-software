@@ -3,9 +3,8 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.robotController.ContactController;
@@ -33,7 +32,7 @@ public class DoorEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
       
-      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", new Point3d(3.0, 0.0, 0.0));
+      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", new Point3D(3.0, 0.0, 0.0));
       doorRobots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
    }

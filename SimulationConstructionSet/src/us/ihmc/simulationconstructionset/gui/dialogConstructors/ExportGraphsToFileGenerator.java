@@ -15,16 +15,18 @@ import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
 
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.WriteOption;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
 import us.ihmc.tools.gui.MyFileFilter;
-import us.ihmc.tools.io.files.FileTools;
 
 public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructor
 {
@@ -129,7 +131,7 @@ public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructo
       }
       
       
-      PrintWriter writer = FileTools.newPrintWriter(chosenFile.toPath());
+      PrintWriter writer = FileTools.newPrintWriter(chosenFile.toPath(), WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       
       for (DataEntry dataEntry : entriesToExport)
       {
@@ -178,6 +180,7 @@ public class ExportGraphsToFileGenerator implements ExportGraphsToFileConstructo
       }
    }
 
+   @Override
    public void closeAndDispose()
    {
       matFileFilter = null;

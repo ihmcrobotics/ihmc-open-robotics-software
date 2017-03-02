@@ -29,9 +29,9 @@ import org.ejml.ops.SingularOps;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 public class GenericActiveSetQPSolverTest
 {
    /** 

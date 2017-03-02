@@ -1,9 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 
 public class RigidBodyInertia extends GeneralizedRigidBodyInertia
 {
@@ -17,7 +16,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
     * @param massMomentOfInertia the mass moment of inertia matrix in ReferenceFrame frame
     * @param mass the mass of the rigid body to which this RigidBodyInertia corresponds
     */
-   public RigidBodyInertia(ReferenceFrame frame, Matrix3d massMomentOfInertia, double mass)
+   public RigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass)
    {
       super(frame, massMomentOfInertia, mass);
       this.bodyFrame = frame;
@@ -29,7 +28,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       this.bodyFrame = frame;
    }
 
-   public RigidBodyInertia(ReferenceFrame frame, Matrix3d massMomentOfInertia, double mass, Vector3d crossPart)
+   public RigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass, Vector3D crossPart)
    {
       super(frame, massMomentOfInertia, mass, crossPart);
       this.bodyFrame = frame;
@@ -54,7 +53,7 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       return bodyFrame;
    }
 
-   public void computeDynamicWrenchInBodyCoordinates(Wrench dynamicWrench, SpatialAccelerationVector acceleration, Twist twist)    // TODO: write test
+   public void computeDynamicWrenchInBodyCoordinates(SpatialAccelerationVector acceleration, Twist twist, Wrench dynamicWrenchToPack)    // TODO: write test
    {
       checkExpressedInBodyFixedFrame();
       checkIsCrossPartZero();    // otherwise this operation would be a lot less efficient
@@ -67,24 +66,24 @@ public class RigidBodyInertia extends GeneralizedRigidBodyInertia
       twist.getBaseFrame().checkIsWorldFrame();
       twist.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
 
-      dynamicWrench.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
-      dynamicWrench.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
+      dynamicWrenchToPack.getBodyFrame().checkReferenceFrameMatch(this.bodyFrame);
+      dynamicWrenchToPack.getExpressedInFrame().checkReferenceFrameMatch(this.expressedInframe);
 
       massMomentOfInertiaPart.transform(acceleration.getAngularPart(), tempVector);    // J * omegad
-      dynamicWrench.setAngularPart(tempVector);    // [J * omegad; 0]
+      dynamicWrenchToPack.setAngularPart(tempVector);    // [J * omegad; 0]
 
       massMomentOfInertiaPart.transform(twist.getAngularPart(), tempVector);    // J * omega
       tempVector.cross(twist.getAngularPart(), tempVector);    // omega x J * omega
-      dynamicWrench.addAngularPart(tempVector);    // [J * omegad + omega x J * omega; 0]
+      dynamicWrenchToPack.addAngularPart(tempVector);    // [J * omegad + omega x J * omega; 0]
 
       tempVector.set(acceleration.getLinearPart());    // vd
       tempVector.scale(mass);    // m * vd
-      dynamicWrench.setLinearPart(tempVector);    // [J * omegad + omega x J * omega; m * vd]
+      dynamicWrenchToPack.setLinearPart(tempVector);    // [J * omegad + omega x J * omega; m * vd]
 
       tempVector.set(twist.getLinearPart());    // v
       tempVector.scale(mass);    // m * v
       tempVector.cross(twist.getAngularPart(), tempVector);    // omega x m * v
-      dynamicWrench.addLinearPart(tempVector);    // [J * omegad + omega x J * omega; m * vd + omega x m * v]
+      dynamicWrenchToPack.addLinearPart(tempVector);    // [J * omegad + omega x J * omega; m * vd + omega x m * v]
    }
 
    /**

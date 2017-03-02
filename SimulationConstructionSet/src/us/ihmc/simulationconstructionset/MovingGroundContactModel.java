@@ -2,7 +2,7 @@
 
 package us.ihmc.simulationconstructionset;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 
 
 public interface MovingGroundContactModel

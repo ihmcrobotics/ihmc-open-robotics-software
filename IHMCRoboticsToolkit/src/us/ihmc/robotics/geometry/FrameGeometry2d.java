@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -44,11 +45,11 @@ public abstract class FrameGeometry2d<S extends FrameGeometry2d<S, T>, T extends
    public abstract double distance(FrameConvexPolygon2d convexPolygon);
 
    // Transformations:
-   public abstract void applyTransformAndProjectToXYPlane(RigidBodyTransform transform);
+   public abstract void applyTransformAndProjectToXYPlane(Transform transform);
 
-   public abstract FrameGeometry2d<S, T> applyTransformCopy(RigidBodyTransform transform);
+   public abstract FrameGeometry2d<S, T> applyTransformCopy(Transform transform);
 
-   public abstract FrameGeometry2d<S, T> applyTransformAndProjectToXYPlaneCopy(RigidBodyTransform transform);
+   public abstract FrameGeometry2d<S, T> applyTransformAndProjectToXYPlaneCopy(Transform transform);
 
    public abstract void changeFrameAndProjectToXYPlane(ReferenceFrame desiredFrame);
 

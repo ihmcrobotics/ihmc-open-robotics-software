@@ -18,9 +18,9 @@
           <x>-1.42261989767305E-4</x>
           <y>6.658530697307655E-4</y>
           <z>-0.007153881555249981</z>
-          <w>0.9999741788565889</w>
+          <s>0.9999741788565889</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
@@ -37,9 +37,9 @@
           <x>-1.4226198980663384E-4</x>
           <y>6.658530697223543E-4</y>
           <z>-0.00715388161431444</z>
-          <w>0.9999741788561664</w>
+          <s>0.9999741788561664</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
@@ -95,9 +95,9 @@
           <x>-1.4226198980663102E-4</x>
           <y>6.658530697223713E-4</y>
           <z>-0.00715388161431444</z>
-          <w>0.9999741788561664</w>
+          <s>0.9999741788561664</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
@@ -114,9 +114,9 @@
           <x>-1.4226198976730511E-4</x>
           <y>6.658530697307571E-4</y>
           <z>-0.007153881555249981</z>
-          <w>0.9999741788565889</w>
+          <s>0.9999741788565889</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
@@ -133,9 +133,9 @@
           <x>-2.388794891600342E-4</x>
           <y>6.831613214981822E-4</y>
           <z>-0.0071538178633947834</z>
-          <w>0.9999741492244566</w>
+          <s>0.9999741492244566</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
@@ -152,9 +152,9 @@
           <x>-7.764063142704572E-5</x>
           <y>6.140671590071871E-4</y>
           <z>-0.007153914168063465</z>
-          <w>0.999974218870433</w>
+          <s>0.999974218870433</s>
         </orientation>
-        <trajectoryType>BASIC</trajectoryType>
+        <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>

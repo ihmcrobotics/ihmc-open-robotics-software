@@ -9,18 +9,18 @@ import static org.junit.Assert.assertTrue;
 import java.awt.Color;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class HumanEvaluationLine2dTest
@@ -29,9 +29,9 @@ public class HumanEvaluationLine2dTest
    private final double EPSILON_FOR_EQUALS = 1e-8;
 
    private Random random = new Random(100L);
-   private Point2d point1 = new Point2d(random.nextDouble(), random.nextDouble());
-   private Point2d point2 = new Point2d(random.nextDouble(), random.nextDouble());
-   private Vector2d vector = new Vector2d(random.nextDouble() + 1.0, random.nextDouble());    // to ensure that the vector is not vertical (for the slope test)
+   private Point2D point1 = new Point2D(random.nextDouble(), random.nextDouble());
+   private Point2D point2 = new Point2D(random.nextDouble(), random.nextDouble());
+   private Vector2D vector = new Vector2D(random.nextDouble() + 1.0, random.nextDouble());    // to ensure that the vector is not vertical (for the slope test)
    private Line2d line2dPointVector = new Line2d(point1, vector);
    private Line2d line2dPointPoint = new Line2d(point1, point2);
    private Line2d line2dLine2d = new Line2d(line2dPointPoint);
@@ -59,7 +59,7 @@ public class HumanEvaluationLine2dTest
       try
       {
          // Try creating a line from two coincidal points.
-         new Line2d(point1, new Point2d(point1));
+         new Line2d(point1, new Point2D(point1));
       }
       catch (RuntimeException runtimeException)
       {
@@ -87,13 +87,13 @@ public class HumanEvaluationLine2dTest
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
       FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
 
-      Point2d randomPoint = new Point2d(xMin + (xMax - xMin) * random.nextDouble(), yMin + (yMax - yMin) * random.nextDouble());
-      Vector2d randomVector = new Vector2d(random.nextDouble(), random.nextDouble());    // both are positive, so vector is always in upper right hand quadrant
+      Point2D randomPoint = new Point2D(xMin + (xMax - xMin) * random.nextDouble(), yMin + (yMax - yMin) * random.nextDouble());
+      Vector2D randomVector = new Vector2D(random.nextDouble(), random.nextDouble());    // both are positive, so vector is always in upper right hand quadrant
       Line2d randomLine = new Line2d(randomPoint, randomVector);
       plotter.addFrameLine2d(new FrameLine2d(someFrame, randomLine));
       plotter.addFrameLine2d(new FrameLine2d(someFrame, randomLine.negateDirectionCopy()));
 
-      Point2d testPoint = new Point2d();
+      Point2D testPoint = new Point2D();
       for (int i = 0; i < 1000; i++)
       {
          testPoint.set(xMin + (xMax - xMin) * random.nextDouble(), yMin + (yMax - yMin) * random.nextDouble());
@@ -123,12 +123,12 @@ public class HumanEvaluationLine2dTest
    public void testIsInFrontOfLine()
    {
       // illegal method call:
-      Line2d line = new Line2d(new Point2d(0.0, 0.0), new Vector2d(1.0, 0.0));
+      Line2d line = new Line2d(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
 
       boolean exceptionThrown = false;
       try
       {
-         line.isPointInFrontOfLine(new Point2d(random.nextDouble(), random.nextDouble()));
+         line.isPointInFrontOfLine(new Point2D(random.nextDouble(), random.nextDouble()));
       }
       catch (RuntimeException e)
       {
@@ -147,15 +147,15 @@ public class HumanEvaluationLine2dTest
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(xMin, xMax, yMin, yMax);
       FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
 
-      Point2d pointOnLine = new Point2d(0.0, 0.0);
-      Vector2d directionVector1 = new Vector2d(1.0, 1.0);
-      Vector2d directionVector2 = new Vector2d(1.0, -1.0);
+      Point2D pointOnLine = new Point2D(0.0, 0.0);
+      Vector2D directionVector1 = new Vector2D(1.0, 1.0);
+      Vector2D directionVector2 = new Vector2D(1.0, -1.0);
       Line2d line1 = new Line2d(pointOnLine, directionVector1);
       Line2d line2 = new Line2d(pointOnLine, directionVector2);
       plotter.addFrameLine2d(new FrameLine2d(someFrame, line1));
       plotter.addFrameLine2d(new FrameLine2d(someFrame, line2));
 
-      Point2d testPoint = new Point2d();
+      Point2D testPoint = new Point2D();
       for (int i = 0; i < 1000; i++)
       {
          testPoint.set(xMin + (xMax - xMin) * random.nextDouble(), yMin + (yMax - yMin) * random.nextDouble());
@@ -183,16 +183,16 @@ public class HumanEvaluationLine2dTest
       RigidBodyTransform transform = new RigidBodyTransform();
 
       // pure translation:
-      Vector3d translation = new Vector3d(random.nextDouble(), random.nextDouble(), 0.0);
-      Vector3d eulerAngles = new Vector3d(0.0, 0.0, 0.0);
+      Vector3D translation = new Vector3D(random.nextDouble(), random.nextDouble(), 0.0);
+      Vector3D eulerAngles = new Vector3D(0.0, 0.0, 0.0);
 
       transform.setRotationEulerAndZeroTranslation(eulerAngles);
       transform.setTranslation(translation);
 
       Line2d line = new Line2d(line2dPointPoint);
-      Point2d point = new Point2d();
+      Point2D point = new Point2D();
       line.getPoint(point);
-      Vector2d vector = new Vector2d();
+      Vector2D vector = new Vector2D();
       line.getNormalizedVector(vector);
 
       line.applyTransform(transform);
@@ -214,9 +214,9 @@ public class HumanEvaluationLine2dTest
       assertTrue("Line created from two points does not contain one of those points", line2dPointPoint.containsEpsilon(point1, epsilon));
       assertTrue("Line created from two points does not contain one of those points", line2dPointPoint.containsEpsilon(point2, epsilon));
 
-      Point2d randomPointOnLine = new Point2d();
-      Point2d randomPointNotOnLine = new Point2d();
-      Vector2d perp;
+      Point2D randomPointOnLine = new Point2D();
+      Point2D randomPointNotOnLine = new Point2D();
+      Vector2D perp;
       for (int i = 0; i < 1000; i++)
       {
          double scaleFactor = 10.0 * random.nextDouble() - 5.0;
@@ -238,7 +238,7 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testGetNormalizedVectorCopy()
    {
-      Vector2d vector = new Vector2d();
+      Vector2D vector = new Vector2D();
       line2dPointPoint.getNormalizedVector(vector);
       assertNotSame("Normalized vector copy is not a copy of the normalized vector", line2dPointPoint.normalizedVector,
             vector);
@@ -254,8 +254,8 @@ public class HumanEvaluationLine2dTest
    {
       double slope = line2dPointPoint.getSlope();
       double scaleFactor = 10.0 * random.nextDouble() - 5.0;
-      Point2d shouldBeOnLine = new Point2d(point1.getX() + scaleFactor * (point2.getX() - point1.getX()), point1.getY() + scaleFactor * (point2.getY() - point1.getY()));
-      Point2d shouldBeOnLineToo = new Point2d(point1.getX() + scaleFactor, point1.getY() + scaleFactor * slope);
+      Point2D shouldBeOnLine = new Point2D(point1.getX() + scaleFactor * (point2.getX() - point1.getX()), point1.getY() + scaleFactor * (point2.getY() - point1.getY()));
+      Point2D shouldBeOnLineToo = new Point2D(point1.getX() + scaleFactor, point1.getY() + scaleFactor * slope);
       double epsilon = 1E-12;
       assertTrue("You didn't even get this right", line2dPointPoint.containsEpsilon(shouldBeOnLine, epsilon));
       assertTrue("Point should have been on the line", line2dPointPoint.containsEpsilon(shouldBeOnLineToo, epsilon));
@@ -265,9 +265,9 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000)
    public void testInteriorBisector()
    {
-      Point2d somePoint = new Point2d(random.nextDouble(), random.nextDouble());
-      Vector2d vector1 = new Vector2d(1.0, 0.0);
-      Vector2d vector2 = new Vector2d(0.0, 1.0);
+      Point2D somePoint = new Point2D(random.nextDouble(), random.nextDouble());
+      Vector2D vector1 = new Vector2D(1.0, 0.0);
+      Vector2D vector2 = new Vector2D(0.0, 1.0);
 
       double epsilon = 1.0E-8;
 
@@ -289,12 +289,12 @@ public class HumanEvaluationLine2dTest
 
       for (int i = 0; i < 100000; i++)
       {
-         Line2d randomLine1 = new Line2d(new Point2d(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
-                                         new Vector2d(random.nextDouble(), random.nextDouble()));
-         Line2d randomLine2 = new Line2d(new Point2d(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
-                                         new Vector2d(random.nextDouble(), random.nextDouble()));
+         Line2d randomLine1 = new Line2d(new Point2D(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
+                                         new Vector2D(random.nextDouble(), random.nextDouble()));
+         Line2d randomLine2 = new Line2d(new Point2D(50.0 * random.nextDouble(), 50.0 * random.nextDouble()),
+                                         new Vector2D(random.nextDouble(), random.nextDouble()));
          bisector = randomLine1.interiorBisector(randomLine2);
-         Point2d intersection = randomLine1.intersectionWith(randomLine2);
+         Point2D intersection = randomLine1.intersectionWith(randomLine2);
 
          if (intersection == null)
          {
@@ -317,7 +317,7 @@ public class HumanEvaluationLine2dTest
    {
       Line2d someLine = new Line2d(line2dPointPoint);
 
-      Vector2d directionVectorBefore = someLine.normalizedVector;
+      Vector2D directionVectorBefore = someLine.normalizedVector;
       double directionBeforeX = someLine.normalizedVector.getX();
       double directionBeforeY = someLine.normalizedVector.getY();
 
@@ -334,8 +334,8 @@ public class HumanEvaluationLine2dTest
    {
       Line2d someLine = new Line2d(line2dPointPoint);
 
-      Vector2d directionVectorBefore = someLine.normalizedVector;
-      Point2d pointBefore = someLine.point;
+      Vector2D directionVectorBefore = someLine.normalizedVector;
+      Point2D pointBefore = someLine.point;
       double directionBeforeX = someLine.normalizedVector.getX();
       double directionBeforeY = someLine.normalizedVector.getY();
 
@@ -353,12 +353,12 @@ public class HumanEvaluationLine2dTest
    public void testPerpendicularVector()
    {
       Line2d line;
-      Vector2d vector;
-      Vector2d vectorPerp;
+      Vector2D vector;
+      Vector2D vectorPerp;
       for (int i = 0; i < 1000000; i++)
       {
-         line = new Line2d(new Point2d(random.nextDouble(), random.nextDouble()), new Vector2d(random.nextDouble(), random.nextDouble()));
-         vector = new Vector2d();
+         line = new Line2d(new Point2D(random.nextDouble(), random.nextDouble()), new Vector2D(random.nextDouble(), random.nextDouble()));
+         vector = new Vector2D();
          line.getNormalizedVector(vector);
          vectorPerp = line.perpendicularVector();
          assertEquals("Dot product of perpendicular vectors not equal to zero", 0.0, vector.dot(vectorPerp), EPSILON_FOR_EQUALS);
@@ -369,8 +369,8 @@ public class HumanEvaluationLine2dTest
 	@Test(timeout = 30000,expected = RuntimeException.class)
    public void testZeroLength()
    {
-      Vector2d directionAndLength = new Vector2d(0.0, 0.0);
-      Point2d start = new Point2d(1.0, 1.0);
+      Vector2D directionAndLength = new Vector2D(0.0, 0.0);
+      Point2D start = new Point2D(1.0, 1.0);
       new Line2d(start, directionAndLength);
    }
 }

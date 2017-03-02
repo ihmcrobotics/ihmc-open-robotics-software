@@ -1,16 +1,24 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
-import us.ihmc.communication.packets.*;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.packets.PlanarRegionsListMessage;
+import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.footstepPlanning.graphSearch.BipedalFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.PlanarRegionBipedalFootstepPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
@@ -34,9 +42,6 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.time.Timer;
-
-import javax.vecmath.*;
 
 public class FollowFiducialBehavior extends AbstractBehavior
 {
@@ -75,9 +80,9 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final FramePose rightFootPose = new FramePose();
    private final FramePose tempStanceFootPose = new FramePose();
    private final FramePose tempFirstFootstepPose = new FramePose();
-   private final Point3d tempFootstepPosePosition = new Point3d();
-   private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
-   private final Timer footstepSentTimer = new Timer();
+   private final Point3D tempFootstepPosePosition = new Point3D();
+   private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
+   private final Stopwatch footstepSentTimer = new Stopwatch();
 
    public FollowFiducialBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
                                  HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
@@ -260,7 +265,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       //      sendHeadTrajectoryMessage(1.0, headOrientation);
    }
 
-   private void sendHeadTrajectoryMessage(double trajectoryTime, Quat4d desiredOrientation)
+   private void sendHeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
 
@@ -302,14 +307,14 @@ public class FollowFiducialBehavior extends AbstractBehavior
          FootstepStatus status = latestFootstepStatus.get(side);
          if (status != null)
          {
-            Point3d desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();
-            Quat4d desiredFootOrientationInWorld = status.getDesiredFootOrientationInWorld();
+            Point3D desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();
+            Quaternion desiredFootOrientationInWorld = status.getDesiredFootOrientationInWorld();
 
             desiredFootStatusPoses.get(side).setPosition(desiredFootPositionInWorld);
             desiredFootStatusPoses.get(side).setOrientation(desiredFootOrientationInWorld);
 
-            Point3d actualFootPositionInWorld = status.getActualFootPositionInWorld();
-            Quat4d actualFootOrientationInWorld = status.getActualFootOrientationInWorld();
+            Point3D actualFootPositionInWorld = status.getActualFootPositionInWorld();
+            Quaternion actualFootOrientationInWorld = status.getActualFootOrientationInWorld();
 
             actualFootStatusPoses.get(side).setPosition(actualFootPositionInWorld);
             actualFootStatusPoses.get(side).setOrientation(actualFootOrientationInWorld);
@@ -345,11 +350,11 @@ public class FollowFiducialBehavior extends AbstractBehavior
       leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Point3d temp = new Point3d();
-      Point3d pointBetweenFeet = new Point3d();
-      Point3d goalPosition = new Point3d();
-      Point3d shorterGoalPosition = new Point3d();
-      Vector3d vectorFromFeetToGoal = new Vector3d();
+      Point3D temp = new Point3D();
+      Point3D pointBetweenFeet = new Point3D();
+      Point3D goalPosition = new Point3D();
+      Point3D shorterGoalPosition = new Point3D();
+      Vector3D vectorFromFeetToGoal = new Vector3D();
 
       leftFootPose.getPosition(temp);
       pointBetweenFeet.set(temp);
@@ -371,7 +376,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       goalPose.setPosition(shorterGoalPosition);
 
       double headingFromFeetToGoal = Math.atan2(vectorFromFeetToGoal.getY(), vectorFromFeetToGoal.getX());
-      AxisAngle4d goalOrientation = new AxisAngle4d(0.0, 0.0, 1.0, headingFromFeetToGoal);
+      AxisAngle goalOrientation = new AxisAngle(0.0, 0.0, 1.0, headingFromFeetToGoal);
       goalPose.setOrientation(goalOrientation);
 
       RobotSide stanceSide;
@@ -404,7 +409,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
       footstepPlannerGoal.setGoalPoseBetweenFeet(goalPose);
 
       // For now, just get close to the Fiducial, don't need to get exactly on it.
-      Point2d xyGoal = new Point2d();
+      Point2D xyGoal = new Point2D();
       xyGoal.setX(goalPose.getX());
       xyGoal.setY(goalPose.getY());
       double distanceFromXYGoal = 1.0;
@@ -412,7 +417,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
 //      footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       footstepPlannerGoal.setFootstepPlannerGoalType(FootstepPlannerGoalType.CLOSE_TO_XY_POSITION);
 
-    sendPacketToUI(new UIPositionCheckerPacket(new Point3d(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()), new Quat4d()));
+    sendPacketToUI(new UIPositionCheckerPacket(new Point3D(xyGoal.getX(), xyGoal.getY(), leftFootPose.getZ()), new Quaternion()));
 
       footstepPlanner.setGoal(footstepPlannerGoal);
 
@@ -435,8 +440,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setSwingTime(0.5);
-      footstepDataListMessage.setTransferTime(0.1);
+      footstepDataListMessage.setDefaultSwingTime(0.5);
+      footstepDataListMessage.setDefaultTransferTime(0.1);
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {
@@ -447,8 +452,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 
-         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition),
-               new Quat4d(tempFirstFootstepPoseOrientation));
+         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition),
+               new Quaternion(tempFirstFootstepPoseOrientation));
          firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          footstepDataListMessage.add(firstFootstepMessage);

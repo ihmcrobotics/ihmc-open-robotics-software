@@ -138,7 +138,7 @@ public class ScriptTools
       ScriptFileLoader loader = null;
       try
       {
-         loader = new ScriptFileLoader(file.getAbsolutePath());
+         loader = new ScriptFileLoader(file);
       }
       catch (StreamException | IOException e)
       {

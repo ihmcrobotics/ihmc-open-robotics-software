@@ -4,17 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -70,13 +69,13 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<HumanoidF
          if (properties.containsKey(POSITION_KEY))
          {
             String position[] = properties.getProperty(POSITION_KEY).split(" ");
-            pelvisPoseInWorld.setTranslation(new Vector3d(Double.parseDouble(position[0]), Double.parseDouble(position[1]), Double.parseDouble(position[2])));
+            pelvisPoseInWorld.setTranslation(new Vector3D(Double.parseDouble(position[0]), Double.parseDouble(position[1]), Double.parseDouble(position[2])));
          }
 
          if (properties.containsKey(ORIENTATION_KEY))
          {
             String quat[] = properties.getProperty(ORIENTATION_KEY).split(" ");
-            pelvisPoseInWorld.setRotation(new Quat4d(Double.parseDouble(quat[0]), Double.parseDouble(quat[1]), Double.parseDouble(quat[2]), 1.0));
+            pelvisPoseInWorld.setRotation(new Quaternion(Double.parseDouble(quat[0]), Double.parseDouble(quat[1]), Double.parseDouble(quat[2]), 1.0));
          }
 
          stream.close();
@@ -113,13 +112,13 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<HumanoidF
    }
 
    @Override
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
       pelvisPoseInWorld.getTranslation(offsetToPack);
    }
 
    @Override
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
       pelvisPoseInWorld.setTranslation(offset);
    }

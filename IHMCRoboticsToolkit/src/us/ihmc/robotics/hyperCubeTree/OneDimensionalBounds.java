@@ -1,7 +1,5 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import us.ihmc.robotics.MathTools;
-
 public class OneDimensionalBounds
 {
    double midpoint = Double.NaN;
@@ -12,7 +10,7 @@ public class OneDimensionalBounds
    {
       this.min = (bound2 >= bound1)?bound1:bound2;
       this.max = (bound2 >= bound1)?bound2:bound1;
-      if (!(MathTools.isNumber(bound1) && MathTools.isNumber(bound2)))
+      if (Double.isNaN(bound1) || Double.isNaN(bound2))
       {
          throw new RuntimeException("illegal Bounds " + bound1 + " and " + bound2);
       }

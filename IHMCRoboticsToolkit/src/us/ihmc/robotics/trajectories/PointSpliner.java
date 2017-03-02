@@ -1,11 +1,11 @@
 package us.ihmc.robotics.trajectories;
 
+import java.util.ArrayList;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point2d;
-import java.util.ArrayList;
 
 /**
  * <p>Title: </p>
@@ -56,26 +56,26 @@ public class PointSpliner
          finalHeading.scale(headingScale);
       }
 
-      ArrayList<Point2d>[] pointArrays = new ArrayList[3];
+      ArrayList<Point2D>[] pointArrays = new ArrayList[3];
 
       for (int i = 0; i < pointArrays.length; i++)
       {
-         pointArrays[i] = new ArrayList<Point2d>();
+         pointArrays[i] = new ArrayList<Point2D>();
       }
 
       double maxIndex = (listOfPoints.size()) - 1.0;
       for (int i = 0; i < listOfPoints.size(); i++)
       {
          double alpha = (i) / maxIndex;
-         Point2d point2d;
+         Point2D point2d;
 
-         point2d = new Point2d(alpha, listOfPoints.get(i).getX());
+         point2d = new Point2D(alpha, listOfPoints.get(i).getX());
          pointArrays[0].add(point2d);
 
-         point2d = new Point2d(alpha, listOfPoints.get(i).getY());
+         point2d = new Point2D(alpha, listOfPoints.get(i).getY());
          pointArrays[1].add(point2d);
 
-         point2d = new Point2d(alpha, listOfPoints.get(i).getZ());
+         point2d = new Point2D(alpha, listOfPoints.get(i).getZ());
          pointArrays[2].add(point2d);
       }
 
@@ -157,7 +157,7 @@ public class PointSpliner
 
    public ArrayList<FramePoint> getSplinedPoints(int numberOfPoints)
    {
-      Point2d[][] listOfPoints = new Point2d[3][numberOfPoints];
+      Point2D[][] listOfPoints = new Point2D[3][numberOfPoints];
 
 //    LinearInterpolatorCurveGenerator[] linearInterpolatorCurveGenerator = new LinearInterpolatorCurveGenerator[3];
 
@@ -229,11 +229,11 @@ public class PointSpliner
       ArrayList<FramePoint> splinedList = pointSpliner.getSplinedPoints(100);
 
 
-      Point2d[] checkPoints = new Point2d[splinedList.size()];
+      Point2D[] checkPoints = new Point2D[splinedList.size()];
 
       for (int i = 0; i < checkPoints.length; i++)
       {
-         Point2d point2d = new Point2d(splinedList.get(i).getX(), splinedList.get(i).getY());
+         Point2D point2d = new Point2D(splinedList.get(i).getX(), splinedList.get(i).getY());
          checkPoints[i] = point2d;
       }
 

@@ -3,16 +3,16 @@ package us.ihmc.humanoidRobotics.footstep;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 public class SingleFootstepVisualizer
 {
@@ -47,7 +46,7 @@ public class SingleFootstepVisualizer
       YoGraphicsList yoGraphicsList = new YoGraphicsList(namePrefix);
       this.robotSide = robotSide;
 
-      ArrayList<Point2d> polyPoints = new ArrayList<Point2d>();
+      ArrayList<Point2D> polyPoints = new ArrayList<Point2D>();
       yoContactPoints = new YoFramePoint[maxContactPoints];
 
       for (int i = 0; i < maxContactPoints; i++)
@@ -58,7 +57,7 @@ public class SingleFootstepVisualizer
          YoGraphicPosition baseControlPointViz = new YoGraphicPosition(namePrefix + "Point" + i, yoContactPoints[i], 0.01, YoAppearance.Blue());
          yoGraphicsList.add(baseControlPointViz);
 
-         polyPoints.add(new Point2d());
+         polyPoints.add(new Point2D());
       }
 
       footPolygon = new YoFrameConvexPolygon2d(namePrefix + "yoPolygon", "", ReferenceFrame.getWorldFrame(), maxContactPoints, registry);
@@ -83,14 +82,14 @@ public class SingleFootstepVisualizer
 
    public void visualizeFootstep(Footstep footstep, ContactablePlaneBody bipedFoot)
    {
-      List<Point2d> predictedContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();
       
       if (robotSide != footstep.getRobotSide())
          throw new RuntimeException("Wrong Robot Side!");
 
       if ((predictedContactPoints == null) || (predictedContactPoints.isEmpty()))
       {
-         predictedContactPoints = new ArrayList<Point2d>();
+         predictedContactPoints = new ArrayList<Point2D>();
 
          List<FramePoint2d> contactPointsFromContactablePlaneBody = bipedFoot.getContactPoints2d();
          for (int i=0; i<contactPointsFromContactablePlaneBody.size(); i++)
@@ -102,14 +101,14 @@ public class SingleFootstepVisualizer
       
       ReferenceFrame soleReferenceFrame = footstep.getSoleReferenceFrame();
       double increaseZSlightlyToSeeBetter = 0.001;
-      FramePose soleFramePose = new FramePose(soleReferenceFrame, new Point3d(0.0, 0.0, increaseZSlightlyToSeeBetter), new AxisAngle4d());
+      FramePose soleFramePose = new FramePose(soleReferenceFrame, new Point3D(0.0, 0.0, increaseZSlightlyToSeeBetter), new AxisAngle());
       soleFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       
       this.soleFramePose.set(soleFramePose);
       
       for (int i=0; i<predictedContactPoints.size(); i++)
       {
-         Point2d contactPoint = predictedContactPoints.get(i);
+         Point2D contactPoint = predictedContactPoints.get(i);
          
          FramePoint pointInWorld = new FramePoint(soleReferenceFrame, contactPoint.getX(), contactPoint.getY(), 0.0);
          pointInWorld.changeFrame(ReferenceFrame.getWorldFrame());

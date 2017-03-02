@@ -10,13 +10,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphics3DDescription.instructions.primitives.Graphics3DIdentityInstruction;
-import us.ihmc.graphics3DDescription.instructions.primitives.Graphics3DTranslateInstruction;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityInstruction;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.simulationconstructionset.DummyOneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -150,8 +149,8 @@ public class RobotDefinitionFixedFrame
          String name = XMLReaderUtility.getMiddleString(0, jointString, "<Name>", "</Name>");
          String parent = XMLReaderUtility.getMiddleString(0, jointString, "<Parent>", "</Parent>");
          String rootJoint = XMLReaderUtility.getMiddleString(0, jointString, "<RootJoint>", "</RootJoint>");
-         Vector3d offset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Offset>", "</Offset>"));
-         Vector3d axis = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Axis>", "</Axis>"));
+         Vector3D offset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Offset>", "</Offset>"));
+         Vector3D axis = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Axis>", "</Axis>"));
 
 
          JointDefinitionFixedFrame joint = new JointDefinitionFixedFrame();
@@ -227,7 +226,7 @@ public class RobotDefinitionFixedFrame
          {
             currentGroundContactPointIndex = XMLReaderUtility.getEndIndexOfSubString(currentGroundContactPointIndex, xmlString, "</GroundContactPoint>");
             String name = XMLReaderUtility.getMiddleString(0, jointString, "<Name>", "</Name>");
-            Vector3d offset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Offset>", "</Offset>"));
+            Vector3D offset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Offset>", "</Offset>"));
 
             GroundContactDefinitionFixedFrame gc = new GroundContactDefinitionFixedFrame();
             gc.setName(name);
@@ -248,7 +247,7 @@ public class RobotDefinitionFixedFrame
          {
             currentExternalForcePointIndex = XMLReaderUtility.getEndIndexOfSubString(currentExternalForcePointIndex, xmlString, "</ExternalForcePoint>");
             String name = XMLReaderUtility.getMiddleString(0, jointString, "<Name>", "</Name>");
-            Vector3d offset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Offset>", "</Offset>"));
+            Vector3D offset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, jointString, "<Offset>", "</Offset>"));
 
             ExternalForcePointDefinitionFixedFrame efp = new ExternalForcePointDefinitionFixedFrame();
             efp.setName(name);
@@ -288,8 +287,8 @@ public class RobotDefinitionFixedFrame
    {
       LinkDefinitionFixedFrame l = new LinkDefinitionFixedFrame();
       double mass = XMLReaderUtility.parseDoubleBetweenTwoStrings(0, linkString, "<Mass>", "</Mass>");
-      Vector3d comOffset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, linkString, "<ComOffset>", "</ComOffset>"));
-      Matrix3d inertia = XMLReaderUtility.parseMatrix3d(XMLReaderUtility.getMiddleString(0, linkString, "<MomentOfInertia>", "</MomentOfInertia>"));
+      Vector3D comOffset = XMLReaderUtility.parseVector3d(XMLReaderUtility.getMiddleString(0, linkString, "<ComOffset>", "</ComOffset>"));
+      Matrix3D inertia = XMLReaderUtility.parseMatrix3d(XMLReaderUtility.getMiddleString(0, linkString, "<MomentOfInertia>", "</MomentOfInertia>"));
       l.setMass(mass);
       l.setComOffset(comOffset);
       l.setInertia(inertia);
@@ -326,7 +325,7 @@ public class RobotDefinitionFixedFrame
          else if (type.equals("Translate"))
          {
             data = XMLReaderUtility.getMiddleString(currentTypeIndex, graphicsString, "<Translate>", "</Translate>");
-            Vector3d translation = XMLReaderUtility.parseVector3d(data);
+            Vector3D translation = XMLReaderUtility.parseVector3d(data);
             Graphics3DTranslateInstruction t = new Graphics3DTranslateInstruction(translation);
             def.addInstruction(t);
 
@@ -396,11 +395,11 @@ public class RobotDefinitionFixedFrame
 
       }
 
-      Vector3d offset = new Vector3d();
+      Vector3D offset = new Vector3D();
       joint.getOffset(offset);
       jointDef.setOffset(offset);
 
-      Vector3d jointAxis = new Vector3d();
+      Vector3D jointAxis = new Vector3D();
       joint.getJointAxis(jointAxis);
       jointDef.setJointAxis(jointAxis);
 
@@ -457,12 +456,12 @@ public class RobotDefinitionFixedFrame
 
       linkDef.setMass(link.getMass());
 
-      Vector3d comOffset = new Vector3d();
+      Vector3D comOffset = new Vector3D();
       link.getComOffset(comOffset);
 
       linkDef.setComOffset(comOffset);
 
-      Matrix3d momentOfInertia = new Matrix3d();
+      Matrix3D momentOfInertia = new Matrix3D();
       link.getMomentOfInertia(momentOfInertia);
 
       linkDef.setInertia(momentOfInertia);

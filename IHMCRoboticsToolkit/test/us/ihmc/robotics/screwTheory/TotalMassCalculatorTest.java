@@ -1,17 +1,18 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class TotalMassCalculatorTest
 {
@@ -41,13 +42,13 @@ public class TotalMassCalculatorTest
 
       for (int i = 0; i < numberOfJoints; i++)
       {
-         Vector3d jointOffset = RandomTools.generateRandomVector(random);
-         Vector3d jointAxis = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D jointOffset = RandomGeometry.nextVector3D(random);
+         Vector3D jointAxis = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          jointAxis.normalize();
-         Matrix3d momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
+         Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
          double mass = random.nextDouble();
          totalMass += mass;
-         Vector3d comOffset = RandomTools.generateRandomVector(random);
+         Vector3D comOffset = RandomGeometry.nextVector3D(random);
 
 
 

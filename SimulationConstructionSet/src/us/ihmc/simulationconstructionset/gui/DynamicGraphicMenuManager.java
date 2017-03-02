@@ -15,6 +15,7 @@ public class DynamicGraphicMenuManager
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             jMenu = new JMenu("Graphics");

@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
-import us.ihmc.graphics3DAdapter.camera.CameraPropertiesHolder;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraPropertiesHolder;
 
 
 public class DollyCheckBox extends JCheckBox implements ActionListener
@@ -26,6 +26,7 @@ public class DollyCheckBox extends JCheckBox implements ActionListener
       addActionListener(this);
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEvent)
    {
       CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();
@@ -36,6 +37,7 @@ public class DollyCheckBox extends JCheckBox implements ActionListener
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();
@@ -49,6 +51,7 @@ public class DollyCheckBox extends JCheckBox implements ActionListener
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
+         @Override
          public void run()
          {
             CameraPropertiesHolder camera = cameraHolder.getCameraPropertiesForActiveCamera();

@@ -10,6 +10,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
+import us.ihmc.graphicsDescription.plotting.PlotterColors;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterLegendPanel;
 import us.ihmc.plotting.PlotterShowHideMenu;
@@ -18,8 +19,8 @@ import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class SimulationOverheadPlotter implements PlaybackListener
 {
-   private final Plotter plotter = new Plotter();
-   private final PlotterLegendPanel legendPanel = plotter.createPlotterLegendPanel();
+   private final Plotter plotter;
+   private final PlotterLegendPanel legendPanel;
    private final PlotterShowHideMenu plotterShowHideMenu;
 
    private JMenuBar menuBar;
@@ -29,6 +30,8 @@ public class SimulationOverheadPlotter implements PlaybackListener
 
    public SimulationOverheadPlotter()
    {
+      plotter = new Plotter(PlotterColors.javaFXStyle(), false);
+      legendPanel = plotter.createPlotterLegendPanel();
       plotter.setViewRange(1.0);
       buildMenuBar();
 

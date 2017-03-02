@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHost;
 import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHostList;
 
+@SuppressWarnings("serial")
 public class DeadDispatchHostPanel extends DispatchHostPanel
 {
    private static final int NAME_WIDTH = 12;
@@ -30,6 +31,7 @@ public class DeadDispatchHostPanel extends DispatchHostPanel
    }
 
 
+   @Override
    public void hostsChanged()
    {
       dispatchHosts.clear();
@@ -66,6 +68,7 @@ public class DeadDispatchHostPanel extends DispatchHostPanel
    }
 
 
+   @Override
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);

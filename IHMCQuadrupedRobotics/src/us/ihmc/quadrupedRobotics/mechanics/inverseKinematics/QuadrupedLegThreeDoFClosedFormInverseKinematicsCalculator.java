@@ -1,14 +1,13 @@
 package us.ihmc.quadrupedRobotics.mechanics.inverseKinematics;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.quadrupedRobotics.model.QuadrupedPhysicalProperties;
+import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
@@ -19,14 +18,14 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
  */
 public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
 {
-   private final Vector3d offsetFromHipRollToHipPitch = new Vector3d();
+   private final Vector3D offsetFromHipRollToHipPitch = new Vector3D();
    private final double thighLength;
    private final double shinLength;
    private final double hipThetaOffset, kneeThetaOffset;
 
    private final RigidBodyTransform transformFromBeforeHipRollToAfterHipRoll = new RigidBodyTransform();
-   private final Vector3d footPositionInFrameAfterHipRoll = new Vector3d();
-   private final Vector3d footPositionInFrameBeforeHipPitch = new Vector3d();
+   private final Vector3D footPositionInFrameAfterHipRoll = new Vector3D();
+   private final Vector3D footPositionInFrameBeforeHipPitch = new Vector3D();
 
    private boolean bendKneesIn = false;
 
@@ -36,7 +35,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
     * @param referenceFrames
     * @param robotQuadrant
     */
-   public QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(Vector3d offsetFromHipRollToHipPitch, QuadrupedReferenceFrames referenceFrames, RobotQuadrant robotQuadrant)
+   public QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator(Vector3D offsetFromHipRollToHipPitch, QuadrupedReferenceFrames referenceFrames, RobotQuadrant robotQuadrant)
    {
       this.offsetFromHipRollToHipPitch.set(offsetFromHipRollToHipPitch);
       ReferenceFrame hipPitchFrame = referenceFrames.getHipPitchFrame(robotQuadrant);
@@ -109,7 +108,7 @@ public class QuadrupedLegThreeDoFClosedFormInverseKinematicsCalculator
       this.bendKneesIn = bendKneesIn;
    }
 
-   public boolean computeJointAnglesGivenFootInFrameBeforeHipRoll(Vector3d footPositionInFrameBeforeHipRoll, double[] jointAnglesToPack)
+   public boolean computeJointAnglesGivenFootInFrameBeforeHipRoll(Vector3D footPositionInFrameBeforeHipRoll, double[] jointAnglesToPack)
    {
       // hipRollAngle will be guaranteed to be between +-PI since using atan2 here.
       double hipRollAngle = Math.atan2(footPositionInFrameBeforeHipRoll.getY(), -footPositionInFrameBeforeHipRoll.getZ());

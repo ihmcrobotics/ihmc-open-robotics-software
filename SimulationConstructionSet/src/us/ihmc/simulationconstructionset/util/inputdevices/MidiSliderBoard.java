@@ -138,6 +138,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
             final Object self = this;
             listener = new VariableChangedListener()
             {
+               @Override
                public void variableChanged(YoVariable<?> v)
                {
                   synchronized (self)
@@ -183,6 +184,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
 
          addListener(new SliderListener()
          {
+            @Override
             public void valueChanged(MidiControl midiControl)
             {
                if (DEBUG)
@@ -200,6 +202,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       }
    }
 
+   @Override
    public void closeAndDispose()
    {
       closeableAndDisposableRegistry.closeAndDispose();
@@ -1004,6 +1007,7 @@ public class MidiSliderBoard implements ExitActionListener, CloseableAndDisposab
       return new ArrayList<VariableChangedListener>(variableChangedListeners);
    }
 
+   @Override
    public void exitActionPerformed()
    {
       printIfDebug("Exit Action was performed. Closing and disposing " + getClass().getSimpleName());

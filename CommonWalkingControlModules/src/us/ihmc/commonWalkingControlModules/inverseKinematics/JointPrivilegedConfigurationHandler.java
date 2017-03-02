@@ -56,9 +56,6 @@ public class JointPrivilegedConfigurationHandler
    private final OneDoFJoint[] oneDoFJoints;
    private final Map<OneDoFJoint, MutableInt> jointIndices;
 
-   private final List<RigidBody> chainBases = new ArrayList<>();
-   private final List<RigidBody> chainEndEffectors = new ArrayList<>();
-
    private final int numberOfDoFs;
 
    private final ArrayList<PrivilegedConfigurationCommand> commandList = new ArrayList<>();
@@ -124,15 +121,6 @@ public class JointPrivilegedConfigurationHandler
    }
 
    /**
-    * Clears the information on the kinematic chains. These are used to compute the necessary Jacobians to project into the null space.
-    */
-   public void reset()
-   {
-      chainBases.clear();
-      chainEndEffectors.clear();
-   }
-
-   /**
     * Computes the desired joint velocity to be submitted to the inverse kinematics control core to achieve the desired privileged configuration.
     * Uses a simple proportional controller with saturation limits based on the position error.
     */
@@ -144,7 +132,7 @@ public class JointPrivilegedConfigurationHandler
       {
          OneDoFJoint joint = oneDoFJoints[i];
          double qd = 2.0 * defaultConfigurationGain.getDoubleValue() * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
-         qd = MathTools.clipToMinMax(qd, defaultMaxVelocity.getDoubleValue());
+         qd = MathTools.clamp(qd, defaultMaxVelocity.getDoubleValue());
          privilegedVelocities.set(i, 0, qd);
          yoJointPrivilegedVelocities.get(joint).set(qd);
       }
@@ -163,7 +151,7 @@ public class JointPrivilegedConfigurationHandler
          OneDoFJoint joint = oneDoFJoints[i];
          double qdd = 2.0 * privilegedConfigurationGains.get(i, 0) * (privilegedConfigurations.get(i, 0) - joint.getQ()) / jointSquaredRangeOfMotions.get(i, 0);
          qdd -= privilegedVelocityGains.get(i, 0) * joint.getQd();
-         qdd = MathTools.clipToMinMax(qdd, privilegedMaxAccelerations.get(i, 0));
+         qdd = MathTools.clamp(qdd, privilegedMaxAccelerations.get(i, 0));
          privilegedAccelerations.set(i, 0, qdd);
          yoJointPrivilegedAccelerations.get(joint).set(qdd);
       }
@@ -269,22 +257,6 @@ public class JointPrivilegedConfigurationHandler
 
             processConfigurationWeightsAndGains(command, jointIndex);
          }
-
-         for (int chainIndex = 0; chainIndex < command.getNumberOfChains(); chainIndex++)
-         {
-            RigidBody base = command.getChainBase(chainIndex);
-            RigidBody endEffector = command.getChainEndEffector(chainIndex);
-
-            if (!chainBases.contains(base) || !chainEndEffectors.contains(endEffector))
-            {
-               chainBases.add(command.getChainBase(chainIndex));
-               chainEndEffectors.add(command.getChainEndEffector(chainIndex));
-            }
-            else
-            {
-               PrintTools.warn(this, "Privileged configuration already received for chain " + base.getName() + " to " + endEffector.getName() + ".");
-            }
-         }
       }
    }
 
@@ -385,43 +357,5 @@ public class JointPrivilegedConfigurationHandler
    {
       int jointIndex = jointIndices.get(joint).intValue();
       return privilegedConfigurationWeights.get(jointIndex, jointIndex);
-   }
-
-   /**
-    * Returns the number of kinematic chains that contain privileged configurations.
-    * @return number of kinematic chains
-    */
-   public int getNumberOfChains()
-   {
-      return chainBases.size();
-   }
-
-   /**
-    * Returns the base of the current kinematic chain to compute the Jacobian.
-    * @param chainIndex the current chain number
-    * @return base body of the current kinematic chain.
-    */
-   public RigidBody getChainBase(int chainIndex)
-   {
-      return chainBases.get(chainIndex);
-   }
-
-   /**
-    * Returns the end effectors of the current kinematic chain to compute the Jacobian.
-    * @param chainIndex the current chain number.
-    * @return end effector body of the current kinematic chain.
-    */
-   public RigidBody getChainEndEffector(int chainIndex)
-   {
-      return chainEndEffectors.get(chainIndex);
-   }
-
-   /**
-    * Returns the default weight for the privileged configuration handler, if there is not a specific weight assigned.
-    * @return default weight
-    */
-   public double getDefaultWeight()
-   {
-      return defaultConfigurationWeight.getDoubleValue();
    }
 }

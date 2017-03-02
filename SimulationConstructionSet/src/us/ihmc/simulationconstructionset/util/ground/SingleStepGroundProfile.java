@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
@@ -21,7 +20,8 @@ public class SingleStepGroundProfile extends GroundProfileFromHeightMap
       this.groundZStep = groundZStep;
    }
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   @Override
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -29,6 +29,7 @@ public class SingleStepGroundProfile extends GroundProfileFromHeightMap
       return height;
    }
 
+   @Override
    public double heightAt(double x, double y, double z)
    {
       if (x < groundXStep)
@@ -37,11 +38,12 @@ public class SingleStepGroundProfile extends GroundProfileFromHeightMap
          return groundZStep;
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       normal.set(0.0, 0.0, 1.0);
    }
 
+   @Override
    public BoundingBox3d getBoundingBox()
    {
       return boundingBox;

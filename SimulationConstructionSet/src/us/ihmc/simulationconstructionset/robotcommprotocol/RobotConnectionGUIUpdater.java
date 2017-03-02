@@ -15,17 +15,20 @@ public class RobotConnectionGUIUpdater implements CreatedNewVariablesListener, R
       this.scs = scs;
    }
 
-   public void receivedData(ArrayList<YoVariable> sendVariables)
+   @Override
+   public void receivedData(ArrayList<YoVariable<?>> sendVariables)
    {
       scs.tickAndUpdateLeisurely(4);    // +++JEP 050722: Make GUI more responsive...
    }
 
+   @Override
    public void createdNewVariables(YoVariableList newVariables)
    {
       scs.addVarList(newVariables);
    }
    
-   public void createdNewVariable(YoVariable variable)
+   @Override
+   public void createdNewVariable(YoVariable<?> variable)
    {
       System.err.println("RobotConnectionGUIUpdater: created new variable: " + variable.getFullNameWithNameSpace());
    }

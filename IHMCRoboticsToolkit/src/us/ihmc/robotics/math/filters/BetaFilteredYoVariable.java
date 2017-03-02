@@ -22,7 +22,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  */
 public class BetaFilteredYoVariable extends DoubleYoVariable
 {
-   private final int beta;
+   private int beta;
    private int index = 0;
    @SuppressWarnings("unused")
    private final DoubleYoVariable betaVariable;
@@ -35,12 +35,22 @@ public class BetaFilteredYoVariable extends DoubleYoVariable
 
    public BetaFilteredYoVariable(String name, YoVariableRegistry registry, int beta)
    {
-      this(name, registry, beta, null);
+      this(name, "", registry, beta, null);
+   }
+
+   public BetaFilteredYoVariable(String name, String description, YoVariableRegistry registry, int beta)
+   {
+      this(name, description, registry, beta, null);
    }
 
    public BetaFilteredYoVariable(String name, YoVariableRegistry registry, int beta, DoubleYoVariable positionVariable)
    {
-      super(name, registry);
+      this(name, "", registry, beta, positionVariable);
+   }
+
+   public BetaFilteredYoVariable(String name, String description, YoVariableRegistry registry, int beta, DoubleYoVariable positionVariable)
+   {
+      super(name, description, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
 
       this.beta = beta;
@@ -72,7 +82,6 @@ public class BetaFilteredYoVariable extends DoubleYoVariable
 
       update(position.getDoubleValue());
    }
-
    public void update(double currentPosition)
    {
       if (!hasBeenCalled.getBooleanValue())

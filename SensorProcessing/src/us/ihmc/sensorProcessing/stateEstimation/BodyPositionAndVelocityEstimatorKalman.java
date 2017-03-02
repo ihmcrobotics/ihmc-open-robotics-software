@@ -4,11 +4,10 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.kalman.KalmanFilter;
 import us.ihmc.kalman.YoKalmanFilter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -223,7 +222,7 @@ public class BodyPositionAndVelocityEstimatorKalman implements BodyPositionAndVe
       }
    }
 
-   private final Tuple3d covariance = new Vector3d();
+   private final Tuple3DBasics covariance = new Vector3D();
 
    private void determineMeasurementNoiseCovariance()
    {

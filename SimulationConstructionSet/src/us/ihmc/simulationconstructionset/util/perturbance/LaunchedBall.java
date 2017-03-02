@@ -1,10 +1,9 @@
 package us.ihmc.simulationconstructionset.util.perturbance;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.instructions.primitives.Graphics3DScaleInstruction;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -15,10 +14,10 @@ public class LaunchedBall extends FloatingJoint
 
    private boolean launched = false;
 
-   private final Point3d finalPosition = new Point3d();
-   private final Point3d currentPosition = new Point3d();
-   private final Vector3d directionVector = new Vector3d();
-   private final Vector3d velocityVector = new Vector3d();
+   private final Point3D finalPosition = new Point3D();
+   private final Point3D currentPosition = new Point3D();
+   private final Vector3D directionVector = new Vector3D();
+   private final Vector3D velocityVector = new Vector3D();
    private final double collisionDistance;
    private final double density;
 
@@ -26,7 +25,7 @@ public class LaunchedBall extends FloatingJoint
 
    public LaunchedBall(String name, Robot robot, double collisionDistance, double density)
    {
-      super(name, name, new Vector3d(), robot);
+      super(name, name, new Vector3D(), robot);
 
       setDynamic(false);
 
@@ -58,7 +57,7 @@ public class LaunchedBall extends FloatingJoint
       return currentPosition.epsilonEquals(finalPosition, collisionDistance);
    }
 
-   public void launch(Point3d initialPosition, Point3d finalPosition, double mass, double velocityMagnitude)
+   public void launch(Point3D initialPosition, Point3D finalPosition, double mass, double velocityMagnitude)
    {
       updateBallSize(mass);
       updatePointsAndVectors(initialPosition, finalPosition, velocityMagnitude);
@@ -77,7 +76,7 @@ public class LaunchedBall extends FloatingJoint
       setVelocity(velocityVector);
    }
 
-   private void updatePointsAndVectors(Point3d initialPosition, Point3d finalPosition, double velocityMagnitude)
+   private void updatePointsAndVectors(Point3D initialPosition, Point3D finalPosition, double velocityMagnitude)
    {
       this.finalPosition.set(finalPosition);
 
@@ -97,7 +96,7 @@ public class LaunchedBall extends FloatingJoint
       linkGraphicsScale.setScale(radius);
    }
 
-   public Vector3d getDirection()
+   public Vector3D getDirection()
    {
       return directionVector;
    }

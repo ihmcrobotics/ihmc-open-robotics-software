@@ -3,8 +3,6 @@ package us.ihmc.simulationconstructionset.gui;
 import java.util.StringTokenizer;
 import java.util.regex.PatternSyntaxException;
 
-
-
 public class RegularExpression
 {
    public static String previousSearch = "";
@@ -133,8 +131,6 @@ public class RegularExpression
 
    public static void main(String[] args)
    {
-      String allVars = "tau";
       System.out.println(RegularExpression.check("testsomethingtorque", "something*torque*"));
    }
-
 }

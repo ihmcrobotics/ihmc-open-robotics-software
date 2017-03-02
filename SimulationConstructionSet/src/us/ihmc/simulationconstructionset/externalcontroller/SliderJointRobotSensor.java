@@ -17,6 +17,7 @@ class SliderJointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public double[] getMessageValues()
    {
       return new double[] {q.getDoubleValue(), qd.getDoubleValue(), qdd.getDoubleValue(), tau_actual.getDoubleValue()};
@@ -24,6 +25,7 @@ class SliderJointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public String getYoVariableOrder()
    {
       String variableOrder = q.getName() + "," + qd.getName() + "," + qdd.getName() + "," + tau_actual.getName();
@@ -32,12 +34,14 @@ class SliderJointRobotSensor implements SensorInterface
    }
 
 
+   @Override
    public int getNumberOfVariables()
    {
       // TODO Auto-generated method stub
       return 4;
    }
 
+   @Override
    public void setTau(double tau)
    {
       tau_actual.set(tau);

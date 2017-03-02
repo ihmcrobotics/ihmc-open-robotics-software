@@ -2,10 +2,9 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.Arrays;
 
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -18,8 +17,8 @@ public class HandComplianceControlParametersCommand
    private final boolean[] enableLinearCompliance = new boolean[] {false, false, false};
    private final boolean[] enableAngularCompliance = new boolean[] {false, false, false};
 
-   private final Vector3d desiredForce = new Vector3d();
-   private final Vector3d desiredTorque = new Vector3d();
+   private final Vector3D desiredForce = new Vector3D();
+   private final Vector3D desiredTorque = new Vector3D();
 
    private double forceDeadZone = Double.NaN;
    private double torqueDeadZone = Double.NaN;
@@ -60,8 +59,8 @@ public class HandComplianceControlParametersCommand
          enable = true;
          boolean[] newEnableLinearCompliance = message.getEnableLinearCompliance();
          boolean[] newEnableAngularCompliance = message.getEnableAngularCompliance();
-         Vector3f newDesiredForce = message.getDesiredForce();
-         Vector3f newDesiredTorque = message.getDesiredTorque();
+         Vector3D32 newDesiredForce = message.getDesiredForce();
+         Vector3D32 newDesiredTorque = message.getDesiredTorque();
          float[] newWrenchDeadzones = message.getWrenchDeadzones();
 
          if (newEnableLinearCompliance == null)
@@ -130,12 +129,12 @@ public class HandComplianceControlParametersCommand
       return enableAngularCompliance;
    }
 
-   public Vector3d getDesiredForce()
+   public Vector3D getDesiredForce()
    {
       return desiredForce;
    }
 
-   public Vector3d getDesiredTorque()
+   public Vector3D getDesiredTorque()
    {
       return desiredTorque;
    }

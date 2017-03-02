@@ -1,18 +1,18 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.FrameLine;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Vector3d;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.FrameLine;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePlane3dTest
 {
@@ -86,7 +86,7 @@ public class FramePlane3dTest
       assertTrue(plane.epsilonEquals(new FramePlane3d(expectedNormal, expectedPoint), epsilon));
 
       RigidBodyTransform transformation2 = new RigidBodyTransform();
-      transformation2.setTranslation(new Vector3d(1.0, 2.0, 3.0));
+      transformation2.setTranslation(new Vector3D(1.0, 2.0, 3.0));
       FramePlane3d plane2 = new FramePlane3d(worldFrame);
       plane2.applyTransform(transformation2);
       expectedNormal.set(0.0, 0.0, 1.0);
@@ -95,7 +95,7 @@ public class FramePlane3dTest
 
       RigidBodyTransform transformation3 = new RigidBodyTransform();
       transformation3.setRotationPitchAndZeroTranslation(Math.PI / 2);
-      transformation3.setTranslation(new Vector3d(1.0, 2.0, 3.0));
+      transformation3.setTranslation(new Vector3D(1.0, 2.0, 3.0));
       FramePlane3d plane3 = new FramePlane3d(worldFrame);
       plane3.applyTransform(transformation3);
       expectedNormal.set(1.0, 0.0, 0.0);
@@ -104,7 +104,7 @@ public class FramePlane3dTest
 
       RigidBodyTransform transformation4 = new RigidBodyTransform();
       transformation4.setRotationPitchAndZeroTranslation(Math.PI / 2);
-      transformation4.setTranslation(new Vector3d(1.0, 2.0, 3.0));
+      transformation4.setTranslation(new Vector3D(1.0, 2.0, 3.0));
       FramePlane3d plane4 = new FramePlane3d(worldFrame);
       FramePlane3d plane5 = plane4.applyTransformCopy(transformation4);
       expectedNormal.set(0.0, 0.0, 1.0);

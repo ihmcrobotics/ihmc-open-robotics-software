@@ -15,11 +15,11 @@ import java.util.Comparator;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.gui.GUIMessageFrame;
-import us.ihmc.tools.io.files.FileTools;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.time.DateTools;
 
 public class BambooTools
 {
@@ -32,20 +32,6 @@ public class BambooTools
    private static final String UPLOADED_VIDEOS_LOG = "uploaded-videos.log";
 
    private static boolean WRITE_LOG_FILE_ON_SUCCESS = false;
-
-   public static boolean isRunningOnBamboo()
-   {
-      String isBamboo = System.getenv("IS_BAMBOO");
-      
-      if (isBamboo == null || !isBamboo.equals("true"))
-      {
-         return false;
-      }
-      else
-      {
-         return true;
-      }
-   }
 
    public static boolean isNightlyBuild()
    {
@@ -160,7 +146,7 @@ public class BambooTools
          // the other specified directories don't exist
          System.out.println("Saving videos to tmp dir before uploading..");
 
-         Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+         Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
          File videoDir = temporaryDirectoryPath.resolve("atlas-videos").toFile();
          if (videoDir.exists() || videoDir.mkdirs())
          {
@@ -198,6 +184,7 @@ public class BambooTools
 
       FileFilter fileFilter = new FileFilter()
       {
+         @Override
          public boolean accept(File file)
          {
             if (!file.isDirectory())
@@ -229,6 +216,7 @@ public class BambooTools
    {
       Comparator<File> fileAlphabeticalComparator = new Comparator<File>()
       {
+         @Override
          public int compare(File file1, File file2)
          {
             String name1 = file1.getName();
@@ -245,7 +233,7 @@ public class BambooTools
    private static File[] createVideoAndDataWithDateTimeClassMethod(String rootDirectory, String simplifiedRobotModelName, SimulationConstructionSet scs,
          int stackDepthForRelevantCallingMethod)
    {
-      String dateString = DateTools.getDateString();
+      String dateString = FormattingTools.getDateString();
       String directoryName = rootDirectory + dateString + "/";
 
       File directory = new File(directoryName);
@@ -256,7 +244,7 @@ public class BambooTools
 
       String classAndMethodName = getClassAndMethodName(stackDepthForRelevantCallingMethod);
 
-      String timeString = DateTools.getTimeString();
+      String timeString = FormattingTools.getTimeString();
       String filenameStart = dateString + "_" + timeString;
       if (!simplifiedRobotModelName.equals(""))
       {
@@ -427,7 +415,7 @@ public class BambooTools
    {
       String rootDirectoryToUse = determineEraseableBambooDataAndVideosRootDirectoryToUse();
 
-      String logFilename = rootDirectoryToUse + DateTools.getDateString() + "_" + DateTools.getTimeString() + "_" + filename;
+      String logFilename = rootDirectoryToUse + FormattingTools.getDateString() + "_" + FormattingTools.getTimeString() + "_" + filename;
       File file = new File(logFilename);
       logMessagesToFile(file);
    }

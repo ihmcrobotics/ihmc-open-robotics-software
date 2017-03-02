@@ -3,15 +3,14 @@ package us.ihmc.simulationconstructionset.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -94,14 +93,14 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
 
    private void createDrill()
    {
-      Vector3d tableCenter = new Vector3d(-0.851, -6.833, 1.118);
+      Vector3D tableCenter = new Vector3D(-0.851, -6.833, 1.118);
 
       double drillHeight = 0.3;
       double drillRadius = 0.03;
       double drillMass = 1.5;
       double forceVectorScale = 1.0 / 500.0;
 
-      RigidBodyTransform initialDrillTransform = new RigidBodyTransform(new AxisAngle4d(), tableCenter);
+      RigidBodyTransform initialDrillTransform = new RigidBodyTransform(new AxisAngle(), tableCenter);
       ContactableCylinderRobot drillRobot = new ContactableCylinderRobot("drill", initialDrillTransform, drillRadius, drillHeight, drillMass,
             "models/drill.obj");
       final int groundContactGroupIdentifier = 0;
@@ -111,7 +110,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
          double angle = i * 2.0 * Math.PI / 4.0;
          double x = 1.5 * drillRadius * Math.cos(angle);
          double y = 1.5 * drillRadius * Math.sin(angle);
-         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_drill_" + i, new Vector3d(x, y, 0.0), drillRobot);
+         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_drill_" + i, new Vector3D(x, y, 0.0), drillRobot);
          drillRobot.getRootJoints().get(0).addGroundContactPoint(groundContactPoint);
       }
 
@@ -128,7 +127,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
 
    private void createDoor()
    {
-      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", new Point3d());
+      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", new Point3D());
       contactableRobots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
    }
@@ -145,10 +144,10 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
       double yaw_degrees = -135;
 
       FramePose valvePose = new FramePose(ReferenceFrame.getWorldFrame());
-      Point3d position = new Point3d(x, y, z);
-      Quat4d orientation = new Quat4d();
+      Point3D position = new Point3D(x, y, z);
+      Quaternion orientation = new Quaternion();
 
-      RotationTools.convertYawPitchRollToQuaternion(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0), orientation);
+      orientation.setYawPitchRoll(Math.toRadians(yaw_degrees), Math.toRadians(0), Math.toRadians(0));
       valvePose.setPose(position, orientation);
 
       ContactableValveRobot valve = new ContactableValveRobot(valveRobotName, valveType, 0.5, valvePose);
@@ -290,7 +289,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
       RigidBodyTransform blockSupportLocation = new RigidBodyTransform();
       blockSupportLocation.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
       double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] { (cinderBlockLength - rampRise) / 2, 0 }, yawDegrees);
-      blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1], rampRise / 2
+      blockSupportLocation.setTranslation(new Vector3D(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1], rampRise / 2
             + numberFlatSupports * cinderBlockHeight));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
             cinderBlockAppearance);
@@ -318,7 +317,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
       location.multiply(tilt);
 
       double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
-      location.setTranslation(new Vector3d(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
+      location.setTranslation(new Vector3D(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth,
             cinderBlockHeight), app);
       combinedTerrainObject.addTerrainObject(newBox);
@@ -368,7 +367,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
+      location.setTranslation(new Vector3D(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
       RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength + overlapToPreventGaps,
             cinderBlockWidth + overlapToPreventGaps, cinderBlockHeight + overlapToPreventGaps), app);
       combinedTerrainObject.addTerrainObject(newBox);

@@ -28,11 +28,13 @@ public class SimpleSimulationIndividualToEvaluate extends IndividualToEvaluate
       listOfParametersToOptimize = controller.getListOfParametersToOptimizeForTrialOne(); 
    }
 
+   @Override
    public IndividualToEvaluate createNewIndividual()
    {
       return new SimpleSimulationIndividualToEvaluate();
    }
 
+   @Override
    public void startEvaluation()
    {
       controller.setCurrentValues(listOfParametersToOptimize);
@@ -56,21 +58,25 @@ public class SimpleSimulationIndividualToEvaluate extends IndividualToEvaluate
       isEvaluationDone = true;
    }
 
+   @Override
    public boolean isEvaluationDone()
    {
       return isEvaluationDone;
    }
 
+   @Override
    public double computeFitness()
    {
       return cost;
    }
 
+   @Override
    public ListOfParametersToOptimize getStructuralParametersToOptimize()
    {
       return null;
    }
    
+   @Override
    public ListOfParametersToOptimize getControlParametersToOptimize()
    {
       return listOfParametersToOptimize;

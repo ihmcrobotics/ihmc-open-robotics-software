@@ -15,6 +15,7 @@ import org.tukaani.xz.XZInputStream;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
@@ -22,7 +23,6 @@ import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class LogFileDecompressor extends YoVariableLogReader
@@ -104,7 +104,7 @@ public class LogFileDecompressor extends YoVariableLogReader
 
       copyMetaData(targetFile);
       
-      out.println("Decompression took " + TimeTools.nanoSecondstoSeconds(System.nanoTime() - startTime));
+      out.println("Decompression took " + Conversions.nanoSecondstoSeconds(System.nanoTime() - startTime));
       checkChecksums(properties);
       incrementProgress();
       

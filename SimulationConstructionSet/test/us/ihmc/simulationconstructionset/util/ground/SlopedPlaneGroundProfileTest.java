@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 
 public class SlopedPlaneGroundProfileTest extends GroundProfileTest
 {
@@ -21,9 +20,9 @@ public class SlopedPlaneGroundProfileTest extends GroundProfileTest
    @Override
    public GroundProfile3D getGroundProfile()
    {
-      Vector3d surfaceNormal = new Vector3d(0.03, 0.27, 1.0);
+      Vector3D surfaceNormal = new Vector3D(0.03, 0.27, 1.0);
       surfaceNormal.normalize();
-      Point3d intersectionPoint = new Point3d(0.22, 2.2, -0.4);
+      Point3D intersectionPoint = new Point3D(0.22, 2.2, -0.4);
       double maxXY = 10.0;
       return new SlopedPlaneGroundProfile(surfaceNormal, intersectionPoint, maxXY);
    }

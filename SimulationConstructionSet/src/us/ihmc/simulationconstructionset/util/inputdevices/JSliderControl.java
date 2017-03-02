@@ -53,6 +53,7 @@ public class JSliderControl extends JSlider implements CloseableAndDisposable
       {
          Thread timer = new Thread(new Runnable()
          {
+            @Override
             public void run()
             {
                changeLock = true;

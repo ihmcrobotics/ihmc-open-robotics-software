@@ -24,6 +24,7 @@ public class AboutAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "About");
    }
 
+   @Override
    public void actionPerformed(ActionEvent actionEventb)
    {
       constructor.constructDialog();

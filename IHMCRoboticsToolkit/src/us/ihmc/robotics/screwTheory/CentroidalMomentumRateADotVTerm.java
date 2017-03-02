@@ -2,10 +2,10 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class CentroidalMomentumRateADotVTerm
 {
@@ -24,9 +24,9 @@ public class CentroidalMomentumRateADotVTerm
    private final Momentum tempMomentum;
    private final Twist tempTwist;
    private final Twist tempCoMTwist;
-   private final Vector3d comVelocityVector;
+   private final Vector3D comVelocityVector;
    private final Twist comTwist;
-   private final Vector3d tempVector;
+   private final Vector3D tempVector;
    private final Momentum leftSide;
 
    public CentroidalMomentumRateADotVTerm(RigidBody rootBody, ReferenceFrame centerOfMassFrame, CentroidalMomentumMatrix centroidalMomentumMatrix,
@@ -50,13 +50,13 @@ public class CentroidalMomentumRateADotVTerm
       this.comTwist = new Twist(centerOfMassFrame, rootBody.getBodyFixedFrame(), centerOfMassFrame);
       comTwist.setToZero();
 
-      this.comVelocityVector = new Vector3d();
+      this.comVelocityVector = new Vector3D();
       this.aDotV = new DenseMatrix64F(6, 1);
       this.tempSpatialAcceleration = new SpatialAccelerationVector();
       this.tempMomentum = new Momentum();
       this.tempTwist = new Twist();
       this.tempCoMTwist = new Twist();
-      this.tempVector = new Vector3d(0, 0, 0);
+      this.tempVector = new Vector3D(0, 0, 0);
       this.leftSide = new Momentum(centerOfMassFrame);
    }
 

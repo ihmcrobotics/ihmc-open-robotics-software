@@ -18,11 +18,17 @@
 
 package us.ihmc.sensorProcessing.bubo.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Rectangle2D;
+
+import javax.swing.JComponent;
 
 /**
  * Draws a 2D coordinate frame axis.  Arrows point in the direction of each axis and each axis can be labeled.

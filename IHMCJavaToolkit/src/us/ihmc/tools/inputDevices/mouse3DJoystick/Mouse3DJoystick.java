@@ -8,11 +8,11 @@ import java.util.concurrent.TimeUnit;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.tools.inputDevices.JInputTools;
 import us.ihmc.tools.inputDevices.JInputTools.ControllerType;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.time.Timer;
 
 public class Mouse3DJoystick
 {
@@ -37,7 +37,7 @@ public class Mouse3DJoystick
    private Controller controller;
    private double scale;
    private ScheduledExecutorService scheduledExecutorService;
-   private Timer timer = new Timer();
+   private Stopwatch timer = new Stopwatch();
    
    public Mouse3DJoystick()
    {

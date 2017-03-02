@@ -60,6 +60,7 @@ public class SplashPanel extends JPanel
       return new Dimension(splashImage.getWidth(this), splashImage.getHeight(this));
    }
 
+   @Override
    public void paintComponent(Graphics g)
    {
       super.paintComponent(g);

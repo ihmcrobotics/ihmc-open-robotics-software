@@ -3,13 +3,12 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3f;
-
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
@@ -97,17 +96,17 @@ public class SnapFootstepPacket extends Packet<SnapFootstepPacket>
          flag[footstepNumber] = (byte) random.nextInt(3);
          RobotSide robotSide = (footstepNumber % 2 == 0) ? RobotSide.RIGHT : RobotSide.LEFT;
 
-         Point3d position = RandomTools.generateRandomPoint(random, xMax, yMax, zMax);
+         Point3D position = RandomGeometry.nextPoint3D(random, xMax, yMax, zMax);
 
-         Quat4d orientation = new Quat4d();
-         orientation.set(RandomTools.generateRandomRotation(random));
+         Quaternion orientation = new Quaternion();
+         orientation.set(RandomGeometry.nextAxisAngle(random));
 
          previousFootstep.transform(position);
 
-         previousFootstep.setTranslation(new Vector3f(position));
+         previousFootstep.setTranslation(new Vector3D32(position));
          previousFootstep.setRotation(orientation);
 
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, new Point3d(position), orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, new Point3D(position), orientation);
 
          footsteps.add(footstepData);
       }

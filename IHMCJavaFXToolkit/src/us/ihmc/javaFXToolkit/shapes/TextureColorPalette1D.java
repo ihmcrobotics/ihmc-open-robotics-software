@@ -12,8 +12,19 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import us.ihmc.robotics.MathTools;
 
+/**
+ * Provides a HSB-based color palette with only one variable, i.e. either the hue, saturation, or brightness, the two other remain constant in the image.
+ * Look at the counterpart {@link TextureColorPalette2D} that handle 2 variables at a time.
+ * Although this implementation is more restrictive than its 2D counterpart, it can be used as a workaround to a bug in JavaFX that affects {@link TextureColorPalette2D}:
+ * <p> <b>
+ * When all the texture coordinates of a mesh have the same y-coordinate, the latter gets ignored and replaced with the value {@code 0.5f} (tested with JDK 1.8.0_112).
+ * </b> </p>
+ * @author Sylvain Bertrand
+ *
+ */
 public class TextureColorPalette1D implements TextureColorPalette
 {
+   /** Debug variable. When set to true, the {@link Image} used in this color palette is printed as a png file.*/
    private static final boolean PRINT_PALETTE = false;
    private static final int DEFAULT_RESOLUTION = 256;
 
@@ -27,16 +38,30 @@ public class TextureColorPalette1D implements TextureColorPalette
 
    private Image colorPalette;
 
+   /**
+    * Creates a color palette with the hue component set as the variable with a resolution of {@value #DEFAULT_RESOLUTION} and the saturation and brightness set to {@code 1.0}.
+    */
    public TextureColorPalette1D()
    {
       setHueBased(1.0, 1.0);
    }
 
+   /**
+    * Changes this color palette to have the hue component be variable with a default resolution of {@value #DEFAULT_RESOLUTION} and given the new constant values for the saturation and brightness components.
+    * @param saturationConstant the new constant value for the saturation component.
+    * @param brightnessConstant the new constant value for the brightness component.
+    */
    public void setHueBased(double saturationConstant, double brightnessConstant)
    {
       setHueBased(DEFAULT_RESOLUTION, saturationConstant, brightnessConstant);
    }
 
+   /**
+    * Changes this color palette to have the hue component be variable with a given resolution and given the new constant values for the saturation and brightness components.
+    * @param hueResolution resolution to use for the hue component.
+    * @param saturationConstant the new constant value for the saturation component.
+    * @param brightnessConstant the new constant value for the brightness component.
+    */
    public void setHueBased(int hueResolution, double saturationConstant, double brightnessConstant)
    {
       MathTools.checkIfGreaterOrEqual(hueResolution, 1);
@@ -54,11 +79,22 @@ public class TextureColorPalette1D implements TextureColorPalette
       updateColorPalette();
    }
 
+   /**
+    * Changes this color palette to have the saturation component be variable with a default resolution of {@value #DEFAULT_RESOLUTION} and given the new constant values for the hue and brightness components.
+    * @param hueConstant the new constant value for the hue component.
+    * @param brightnessConstant the new constant value for the brightness component.
+    */
    public void setSaturationBased(double hueConstant, double brightnessConstant)
    {
       setSaturationBased(DEFAULT_RESOLUTION, hueConstant, brightnessConstant);
    }
 
+   /**
+    * Changes this color palette to have the saturation component be variable with a given resolution and given the new constant values for the hue and brightness components.
+    * @param saturationResolution resolution to use for the saturation component.
+    * @param hueConstant the new constant value for the hue component.
+    * @param brightnessConstant the new constant value for the brightness component.
+    */
    public void setSaturationBased(int saturationResolution, double hueConstant, double brightnessConstant)
    {
       MathTools.checkIfGreaterOrEqual(saturationResolution, 1);
@@ -75,11 +111,22 @@ public class TextureColorPalette1D implements TextureColorPalette
       updateColorPalette();
    }
 
+   /**
+    * Changes this color palette to have the brightness component be variable with a default resolution of {@value #DEFAULT_RESOLUTION} and given the new constant values for the hue and saturation components.
+    * @param hueConstant the new constant value for the hue.
+    * @param saturationConstant the new constant value for the saturation.
+    */
    public void setBrightnessBased(double hueConstant, double saturationConstant)
    {
       setBrightnessBased(DEFAULT_RESOLUTION, hueConstant, saturationConstant);
    }
 
+   /**
+    * Changes this color palette to have the brightness component be variable with a given resolution and given the new constant values for the hue and saturation components.
+    * @param brightnessResolution resolution to use for the brightness component.
+    * @param hueConstant the new constant value for the hue component.
+    * @param saturationConstant the new constant value for the saturation component.
+    */
    public void setBrightnessBased(int brightnessResolution, double hueConstant, double saturationConstant)
    {
       MathTools.checkIfGreaterOrEqual(brightnessResolution, 1);

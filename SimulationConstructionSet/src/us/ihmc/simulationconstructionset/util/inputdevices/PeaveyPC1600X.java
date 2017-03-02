@@ -22,7 +22,7 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 {
    private static final boolean printInfo = false;
 
-   private YoVariable[] variables = new YoVariable[16];
+   private YoVariable<?>[] variables = new YoVariable[16];
    private String[] names = new String[16];
    private YoVariableRegistry holder = null;
 
@@ -293,6 +293,7 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
       System.exit(1);
    }
 
+   @Override
    public void close()
    {
       System.out.println("Closing Receiver");
@@ -301,6 +302,7 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
          inDevice.close();
    }
 
+   @Override
    public void send(MidiMessage message, long timeStamp)
    {
       if (message instanceof ShortMessage)
@@ -351,7 +353,7 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 
    public void sliderSlid(int channel, int sliderVal)
    {
-	   YoVariable variable = variables[channel];
+	   YoVariable<?> variable = variables[channel];
       if (variable == null)
       {
          if (holder != null)
@@ -385,6 +387,7 @@ public class PeaveyPC1600X implements Receiver, ExitActionListener
 
    }
 
+   @Override
    public void exitActionPerformed()
    {
       close();

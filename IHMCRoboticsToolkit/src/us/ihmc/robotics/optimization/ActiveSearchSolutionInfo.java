@@ -1,9 +1,9 @@
 package us.ihmc.robotics.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.ejml.data.DenseMatrix64F;
 
 /**
 * @author twan

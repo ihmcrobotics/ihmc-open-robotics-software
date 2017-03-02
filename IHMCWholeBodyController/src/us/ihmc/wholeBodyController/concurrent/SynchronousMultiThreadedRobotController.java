@@ -1,13 +1,13 @@
 package us.ihmc.wholeBodyController.concurrent;
 
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.thread.ThreadTools;
-
 import java.util.ArrayList;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.tools.TimestampProvider;
+import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

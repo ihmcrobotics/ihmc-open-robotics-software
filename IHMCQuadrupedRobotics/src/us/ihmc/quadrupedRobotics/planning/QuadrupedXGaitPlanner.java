@@ -1,14 +1,18 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import java.util.List;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.*;
-
-import javax.vecmath.Vector3d;
-import java.util.List;
+import us.ihmc.robotics.robotSide.EndDependentList;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class QuadrupedXGaitPlanner
 {
@@ -38,7 +42,7 @@ public class QuadrupedXGaitPlanner
       pastSteps.put(RobotEnd.HIND, new QuadrupedTimedStep());
    }
 
-   public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3d planarVelocity, RobotQuadrant initialStepQuadrant,
+   public void computeInitialPlan(List<? extends QuadrupedTimedStep> plannedSteps, Vector3D planarVelocity, RobotQuadrant initialStepQuadrant,
          FramePoint supportCentroidAtSoS, double timeAtSoS, double yawAtSoS, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize nominal support rectangle
@@ -105,7 +109,7 @@ public class QuadrupedXGaitPlanner
    }
 
    public void computeOnlinePlan(List<? extends QuadrupedTimedStep> plannedSteps, EndDependentList<? extends QuadrupedTimedStep> latestSteps,
-         Vector3d planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
+         Vector3D planarVelocity, double currentTime, double currentYaw, QuadrupedXGaitSettings xGaitSettings)
    {
       // initialize latest step
       QuadrupedTimedStep latestStep;
@@ -196,7 +200,7 @@ public class QuadrupedXGaitPlanner
       }
    }
 
-   private void extrapolatePose(FramePose finalPose, FramePose initialPose, Vector3d planarVelocity, double deltaTime)
+   private void extrapolatePose(FramePose finalPose, FramePose initialPose, Vector3D planarVelocity, double deltaTime)
    {
 
       double a0 = initialPose.getYaw();
@@ -243,7 +247,7 @@ public class QuadrupedXGaitPlanner
       // Compute support durations and end phase shift.
       double nominalStepDuration = xGaitSettings.getStepDuration();
       double endDoubleSupportDuration = xGaitSettings.getEndDoubleSupportDuration();
-      double endPhaseShift = MathTools.clipToMinMax(xGaitSettings.getEndPhaseShift(), 0, 359);
+      double endPhaseShift = MathTools.clamp(xGaitSettings.getEndPhaseShift(), 0, 359);
       if (thisStepEnd == RobotEnd.HIND)
          endPhaseShift = 360 - endPhaseShift;
       if (pastStepSide != thisStepSide)
@@ -252,7 +256,7 @@ public class QuadrupedXGaitPlanner
       // Compute step time interval. Step duration is scaled in the range (1.0, 1.5) to account for end phase shifts.
       double thisStepStartTime = pastStepEndTimeForSameEnd + endDoubleSupportDuration;
       double thisStepEndTime = pastStepEndTimeForOppositeEnd + (nominalStepDuration + endDoubleSupportDuration) * endPhaseShift / 180.0;
-      double thisStepDuration = MathTools.clipToMinMax(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.5 * nominalStepDuration);
+      double thisStepDuration = MathTools.clamp(thisStepEndTime - thisStepStartTime, nominalStepDuration, 1.5 * nominalStepDuration);
 
       thisStep.getTimeInterval().setStartTime(thisStepStartTime);
       thisStep.getTimeInterval().setEndTime(thisStepStartTime + thisStepDuration);

@@ -46,6 +46,9 @@ public class NetworkPorts
    public static final NetworkPorts HEIGHT_QUADTREE_TOOLBOX_MODULE_PORT = new NetworkPorts(6021);
    public static final NetworkPorts REA_MODULE_UI_PORT = new NetworkPorts(6022);
    public static final NetworkPorts LIDAR_SCAN_LOGGER_PORT = new NetworkPorts(6023);
+   public static final NetworkPorts VALVE_DETECTOR_SERVER_PORT = new NetworkPorts(6024);
+   public static final NetworkPorts VALVE_DETECTOR_FEEDBACK_PORT = new NetworkPorts(6025);
+   public static final NetworkPorts MOCAP_MODULE_VIZ = new NetworkPorts(6026);
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046);

@@ -3,23 +3,21 @@ package us.ihmc.simulationconstructionset.utilities.screwTheory;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
@@ -28,8 +26,10 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class CentroidalMomentumMatrixSCSTest
 {
@@ -58,13 +58,13 @@ public class CentroidalMomentumMatrixSCSTest
 
       Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
-      Point3d comPoint = new Point3d();
-      Vector3d linearMomentum = new Vector3d();
-      Vector3d angularMomentum = new Vector3d();
+      Point3D comPoint = new Point3D();
+      Vector3D linearMomentum = new Vector3D();
+      Vector3D angularMomentum = new Vector3D();
       robot.computeCOMMomentum(comPoint, linearMomentum, angularMomentum);
 
-      JUnitTools.assertTuple3dEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
-      JUnitTools.assertTuple3dEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
+      EuclidCoreTestTools.assertTuple3DEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -74,11 +74,11 @@ public class CentroidalMomentumMatrixSCSTest
       Random random = new Random(167L);
 
       double mass = random.nextDouble();
-      Matrix3d momentOfInertia = RandomTools.generateRandomDiagonalMatrix3d(random);
-      Vector3d comOffset = RandomTools.generateRandomVector(random);
+      Matrix3D momentOfInertia = RandomGeometry.nextDiagonalMatrix3D(random);
+      Vector3D comOffset = RandomGeometry.nextVector3D(random);
 
       Robot robot = new Robot("robot");
-      FloatingJoint rootJoint = new FloatingJoint("rootJoint", new Vector3d(), robot);
+      FloatingJoint rootJoint = new FloatingJoint("rootJoint", new Vector3D(), robot);
       Link link = new Link("link");
       link.setMass(mass);
       link.setMomentOfInertia(momentOfInertia);
@@ -98,22 +98,22 @@ public class CentroidalMomentumMatrixSCSTest
       int nTests = 10;
       for (int i = 0; i < nTests; i++)
       {
-         Vector3d position = RandomTools.generateRandomVector(random);
-         Matrix3d rotation = new Matrix3d();
-         RotationTools.convertYawPitchRollToMatrix(random.nextDouble(), random.nextDouble(), random.nextDouble(), rotation);
-         Vector3d linearVelocityInBody = RandomTools.generateRandomVector(random);
-         Vector3d linearVelocityInWorld = new Vector3d(linearVelocityInBody);
+         Vector3D position = RandomGeometry.nextVector3D(random);
+         RotationMatrix rotation = new RotationMatrix();
+         rotation.setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D linearVelocityInBody = RandomGeometry.nextVector3D(random);
+         Vector3D linearVelocityInWorld = new Vector3D(linearVelocityInBody);
          rotation.transform(linearVelocityInWorld);
-         Vector3d angularVelocity = RandomTools.generateRandomVector(random);
+         Vector3D angularVelocity = RandomGeometry.nextVector3D(random);
 
          rootJoint.setPosition(position);
          rootJoint.setRotation(rotation);
          rootJoint.setVelocity(linearVelocityInWorld);
          rootJoint.setAngularVelocityInBody(angularVelocity);
          robot.updateVelocities();
-         Point3d comPoint = new Point3d();
-         Vector3d linearMomentum = new Vector3d();
-         Vector3d angularMomentum = new Vector3d();
+         Point3D comPoint = new Point3D();
+         Vector3D linearMomentum = new Vector3D();
+         Vector3D angularMomentum = new Vector3D();
          robot.computeCOMMomentum(comPoint, linearMomentum, angularMomentum);
 
          sixDoFJoint.setPosition(position);
@@ -130,8 +130,8 @@ public class CentroidalMomentumMatrixSCSTest
          centroidalMomentumMatrix.compute();
          Momentum comMomentum = computeCoMMomentum(elevator, centerOfMassFrame, centroidalMomentumMatrix);
 
-         JUnitTools.assertTuple3dEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
-         JUnitTools.assertTuple3dEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
+         EuclidCoreTestTools.assertTuple3DEquals(linearMomentum, comMomentum.getLinearPart(), 1e-12);
+         EuclidCoreTestTools.assertTuple3DEquals(angularMomentum, comMomentum.getAngularPart(), 1e-12);
       }
    }
 

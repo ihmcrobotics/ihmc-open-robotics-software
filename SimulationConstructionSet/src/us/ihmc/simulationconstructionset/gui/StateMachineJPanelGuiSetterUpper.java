@@ -5,8 +5,8 @@ import java.awt.Container;
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
-import us.ihmc.robotics.stateMachines.StateMachine;
-import us.ihmc.robotics.stateMachines.StateMachinesJPanel;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
@@ -19,6 +19,7 @@ public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
       this.inJFrame = inJFrame;
    }
 
+   @Override
    public void setupGUI(SimulationConstructionSet scs)
    {
       StateMachinesJPanel walkingStatePanel = new StateMachinesJPanel(stateMachine);
@@ -39,7 +40,7 @@ public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
       }
       else
       {
-         scs.addExtraJpanel(walkingStatePanel, name);         
+         scs.addExtraJpanel(walkingStatePanel, name, false);         
       }
 
       // Doing the following will cause redraw when the state changes, but not

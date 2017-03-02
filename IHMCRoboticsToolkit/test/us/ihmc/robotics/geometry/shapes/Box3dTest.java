@@ -1,27 +1,31 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import junit.framework.Assert;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.Test;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.junit.Test;
+
+import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.geometry.Direction;
+import us.ihmc.robotics.geometry.shapes.Box3d.FaceName;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Box3dTest
 {
@@ -38,12 +42,21 @@ public class Box3dTest
       
       for (int i=0; i<numberOfShapes; i++)
       {
-         RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
-         double length = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double width = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Box3d box3d = new Box3d(transform, length, width, height);
-         testHelper.runSimpleTests(box3d, random, numberOfPoints);
+
+         try
+         {
+            testHelper.runSimpleTests(box3d, random, numberOfPoints);
+         }
+         catch (AssertionError e)
+         {
+            e.printStackTrace();
+            throw new AssertionError(e.getMessage());
+         }
       }
 
    }
@@ -59,10 +72,10 @@ public class Box3dTest
 
       assertEverythingDifferent(box1, box2, 1e-14);
       box2.set(box1);
-      assertEquals(box1, box2, 1e-14);
+      assertBoxEquals(box1, box2, 1e-14);
 
       // make sure we're not copying references:
-      box1.setTransform(RigidBodyTransform.generateRandomTransform(random));
+      box1.setFromTransform(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       box1.setDimensions(random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertEverythingDifferent(box1, box2, 1e-14);
    }
@@ -75,10 +88,10 @@ public class Box3dTest
       Box3d box1 = createRandomBox(random);
       Box3d box2 = new Box3d(box1);
 
-      assertEquals(box1, box2, 1e-14);
+      assertBoxEquals(box1, box2, 1e-14);
 
       // make sure we're not copying references:
-      box1.setTransform(RigidBodyTransform.generateRandomTransform(random));
+      box1.setFromTransform(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
       box1.setDimensions(random.nextDouble(), random.nextDouble(), random.nextDouble());
       assertEverythingDifferent(box1, box2, 1e-14);
    }
@@ -88,7 +101,7 @@ public class Box3dTest
    public void testConstructors()
    {
       Random random = new Random(2345L);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
       double length = random.nextDouble();
       double width = random.nextDouble();
@@ -97,10 +110,10 @@ public class Box3dTest
       Box3d box1 = new Box3d(transform, length, width, height);
       Box3d box2 = new Box3d(transform, new double[] {length, width, height});
       Box3d box3 = new Box3d(length, width, height);
-      box3.setTransform(transform);
+      box3.setFromTransform(transform);
 
-      assertEquals(box1, box2, 0.0);
-      assertEquals(box1, box3, 0.0);
+      assertBoxEquals(box1, box2, 0.0);
+      assertBoxEquals(box1, box3, 0.0);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -109,28 +122,28 @@ public class Box3dTest
    {
       Random random = new Random(351235L);
       Box3d box = new Box3d();
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
-      box.setTransform(transform);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      box.setFromTransform(transform);
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
-      box.getTransform(transformBack);
-      assertTrue(transform.epsilonEquals(transformBack, 0.0));
-      assertTrue(transform.epsilonEquals(box.getTransformCopy(), 0.0));
+      box.getPose(transformBack);
+      assertTrue(transform.epsilonEquals(transformBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(transform.epsilonEquals(box.getTransformCopy(), Epsilons.ONE_TRILLIONTH));
 
-      Matrix3d matrix = new Matrix3d();
-      Vector3d vector = new Vector3d();
+      RotationMatrix matrix = new RotationMatrix();
+      Vector3D vector = new Vector3D();
       transform.get(matrix, vector);
 
-      Matrix3d matrixBack = new Matrix3d();
-      Vector3d vectorBack = new Vector3d();
+      RotationMatrix matrixBack = new RotationMatrix();
+      Point3D pointBack = new Point3D();
 
       box.getRotation(matrixBack);
-      assertTrue(matrix.epsilonEquals(matrixBack, 0.0));
-      assertTrue(matrix.epsilonEquals(box.getRotationCopy(), 0.0));
+      assertTrue(matrix.epsilonEquals(matrixBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(matrix.epsilonEquals(box.getRotationCopy(), Epsilons.ONE_TRILLIONTH));
 
-      box.getCenter(vectorBack);
-      assertTrue(vector.epsilonEquals(vectorBack, 0.0));
-      assertTrue(vector.epsilonEquals(box.getCenterCopy(), 0.0));
+      box.getCenter(pointBack);
+      assertTrue(vector.epsilonEquals(pointBack, Epsilons.ONE_TRILLIONTH));
+      assertTrue(vector.epsilonEquals(box.getCenterCopy(), Epsilons.ONE_TRILLIONTH));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -145,12 +158,12 @@ public class Box3dTest
       Plane3d yFaceMinus = box3d.getFace(FaceName.MINUSY);
       Plane3d zFaceMinus = box3d.getFace(FaceName.MINUSZ);
       
-      Plane3d expectedXFace = new Plane3d(new Point3d(0.5, 0.0, 0.0), new Vector3d(1.0, 0.0, 0.0));
-      Plane3d expectedYFace = new Plane3d(new Point3d(0.0, 0.5, 0.0), new Vector3d(0.0, 1.0, 0.0));
-      Plane3d expectedZFace = new Plane3d(new Point3d(0.0, 0.0, 0.5), new Vector3d(0.0, 0.0, 1.0));
-      Plane3d expectedXFaceMinus = new Plane3d(new Point3d(-0.5, 0.0, 0.0), new Vector3d(-1.0, 0.0, 0.0));
-      Plane3d expectedYFaceMinus = new Plane3d(new Point3d(0.0, -0.5, 0.0), new Vector3d(0.0, -1.0, 0.0));
-      Plane3d expectedZFaceMinus = new Plane3d(new Point3d(0.0, 0.0, -0.5), new Vector3d(0.0, 0.0, -1.0));
+      Plane3d expectedXFace = new Plane3d(new Point3D(0.5, 0.0, 0.0), new Vector3D(1.0, 0.0, 0.0));
+      Plane3d expectedYFace = new Plane3d(new Point3D(0.0, 0.5, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      Plane3d expectedZFace = new Plane3d(new Point3D(0.0, 0.0, 0.5), new Vector3D(0.0, 0.0, 1.0));
+      Plane3d expectedXFaceMinus = new Plane3d(new Point3D(-0.5, 0.0, 0.0), new Vector3D(-1.0, 0.0, 0.0));
+      Plane3d expectedYFaceMinus = new Plane3d(new Point3D(0.0, -0.5, 0.0), new Vector3D(0.0, -1.0, 0.0));
+      Plane3d expectedZFaceMinus = new Plane3d(new Point3D(0.0, 0.0, -0.5), new Vector3D(0.0, 0.0, -1.0));
       
       double epsilon = 1e-14;
       assertTrue(xFace.epsilonEquals(expectedXFace, epsilon));
@@ -168,12 +181,12 @@ public class Box3dTest
       yFaceMinus = box3d.getFace(FaceName.MINUSY);
       zFaceMinus = box3d.getFace(FaceName.MINUSZ);
       
-      expectedXFace = new Plane3d(new Point3d(1.0, 0.0, 0.0), new Vector3d(2.0, 0.0, 0.0));
-      expectedYFace = new Plane3d(new Point3d(0.0, 1.0, 0.0), new Vector3d(0.0, 2.0, 0.0));
-      expectedZFace = new Plane3d(new Point3d(0.0, 0.0, 1.0), new Vector3d(0.0, 0.0, 2.0));
-      expectedXFaceMinus = new Plane3d(new Point3d(-1.0, 0.0, 0.0), new Vector3d(-2.0, 0.0, 0.0));
-      expectedYFaceMinus = new Plane3d(new Point3d(0.0, -1.0, 0.0), new Vector3d(0.0, -2.0, 0.0));
-      expectedZFaceMinus = new Plane3d(new Point3d(0.0, 0.0, -1.0), new Vector3d(0.0, 0.0, -2.0));
+      expectedXFace = new Plane3d(new Point3D(1.0, 0.0, 0.0), new Vector3D(2.0, 0.0, 0.0));
+      expectedYFace = new Plane3d(new Point3D(0.0, 1.0, 0.0), new Vector3D(0.0, 2.0, 0.0));
+      expectedZFace = new Plane3d(new Point3D(0.0, 0.0, 1.0), new Vector3D(0.0, 0.0, 2.0));
+      expectedXFaceMinus = new Plane3d(new Point3D(-1.0, 0.0, 0.0), new Vector3D(-2.0, 0.0, 0.0));
+      expectedYFaceMinus = new Plane3d(new Point3D(0.0, -1.0, 0.0), new Vector3D(0.0, -2.0, 0.0));
+      expectedZFaceMinus = new Plane3d(new Point3D(0.0, 0.0, -1.0), new Vector3D(0.0, 0.0, -2.0));
       
       assertTrue(xFace.epsilonEquals(expectedXFace, epsilon));
       assertTrue(yFace.epsilonEquals(expectedYFace, epsilon));
@@ -190,10 +203,10 @@ public class Box3dTest
       Random random = new Random(123234L);
       Box3d box = createRandomBox(random);
 
-      Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+      Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
       for (int i = 0; i < vertices.length; i++)
       {
-         vertices[i] = new Point3d();
+         vertices[i] = new Point3D();
       }
 
       box.computeVertices(vertices);
@@ -201,7 +214,7 @@ public class Box3dTest
       int nTests = 300;
       for (int i = 0; i < nTests; i++)
       {
-         Point3d pointToTest = getRandomConvexCombination(random, vertices);
+         Point3D pointToTest = getRandomConvexCombination(random, vertices);
 
          assertTrue(box.isInsideOrOnSurface(pointToTest));
       }
@@ -214,19 +227,19 @@ public class Box3dTest
       Random random = new Random(123234L);
       Box3d box = createRandomBox(random);
 
-      Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+      Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
       for (int i = 0; i < vertices.length; i++)
       {
-         vertices[i] = new Point3d();
+         vertices[i] = new Point3D();
       }
 
       box.computeVertices(vertices);
 
-      for (Point3d vertex : vertices)
+      for (Point3D vertex : vertices)
       {
-         Point3d projectedVertex = new Point3d(vertex);
+         Point3D projectedVertex = new Point3D(vertex);
          box.orthogonalProjection(projectedVertex);
-         JUnitTools.assertTuple3dEquals(vertex, projectedVertex, 1e-14);
+         EuclidCoreTestTools.assertTuple3DEquals(vertex, projectedVertex, 1e-14);
       }
    }
 
@@ -237,15 +250,15 @@ public class Box3dTest
       Random random = new Random(123234L);
       Box3d box = createRandomBox(random);
 
-      Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+      Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
       for (int i = 0; i < vertices.length; i++)
       {
-         vertices[i] = new Point3d();
+         vertices[i] = new Point3D();
       }
 
       box.computeVertices(vertices);
 
-      for (Point3d vertex : vertices)
+      for (Point3D vertex : vertices)
       {
          assertTrue(box.isInsideOrOnSurface(vertex, 1e-14));
       }
@@ -262,29 +275,29 @@ public class Box3dTest
       {
          Box3d box = createRandomBox(random);
 
-         Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+         Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
          for (int i = 0; i < vertices.length; i++)
          {
-            vertices[i] = new Point3d();
+            vertices[i] = new Point3D();
          }
 
-         double epsilon = 1e-14;
+         double epsilon = Epsilons.ONE_TRILLIONTH;
          double maxScale = 2.0;
          box.computeVertices(vertices);
-         Point3d center = box.getCenterCopy();
-         for (Point3d vertex : vertices)
+         Point3D center = box.getCenterCopy();
+         for (Point3D vertex : vertices)
          {
-            Vector3d offset = new Vector3d(vertex);
+            Vector3D offset = new Vector3D(vertex);
             offset.sub(center);
             offset.normalize();
-            offset.scale(RandomTools.generateRandomDoubleInRange(random, epsilon, maxScale));
-            Point3d testPoint = new Point3d(vertex);
+            offset.scale(RandomNumbers.nextDouble(random, epsilon, maxScale));
+            Point3D testPoint = new Point3D(vertex);
             testPoint.add(offset);
             assertFalse(box.isInsideOrOnSurface(testPoint, epsilon));
 
-            Point3d projection = new Point3d(testPoint);
+            Point3D projection = new Point3D(testPoint);
             box.orthogonalProjection(projection);
-            JUnitTools.assertTuple3dEquals(vertex, projection, epsilon);
+            EuclidCoreTestTools.assertTuple3DEquals(vertex, projection, epsilon);
             assertTrue(box.isInsideOrOnSurface(projection, epsilon));
          }
       }
@@ -298,45 +311,45 @@ public class Box3dTest
       double length = random.nextDouble();
       double width = random.nextDouble();
       double height = random.nextDouble();
-      RigidBodyTransform configuration = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform configuration = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       Box3d box3d = new Box3d(configuration, length, width, height);
 
-      ArrayList<Point3d> expectedVertices = new ArrayList<Point3d>(Box3d.NUM_VERTICES);
-      expectedVertices.add(new Point3d(length / 2.0, width / 2.0, height / 2.0));
-      expectedVertices.add(new Point3d(length / 2.0, width / 2.0, -height / 2.0));
-      expectedVertices.add(new Point3d(length / 2.0, -width / 2.0, height / 2.0));
-      expectedVertices.add(new Point3d(length / 2.0, -width / 2.0, -height / 2.0));
-      expectedVertices.add(new Point3d(-length / 2.0, width / 2.0, height / 2.0));
-      expectedVertices.add(new Point3d(-length / 2.0, width / 2.0, -height / 2.0));
-      expectedVertices.add(new Point3d(-length / 2.0, -width / 2.0, height / 2.0));
-      expectedVertices.add(new Point3d(-length / 2.0, -width / 2.0, -height / 2.0));
+      ArrayList<Point3D> expectedVertices = new ArrayList<Point3D>(Box3d.NUM_VERTICES);
+      expectedVertices.add(new Point3D(length / 2.0, width / 2.0, height / 2.0));
+      expectedVertices.add(new Point3D(length / 2.0, width / 2.0, -height / 2.0));
+      expectedVertices.add(new Point3D(length / 2.0, -width / 2.0, height / 2.0));
+      expectedVertices.add(new Point3D(length / 2.0, -width / 2.0, -height / 2.0));
+      expectedVertices.add(new Point3D(-length / 2.0, width / 2.0, height / 2.0));
+      expectedVertices.add(new Point3D(-length / 2.0, width / 2.0, -height / 2.0));
+      expectedVertices.add(new Point3D(-length / 2.0, -width / 2.0, height / 2.0));
+      expectedVertices.add(new Point3D(-length / 2.0, -width / 2.0, -height / 2.0));
 
-      for (Point3d point3d : expectedVertices)
+      for (Point3D point3d : expectedVertices)
       {
          configuration.transform(point3d);
       }
 
-      Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+      Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
       for (int i = 0; i < vertices.length; i++)
       {
-         vertices[i] = new Point3d();
+         vertices[i] = new Point3D();
       }
 
       box3d.computeVertices(vertices);
 
-      double epsilon = 1e-24;
-      for (Point3d vertex : vertices)
+      double epsilon = Epsilons.ONE_TRILLIONTH;
+      for (Point3D vertex : vertices)
       {
-         Iterator<Point3d> iterator = expectedVertices.iterator();
+         Iterator<Point3D> iterator = expectedVertices.iterator();
          while (iterator.hasNext())
          {
-            Point3d expectedVertex = iterator.next();
+            Point3D expectedVertex = iterator.next();
             if (expectedVertex.epsilonEquals(vertex, epsilon))
                iterator.remove();
          }
       }
 
-      Assert.assertEquals(0, expectedVertices.size());
+      assertEquals(0, expectedVertices.size());
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -351,7 +364,7 @@ public class Box3dTest
       faces.add(new ImmutablePair<FaceName, FaceName>(FaceName.PLUSY, FaceName.MINUSY));
       faces.add(new ImmutablePair<FaceName, FaceName>(FaceName.PLUSZ, FaceName.MINUSZ));
 
-      double epsilon = 1e-14;
+      double epsilon = Epsilons.ONE_TRILLIONTH;
       for (int i = 0; i < nTests; i++)
       {
          Box3d box = createRandomBox(random);
@@ -359,16 +372,16 @@ public class Box3dTest
 
          for (ImmutablePair<FaceName, FaceName> pair : faces)
          {
-            Vector3d firstNormal = box.getFace(pair.getLeft()).getNormalCopy();
-            Vector3d secondNormal = box.getFace(pair.getRight()).getNormalCopy();
-            Assert.assertEquals(-1.0, firstNormal.dot(secondNormal), epsilon);
+            Vector3D firstNormal = box.getFace(pair.getLeft()).getNormalCopy();
+            Vector3D secondNormal = box.getFace(pair.getRight()).getNormalCopy();
+            assertEquals(-1.0, firstNormal.dot(secondNormal), epsilon);
 
             for (ImmutablePair<FaceName, FaceName> otherPair : faces)
             {
                if (pair != otherPair)
                {
-                  Vector3d otherNormal = box.getFace(otherPair.getLeft()).getNormalCopy();
-                  Assert.assertEquals(0.0, firstNormal.dot(otherNormal), epsilon);
+                  Vector3D otherNormal = box.getFace(otherPair.getLeft()).getNormalCopy();
+                  assertEquals(0.0, firstNormal.dot(otherNormal), epsilon);
 
                }
             }
@@ -388,34 +401,34 @@ public class Box3dTest
       faces.add(new ImmutablePair<FaceName, Integer>(FaceName.PLUSY, 1));
       faces.add(new ImmutablePair<FaceName, Integer>(FaceName.PLUSZ, 2));
 
-      Vector3d center = RandomTools.generateRandomVector(random);
+      Vector3D center = RandomGeometry.nextVector3D(random);
       double length = random.nextDouble();
       double width = random.nextDouble();
       double height = random.nextDouble();
 
       Box3d box = new Box3d(length, width, height);
-      box.setTranslation(new Vector3d(center));
+      box.setTranslation(new Point3D(center));
 
       for (int i = 0; i < nTests; i++)
       {
-         Matrix3d rotation = new Matrix3d();
-         rotation.set(RandomTools.generateRandomRotation(random));
+         RotationMatrix rotation = new RotationMatrix();
+         rotation.set(RandomGeometry.nextAxisAngle(random));
          box.setRotation(rotation);
-         Assert.assertEquals(length, box.getLength(), 0.0);
-         Assert.assertEquals(width, box.getWidth(), 0.0);
-         Assert.assertEquals(height, box.getHeight(), 0.0);
-         JUnitTools.assertTuple3dEquals(center, box.getCenterCopy(), 0.0);
-         JUnitTools.assertMatrix3dEquals("", rotation, box.getRotationCopy(), 1e-14);
+         assertEquals(length, box.getLength(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(width, box.getWidth(), Epsilons.ONE_TRILLIONTH);
+         assertEquals(height, box.getHeight(), Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertTuple3DEquals(center, box.getCenterCopy(), Epsilons.ONE_TRILLIONTH);
+         EuclidCoreTestTools.assertMatrix3DEquals("", rotation, box.getRotationCopy(), Epsilons.ONE_TRILLIONTH);
          
          Collections.shuffle(faces);
          for (ImmutablePair<FaceName, Integer> face : faces)
          {
             Plane3d plane = box.getFace(face.getLeft());
-            Vector3d normal = plane.getNormalCopy();
+            Vector3D normal = plane.getNormalCopy();
             
-            Vector3d rotationMatrixColumn = new Vector3d();
+            Vector3D rotationMatrixColumn = new Vector3D();
             rotation.getColumn(face.getRight(), rotationMatrixColumn);
-            JUnitTools.assertTuple3dEquals(rotationMatrixColumn, normal, 1e-14);
+            EuclidCoreTestTools.assertTuple3DEquals(rotationMatrixColumn, normal, Epsilons.ONE_TRILLIONTH);
          }
       }
    }
@@ -433,51 +446,51 @@ public class Box3dTest
          Box3d biggerBox = new Box3d(box);
          biggerBox.scale(2.0);
 
-         Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+         Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
          for (int i = 0; i < vertices.length; i++)
          {
-            vertices[i] = new Point3d();
+            vertices[i] = new Point3D();
          }
          biggerBox.computeVertices(vertices);
 
          for (int testNumber = 0; testNumber < nTestsPerBox; testNumber++)
          {
-            Point3d point = getRandomConvexCombination(random, vertices);
-            Point3d projectedPoint = new Point3d(point);
+            Point3D point = getRandomConvexCombination(random, vertices);
+            Point3D projectedPoint = new Point3D(point);
             box.orthogonalProjection(projectedPoint);
             
-            Point3d closestPoint = new Point3d();
-            Vector3d normal = new Vector3d();
+            Point3D closestPoint = new Point3D();
+            Vector3D normal = new Vector3D();
             box.checkIfInside(point, closestPoint, normal);
 
             // check distance stuff:
             double epsilon = 1e-14;
-            Assert.assertEquals(box.distance(closestPoint), 0.0, epsilon);
+            assertEquals(box.distance(closestPoint), 0.0, epsilon);
             assertTrue(box.isInsideOrOnSurface(closestPoint, epsilon));
             assertTrue(box.isInsideOrOnSurface(projectedPoint, epsilon));
             if (box.isInsideOrOnSurface(point))
             {
-               JUnitTools.assertTuple3dEquals(point, projectedPoint, 0.0);
+               EuclidCoreTestTools.assertTuple3DEquals(point, projectedPoint, 1e-10);
             }
             else
             {
-               Assert.assertEquals(point.distance(projectedPoint), box.distance(point), epsilon);
-               JUnitTools.assertTuple3dEquals(projectedPoint, closestPoint, epsilon);
+               assertEquals(point.distance(projectedPoint), box.distance(point), epsilon);
+               EuclidCoreTestTools.assertTuple3DEquals(projectedPoint, closestPoint, epsilon);
             }
             
             // create 3 points that are close to point and check whether a numerical normal to a plane through those points equals the returned normal:
             double delta = 1e-5;
 
-            Point3d point2 = new Point3d(point);
-            point2.add(RandomTools.generateRandomVector(random, delta));           
-            Point3d closestPoint2 = new Point3d();
-            Vector3d normal2 = new Vector3d();
+            Point3D point2 = new Point3D(point);
+            point2.add(RandomGeometry.nextVector3D(random, delta));           
+            Point3D closestPoint2 = new Point3D();
+            Vector3D normal2 = new Vector3D();
             box.checkIfInside(point2, closestPoint2, normal2);
             
-            Point3d point3 = new Point3d(point);
-            point3.add(RandomTools.generateRandomVector(random, delta));
-            Point3d closestPoint3 = new Point3d();
-            Vector3d normal3 = new Vector3d();
+            Point3D point3 = new Point3D(point);
+            point3.add(RandomGeometry.nextVector3D(random, delta));
+            Point3D closestPoint3 = new Point3D();
+            Vector3D normal3 = new Vector3D();
             box.checkIfInside(point3, closestPoint3, normal3);
             
             boolean pointsDistinct = closestPoint2.distance(closestPoint) > epsilon && closestPoint3.distance(closestPoint) > epsilon && closestPoint3.distance(closestPoint2) > epsilon;
@@ -486,25 +499,25 @@ public class Box3dTest
                boolean normalsEqual = normal.epsilonEquals(normal2, epsilon) && normal.epsilonEquals(normal3, epsilon);
                if (normalsEqual)
                {
-                  Vector3d vector1 = new Vector3d();
+                  Vector3D vector1 = new Vector3D();
                   vector1.sub(closestPoint2, closestPoint);
                   
-                  Vector3d vector2 = new Vector3d();
+                  Vector3D vector2 = new Vector3D();
                   vector2.sub(closestPoint3, closestPoint);
                   
-                  Vector3d normalFromCrossProduct = new Vector3d();
+                  Vector3D normalFromCrossProduct = new Vector3D();
                   normalFromCrossProduct.cross(vector1, vector2);
                   normalFromCrossProduct.normalize();
 
-                  Assert.assertEquals(1.0, Math.abs(normalFromCrossProduct.dot(normal)), 1e-8);
+                  assertEquals(1.0, Math.abs(normalFromCrossProduct.dot(normal)), 1e-8);
                }
             }
          }
       }
    }
-
+	
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-	@Test(timeout = 30000)
+   @Test(timeout = 30000)
    public void testApplyTransform()
    {
       Random random = new Random(562346L);
@@ -513,28 +526,58 @@ public class Box3dTest
       for (int boxNumber = 0; boxNumber < nBoxes; boxNumber++)
       {
          Box3d box = createRandomBox(random);
-         RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+         RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          Box3d boxTransformed = new Box3d(box);
          boxTransformed.applyTransform(transform);
          Box3d biggerBox = new Box3d(box);
          biggerBox.scale(2.0);
 
-         Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+         Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
          for (int i = 0; i < vertices.length; i++)
          {
-            vertices[i] = new Point3d();
+            vertices[i] = new Point3D();
          }
          biggerBox.computeVertices(vertices);
       
          for (int testNumber = 0; testNumber < nTestsPerBox; testNumber++)
          {
-            Point3d point = getRandomConvexCombination(random, vertices);
-            Point3d pointTransformed = new Point3d(point);
-            transform.transform(pointTransformed);
+            Point3D point = getRandomConvexCombination(random, vertices);
+            Point3D pointTransformed = new Point3D(point);
+            box.transformToLocal(pointTransformed);
+            boxTransformed.transformToWorld(pointTransformed);
             
-            Assert.assertEquals(box.isInsideOrOnSurface(point), boxTransformed.isInsideOrOnSurface(pointTransformed));            
+            assertEquals(box.isInsideOrOnSurface(point), boxTransformed.isInsideOrOnSurface(pointTransformed));            
          }
       }
+   }
+	
+	@ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testApplyTransform2()
+   {
+      Box3d box3d = new Box3d();
+      RigidBodyTransform transform = new RigidBodyTransform();
+      Point3D point = new Point3D();
+      point.set(1.0, 1.0, 1.0);
+      transform.setTranslation(point);
+      box3d.applyTransform(transform);
+      
+      box3d.getCenter(point);
+      Point3D expectedPosition = new Point3D(1.0, 1.0, 1.0);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, point, Epsilons.ONE_TRILLIONTH);
+      
+      Quaternion quat = new Quaternion();
+      quat.setYawPitchRoll(1.0, 1.0, 1.0);
+      Quaternion quat2 = new Quaternion(quat);
+      transform.setRotationAndZeroTranslation(quat);
+      
+      box3d.applyTransform(transform);
+      
+      box3d.getPosition(point);
+      box3d.getOrientation(quat);
+      expectedPosition.applyTransform(transform);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedPosition, point, Epsilons.ONE_TRILLIONTH);
+      EuclidCoreTestTools.assertQuaternionEquals(quat2, quat, Epsilons.ONE_TRILLIONTH);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -552,19 +595,19 @@ public class Box3dTest
          double roll = random.nextDouble();
          box.setYawPitchRoll(yaw, pitch, roll);
          
-         Matrix3d rotation = new Matrix3d();
+         RotationMatrix rotation = new RotationMatrix();
          box.getRotation(rotation);
          
          double epsilon = 1e-14;
-         Assert.assertEquals(yaw, RotationTools.computeYaw(rotation), epsilon);
-         Assert.assertEquals(pitch, RotationTools.computePitch(rotation), epsilon);
-         Assert.assertEquals(roll, RotationTools.computeRoll(rotation), epsilon);
+         assertEquals(yaw, rotation.getYaw(), epsilon);
+         assertEquals(pitch, rotation.getPitch(), epsilon);
+         assertEquals(roll, rotation.getRoll(), epsilon);
       }
    }
 
    private static Box3d createRandomBox(Random random)
    {
-      RigidBodyTransform configuration = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform configuration = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       double lengthX = random.nextDouble();
       double widthY = random.nextDouble();
       double heightZ = random.nextDouble();
@@ -582,17 +625,17 @@ public class Box3dTest
       }
    }
 
-   private static void assertEquals(Box3d box1, Box3d box2, double epsilon)
+   private static void assertBoxEquals(Box3d box1, Box3d box2, double epsilon)
    {
       assertTrue(box1.getTransformCopy().epsilonEquals(box2.getTransformCopy(), epsilon));
 
       for (Direction direction : Direction.values())
       {
-         Assert.assertEquals(box1.getDimension(direction), box2.getDimension(direction), epsilon);
+         assertEquals(box1.getDimension(direction), box2.getDimension(direction), epsilon);
       }
    }
    
-   private static Point3d getRandomConvexCombination(Random random, Point3d[] vertices)
+   private static Point3D getRandomConvexCombination(Random random, Point3D[] vertices)
    {
       double[] weightings = new double[vertices.length];
       for (int j = 0; j < weightings.length; j++)
@@ -606,10 +649,10 @@ public class Box3dTest
          weightings[j] /= sum;
       }
 
-      Point3d pointToTest = new Point3d();
+      Point3D pointToTest = new Point3D();
       for (int j = 0; j < weightings.length; j++)
       {
-         Point3d tempPoint = new Point3d(vertices[j]);
+         Point3D tempPoint = new Point3D(vertices[j]);
          tempPoint.scale(weightings[j]);
          pointToTest.add(tempPoint);
       }

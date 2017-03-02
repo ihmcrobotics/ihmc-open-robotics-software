@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DAdapter.camera.CameraMountInterface;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 
 public class CameraMount implements CameraMountInterface
@@ -27,7 +26,7 @@ public class CameraMount implements CameraMountInterface
    private double fieldOfView, clipDistanceNear, clipDistanceFar;
    private int imageWidth, imageHeight;
 
-   public CameraMount(String name, Vector3d offsetVector, Robot rob)
+   public CameraMount(String name, Vector3D offsetVector, Robot rob)
    {
       this(name, offsetVector, CameraConfiguration.DEFAULT_FIELD_OF_VIEW, CameraConfiguration.DEFAULT_CLIP_DISTANCE_NEAR, CameraConfiguration.DEFAULT_CLIP_DISTANCE_FAR, rob);
    }
@@ -37,7 +36,7 @@ public class CameraMount implements CameraMountInterface
       this(name, camRotation, CameraConfiguration.DEFAULT_FIELD_OF_VIEW, CameraConfiguration.DEFAULT_CLIP_DISTANCE_NEAR, CameraConfiguration.DEFAULT_CLIP_DISTANCE_FAR, rob);
    }
 
-   public CameraMount(String name, Vector3d offsetVector, double fieldOfView, double clipDistanceNear, double clipDistanceFar, Robot rob)
+   public CameraMount(String name, Vector3D offsetVector, double fieldOfView, double clipDistanceNear, double clipDistanceFar, Robot rob)
    {
       this(name, TransformTools.createTranslationTransform(offsetVector), fieldOfView, clipDistanceNear, clipDistanceFar, rob);
    }
@@ -54,6 +53,7 @@ public class CameraMount implements CameraMountInterface
       this.clipDistanceFar = clipDistanceFar;
    }
 
+   @Override
    public String getName()
    {
       return name;
@@ -69,6 +69,7 @@ public class CameraMount implements CameraMountInterface
       return parentJoint;
    }
 
+   @Override
    public String toString()
    {
       return ("name: " + name);
@@ -94,9 +95,9 @@ public class CameraMount implements CameraMountInterface
       rob.addYoVariableRegistry(registry);
    }
 
-   private Point3d tempPoint3d;
+   private Point3D tempPoint3d;
 
-   public void lookAt(Point3d center)
+   public void lookAt(Point3D center)
    {
       lookAt(center.getX(), center.getY(), center.getZ());
    }
@@ -106,7 +107,7 @@ public class CameraMount implements CameraMountInterface
    public void lookAt(double x, double y, double z)
    {
       if (tempPoint3d == null)
-         tempPoint3d = new Point3d();
+         tempPoint3d = new Point3D();
       if (lookAtTransform3D == null)
          lookAtTransform3D = new RigidBodyTransform();
 
@@ -127,7 +128,8 @@ public class CameraMount implements CameraMountInterface
 
    protected void updateTransform(RigidBodyTransform t1)
    {
-      transformToMount.multiply(t1, offsetTransform);    // transformToMount. = t1 * offsetTransform;
+      transformToMount.set(t1);    // transformToMount. = t1 * offsetTransform;
+      transformToMount.multiply(offsetTransform);    // transformToMount. = t1 * offsetTransform;
 
       if (enablePanTiltRoll)
       {
@@ -140,7 +142,8 @@ public class CameraMount implements CameraMountInterface
          temp1.setRotationRollAndZeroTranslation(roll.getDoubleValue());
          panTiltRollTransform3D.multiply(temp1);
 
-         transformToCamera.multiply(transformToMount, panTiltRollTransform3D);
+         transformToCamera.set(transformToMount);
+         transformToCamera.multiply(panTiltRollTransform3D);
       }
 
       else
@@ -200,21 +203,25 @@ public class CameraMount implements CameraMountInterface
       this.fieldOfView = fieldOfView;
    }
 
+   @Override
    public double getFieldOfView()
    {
       return fieldOfView;
    }
 
+   @Override
    public double getClipDistanceNear()
    {
       return clipDistanceNear;
    }
 
+   @Override
    public double getClipDistanceFar()
    {
       return clipDistanceFar;
    }
 
+   @Override
    public void zoom(double amount)
    {
       fieldOfView = fieldOfView + amount;

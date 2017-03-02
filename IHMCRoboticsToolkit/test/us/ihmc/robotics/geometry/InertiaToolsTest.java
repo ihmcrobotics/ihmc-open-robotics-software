@@ -1,18 +1,19 @@
 package us.ihmc.robotics.geometry;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class InertiaToolsTest
 {
@@ -32,10 +33,10 @@ public class InertiaToolsTest
          double yRadius = maxRandomValue * random.nextDouble();
          double zRadius = maxRandomValue * random.nextDouble();
 
-         Matrix3d rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
-         Vector3d principalMomentsOfInertia = new Vector3d(rotationalInertia.getM00(), rotationalInertia.getM11(), rotationalInertia.getM22());
+         Matrix3D rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+         Vector3D principalMomentsOfInertia = new Vector3D(rotationalInertia.getM00(), rotationalInertia.getM11(), rotationalInertia.getM22());
 
-         Vector3d ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
+         Vector3D ellipsoidRadii = InertiaTools.getInertiaEllipsoidRadii(principalMomentsOfInertia, mass);
 
          assertEquals(xRadius, ellipsoidRadii.getX(), DELTA);
          assertEquals(yRadius, ellipsoidRadii.getY(), DELTA);
@@ -58,15 +59,15 @@ public class InertiaToolsTest
          double yRadius = maxRandomValue * random.nextDouble();
          double zRadius = maxRandomValue * random.nextDouble();
 
-         Matrix3d rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
+         Matrix3D rotationalInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidEllipsoid(mass, xRadius, yRadius, zRadius);
 
-         Matrix3d rotationalInertiaCopy = new Matrix3d(rotationalInertia);
-         Matrix3d inertialFrameRotation = RandomTools.generateRandomRotationMatrix3d(random);
+         Matrix3D rotationalInertiaCopy = new Matrix3D(rotationalInertia);
+         RotationMatrix inertialFrameRotation = RandomGeometry.nextRotationMatrix(random);
          
-         Matrix3d rotatedInertia = InertiaTools.rotate(inertialFrameRotation, rotationalInertiaCopy);
+         Matrix3D rotatedInertia = InertiaTools.rotate(inertialFrameRotation, rotationalInertiaCopy);
          
-         Matrix3d principalAxesAfterRotation = new Matrix3d();
-         Vector3d principalMomentsOfInertiaAfterRotation = new Vector3d();
+         RotationMatrix principalAxesAfterRotation = new RotationMatrix();
+         Vector3D principalMomentsOfInertiaAfterRotation = new Vector3D();
          InertiaTools.computePrincipalMomentsOfInertia(rotatedInertia, principalAxesAfterRotation, principalMomentsOfInertiaAfterRotation);
 
          ArrayList<Double> principleMomentsBeforeRotation = new ArrayList<Double>();
@@ -86,12 +87,12 @@ public class InertiaToolsTest
          assertEquals(principleMomentsBeforeRotation.get(1), principleMomentsAfterRotation.get(1), epsilon);
          assertEquals(principleMomentsBeforeRotation.get(2), principleMomentsAfterRotation.get(2), epsilon);
 
-         Matrix3d inertiaAboutPrincipalAxes = new Matrix3d();
+         Matrix3D inertiaAboutPrincipalAxes = new Matrix3D();
          inertiaAboutPrincipalAxes.setM00(principalMomentsOfInertiaAfterRotation.getX());
          inertiaAboutPrincipalAxes.setM11(principalMomentsOfInertiaAfterRotation.getY());
          inertiaAboutPrincipalAxes.setM22(principalMomentsOfInertiaAfterRotation.getZ());
          
-         Matrix3d rotatedInertiaAgain = InertiaTools.rotate(principalAxesAfterRotation, inertiaAboutPrincipalAxes);
+         Matrix3D rotatedInertiaAgain = InertiaTools.rotate(principalAxesAfterRotation, inertiaAboutPrincipalAxes);
          assertTrue(rotatedInertiaAgain.epsilonEquals(rotatedInertia, epsilon));
       }
    }

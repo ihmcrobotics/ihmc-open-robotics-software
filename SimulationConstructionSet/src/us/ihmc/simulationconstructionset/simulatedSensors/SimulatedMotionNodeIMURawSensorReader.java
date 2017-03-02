@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.simulatedSensors;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.corruptors.NoisyDoubleYoVariable;
 import us.ihmc.robotics.math.corruptors.NoisyYoRotationMatrix;
@@ -39,11 +38,11 @@ public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensor
    private static final double GYRO_BIAS_MIN = -GYRO_BIAS_MAX;
    private static final double GYRO_BIAS_DELTA = 0.1 / 180.0 * Math.PI * DT;
    
-   private final Matrix3d imuMountingOffset;
+   private final RotationMatrix imuMountingOffset;
    private final double localGravityZ;
 
    public SimulatedMotionNodeIMURawSensorReader(RawIMUSensorsInterface rawSensors, int imuIndex, RigidBody rigidBody, ReferenceFrame imuFrame,
-         RigidBody rootBody, SpatialAccelerationVector rootAcceleration, Matrix3d imuMountingOffset, double localGravityPositiveZ)
+         RigidBody rootBody, SpatialAccelerationVector rootAcceleration, RotationMatrix imuMountingOffset, double localGravityPositiveZ)
    {
       super(rawSensors, imuIndex, rigidBody, imuFrame, rootBody, rootAcceleration);
       
@@ -68,6 +67,7 @@ public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensor
    }
 
    // Make sure that simulateIMU() is only executed at original sample rate!
+   @Override
    protected void simulateIMU()
    {
       // TODO: Add time delay, internal filters, sensor range clipping, nonlinearities
@@ -76,8 +76,8 @@ public class SimulatedMotionNodeIMURawSensorReader extends SimulatedIMURawSensor
             perfM12.getDoubleValue(), perfM20.getDoubleValue(), perfM21.getDoubleValue(), perfM22.getDoubleValue());
       
       //12112012 added mounting orientation offset.
-      Matrix3d noisyRotationInWorld = rotationMatrix.getMatrix3d();
-      noisyRotationInWorld.mulTransposeRight(noisyRotationInWorld, imuMountingOffset);
+      RotationMatrix noisyRotationInWorld = rotationMatrix.getMatrix3d();
+      noisyRotationInWorld.multiplyTransposeOther(imuMountingOffset);
       
       accelX.update(perfAccelX.getDoubleValue());
       accelY.update(perfAccelY.getDoubleValue());

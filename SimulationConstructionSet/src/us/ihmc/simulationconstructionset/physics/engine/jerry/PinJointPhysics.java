@@ -1,22 +1,18 @@
 package us.ihmc.simulationconstructionset.physics.engine.jerry;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.robotics.MathTools;
 
-/**
- * @author Peter Abeles
- */
 public class PinJointPhysics extends JointPhysics<PinJoint>
 {
 
-   private Vector3d vel_iXd_i = new Vector3d();
-   private Vector3d w_hXr_i = new Vector3d();
-   private Vector3d vel_i = new Vector3d();    // vel_i is the vector velocity of joint i (vel_i = q_dot_i * u_i)
-   private Vector3d temp1 = new Vector3d(), temp2 = new Vector3d(), temp3 = new Vector3d();
+   private Vector3D vel_iXd_i = new Vector3D();
+   private Vector3D w_hXr_i = new Vector3D();
+   private Vector3D vel_i = new Vector3D();    // vel_i is the vector velocity of joint i (vel_i = q_dot_i * u_i)
+   private Vector3D temp1 = new Vector3D(), temp2 = new Vector3D(), temp3 = new Vector3D();
 
    private double[] k_qdd = new double[4], k_qd = new double[4];
 
@@ -33,6 +29,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     *
     * @param delta_qd change in velocity to be added
     */
+   @Override
    protected void jointDependentChangeVelocity(double delta_qd)
    {
       owner.getQDYoVariable().set(owner.getQDYoVariable().getDoubleValue() + delta_qd);
@@ -44,7 +41,8 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     *
     * @param Rh_i Matrix3d in which to store the rotation
     */
-   protected void jointDependentSetAndGetRotation(Matrix3d Rh_i)
+   @Override
+   protected void jointDependentSetAndGetRotation(RotationMatrix Rh_i)
    {
       Rh_i.setIdentity();    // We probably can rely on Rh_i not changing its 1 and 0 elements but let's just be safe.
 
@@ -54,15 +52,16 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       double ux_sinQ = u_i.getX() * sinQ, uy_sinQ = u_i.getY() * sinQ, uz_sinQ = u_i.getZ() * sinQ;
       double uxy_one_cosQ = u_i.getX() * u_i.getY() * one_cosQ, uxz_one_cosQ = u_i.getX() * u_i.getZ() * one_cosQ, uyz_one_cosQ = u_i.getY() * u_i.getZ() * one_cosQ;
 
-      Rh_i.setM00(cosQ + u_i.getX() * u_i.getX() * one_cosQ);
-      Rh_i.setM01(uxy_one_cosQ - uz_sinQ);
-      Rh_i.setM02(uxz_one_cosQ + uy_sinQ);
-      Rh_i.setM10(uxy_one_cosQ + uz_sinQ);
-      Rh_i.setM11(cosQ + u_i.getY() * u_i.getY() * one_cosQ);
-      Rh_i.setM12(uyz_one_cosQ - ux_sinQ);
-      Rh_i.setM20(uxz_one_cosQ - uy_sinQ);
-      Rh_i.setM21(uyz_one_cosQ + ux_sinQ);
-      Rh_i.setM22(cosQ + u_i.getZ() * u_i.getZ() * one_cosQ);
+      double m00 = cosQ + u_i.getX() * u_i.getX() * one_cosQ;
+      double m01 = uxy_one_cosQ - uz_sinQ;
+      double m02 = uxz_one_cosQ + uy_sinQ;
+      double m10 = uxy_one_cosQ + uz_sinQ;
+      double m11 = cosQ + u_i.getY() * u_i.getY() * one_cosQ;
+      double m12 = uyz_one_cosQ - ux_sinQ;
+      double m20 = uxz_one_cosQ - uy_sinQ;
+      double m21 = uyz_one_cosQ + ux_sinQ;
+      double m22 = cosQ + u_i.getZ() * u_i.getZ() * one_cosQ;
+      Rh_i.set(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 
       /*
        * if (this.axis == Axis.X) {Rh_i.setElement(1,1,cosQ);Rh_i.setElement(2,2,cosQ);Rh_i.setElement(1,2,-sinQ);Rh_i.setElement(2,1,sinQ);}
@@ -75,6 +74,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     * Calculates the joint dependent components of Featherstone pass one.  The primary purpose of this method is the computation of angular and linear
     * velocities although limits associated with this joint are also applied here.
     */
+   @Override
    protected void jointDependentFeatherstonePassOne()
    {
       // User torque-speed curve:
@@ -87,7 +87,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
       if (owner.tau_max != null)
       {
          double maxTorque = owner.tau_max.getDoubleValue();
-         owner.getTauYoVariable().set(MathTools.clipToMinMax(owner.getTau(), -maxTorque, maxTorque));
+         owner.getTauYoVariable().set(MathTools.clamp(owner.getTau(), -maxTorque, maxTorque));
       }
 
       Q_i = owner.doPDControl() + owner.getTau();
@@ -166,6 +166,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
    /**
     * Sets the offset between this joint and its link.  This method is called only once.
     */
+   @Override
    protected void jointDependentSet_d_i()
    {
       d_i.set(owner.getLink().getComOffset());
@@ -177,7 +178,8 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     *
     * @param w_h Vector3d representing the rotational velocity of the previous link in this link's coordinates
     */
-   protected void jointDependentFeatherstonePassTwo(Vector3d w_h)
+   @Override
+   protected void jointDependentFeatherstonePassTwo(Vector3D w_h)
    {
       // Coriolis Forces:
       vel_i.set(u_i);
@@ -207,6 +209,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     * @param Q acceleration of the joint
     * @param passNumber number indicating the current pass
     */
+   @Override
    protected void jointDependentFeatherstonePassFour(double Q, int passNumber)
    {
       owner.getQDDYoVariable().set(Q);
@@ -220,6 +223,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     *
     * @param passNumber int representing the current pass in the featherstone algorithm
     */
+   @Override
    protected void jointDependentRecordK(int passNumber)
    {
       k_qdd[passNumber] = owner.getQDDYoVariable().getDoubleValue();
@@ -233,6 +237,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     *
     * @param stepSize time in seconds between the current value and next value
     */
+   @Override
    public void recursiveEulerIntegrate(double stepSize)
    {
       owner.getQYoVariable().set(q_n + stepSize * owner.getQDYoVariable().getDoubleValue());
@@ -253,6 +258,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     *
     * @param stepSize time in seconds for each step
     */
+   @Override
    public void recursiveRungeKuttaSum(double stepSize)
    {
       owner.getQYoVariable().set(q_n + stepSize * (k_qd[0] / 6.0 + k_qd[1] / 3.0 + k_qd[2] / 3.0 + k_qd[3] / 6.0));
@@ -271,6 +277,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     * Recurse over the children of this joint and save the relevant information.  Pin joints
     * save only position and velocity.
     */
+   @Override
    public void recursiveSaveTempState()
    {
       q_n = owner.getQYoVariable().getDoubleValue();
@@ -289,6 +296,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     * Recurse over each joint and restore the relevant information.  Pin joints save only
     * position (angle) and velocity.
     */
+   @Override
    public void recursiveRestoreTempState()
    {
       owner.getQYoVariable().set(q_n);
@@ -309,6 +317,7 @@ public class PinJointPhysics extends JointPhysics<PinJoint>
     *
     * @return were the accelerations reasonable?
     */
+   @Override
    protected boolean jointDependentVerifyReasonableAccelerations()
    {
       if (Math.abs(owner.getQDDYoVariable().getDoubleValue()) > Joint.MAX_ROT_ACCEL)

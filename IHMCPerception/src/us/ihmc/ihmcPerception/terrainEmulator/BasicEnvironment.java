@@ -3,16 +3,15 @@ package us.ihmc.ihmcPerception.terrainEmulator;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceTexture;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.CylinderTerrainObject;
@@ -398,7 +397,7 @@ public class BasicEnvironment{
          double width2 = 10;
          double width1 = width2 / 2;
          RigidBodyTransform location = new RigidBodyTransform();
-         location.setTranslation(new Vector3d(width1 / 2, width1 / 2, -0.5));
+         location.setTranslation(new Vector3D(width1 / 2, width1 / 2, -0.5));
          RigidBodyTransform location2 = new RigidBodyTransform(location);
 
          // location2.setTranslation(new Vector3d(0, 0, -2));
@@ -601,7 +600,7 @@ public class BasicEnvironment{
             Graphics3DObject linkGraphics = new Graphics3DObject();
 
             // Vector3d translation = new Vector3d(-1.0, 0, startDistance);// startDistance);
-            Vector3d translation = new Vector3d(-1, 0, 2.9);    // startDistance);
+            Vector3D translation = new Vector3D(-1, 0, 2.9);    // startDistance);
 
             linkGraphics.rotate(Math.PI / 2, Axis.Y);
             linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
@@ -1313,7 +1312,7 @@ public class BasicEnvironment{
          for (int i = 0; i < NUM_ROCKS; i++)
          {
             double centroidHeight = random.nextDouble() * MAX_ROCK_CENTROID_HEIGHT;
-            Vector3d normal = generateRandomUpFacingNormal();
+            Vector3D normal = generateRandomUpFacingNormal();
 
             double[] approximateCentroid = generateRandomApproximateCentroid(i);
 
@@ -1326,7 +1325,7 @@ public class BasicEnvironment{
 
 //    linkGraphics.rotate(Math.PI / 2, Axis.Y);
 //    linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
-         linkGraphics.translate(new Vector3d(2, 2, 0));
+         linkGraphics.translate(new Vector3D(2, 2, 0));
 
 
          if (SHOW_FULL_TESTBED)
@@ -1376,11 +1375,11 @@ public class BasicEnvironment{
          return approximateCentroid;
       }
 
-      private Vector3d generateRandomUpFacingNormal()
+      private Vector3D generateRandomUpFacingNormal()
       {
          double normalX = random.nextDouble() * (2.0 * MAX_ABS_XY_NORMAL_VALUE) - MAX_ABS_XY_NORMAL_VALUE;
          double normalY = random.nextDouble() * (2.0 * MAX_ABS_XY_NORMAL_VALUE) - MAX_ABS_XY_NORMAL_VALUE;
-         Vector3d normal = new Vector3d(normalX, normalY, 1.0);
+         Vector3D normal = new Vector3D(normalX, normalY, 1.0);
 
          return normal;
       }
@@ -1398,15 +1397,15 @@ public class BasicEnvironment{
          return vertices;
       }
 
-      private static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3d normal, double centroidHeight, double[][] vertices)
+      private static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
       {
          AppearanceDefinition color = YoAppearance.DarkGray();
 
-         ArrayList<Point2d> vertexPoints = new ArrayList<Point2d>();
+         ArrayList<Point2D> vertexPoints = new ArrayList<Point2D>();
 
          for (double[] point : vertices)
          {
-            Point2d point2d = new Point2d(point);
+            Point2D point2d = new Point2D(point);
             vertexPoints.add(point2d);
          }
 
@@ -1415,15 +1414,15 @@ public class BasicEnvironment{
          combinedTerrainObject.addTerrainObject(rock);
       }
 
-      private static void addRock(CombinedTerrainObject3D combinedTerrainObject, Vector3d normal, double centroidHeight, double[][] vertices)
+      private static void addRock(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double centroidHeight, double[][] vertices)
       {
          AppearanceDefinition color = YoAppearance.DarkGray();
 
-         ArrayList<Point2d> vertexPoints = new ArrayList<Point2d>();
+         ArrayList<Point2D> vertexPoints = new ArrayList<Point2D>();
 
          for (double[] point : vertices)
          {
-            Point2d point2d = new Point2d(point);
+            Point2D point2d = new Point2D(point);
             vertexPoints.add(point2d);
          }
 
@@ -1440,7 +1439,7 @@ public class BasicEnvironment{
          RigidBodyTransform location = new RigidBodyTransform();
          location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-         location.setTranslation(new Vector3d(x, y, height / 2));
+         location.setTranslation(new Vector3D(x, y, height / 2));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
          combinedTerrainObject.addTerrainObject(newBox);
       }
@@ -1453,7 +1452,7 @@ public class BasicEnvironment{
          RigidBodyTransform location = new RigidBodyTransform();
          location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-         location.setTranslation(new Vector3d(x, y, height / 2));
+         location.setTranslation(new Vector3D(x, y, height / 2));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
          combinedTerrainObject.addTerrainObject(newBox);
       }
@@ -1466,7 +1465,7 @@ public class BasicEnvironment{
          RigidBodyTransform location = new RigidBodyTransform();
          location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-         location.setTranslation(new Vector3d(xCenter, yCenter, stairTopHeight - thickness / 2));
+         location.setTranslation(new Vector3D(xCenter, yCenter, stairTopHeight - thickness / 2));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, tread, width, thickness), app);
          combinedTerrainObject.addTerrainObject(newBox);
       }
@@ -1526,7 +1525,7 @@ public class BasicEnvironment{
          RigidBodyTransform location = new RigidBodyTransform();
          location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-         location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
+         location.setTranslation(new Vector3D(xCenter, yCenter, cinderBlockHeight / 2 + numberFlatSupports * cinderBlockHeight));
          RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength + overlapToPreventGaps, cinderBlockWidth + overlapToPreventGaps,
                cinderBlockHeight + overlapToPreventGaps), app);
          combinedTerrainObject.addTerrainObject(newBox);
@@ -1542,7 +1541,7 @@ public class BasicEnvironment{
          tilt.setRotationPitchAndZeroTranslation(-slopeRadians);
          location.multiply(tilt);
 
-         location.setTranslation(new Vector3d(xCenter, yCenter, zCenter));
+         location.setTranslation(new Vector3D(xCenter, yCenter, zCenter));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, xLength, yLength, zLength), app);
          combinedTerrainObject.addTerrainObject(newBox);
       }
@@ -1551,7 +1550,7 @@ public class BasicEnvironment{
                                               double radius, double slopeRadians, double yawDegrees, AppearanceDefinition app)
       {
          double pitchDownDegrees = Math.toDegrees(-slopeRadians + Math.PI / 2);
-         Vector3d center = new Vector3d(xCenter, yCenter, zCenter);
+         Vector3D center = new Vector3D(xCenter, yCenter, zCenter);
 
          CylinderTerrainObject newCylinder = new CylinderTerrainObject(center, pitchDownDegrees, yawDegrees, xLength, radius, app);
          combinedTerrainObject.addTerrainObject(newCylinder);
@@ -1573,7 +1572,7 @@ public class BasicEnvironment{
          location.multiply(tilt);
 
          double zCenter = (cinderBlockHeight * Math.cos(cinderBlockTiltRadians) + cinderBlockLength * Math.sin(cinderBlockTiltRadians)) / 2;
-         location.setTranslation(new Vector3d(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
+         location.setTranslation(new Vector3D(xCenter, yCenter, zCenter + numberFlatSupports * cinderBlockHeight));
          RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth,
                cinderBlockHeight), app);
          combinedTerrainObject.addTerrainObject(newBox);
@@ -1616,7 +1615,7 @@ public class BasicEnvironment{
          setUpright.setRotationRollAndZeroTranslation(Math.toRadians(90));
          location.multiply(setUpright);
 
-         location.setTranslation(new Vector3d(xCenter, yCenter, cinderBlockWidth / 2 + numberFlatSupports * cinderBlockHeight));
+         location.setTranslation(new Vector3D(xCenter, yCenter, cinderBlockWidth / 2 + numberFlatSupports * cinderBlockHeight));
          RotatableCinderBlockTerrainObject newBox = new RotatableCinderBlockTerrainObject(new Box3d(location, cinderBlockLength, cinderBlockWidth,
                cinderBlockHeight), app);
          combinedTerrainObject.addTerrainObject(newBox);
@@ -1641,7 +1640,7 @@ public class BasicEnvironment{
          RigidBodyTransform blockSupportLocation = new RigidBodyTransform();
          blockSupportLocation.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
          double[] xySupportRotatedOffset = rotateAroundOrigin(new double[] {(cinderBlockLength - rampRise) / 2, 0}, yawDegrees);
-         blockSupportLocation.setTranslation(new Vector3d(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1],
+         blockSupportLocation.setTranslation(new Vector3D(xCenter + xySupportRotatedOffset[0], yCenter + xySupportRotatedOffset[1],
                rampRise / 2 + numberFlatSupports * cinderBlockHeight));
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(blockSupportLocation, rampRise, cinderBlockLength, rampRise),
                cinderBlockAppearance);
@@ -1662,7 +1661,7 @@ public class BasicEnvironment{
          YoAppearanceTexture texture = new YoAppearanceTexture("Textures/ground2.png");
 
          RigidBodyTransform location = new RigidBodyTransform();
-         location.setTranslation(new Vector3d(0, 0, -0.5));
+         location.setTranslation(new Vector3D(0, 0, -0.5));
 
          RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, 45, 45, 1), texture);
          combinedTerrainObject.addTerrainObject(newBox);

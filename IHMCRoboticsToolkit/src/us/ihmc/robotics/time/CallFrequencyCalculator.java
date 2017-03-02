@@ -8,7 +8,6 @@ public class CallFrequencyCalculator
    private DoubleYoVariable yoCallFrequency;
    private DoubleYoVariable yoRequestDeltaTInMilliseconds;
    private int counter;
-   private double deltaTime = 0.0;
    private double lastTimeCalled = 0.0;
    private double currentTime = 0.0;
    private int numberOfSamples = 10;

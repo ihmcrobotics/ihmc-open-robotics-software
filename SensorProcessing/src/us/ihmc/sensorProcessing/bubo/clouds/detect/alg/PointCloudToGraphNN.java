@@ -18,13 +18,14 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
-import georegression.struct.point.Point3D_F64;
+import java.util.List;
+import java.util.Stack;
+
 import org.ddogleg.nn.NearestNeighbor;
 import org.ddogleg.nn.NnData;
 import org.ddogleg.struct.FastQueue;
 
-import java.util.List;
-import java.util.Stack;
+import georegression.struct.point.Point3D_F64;
 
 /**
  * Creates a nearest-neighbor graph out of a point cloud
