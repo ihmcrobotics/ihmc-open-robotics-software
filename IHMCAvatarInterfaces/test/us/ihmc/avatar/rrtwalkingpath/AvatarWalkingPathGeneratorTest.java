@@ -73,7 +73,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
    SimpleCollisionShapeFactory shapeFactory;
 
-   BoxInfo boxA, boxB, boxC, boxD, boxE;
+   BoxInfo[] boxes;
    
    Vector3d goalState;
    Vector3d initialState;
@@ -115,11 +115,10 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       {
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
 
-         addBoxEnvironment(boxA);
-         addBoxEnvironment(boxB);
-         addBoxEnvironment(boxC);
-         addBoxEnvironment(boxD);
-         addBoxEnvironment(boxE);
+         for(int i=0;i<boxes.length;i++)
+         {
+            addBoxEnvironment(boxes[i]);
+         }
          
          EnvSet.addBox(goalState.x + 0.5, goalState.y -0.6, goalState.x + 0.6, goalState.y +0.6, 2, YoAppearance.Gray());
          
@@ -310,6 +309,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       double sizeY;
       double sizeZ;
       Point3D center;
+
       public BoxInfo(Point3D center, double[] size)
       {
          this.center = center;
@@ -324,41 +324,25 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       
    
    private void setUpEnvironment()
-   {      
-      boxA = new BoxInfo(new Point3D(1.5, -0.5, 0), new double[]{0.2, 1.0, 0.5});
-      boxB = new BoxInfo(new Point3D(1.0, -2.0, 0), new double[]{0.5, 0.5, 0.5});
-      boxC = new BoxInfo(new Point3D(4.0,  2.0, 0), new double[]{1.0, 1.0, 0.5});
-      boxD = new BoxInfo(new Point3D(4.5, -1.5, 0), new double[]{1.8, 1.0, 0.5});
-      boxE = new BoxInfo(new Point3D(3.5, -5.5, 0), new double[]{1.5, 1.5, 0.5});      
-      
+   {            
+      boxes = new BoxInfo[5];
+      boxes[0] = new BoxInfo(new Point3D(1.5, -0.5, 0), new double[]{0.2, 1.0, 0.5});
+      boxes[1] = new BoxInfo(new Point3D(1.0, -2.0, 0), new double[]{0.5, 0.5, 0.5});
+      boxes[2] = new BoxInfo(new Point3D(4.0,  2.0, 0), new double[]{1.0, 1.0, 0.5});
+      boxes[3] = new BoxInfo(new Point3D(4.5, -1.5, 0), new double[]{1.8, 1.0, 0.5});
+      boxes[4] = new BoxInfo(new Point3D(3.5, -5.5, 0), new double[]{1.5, 1.5, 0.5});  
+            
       shapeFactory = (SimpleCollisionShapeFactory) collisionDetector.getShapeFactory();
-      
-      shapeFactory.addShape(shapeFactory.createBox(boxA.sizeX/2, boxA.sizeY/2, boxA.sizeZ/2));
-      shapeFactory.addShape(shapeFactory.createBox(boxB.sizeX/2, boxB.sizeY/2, boxB.sizeZ/2));
-      shapeFactory.addShape(shapeFactory.createBox(boxC.sizeX/2, boxC.sizeY/2, boxC.sizeZ/2));
-      shapeFactory.addShape(shapeFactory.createBox(boxD.sizeX/2, boxD.sizeY/2, boxD.sizeZ/2));
-      shapeFactory.addShape(shapeFactory.createBox(boxE.sizeX/2, boxE.sizeY/2, boxE.sizeZ/2));
-      
-      RigidBodyTransform transform;
-      transform = new RigidBodyTransform();
-      transform.setTranslation(boxA.center);
-      collisionDetector.getCollisionObjects().get(0).setTransformToWorld(transform);
-      
-      transform = new RigidBodyTransform();
-      transform.setTranslation(boxB.center);
-      collisionDetector.getCollisionObjects().get(1).setTransformToWorld(transform);
-      
-      transform = new RigidBodyTransform();
-      transform.setTranslation(boxC.center);
-      collisionDetector.getCollisionObjects().get(2).setTransformToWorld(transform);
-      
-      transform = new RigidBodyTransform();
-      transform.setTranslation(boxD.center);
-      collisionDetector.getCollisionObjects().get(3).setTransformToWorld(transform);
-      
-      transform = new RigidBodyTransform();
-      transform.setTranslation(boxE.center);
-      collisionDetector.getCollisionObjects().get(4).setTransformToWorld(transform);
+            
+      for (int i =0;i<boxes.length;i++)
+      {
+         shapeFactory.addShape(shapeFactory.createBox(boxes[i].sizeX/2, boxes[i].sizeY/2, boxes[i].sizeZ/2));
+         
+         RigidBodyTransform transform;
+         transform = new RigidBodyTransform();
+         transform.setTranslation(boxes[i].center);
+         collisionDetector.getCollisionObjects().get(i).setTransformToWorld(transform);
+      }      
    }
 
    public ArrayList<Graphics3DObject> getNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
