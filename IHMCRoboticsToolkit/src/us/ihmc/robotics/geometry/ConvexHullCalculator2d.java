@@ -1,10 +1,11 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 /**
  * <p>Title: </p>
@@ -46,14 +47,14 @@ public class ConvexHullCalculator2d
     * @param pointList ArrayList
     * @return ArrayList the convex hull
     */
-   public static void getConvexHull(ArrayList<Point2d> convexHullToPack, ArrayList<Point2d> pointList)
+   public static void getConvexHull(ArrayList<Point2D> convexHullToPack, ArrayList<Point2D> pointList)
    {   
       if (convexHullToPack == pointList) throw new RuntimeException("getConvexHull cannot be done in place!");
       
       // Find upper and lower hull:
-      ArrayList<Point2d> upperHull = new ArrayList<Point2d>();
+      ArrayList<Point2D> upperHull = new ArrayList<Point2D>();
       getUpperHull(upperHull, pointList);
-      ArrayList<Point2d> lowerHull = new ArrayList<Point2d>();
+      ArrayList<Point2D> lowerHull = new ArrayList<Point2D>();
       getLowerHull(lowerHull, pointList);
 
       // Remove vertices on edges of upper and lower hull that have equal coordinates
@@ -86,17 +87,17 @@ public class ConvexHullCalculator2d
 //      return result;
    }
 
-   public static List<Point2d> getConvexHullCopy(List<Point2d> pointList)
+   public static List<Point2D> getConvexHullCopy(List<Point2D> pointList)
    {
       // Copy:
-      ArrayList<Point2d> copyList = new ArrayList<Point2d>(pointList.size());
+      ArrayList<Point2D> copyList = new ArrayList<Point2D>(pointList.size());
       for(int i = 0; i <  pointList.size(); i++)
       {
-         Point2d copy = new Point2d(pointList.get(i));
+         Point2D copy = new Point2D(pointList.get(i));
          copyList.add(copy);
       }
 
-      ArrayList<Point2d> result = new ArrayList<Point2d>();
+      ArrayList<Point2D> result = new ArrayList<Point2D>();
       getConvexHull(result, copyList);
 
       return result;
@@ -112,23 +113,23 @@ public class ConvexHullCalculator2d
 //    return ret;
    }
 
-   public static ArrayList<Point2d> getConvexHullCopy(double[][] pointListArray)
+   public static ArrayList<Point2D> getConvexHullCopy(double[][] pointListArray)
    {
-      ArrayList<Point2d> pointList = new ArrayList<Point2d>();
+      ArrayList<Point2D> pointList = new ArrayList<Point2D>();
 
       for (int i = 0; i < pointListArray.length; i++)
       {
-         pointList.add(new Point2d(pointListArray[i]));
+         pointList.add(new Point2D(pointListArray[i]));
       }
 
-      ArrayList<Point2d> ret = new ArrayList<Point2d>();
+      ArrayList<Point2D> ret = new ArrayList<Point2D>();
       getConvexHull(ret, pointList);
 
       return ret;
    }
 
 
-   public static void getLowerHull(ArrayList<Point2d> lowerHullToPack, ArrayList<Point2d> pointList)
+   public static void getLowerHull(ArrayList<Point2D> lowerHullToPack, ArrayList<Point2D> pointList)
    {
       /*
        * Changes the points in pointList, but changes them back after the hull was found.
@@ -140,7 +141,7 @@ public class ConvexHullCalculator2d
       
       for(int i = 0; i <  pointList.size(); i++)
       {
-         Point2d point = pointList.get(i);
+         Point2D point = pointList.get(i);
          point.setX(-point.getX());
          point.setY(-point.getY());
       }
@@ -148,23 +149,23 @@ public class ConvexHullCalculator2d
       getUpperHull(lowerHullToPack, pointList);
       for(int i = 0; i <  pointList.size(); i++)
       {
-         Point2d point = pointList.get(i);
+         Point2D point = pointList.get(i);
          point.setX(-point.getX());
          point.setY(-point.getY());
       }
    }
 
-   private static final ThreadLocal<Point2d[]> minMaxLocal = new ThreadLocal<Point2d[]>()
+   private static final ThreadLocal<Point2D[]> minMaxLocal = new ThreadLocal<Point2D[]>()
    {
       @Override
-      protected Point2d[] initialValue()
+      protected Point2D[] initialValue()
       {
-         Point2d[] minMax = new Point2d[2];
+         Point2D[] minMax = new Point2D[2];
          return minMax;
       }
 
    };
-   public static void getUpperHull(ArrayList<Point2d> upperHullToPack, ArrayList<Point2d> pointList)
+   public static void getUpperHull(ArrayList<Point2D> upperHullToPack, ArrayList<Point2D> pointList)
    {
       if (upperHullToPack == pointList)
       {
@@ -175,10 +176,10 @@ public class ConvexHullCalculator2d
 //    random = new Random(100L);
 
       // 1:
-      Point2d[] minMax = minMaxLocal.get();
+      Point2D[] minMax = minMaxLocal.get();
       findMinMax(minMax, pointList);
-      Point2d min = minMax[0];
-      Point2d max = minMax[1];
+      Point2D min = minMax[0];
+      Point2D max = minMax[1];
 
       if (min.equals(max))
       {
@@ -186,13 +187,13 @@ public class ConvexHullCalculator2d
       }
       else
       {
-         ArrayList<Point2d> T = new ArrayList<Point2d>();
+         ArrayList<Point2D> T = new ArrayList<Point2D>();
          T.add(min);
          T.add(max);
 
          for(int i = 0; i <  pointList.size(); i++)
          {
-            Point2d point = pointList.get(i);
+            Point2D point = pointList.get(i);
             if ((point.getX() > min.getX()) && (point.getX() < max.getX()))
             {
                T.add(point);
@@ -215,14 +216,14 @@ public class ConvexHullCalculator2d
     * @return Point2d[] An array that has pMin as the first entry and pMax
     *   as the second entry
     */
-   private static void findMinMax(Point2d[] minMax, ArrayList<Point2d> pointList)    // TESTED
+   private static void findMinMax(Point2D[] minMax, ArrayList<Point2D> pointList)    // TESTED
    {
-      Point2d min = null;
-      Point2d max = null;
+      Point2D min = null;
+      Point2D max = null;
 
       for(int i = 0; i <  pointList.size(); i++)
       {
-         Point2d point = pointList.get(i);
+         Point2D point = pointList.get(i);
          if (min != null)
          {
             if ((point.getX() < min.getX()) || ((point.getX() == min.getX()) && (point.getY() >= min.getY())))
@@ -252,7 +253,7 @@ public class ConvexHullCalculator2d
       minMax[1] = max;
    }
 
-   private static void connect(ArrayList<Point2d> hullPointsToPack, Point2d min, Point2d max, ArrayList<Point2d> pointList)
+   private static void connect(ArrayList<Point2D> hullPointsToPack, Point2D min, Point2D max, ArrayList<Point2D> pointList)
    {
       hullPointsToPack.clear();
       connectRecursively(0, hullPointsToPack, min, max, pointList);
@@ -262,7 +263,7 @@ public class ConvexHullCalculator2d
    
    private static final MultiArrayListLocal pointListRightLocal = new MultiArrayListLocal();
    
-   private static void connectRecursively(int depth, ArrayList<Point2d> hullPointsToPack, Point2d min, Point2d max, ArrayList<Point2d> pointList)
+   private static void connectRecursively(int depth, ArrayList<Point2D> hullPointsToPack, Point2D min, Point2D max, ArrayList<Point2D> pointList)
    {
 //      ArrayList<Point2d> hullPoints = new ArrayList<Point2d>();
 
@@ -275,18 +276,18 @@ public class ConvexHullCalculator2d
       double a = (min.getX() + max.getX()) / 2.0;
 
       // 2.2:
-      Point2d[] bridge = bridge(0, pointList, a);
+      Point2D[] bridge = bridge(0, pointList, a);
 
       // 2.3:
-      ArrayList<Point2d> pointListLeft = pointListLeftLocal.getAndClear(depth);
+      ArrayList<Point2D> pointListLeft = pointListLeftLocal.getAndClear(depth);
       pointListLeft.add(bridge[0]);
 
-      ArrayList<Point2d> pointListRight = pointListRightLocal.getAndClear(depth);
+      ArrayList<Point2D> pointListRight = pointListRightLocal.getAndClear(depth);
       pointListRight.add(bridge[1]);
 
       for(int i = 0; i <  pointList.size(); i++)
       {
-         Point2d point = pointList.get(i);
+         Point2D point = pointList.get(i);
          if (point.getX() < bridge[0].getX())
          {
             pointListLeft.add(point);
@@ -349,9 +350,9 @@ public class ConvexHullCalculator2d
    private static ArrayOfPointListLocal largeUnionEqualLocal = new ArrayOfPointListLocal();
    private static ArrayOfPointListLocal smallUnionEqualLocal = new ArrayOfPointListLocal();
    
-   private static Point2d[] bridge(int depth, ArrayList<Point2d> pointList, double a)
+   private static Point2D[] bridge(int depth, ArrayList<Point2D> pointList, double a)
    {
-      Point2d[] bridge = new Point2d[2];
+      Point2D[] bridge = new Point2D[2];
 
       // 0:
 
@@ -374,9 +375,9 @@ public class ConvexHullCalculator2d
 
 
       // 2:     
-      ArrayList<Point2d> candidates = candidatesLocal.getAndClear(depth);
+      ArrayList<Point2D> candidates = candidatesLocal.getAndClear(depth);
 
-      ArrayList<Point2d[]> pairs = pairsLocal.get();
+      ArrayList<Point2D[]> pairs = pairsLocal.get();
 
       if (pointList.size() % 2 != 0)
       {
@@ -385,7 +386,7 @@ public class ConvexHullCalculator2d
 
       for (int i = 0; i < pointList.size() / 2; i++)
       {
-         Point2d[] pair = new Point2d[2];
+         Point2D[] pair = new Point2D[2];
 
          if (pointList.get(2 * i).getX() <= pointList.get(2 * i + 1).getX())
          {
@@ -407,7 +408,7 @@ public class ConvexHullCalculator2d
          int i = 0;    // This construction is used to cope with removing a pair while in the loop
          while (i < pairs.size())
          {
-            Point2d[] pair = pairs.get(i);
+            Point2D[] pair = pairs.get(i);
             if (pair[0].getX() == pair[1].getX())
             {
                if (pair[0].getY() > pair[1].getY())
@@ -444,9 +445,9 @@ public class ConvexHullCalculator2d
       // double K = computeMedian(slopes.toArray())
 
       // 5:
-      ArrayList<Point2d[]> small = smallLocal.get();
-      ArrayList<Point2d[]> equal = equalLocal.get();
-      ArrayList<Point2d[]> large = largeLocal.get();
+      ArrayList<Point2D[]> small = smallLocal.get();
+      ArrayList<Point2D[]> equal = equalLocal.get();
+      ArrayList<Point2D[]> large = largeLocal.get();
 
       for (int i = 0; i < pairs.size(); i++)
       {
@@ -466,13 +467,13 @@ public class ConvexHullCalculator2d
 
       // 6:
       // Determine MAX:
-      ArrayList<Point2d> max = maxLocal.get();
+      ArrayList<Point2D> max = maxLocal.get();
       double maxCriterionValue = Double.NEGATIVE_INFINITY;
       double epsilon = 1e-6;
 
       for(int i = 0; i <  pointList.size(); i++)
       {
-         Point2d point = pointList.get(i);
+         Point2D point = pointList.get(i);
          double criterionValue = point.getY() - K * point.getX();
          if (criterionValue > maxCriterionValue + epsilon)    // If the criterion value is significantly larger
          {
@@ -487,11 +488,11 @@ public class ConvexHullCalculator2d
       }
 
       // Find pK and pM:
-      Point2d[] minMax = minMaxLocal.get(); 
+      Point2D[] minMax = minMaxLocal.get(); 
       findMinMax(minMax, max);
 
-      Point2d pK = minMax[0];
-      Point2d pM = minMax[1];
+      Point2D pK = minMax[0];
+      Point2D pM = minMax[1];
 
       // 7:
       if ((pK.getX() <= a) && (pM.getX() > a))
@@ -505,7 +506,7 @@ public class ConvexHullCalculator2d
       // 8:
       if (pM.getX() <= a)
       {
-         ArrayList<Point2d[]> largeUnionEqual = largeUnionEqualLocal.get();
+         ArrayList<Point2D[]> largeUnionEqual = largeUnionEqualLocal.get();
          largeUnionEqual.addAll(large);
          largeUnionEqual.addAll(equal);
 
@@ -525,7 +526,7 @@ public class ConvexHullCalculator2d
       // 9:
       if (pK.getX() > a)
       {
-         ArrayList<Point2d[]> smallUnionEqual = smallUnionEqualLocal.get();
+         ArrayList<Point2D[]> smallUnionEqual = smallUnionEqualLocal.get();
          smallUnionEqual.addAll(small);
          smallUnionEqual.addAll(equal);
 
@@ -553,7 +554,7 @@ public class ConvexHullCalculator2d
     * @param clockwiseOrderedListOfVertices ArrayList
     * @return boolean
     */
-   public static boolean isConvexAndClockwise(List<Point2d> pointList)
+   public static boolean isConvexAndClockwise(List<Point2D> pointList)
    {
       int n = pointList.size();
       return isConvexAndClockwise(pointList, n);
@@ -568,7 +569,7 @@ public class ConvexHullCalculator2d
     * @param n is the number of useful elements assuming they are positioned in [0; n-1]. The others won't be used. 
     * @return boolean
     */
-   public static boolean isConvexAndClockwise(List<Point2d> pointList, int n)
+   public static boolean isConvexAndClockwise(List<Point2D> pointList, int n)
    {
       if (n < 3)
       {
@@ -580,14 +581,14 @@ public class ConvexHullCalculator2d
       }
 
       // Create list of vertices with the last vertex equal to the first vertex:
-      ArrayList<Point2d> closedListOfVertices = new ArrayList<Point2d>(pointList.subList(0, n));
-      closedListOfVertices.add(new Point2d(pointList.get(0)));
+      ArrayList<Point2D> closedListOfVertices = new ArrayList<Point2D>(pointList.subList(0, n));
+      closedListOfVertices.add(new Point2D(pointList.get(0)));
 
       // Compute the differences between the vertices:
-      ArrayList<Vector2d> differences = new ArrayList<Vector2d>();
+      ArrayList<Vector2D> differences = new ArrayList<Vector2D>();
       for (int i = 0; i < n; i++)
       {
-         differences.add(new Vector2d(closedListOfVertices.get(i + 1)));
+         differences.add(new Vector2D(closedListOfVertices.get(i + 1)));
          differences.get(differences.size() - 1).sub(closedListOfVertices.get(i));
       }
 
@@ -632,64 +633,64 @@ public class ConvexHullCalculator2d
       return ((x < 0) ? -1 : 1);
    }
    
-   private static class MultiArrayListLocal extends ThreadLocal<ArrayList<ArrayList<Point2d>>>
+   private static class MultiArrayListLocal extends ThreadLocal<ArrayList<ArrayList<Point2D>>>
    {
 
       @Override
-      protected ArrayList<ArrayList<Point2d>> initialValue()
+      protected ArrayList<ArrayList<Point2D>> initialValue()
       {
-         ArrayList<ArrayList<Point2d>> result = new ArrayList<ArrayList<Point2d>>(32);
+         ArrayList<ArrayList<Point2D>> result = new ArrayList<ArrayList<Point2D>>(32);
          for (int i=0; i<32; i++)
          {
-            result.add(new ArrayList<Point2d>(32));
+            result.add(new ArrayList<Point2D>(32));
          }
          return result;
       }
 
-      public ArrayList<Point2d> getAndClear(int depth)
+      public ArrayList<Point2D> getAndClear(int depth)
       {
-         ArrayList<ArrayList<Point2d>> multiListList = this.get();
+         ArrayList<ArrayList<Point2D>> multiListList = this.get();
          while (multiListList.size() <= depth)
          {
-            multiListList.add(new ArrayList<Point2d>());
+            multiListList.add(new ArrayList<Point2D>());
          }
-         ArrayList<Point2d> multiList = multiListList.get(depth);
+         ArrayList<Point2D> multiList = multiListList.get(depth);
          multiList.clear(); 
          
          return multiList;
       }
    }
 
-   private static class ArrayOfPointListLocal extends ThreadLocal<ArrayList<Point2d[]>>
+   private static class ArrayOfPointListLocal extends ThreadLocal<ArrayList<Point2D[]>>
    {
       @Override
-      protected ArrayList<Point2d[]> initialValue()
+      protected ArrayList<Point2D[]> initialValue()
       {
-         ArrayList<Point2d[]> result = new ArrayList<Point2d[]>(16);
+         ArrayList<Point2D[]> result = new ArrayList<Point2D[]>(16);
          return result;
       }
 
-      public ArrayList<Point2d[]> get()
+      public ArrayList<Point2D[]> get()
       {
-         ArrayList<Point2d[]> e = super.get();
+         ArrayList<Point2D[]> e = super.get();
          e.clear();
          return e;
       }
    }
    
-   private static class PointListLocal extends ThreadLocal<ArrayList<Point2d>>
+   private static class PointListLocal extends ThreadLocal<ArrayList<Point2D>>
    {
 
       @Override
-      protected ArrayList<Point2d> initialValue()
+      protected ArrayList<Point2D> initialValue()
       {
-         ArrayList<Point2d> result = new ArrayList<Point2d>(16);
+         ArrayList<Point2D> result = new ArrayList<Point2D>(16);
          return result;
       }
 
-      public ArrayList<Point2d> get()
+      public ArrayList<Point2D> get()
       {
-         ArrayList<Point2d> e = super.get();
+         ArrayList<Point2D> e = super.get();
          e.clear();
          return e;
       }

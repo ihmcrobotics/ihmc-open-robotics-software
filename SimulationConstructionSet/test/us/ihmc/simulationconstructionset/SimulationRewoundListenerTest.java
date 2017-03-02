@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
@@ -79,6 +79,7 @@ public class SimulationRewoundListenerTest
    private class SimpleSimulationRewoundListener implements RewoundListener
    {
       private int count = 0;
+      @Override
       public void wasRewound()
       {
 //         System.out.println(count + ": Sim was rewound");
@@ -89,5 +90,5 @@ public class SimulationRewoundListenerTest
       {
          return count;
       }
-   };
+   }
 }

@@ -1,9 +1,20 @@
 package us.ihmc.robotModels;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.FingerName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.JointRole;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -13,9 +24,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-
-import java.util.ArrayList;
-import java.util.EnumMap;
 
 public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDescription implements FullHumanoidRobotModel
 {

@@ -1,18 +1,19 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.util.Random;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class Torus3dTest
 {
@@ -29,10 +30,10 @@ public class Torus3dTest
       
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationRollAndZeroTranslation(Math.PI/2.0);
-      transform.setTranslation(new Vector3d(2.0, 0.0, 3.0));
+      transform.setTranslation(new Vector3D(2.0, 0.0, 3.0));
       
       Torus3d torus3d = new Torus3d(transform, radius, thickness);
-      Point3d pointToCheck = new Point3d(2.0, 0.0, 4.0);
+      Point3D pointToCheck = new Point3D(2.0, 0.0, 4.0);
       
       assertTrue(torus3d.isInsideOrOnSurface(pointToCheck));
    }
@@ -90,36 +91,36 @@ public class Torus3dTest
     
       Torus3d torus3d = new Torus3d(radius, thickness);
       
-      Point3d testPoint = new Point3d(1.0, 0.0, 0.0);
-      Point3d projectedPoint = new Point3d(testPoint);
+      Point3D testPoint = new Point3D(1.0, 0.0, 0.0);
+      Point3D projectedPoint = new Point3D(testPoint);
       torus3d.orthogonalProjection(projectedPoint);
       
-      JUnitTools.assertTuple3dEquals(testPoint, projectedPoint, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(testPoint, projectedPoint, 1e-7);
       
-      testPoint = new Point3d(-1.09, 0.0, 0.0);
-      projectedPoint = new Point3d(testPoint);
+      testPoint = new Point3D(-1.09, 0.0, 0.0);
+      projectedPoint = new Point3D(testPoint);
       torus3d.orthogonalProjection(projectedPoint);
       
-      JUnitTools.assertTuple3dEquals(testPoint, projectedPoint, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(testPoint, projectedPoint, 1e-7);
      
-      testPoint = new Point3d(radius + 0.2, 0.0, 0.0);
-      projectedPoint = new Point3d(testPoint);
+      testPoint = new Point3D(radius + 0.2, 0.0, 0.0);
+      projectedPoint = new Point3D(testPoint);
       torus3d.orthogonalProjection(projectedPoint);
-      Point3d expectedProjectedPoint = new Point3d(radius+thickness, 0.0, 0.0);
+      Point3D expectedProjectedPoint = new Point3D(radius+thickness, 0.0, 0.0);
       
-      JUnitTools.assertTuple3dEquals(expectedProjectedPoint, projectedPoint, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-7);
       
       double amountPastCenter = 1.7;
-      testPoint = new Point3d(radius + amountPastCenter, 0.0, amountPastCenter);
-      projectedPoint = new Point3d(testPoint);
+      testPoint = new Point3D(radius + amountPastCenter, 0.0, amountPastCenter);
+      projectedPoint = new Point3D(testPoint);
       torus3d.orthogonalProjection(projectedPoint);
-      expectedProjectedPoint = new Point3d(radius + thickness * Math.sqrt(2.0)/2.0, 0.0, thickness * Math.sqrt(2.0)/2.0);
+      expectedProjectedPoint = new Point3D(radius + thickness * Math.sqrt(2.0)/2.0, 0.0, thickness * Math.sqrt(2.0)/2.0);
       
-      JUnitTools.assertTuple3dEquals(expectedProjectedPoint, projectedPoint, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedProjectedPoint, projectedPoint, 1e-7);
       
       // Middle of torus should project to anywhere on the inside ring.
-      testPoint = new Point3d(0.0, 0.0, 0.0);
-      projectedPoint = new Point3d(testPoint);
+      testPoint = new Point3D(0.0, 0.0, 0.0);
+      projectedPoint = new Point3D(testPoint);
       torus3d.orthogonalProjection(projectedPoint);
       
       assertEquals(radius-thickness, testPoint.distance(projectedPoint), 1e-7);
@@ -134,104 +135,104 @@ public class Torus3dTest
       double radius = 1.0;
       double thickness = 0.1;
       Torus3d torus3d = new Torus3d(radius, thickness);
-      Point3d closestPointToPack = new Point3d();
-      Vector3d normalToPack = new Vector3d();
+      Point3D closestPointToPack = new Point3D();
+      Vector3D normalToPack = new Vector3D();
  
       // any value on the axis of the origin of the torus is indeterminate, but will be treated as being at (R, 0, 0).
       //X
       // on the outside edge
-      Point3d pointInWorldToCheck = new Point3d(radius+thickness, 0.0, 0.0);
+      Point3D pointInWorldToCheck = new Point3D(radius+thickness, 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(radius+thickness, 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(radius+thickness, 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(1.0, 0.0, 0.0), 10e-7));
       
       // beyond the outside edge
-      pointInWorldToCheck = new Point3d(radius+thickness+epsilon, 0.0, 0.0);
+      pointInWorldToCheck = new Point3D(radius+thickness+epsilon, 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(radius+thickness, 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(radius+thickness, 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(1.0, 0.0, 0.0), 10e-7));
 
       // on the outside edge
-      pointInWorldToCheck = new Point3d(-(radius+thickness), 0.0, 0.0);
+      pointInWorldToCheck = new Point3D(-(radius+thickness), 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(-(radius+thickness), 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(-1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(-(radius+thickness), 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(-1.0, 0.0, 0.0), 10e-7));
 
       // beyond the outside edge
-      pointInWorldToCheck = new Point3d(-(radius+thickness+epsilon), 0.0, 0.0);
+      pointInWorldToCheck = new Point3D(-(radius+thickness+epsilon), 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(-(radius+thickness), 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(-1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(-(radius+thickness), 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(-1.0, 0.0, 0.0), 10e-7));
 
       // on the inner edge
-      pointInWorldToCheck = new Point3d(radius-thickness, 0.0, 0.0);
+      pointInWorldToCheck = new Point3D(radius-thickness, 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(radius-thickness, 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(-1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(radius-thickness, 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(-1.0, 0.0, 0.0), 10e-7));
 
       // beyond the inner edge
-      pointInWorldToCheck = new Point3d(radius-(thickness+epsilon), 0.0, 0.0);
+      pointInWorldToCheck = new Point3D(radius-(thickness+epsilon), 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(radius-thickness, 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(-1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(radius-thickness, 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(-1.0, 0.0, 0.0), 10e-7));
 
       // on the inner edge
-      pointInWorldToCheck = new Point3d(-radius+thickness, 0.0, 0.0);
+      pointInWorldToCheck = new Point3D(-radius+thickness, 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(-radius+thickness, 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(-radius+thickness, 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(1.0, 0.0, 0.0), 10e-7));
 
       // beyond the inner edge
-      pointInWorldToCheck = new Point3d(-radius+(thickness+epsilon), 0.0, 0.0);
+      pointInWorldToCheck = new Point3D(-radius+(thickness+epsilon), 0.0, 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(-radius+thickness, 0.0, 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(1.0, 0.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(-radius+thickness, 0.0, 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(1.0, 0.0, 0.0), 10e-7));
       
       //Y
       // on the outside edge
-      pointInWorldToCheck = new Point3d(0.0, (radius+thickness), 0.0);
+      pointInWorldToCheck = new Point3D(0.0, (radius+thickness), 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(0.0, (radius+thickness), 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, 1.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(0.0, (radius+thickness), 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, 1.0, 0.0), 10e-7));
    
       // beyond the outside edge
-      pointInWorldToCheck = new Point3d(0.0, (radius+thickness+epsilon), 0.0);
+      pointInWorldToCheck = new Point3D(0.0, (radius+thickness+epsilon), 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(0.0, (radius+thickness), 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, 1.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(0.0, (radius+thickness), 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, 1.0, 0.0), 10e-7));
 
       // on the outside edge
-      pointInWorldToCheck = new Point3d(0.0, -(radius+thickness), 0.0);
+      pointInWorldToCheck = new Point3D(0.0, -(radius+thickness), 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(0.0, -(radius+thickness), 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, -1.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(0.0, -(radius+thickness), 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, -1.0, 0.0), 10e-7));
 
       // beyond the outside edge
-      pointInWorldToCheck = new Point3d(0.0, -(radius+thickness+epsilon), 0.0);
+      pointInWorldToCheck = new Point3D(0.0, -(radius+thickness+epsilon), 0.0);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(0.0, -(radius+thickness), 0.0), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, -1.0, 0.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(0.0, -(radius+thickness), 0.0), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, -1.0, 0.0), 10e-7));
 
       // Z at X=radius
-      pointInWorldToCheck = new Point3d(radius, 0.0, thickness);
+      pointInWorldToCheck = new Point3D(radius, 0.0, thickness);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(radius, 0.0, thickness), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, 0.0, 1.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(radius, 0.0, thickness), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, 0.0, 1.0), 10e-7));
       
-      pointInWorldToCheck = new Point3d(radius, 0.0, thickness+epsilon);
+      pointInWorldToCheck = new Point3D(radius, 0.0, thickness+epsilon);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(radius, 0.0, thickness), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, 0.0, 1.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(radius, 0.0, thickness), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, 0.0, 1.0), 10e-7));
 
-      pointInWorldToCheck = new Point3d(-radius, 0.0, -thickness);
+      pointInWorldToCheck = new Point3D(-radius, 0.0, -thickness);
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(-radius, 0.0, -thickness), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, 0.0, -1.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(-radius, 0.0, -thickness), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, 0.0, -1.0), 10e-7));
 
-      pointInWorldToCheck = new Point3d(-radius, 0.0, -(thickness+epsilon));
+      pointInWorldToCheck = new Point3D(-radius, 0.0, -(thickness+epsilon));
       torus3d.checkIfInside(pointInWorldToCheck, closestPointToPack, normalToPack);
-      assertTrue(closestPointToPack.epsilonEquals(new Point3d(-radius, 0.0, -thickness), 10e-7));
-      assertTrue(normalToPack.epsilonEquals(new Vector3d(0.0, 0.0, -1.0), 10e-7));
+      assertTrue(closestPointToPack.epsilonEquals(new Point3D(-radius, 0.0, -thickness), 10e-7));
+      assertTrue(normalToPack.epsilonEquals(new Vector3D(0.0, 0.0, -1.0), 10e-7));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -249,32 +250,32 @@ public class Torus3dTest
          Torus3d torus3d = new Torus3d(radius, thickness);
          
          // center point should always be false
-         assertFalse(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, 0.0)));
+         assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
          
          RigidBodyTransform transform = new RigidBodyTransform();
-         Matrix3d rotation = new Matrix3d();
+         RotationMatrix rotation = new RotationMatrix();
          
          // test rotation about x-axis of pi/2
-         rotation.rotX(Math.PI / 2);
+         rotation.setToRollMatrix(Math.PI / 2);
          transform.setRotation(rotation);
-         torus3d.setTransform(transform);
+         torus3d.setPose(transform);
          
-         assertFalse(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, 0.0)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(radius, 0.0, 0.0)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(radius, 0.0, 0.0)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, radius)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, -radius)));
+         assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(radius, 0.0, 0.0)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(radius, 0.0, 0.0)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, radius)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, -radius)));
          
          // test rotation about y-axis of pi/2
-         rotation.rotY(Math.PI / 2);
+         rotation.setToPitchMatrix(Math.PI / 2);
          transform.setRotation(rotation);
-         torus3d.setTransform(transform);
+         torus3d.setPose(transform);
          
-         assertFalse(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, 0.0)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(0.0, radius, 0.0)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(0.0, radius, 0.0)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, radius)));
-         assertTrue(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, -radius)));
+         assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(0.0, radius, 0.0)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(0.0, radius, 0.0)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, radius)));
+         assertTrue(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, -radius)));
          
       }
    }
@@ -304,10 +305,10 @@ public class Torus3dTest
          Torus3d torus3d = new Torus3d(radius, thickness);
          
          // center point should always be false
-         assertFalse(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, 0.0)));
+         assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
          
          RigidBodyTransform transform = new RigidBodyTransform();
-         Matrix3d rotation = new Matrix3d();
+         RotationMatrix rotation = new RotationMatrix();
          
          // loop to test rotations of pi/3, pi/4, and pi/6 about x and y-axes respectively
          double[] angles = new double[] { Math.PI / 3, Math.PI / 4, Math.PI / 6, 
@@ -319,23 +320,23 @@ public class Torus3dTest
             
             torus3d.set(new Torus3d(radius, thickness));
 
-            assertFalse(torus3d.isInsideOrOnSurface(new Point3d(0.0, 0.0, 0.0)));
+            assertFalse(torus3d.isInsideOrOnSurface(new Point3D(0.0, 0.0, 0.0)));
 
             for (int i = 0; i < 2; i++)
             {
                if (i == 0)
                {
-                  rotation.rotX(angle);
+                  rotation.setToRollMatrix(angle);
 //                  System.out.println("Rotating " + angle + " rads about X");
                }
                if (i == 1)
                {
-                  rotation.rotY(angle);
+                  rotation.setToPitchMatrix(angle);
 //                  System.out.println("Rotating " + angle + " rads about Y");
                }
 
                transform.setRotation(rotation);
-               torus3d.setTransform(transform);
+               torus3d.setPose(transform);
 
                for (int j = -1; j < 2; j++)
                {
@@ -347,12 +348,12 @@ public class Torus3dTest
 //                  System.out.print("\n");
                   
                   // only points along rotating axis should not move
-                  assertTrue(torus3d.isInsideOrOnSurface(new Point3d(xyzToTest[0], xyzToTest[1], xyzToTest[2])));
-                  assertTrue(torus3d.isInsideOrOnSurface(new Point3d(-xyzToTest[0], -xyzToTest[1], -xyzToTest[2])));
-                  assertFalse(torus3d.isInsideOrOnSurface(new Point3d(xyzToTest[1], xyzToTest[0], xyzToTest[2])));
-                  assertFalse(torus3d.isInsideOrOnSurface(new Point3d(-xyzToTest[1], -xyzToTest[0], -xyzToTest[2])));
-                  assertFalse(torus3d.isInsideOrOnSurface(new Point3d(xyzToTest[1], xyzToTest[2], xyzToTest[0])));
-                  assertFalse(torus3d.isInsideOrOnSurface(new Point3d(-xyzToTest[1], -xyzToTest[2], -xyzToTest[0])));
+                  assertTrue(torus3d.isInsideOrOnSurface(new Point3D(xyzToTest[0], xyzToTest[1], xyzToTest[2])));
+                  assertTrue(torus3d.isInsideOrOnSurface(new Point3D(-xyzToTest[0], -xyzToTest[1], -xyzToTest[2])));
+                  assertFalse(torus3d.isInsideOrOnSurface(new Point3D(xyzToTest[1], xyzToTest[0], xyzToTest[2])));
+                  assertFalse(torus3d.isInsideOrOnSurface(new Point3D(-xyzToTest[1], -xyzToTest[0], -xyzToTest[2])));
+                  assertFalse(torus3d.isInsideOrOnSurface(new Point3D(xyzToTest[1], xyzToTest[2], xyzToTest[0])));
+                  assertFalse(torus3d.isInsideOrOnSurface(new Point3D(-xyzToTest[1], -xyzToTest[2], -xyzToTest[0])));
 
                   xyzToTest[i] = 0.0;
 
@@ -368,8 +369,8 @@ public class Torus3dTest
 //                  System.out.print("\n");
 
                   // points along non-rotated axis should be displaced in 2 dimensions
-                  assertTrue(torus3d.isInsideOrOnSurface(new Point3d(xyzToTest[0], xyzToTest[1], xyzToTest[2])));
-                  assertTrue(torus3d.isInsideOrOnSurface(new Point3d(-xyzToTest[0], -xyzToTest[1], -xyzToTest[2])));
+                  assertTrue(torus3d.isInsideOrOnSurface(new Point3D(xyzToTest[0], xyzToTest[1], xyzToTest[2])));
+                  assertTrue(torus3d.isInsideOrOnSurface(new Point3D(-xyzToTest[0], -xyzToTest[1], -xyzToTest[2])));
                }
             }
          }
@@ -402,27 +403,27 @@ public class Torus3dTest
 
       RigidBodyTransform transform = new RigidBodyTransform();
       
-      transform.setTranslation(new Vector3d(translation, 0.0, 0.0));
-      torus3d.setTransform(transform);
+      transform.setTranslation(new Vector3D(translation, 0.0, 0.0));
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, translation, 0.0, 0.0);
       
       translation = (random.nextDouble() - 0.5) * 10.0;
-      transform.setTranslation(new Vector3d(0.0, translation, 0.0));
-      torus3d.setTransform(transform);
+      transform.setTranslation(new Vector3D(0.0, translation, 0.0));
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, 0.0, translation, 0.0);
 
       translation = (random.nextDouble() - 0.5) * 10.0;
 //      System.out.println("Torus3dTest:testTranslatedPointOnOrInside:" + "0,0," + translation);
-      transform.setTranslation(new Vector3d(0.0, 0.0, translation));
-      torus3d.setTransform(transform);
+      transform.setTranslation(new Vector3D(0.0, 0.0, translation));
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, 0.0, 0.0, translation);
 
       translation = (random.nextDouble() - 0.5) * 10.0;
-      double translationY = (random.nextDouble() - 0.5) * 10.0;;
+      double translationY = (random.nextDouble() - 0.5) * 10.0;
       double translationZ = (random.nextDouble() - 0.5) * 10.0;
 //      System.out.println("Torus3dTest:testTranslatedPointOnOrInside:" + translation + "," + translationY + "," + translationZ);
-      transform.setTranslation(new Vector3d(translation, translationY, translationZ));
-      torus3d.setTransform(transform);
+      transform.setTranslation(new Vector3D(translation, translationY, translationZ));
+      torus3d.setPose(transform);
       testPointsInsideWhenOffsetBy(torus3d, translation, translationY, translationZ);
    }
    
@@ -433,49 +434,49 @@ public class Torus3dTest
       
 //      System.out.println("Testing points for offsets " + tx + "," + ty + "," + tz + " for torus : " + torus3d);
       // center point is false
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty, tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty, tz)));
       
       // left, right, top and bottom at the radius are true
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx+radius, ty, tz)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx, ty+radius, tz)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx-radius, ty, tz)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx, ty-radius, tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx+radius, ty, tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx, ty+radius, tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx-radius, ty, tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx, ty-radius, tz)));
       
       // Z direction at the radius is false
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty, tz+radius)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty, tz-radius)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty, tz+radius)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty, tz-radius)));
 
       // on the left, right, top, and bottom outside surface edges
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx+radius+thickness, ty, tz)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx, ty+radius+thickness, tz)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx-(radius+thickness), ty, tz)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx, ty-(radius+thickness), tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx+radius+thickness, ty, tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx, ty+radius+thickness, tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx-(radius+thickness), ty, tz)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx, ty-(radius+thickness), tz)));
       
       // Z direction at the center is always false
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty, tz+radius+thickness)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty, tz-(radius+thickness))));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty, tz+radius+thickness)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty, tz-(radius+thickness))));
 
       // At radius in X or Y and thickness in Z should be true
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx+radius, ty, tz+thickness)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx-radius, ty, tz+thickness)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx+radius, ty, tz-thickness)));
-      assertTrue(torus3d.isInsideOrOnSurface(new Point3d(tx-radius, ty, tz-thickness)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx+radius, ty, tz+thickness)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx-radius, ty, tz+thickness)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx+radius, ty, tz-thickness)));
+      assertTrue(torus3d.isInsideOrOnSurface(new Point3D(tx-radius, ty, tz-thickness)));
 
       // left, right, top, bottom just beyond the surface
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx+radius+thickness+epsilon, ty, tz)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty+radius+thickness+epsilon, tz)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx-(radius+thickness+epsilon), ty, tz)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty-(radius+thickness+epsilon), tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx+radius+thickness+epsilon, ty, tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty+radius+thickness+epsilon, tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx-(radius+thickness+epsilon), ty, tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty-(radius+thickness+epsilon), tz)));
 
       // at radius, but Z just beyond the surface
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx+radius, ty, tz+thickness+epsilon)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx+radius, ty, tz-(thickness+epsilon))));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx+radius, ty, tz+thickness+epsilon)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx+radius, ty, tz-(thickness+epsilon))));
 
       // left, right, top, bottom just inside the inner ring of the surface
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx+radius-(thickness+epsilon), ty, tz)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty+radius-(thickness+epsilon), tz)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx-(radius-(thickness+epsilon)), ty, tz)));
-      assertFalse(torus3d.isInsideOrOnSurface(new Point3d(tx, ty-(radius-(thickness+epsilon)), tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx+radius-(thickness+epsilon), ty, tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty+radius-(thickness+epsilon), tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx-(radius-(thickness+epsilon)), ty, tz)));
+      assertFalse(torus3d.isInsideOrOnSurface(new Point3D(tx, ty-(radius-(thickness+epsilon)), tz)));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -490,13 +491,13 @@ public class Torus3dTest
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
       transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       torusCopy.applyTransform(transformAppliedOnlyToCopy);
-      assertFalse(torusCopy.getTransform().equals(torus.getTransform()));
+      assertFalse(torusCopy.equals(torus));
       
       Torus3d torusCopyBySet = new Torus3d(5.0, 1.0);
       torusCopyBySet.set(torus);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       torusCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);      
-      assertFalse(torusCopyBySet.getTransform().equals(torus.getTransform()));
+      assertFalse(torusCopyBySet.equals(torus));
    }
 }

@@ -9,6 +9,4 @@ public class SimpleRobotToOptimize extends Robot
       super("SimpleRobotToOptimize");
    }
 
-   private static final long serialVersionUID = 6788678557943320427L;
-
 }

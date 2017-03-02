@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public abstract class OneDegreeOfFreedomJoint extends Joint
@@ -16,7 +15,7 @@ public abstract class OneDegreeOfFreedomJoint extends Joint
    private double qDesired = 0;
    private double qdDesired = 0;
 
-   public OneDegreeOfFreedomJoint(String jname, Vector3d offset, Robot rob)
+   public OneDegreeOfFreedomJoint(String jname, Vector3D offset, Robot rob)
    {
       super(jname, offset, rob, 1);
    }

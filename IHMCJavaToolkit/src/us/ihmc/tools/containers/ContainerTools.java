@@ -51,8 +51,6 @@ public class ContainerTools
          {
             E currentLowest = ret.first();
             if (ret.comparator().compare(element, currentLowest) > 0)
-               ;
-
             {
                ret.remove(currentLowest);
                ret.add(element);

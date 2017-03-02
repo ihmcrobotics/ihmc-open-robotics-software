@@ -2,12 +2,12 @@ package us.ihmc.ihmcPerception.depthData;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class PointCloudWorldPacketGeneratorTest
 {
@@ -19,12 +19,12 @@ public class PointCloudWorldPacketGeneratorTest
       DepthDataFilter depthDataFilter = new DepthDataFilter();
       PointCloudWorldPacketGenerator generator = new PointCloudWorldPacketGenerator(depthDataFilter);
 
-      Point3d sensorOrigin = new Point3d(0, 0, 1.0);
+      Point3D sensorOrigin = new Point3D(0, 0, 1.0);
       for (double x = -10; x < 10; x += 0.01)
       {
          for (double y = -10; y < 10; y += 0.01)
          {
-            Point3d point = new Point3d(x, y, Math.max(x + y, 0.0));
+            Point3D point = new Point3D(x, y, Math.max(x + y, 0.0));
             depthDataFilter.addPoint(point, sensorOrigin);
          }
       }

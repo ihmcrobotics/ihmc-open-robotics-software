@@ -17,6 +17,7 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
       scs.attachPlayCycleListener(this);
    }
 
+   @Override
    public void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle)
    {
       controllers.add(new MultiThreadedRobotControllerExecutor(simulatedRobot, controller, executionsPerControlTick, skipFirstControlCycle, registry));
@@ -26,6 +27,7 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
       }
    }
 
+   @Override
    public void wasRewound()
    {
       updateDynamicGraphicObjectListRegistries();
@@ -65,6 +67,7 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
       }
    }
 
+   @Override
    public void update(int tick)
    {
       updateDynamicGraphicObjectListRegistries();

@@ -1,13 +1,13 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 // TODO delete if not used
+@SuppressWarnings("serial")
 public class WrenchContactPoint extends ExternalForcePoint
 {
 
@@ -17,11 +17,11 @@ public class WrenchContactPoint extends ExternalForcePoint
 
    Link link;
    RigidBodyTransform toWorld = new RigidBodyTransform();
-   Vector3d v = new Vector3d();
+   Vector3D v = new Vector3D();
 
    public WrenchContactPoint(String name, YoVariableRegistry registry, Link link )
    {
-      super(name, new Vector3d(), registry);
+      super(name, new Vector3D(), registry);
 
       this.link = link;
 
@@ -33,7 +33,7 @@ public class WrenchContactPoint extends ExternalForcePoint
    }
 
    public void updateForce() {
-      Vector3d force = link.getParentJoint().physics.Z_hat_i.top;
+      Vector3D force = link.getParentJoint().physics.Z_hat_i.top;
       fs.set(force.length());
       System.out.println("force on sensor: "+fs.getDoubleValue());
    }
@@ -63,12 +63,12 @@ public class WrenchContactPoint extends ExternalForcePoint
          fs.set(0.0);
    }
 
-   public void getTouchdownLocation(Point3d touchdownLocationToPack)
+   public void getTouchdownLocation(Point3D touchdownLocationToPack)
    {
       touchdownLocationToPack.set(tdx.getDoubleValue(), tdy.getDoubleValue(), tdz.getDoubleValue());
    }
 
-   public void setTouchdownLocation(Point3d touchdownLocation)
+   public void setTouchdownLocation(Point3D touchdownLocation)
    {
       tdx.set(touchdownLocation.getX());
       tdy.set(touchdownLocation.getY());

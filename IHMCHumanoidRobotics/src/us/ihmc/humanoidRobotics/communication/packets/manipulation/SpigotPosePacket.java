@@ -2,20 +2,19 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class SpigotPosePacket extends Packet<SpigotPosePacket> implements TransformableDataObject<SpigotPosePacket>
 {
-   public Point3d position;
-   public Quat4d orientation;
+   public Point3D position;
+   public Quaternion orientation;
 
    public int index = 0;
 
@@ -24,18 +23,18 @@ public class SpigotPosePacket extends Packet<SpigotPosePacket> implements Transf
       // Empty constructor for deserialization
    }
 
-   public SpigotPosePacket(Point3d position, Quat4d orientation)
+   public SpigotPosePacket(Point3D position, Quaternion orientation)
    {
       this.orientation = orientation;
       this.position = position;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
@@ -65,10 +64,10 @@ public class SpigotPosePacket extends Packet<SpigotPosePacket> implements Transf
 
    public SpigotPosePacket(Random random)
    {
-      Point3d point = new Point3d();
-      Quat4d quat = new Quat4d();
+      Point3D point = new Point3D();
+      Quaternion quat = new Quaternion();
 
-      point.set(RandomTools.generateRandomPoint(random, 0.288, 0.288, 0.288));    // magic
+      point.set(RandomGeometry.nextPoint3D(random, 0.288, 0.288, 0.288));    // magic
 
       // numbers
       // so
@@ -81,7 +80,7 @@ public class SpigotPosePacket extends Packet<SpigotPosePacket> implements Transf
       // MAX
       // in
       // TorusPosePacketSerializer
-      quat.set(RandomTools.generateRandomRotation(random));
+      quat.set(RandomGeometry.nextAxisAngle(random));
 
       this.position = point;
       this.orientation = quat;

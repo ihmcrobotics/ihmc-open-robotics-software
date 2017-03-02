@@ -16,8 +16,8 @@ public class ExternalControlServer implements RobotController
 
    // ArrayList<SensorInterface> sensorData = new ArrayList<SensorInterface>();
    boolean debug = false;
-   YoVariable[] allVariables;
-   YoVariable[] torques;
+   YoVariable<?>[] allVariables;
+   YoVariable<?>[] torques;
    private String name;
 
    public ExternalControlServer(Robot terminator, String name)
@@ -63,16 +63,16 @@ public class ExternalControlServer implements RobotController
       for (int i = 0; i < allVariables.length; i++)
       {
          double initialValue = initialSetup[i];
-         YoVariable variable = allVariables[i];
+         YoVariable<?> variable = allVariables[i];
          System.out.println(variable.getName() + ": " + initialValue);
          variable.setValueFromDouble(initialValue);
       }
    }
 
-   private YoVariable[] setUpVariableList(String variableOrderedList)
+   private YoVariable<?>[] setUpVariableList(String variableOrderedList)
    {
       StringTokenizer tokenizer = new StringTokenizer(variableOrderedList, ",");
-      YoVariable[] vars = new YoVariable[tokenizer.countTokens()];
+      YoVariable<?>[] vars = new YoVariable[tokenizer.countTokens()];
 
       int index = 0;
       while (tokenizer.hasMoreTokens())
@@ -87,6 +87,7 @@ public class ExternalControlServer implements RobotController
    }
 
 
+   @Override
    public void doControl()
    {
       // System.out.println("do control start");
@@ -109,6 +110,7 @@ public class ExternalControlServer implements RobotController
       }
    }
 
+   @Override
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
@@ -127,15 +129,18 @@ public class ExternalControlServer implements RobotController
 
    }
 
+   @Override
    public String getName()
    {
       return name;
    }
    
+   @Override
    public void initialize()
    {      
    }
 
+   @Override
    public String getDescription()
    {
       return getName();

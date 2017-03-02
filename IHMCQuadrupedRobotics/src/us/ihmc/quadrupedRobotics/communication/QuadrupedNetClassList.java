@@ -2,9 +2,10 @@ package us.ihmc.quadrupedRobotics.communication;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import us.ihmc.communication.packets.DetectedFacesPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
@@ -21,17 +22,17 @@ import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedTimedStepPacket;
 import us.ihmc.quadrupedRobotics.communication.packets.QuadrupedXGaitSettingsPacket;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
-import us.ihmc.quadrupedRobotics.params.BooleanParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleArrayParameter;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.IntegerParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterListPacket;
-import us.ihmc.quadrupedRobotics.params.RequestParameterListPacket;
-import us.ihmc.quadrupedRobotics.params.SetBooleanParameterPacket;
-import us.ihmc.quadrupedRobotics.params.SetDoubleArrayParameterPacket;
-import us.ihmc.quadrupedRobotics.params.SetDoubleParameterPacket;
-import us.ihmc.quadrupedRobotics.params.SetStringParameterPacket;
-import us.ihmc.quadrupedRobotics.params.StringParameter;
+import us.ihmc.robotics.dataStructures.parameter.BooleanParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleArrayParameter;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.IntegerParameter;
+import us.ihmc.communication.packets.ParameterListPacket;
+import us.ihmc.communication.packets.RequestParameterListPacket;
+import us.ihmc.communication.packets.SetBooleanParameterPacket;
+import us.ihmc.communication.packets.SetDoubleArrayParameterPacket;
+import us.ihmc.communication.packets.SetDoubleParameterPacket;
+import us.ihmc.communication.packets.SetStringParameterPacket;
+import us.ihmc.robotics.dataStructures.parameter.StringParameter;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedSoleWaypointList;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
@@ -59,23 +60,23 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
 
       registerPacketClass(DetectedFacesPacket.class);
       registerPacketField(String[].class);
-      registerPacketField(Point3d[].class);
+      registerPacketField(Point3D[].class);
 
 
       registerPacketClass(ComPositionPacket.class);
-      registerPacketField(Point3d.class);
+      registerPacketField(Point3D.class);
 
       registerPacketClass(ComVelocityPacket.class);
-      registerPacketField(Vector3d.class);
+      registerPacketField(Vector3D.class);
 
       registerPacketClass(BodyOrientationPacket.class);
-      registerPacketField(Quat4d.class);
+      registerPacketField(Quaternion.class);
 
       registerPacketClass(BodyAngularRatePacket.class);
-      registerPacketField(Vector3d.class);
+      registerPacketField(Vector3D.class);
 
       registerPacketClass(PlanarVelocityPacket.class);
-      registerPacketField(Vector3d.class);
+      registerPacketField(Vector3D.class);
 
       registerPacketClass(QuadrupedForceControllerEventPacket.class);
       registerPacketField(QuadrupedForceControllerRequestedEvent.class);
@@ -104,7 +105,7 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
       registerPacketClass(QuadrupedTimedStepPacket.class);
       registerPacketField(ArrayList.class);
       registerPacketField(QuadrupedTimedStep.class);
-      registerPacketField(Point3d.class);
+      registerPacketField(Point3D.class);
       registerPacketField(RobotQuadrant.class);
       registerPacketField(TimeInterval.class);
 
@@ -123,8 +124,8 @@ public class QuadrupedNetClassList extends IHMCCommunicationKryoNetClassList
       registerPacketField(RobotQuadrant[].class);
       registerPacketField(ArrayList.class);
       registerPacketField(SoleWaypoint.class);
-      registerPacketField(Point3d.class);
-      registerPacketField(Vector3d.class);
+      registerPacketField(Point3D.class);
+      registerPacketField(Vector3D.class);
       registerPacketField(Double.class);
       registerPacketField(Object[].class);
       

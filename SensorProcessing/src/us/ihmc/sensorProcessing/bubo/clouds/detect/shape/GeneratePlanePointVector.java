@@ -18,6 +18,8 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.shape;
 
+import java.util.List;
+
 import georegression.geometry.GeometryMath_F64;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.struct.plane.PlaneGeneral3D_F64;
@@ -25,8 +27,6 @@ import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ModelGeneratorCheck;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
-
-import java.util.List;
 
 /**
  * Plane estimation for use in {@link us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007}.  The equation of the plane is found

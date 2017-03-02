@@ -1,5 +1,8 @@
 package us.ihmc.tools.factories;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public class ExampleValidFactory
 {
    private final RequiredFactoryField<Double> requiredField1 = new RequiredFactoryField<>("requiredField1");
@@ -11,7 +14,9 @@ public class ExampleValidFactory
    public Object createObject()
    {
       optionalField1.setDefaultValue(0.0);
-      optionalField2.setDefaultValue(0.0);
+      
+      assertTrue(optionalField1.hasValue());
+      assertFalse(optionalField2.hasValue());
       
       FactoryTools.checkAllFactoryFieldsAreSet(this);
       

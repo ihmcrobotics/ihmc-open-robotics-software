@@ -9,13 +9,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CoactiveElementYoWhiteBoardSynchronizerTest
 {
@@ -156,7 +156,7 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
 
             if (buttonWasClicked.getBooleanValue())
             {
-               variableForUserInterfaceToWrite.set(RandomTools.generateRandomDouble(random, 20.0));
+               variableForUserInterfaceToWrite.set(RandomNumbers.nextDouble(random, 20.0));
             }
          }
       }
@@ -177,11 +177,11 @@ public class CoactiveElementYoWhiteBoardSynchronizerTest
       {
          if (buttonWasClicked.getBooleanValue())
          {
-            variableForMachineToWrite.set(RandomTools.generateRandomDouble(random, variableForUserInterfaceToWrite.getDoubleValue()));
+            variableForMachineToWrite.set(RandomNumbers.nextDouble(random, variableForUserInterfaceToWrite.getDoubleValue()));
          }
          else
          {
-            variableForMachineToWrite.set(RandomTools.generateRandomDouble(random, 1.0));
+            variableForMachineToWrite.set(RandomNumbers.nextDouble(random, 1.0));
          }
       }
 

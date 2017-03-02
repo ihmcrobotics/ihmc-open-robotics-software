@@ -1,18 +1,18 @@
 package us.ihmc.communication.packets;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
 {
    public String[] ids;
-   public Point3d[] positions;
+   public Point3D[] positions;
 
    public DetectedFacesPacket()
    {
 
    }
 
-   public DetectedFacesPacket(String[] ids, Point3d[] positions)
+   public DetectedFacesPacket(String[] ids, Point3D[] positions)
    {
       this.ids = ids;
       this.positions = positions;
@@ -23,7 +23,7 @@ public class DetectedFacesPacket extends Packet<DetectedFacesPacket>
       return ids;
    }
 
-   public Point3d[] getPositions()
+   public Point3D[] getPositions()
    {
       return positions;
    }

@@ -2,9 +2,8 @@ package us.ihmc.simulationconstructionset.util.robotExplorer;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;
@@ -41,12 +40,12 @@ public class RobotExplorer
 
       buffer.append("Joint name = " + jointName + "\n");
 
-      Vector3d offset = new Vector3d();
+      Vector3D offset = new Vector3D();
       joint.getOffset(offset);
 
       buffer.append("Joint offset = " + offset + "\n");
 
-      Vector3d jointAxis = new Vector3d();
+      Vector3D jointAxis = new Vector3D();
       joint.getJointAxis(jointAxis);
 
       buffer.append("Joint axis = " + jointAxis + "\n");
@@ -117,10 +116,10 @@ public class RobotExplorer
    {
       double mass = link.getMass();
 
-      Vector3d comOffset = new Vector3d();
+      Vector3D comOffset = new Vector3D();
       link.getComOffset(comOffset);
 
-      Matrix3d momentOfInertia = new Matrix3d();
+      Matrix3D momentOfInertia = new Matrix3D();
       link.getMomentOfInertia(momentOfInertia);
 
       buffer.append("Mass = " + mass + "\n");
@@ -128,6 +127,7 @@ public class RobotExplorer
       buffer.append("momentOfInertia = \n" + momentOfInertia + "\n");
    }
    
+   @Override
    public String toString()
    {
       StringBuffer buffer = new StringBuffer();

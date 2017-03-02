@@ -4,19 +4,18 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.FramePointTest;
-import us.ihmc.robotics.geometry.FrameVectorTest;
-import us.ihmc.robotics.math.trajectories.CirclePositionTrajectoryGenerator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVectorTest;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.robotics.trajectories.providers.PositionProvider;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class CirclePositionTrajectoryGeneratorTest
@@ -71,7 +70,7 @@ public class CirclePositionTrajectoryGeneratorTest
 
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      FramePoint offset = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
+      FramePoint offset = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
       double rotationAngle = 2.0 * Math.PI;
       double trajectoryTime = random.nextDouble();
 

@@ -14,10 +14,10 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -227,7 +227,7 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getIMUYawDriftFilterFreqInHertz()
    {
-      return 1.0e-3;
+      return 0.4; // alpha = 0.995 with dt = 2ms
    }
 
    @Override

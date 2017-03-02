@@ -1,16 +1,16 @@
 package us.ihmc.exampleSimulations.fallingObjects;
 
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactModel;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
-import us.ihmc.simulationconstructionset.util.ground.WavyGroundProfile;
-
-import javax.vecmath.Vector3d;
 
 public class FallingObjectsRobot extends Robot {
 
@@ -43,7 +43,7 @@ public class FallingObjectsRobot extends Robot {
         double length = Math.random()*1+0.5;
         double mass = 12.0;
 
-        FloatingJoint j = new FloatingJoint("RodJoint"+counter, counter+"", new Vector3d(Math.random()*10-5,Math.random()*10-5,Math.random()*2+length), this);
+        FloatingJoint j = new FloatingJoint("RodJoint"+counter, counter+"", new Vector3D(Math.random()*10-5,Math.random()*10-5,Math.random()*2+length), this);
 
         Link l = new Link("RodLink");
         l.setMass(mass);
@@ -66,7 +66,7 @@ public class FallingObjectsRobot extends Robot {
         int zCount = 0;
         for(double z = 0; z <= length; z+= length/3){
             for(double theta = 0; theta < Math.PI*2; theta += Math.PI*0.35){
-                GroundContactPoint gc1 = new GroundContactPoint("gc"+counter+iterator+zCount, new Vector3d(radius*Math.sin(theta),
+                GroundContactPoint gc1 = new GroundContactPoint("gc"+counter+iterator+zCount, new Vector3D(radius*Math.sin(theta),
                         radius*Math.cos(theta), z), this);
                 j.addGroundContactPoint(gc1);
                 iterator++;
@@ -80,7 +80,7 @@ public class FallingObjectsRobot extends Robot {
         double radius = Math.random()*0.15+0.15;
         double mass = 1.0;
 
-        FloatingJoint j = new FloatingJoint("SphereJoint"+counter, counter+"", new Vector3d(Math.random()*10-5,Math.random()*10-5,Math.random()*2+radius*2), this);
+        FloatingJoint j = new FloatingJoint("SphereJoint"+counter, counter+"", new Vector3D(Math.random()*10-5,Math.random()*10-5,Math.random()*2+radius*2), this);
 
         Link l = new Link("SphereLink");
         l.setMass(mass);
@@ -101,7 +101,7 @@ public class FallingObjectsRobot extends Robot {
         int iterator = 0;
         for(double phi = 0; phi < Math.PI; phi += Math.PI/10.0){
             for(double theta = 0; theta < Math.PI*2.0; theta += Math.PI*0.35){
-                GroundContactPoint gc1 = new GroundContactPoint("gc"+counter+iterator, new Vector3d(radius*Math.sin(phi)*Math.cos(theta),
+                GroundContactPoint gc1 = new GroundContactPoint("gc"+counter+iterator, new Vector3D(radius*Math.sin(phi)*Math.cos(theta),
                         radius*Math.sin(phi)*Math.sin(theta), radius*Math.cos(phi)), this);
                 j.addGroundContactPoint(gc1);
                 iterator++;

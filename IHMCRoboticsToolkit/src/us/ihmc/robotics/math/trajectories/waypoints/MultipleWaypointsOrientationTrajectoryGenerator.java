@@ -4,9 +4,8 @@ import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTraj
 
 import java.util.ArrayList;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -102,13 +101,13 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       switchTrajectoryFrame(referenceFrame);
    }
 
-   public void appendWaypoint(double timeAtWaypoint, Quat4d orientation, Vector3d angularVelocity)
+   public void appendWaypoint(double timeAtWaypoint, Quaternion orientation, Vector3D angularVelocity)
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(timeAtWaypoint, orientation, angularVelocity);
    }
 
-   private void appendWaypointUnsafe(double timeAtWaypoint, Quat4d orientation, Vector3d angularVelocity)
+   private void appendWaypointUnsafe(double timeAtWaypoint, Quaternion orientation, Vector3D angularVelocity)
    {
       waypoints.get(numberOfWaypoints.getIntegerValue()).set(timeAtWaypoint, orientation, angularVelocity);
       numberOfWaypoints.increment();
@@ -138,7 +137,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       numberOfWaypoints.increment();
    }
 
-   public void appendWaypoints(double[] timeAtWaypoints, Quat4d[] orientations, Vector3d[] angularVelocities)
+   public void appendWaypoints(double[] timeAtWaypoints, Quaternion[] orientations, Vector3D[] angularVelocities)
    {
       if (timeAtWaypoints.length != orientations.length || angularVelocities != null && orientations.length != angularVelocities.length)
          throw new RuntimeException("Arguments are inconsistent.");
@@ -300,6 +299,11 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    public double getLastWaypointTime()
    {
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
+   }
+
+   public void getLastWaypoint(FrameSO3TrajectoryPoint pointToPack)
+   {
+      pointToPack.set(waypoints.get(numberOfWaypoints.getIntegerValue() - 1));
    }
 
    @Override

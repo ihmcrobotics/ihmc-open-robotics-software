@@ -2,13 +2,12 @@ package us.ihmc.ihmcPerception;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point3d;
-
 import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LocalizationPointMapPacket;
@@ -99,7 +98,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    
    private void processAndSendPointCloud(UnpackedPointCloud pointCloudData)
    {
-      Point3d[] points = pointCloudData.getPoints();
+      Point3D[] points = pointCloudData.getPoints();
       LocalizationPointMapPacket localizationMapPacket = new LocalizationPointMapPacket();
       localizationMapPacket.setLocalizationPointMap(points);
       rosModulePacketCommunicator.send(localizationMapPacket);

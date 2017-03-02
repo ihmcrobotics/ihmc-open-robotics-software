@@ -26,6 +26,7 @@ public class SelectGraphGroupAction extends AbstractAction
       this.putValue(Action.SHORT_DESCRIPTION, "Short Description");
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       selector.selectGraphGroup(name);

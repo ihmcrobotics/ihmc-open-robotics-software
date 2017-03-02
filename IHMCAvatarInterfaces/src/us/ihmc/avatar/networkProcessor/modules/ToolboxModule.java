@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -25,7 +26,7 @@ import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -34,7 +35,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
@@ -163,8 +163,8 @@ public abstract class ToolboxModule
             if (Thread.interrupted())
                return;
 
-            serverTime += TimeTools.milliSecondsToSeconds(updatePeriodMilliseconds);
-            yoVariableServer.update(TimeTools.secondsToNanoSeconds(serverTime));
+            serverTime += Conversions.milliSecondsToSeconds(updatePeriodMilliseconds);
+            yoVariableServer.update(Conversions.secondsToNanoSeconds(serverTime));
          }
       };
    }
@@ -352,7 +352,7 @@ public abstract class ToolboxModule
             {
                getToolboxController().update();
                controllerNetworkSubscriber.run();
-               yoTime.add(TimeTools.milliSecondsToSeconds(updatePeriodMilliseconds));
+               yoTime.add(Conversions.milliSecondsToSeconds(updatePeriodMilliseconds));
 
                if (receivedInput.getAndSet(false))
                   timeOfLastInput.set(yoTime.getDoubleValue());

@@ -50,11 +50,6 @@ public class DebugNameSpaces
 
    private class DebugNameSpacesRobot extends Robot
    {
-      /**
-       *
-       */
-      private static final long serialVersionUID = 1728854630626443794L;
-
       @SuppressWarnings("unused")
       private final DoubleYoVariable variable1;
 
@@ -92,24 +87,29 @@ public class DebugNameSpaces
       {
       }
 
+      @Override
       public void doControl()
       {
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
       }
 
+      @Override
       public String getName()
       {
          return "debugNameSpacesController";
       }
       
+      @Override
       public void initialize()
       {      
       }
 
+      @Override
       public String getDescription()
       {
          return getName();

@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.humanoidRobotics.model.IntermediateDesiredJointDataHolder;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -18,7 +17,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 public class ControllerDataForEstimatorHolder
 {
    // Do not use FramePoint here, as HumanoidReferenceFrames are not shared between controller/estimator
-   private final Map<String, Point2d> centerOfPressure = new HashMap<String, Point2d>();
+   private final Map<String, Point2D> centerOfPressure = new HashMap<String, Point2D>();
    private AtomicReference<RobotMotionStatus> robotMotionStatus = new AtomicReference<RobotMotionStatus>(null);
 
    private final List<RigidBody> controllerFeet;
@@ -50,7 +49,7 @@ public class ControllerDataForEstimatorHolder
       for (int i = 0; i < controllerFeet.size(); i++)
       {
          RigidBody foot = controllerFeet.get(i);
-         centerOfPressure.put(foot.getName(), new Point2d());
+         centerOfPressure.put(foot.getName(), new Point2D());
       }
    }
 

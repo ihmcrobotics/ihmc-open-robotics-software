@@ -1,23 +1,24 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
-import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand.BodyWeights;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
@@ -59,6 +60,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private ChestTrajectoryMessage chestTrajectoryMessage;
    private PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage;
    private SideDependentList<HandTrajectoryMessage> handTrajectoryMessage = new SideDependentList<>();
+   private TrackingWeightsMessage trackingWeightsMessage;
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(40);
    private KinematicsToolboxOutputStatus solutionSentToController = null;
@@ -229,6 +231,18 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
       organizeDataInSelectionMatrix(selectionMatrix, data);
    }
+   
+   public void setBodyWeights(BodyWeights bodyWeights)
+   {
+      if(trackingWeightsMessage == null)
+      {
+         trackingWeightsMessage = new TrackingWeightsMessage(bodyWeights);
+      }
+      else
+      {
+      trackingWeightsMessage.setTrackingWeightsMessage(bodyWeights);
+      }
+   }
 
    public double getSolutionQuality()
    {
@@ -261,8 +275,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          }
          else
          {
-            Point3d desiredHandPosition = new Point3d();
-            Quat4d desiredHandOrientation = new Quat4d();
+            Point3D desiredHandPosition = new Point3D();
+            Quaternion desiredHandOrientation = new Quaternion();
             yoDesiredHandPosition.get(desiredHandPosition);
             yoDesiredHandOrientation.get(desiredHandOrientation);
             HandTrajectoryMessage temporaryHandTrajectoryMessage = new HandTrajectoryMessage(robotSide, 0.0, desiredHandPosition, desiredHandOrientation);
@@ -277,7 +291,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       else
       {
          YoFrameQuaternion yoDesiredChestQuaternion = yoDesiredChestOrientation;
-         Quat4d desiredChestOrientation = new Quat4d();
+         Quaternion desiredChestOrientation = new Quaternion();
          yoDesiredChestQuaternion.get(desiredChestOrientation);
          chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
       }
@@ -289,9 +303,15 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       else
       {
          YoFrameQuaternion yoDesiredPelvisQuaternion = yoDesiredPelvisOrientation;
-         Quat4d desiredPelvisOrientation = new Quat4d();
+         Quaternion desiredPelvisOrientation = new Quaternion();
          yoDesiredPelvisQuaternion.get(desiredPelvisOrientation);
          pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredPelvisOrientation);
+      }
+      
+      
+      if (trackingWeightsMessage == null)
+      {
+         trackingWeightsMessage = new TrackingWeightsMessage(BodyWeights.STANDARD);
       }
    }
 
@@ -323,6 +343,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(pelvisOrientationTrajectoryMessage);
          }
+         
+         if (trackingWeightsMessage != null)
+         {
+            trackingWeightsMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+            sendPacket(trackingWeightsMessage);
+         }
+         
       }
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
@@ -394,6 +421,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       solutionSentToController = null;
       chestTrajectoryMessage = null;
       pelvisOrientationTrajectoryMessage = null;
+      trackingWeightsMessage = null;
 
       for (RobotSide robotSide : RobotSide.values)
       {

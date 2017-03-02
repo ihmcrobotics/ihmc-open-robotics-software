@@ -1,9 +1,8 @@
 package us.ihmc.exampleSimulations.collisionExample;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -28,13 +27,13 @@ public class CollisionExampleRobot extends Robot
       super("CollisionExample");
       this.setGravity(0.0, 0.0, 0.0);
 
-      FloatingJoint floatingJoint1 = new FloatingJoint("ball1", "ball1", new Vector3d(0.0, 0.0, 0.0), this);
+      FloatingJoint floatingJoint1 = new FloatingJoint("ball1", "ball1", new Vector3D(0.0, 0.0, 0.0), this);
       Link ball1 = ball1();
       floatingJoint1.setLink(ball1);
 
       this.addRootJoint(floatingJoint1);
 
-      FloatingJoint floatingJoint2 = new FloatingJoint("ball2", "ball2", new Vector3d(0.0, 0.0, 0.0), this);
+      FloatingJoint floatingJoint2 = new FloatingJoint("ball2", "ball2", new Vector3D(0.0, 0.0, 0.0), this);
       Link ball2 = ball2();
       floatingJoint2.setLink(ball2);
 

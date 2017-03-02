@@ -15,7 +15,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
    private Simulation simulation;
 
    private String[] inputStateVariableNames, outputStateVariableNames;
-   private YoVariable[] inputStateVariables, outputStateVariables;
+   private YoVariable<?>[] inputStateVariables, outputStateVariables;
 
    private SimulationConstructor constructor;
    private boolean isSimulationDone;
@@ -37,6 +37,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
    }
 
 
+   @Override
    public void createSimulation(String[] structuralParameterNames, double[] structuralParameterValues)
    {
       System.out.println("In Create Simulation");
@@ -67,6 +68,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
       }
    }
 
+   @Override
    public void destroySimulation()
    {
       System.out.println("Destroying Simulation!");
@@ -96,6 +98,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
 */
 
 
+   @Override
    public void setSimulationState(Object state)
    {
       if (inputStateVariables == null)
@@ -111,7 +114,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
 
       for (int i = 0; i < inputStateVariables.length; i++)
       {
-         YoVariable var = inputStateVariables[i];
+         YoVariable<?> var = inputStateVariables[i];
          if (var != null)
          {
             var.setValueFromDouble(inputStateVals[i]);
@@ -126,7 +129,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
    {
       for (int i = 0; i < outputStateVariables.length; i++)
       {
-         YoVariable var = outputStateVariables[i];
+         YoVariable<?> var = outputStateVariables[i];
          if (var != null)
          {
             System.out.println(var.getName() + ": " + var.getValueAsDouble());
@@ -134,6 +137,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
       }
    }
 
+   @Override
    public void startSimulation()
    {
       this.isSimulationDone = false;
@@ -143,6 +147,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
 
       Thread anim = new Thread("Simulation Anim")
       {
+         @Override
          public void run()    // throws Exception
          {
             try
@@ -172,11 +177,13 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
       System.out.println("That Sim is now running on a new thread.");
    }
 
+   @Override
    public boolean isSimulationDone()
    {
       return isSimulationDone;
    }
 
+   @Override
    public Object getSimulationState()
    {
 //    System.out.println("Getting Simulation State!"); System.out.flush();
@@ -191,7 +198,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
 
       for (int i = 0; i < ret.length; i++)
       {
-         YoVariable var = outputStateVariables[i];
+         YoVariable<?> var = outputStateVariables[i];
          if (var != null)
             ret[i] = outputStateVariables[i].getValueAsDouble();
          else
@@ -201,11 +208,13 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
       return ret;
    }
 
+   @Override
    public Object getSimulationData()
    {
       return simulation.getDataBuffer();
    }
 
+   @Override
    public void simulationDone()
    {
       System.out.println("Simulation Done!!!");
@@ -216,6 +225,7 @@ public class DispatchedSimulationDescription implements RemoteSimulationDescript
    }
 
 
+   @Override
    public void simulationDoneWithException(Throwable throwable)
    {
       System.out.println("Simulation Done with Exception!!!");

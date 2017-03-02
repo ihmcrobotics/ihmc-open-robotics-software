@@ -5,9 +5,9 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.DivergentComponentOfMotionEstimator;
 import us.ihmc.quadrupedRobotics.controller.force.toolbox.LinearInvertedPendulumModel;
 import us.ihmc.quadrupedRobotics.planning.*;

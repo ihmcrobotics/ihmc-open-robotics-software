@@ -1,15 +1,15 @@
 package us.ihmc.atlas.sensors;
 
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.collisions.SDFCollisionBoxProvider;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AtlasCollisionBoxProvider extends SDFCollisionBoxProvider

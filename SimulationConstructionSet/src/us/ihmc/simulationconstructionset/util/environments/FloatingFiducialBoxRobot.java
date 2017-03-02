@@ -1,11 +1,10 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
@@ -18,7 +17,7 @@ public class FloatingFiducialBoxRobot extends Robot
    {
       super("FloatingFiducialBoxRobot");
 
-      qrCodeJoint = new FloatingJoint("qrCode", "qrCode", new Vector3d(), this);
+      qrCodeJoint = new FloatingJoint("qrCode", "qrCode", new Vector3D(), this);
       Link qrCodeLink = new Link("qrCode");
       qrCodeLink.setMassAndRadiiOfGyration(1.0, 0.1, 0.1, 0.1);
       Graphics3DObject qrCodeLinkGraphics = new Graphics3DObject();
@@ -38,7 +37,7 @@ public class FloatingFiducialBoxRobot extends Robot
       setGravity(0.0);
    }
 
-   public void setPosition(Tuple3d position)
+   public void setPosition(Tuple3DBasics position)
    {
       qrCodeJoint.setPosition(position);
    }
@@ -53,12 +52,12 @@ public class FloatingFiducialBoxRobot extends Robot
       qrCodeJoint.setYawPitchRoll(yaw, pitch, roll);
    }
 
-   public void setAngularVelocity(Vector3d angularVelocityInBody)
+   public void setAngularVelocity(Vector3D angularVelocityInBody)
    {
       qrCodeJoint.setAngularVelocityInBody(angularVelocityInBody);
    }
 
-   public void setLinearVelocity(Vector3d linearVelocityInWorld)
+   public void setLinearVelocity(Vector3D linearVelocityInWorld)
    {
       qrCodeJoint.setVelocity(linearVelocityInWorld);
    }

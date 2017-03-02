@@ -4,21 +4,22 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 import com.thoughtworks.xstream.XStream;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class ScriptFileSaver
 {
    private final FileWriter fileWriter;
    private final ObjectOutputStream outputStream;
 
-   public ScriptFileSaver(String filename, boolean overwriteExistingScript) throws IOException
+   public ScriptFileSaver(Path scriptFilePath, boolean overwriteExistingScript) throws IOException
    {
-      this(new File(filename), overwriteExistingScript);
+      this(scriptFilePath.toFile(), overwriteExistingScript);
    }
    
    public ScriptFileSaver(File file, boolean overwriteExistingScript) throws IOException
@@ -81,5 +82,4 @@ public class ScriptFileSaver
          recordObject(scriptObject.getTimeStamp(), scriptObject.getScriptObject());
       }
    }
-
 }

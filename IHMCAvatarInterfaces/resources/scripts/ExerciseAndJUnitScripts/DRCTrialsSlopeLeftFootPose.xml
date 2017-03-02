@@ -18,7 +18,7 @@
           <x>0.0033380751509319547</x>
           <y>0.0060011596128933505</y>
           <z>0.0035528842929810705</z>
-          <w>0.9999701097286798</w>
+          <s>0.9999701097286798</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -37,7 +37,7 @@
           <x>-1.1651165434174243E-4</x>
           <y>0.0015395393915390602</y>
           <z>0.0035742441276513303</z>
-          <w>0.9999924204824816</w>
+          <s>0.9999924204824816</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -56,7 +56,7 @@
           <x>0.0025136373658113335</x>
           <y>-4.1334771937638414E-4</y>
           <z>0.003575562449809849</z>
-          <w>0.9999903630155761</w>
+          <s>0.9999903630155761</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -90,7 +90,7 @@
           <x>0.025427661638809794</x>
           <y>-0.026269017796840412</y>
           <z>-0.03314048200832464</z>
-          <w>0.998781798582567</w>
+          <s>0.998781798582567</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -109,7 +109,7 @@
           <x>0.002001072509080682</x>
           <y>-0.03457796465628506</y>
           <z>-0.0419426752996716</z>
-          <w>0.9985194900740538</w>
+          <s>0.9985194900740538</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -128,7 +128,7 @@
           <x>0.054249338760572426</x>
           <y>-0.15664097158605744</y>
           <z>-0.03194261322336017</z>
-          <w>0.9856471400684321</w>
+          <s>0.9856471400684321</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -147,7 +147,7 @@
           <x>-0.012298185810682693</x>
           <y>-0.14433945567362388</y>
           <z>-0.042495059041586854</z>
-          <w>0.9885388440110282</w>
+          <s>0.9885388440110282</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -166,7 +166,7 @@
           <x>0.005451968813995574</x>
           <y>-0.12385807730221088</y>
           <z>-0.040391385614190436</z>
-          <w>0.9914625503221071</w>
+          <s>0.9914625503221071</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -185,7 +185,7 @@
           <x>-0.0018950853997859723</x>
           <y>-0.12854159942701113</y>
           <z>-0.041234859064142614</z>
-          <w>0.9908446660632703</w>
+          <s>0.9908446660632703</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -219,7 +219,7 @@
           <x>-0.002536873056239694</x>
           <y>-0.1283752583645514</y>
           <z>0.013809198431849606</z>
-          <w>0.9916262720166308</w>
+          <s>0.9916262720166308</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -238,7 +238,7 @@
           <x>0.017451017801187206</x>
           <y>0.12049555722275644</y>
           <z>0.04585244712748365</z>
-          <w>0.9915007996767836</w>
+          <s>0.9915007996767836</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -257,7 +257,7 @@
           <x>0.012519722504541865</x>
           <y>0.13724016152471977</y>
           <z>0.04591007410758</z>
-          <w>0.9893940871606797</w>
+          <s>0.9893940871606797</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -276,7 +276,7 @@
           <x>0.00977409944370276</x>
           <y>0.14205428088971064</y>
           <z>0.04613860215464631</z>
-          <w>0.9887346851669497</w>
+          <s>0.9887346851669497</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -295,7 +295,7 @@
           <x>0.005064921099470477</x>
           <y>0.1453070660929657</y>
           <z>0.046722280630632426</z>
-          <w>0.9882698172110606</w>
+          <s>0.9882698172110606</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -329,7 +329,7 @@
           <x>-0.03996137793337269</x>
           <y>0.16362751490552138</y>
           <z>0.0010410711145800151</z>
-          <w>0.9857119461640119</w>
+          <s>0.9857119461640119</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -348,7 +348,7 @@
           <x>0.009031237629051279</x>
           <y>0.00978788936302821</y>
           <z>-0.005867111523041889</z>
-          <w>0.9998940998781226</w>
+          <s>0.9998940998781226</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -367,7 +367,7 @@
           <x>-0.005798159674052659</x>
           <y>-0.0012900691047702047</y>
           <z>-0.005783730336863959</z>
-          <w>0.9999656321741711</w>
+          <s>0.9999656321741711</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -386,7 +386,7 @@
           <x>0.004613736234819086</x>
           <y>0.010144442876422046</y>
           <z>-0.005825354247955351</z>
-          <w>0.999920931356359</w>
+          <s>0.999920931356359</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
@@ -405,7 +405,7 @@
           <x>5.09622949998805E-4</x>
           <y>0.010161212697416818</y>
           <z>-0.00578366401508213</z>
-          <w>0.999931517290823</w>
+          <s>0.999931517290823</s>
         </orientation>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>

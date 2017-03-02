@@ -1,18 +1,19 @@
 
 package us.ihmc.robotics.referenceFrames;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
 import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Point2d;
-import java.util.Random;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Pose2dReferenceFrameTest
 {
@@ -107,7 +108,7 @@ public class Pose2dReferenceFrameTest
       
       Pose2dReferenceFrame[] referenceFrames = new Pose2dReferenceFrame[]{poseFrame0, poseFrame00, poseFrame01, poseFrame010, poseFrame000, poseFrame001, poseFrame1, poseFrame10, poseFrame100, poseFrame101};
       
-      Point2d position = new Point2d(1.0, 2.2);
+      Point2D position = new Point2D(1.0, 2.2);
       FramePoint2d framePoint = new FramePoint2d(poseFrame010, position);
       
       updateAllFrames(referenceFrames);
@@ -144,7 +145,7 @@ public class Pose2dReferenceFrameTest
    private void doRandomPoseChangeAndUpdate(Pose2dReferenceFrame poseReferenceFrame, Random random)
    {
 
-      Point2d randomPoint2d = RandomTools.generateRandomPoint2d(random, 1234, 1234);
+      Point2D randomPoint2d = RandomGeometry.nextPoint2D(random, 1234, 1234);
       FramePose2d framePose = new FramePose2d(poseReferenceFrame.getParent(), randomPoint2d,random.nextGaussian());
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }

@@ -2,10 +2,9 @@ package optiTrack;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.vicon.QuaternionPose;
 
 public class MocapRigidBody extends QuaternionPose
@@ -14,13 +13,13 @@ public class MocapRigidBody extends QuaternionPose
 
    private ArrayList<MocapMarker> listOfAssociatedMarkers;
 
-   public MocapRigidBody(int id, Vector3d position, Quat4d orientation, ArrayList<MocapMarker> listOfAssociatedMarkers, boolean isTracked)
+   public MocapRigidBody(int id, Vector3D position, Quaternion orientation, ArrayList<MocapMarker> listOfAssociatedMarkers, boolean isTracked)
    {
       this.id = id;
       this.xPosition = (float) position.getX();
       this.yPosition = (float) position.getY();
       this.zPosition = (float) position.getZ();
-      this.qw = (float) orientation.getW();
+      this.qw = (float) orientation.getS();
       this.qx = (float) orientation.getX();
       this.qy = (float) orientation.getY();
       this.qz = (float) orientation.getZ();
@@ -32,6 +31,16 @@ public class MocapRigidBody extends QuaternionPose
    public int getId()
    {
       return id;
+   }
+
+   public Vector3D getPosition()
+   {
+      return new Vector3D(xPosition, yPosition, zPosition);
+   }
+
+   public Quaternion getOrientation()
+   {
+      return new Quaternion(qx, qy, qz, qw);
    }
 
    public ArrayList<MocapMarker> getListOfAssociatedMarkers()
@@ -51,18 +60,20 @@ public class MocapRigidBody extends QuaternionPose
       for (int i = 0; i < listOfAssociatedMarkers.size(); i++)
       {
          message = message + "\nMarker " + i + " is at: " + listOfAssociatedMarkers.get(i).getPosition() + "  and has size: "
-                   + listOfAssociatedMarkers.get(i).getMarkerSize() + "m";
+               + listOfAssociatedMarkers.get(i).getMarkerSize() + "m";
       }
 
       return message;
    }
-   
-   public void getPose(RigidBodyTransform pose)
+
+   private final Quaternion tempQuaternion = new Quaternion();
+
+   public void packPose(RigidBodyTransform pose)
    {
-      pose.setRotationWithQuaternion(qx, qy, qz, qw);
+      tempQuaternion.set(qx, qy, qz, qw);
+      pose.setRotation(tempQuaternion);
       pose.setTranslation(xPosition, yPosition, zPosition);
    }
 }
-
 
 //~ Formatted by Jindent --- http://www.jindent.com

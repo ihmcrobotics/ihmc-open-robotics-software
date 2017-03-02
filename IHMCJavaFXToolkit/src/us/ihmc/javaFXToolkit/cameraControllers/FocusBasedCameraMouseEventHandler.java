@@ -1,22 +1,14 @@
 package us.ihmc.javaFXToolkit.cameraControllers;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Point3D;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SubScene;
@@ -30,57 +22,72 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Affine;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.GeometryTools;
 
+/**
+ * This class provides a simple controller for a JavaFX {@link PerspectiveCamera}.
+ * The control is achieved via event handling by adding this controller as an {@link EventHandler} to the scene or sub-scene the camera is attached to.
+ * <p>
+ * Behavior of this camera controller:
+ * <li> The camera is always pointing toward a focus point.
+ * <li> The focus point can be translated via keyboard bindings, or instantly moved with a mouse shortcut only if {@link #setupRayBasedFocusTranslation(Predicate)} or {@link #enableShiftClickFocusTranslation()} has been called.
+ * <li> The camera zoom can be changed vi the mouse wheel.
+ * <li> Using the mouse, the camera can be rotated around the focus point.
+ * @author Sylvain Bertrand
+ */
 public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
 {
    private static final double DEFAULT_DISTANCE_FROM_FOCUS_POINT = 10.0;
 
-   private Point3D focusPoint = new Point3D(0.0, 0.0, 0.0);
    private final Sphere focusPointViz;
 
-   private final Translate focusPointTranslation = new Translate();
-   private final Affine cameraOrientation = new Affine();
+   private final Translate focusPointTranslation;
+   private final Affine cameraOrientation;
    private final Translate offsetFromFocusPoint = new Translate(0.0, 0.0, -DEFAULT_DISTANCE_FROM_FOCUS_POINT);
 
-   private double focusPointSlowModifier = 0.005;
-   private double focusPointFastModifier = 2.0 * focusPointSlowModifier;
+   private final CameraZoomCalculator zoomCalculator = new CameraZoomCalculator();
+   private final CameraRotationCalculator rotationCalculator;
+   private final CameraTranslationCalculator translationCalculator;
 
-   private final Point2d oldMouseLocation = new Point2d();
-   private final Point2d newMouseLocation = new Point2d();
-   private final Point2d centerLocation = new Point2d();
-
-   private double rotateSlowModifier = 150.0;
-   private double rotateFastModifier = 0.5 * rotateSlowModifier;
-   private double rollModifierScaleFactor = 30.0;
-
-   private final PerspectiveCamera camera;
-   private final Vector3d up;
-
-   private final ReadOnlyDoubleProperty sceneWidthProperty;
-   private final ReadOnlyDoubleProperty sceneHeightProperty;
-
-   private boolean keepCameraLeveled = true;
-   private boolean performHorizontalTranslation = true;
-
-   private double minAngleBetweenCameraZAxisAndUp = 0.2;
+   private final EventHandler<ScrollEvent> zoomEventHandler = zoomCalculator.createScrollEventHandler();
+   private final EventHandler<MouseEvent> rotationEventHandler;
+   private final EventHandler<KeyEvent> translationEventHandler;
 
    public FocusBasedCameraMouseEventHandler(ReadOnlyDoubleProperty sceneWidthProperty, ReadOnlyDoubleProperty sceneHeightProperty, PerspectiveCamera camera,
-         Vector3d up)
+                                            Vector3D up, Vector3D forward)
    {
-      this.sceneWidthProperty = sceneWidthProperty;
-      this.sceneHeightProperty = sceneHeightProperty;
-      this.camera = camera;
-      this.up = new Vector3d(up);
-      this.up.normalize();
-      camera.getTransforms().addAll(focusPointTranslation, cameraOrientation, offsetFromFocusPoint);
+      Vector3D left = new Vector3D();
+      left.cross(up, forward);
+      if (!MathTools.epsilonEquals(left.length(), 1.0, 1.0 - 5))
+         throw new RuntimeException("The vectors up and forward must be orthogonal. Received: up = " + up + ", forward = " + forward);
+
+      zoomCalculator.zoomProperty().bindBidirectional(offsetFromFocusPoint.zProperty());
+      zoomCalculator.setInvertZoomDirection(true);
+      zoomCalculator.setMinZoom(-0.90 * camera.getFarClip());
+      zoomCalculator.setMaxZoom(-1.10 * camera.getNearClip());
+
+      rotationCalculator = new CameraRotationCalculator(up, forward);
+      rotationCalculator.setFastModifierPredicate(event -> event.isShiftDown());
+      cameraOrientation = rotationCalculator.getRotation();
+      rotationEventHandler = rotationCalculator.createMouseEventHandler(sceneWidthProperty, sceneHeightProperty);
+
+      translationCalculator = new CameraTranslationCalculator(up);
+      translationCalculator.setFastModifierPredicate(event -> event.isShiftDown());
+      translationCalculator.setCameraOrientation(cameraOrientation);
+      translationCalculator.setZoom(zoomCalculator.zoomProperty());
+      focusPointTranslation = translationCalculator.getTranslation();
+      translationEventHandler = translationCalculator.createKeyEventHandler();
 
       changeCameraPosition(-2.0, 0.7, 1.0);
+
+      camera.getTransforms().addAll(focusPointTranslation, cameraOrientation, offsetFromFocusPoint);
+
+      Point3D cameraPosition = new Point3D();
+      JavaFXTools.applyTranform(camera.getLocalToSceneTransform(), cameraPosition);
 
       focusPointViz = new Sphere(0.01);
       PhongMaterial material = new PhongMaterial();
@@ -94,238 +101,37 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
          @Override
          public void handle(long now)
          {
-            shiftCameraFocusPoint();
             double sphereRadius = 0.0025 * Math.abs(offsetFromFocusPoint.getTz());
             focusPointViz.setRadius(sphereRadius);
          }
       }.start();
    }
 
-   public void setKeepCameraLeveled(boolean keepCameraLeveled)
-   {
-      this.keepCameraLeveled = keepCameraLeveled;
-   }
-
    public void changeCameraPosition(double x, double y, double z)
    {
-      Point3d desiredCameraPosition = new Point3d(x, y, z);
-      Point3d desiredFocusPoint = new Point3d(focusPoint.getX(), focusPoint.getY(), focusPoint.getZ());
+      Point3D desiredCameraPosition = new Point3D(x, y, z);
+      Point3D desiredFocusPoint = new Point3D(focusPointTranslation.getX(), focusPointTranslation.getY(), focusPointTranslation.getZ());
 
       double distanceFromFocusPoint = desiredCameraPosition.distance(desiredFocusPoint);
       offsetFromFocusPoint.setZ(-distanceFromFocusPoint);
-
-      Vector3d zAxis = new Vector3d();
-      zAxis.sub(desiredFocusPoint, desiredCameraPosition);
-      zAxis.normalize();
-
-      Vector3d xAxis = new Vector3d();
-
-      Vector3d down = new Vector3d(up);
-      down.negate();
-
-      xAxis.cross(down, zAxis);
-      xAxis.normalize();
-
-      Vector3d yAxis = new Vector3d();
-      yAxis.cross(zAxis, xAxis);
-
-      Matrix3d rotation = new Matrix3d();
-      rotation.setColumn(0, xAxis);
-      rotation.setColumn(1, yAxis);
-      rotation.setColumn(2, zAxis);
-      JavaFXTools.convertRotationMatrixToAffine(rotation, cameraOrientation);
+      rotationCalculator.setRotationFromCameraAndFocusPositions(desiredCameraPosition, desiredFocusPoint, 0.0);
    }
 
    @Override
    public void handle(Event event)
    {
       if (event instanceof ScrollEvent)
-         handleScrollEvent((ScrollEvent) event);
+         zoomEventHandler.handle((ScrollEvent) event);
       if (event instanceof KeyEvent)
-         handleKeyEvent((KeyEvent) event);
+         translationEventHandler.handle((KeyEvent) event);
+
       if (event instanceof MouseEvent)
-         handleMouseEvent((MouseEvent) event);
-   }
-
-   private void handleScrollEvent(ScrollEvent event)
-   {
-      double deltaZoom = event.getDeltaY();
-
-      double newOffset = offsetFromFocusPoint.getTz() + Math.abs(offsetFromFocusPoint.getTz()) / 10.0 * Math.signum(deltaZoom);
-      newOffset = MathTools.clipToMinMax(newOffset, -0.90 * camera.getFarClip(), -1.10 * camera.getNearClip());
-      offsetFromFocusPoint.setZ(newOffset);
-   }
-
-   private void handleMouseEvent(MouseEvent event)
-   {
-      if (event.getButton() != MouseButton.PRIMARY)
-         return;
-
-      if (rayBasedFocusTranslation != null)
-         rayBasedFocusTranslation.handle(event);
-
-      if (event.isStillSincePress())
-         return;
-
-      if (event.getEventType() == MouseEvent.MOUSE_PRESSED || event.getEventType() == MouseEvent.MOUSE_DRAGGED)
       {
-         // Acquire the new mouse coordinates from the recent event
-         centerLocation.set(sceneWidthProperty.doubleValue() / 2.0, sceneHeightProperty.doubleValue() / 2.0);
-         newMouseLocation.set(event.getSceneX(), event.getSceneY());
+         if (rayBasedFocusTranslation != null)
+            rayBasedFocusTranslation.handle((MouseEvent) event);
 
-         if (event.getEventType() == MouseEvent.MOUSE_DRAGGED)
-         {
-            // Calculate the rotation change of the camera pitch
-            double modifier = event.isShiftDown() ? rotateFastModifier : rotateSlowModifier;
-
-            double angleShift = newMouseLocation.distance(oldMouseLocation) / modifier;
-            if (Math.abs(angleShift) < 1.0e-5)
-               return;
-
-            Vector2d dragDirection = new Vector2d();
-            dragDirection.sub(newMouseLocation, oldMouseLocation);
-            double dragMagnitude = dragDirection.length();
-            if (dragMagnitude < 1.0e-3)
-               return;
-            dragDirection.scale(1.0 / dragMagnitude);
-
-            Vector3d deltaAxis = new Vector3d();
-            deltaAxis.set(-dragDirection.getY(), dragDirection.getX(), 0.0);
-
-            AxisAngle4d deltaAxisAngle = new AxisAngle4d(deltaAxis, angleShift);
-            Affine deltaOrientation = JavaFXTools.createAffineFromAxisAngle(deltaAxisAngle);
-            cameraOrientation.append(deltaOrientation);
-
-            if (keepCameraLeveled)
-            {
-               Vector3d zAxis = new Vector3d(cameraOrientation.getMxz(), cameraOrientation.getMyz(), cameraOrientation.getMzz());
-               double angleWithUp = zAxis.angle(up);
-
-               if (angleWithUp > Math.PI - minAngleBetweenCameraZAxisAndUp)
-               {
-                  double correctionAngle = Math.PI - minAngleBetweenCameraZAxisAndUp - angleWithUp;
-                  Vector3d correctionAxis = new Vector3d();
-                  correctionAxis.cross(up, zAxis);
-                  correctionAxis.normalize();
-                  deltaAxisAngle = new AxisAngle4d(correctionAxis, correctionAngle);
-                  deltaOrientation = JavaFXTools.createAffineFromAxisAngle(deltaAxisAngle);
-                  cameraOrientation.prepend(deltaOrientation);
-               }
-               else if (angleWithUp < minAngleBetweenCameraZAxisAndUp)
-               {
-                  double correctionAngle = minAngleBetweenCameraZAxisAndUp - angleWithUp;
-                  Vector3d correctionAxis = new Vector3d();
-                  correctionAxis.cross(up, zAxis);
-                  correctionAxis.normalize();
-                  deltaAxisAngle = new AxisAngle4d(correctionAxis, correctionAngle);
-                  deltaOrientation = JavaFXTools.createAffineFromAxisAngle(deltaAxisAngle);
-                  cameraOrientation.prepend(deltaOrientation);
-               }
-
-               zAxis = new Vector3d(cameraOrientation.getMxz(), cameraOrientation.getMyz(), cameraOrientation.getMzz());
-
-               Vector3d down = new Vector3d(up);
-               down.negate();
-               Vector3d xAxisLeveled = new Vector3d();
-               xAxisLeveled.cross(down, zAxis);
-               xAxisLeveled.normalize();
-               Vector3d yAxisLeveled = new Vector3d();
-               yAxisLeveled.cross(zAxis, xAxisLeveled);
-
-               Matrix3d rotation = new Matrix3d();
-               rotation.setColumn(0, xAxisLeveled);
-               rotation.setColumn(1, yAxisLeveled);
-               rotation.setColumn(2, zAxis);
-               JavaFXTools.convertRotationMatrixToAffine(rotation, cameraOrientation);
-            }
-            else
-            {
-               Vector2d centerToMouseLocation = new Vector2d();
-               centerToMouseLocation.sub(newMouseLocation, centerLocation);
-               double roll = 0.0;
-               roll = GeometryTools.cross(dragDirection, centerToMouseLocation) / modifier / rollModifierScaleFactor;
-               Rotate rollRotate = new Rotate(Math.toDegrees(roll), Rotate.Z_AXIS);
-               cameraOrientation.append(rollRotate);
-            }
-
-         }
-
-         oldMouseLocation.set(newMouseLocation);
+         rotationEventHandler.handle((MouseEvent) event);
       }
-   }
-
-   private final AtomicBoolean isShiftDown = new AtomicBoolean(false);
-   private final Set<KeyCode> keyBeingPressed = new HashSet<>();
-
-   private void handleKeyEvent(KeyEvent event)
-   {
-      KeyCode keyCode = event.getCode();
-      if (event.getEventType() == KeyEvent.KEY_PRESSED)
-         keyBeingPressed.add(keyCode);
-      else if (event.getEventType() == KeyEvent.KEY_RELEASED)
-         keyBeingPressed.remove(keyCode);
-
-      isShiftDown.set(event.isShiftDown());
-   }
-
-   private void shiftCameraFocusPoint()
-   {
-      double change = focusPointSlowModifier;
-      //Add shift modifier to simulate running speed
-      if (isShiftDown.get())
-         change = focusPointFastModifier;
-
-      change *= Math.pow(Math.abs(offsetFromFocusPoint.getTz()), 1.5);
-      change = Math.min(change, 0.1);
-
-      Vector3d focusPointShift = new Vector3d();
-      
-      for (KeyCode keyDown : keyBeingPressed)
-      {
-         if (keyDown == KeyCode.W)
-            focusPointShift.setZ(focusPointShift.getZ() - change);
-         if (keyDown == KeyCode.S)
-            focusPointShift.setZ(focusPointShift.getZ() + change);
-         
-         if (keyDown == KeyCode.D)
-            focusPointShift.setX(focusPointShift.getX() - change);
-         if (keyDown == KeyCode.A)
-            focusPointShift.setX(focusPointShift.getX() + change);
-         
-         if (keyDown == KeyCode.Q)
-            focusPointShift.setY(focusPointShift.getY() + change);
-         if (keyDown == KeyCode.Z)
-            focusPointShift.setY(focusPointShift.getY() - change);
-      }
-
-      if (performHorizontalTranslation)
-      {
-         Vector3d cameraZAxis = new Vector3d(cameraOrientation.getMxz(), cameraOrientation.getMyz(), cameraOrientation.getMzz());
-         Vector3d down = new Vector3d(up);
-         down.negate();
-         Vector3d xAxisLeveled = new Vector3d();
-         xAxisLeveled.cross(down, cameraZAxis);
-         xAxisLeveled.normalize();
-         Vector3d yAxisLeveled = new Vector3d(down);
-         Vector3d zAxisLeveled = new Vector3d();
-         zAxisLeveled.cross(xAxisLeveled, yAxisLeveled);
-
-         Matrix3d rotation = new Matrix3d();
-         rotation.setColumn(0, xAxisLeveled);
-         rotation.setColumn(1, yAxisLeveled);
-         rotation.setColumn(2, zAxisLeveled);
-         rotation.transform(focusPointShift);
-      }
-      else
-      {
-         Transform localToParentTransform = camera.getLocalToParentTransform();
-         JavaFXTools.applyTranform(localToParentTransform, focusPointShift);
-      }
-
-      JavaFXTools.addEquals(focusPoint, focusPointShift);
-      focusPointTranslation.setX(focusPointTranslation.getX() - focusPointShift.getX());
-      focusPointTranslation.setY(focusPointTranslation.getY() - focusPointShift.getY());
-      focusPointTranslation.setZ(focusPointTranslation.getZ() - focusPointShift.getZ());
    }
 
    private EventHandler<MouseEvent> rayBasedFocusTranslation = null;
@@ -342,14 +148,17 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
          @Override
          public void handle(MouseEvent event)
          {
+            if (event.getButton() != MouseButton.PRIMARY)
+               return;
+
             if (condition.test(event) && event.isStillSincePress() && event.getEventType() == MouseEvent.MOUSE_CLICKED)
             {
                PickResult pickResult = event.getPickResult();
                Node intersectedNode = pickResult.getIntersectedNode();
                if (intersectedNode == null || intersectedNode instanceof SubScene)
                   return;
-               Point3D localPoint = pickResult.getIntersectedPoint();
-               Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
+               javafx.geometry.Point3D localPoint = pickResult.getIntersectedPoint();
+               javafx.geometry.Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
                focusPointTranslation.setX(scenePoint.getX());
                focusPointTranslation.setY(scenePoint.getY());
                focusPointTranslation.setZ(scenePoint.getZ());
@@ -366,5 +175,521 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
    public Translate getTranslate()
    {
       return focusPointTranslation;
+   }
+
+   //-----------------------------------------------------
+   // Zoom properties
+   //-----------------------------------------------------
+
+   /** See {@link CameraZoomCalculator#minZoomProperty()}. */
+   public final DoubleProperty minZoomProperty()
+   {
+      return zoomCalculator.minZoomProperty();
+   }
+
+   /** See {@link CameraZoomCalculator#getMinZoom()}. */
+   public final double getMinZoom()
+   {
+      return minZoomProperty().get();
+   }
+
+   /** See {@link CameraZoomCalculator#setMinZoom(double)}. */
+   public final void setMinZoom(final double minZoom)
+   {
+      minZoomProperty().set(minZoom);
+   }
+
+   /** See {@link CameraZoomCalculator#maxZoomProperty()}. */
+   public final DoubleProperty maxZoomProperty()
+   {
+      return zoomCalculator.maxZoomProperty();
+   }
+
+   /** See {@link CameraZoomCalculator#getMaxZoom()}. */
+   public final double getMaxZoom()
+   {
+      return maxZoomProperty().get();
+   }
+
+   /** See {@link CameraZoomCalculator#setMaxZoom(double)}. */
+   public final void setMaxZoom(final double maxZoom)
+   {
+      maxZoomProperty().set(maxZoom);
+   }
+
+   /** See {@link CameraZoomCalculator#zoomSpeedFactorProperty()}. */
+   public final DoubleProperty zoomSpeedFactorProperty()
+   {
+      return zoomCalculator.zoomSpeedFactorProperty();
+   }
+
+   /** See {@link CameraZoomCalculator#getZoomSpeedFactor()}. */
+   public final double getZoomSpeedFactor()
+   {
+      return zoomSpeedFactorProperty().get();
+   }
+
+   /** See {@link CameraZoomCalculator#setZoomSpeedFactor(double)}. */
+   public final void setZoomSpeedFactor(final double zoomSpeedFactor)
+   {
+      zoomSpeedFactorProperty().set(zoomSpeedFactor);
+   }
+
+   /** See {@link CameraZoomCalculator#invertZoomDirectionProperty()}. */
+   public final BooleanProperty invertZoomDirectionProperty()
+   {
+      return zoomCalculator.invertZoomDirectionProperty();
+   }
+
+   /** See {@link CameraZoomCalculator#isInvertZoomDirection()}. */
+   public final boolean isInvertZoomDirection()
+   {
+      return invertZoomDirectionProperty().get();
+   }
+
+   /** See {@link CameraZoomCalculator#setInvertZoomDirection(boolean)}. */
+   public final void setInvertZoomDirection(final boolean invertZoomDirection)
+   {
+      invertZoomDirectionProperty().set(invertZoomDirection);
+   }
+
+   //-----------------------------------------------------
+   // Rotation properties
+   //-----------------------------------------------------
+
+   /** See {@link CameraRotationCalculator#latitudeProperty()}. */
+   public final DoubleProperty latitudeProperty()
+   {
+      return rotationCalculator.latitudeProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getLatitude()}. */
+   public final double getLatitude()
+   {
+      return latitudeProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setLatitude(double)}. */
+   public final void setLatitude(final double latitude)
+   {
+      latitudeProperty().set(latitude);
+   }
+
+   /** See {@link CameraRotationCalculator#longitudeProperty()}. */
+   public final DoubleProperty longitudeProperty()
+   {
+      return rotationCalculator.longitudeProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getLongitude()}. */
+   public final double getLongitude()
+   {
+      return longitudeProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setLongitude(double)}. */
+   public final void setLongitude(final double longitude)
+   {
+      longitudeProperty().set(longitude);
+   }
+
+   /** See {@link CameraRotationCalculator#rollProperty()}. */
+   public final DoubleProperty rollProperty()
+   {
+      return rotationCalculator.rollProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getRoll()}. */
+   public final double getRoll()
+   {
+      return rollProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setRoll(double)}. */
+   public final void setRoll(final double roll)
+   {
+      rollProperty().set(roll);
+   }
+
+   /** See {@link CameraRotationCalculator#keepRotationLeveledProperty()}. */
+   public final BooleanProperty keepRotationLeveledProperty()
+   {
+      return rotationCalculator.keepRotationLeveledProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#isKeepRotationLeveled()}. */
+   public final boolean isKeepRotationLeveled()
+   {
+      return keepRotationLeveledProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setKeepRotationLeveled(boolean)}. */
+   public final void setKeepRotationLeveled(final boolean keepRotationLeveled)
+   {
+      keepRotationLeveledProperty().set(keepRotationLeveled);
+   }
+
+   /** See {@link CameraRotationCalculator#fastModifierPredicateProperty()}. */
+   public final ObjectProperty<Predicate<MouseEvent>> rotationFastModifierPredicateProperty()
+   {
+      return rotationCalculator.fastModifierPredicateProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getFastModifierPredicate()}. */
+   public final Predicate<MouseEvent> getRotationFastModifierPredicate()
+   {
+      return rotationFastModifierPredicateProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setFastModifierPredicate(Predicate)}. */
+   public final void setRotationFastModifierPredicate(final Predicate<MouseEvent> fastModifierPredicate)
+   {
+      rotationFastModifierPredicateProperty().set(fastModifierPredicate);
+   }
+
+   /** See {@link CameraRotationCalculator#slowModifierProperty()}. */
+   public final DoubleProperty rotationSlowModifierProperty()
+   {
+      return rotationCalculator.slowModifierProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getSlowModifier()}. */
+   public final double getRotationSlowModifier()
+   {
+      return rotationSlowModifierProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setSlowModifier(double)}. */
+   public final void setRotationSlowModifier(final double slowModifier)
+   {
+      rotationSlowModifierProperty().set(slowModifier);
+   }
+
+   /** See {@link CameraRotationCalculator#fastModifierProperty()}. */
+   public final DoubleProperty rotationFastModifierProperty()
+   {
+      return rotationCalculator.fastModifierProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getFastModifier()}. */
+   public final double getRotationFastModifier()
+   {
+      return rotationFastModifierProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setFastModifier(double)}. */
+   public final void setRotationFastModifier(final double fastModifier)
+   {
+      rotationFastModifierProperty().set(fastModifier);
+   }
+
+   /** See {@link CameraRotationCalculator#rollModifierProperty()}. */
+   public final DoubleProperty rollModifierProperty()
+   {
+      return rotationCalculator.rollModifierProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getRollModifier()}. */
+   public final double getRollModifier()
+   {
+      return rollModifierProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setRollModifier(double)}. */
+   public final void setRollModifier(final double rollModifier)
+   {
+      rollModifierProperty().set(rollModifier);
+   }
+
+   /** See {@link CameraRotationCalculator#rotationMouseButtonProperty()}. */
+   public final ObjectProperty<MouseButton> rotationMouseButtonProperty()
+   {
+      return rotationCalculator.rotationMouseButtonProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getRotationMouseButton()}. */
+   public final MouseButton getRotationMouseButton()
+   {
+      return rotationMouseButtonProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setRotationMouseButton(MouseButton)}. */
+   public final void setRotationMouseButton(final MouseButton rotationMouseButton)
+   {
+      rotationMouseButtonProperty().set(rotationMouseButton);
+   }
+
+   /** See {@link CameraRotationCalculator#restrictLatitudeProperty()}. */
+   public final BooleanProperty restrictLatitudeProperty()
+   {
+      return rotationCalculator.restrictLatitudeProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#isRestrictLatitude()}. */
+   public final boolean isRestrictLatitude()
+   {
+      return restrictLatitudeProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setRestrictLatitude(boolean)}. */
+   public final void setRestrictLatitude(final boolean restrictLatitude)
+   {
+      restrictLatitudeProperty().set(restrictLatitude);
+   }
+
+   /** See {@link CameraRotationCalculator#minLatitudeProperty()}. */
+   public final DoubleProperty minLatitudeProperty()
+   {
+      return rotationCalculator.minLatitudeProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getMinLatitude()}. */
+   public final double getMinLatitude()
+   {
+      return minLatitudeProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setMinLatitude(double)}. */
+   public final void setMinLatitude(final double minLatitude)
+   {
+      minLatitudeProperty().set(minLatitude);
+   }
+
+   /** See {@link CameraRotationCalculator#maxLatitudeProperty()}. */
+   public final DoubleProperty maxLatitudeProperty()
+   {
+      return rotationCalculator.maxLatitudeProperty();
+   }
+
+   /** See {@link CameraRotationCalculator#getMaxLatitude()}. */
+   public final double getMaxLatitude()
+   {
+      return maxLatitudeProperty().get();
+   }
+
+   /** See {@link CameraRotationCalculator#setMaxLatitude(double)}. */
+   public final void setMaxLatitude(final double maxLatitude)
+   {
+      maxLatitudeProperty().set(maxLatitude);
+   }
+
+   //-----------------------------------------------------
+   // Translation properties
+   //-----------------------------------------------------
+
+   /** See {@link CameraTranslationCalculator#maxLatitudeProperty()}. */
+   public final BooleanProperty keepTranslationLeveledProperty()
+   {
+      return translationCalculator.keepTranslationLeveledProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#isKeepTranslationLeveled()}. */
+   public final boolean isKeepTranslationLeveled()
+   {
+      return keepTranslationLeveledProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setKeepTranslationLeveled(boolean)}. */
+   public final void setKeepTranslationLeveled(final boolean keepTranslationLeveled)
+   {
+      keepTranslationLeveledProperty().set(keepTranslationLeveled);
+   }
+
+   /** See {@link CameraTranslationCalculator#fastModifierPredicateProperty()}. */
+   public final ObjectProperty<Predicate<KeyEvent>> translationFastModifierPredicateProperty()
+   {
+      return translationCalculator.fastModifierPredicateProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getFastModifierPredicate()}. */
+   public final Predicate<KeyEvent> getTranslationFastModifierPredicate()
+   {
+      return translationFastModifierPredicateProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setFastModifierPredicate(Predicate)}. */
+   public final void setTranslationFastModifierPredicate(final Predicate<KeyEvent> fastModifierPredicate)
+   {
+      translationFastModifierPredicateProperty().set(fastModifierPredicate);
+   }
+
+   /** See {@link CameraTranslationCalculator#slowModifierProperty()}. */
+   public final DoubleProperty translationSlowModifierProperty()
+   {
+      return translationCalculator.slowModifierProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getSlowModifier}. */
+   public final double getTranslationSlowModifier()
+   {
+      return translationSlowModifierProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setSlowModifier(double)}. */
+   public final void setTranslationSlowModifier(final double slowModifier)
+   {
+      translationSlowModifierProperty().set(slowModifier);
+   }
+
+   /** See {@link CameraTranslationCalculator#fastModifierProperty()}. */
+   public final DoubleProperty translationFastModifierProperty()
+   {
+      return translationCalculator.fastModifierProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getFastModifier()}. */
+   public final double getTranslationFastModifier()
+   {
+      return translationFastModifierProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setFastModifier(double)}. */
+   public final void setTranslationFastModifier(final double fastModifier)
+   {
+      translationFastModifierProperty().set(fastModifier);
+   }
+
+   /** See {@link CameraTranslationCalculator#minTranslationOffsetProperty()}. */
+   public final DoubleProperty minTranslationOffsetProperty()
+   {
+      return translationCalculator.minTranslationOffsetProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getMinTranslationOffset()}. */
+   public final double getMinTranslationOffset()
+   {
+      return minTranslationOffsetProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setMinTranslationOffset(double)}. */
+   public final void setMinTranslationOffset(final double minTranslationOffset)
+   {
+      minTranslationOffsetProperty().set(minTranslationOffset);
+   }
+
+   /** See {@link CameraTranslationCalculator#zoomToTranslationPowProperty()}. */
+   public final DoubleProperty zoomToTranslationPowProperty()
+   {
+      return translationCalculator.zoomToTranslationPowProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getZoomToTranslationPow()}. */
+   public final double getZoomToTranslationPow()
+   {
+      return zoomToTranslationPowProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setZoomToTranslationPow(double)}. */
+   public final void setZoomToTranslationPow(final double zoomToTranslationPow)
+   {
+      zoomToTranslationPowProperty().set(zoomToTranslationPow);
+   }
+
+   /** See {@link CameraTranslationCalculator#forwardKeyProperty()}. */
+   public final ObjectProperty<KeyCode> forwardKeyProperty()
+   {
+      return translationCalculator.forwardKeyProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getForwardKey()}. */
+   public final KeyCode getForwardKey()
+   {
+      return forwardKeyProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setForwardKey(KeyCode)}. */
+   public final void setForwardKey(final KeyCode forwardKey)
+   {
+      forwardKeyProperty().set(forwardKey);
+   }
+
+   /** See {@link CameraTranslationCalculator#backwardKeyProperty()}. */
+   public final ObjectProperty<KeyCode> backwardKeyProperty()
+   {
+      return translationCalculator.backwardKeyProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getBackwardKey()}. */
+   public final KeyCode getBackwardKey()
+   {
+      return backwardKeyProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setBackwardKey(KeyCode)}. */
+   public final void setBackwardKey(final KeyCode backwardKey)
+   {
+      backwardKeyProperty().set(backwardKey);
+   }
+
+   /** See {@link CameraTranslationCalculator#leftKeyProperty()}. */
+   public final ObjectProperty<KeyCode> leftKeyProperty()
+   {
+      return translationCalculator.leftKeyProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getLeftKey()}. */
+   public final KeyCode getLeftKey()
+   {
+      return leftKeyProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setLeftKey(KeyCode)}. */
+   public final void setLeftKey(final KeyCode leftKey)
+   {
+      leftKeyProperty().set(leftKey);
+   }
+
+   /** See {@link CameraTranslationCalculator#rightKeyProperty()}. */
+   public final ObjectProperty<KeyCode> rightKeyProperty()
+   {
+      return translationCalculator.rightKeyProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getRightKey()}. */
+   public final KeyCode getRightKey()
+   {
+      return rightKeyProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setRightKey(KeyCode)}. */
+   public final void setRightKey(final KeyCode rightKey)
+   {
+      rightKeyProperty().set(rightKey);
+   }
+
+   /** See {@link CameraTranslationCalculator#upKeyProperty()}. */
+   public final ObjectProperty<KeyCode> upKeyProperty()
+   {
+      return translationCalculator.upKeyProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getUpKey()}. */
+   public final KeyCode getUpKey()
+   {
+      return upKeyProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setUpKey(KeyCode)}. */
+   public final void setUpKey(final KeyCode upKey)
+   {
+      upKeyProperty().set(upKey);
+   }
+
+   /** See {@link CameraTranslationCalculator#downKeyProperty()}. */
+   public final ObjectProperty<KeyCode> downKeyProperty()
+   {
+      return translationCalculator.downKeyProperty();
+   }
+
+   /** See {@link CameraTranslationCalculator#getDownKey()}. */
+   public final KeyCode getDownKey()
+   {
+      return downKeyProperty().get();
+   }
+
+   /** See {@link CameraTranslationCalculator#setDownKey(KeyCode)}. */
+   public final void setDownKey(final KeyCode downKey)
+   {
+      downKeyProperty().set(downKey);
    }
 }

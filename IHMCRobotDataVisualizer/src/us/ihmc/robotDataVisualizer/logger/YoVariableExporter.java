@@ -14,6 +14,8 @@ import com.jmatio.types.MLInt32;
 import com.jmatio.types.MLInt64;
 import com.jmatio.types.MLNumericArray;
 
+import us.ihmc.commons.Conversions;
+import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
@@ -24,9 +26,7 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.dataBuffer.DataEntry;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.YoGraph;
@@ -124,7 +124,7 @@ public class YoVariableExporter extends YoVariableLogReader
             }
             
             timestamp.setReal(entryTimestamp, i - startPosition);
-            robotTime.setReal(TimeTools.nanoSecondstoSeconds(entryTimestamp - firstTimestamp), i - startPosition);
+            robotTime.setReal(Conversions.nanoSecondstoSeconds(entryTimestamp - firstTimestamp), i - startPosition);
             
             for (int dh = 0; dh < dataHolders.size(); dh++)
             {

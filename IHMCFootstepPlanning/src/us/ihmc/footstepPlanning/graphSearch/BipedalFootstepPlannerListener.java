@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public interface BipedalFootstepPlannerListener
 {

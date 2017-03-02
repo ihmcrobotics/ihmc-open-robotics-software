@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.AuxiliaryRobotData;
 import us.ihmc.sensorProcessing.communication.producers.DRCPoseCommunicator;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -83,12 +83,13 @@ public class KinematicToolboxDiagnosticEnvironment
             poseCommunicator.write();
          }
       }, 1, TimeUnit.MILLISECONDS);
-      
+
       DRCNetworkModuleParameters parameters = new DRCNetworkModuleParameters();
       parameters.enableUiModule(true);
       parameters.enableKinematicsToolbox(true);
       parameters.enableKinematicsToolboxVisualizer(true);
       parameters.enableLocalControllerCommunicator(true);
+      parameters.enableMocapModule(true);
       new DRCNetworkProcessor(drcRobotModel, parameters);
    }
 
@@ -173,7 +174,7 @@ public class KinematicToolboxDiagnosticEnvironment
    }
 
    private long timestamp = 0L;
-   
+
    private SensorOutputMapReadOnly initializeSensorOutputMapReadOnly()
    {
       return new SensorOutputMapReadOnly()
@@ -182,7 +183,7 @@ public class KinematicToolboxDiagnosticEnvironment
          @Override
          public long getVisionSensorTimestamp()
          {
-            timestamp += TimeTools.milliSecondsToNanoSeconds(1L);
+            timestamp += Conversions.milliSecondsToNanoSeconds(1L);
             return timestamp;
          }
 

@@ -729,6 +729,7 @@ public class RecursiveObjectComparer
       return equal;
    }
 
+   @Override
    public String toString()
    {
       StringBuffer buf = new StringBuffer();
@@ -786,6 +787,4 @@ public class RecursiveObjectComparer
 
       return buf.toString();
    }
-
-   
 }

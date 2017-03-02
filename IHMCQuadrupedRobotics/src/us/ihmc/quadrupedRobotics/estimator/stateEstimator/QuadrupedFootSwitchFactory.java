@@ -4,8 +4,8 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.commonWalkingControlModules.touchdownDetector.ForceBasedTouchDownDetection;
 import us.ihmc.commonWalkingControlModules.touchdownDetector.JointTorqueBasedTouchdownDetector;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.quadrupedRobotics.params.DoubleParameter;
-import us.ihmc.quadrupedRobotics.params.ParameterFactory;
+import us.ihmc.robotics.dataStructures.parameter.DoubleParameter;
+import us.ihmc.robotics.dataStructures.parameter.ParameterFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;

@@ -5,16 +5,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.shape.Box;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class CollisionBoxTest
 {
@@ -31,7 +30,7 @@ public class CollisionBoxTest
          double y = -5.0 + random.nextDouble() * 10;
          double z = -5.0 + random.nextDouble() * 10;
 
-         Point3d point = new Point3d(x, y, z);
+         Point3D point = new Point3D(x, y, z);
          assertTrue(box.contains(point));
       }
    }
@@ -49,7 +48,7 @@ public class CollisionBoxTest
          double y = (random.nextBoolean() ? -1 : 1) * (5.0 + random.nextDouble() * 10);
          double z = (random.nextBoolean() ? -1 : 1) * (5.0 + random.nextDouble() * 10);
 
-         Point3d point = new Point3d(x, y, z);
+         Point3D point = new Point3D(x, y, z);
          assertFalse(box.contains(point));
       }
    }
@@ -68,7 +67,7 @@ public class CollisionBoxTest
          double x = -10.0 + 20.0 * random.nextDouble();
          double y = -10.0 + 20.0 * random.nextDouble();
          double z = -10.0 + 20.0 * random.nextDouble();
-         Point3d point = new Point3d(x, y, z);
+         Point3D point = new Point3D(x, y, z);
 
          assertTrue(box.contains(point) == mesh.getBound().contains(new Vector3f((float) x, (float) y, (float) z)));
       }

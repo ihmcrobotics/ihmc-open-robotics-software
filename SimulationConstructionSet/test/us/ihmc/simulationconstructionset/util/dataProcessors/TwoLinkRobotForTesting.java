@@ -1,14 +1,13 @@
 package us.ihmc.simulationconstructionset.util.dataProcessors;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 
 public class TwoLinkRobotForTesting extends Robot
@@ -35,7 +34,6 @@ public class TwoLinkRobotForTesting extends Robot
    private final PinJoint elbowJoint;
    private DoubleYoVariable bodyPitch;
 
-   @SuppressWarnings("deprecation")
    public TwoLinkRobotForTesting()
    {
       super("TwoLink");
@@ -43,7 +41,7 @@ public class TwoLinkRobotForTesting extends Robot
 
       this.setGravity(0.0, 0.0, -gravity);
 
-      upperJoint = new PinJoint("upper", new Vector3d(0.0, 0.0, 4.0 * linkLength), this, Axis.Y);
+      upperJoint = new PinJoint("upper", new Vector3D(0.0, 0.0, 4.0 * linkLength), this, Axis.Y);
 
       //upperJoint.setCartesianPosition(0.0, activeLegLength + passiveLegLength + footLength + 0.13);
 
@@ -59,7 +57,7 @@ public class TwoLinkRobotForTesting extends Robot
       this.addRootJoint(upperJoint);
 
 
-      elbowJoint = new PinJoint("elbow", new Vector3d(0.0, 0.0, -linkLength), this, Axis.Y);
+      elbowJoint = new PinJoint("elbow", new Vector3D(0.0, 0.0, -linkLength), this, Axis.Y);
       upperJoint.addJoint(elbowJoint);
       Link lowerArmLink = lowerArm();
       elbowJoint.setLink(lowerArmLink);

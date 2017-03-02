@@ -3,18 +3,17 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class ConvexPolygonConstructorFromInteriorOfRays
 {
-   private final ArrayList<Point2d> pointPool = new ArrayList<Point2d>();
+   private final ArrayList<Point2D> pointPool = new ArrayList<Point2D>();
    
-   private final ArrayList<Point2d> intersectionArrayList = new ArrayList<Point2d>();
-   private final ArrayList<Point2d> intersectionPoints = new ArrayList<Point2d>();
+   private final ArrayList<Point2D> intersectionArrayList = new ArrayList<Point2D>();
+   private final ArrayList<Point2D> intersectionPoints = new ArrayList<Point2D>();
    private final RecyclingArrayList<MutableBoolean> removeRay = new RecyclingArrayList<MutableBoolean>(MutableBoolean.class);
    
    public boolean constructFromInteriorOfRays(List<Line2d> rays, ConvexPolygon2d polygonToPack)
@@ -56,7 +55,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
             if (removeRay.get(previousIndexToCheck).booleanValue())
                continue;    // That ray was removed already. Check a previous ray.
 
-            Point2d previousPointToCheck = intersectionPoints.get(previousIndexToCheck);
+            Point2D previousPointToCheck = intersectionPoints.get(previousIndexToCheck);
 
             // If the point is not to be in the polygon, as determined by the current ray under consideration, remove it and try the previous one.
             if ((previousPointToCheck != null) && (ray.isPointOnLeftSideOfLine(previousPointToCheck)))
@@ -71,10 +70,10 @@ public class ConvexPolygonConstructorFromInteriorOfRays
             // Found a previous Ray that may be ok. Use it to find this rays potential intersection point:
             Line2d previousRayToCheck = rays.get(previousIndexToCheck);
 
-            Point2d intersection = getAndRemovePointFromPool();
+            Point2D intersection = getAndRemovePointFromPool();
             if (intersection == null) throw new RuntimeException("intersection == null!");
             
-            boolean foundIntersection = ray.intersectionWith(intersection, previousRayToCheck);
+            boolean foundIntersection = ray.intersectionWith(previousRayToCheck, intersection);
             
             if (!foundIntersection)
             {
@@ -113,7 +112,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
                   previousIndexToCheck = evenMorePreviousIndexToCheck;
                   
                   intersection = getAndRemovePointFromPool();
-                  foundIntersection = ray.intersectionWith(intersection, evenMorePreviousRayToCheck);
+                  foundIntersection = ray.intersectionWith(evenMorePreviousRayToCheck, intersection);
                   if (!foundIntersection)
                   {
                      returnPointsToPool(intersectionPoints);
@@ -137,7 +136,7 @@ public class ConvexPolygonConstructorFromInteriorOfRays
 
       for (int i=0; i<intersectionPoints.size(); i++)
       {
-         Point2d point = intersectionPoints.get(i);
+         Point2D point = intersectionPoints.get(i);
          
          if (point != null)
             intersectionArrayList.add(point);
@@ -155,19 +154,19 @@ public class ConvexPolygonConstructorFromInteriorOfRays
       return true;
    }
 
-   private Point2d getAndRemovePointFromPool()
+   private Point2D getAndRemovePointFromPool()
    {
       if (pointPool.isEmpty())
       {
-         pointPool.add(new Point2d());
+         pointPool.add(new Point2D());
       }
       
       return pointPool.remove(pointPool.size()-1);
    }
    
-   private void removeIntersectionPoint(ArrayList<Point2d> intersectionPoints, int index)
+   private void removeIntersectionPoint(ArrayList<Point2D> intersectionPoints, int index)
    {
-      Point2d pointToRemove = intersectionPoints.get(index);
+      Point2D pointToRemove = intersectionPoints.get(index);
       
       if (pointToRemove != null)
       {
@@ -177,11 +176,11 @@ public class ConvexPolygonConstructorFromInteriorOfRays
       
    }
    
-   private void returnPointsToPool(ArrayList<Point2d> intersectionPoints)
+   private void returnPointsToPool(ArrayList<Point2D> intersectionPoints)
    {
       for (int i=0; i<intersectionPoints.size(); i++)
       {
-         Point2d point = intersectionPoints.get(i);
+         Point2D point = intersectionPoints.get(i);
          if (point != null) pointPool.add(point);
       }
       

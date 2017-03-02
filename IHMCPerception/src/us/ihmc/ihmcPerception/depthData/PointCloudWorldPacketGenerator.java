@@ -9,17 +9,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.LidarPosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.robotics.dataStructures.TimestampedPoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -77,20 +76,20 @@ public class PointCloudWorldPacketGenerator implements Runnable
       PointCloudWorldPacket packet = new PointCloudWorldPacket();
 
       readLock.lock();
-      ArrayList<Point3d> groundPoints = new ArrayList<>();
+      ArrayList<Point3D> groundPoints = new ArrayList<>();
       ArrayList<TimestampedPoint> nearScanTimestampedPoints = depthDataFilter.getNearScan().getPointsCopy();
       packet.defaultGroundHeight = (float) depthDataFilter.getQuadTree().getDefaultHeightWhenNoPoints();
       depthDataFilter.getQuadTree().getCellAverageStoredPoints(groundPoints);
       readLock.unlock();
 
-      packet.setGroundQuadTreeSupport(groundPoints.toArray(new Point3d[groundPoints.size()]));
+      packet.setGroundQuadTreeSupport(groundPoints.toArray(new Point3D[groundPoints.size()]));
 
-      ArrayList<Point3d> nearScanPoints = new ArrayList<>();
+      ArrayList<Point3D> nearScanPoints = new ArrayList<>();
       for (TimestampedPoint point : nearScanTimestampedPoints)
       {
-         nearScanPoints.add(new Point3d(point.getX(), point.getY(), point.getZ()));
+         nearScanPoints.add(new Point3D(point.getX(), point.getY(), point.getZ()));
       }
-      packet.setDecayingWorldScan(nearScanPoints.toArray(new Point3d[nearScanPoints.size()]));
+      packet.setDecayingWorldScan(nearScanPoints.toArray(new Point3D[nearScanPoints.size()]));
       packet.timestamp = System.nanoTime();
       return packet;
    }
@@ -99,8 +98,8 @@ public class PointCloudWorldPacketGenerator implements Runnable
 
    public void setLidarPose(RigidBodyTransform lidarTransformToWorld)
    {
-      Point3d position = new Point3d();
-      Quat4d orientation = new Quat4d();
+      Point3D position = new Point3D();
+      Quaternion orientation = new Quaternion();
       lidarTransformToWorld.get(orientation, position);
       lidarPosePacketToSend.set(new LidarPosePacket(position, orientation));
    }

@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.referenceFrames;
 
 import java.util.ArrayList;
 
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicReferenceFrame;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -34,6 +34,14 @@ public class CommonHumanoidReferenceFramesVisualizer
       YoGraphicReferenceFrame pelvisFrame = new YoGraphicReferenceFrame(referenceFrames.getPelvisFrame(), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, pelvisFrame);
       referenceFramesVisualizers.add(pelvisFrame);
+      
+      YoGraphicReferenceFrame leftSoleFrmae = new YoGraphicReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT), registry, 0.2);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, leftSoleFrmae);
+      referenceFramesVisualizers.add(leftSoleFrmae);
+      
+      YoGraphicReferenceFrame rightSoleFrame = new YoGraphicReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT), registry, 0.2);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, rightSoleFrame);
+      referenceFramesVisualizers.add(rightSoleFrame);
 
       parentRegistry.addChild(registry);
    }

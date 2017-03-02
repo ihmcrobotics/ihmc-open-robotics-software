@@ -5,17 +5,18 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
 import us.ihmc.footstepPlanning.polygonWiggling.WiggleParameters;
 import us.ihmc.footstepPlanning.scoring.BipedalStepAdjustmentCostCalculator;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -50,10 +50,10 @@ public class PlanarRegionPotentialNextStepCalculator
    private SideDependentList<ConvexPolygon2d> controllerPolygonsInSoleFrame;
 
    private FootstepPlannerGoalType footstepPlannerGoalType;
-   private Point2d xyGoal;
+   private Point2D xyGoal;
    private double distanceFromXYGoal;
 
-   private SideDependentList<Point3d> goalPositions;
+   private SideDependentList<Point3D> goalPositions;
    private SideDependentList<Double> goalYaws;
    private SideDependentList<RigidBodyTransform> goalFootstepPoses;
 
@@ -131,7 +131,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private void setGoalXYAndRadius(FootstepPlannerGoal goal)
    {
-      xyGoal = new Point2d(goal.getXYGoal());
+      xyGoal = new Point2D(goal.getXYGoal());
       distanceFromXYGoal = goal.getDistanceFromXYGoal();
    }
 
@@ -146,34 +146,41 @@ public class PlanarRegionPotentialNextStepCalculator
       goalPose.getPose(goalLeftFootPose);
       goalPose.getPose(goalRightFootPose);
 
-      Vector3d toTheLeft;
-      Vector3d toTheRight;
+      Vector3D toTheLeft;
+      Vector3D toTheRight;
 
       double idealFootstepWidth = parameters.getIdealFootstepWidth();
 
       if (idealFootstepWidth == 0.0)
       {
-         toTheLeft = new Vector3d(0.0, 0.15, 0.0);
-         toTheRight = new Vector3d(0.0, -0.15, 0.0);
+         toTheLeft = new Vector3D(0.0, 0.15, 0.0);
+         toTheRight = new Vector3D(0.0, -0.15, 0.0);
       }
       else
       {
-         toTheLeft = new Vector3d(0.0, idealFootstepWidth / 2.0, 0.0);
-         toTheRight = new Vector3d(0.0, -idealFootstepWidth / 2.0, 0.0);
+         toTheLeft = new Vector3D(0.0, idealFootstepWidth / 2.0, 0.0);
+         toTheRight = new Vector3D(0.0, -idealFootstepWidth / 2.0, 0.0);
       }
 
-      goalLeftFootPose.applyTranslation(toTheLeft);
-      goalRightFootPose.applyTranslation(toTheRight);
+      RigidBodyTransform tempTransform = new RigidBodyTransform();
+      tempTransform.setTranslation(toTheLeft);
+      goalLeftFootPose.transform(tempTransform);
+      goalLeftFootPose.set(tempTransform);
+
+      tempTransform.setIdentity();
+      tempTransform.setTranslation(toTheRight);
+      goalRightFootPose.transform(tempTransform);
+      goalRightFootPose.set(tempTransform);
 
       goalFootstepPoses = new SideDependentList<>(goalLeftFootPose, goalRightFootPose);
 
-      Point3d goalLeftSolePosition = new Point3d();
+      Point3D goalLeftSolePosition = new Point3D();
       goalLeftFootPose.transform(goalLeftSolePosition);
 
-      Point3d goalRightSolePosition = new Point3d();
+      Point3D goalRightSolePosition = new Point3D();
       goalRightFootPose.transform(goalRightSolePosition);
 
-      Vector3d eulerAngles = new Vector3d();
+      Vector3D eulerAngles = new Vector3D();
       goalLeftFootPose.getRotationEuler(eulerAngles);
       double goalLeftSoleYaw = eulerAngles.getZ();
       goalRightFootPose.getRotationEuler(eulerAngles);
@@ -221,12 +228,12 @@ public class PlanarRegionPotentialNextStepCalculator
 
    private BipedalFootstepPlannerNode findGoalNodeUsingSolePositions(BipedalFootstepPlannerNode nodeToExpand, RigidBodyTransform soleZUpTransform)
    {
-      Point3d currentSolePosition = nodeToExpand.getSolePosition();
+      Point3D currentSolePosition = nodeToExpand.getSolePosition();
 
       RobotSide currentSide = nodeToExpand.getRobotSide();
       RobotSide nextSide = currentSide.getOppositeSide();
 
-      Point3d goalSolePosition = goalPositions.get(nextSide);
+      Point3D goalSolePosition = goalPositions.get(nextSide);
 
       //      stepReach.set(goalSolePosition.distance(currentSolePosition));
       double stepReach = goalSolePosition.distance(currentSolePosition);
@@ -239,7 +246,7 @@ public class PlanarRegionPotentialNextStepCalculator
 
          if (Math.abs(stepYaw) < parameters.getMaximumStepYaw())
          {
-            Vector3d finishStep = new Vector3d();
+            Vector3D finishStep = new Vector3D();
             finishStep.sub(goalSolePosition, currentSolePosition);
 
             RigidBodyTransform inverseTransform = new RigidBodyTransform();
@@ -264,7 +271,7 @@ public class PlanarRegionPotentialNextStepCalculator
       BipedalFootstepPlannerNode goalNode = computeGoalNodeIfGoalIsReachable(nodeToExpand);
       if (goalNode != null)
       {
-         boolean acceptable = checkIfNodeAcceptableCostAndAddToList(goalNode, nodesToAdd, new Vector3d(), 0.0, smallestCostToGoal);
+         boolean acceptable = checkIfNodeAcceptableCostAndAddToList(goalNode, nodesToAdd, new Vector3D(), 0.0, smallestCostToGoal);
          if (acceptable)
             return nodesToAdd;
       }
@@ -274,21 +281,21 @@ public class PlanarRegionPotentialNextStepCalculator
       RobotSide currentSide = nodeToExpand.getRobotSide();
       RobotSide nextSide = currentSide.getOppositeSide();
 
-      Point3d goalPosition = goalPositions.get(nextSide);
-      Point3d currentPosition = nodeToExpand.getSolePosition();
-      Vector3d currentToGoalVector = new Vector3d();
+      Point3D goalPosition = goalPositions.get(nextSide);
+      Point3D currentPosition = nodeToExpand.getSolePosition();
+      Vector3D currentToGoalVector = new Vector3D();
       currentToGoalVector.sub(goalPosition, currentPosition);
 
       double distance = currentToGoalVector.length();
-      Vector3d idealStepVector = computeIdealStepVector(parameters, soleZUpTransform, nextSide, currentToGoalVector);
+      Vector3D idealStepVector = computeIdealStepVector(parameters, soleZUpTransform, nextSide, currentToGoalVector);
 
-      Point3d idealStepLocationInWorld = new Point3d(idealStepVector);
+      Point3D idealStepLocationInWorld = new Point3D(idealStepVector);
       soleZUpTransform.transform(idealStepLocationInWorld);
 
-      Vector3d vectorToGoal = new Vector3d();
+      Vector3D vectorToGoal = new Vector3D();
       vectorToGoal.sub(goalPosition, idealStepLocationInWorld);
 
-      Vector3d currentRotationEulerInWorld = new Vector3d();
+      Vector3D currentRotationEulerInWorld = new Vector3D();
       soleZUpTransform.getRotationEuler(currentRotationEulerInWorld);
       double currentYaw = currentRotationEulerInWorld.getZ();
 
@@ -304,7 +311,7 @@ public class PlanarRegionPotentialNextStepCalculator
       }
 
       double idealStepYaw = AngleTools.computeAngleDifferenceMinusPiToPi(idealYawInWorld, currentYaw);
-      idealStepYaw = MathTools.clipToMinMax(idealStepYaw, parameters.getMaximumStepYaw());
+      idealStepYaw = MathTools.clamp(idealStepYaw, parameters.getMaximumStepYaw());
 
       BipedalFootstepPlannerNode childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, idealStepVector, idealStepYaw);
       seeIfNodeIsAtGoal(childNode);
@@ -318,7 +325,7 @@ public class PlanarRegionPotentialNextStepCalculator
             //for (double thetaStep = -0.1; thetaStep < 0.1; thetaStep = thetaStep + 0.1 / 2.0)
             {
                double nextStepYaw = idealStepYaw;
-               Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
+               Vector3D nextStepVector = new Vector3D(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
                childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
 
                seeIfNodeIsAtGoal(childNode);
@@ -331,7 +338,7 @@ public class PlanarRegionPotentialNextStepCalculator
       // Add a side step.
       double xStep = 1.001 * Math.max(0.0, parameters.getMinimumStepLength());
       double yStep = parameters.getIdealFootstepWidth();
-      Vector3d nextStepVector = new Vector3d(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
+      Vector3D nextStepVector = new Vector3D(xStep, currentSide.negateIfLeftSide(yStep), 0.0);
       double nextStepYaw = idealStepYaw;
       childNode = createAndAddNextNodeGivenStep(soleZUpTransform, nodeToExpand, nextStepVector, nextStepYaw);
 
@@ -344,21 +351,21 @@ public class PlanarRegionPotentialNextStepCalculator
       return nodesToAdd;
    }
 
-   private static Vector3d computeIdealStepVector(BipedalFootstepPlannerParameters parameters, RigidBodyTransform soleZUpTransform, RobotSide nextSide,
-                                                  Vector3d currentToGoalInWorld)
+   private static Vector3D computeIdealStepVector(BipedalFootstepPlannerParameters parameters, RigidBodyTransform soleZUpTransform, RobotSide nextSide,
+                                                  Vector3D currentToGoalInWorld)
    {
       double distanceToGoal = currentToGoalInWorld.length();
 
-      Vector3d currentToGoalInSoleFrame = new Vector3d(currentToGoalInWorld);
+      Vector3D currentToGoalInSoleFrame = new Vector3D(currentToGoalInWorld);
       RigidBodyTransform inverseTransform = new RigidBodyTransform(soleZUpTransform);
       inverseTransform.invert();
       inverseTransform.transform(currentToGoalInSoleFrame);
 
-      Vector3d idealStepVector;
+      Vector3D idealStepVector;
 
       if (distanceToGoal > 2.0 * parameters.getMaximumStepReach())
       {
-         idealStepVector = new Vector3d(parameters.getIdealFootstepLength(), nextSide.negateIfRightSide(parameters.getIdealFootstepWidth()), 0.0);
+         idealStepVector = new Vector3D(parameters.getIdealFootstepLength(), nextSide.negateIfRightSide(parameters.getIdealFootstepWidth()), 0.0);
 
          double idealYawInSoleFrame = Math.atan2(currentToGoalInSoleFrame.getY(), currentToGoalInSoleFrame.getX());
 
@@ -398,7 +405,7 @@ public class PlanarRegionPotentialNextStepCalculator
    private final SideDependentList<RigidBodyTransform> soleTransforms = new SideDependentList<>(leftSoleTransform, rightSoleTransform);
 
    private boolean checkIfNodeAcceptableCostAndAddToList(BipedalFootstepPlannerNode node, ArrayList<BipedalFootstepPlannerNode> nodesToAdd,
-                                                          Vector3d idealStepVector, double idealStepYaw, double smallestCostToGoal)
+                                                          Vector3D idealStepVector, double idealStepYaw, double smallestCostToGoal)
    {
       notifyListenerNodeUnderConsideration(node);
 
@@ -457,7 +464,7 @@ public class PlanarRegionPotentialNextStepCalculator
    }
 
    private BipedalFootstepPlannerNode createAndAddNextNodeGivenStep(RigidBodyTransform soleZUpTransform, BipedalFootstepPlannerNode nodeToExpand,
-                                                                    Vector3d stepVectorInSoleFrame, double stepYaw)
+                                                                    Vector3D stepVectorInSoleFrame, double stepYaw)
    {
       RigidBodyTransform nextTransform = getTransformFromStepToWorld(soleZUpTransform, stepVectorInSoleFrame, stepYaw);
 
@@ -469,12 +476,12 @@ public class PlanarRegionPotentialNextStepCalculator
       return childNode;
    }
 
-   private RigidBodyTransform getTransformFromStepToWorld(RigidBodyTransform soleZUpTransform, Vector3d stepVectorInSoleFrame, double stepYaw)
+   private RigidBodyTransform getTransformFromStepToWorld(RigidBodyTransform soleZUpTransform, Vector3D stepVectorInSoleFrame, double stepYaw)
    {
-      Point3d stepLocationInWorld = new Point3d(stepVectorInSoleFrame);
+      Point3D stepLocationInWorld = new Point3D(stepVectorInSoleFrame);
       soleZUpTransform.transform(stepLocationInWorld);
 
-      Vector3d stepRotationEulerInWorld = new Vector3d();
+      Vector3D stepRotationEulerInWorld = new Vector3D();
       soleZUpTransform.getRotationEuler(stepRotationEulerInWorld);
       //      stepRotationEulerInWorld.setZ((stepRotationEulerInWorld.getZ() + stepYaw + 2.0 * Math.PI) % Math.PI);
       stepRotationEulerInWorld.setZ(stepRotationEulerInWorld.getZ() + stepYaw);
@@ -489,7 +496,7 @@ public class PlanarRegionPotentialNextStepCalculator
    {
       if (footstepPlannerGoalType == FootstepPlannerGoalType.CLOSE_TO_XY_POSITION)
       {
-         Point3d solePosition = childNode.getSolePosition();
+         Point3D solePosition = childNode.getSolePosition();
 
          double deltaX = solePosition.getX() - xyGoal.getX();
          double deltaY = solePosition.getY() - xyGoal.getY();
@@ -506,9 +513,9 @@ public class PlanarRegionPotentialNextStepCalculator
       }
    }
 
-   private final Vector3d xAxis = new Vector3d();
-   private final Vector3d yAxis = new Vector3d();
-   private final Vector3d zAxis = new Vector3d();
+   private final Vector3D xAxis = new Vector3D();
+   private final Vector3D yAxis = new Vector3D();
+   private final Vector3D zAxis = new Vector3D();
 
    private void setTransformZUpPreserveX(RigidBodyTransform transform)
    {
@@ -517,17 +524,7 @@ public class PlanarRegionPotentialNextStepCalculator
       zAxis.set(0.0, 0.0, 1.0);
       yAxis.cross(zAxis, xAxis);
 
-      transform.setM00(xAxis.getX());
-      transform.setM10(xAxis.getY());
-      transform.setM20(xAxis.getZ());
-
-      transform.setM01(yAxis.getX());
-      transform.setM11(yAxis.getY());
-      transform.setM21(yAxis.getZ());
-
-      transform.setM02(zAxis.getX());
-      transform.setM12(zAxis.getY());
-      transform.setM22(zAxis.getZ());
+      transform.setRotation(xAxis.getX(), yAxis.getX(), zAxis.getX(), xAxis.getY(), yAxis.getY(), zAxis.getY(), xAxis.getZ(), yAxis.getZ(), zAxis.getZ());
    }
 
    protected boolean snapNodeAndCheckIfAcceptableToExpand(BipedalFootstepPlannerNode nodeToExpand)
@@ -794,18 +791,18 @@ public class PlanarRegionPotentialNextStepCalculator
       //      wiggleTransform = new RigidBodyTransform();
       //      wiggleTransform.setTranslation(0.2, 0.0, 0.0);
 
-      Point3d wiggleTranslation = new Point3d();
+      Point3D wiggleTranslation = new Point3D();
       wiggleTransformLocalToLocal.transform(wiggleTranslation);
-      Vector3d wiggleVector = new Vector3d(wiggleTranslation);
+      Vector3D wiggleVector = new Vector3D(wiggleTranslation);
       if (wiggleVector.length() > parameters.getMaximumXYWiggleDistance())
       {
          wiggleVector.scale(parameters.getMaximumXYWiggleDistance() / wiggleVector.length());
       }
 
-      Vector3d rotationEuler = new Vector3d();
+      Vector3D rotationEuler = new Vector3D();
       wiggleTransformLocalToLocal.getRotationEuler(rotationEuler);
       double yaw = rotationEuler.getZ();
-      yaw = MathTools.clipToMinMax(yaw, parameters.getMaximumYawWiggle());
+      yaw = MathTools.clamp(yaw, parameters.getMaximumYawWiggle());
 
       rotationEuler.setZ(yaw);
       wiggleTransformLocalToLocal.setRotationEulerAndZeroTranslation(rotationEuler);
@@ -819,13 +816,15 @@ public class PlanarRegionPotentialNextStepCalculator
       RigidBodyTransform transformTwo = new RigidBodyTransform(transformOne);
       transformTwo.invert();
 
-      wiggleTransformWorldToWorld.multiply(transformOne, wiggleTransformLocalToLocal);
-      wiggleTransformWorldToWorld.multiply(wiggleTransformWorldToWorld, transformTwo);
+      wiggleTransformWorldToWorld.set(transformOne);
+      wiggleTransformWorldToWorld.multiply(wiggleTransformLocalToLocal);
+      wiggleTransformWorldToWorld.set(wiggleTransformWorldToWorld);
+      wiggleTransformWorldToWorld.multiply(transformTwo);
 
       //      System.out.println("wiggleTransformWorldToWorld = \n" + wiggleTransformWorldToWorld);
 
-      RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform();
-      snapAndWiggleTransform.multiply(wiggleTransformWorldToWorld, snapTransform);
+      RigidBodyTransform snapAndWiggleTransform = new RigidBodyTransform(wiggleTransformWorldToWorld);
+      snapAndWiggleTransform.multiply(snapTransform);
 
       // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
       ConvexPolygon2d checkFootPolygonInWorld = new ConvexPolygon2d(currentFootPolygon);
@@ -851,8 +850,8 @@ public class PlanarRegionPotentialNextStepCalculator
                int numberOfVertices = intersectionPolygon.getNumberOfVertices();
                for (int i = 0; i < numberOfVertices; i++)
                {
-                  Point2d vertex2d = intersectionPolygon.getVertex(i);
-                  Point3d vertex3dInWorld = new Point3d(vertex2d.getX(), vertex2d.getY(), 0.0);
+                  Point2DReadOnly vertex2d = intersectionPolygon.getVertex(i);
+                  Point3D vertex3dInWorld = new Point3D(vertex2d.getX(), vertex2d.getY(), 0.0);
                   transformToWorldFromIntersectingPlanarRegion.transform(vertex3dInWorld);
 
                   double planeZGivenXY = planarRegionToPack.getPlaneZGivenXY(vertex3dInWorld.getX(), vertex3dInWorld.getY());
@@ -903,7 +902,7 @@ public class PlanarRegionPotentialNextStepCalculator
       }
    }
 
-   public Point3d getGoalPosition(RobotSide robotSide)
+   public Point3D getGoalPosition(RobotSide robotSide)
    {
       return goalPositions.get(robotSide);
    }

@@ -1,13 +1,13 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import org.junit.Test;
-
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ConstantDoubleProviderTest
 {
@@ -19,7 +19,7 @@ public class ConstantDoubleProviderTest
    public void test()
    {
       Random random = new Random();
-      double expectedValue = RandomTools.generateRandomDouble(random, Double.MIN_VALUE, Double.MAX_VALUE);
+      double expectedValue = RandomNumbers.nextDouble(random, Double.MIN_VALUE, Double.MAX_VALUE);
       ConstantDoubleProvider constantDoubleProvider = new ConstantDoubleProvider(expectedValue);
       double actualValue = constantDoubleProvider.getValue();
       
