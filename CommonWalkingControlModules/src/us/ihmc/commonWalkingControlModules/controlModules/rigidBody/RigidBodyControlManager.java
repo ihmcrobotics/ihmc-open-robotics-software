@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -248,20 +247,13 @@ public class RigidBodyControlManager
       }
    }
 
-   public void handleGoHomeCommand(GoHomeCommand command)
-   {
-      // TODO: chest
-      // check if rigid body is in command
-      // if so go home from current desired
-   }
-
    public void goToHomeFromCurrent(double trajectoryTime)
    {
       // TODO: chest
       // go to some default configuration starting from the current measured in taskspace
    }
 
-   public void goHome()
+   public void goHome(double trajectoryTime)
    {
       // TODO: hand
       // go to some default configuration

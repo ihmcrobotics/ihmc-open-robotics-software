@@ -22,7 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
@@ -413,9 +412,10 @@ public class BalanceManager
       return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
    }
 
-   public void handleGoHomeCommand(GoHomeCommand command)
+   public void goHome()
    {
-      pelvisICPBasedTranslationManager.handleGoHomeCommand(command);
+      if (pelvisICPBasedTranslationManager.isEnabled())
+         pelvisICPBasedTranslationManager.goToHome();
    }
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
