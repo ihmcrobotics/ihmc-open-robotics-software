@@ -5,8 +5,6 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
@@ -14,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -28,10 +27,10 @@ import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.stateMachines.GenericStateMachine;
-import us.ihmc.robotics.stateMachines.StateMachineTools;
-import us.ihmc.robotics.stateMachines.StateTransition;
-import us.ihmc.robotics.stateMachines.StateTransitionCondition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class FootControlModule
@@ -115,10 +114,10 @@ public class FootControlModule
       setupContactStatesMap();
 
       YoVelocityProvider touchdownVelocityProvider = new YoVelocityProvider(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), registry);
-      touchdownVelocityProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
+      touchdownVelocityProvider.set(new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownVelocity()));
 
       YoVelocityProvider touchdownAccelerationProvider = new YoVelocityProvider(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(), registry);
-      touchdownAccelerationProvider.set(new Vector3d(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration()));
+      touchdownAccelerationProvider.set(new Vector3D(0.0, 0.0, walkingControllerParameters.getDesiredTouchdownAcceleration()));
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
 
@@ -264,7 +263,7 @@ public class FootControlModule
          exploreFootPolygonState.setWeight(defaultFootWeight);
    }
 
-   public void setWeights(Vector3d highAngularFootWeight, Vector3d highLinearFootWeight, Vector3d defaultAngularFootWeight, Vector3d defaultLinearFootWeight)
+   public void setWeights(Vector3D highAngularFootWeight, Vector3D highLinearFootWeight, Vector3D defaultAngularFootWeight, Vector3D defaultLinearFootWeight)
    {
       swingState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);
       moveViaWaypointsState.setWeights(defaultAngularFootWeight, defaultLinearFootWeight);

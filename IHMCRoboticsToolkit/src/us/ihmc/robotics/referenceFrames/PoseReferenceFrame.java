@@ -1,16 +1,17 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
 
 public class PoseReferenceFrame extends ReferenceFrame
 {
@@ -63,7 +64,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setPoseAndUpdate(Point3d position, Quat4d orientation)
+   public void setPoseAndUpdate(Point3D position, Quaternion orientation)
    {
       originPose.setPose(position, orientation);
       this.update();
@@ -75,6 +76,18 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
+   public void setPositionWithoutChecksAndUpdate(Point3D position)
+   {
+      originPose.setPosition(position);
+      this.update();
+   }
+
+   public void setPositionWithoutChecksAndUpdate(double x, double y, double z)
+   {
+      originPose.setPosition(x, y, z);
+      this.update();
+   }
+
    public void setPositionAndUpdate(FramePoint framePoint)
    {
       framePoint.checkReferenceFrameMatch(parentFrame);
@@ -82,16 +95,22 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setOrientationAndUpdate(Quat4d quat4d)
+   public void setOrientationAndUpdate(Quaternion quat4d)
    {
       originPose.setOrientation(quat4d);
       this.update();
    }
 
-   public void setOrientationAndUpdate(AxisAngle4d axisAngle4d)
+   public void setOrientationAndUpdate(AxisAngle axisAngle4d)
    {
       originPose.setOrientation(axisAngle4d);
       this.update();
+   }
+
+   public void setOrientationAndUpdate(double qx, double qy, double qz, double qs)
+   {
+      originPose.setOrientation(qx, qy, qz, qs);
+      update();
    }
 
    public void setOrientationAndUpdate(FrameOrientation frameOrientation)
@@ -100,7 +119,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       originPose.setOrientation(frameOrientation);
       this.update();
    }
-
+   
    public void setXYFromPosition2dAndUpdate(FramePoint2d position2d)
    {
       position2d.checkReferenceFrameMatch(parentFrame);
@@ -144,7 +163,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       return originPose.getRoll();
    }
 
-   public void getPose(Point3d pointToPack, Quat4d quaternionToPack)
+   public void getPose(Point3D pointToPack, Quaternion quaternionToPack)
    {
       originPose.getPose(pointToPack, quaternionToPack);
    }
@@ -167,8 +186,13 @@ public class PoseReferenceFrame extends ReferenceFrame
    {
       framePoseToPack.setPoseIncludingFrame(originPose);
    }
+   
+   public Point3DReadOnly getPosition()
+   {
+      return originPose.getPosition();
+   }
 
-   public void getPosition(Point3d pointToPack)
+   public void getPosition(Point3D pointToPack)
    {
       originPose.getPosition(pointToPack);
    }
@@ -177,13 +201,18 @@ public class PoseReferenceFrame extends ReferenceFrame
    {
       originPose.getPositionIncludingFrame(framePointToPack);
    }
+   
+   public QuaternionReadOnly getOrientation()
+   {
+      return originPose.getOrientation();
+   }
 
-   public void getOrientation(Quat4d quaternionToPack)
+   public void getOrientation(Quaternion quaternionToPack)
    {
       originPose.getOrientation(quaternionToPack);
    }
 
-   public void getOrientation(Matrix3d matrixToPack)
+   public void getOrientation(RotationMatrix matrixToPack)
    {
       originPose.getOrientation(matrixToPack);
    }

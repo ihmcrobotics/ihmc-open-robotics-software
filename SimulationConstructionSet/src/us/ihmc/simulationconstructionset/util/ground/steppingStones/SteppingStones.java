@@ -3,13 +3,13 @@ package us.ihmc.simulationconstructionset.util.ground.steppingStones;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 /**
  * <p>Title: </p>
@@ -95,7 +95,7 @@ public class SteppingStones
 
          for (int j = 0; j < convexPolygon2d.getNumberOfVertices(); j++)
          {
-            Point2d point2d = convexPolygon2d.getVertex(j);
+            Point2DReadOnly point2d = convexPolygon2d.getVertex(j);
 
             ret[i][j] = new double[] {point2d.getX(), point2d.getY()};
          }
@@ -118,7 +118,7 @@ public class SteppingStones
 
          for (int j = 0; j < shrunkenConvexPolygon2d.getNumberOfVertices(); j++)
          {
-            Point2d point2d = shrunkenConvexPolygon2d.getVertex(j);
+            Point2DReadOnly point2d = shrunkenConvexPolygon2d.getVertex(j);
 
             ret[i][j] = new double[] {point2d.getX(), point2d.getY()};
          }
@@ -388,110 +388,110 @@ public class SteppingStones
       ret = SteppingStones.generateRectangularUniformSteppingStones(startXPosition, startYPosition, stoneXDimension, stoneYDimension, spacingInX, spacingInY,
               baseZ, height, numRows, numColumns, polygonToShrink, false);
 
-      ArrayList<Point2d> points0 = new ArrayList<Point2d>();
-      points0.add(new Point2d(0.0, -0.3));
-      points0.add(new Point2d(0.0, -0.1));
-      points0.add(new Point2d(12.0, -0.1));
-      points0.add(new Point2d(12.0, -0.3));
+      ArrayList<Point2D> points0 = new ArrayList<Point2D>();
+      points0.add(new Point2D(0.0, -0.3));
+      points0.add(new Point2D(0.0, -0.1));
+      points0.add(new Point2D(12.0, -0.1));
+      points0.add(new Point2D(12.0, -0.3));
 
       SteppingStone steppingStone = new SteppingStone("stone0", -0.1, 0.0, points0, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points1 = new ArrayList<Point2d>();
-      points1.add(new Point2d(1.1, -3.1));
-      points1.add(new Point2d(0.9, -2.9));
-      points1.add(new Point2d(4.9, 3.1));
-      points1.add(new Point2d(5.1, 2.9));
+      ArrayList<Point2D> points1 = new ArrayList<Point2D>();
+      points1.add(new Point2D(1.1, -3.1));
+      points1.add(new Point2D(0.9, -2.9));
+      points1.add(new Point2D(4.9, 3.1));
+      points1.add(new Point2D(5.1, 2.9));
 
       steppingStone = new SteppingStone("stone1", -0.1, 0.0, points1, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points2 = new ArrayList<Point2d>();
-      points2.add(new Point2d(0.0, 1.9));
-      points2.add(new Point2d(0.0, 2.1));
-      points2.add(new Point2d(10.0, 2.1));
-      points2.add(new Point2d(10.0, 1.9));
+      ArrayList<Point2D> points2 = new ArrayList<Point2D>();
+      points2.add(new Point2D(0.0, 1.9));
+      points2.add(new Point2D(0.0, 2.1));
+      points2.add(new Point2D(10.0, 2.1));
+      points2.add(new Point2D(10.0, 1.9));
 
       steppingStone = new SteppingStone("stone2", -0.1, 0.0, points2, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points3 = new ArrayList<Point2d>();
-      points3.add(new Point2d(0.9, 0.9));
-      points3.add(new Point2d(1.1, 1.1));
-      points3.add(new Point2d(12.1, -2.4));
-      points3.add(new Point2d(11.9, -2.6));
+      ArrayList<Point2D> points3 = new ArrayList<Point2D>();
+      points3.add(new Point2D(0.9, 0.9));
+      points3.add(new Point2D(1.1, 1.1));
+      points3.add(new Point2D(12.1, -2.4));
+      points3.add(new Point2D(11.9, -2.6));
 
       steppingStone = new SteppingStone("stone3", -0.1, 0.0, points3, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points4 = new ArrayList<Point2d>();
-      points4.add(new Point2d(5.9, 2.4));
-      points4.add(new Point2d(6.1, 2.6));
-      points4.add(new Point2d(12.0, -3.9));
-      points4.add(new Point2d(11.8, -4.1));
+      ArrayList<Point2D> points4 = new ArrayList<Point2D>();
+      points4.add(new Point2D(5.9, 2.4));
+      points4.add(new Point2D(6.1, 2.6));
+      points4.add(new Point2D(12.0, -3.9));
+      points4.add(new Point2D(11.8, -4.1));
 
       steppingStone = new SteppingStone("stone4", -0.1, 0.0, points4, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points5 = new ArrayList<Point2d>();
-      points5.add(new Point2d(0.0, -2.5));
-      points5.add(new Point2d(0.0, -2.3));
-      points5.add(new Point2d(10.3, -2.3));
-      points5.add(new Point2d(10.3, -2.5));
+      ArrayList<Point2D> points5 = new ArrayList<Point2D>();
+      points5.add(new Point2D(0.0, -2.5));
+      points5.add(new Point2D(0.0, -2.3));
+      points5.add(new Point2D(10.3, -2.3));
+      points5.add(new Point2D(10.3, -2.5));
 
       steppingStone = new SteppingStone("stone5", -0.1, 0.0, points5, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points6 = new ArrayList<Point2d>();
-      points6.add(new Point2d(0.9, -1.6));
-      points6.add(new Point2d(1.1, -1.4));
-      points6.add(new Point2d(12.1, -3.4));
-      points6.add(new Point2d(11.9, -3.6));
+      ArrayList<Point2D> points6 = new ArrayList<Point2D>();
+      points6.add(new Point2D(0.9, -1.6));
+      points6.add(new Point2D(1.1, -1.4));
+      points6.add(new Point2D(12.1, -3.4));
+      points6.add(new Point2D(11.9, -3.6));
 
       steppingStone = new SteppingStone("stone6", -0.1, 0.0, points6, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points7 = new ArrayList<Point2d>();
-      points7.add(new Point2d(3.1, -3.1));
-      points7.add(new Point2d(2.9, -2.9));
-      points7.add(new Point2d(6.4, 1.1));
-      points7.add(new Point2d(6.6, 0.9));
+      ArrayList<Point2D> points7 = new ArrayList<Point2D>();
+      points7.add(new Point2D(3.1, -3.1));
+      points7.add(new Point2D(2.9, -2.9));
+      points7.add(new Point2D(6.4, 1.1));
+      points7.add(new Point2D(6.6, 0.9));
 
       steppingStone = new SteppingStone("stone7", -0.1, 0.0, points7, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points8 = new ArrayList<Point2d>();
-      points8.add(new Point2d(11.0, -1.95));
-      points8.add(new Point2d(11.0, -1.75));
-      points8.add(new Point2d(12.5, -1.8));
-      points8.add(new Point2d(12.5, -2.0));
+      ArrayList<Point2D> points8 = new ArrayList<Point2D>();
+      points8.add(new Point2D(11.0, -1.95));
+      points8.add(new Point2D(11.0, -1.75));
+      points8.add(new Point2D(12.5, -1.8));
+      points8.add(new Point2D(12.5, -2.0));
 
       steppingStone = new SteppingStone("stone8", -0.1, 0.0, points8, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points9 = new ArrayList<Point2d>();
-      points9.add(new Point2d(11.0, -1.55));
-      points9.add(new Point2d(11.0, -1.35));
-      points9.add(new Point2d(13.0, -1.35));
-      points9.add(new Point2d(13.0, -1.55));
+      ArrayList<Point2D> points9 = new ArrayList<Point2D>();
+      points9.add(new Point2D(11.0, -1.55));
+      points9.add(new Point2D(11.0, -1.35));
+      points9.add(new Point2D(13.0, -1.35));
+      points9.add(new Point2D(13.0, -1.55));
 
       steppingStone = new SteppingStone("stone9", -0.1, 0.0, points9, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points10 = new ArrayList<Point2d>();
-      points10.add(new Point2d(10.5, -1.15));
-      points10.add(new Point2d(10.5, -0.95));
-      points10.add(new Point2d(12.5, -0.9));
-      points10.add(new Point2d(12.5, -1.1));
+      ArrayList<Point2D> points10 = new ArrayList<Point2D>();
+      points10.add(new Point2D(10.5, -1.15));
+      points10.add(new Point2D(10.5, -0.95));
+      points10.add(new Point2D(12.5, -0.9));
+      points10.add(new Point2D(12.5, -1.1));
 
       steppingStone = new SteppingStone("stone10", -0.1, 0.0, points10, polygonToShrink);
       ret.addSteppingStone(steppingStone);
 
-      ArrayList<Point2d> points11 = new ArrayList<Point2d>();
-      points11.add(new Point2d(9.75, -0.25));
-      points11.add(new Point2d(9.75, -0.05));
-      points11.add(new Point2d(13.25, -0.7));
-      points11.add(new Point2d(13.25, -0.9));
+      ArrayList<Point2D> points11 = new ArrayList<Point2D>();
+      points11.add(new Point2D(9.75, -0.25));
+      points11.add(new Point2D(9.75, -0.05));
+      points11.add(new Point2D(13.25, -0.7));
+      points11.add(new Point2D(13.25, -0.9));
 
       steppingStone = new SteppingStone("stone11", -0.1, 0.0, points11, polygonToShrink);
       ret.addSteppingStone(steppingStone);

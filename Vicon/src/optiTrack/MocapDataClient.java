@@ -33,6 +33,8 @@ public class MocapDataClient
          callFrequencyCalculator = new CallFrequencyCalculator(new YoVariableRegistry("Mocap"), "MOCAP_");
          Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces();
 
+         System.out.println("\n\nNetwork adapters found:\n-----------------------------------");
+
          while (enumeration.hasMoreElements())
          {
             NetworkInterface networkInterface = enumeration.nextElement();
@@ -40,7 +42,7 @@ public class MocapDataClient
             System.out.println("Name: " + networkInterface.getDisplayName() + " Index: " + networkInterface.getIndex());
          }
 
-         System.out.println("Starting Multicast using Interface " + NETWORK_IF_TO_USE + "...");
+         System.out.println("\n>> Starting Multicast client on interface " + NETWORK_IF_TO_USE + "\n");
          socket = new MulticastSocket(port);
          socket.setSoTimeout(100);
          if (NETWORK_IF_TO_USE >= 0)
@@ -85,7 +87,7 @@ public class MocapDataClient
       {
          while (true)
          {
-//          ThreadTools.sleep(10);
+            //          ThreadTools.sleep(10);
             try
             {
                DatagramPacket packet;
@@ -110,19 +112,17 @@ public class MocapDataClient
             }
             catch (IOException e)
             {
-               System.err.println(
-                   "**MOCAP WARNING** - Socket Timeout - No Rigibodies are being transmitted from MOCAP SERVER. Make sure streaming is enabled!");
+//               System.err
+//                     .println("**MOCAP WARNING** - Socket Timeout - No Rigibodies are being transmitted from MOCAP SERVER. Make sure streaming is enabled!");
             }
          }
       }
    }
 
-
    public ArrayList<String> getAvailableModels()
    {
       return listOfModels;
    }
-
 
    public double getMocapDataReceivingFrequency()
    {
@@ -140,13 +140,13 @@ public class MocapDataClient
 
       if (System.currentTimeMillis() - lastTime > 5000)
       {
-         if (frequency < 95)    // Should always be around 99
+         if (frequency < 95) // Should always be around 99
          {
             System.err.println("**MOCAP WARNING** - Receiving data rate is less than 95Hz >>>> " + frequency);
          }
       }
 
-      ArrayList<MocapRigidbodiesListener>list = (ArrayList<MocapRigidbodiesListener>) listOfMocapRigidBodiesListeners.clone();
+      ArrayList<MocapRigidbodiesListener> list = (ArrayList<MocapRigidbodiesListener>) listOfMocapRigidBodiesListeners.clone();
       for (MocapRigidbodiesListener listener : list)
       {
          listener.updateRigidbodies(listOfRigidbodies);

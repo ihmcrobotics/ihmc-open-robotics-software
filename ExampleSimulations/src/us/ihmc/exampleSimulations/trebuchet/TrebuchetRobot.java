@@ -1,10 +1,9 @@
 package us.ihmc.exampleSimulations.trebuchet;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -119,17 +118,17 @@ public class TrebuchetRobot extends Robot
 
       /** ************************ Ball ********************************** */
 
-      ballJoint = new FloatingJoint("ball", "ball", new Vector3d(), this);
+      ballJoint = new FloatingJoint("ball", "ball", new Vector3D(), this);
       Link ball = createBallLink();
       ballJoint.setLink(ball);
       this.addRootJoint(ballJoint);
 
-      ballCenterExternalForcePoint = new ExternalForcePoint("ef_ball", new Vector3d(), this);
+      ballCenterExternalForcePoint = new ExternalForcePoint("ef_ball", new Vector3D(), this);
       ballJoint.addExternalForcePoint(ballCenterExternalForcePoint);
 
       /** ************************ Tower ********************************** */
 
-      xSliderJoint = new SliderJoint("x", new Vector3d(0.0, 0.0, WHEEL_RADIUS + BASE_HEIGHT / 2.0), this, Axis.X);
+      xSliderJoint = new SliderJoint("x", new Vector3D(0.0, 0.0, WHEEL_RADIUS + BASE_HEIGHT / 2.0), this, Axis.X);
       Link tower = createTowerLink();
       xSliderJoint.setLink(tower);
       this.addRootJoint(xSliderJoint);
@@ -138,12 +137,12 @@ public class TrebuchetRobot extends Robot
 
       /** ************************ Pole ********************************** */
 
-      pivotJoint = new PinJoint("pivot", new Vector3d(0.0, 0.0, TOWER_HEIGHT), this, Axis.Y);
+      pivotJoint = new PinJoint("pivot", new Vector3D(0.0, 0.0, TOWER_HEIGHT), this, Axis.Y);
       Link pole = createPoleLink();
       pivotJoint.setLink(pole);
       xSliderJoint.addJoint(pivotJoint);
 
-      poleTipExternalForcePoint = new ExternalForcePoint("ef_pole", new Vector3d(0.0, 0.0, POLE_BALLSIDE_LENGTH), this);
+      poleTipExternalForcePoint = new ExternalForcePoint("ef_pole", new Vector3D(0.0, 0.0, POLE_BALLSIDE_LENGTH), this);
       pivotJoint.addExternalForcePoint(poleTipExternalForcePoint);
       
       setInitialConditions();

@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 
@@ -18,9 +17,9 @@ import com.joptimizer.functions.LinearMultivariateRealFunction;
 import com.joptimizer.optimizers.JOptimizer;
 import com.joptimizer.optimizers.OptimizationRequest;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public abstract class ConvexOptimizationAdapterTest
 {

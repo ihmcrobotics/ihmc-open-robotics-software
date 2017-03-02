@@ -1,15 +1,14 @@
 package us.ihmc.tools.inputDevices.mouse3DJoystick;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
-import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -41,6 +40,6 @@ public class Mouse3DJoystickTest
    
    private String format(double value)
    {
-      return FormattingTools.getFormattedDecimal2D(FormattingTools.roundToSignificantFigures(value, 2));
+      return FormattingTools.getFormattedDecimal2D(MathTools.roundToSignificantFigures(value, 2));
    }
 }

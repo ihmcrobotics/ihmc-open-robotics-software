@@ -26,8 +26,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.border.TitledBorder;
 
-import us.ihmc.graphics3DAdapter.Graphics3DAdapter;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.Simulation;
@@ -88,6 +88,7 @@ public class SimulationDispatcherGUI
 
       frame.addWindowListener(new WindowAdapter()
       {
+         @Override
          public void windowClosing(WindowEvent e)
          {
             fileExit_actionPerformed();
@@ -250,6 +251,7 @@ public class SimulationDispatcherGUI
       JMenuItem exitMenuItem = new JMenuItem("Exit");
       exitMenuItem.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             fileExit_actionPerformed();
@@ -408,7 +410,7 @@ public class SimulationDispatcherGUI
       String[] vars = dispatchSim.getOutputStateVariableNames();
       for (int i = 0; i < vars.length; i++)
       {
-         YoVariable var = simulation.getVariable(vars[i]);
+         YoVariable<?> var = simulation.getVariable(vars[i]);
          if (var != null)
             varPanel.addVariable(var);
       }
@@ -480,6 +482,7 @@ public class SimulationDispatcherGUI
          alertChangeListenersTimer = new Timer("CombinedVarPanelTimer");
          alertChangeListenersTask = new TimerTask()
          {
+            @Override
             public void run()
             {
                if (panelToUpdate != null)

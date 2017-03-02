@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShape;
 
@@ -40,7 +40,8 @@ public class SimpleCollisionShapeWithLink extends SimpleCollisionShape implement
       if (link != null)
       {
          link.getParentJoint().getTransformToWorld(tempTransform);
-         transformToWorldToPack.multiply(tempTransform, shapeToLink);
+         transformToWorldToPack.set(tempTransform);
+         transformToWorldToPack.multiply(shapeToLink);
       }
       else
       {

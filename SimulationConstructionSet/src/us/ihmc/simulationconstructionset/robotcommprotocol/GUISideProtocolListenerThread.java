@@ -131,6 +131,7 @@ public class GUISideProtocolListenerThread implements Runnable
       pause = true;
    }
 
+   @Override
    public void run()
    {
       while (anim == Thread.currentThread())

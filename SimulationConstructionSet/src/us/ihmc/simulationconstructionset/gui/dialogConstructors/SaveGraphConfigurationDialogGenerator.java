@@ -45,16 +45,19 @@ public class SaveGraphConfigurationDialogGenerator implements SaveGraphConfigura
       }
    }
 
+   @Override
    public void setCurrentDirectory(File dir)
    {
       dataFileChooser.setCurrentDirectory(dir);
    }
 
+   @Override
    public void setCurrentDirectory(String dir)
    {
       dataFileChooser.setCurrentDirectory(new File(dir));
    }
 
+   @Override
    public void constructDialog()
    {
       guiEnablerAndDisabler.disableGUIComponents();

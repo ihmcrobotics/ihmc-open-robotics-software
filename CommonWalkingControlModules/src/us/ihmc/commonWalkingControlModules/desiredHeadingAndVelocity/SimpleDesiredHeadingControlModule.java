@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity;
 
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.RateBasedDesiredHeadingControlModule.DesiredHeadingFrame;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -135,7 +135,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       double error = desiredHeadingFinal.getDoubleValue() - desiredHeading.getDoubleValue();
       double maximumChangePerTick = maxHeadingDot.getDoubleValue() * controlDT;
 
-      double deltaHeading = MathTools.clipToMinMax(error, -maximumChangePerTick, maximumChangePerTick);
+      double deltaHeading = MathTools.clamp(error, -maximumChangePerTick, maximumChangePerTick);
 
       desiredHeading.set(desiredHeading.getDoubleValue() + deltaHeading);
    }
@@ -145,7 +145,7 @@ public class SimpleDesiredHeadingControlModule implements DesiredHeadingControlM
       double error = desiredHeadingFinal.getDoubleValue() - desiredHeading.getDoubleValue();
       double maximumChange = maxHeadingDot.getDoubleValue() * timeFromNow;
 
-      double deltaHeading = MathTools.clipToMinMax(error, -maximumChange, maximumChange);
+      double deltaHeading = MathTools.clamp(error, -maximumChange, maximumChange);
 
       return desiredHeading.getDoubleValue() + deltaHeading;
    }

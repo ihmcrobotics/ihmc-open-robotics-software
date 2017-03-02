@@ -10,12 +10,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 
 public class TimeScriptTest
@@ -153,6 +153,7 @@ public class TimeScriptTest
 
       TimeScriptCommand timeScriptCommandOne = new TimeScriptCommand()
       {
+         @Override
          public void doCommand()
          {  
             doubleVariable.set(valueOne);
@@ -167,6 +168,7 @@ public class TimeScriptTest
 
       TimeScriptCommand timeScriptCommandTwo = new TimeScriptCommand()
       {
+         @Override
          public void doCommand()
          {  
             doubleVariable.set(valueTwo);
@@ -180,6 +182,7 @@ public class TimeScriptTest
 
       TimeScriptCommand timeScriptCommandThree = new TimeScriptCommand()
       {
+         @Override
          public void doCommand()
          {  
             doubleVariable.set(valueThree);

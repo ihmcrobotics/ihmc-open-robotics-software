@@ -1,23 +1,22 @@
 package us.ihmc.simulationToolkit.controllers;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicCoordinateSystem;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -28,13 +27,13 @@ public class SimulateCutforceController implements RobotController
 
    private final ExternalForcePoint efpWrist;
    private final ExternalForcePoint efpHandControlFrame;
-   private final Point3d handControlFramePositionInWorld;
-   private final Vector3d wristToHandControlFrame;
-   private final Vector3d tangentVector;
-   private final Vector3d forceVector;
-   private final Vector3d climbingForceVector;
-   private final Vector3d xAxisVector;
-   private final Vector3d tangentionalVelocity;
+   private final Point3D handControlFramePositionInWorld;
+   private final Vector3D wristToHandControlFrame;
+   private final Vector3D tangentVector;
+   private final Vector3D forceVector;
+   private final Vector3D climbingForceVector;
+   private final Vector3D xAxisVector;
+   private final Vector3D tangentionalVelocity;
 
    private final DoubleYoVariable efpHandControlFrameVelocity;
    private final DoubleYoVariable efpForce;
@@ -66,12 +65,12 @@ public class SimulateCutforceController implements RobotController
 
       wristJoint = robot.getJoint(fullRobotModel.getHand(this.robotSide).getParentJoint().getName());
       transform = new RigidBodyTransform();
-      wristToHandControlFrame = new Vector3d();
-      tangentVector = new Vector3d();
-      forceVector = new Vector3d();
-      tangentionalVelocity = new Vector3d();
-      climbingForceVector = new Vector3d();
-      xAxisVector = new Vector3d(1.0, 0.0, 0.0);
+      wristToHandControlFrame = new Vector3D();
+      tangentVector = new Vector3D();
+      forceVector = new Vector3D();
+      tangentionalVelocity = new Vector3D();
+      climbingForceVector = new Vector3D();
+      xAxisVector = new Vector3D(1.0, 0.0, 0.0);
 
       efpHandControlFrameVelocity = new DoubleYoVariable("cutforceSimulatorVelocity", registry);
       efpForce = new DoubleYoVariable("cutforceSimulatorForce", registry);
@@ -91,7 +90,7 @@ public class SimulateCutforceController implements RobotController
 
       efpWrist = new ExternalForcePoint("wrist", sdfRobot);
       efpHandControlFrame = new ExternalForcePoint("tooltip", wristToHandControlFrame, sdfRobot);
-      handControlFramePositionInWorld = new Point3d();
+      handControlFramePositionInWorld = new Point3D();
 
       wristJoint.addExternalForcePoint(efpWrist);
       wristJoint.addExternalForcePoint(efpHandControlFrame);
@@ -168,7 +167,7 @@ public class SimulateCutforceController implements RobotController
 
    }
 
-   private Vector3d quadraticCutForceModel(ExternalForcePoint forcePoint)
+   private Vector3D quadraticCutForceModel(ExternalForcePoint forcePoint)
    {
 	   tangentVector.set(forcePoint.getVelocityVector());
 	   tangentionalVelocity.set(forcePoint.getVelocityVector());
@@ -207,7 +206,7 @@ public class SimulateCutforceController implements RobotController
    }
 
 
-   private Vector3d exponentialCutForceModel(ExternalForcePoint forcePoint)
+   private Vector3D exponentialCutForceModel(ExternalForcePoint forcePoint)
    {
 	   tangentVector.set(forcePoint.getVelocityVector());
 	   tangentionalVelocity.set(forcePoint.getVelocityVector());

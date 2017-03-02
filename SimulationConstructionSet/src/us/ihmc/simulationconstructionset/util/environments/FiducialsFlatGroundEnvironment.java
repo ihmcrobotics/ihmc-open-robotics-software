@@ -1,16 +1,12 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import us.ihmc.graphics3DDescription.appearance.YoAppearanceTexture;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.shapes.Box3d;
+import java.util.List;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-
-import javax.vecmath.Vector3d;
-import java.util.List;
 
 public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentInterface
 {
@@ -25,7 +21,7 @@ public class FiducialsFlatGroundEnvironment implements CommonAvatarEnvironmentIn
       double radius = 3.0;
       for (Fiducial fiducial : Fiducial.values)
       {
-         Vector3d position = new Vector3d(radius * Math.cos(angle), radius * Math.sin(angle), 1.7);
+         Vector3D position = new Vector3D(radius * Math.cos(angle), radius * Math.sin(angle), 1.7);
          CombinedTerrainObject3D fiducualTerrainObject = DefaultCommonAvatarEnvironment.addFiducial(position, angle, fiducial);
          combinedTerrainObject.addTerrainObject(fiducualTerrainObject);
 

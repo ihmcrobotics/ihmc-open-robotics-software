@@ -2,11 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets.sensing;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 
 public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacket>
 {
@@ -32,27 +31,27 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
       setDestination(PacketDestination.UI);
    }
    
-   public void setLocalizationPointMap(Point3d[] pointCloud)
+   public void setLocalizationPointMap(Point3D[] pointCloud)
    {
       localizationPointMap = new float[pointCloud.length*3];
       for (int i = 0; i < pointCloud.length; i++)
       {
-         Point3d point = pointCloud[i];
+         Point3D point = pointCloud[i];
          localizationPointMap[3 * i] = (float) point.getX();
          localizationPointMap[3 * i + 1] = (float) point.getY();
          localizationPointMap[3 * i + 2] = (float) point.getZ();
       }
    }
 
-   public Point3f[] getPointMap()
+   public Point3D32[] getPointMap()
    {
       
       int numberOfPoints = localizationPointMap.length/3;
       
-      Point3f[] points = new Point3f[numberOfPoints];
+      Point3D32[] points = new Point3D32[numberOfPoints];
       for(int i = 0; i < numberOfPoints; i++)
       {
-         Point3f point = new Point3f();
+         Point3D32 point = new Point3D32();
          point.setX(localizationPointMap[3 * i]);
          point.setY(localizationPointMap[3 * i + 1]);
          point.setZ(localizationPointMap[3 * i + 2]);

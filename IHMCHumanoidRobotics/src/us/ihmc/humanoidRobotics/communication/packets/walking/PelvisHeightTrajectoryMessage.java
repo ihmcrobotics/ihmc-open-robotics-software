@@ -1,19 +1,18 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import javax.vecmath.Vector3d;
+import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosExportedField;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import java.util.Random;
 
 @RosMessagePacket(documentation =
       "This mesage commands the controller to move the pelvis to a new height in world while going through the specified trajectory points."
@@ -140,7 +139,7 @@ public class PelvisHeightTrajectoryMessage extends Abstract1DTrajectoryMessage<P
    public PelvisHeightTrajectoryMessage transform(RigidBodyTransform transform)
    {
       PelvisHeightTrajectoryMessage transformedMessage = new PelvisHeightTrajectoryMessage(this);
-      Vector3d translation = new Vector3d();
+      Vector3D translation = new Vector3D();
       transform.getTranslation(translation);
       for (int trajectoryPointIndex = 0; trajectoryPointIndex < getNumberOfTrajectoryPoints(); trajectoryPointIndex++)
       {

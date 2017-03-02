@@ -5,8 +5,11 @@ root.StackOfBlocksRobot2*false*false
 root.StackOfBlocksRobot3*false*false
 root.StackOfBlocksRobot4*false*false
 root.StackOfBlocksRobot5*false*false
-root.StackOfBlocksRobot6*false*false
-root.StackOfBlocksRobot7*false*false
-root.StackOfBlocksRobot8*false*false
-root.StackOfBlocksRobot9*false*false
-root.BaseRobot*false*false
+root.GroundAsABoxRobot*false*false
+root.DefaultCollisionVisualizer*false*false
+root.DefaultCollisionVisualizer.CollisionOneBalls*false*false
+root.DefaultCollisionVisualizer.CollisionTwoBalls*false*false
+root.contactBallsBalls*false*false
+root.newCollisionBallsBalls*false*false
+root.ContactingExternalForcePointsVisualizer*false*false
+root.HybridImpulseSpringDamperCollisionHandler*false*false

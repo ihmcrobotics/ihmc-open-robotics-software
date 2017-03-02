@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -117,7 +116,7 @@ public class AlphaFilteredYoFramePoint extends YoFramePoint
       z.update(zUnfiltered);
    }
 
-   public void update(Point3d pointUnfiltered)
+   public void update(Point3D pointUnfiltered)
    {
       x.update(pointUnfiltered.getX());
       y.update(pointUnfiltered.getY());

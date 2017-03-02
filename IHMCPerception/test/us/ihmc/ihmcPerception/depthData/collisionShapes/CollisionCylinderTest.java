@@ -5,13 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class CollisionCylinderTest
 {
@@ -25,14 +24,14 @@ public class CollisionCylinderTest
       for (int i = 0; i < 1000000; i++)
       {
          double radius = -5.0 + 10.0 * random.nextDouble();
-         Vector2d vector = new Vector2d(random.nextDouble(), random.nextDouble());
+         Vector2D vector = new Vector2D(random.nextDouble(), random.nextDouble());
          vector.normalize();
          vector.scale(radius);
          
          double z = -5.0 +  10.0 * random.nextDouble();  
          
          
-         Point3d point = new Point3d(vector.getX(), vector.getY(), z);
+         Point3D point = new Point3D(vector.getX(), vector.getY(), z);
          assertTrue(cylinder.contains(point));
       }
    }
@@ -46,14 +45,14 @@ public class CollisionCylinderTest
       for (int i = 0; i < 1000000; i++)
       {
          double radius = (random.nextBoolean()?1.0:-1.0) * (5.0 + 10.0 * random.nextDouble());
-         Vector2d vector = new Vector2d(random.nextDouble(), random.nextDouble());
+         Vector2D vector = new Vector2D(random.nextDouble(), random.nextDouble());
          vector.normalize();
          vector.scale(radius);
          
          double z = (random.nextBoolean()?1.0:-1.0) * (5.0 + 10.0 * random.nextDouble());  
          
          
-         Point3d point = new Point3d(vector.getX(), vector.getY(), z);
+         Point3D point = new Point3D(vector.getX(), vector.getY(), z);
          assertFalse(cylinder.contains(point));
       }
    }

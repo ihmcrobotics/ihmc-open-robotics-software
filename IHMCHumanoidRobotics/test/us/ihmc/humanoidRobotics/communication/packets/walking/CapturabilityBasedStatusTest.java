@@ -8,41 +8,41 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Random;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.KryoStreamSerializer;
-import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class CapturabilityBasedStatusTest
 {
-   private static final Path TEST_ROOT_PATH = JUnitTools.deriveTestResourcesPath(CapturabilityBasedStatusTest.class);
+   private static final Path TEST_FILE_PATH = Paths.get("TestSerialize" + CapturabilityBasedStatus.class.getSimpleName() + ".ibag");
 
-   @Before
-   public void setUp()
+   @After
+   public void cleanUp()
    {
-      FileTools.ensureDirectoryExists(TEST_ROOT_PATH);
+      FileTools.deleteQuietly(TEST_FILE_PATH);
    }
-
+   
 	@ContinuousIntegrationTest(estimatedDuration = 0.4)
    @Test(timeout = 30000)
    public void testSerializeAndDeserialize() throws IOException
    {
-      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(Conversions.megabytesToBytes(10));
       kryoStreamSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
-      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(Conversions.megabytesToBytes(10));
       kryoStreamDeSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
       CapturabilityBasedStatus cbs = new CapturabilityBasedStatus(new Random());
@@ -61,25 +61,23 @@ public class CapturabilityBasedStatusTest
    public void testSerializeToFileAndDeserialize() throws IOException
    {
       Random random = new Random();
-      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamSerializer kryoStreamSerializer = new KryoStreamSerializer(Conversions.megabytesToBytes(10));
       kryoStreamSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
-      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(UnitConversions.megabytesToBytes(10));
+      KryoStreamDeSerializer kryoStreamDeSerializer = new KryoStreamDeSerializer(Conversions.megabytesToBytes(10));
       kryoStreamDeSerializer.registerClasses(new IHMCCommunicationKryoNetClassList());
 
       CapturabilityBasedStatus cbs1 = new CapturabilityBasedStatus(random);
       CapturabilityBasedStatus cbs2 = new CapturabilityBasedStatus(random);
       CapturabilityBasedStatus cbs3 = new CapturabilityBasedStatus(random);
 
-      Path testFilePath = TEST_ROOT_PATH.resolve("TestSerialize" + CapturabilityBasedStatus.class.getSimpleName() + ".ibag");
-
-      DataOutputStream fileDataOutputStream = FileTools.getFileDataOutputStream(testFilePath);
+      DataOutputStream fileDataOutputStream = FileTools.newFileDataOutputStream(TEST_FILE_PATH, DefaultExceptionHandler.PRINT_STACKTRACE);
       kryoStreamSerializer.write(fileDataOutputStream, cbs1);
       kryoStreamSerializer.write(fileDataOutputStream, cbs2);
       kryoStreamSerializer.write(fileDataOutputStream, cbs3);
       fileDataOutputStream.close();
 
-      DataInputStream fileDataInputStream = FileTools.getFileDataInputStream(testFilePath);
+      DataInputStream fileDataInputStream = FileTools.newFileDataInputStream(TEST_FILE_PATH);
       CapturabilityBasedStatus cbs1Out = (CapturabilityBasedStatus) kryoStreamDeSerializer.read(fileDataInputStream);
       CapturabilityBasedStatus cbs2Out = (CapturabilityBasedStatus) kryoStreamDeSerializer.read(fileDataInputStream);
       CapturabilityBasedStatus cbs3Out = (CapturabilityBasedStatus) kryoStreamDeSerializer.read(fileDataInputStream);

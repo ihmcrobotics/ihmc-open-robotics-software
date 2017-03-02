@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import us.ihmc.graphics3DAdapter.HeightMapWithNormals;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -18,13 +17,15 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private final double allowablePenetrationThickness;
    private final Graphics3DObject linkGraphics;
 
-   private final Point3d tempPoint3dForCheckInside = new Point3d(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private final Point3D tempPoint3dForCheckInside = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public PlanarRegionTerrainObject(PlanarRegion planarRegion, double allowablePenetrationThickness)
    {
       this.planarRegion = planarRegion;
       this.allowablePenetrationThickness = allowablePenetrationThickness;
       this.linkGraphics = setupLinkGraphics();
+
+      this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
    }
 
    @Override
@@ -41,7 +42,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       if (planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
       {
@@ -81,11 +82,11 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
-      tempPoint3dForCheckInside.x = x;
-      tempPoint3dForCheckInside.y = y;
-      tempPoint3dForCheckInside.z = z;
+      tempPoint3dForCheckInside.setX(x);
+      tempPoint3dForCheckInside.setY(y);
+      tempPoint3dForCheckInside.setZ(z);
 
       boolean isPointInside = planarRegion.isPointOnOrSlightlyBelow(tempPoint3dForCheckInside, allowablePenetrationThickness);
 

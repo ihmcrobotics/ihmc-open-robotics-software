@@ -2,16 +2,15 @@ package us.ihmc.kalman.imu.testCases;
 
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.kalman.imu.QuaternionBasedFullIMUKalmanFilter;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.robotController.RobotController;
 
@@ -419,8 +418,8 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
          q3_from_accel.set(quaternions[3]);
 
          double[] yawPitchRoll = new double[3];
-         Quat4d quaternion = new Quat4d(quaternions);
-         RotationTools.convertQuaternionToYawPitchRoll(quaternion, yawPitchRoll);
+         Quaternion quaternion = new Quaternion(quaternions);
+         YawPitchRollConversion.convertQuaternionToYawPitchRoll(quaternion, yawPitchRoll);
 
          //
          // Matrix euler = QuaternionTools.quat2euler(quaternions);
@@ -488,8 +487,8 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
          double[] eulerMatrix_2 = new double[3];
          DenseMatrix64F quaternionMatrix = new DenseMatrix64F(4, 1);
          quaternionBasedFullIMUKalmanFilterTwo.getQuaternion(quaternionMatrix);
-         MatrixTools.extractQuat4dFromEJMLVector(quaternion, quaternionMatrix, 0);
-         RotationTools.convertQuaternionToYawPitchRoll(quaternion, eulerMatrix_2);
+         quaternion.set(quaternionMatrix);
+         YawPitchRollConversion.convertQuaternionToYawPitchRoll(quaternion, eulerMatrix_2);
 
          estimated_q0_2.set(quaternionMatrix.get(0, 0));
          estimated_q1_2.set(quaternionMatrix.get(1, 0));
@@ -522,8 +521,8 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
          @SuppressWarnings("unused") double[] quat = new double[] {estimated_q0.getDoubleValue(), estimated_q1.getDoubleValue(), estimated_q2.getDoubleValue(), estimated_q3.getDoubleValue()};
 
          double[] eulerMatrix = new double[3];
-         MatrixTools.extractQuat4dFromEJMLVector(quaternion, quatMatrix, 0);
-         RotationTools.convertQuaternionToYawPitchRoll(quaternion, eulerMatrix);
+         quaternion.set(quatMatrix);
+         YawPitchRollConversion.convertQuaternionToYawPitchRoll(quaternion, eulerMatrix);
 
          estimated_yaw.set(eulerMatrix[2]);
          estimated_pitch.set(eulerMatrix[1]);
@@ -560,8 +559,8 @@ public class TestIMUKalmanFilterControllerJerryOne implements RobotController
       transformFromWorldToBody.invert();
 
       // Transform accelerations from world coordinates to body coordinates:
-      Vector3d qddBody = new Vector3d(robot.qdd_x.getDoubleValue(), robot.qdd_y.getDoubleValue(), (robot.qdd_z.getDoubleValue() + 9.81));
-      Vector3d wBody = new Vector3d(robot.qd_wx.getDoubleValue(), robot.qd_wy.getDoubleValue(), robot.qd_wz.getDoubleValue());
+      Vector3D qddBody = new Vector3D(robot.qdd_x.getDoubleValue(), robot.qdd_y.getDoubleValue(), (robot.qdd_z.getDoubleValue() + 9.81));
+      Vector3D wBody = new Vector3D(robot.qd_wx.getDoubleValue(), robot.qd_wy.getDoubleValue(), robot.qd_wz.getDoubleValue());
 
       transformFromWorldToBody.transform(qddBody);
       transformFromWorldToBody.transform(wBody);

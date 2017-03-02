@@ -16,15 +16,18 @@ public class YoGraphTargetListener implements DropTargetListener
       this.yoGraph = yoGraph;
    }
 
+   @Override
    public void dragEnter(DropTargetDragEvent dtde)
    {
    }
 
+   @Override
    public void dragExit(DropTargetEvent dte)
    {
 
    }
 
+   @Override
    public void dragOver(DropTargetDragEvent dtde)
    {
       YoGraph.setRecipientOfDrag(yoGraph);
@@ -35,6 +38,7 @@ public class YoGraphTargetListener implements DropTargetListener
       }
    }
 
+   @Override
    public void drop(DropTargetDropEvent dtde)
    {
       YoGraph.setRecipientOfDrag(yoGraph);
@@ -50,6 +54,7 @@ public class YoGraphTargetListener implements DropTargetListener
       }
    }
 
+   @Override
    public void dropActionChanged(DropTargetDragEvent dtde)
    {
       YoGraph.setActionPerformedByDragAndDrop(dtde.getDropAction());

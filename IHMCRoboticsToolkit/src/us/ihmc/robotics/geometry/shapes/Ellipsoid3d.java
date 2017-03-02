@@ -1,124 +1,102 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-public class Ellipsoid3d implements Shape3d
+public class Ellipsoid3d extends Shape3d<Ellipsoid3d>
 {
-   private RigidBodyTransform transform = new RigidBodyTransform();
-   private RigidBodyTransform inverseTransform = new RigidBodyTransform();
-   private double xRadius, yRadius, zRadius;
+   private Vector3D radius;
 
-   private final Point3d tempPoint3d = new Point3d();
+   private final Point3D tempPoint3d;
+
+   public Ellipsoid3d(Ellipsoid3d ellipsoid)
+   {
+      setPose(ellipsoid);
+      radius = new Vector3D(ellipsoid.getXRadius(), ellipsoid.getYRadius(), ellipsoid.getZRadius());
+      
+      tempPoint3d = new Point3D();
+   }
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius)
    {
-      this.xRadius = xRadius;
-      this.yRadius = yRadius;
-      this.zRadius = zRadius;
+      radius = new Vector3D(xRadius, yRadius, zRadius);
+      
+      tempPoint3d = new Point3D();
    }
 
    public Ellipsoid3d(double xRadius, double yRadius, double zRadius, RigidBodyTransform transform)
    {
-      this(xRadius, yRadius, zRadius);
-      this.transform.set(transform);
-      this.inverseTransform.set(transform);
-      this.inverseTransform.invert();
+      setPose(transform);
+      radius = new Vector3D(xRadius, yRadius, zRadius);
+      
+      tempPoint3d = new Point3D();
    }
 
-   public Ellipsoid3d(Ellipsoid3d ellipsoid)
+   public Ellipsoid3d(double xRadius, double yRadius, double zRadius, Pose pose)
    {
-      this(ellipsoid.getXRadius(), ellipsoid.getYRadius(), ellipsoid.getZRadius(), ellipsoid.transform);
+      setPose(pose);
+      radius = new Vector3D(xRadius, yRadius, zRadius);
+      
+      tempPoint3d = new Point3D();
    }
 
-   public void getCenter(Point3d centerToPack)
+   public void getCenter(Point3DBasics centerToPack)
    {
-      centerToPack.set(0.0, 0.0, 0.0);
-      transform.transform(centerToPack);
+      getPosition(centerToPack);
    }
    
-   public void getRadii(Vector3d radiiToPack)
+   public void getRadii(Vector3DBasics radiiToPack)
    {
-      radiiToPack.set(xRadius, yRadius, zRadius);
+      radiiToPack.set(radius);
    }
 
    public double getXRadius()
    {
-      return xRadius;
+      return radius.getX();
    }
 
    public void setXRadius(double xRadius)
    {
-      this.xRadius = xRadius;
+      radius.setX(xRadius);
    }
 
    public double getYRadius()
    {
-      return yRadius;
+      return radius.getY();
    }
 
    public void setYRadius(double yRadius)
    {
-      this.yRadius = yRadius;
+      radius.setY(yRadius);
    }
 
    public double getZRadius()
    {
-      return zRadius;
+      return radius.getZ();
    }
 
    public void setZRadius(double zRadius)
    {
-      this.zRadius = zRadius;
+      radius.setZ(zRadius);
    }
 
-   public void setTransform(RigidBodyTransform newTransform)
-   {
-      transform.set(newTransform);
-      inverseTransform.set(transform);
-      inverseTransform.invert();
-   }
-
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   public void applyTransform(RigidBodyTransform transform)
-   {
-      tempTransform.set(transform);
-      tempTransform.multiply(this.transform);
-      this.transform.set(tempTransform);
-      inverseTransform.set(this.transform);
-      inverseTransform.invert();
-   }
-
-   private final Point3d tempPointForDistance = new Point3d();
-   public double distance(Point3d point)
-   {
-      tempPointForDistance.set(point);
-      orthogonalProjection(tempPointForDistance);
-      return tempPointForDistance.distance(point);
-   }
-
-   public boolean checkIfInside(Point3d pointToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   @Override
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
       tempPoint3d.set(pointToCheck);
-      inverseTransform.transform(tempPoint3d);
-      boolean isInside = checkIfInsideLocal(tempPoint3d, closestPointToPack, normalToPack);
-      transform.transform(closestPointToPack);
-      transform.transform(normalToPack);
-
-      return isInside;
-   }
-
-   private boolean checkIfInsideLocal(Point3d pointToCheck, Point3d closestPointToPack, Vector3d normalToPack)
-   {
-      double scaledX = pointToCheck.getX() / xRadius;
-      double scaledY = pointToCheck.getY() / yRadius;
-      double scaledZ = pointToCheck.getZ() / zRadius;
-
+      double scaledX = tempPoint3d.getX() / radius.getX();
+      double scaledY = tempPoint3d.getY() / radius.getY();
+      double scaledZ = tempPoint3d.getZ() / radius.getZ();
+      
       double sumOfSquares = scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ;
-      boolean isInside = sumOfSquares <= 1.0;
-
+      boolean isInside1 = sumOfSquares <= 1.0;
+      
       if (sumOfSquares > 1e-10)
       {
          double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
@@ -132,73 +110,102 @@ public class Ellipsoid3d implements Shape3d
          scaledY = 0.0;
          scaledZ = 0.0;
       }
-
-      closestPointToPack.set(scaledX * xRadius, scaledY * yRadius, scaledZ * zRadius);
       
-      double normalX = 2.0 * closestPointToPack.getX() / (xRadius * xRadius);
-      double normalY = 2.0 * closestPointToPack.getY() / (yRadius * yRadius);
-      double normalZ = 2.0 * closestPointToPack.getZ() / (zRadius * zRadius);
-
+      closestPointToPack.set(scaledX * radius.getX(), scaledY * radius.getY(), scaledZ * radius.getZ());
+      
+      double normalX = 2.0 * closestPointToPack.getX() / (radius.getX() * radius.getX());
+      double normalY = 2.0 * closestPointToPack.getY() / (radius.getY() * radius.getY());
+      double normalZ = 2.0 * closestPointToPack.getZ() / (radius.getZ() * radius.getZ());
+      
       normalToPack.set(normalX, normalY, normalZ);
       normalToPack.normalize();
-
-      return isInside;
+      return isInside1;
    }
 
-   public boolean isInsideOrOnSurface(Point3d pointToCheck)
-   {
-      return isInsideOrOnSurface(pointToCheck, 0.0);
-   }
-
-   public boolean isInsideOrOnSurface(Point3d point, double epsilon)
+   @Override
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly point, double epsilon)
    {
       tempPoint3d.set(point);
-      inverseTransform.transform(tempPoint3d);
-      boolean isInside = isInsideOrOnSurfaceLocal(tempPoint3d, epsilon);
-
-      return isInside;
-   }
-
-   public boolean isInsideOrOnSurfaceLocal(Point3d pointToCheck, double epsilon)
-   {
-      double scaledX = pointToCheck.getX() / xRadius;
-      double scaledY = pointToCheck.getY() / yRadius;
-      double scaledZ = pointToCheck.getZ() / zRadius;
-
+      double scaledX = tempPoint3d.getX() / radius.getX();
+      double scaledY = tempPoint3d.getY() / radius.getY();
+      double scaledZ = tempPoint3d.getZ() / radius.getZ();
+      
       double sumOfSquares = scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ;
-
+      
       return sumOfSquares <= 1.0 + epsilon;
    }
 
-   public void orthogonalProjection(Point3d pointToCheckAndPack)
+   @Override
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
-      inverseTransform.transform(pointToCheckAndPack);
-      orthogonalProjectionLocal(pointToCheckAndPack);
-      transform.transform(pointToCheckAndPack);
+      tempPoint3d.set(point);
+      orthogonalProjectionShapeFrame(tempPoint3d);
+      return tempPoint3d.distance(point);
    }
-   
-   private void orthogonalProjectionLocal(Point3d pointToCheckAndPack)
-   {
-      double scaledX = pointToCheckAndPack.getX() / xRadius;
-      double scaledY = pointToCheckAndPack.getY() / yRadius;
-      double scaledZ = pointToCheckAndPack.getZ() / zRadius;
 
+   @Override
+   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
+   {
+      double scaledX = pointToCheckAndPack.getX() / radius.getX();
+      double scaledY = pointToCheckAndPack.getY() / radius.getY();
+      double scaledZ = pointToCheckAndPack.getZ() / radius.getZ();
+      
       double sumOfSquares = scaledX * scaledX + scaledY * scaledY + scaledZ * scaledZ;
       boolean isInside = sumOfSquares <= 1.0;
-
+      
       if (!isInside)
       {
          double scaleFactor = 1.0 / Math.sqrt(sumOfSquares);
          scaledX = scaledX * scaleFactor;
          scaledY = scaledY * scaleFactor;
          scaledZ = scaledZ * scaleFactor;
-         pointToCheckAndPack.set(scaledX * xRadius, scaledY * yRadius, scaledZ * zRadius);
+         pointToCheckAndPack.set(scaledX * radius.getX(), scaledY * radius.getY(), scaledZ * radius.getZ());
       }
    }
    
    @Override
+   public void set(Ellipsoid3d other)
+   {
+      if (this != other)
+      {
+         setPose(other);
+         radius.set(other.radius);
+      }
+   }
+
+   @Override
+   public void setToZero()
+   {
+      radius.set(0.0, 0.0, 0.0);
+   }
+
+   @Override
+   public void setToNaN()
+   {
+      radius.set(Double.NaN, Double.NaN, Double.NaN);
+   }
+
+   @Override
+   public boolean containsNaN()
+   {
+      return Double.isNaN(radius.getX()) || Double.isNaN(radius.getY()) || Double.isNaN(radius.getZ());
+   }
+
+   @Override
+   public boolean epsilonEquals(Ellipsoid3d other, double epsilon)
+   {
+      return radius.epsilonEquals(other.radius, epsilon);
+   }
+
+   @Override
    public String toString()
    {
-      return "xRadius = " + xRadius + ", yRadius = " + yRadius + ", zRadius = " + zRadius + ", \ntransform = " + transform + "\n";
+      return "radius = " + radius + ", \npose = " + getPoseString() + "\n";
+   }
+
+   @Override
+   public void applyTransform(Transform transform)
+   {
+      applyTransformToPose(transform);
    }
 }

@@ -10,11 +10,11 @@ public class ExampleInvalidFactory
    
    public Object createObject()
    {
-      FactoryTools.checkAllFactoryFieldsAreSet(this);
-      
-      // Incorrect, defaults need to be set before check
-      optionalField1.setDefaultValue(0.0);
+      // null is not allowed, use hasValue()
+      optionalField1.setDefaultValue(null);
       optionalField2.setDefaultValue(0.0);
+      
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
       
       requiredField1.get();
       requiredField2.get();

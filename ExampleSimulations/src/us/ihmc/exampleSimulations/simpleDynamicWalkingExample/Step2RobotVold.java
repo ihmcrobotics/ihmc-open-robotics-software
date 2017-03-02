@@ -1,10 +1,9 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.Graphics3DObject;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
@@ -42,7 +41,7 @@ public class Step2RobotVold extends Robot
       this.setGravity(-9.81);
       
       // Body
-      bodyJoint = new FloatingJoint("body", new Vector3d(0.0, 0.0, 0.0), this, true);
+      bodyJoint = new FloatingJoint("body", new Vector3D(0.0, 0.0, 0.0), this, true);
       bodyJoint.setDynamic(true);
       Link bodyLink = body();
       bodyJoint.setLink(bodyLink);
@@ -50,7 +49,7 @@ public class Step2RobotVold extends Robot
       bodyJoint.setPosition(0.0,0.0,legHeight);
       
       // Upper Joint
-      hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
+      hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, 0.0), this, Axis.Y);
       hipJoint.setDynamic(true);
       hipJoint.setLimitStops(0.0, 1.0, 1e6, 1e3);;
       Link upperLink = upperLink();
@@ -58,7 +57,7 @@ public class Step2RobotVold extends Robot
       bodyJoint.addJoint(hipJoint);
 
       // Lower Joint
-      kneeJoint = new SliderJoint("knee", new Vector3d(0.0, 0.0, -upperLinkLength), this, Axis.Z);
+      kneeJoint = new SliderJoint("knee", new Vector3D(0.0, 0.0, -upperLinkLength), this, Axis.Z);
       kneeJoint.setDynamic(true);
       kneeJoint.setLimitStops(0.0, 0.6, 1e9, 1e2);
       Link lowerLink = lowerLink();
@@ -66,7 +65,7 @@ public class Step2RobotVold extends Robot
       hipJoint.addJoint(kneeJoint);
       
       // Ground contact points
-      GroundContactPoint contactPoint = new GroundContactPoint("Foot", new Vector3d(0.0, 0.0, -lowerLinkLength), this);
+      GroundContactPoint contactPoint = new GroundContactPoint("Foot", new Vector3D(0.0, 0.0, -lowerLinkLength), this);
       kneeJoint.addGroundContactPoint(contactPoint);
       
       // Ground Model (If no GroundProfile is specified, then a flat ground will be simulated.)

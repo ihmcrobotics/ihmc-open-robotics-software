@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--AgileJ Ltd. (http://www.agilej.com)--><ajsv>
+    <diagram creationDate="2016-Sep-01 16:24" licenseGrade="multi" licenseeName="Tracie_Moore" licenseeOrganization="Personal" populationMethod="manual" version="1.8.3.v20160414-2044">
+        <filterScript>
+
+// no filter script yet defined for this class diagram
+// use CTRL+SPACE for completion suggestions
+hide all methods
+hide all fields
+
+</filterScript>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry" project="SDFLoader" xLocation="-690" yLocation="6"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision" project="SDFLoader" xLocation="1" yLocation="441"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual" project="SDFLoader" xLocation="-373" yLocation="462"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader" project="SDFLoader" xLocation="-277" yLocation="-410"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel" project="SDFLoader" xLocation="75" yLocation="-93"/>
+        <class className="us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper" modelMemberId="us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper" project="SDFLoader" xLocation="376" yLocation="460"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFGraphics3DObject" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFGraphics3DObject" project="SDFLoader" xLocation="-377" yLocation="-32"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFFullRobotModel" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFFullRobotModel" project="SDFLoader" xLocation="668" yLocation="147"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.AbstractSDFMesh" project="SDFLoader" xLocation="-83" yLocation="320"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor" project="SDFLoader" xLocation="849" yLocation="492"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader" project="SDFLoader" xLocation="152" yLocation="-315"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFParameters" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFParameters" project="SDFLoader" xLocation="-45" yLocation="46"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder" project="SDFLoader" xLocation="585" yLocation="326"/>
+        <class className="us.ihmc.modelFileLoaders.SdfLoader.SDFRobot" modelMemberId="us.ihmc.modelFileLoaders.SdfLoader.SDFRobot" project="SDFLoader" xLocation="577" yLocation="-178"/>
+    </diagram>
+</ajsv>

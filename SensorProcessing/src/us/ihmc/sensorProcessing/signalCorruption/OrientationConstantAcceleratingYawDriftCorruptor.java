@@ -1,13 +1,11 @@
 package us.ihmc.sensorProcessing.signalCorruption;
 
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RotationTools;
 
 
-public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalCorruptor<Matrix3d>
+public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalCorruptor<RotationMatrix>
 {
    public static final String SIMULATED_YAW_DRIFT_ACCELERATION = "SimulatedYawDriftAcceleration";
 
@@ -18,8 +16,8 @@ public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalC
    private final DoubleYoVariable yawDriftAngle;
    private final DoubleYoVariable corruptedIMUYawAngle;
 
-   private final Matrix3d yawDriftRotation = new Matrix3d();
-   private final Matrix3d tempRotation = new Matrix3d();
+   private final RotationMatrix yawDriftRotation = new RotationMatrix();
+   private final RotationMatrix tempRotation = new RotationMatrix();
 
    private final double dt;
 
@@ -42,16 +40,17 @@ public class OrientationConstantAcceleratingYawDriftCorruptor implements SignalC
       this.yawDriftAcceleration.set(yawDriftAcceleration);
    }
 
-   public void corrupt(Matrix3d signal)
+   public void corrupt(RotationMatrix signal)
    {
       yawDriftVelocity.add(yawDriftAcceleration.getDoubleValue() * dt);
       yawDriftAngle.add(yawDriftVelocity.getDoubleValue() * dt);
 
-      yawDriftRotation.rotZ(yawDriftAngle.getDoubleValue());
+      yawDriftRotation.setToYawMatrix(yawDriftAngle.getDoubleValue());
 
-      tempRotation.mul(yawDriftRotation, signal);
+      tempRotation.set(yawDriftRotation);
+      tempRotation.multiply(signal);
       signal.set(tempRotation);
       
-      corruptedIMUYawAngle.set(RotationTools.computeYaw(tempRotation));
+      corruptedIMUYawAngle.set(tempRotation.getYaw());
    }
 }

@@ -8,14 +8,10 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.posePlayback.PlaybackPoseSequence;
-import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceReader;
-import us.ihmc.avatar.posePlayback.PlaybackPoseSequenceWriter;
-import us.ihmc.avatar.posePlayback.PosePlaybackExampleSequence;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public abstract class PlaybackPoseSequenceDRCTest implements MultiRobotTestInterface
 {

@@ -9,11 +9,8 @@ import java.util.ArrayList;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.dataExporter.DataExporterDirectoryFinder;
-import us.ihmc.simulationconstructionset.dataExporter.DataExporterGraphCreator;
-import us.ihmc.simulationconstructionset.dataExporter.DataExporterReadmeWriter;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.time.DateTools;
 
 public abstract class AbstractDataExporter implements ActionListener
 {
@@ -49,6 +46,7 @@ public abstract class AbstractDataExporter implements ActionListener
       this.rootClassForDirectory = rootClassForDirectory;
    }
 
+   @Override
    public void actionPerformed(ActionEvent e)
    {
       File simulationRootDirectory = DataExporterDirectoryFinder.findSimulationRootLocation(rootClassForDirectory);
@@ -77,7 +75,7 @@ public abstract class AbstractDataExporter implements ActionListener
          return;
 
       // create label
-      String timeStamp = DateTools.getDateString() + "_" + DateTools.getTimeString();
+      String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
       String tagName = timeStamp + "_" + name;
 
       //      optionsPanel = new DataExporterOptionsDialog(tagName, simulationDataAndVideoDirectory.getAbsolutePath());

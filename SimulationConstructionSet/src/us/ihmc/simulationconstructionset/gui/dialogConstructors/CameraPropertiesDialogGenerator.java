@@ -24,6 +24,7 @@ public class CameraPropertiesDialogGenerator implements CameraPropertiesDialogCo
       this.cameraHolder = cameraHolder;
    }
 
+   @Override
    public void constructCameraPropertiesDialog(TrackCheckBox trackCheckBox, DollyCheckBox dollyCheckBox)
    {
       new CameraPropertiesDialog(parentContainer, frame, trackCheckBox, dollyCheckBox, cameraHolder);

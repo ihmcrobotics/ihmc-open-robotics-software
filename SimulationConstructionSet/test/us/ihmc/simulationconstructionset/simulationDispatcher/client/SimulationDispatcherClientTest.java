@@ -5,10 +5,10 @@ import java.rmi.registry.Registry;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.MANUAL)
 public class SimulationDispatcherClientTest
@@ -33,8 +33,9 @@ public class SimulationDispatcherClientTest
 
       String codebase = System.getProperty("java.rmi.server.codebase");
       if (codebase == "null")
-         ;
-      codebase = "";
+      {
+         codebase = "";
+      }
 
 //      String myCodeBase = "file://halo/Public/Projects/SimulationDispatcher/SimulationDispatcherTestClient.jar";
       String myCodeBase = "https://bengal.ihmc.us/svn/SimulationDispatcher/SimulationDispatcherTestClient/SimulationDispatcherTestClient.jar";

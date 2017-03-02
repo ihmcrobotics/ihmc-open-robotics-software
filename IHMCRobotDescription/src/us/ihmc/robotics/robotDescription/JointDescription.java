@@ -3,9 +3,8 @@ package us.ihmc.robotics.robotDescription;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class JointDescription implements RobotDescriptionNode
 {
@@ -13,7 +12,7 @@ public class JointDescription implements RobotDescriptionNode
    private final ArrayList<JointDescription> childrenJointDescriptions = new ArrayList<>();
 
    private JointDescription parentJoint;
-   private Vector3d offsetFromParentJoint = new Vector3d();
+   private Vector3D offsetFromParentJoint = new Vector3D();
 
    private LinkDescription link;
 
@@ -31,7 +30,7 @@ public class JointDescription implements RobotDescriptionNode
 
    private boolean isDynamic = true;
 
-   public JointDescription(String name, Vector3d offsetFromParentJoint)
+   public JointDescription(String name, Vector3D offsetFromParentJoint)
    {
       this.name = name;
       this.offsetFromParentJoint.set(offsetFromParentJoint);
@@ -48,7 +47,7 @@ public class JointDescription implements RobotDescriptionNode
       this.parentJoint = parentJoint;
    }
 
-   public void setOffsetFromParentJoint(Vector3d offset)
+   public void setOffsetFromParentJoint(Vector3D offset)
    {
       this.offsetFromParentJoint.set(offset);
    }
@@ -58,7 +57,7 @@ public class JointDescription implements RobotDescriptionNode
       return parentJoint;
    }
 
-   public void getOffsetFromParentJoint(Vector3d offsetToPack)
+   public void getOffsetFromParentJoint(Vector3D offsetToPack)
    {
       offsetToPack.set(offsetFromParentJoint);
    }
@@ -205,7 +204,7 @@ public class JointDescription implements RobotDescriptionNode
    
    public static void scaleChildrenJoint(ArrayList<JointDescription> childrenJoints, double factor, double massScalePower, List<String>  ignoreInertiaScaleJointList)
    {
-      Vector3d offsetFromParentJoint = new Vector3d();
+      Vector3D offsetFromParentJoint = new Vector3D();
       for(int i = 0; i < childrenJoints.size(); i++)
       {
          JointDescription description = childrenJoints.get(i);
@@ -244,7 +243,7 @@ public class JointDescription implements RobotDescriptionNode
       {
          SensorDescription sensor = sensors.get(i);
          RigidBodyTransform transformToJoint = sensor.getTransformToJoint();
-         Vector3d translation = new Vector3d();
+         Vector3D translation = new Vector3D();
          transformToJoint.getTranslation(translation);
          translation.scale(factor);
          transformToJoint.setTranslation(translation);
@@ -261,7 +260,7 @@ public class JointDescription implements RobotDescriptionNode
       {
          KinematicPointDescription kinematicPoint = allKinematicPoints.get(i);
          
-         Vector3d offset = kinematicPoint.getOffsetFromJoint();
+         Vector3D offset = kinematicPoint.getOffsetFromJoint();
          offset.scale(factor);
          kinematicPoint.setOffsetFromJoint(offset);
       }

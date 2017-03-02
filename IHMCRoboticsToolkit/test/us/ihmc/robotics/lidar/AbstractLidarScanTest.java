@@ -1,14 +1,15 @@
 package us.ihmc.robotics.lidar;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class AbstractLidarScanTest
 {
@@ -32,7 +33,7 @@ public class AbstractLidarScanTest
 
       for (int i = 0; i < ranges.length; i++)
       {
-         JUnitTools.assertTuple3dEquals(new Point3d(ranges[i], 0, 0), lidarScan.getPoint(i), eps);
+         EuclidCoreTestTools.assertTuple3DEquals(new Point3D(ranges[i], 0, 0), lidarScan.getPoint(i), eps);
       }
    }
 
@@ -57,11 +58,11 @@ public class AbstractLidarScanTest
       double sweepPerStep = (params.sweepYawMax - params.sweepYawMin) / (params.pointsPerSweep - 1);
       for (int i = 0; i < ranges.length; i++)
       {
-         Point3d p = new Point3d(ranges[i], 0, 0);
+         Point3D p = new Point3D(ranges[i], 0, 0);
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setRotationYawAndZeroTranslation(params.sweepYawMin + i * sweepPerStep);
          transform.transform(p);
-         JUnitTools.assertTuple3dEquals(p, lidarScan.getPoint(i), eps);
+         EuclidCoreTestTools.assertTuple3DEquals(p, lidarScan.getPoint(i), eps);
       }
    }
 
@@ -91,18 +92,18 @@ public class AbstractLidarScanTest
       double sweepPerStep = (sweepMax - sweepMin) / (numPoints - 1);
       for (int i = 0; i < ranges.length; i++)
       {
-         Point3d p = new Point3d(ranges[i], 0, 0);
+         Point3D p = new Point3D(ranges[i], 0, 0);
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setRotationYawAndZeroTranslation(sweepMin + i * sweepPerStep);
          transform.transform(p);
-         JUnitTools.assertTuple3dEquals(p, lidarScan.getPoint(i), eps);
+         EuclidCoreTestTools.assertTuple3DEquals(p, lidarScan.getPoint(i), eps);
       }
    }
 
    public RigidBodyTransform randomTransform()
    {
-      Quat4d rotate = new Quat4d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
-      Vector3d translate = new Vector3d(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
+      Quaternion rotate = new Quaternion(rand.nextDouble(), rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
+      Vector3D translate = new Vector3D(rand.nextDouble(), rand.nextDouble(), rand.nextDouble());
 
       return new RigidBodyTransform(rotate, translate);
    }

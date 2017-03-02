@@ -6,17 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-import javax.vecmath.Vector4d;
-import javax.vecmath.Vector4f;
-
 import org.ejml.alg.dense.misc.TransposeAlgs;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -25,19 +14,28 @@ import org.ejml.ops.MatrixIO;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.Vector4DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameTuple;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameTuple;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class MatrixTools
 {
-   public final static Matrix3d IDENTITY = new Matrix3d();
+   public final static Matrix3D IDENTITY = new Matrix3D();
 
    static
    {
@@ -551,35 +549,6 @@ public class MatrixTools
       return ret;
    }
 
-   public static void denseMatrixToMatrix3d(DenseMatrix64F denseMatrix, Matrix3d matrixToPack, int startRow, int startColumn)
-   {
-      for (int row = 0; row < 3; row++)
-      {
-         for (int column = 0; column < 3; column++)
-         {
-            matrixToPack.setElement(row, column, denseMatrix.get(row + startRow, column + startColumn));
-         }
-      }
-   }
-
-   public static void matrix3DToDenseMatrix(Matrix3d matrix, DenseMatrix64F denseMatrixToPack, int startRow, int startColumn)
-   {
-      for (int row = 0; row < 3; row++)
-      {
-         for (int column = 0; column < 3; column++)
-         {
-            denseMatrixToPack.unsafe_set(row + startRow, column + startColumn, matrix.getElement(row, column));
-         }
-      }
-   }
-
-   public static void denseMatrixToVector3d(DenseMatrix64F denseMatrix, Tuple3d vectorToPack, int startRow, int startColumn)
-   {
-      vectorToPack.setX(denseMatrix.get(startRow + 0, startColumn));
-      vectorToPack.setY(denseMatrix.get(startRow + 1, startColumn));
-      vectorToPack.setZ(denseMatrix.get(startRow + 2, startColumn));
-   }
-
    public static DenseMatrix64F mult(DenseMatrix64F A, DenseMatrix64F B)
    {
       DenseMatrix64F C = new DenseMatrix64F(A.getNumRows(), B.getNumCols());
@@ -603,7 +572,7 @@ public class MatrixTools
     * @param matrix
     * @param diagValues
     */
-   public static void setMatrixDiag(Matrix3d matrix, double[] diagValues)
+   public static void setMatrixDiag(Matrix3D matrix, double[] diagValues)
    {
       for (int i = 0; i < 3; i++)
       {
@@ -617,9 +586,9 @@ public class MatrixTools
     * @param vector1
     * @param vector2
     */
-   public static Matrix3d vectorTimesVectorTranspose(Vector3d vector1, Vector3d vector2)
+   public static Matrix3D vectorTimesVectorTranspose(Vector3DReadOnly vector1, Vector3DReadOnly vector2)
    {
-      Matrix3d matrix = new Matrix3d();
+      Matrix3D matrix = new Matrix3D();
 
       double[] array1 = new double[3];
       double[] array2 = new double[3];
@@ -643,12 +612,12 @@ public class MatrixTools
     *
     * @param vector
     */
-   public static Matrix3d vectorTimesVectorTranspose(Vector3d vector)
+   public static Matrix3D vectorTimesVectorTranspose(Vector3DReadOnly vector)
    {
       return vectorTimesVectorTranspose(vector, vector);
    }
 
-   public static void vectorToSkewSymmetricMatrix(DenseMatrix64F matrixToPack, Tuple3d tuple)
+   public static void vectorToSkewSymmetricMatrix(DenseMatrix64F matrixToPack, Tuple3DReadOnly tuple)
    {
       matrixToPack.set(0, 0, 0.0);
       matrixToPack.set(0, 1, -tuple.getZ());
@@ -663,28 +632,10 @@ public class MatrixTools
       matrixToPack.set(2, 2, 0.0);
    }
 
-   /**
-    * Converts a vector to tilde form (matrix implementation of cross product)
-    */
-   public static void toTildeForm(Matrix3d matrixToPack, Tuple3d p)
-   {
-      matrixToPack.setElement(0, 0, 0.0);
-      matrixToPack.setElement(0, 1, -p.getZ());
-      matrixToPack.setElement(0, 2, p.getY());
-
-      matrixToPack.setElement(1, 0, p.getZ());
-      matrixToPack.setElement(1, 1, 0.0);
-      matrixToPack.setElement(1, 2, -p.getX());
-
-      matrixToPack.setElement(2, 0, -p.getY());
-      matrixToPack.setElement(2, 1, p.getX());
-      matrixToPack.setElement(2, 2, 0.0);
-   }
-
    /*
     * M = \tilde{a} * \tilde{b}
     */
-   public static void setTildeTimesTilde(Matrix3d M, Tuple3d a, Tuple3d b)
+   public static void setTildeTimesTilde(Matrix3D M, Tuple3DReadOnly a, Tuple3DReadOnly b)
    {
       double axbx = a.getX() * b.getX();
       double ayby = a.getY() * b.getY();
@@ -701,17 +652,6 @@ public class MatrixTools
       M.setM20(a.getX() * b.getZ());
       M.setM21(a.getY() * b.getZ());
       M.setM22(-axbx - ayby);
-   }
-
-   public static void setDenseMatrixFromMatrix3d(int startRow, int startColumn, Matrix3d fromMatrix3d, DenseMatrix64F denseMatrix)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         for (int j = 0; j < 3; j++)
-         {
-            denseMatrix.set(i + startRow, j + startColumn, fromMatrix3d.getElement(i, j));
-         }
-      }
    }
 
    public static void setMatrixColumnToVector(int columnIndex, DenseMatrix64F Matrix, DenseMatrix64F vector)
@@ -736,11 +676,10 @@ public class MatrixTools
       DenseMatrix64F R = from.getR();
       Vector3D_F64 T = from.getT();
 
-      Matrix3d Rd = new Matrix3d();
-      denseMatrixToMatrix3d(R, Rd, 0, 0);
+      RotationMatrix Rd = new RotationMatrix(R);
 
       to.setRotation(Rd);
-      to.setTranslation(new Vector3d(T.x, T.y, T.z));
+      to.setTranslation(new Vector3D(T.x, T.y, T.z));
    }
 
    public static void transformFramePoint2dIntoColumnVector(DenseMatrix64F matrix, FramePoint2d framePoint)
@@ -791,19 +730,6 @@ public class MatrixTools
       frameVector.setY(matrix.get(0, 1));
    }
 
-   public static void setDenseMatrixFromTuple3d(DenseMatrix64F matrixToPack, Tuple3d tuple, int startRow, int startColumn)
-   {
-      matrixToPack.set(startRow + 0, startColumn, tuple.getX());
-      matrixToPack.set(startRow + 1, startColumn, tuple.getY());
-      matrixToPack.set(startRow + 2, startColumn, tuple.getZ());
-   }
-
-   public static void setDenseMatrixFromTuple2d(DenseMatrix64F matrixToPack, Tuple2d tuple, int startRow, int startColumn)
-   {
-      matrixToPack.set(startRow + 0, startColumn, tuple.getX());
-      matrixToPack.set(startRow + 1, startColumn, tuple.getY());
-   }
-
    public static int denseMatrixToArrayColumnMajor(DenseMatrix64F src, int srcStartRow, int srcStartCol, int numRows, int numCols, double[] dest,
          int destStartIndex)
    {
@@ -832,21 +758,14 @@ public class MatrixTools
       return denseMatrixToArrayColumnMajor(src, 0, 0, src.getNumRows(), src.getNumCols(), dest, 0);
    }
 
-   public static void tuple3dToArray(Tuple3d tuple, double[] dest, int startIndex)
-   {
-      dest[startIndex + 0] = tuple.getX();
-      dest[startIndex + 1] = tuple.getY();
-      dest[startIndex + 2] = tuple.getZ();
-   }
-
-   public static void extractTuple3dFromEJMLVector(Tuple3d tuple3d, DenseMatrix64F ejmlVector, int[] indices)
+   public static void extractTuple3dFromEJMLVector(Tuple3DBasics tuple3d, DenseMatrix64F ejmlVector, int[] indices)
    {
       tuple3d.setX(ejmlVector.get(indices[0], 0));
       tuple3d.setY(ejmlVector.get(indices[1], 0));
       tuple3d.setZ(ejmlVector.get(indices[2], 0));
    }
 
-   public static void extractTuple3dFromEJMLVector(Tuple3d tuple3d, DenseMatrix64F ejmlVector, int startIndex)
+   public static void extractTuple3dFromEJMLVector(Tuple3DBasics tuple3d, DenseMatrix64F ejmlVector, int startIndex)
    {
       tuple3d.setX(ejmlVector.get(startIndex + 0, 0));
       tuple3d.setY(ejmlVector.get(startIndex + 1, 0));
@@ -888,28 +807,11 @@ public class MatrixTools
       frameOrientation.set(x, y, z, w);
    }
 
-   public static void extractQuat4dFromEJMLVector(Quat4d quaternion, DenseMatrix64F matrix, int rowStart)
-   {
-      int index = rowStart;
-      double x = matrix.get(index++, 0);
-      double y = matrix.get(index++, 0);
-      double z = matrix.get(index++, 0);
-      double w = matrix.get(index++, 0);
-      quaternion.set(x, y, z, w);
-   }
-
-   public static void insertTuple3dIntoEJMLVector(Tuple3d tuple3d, DenseMatrix64F ejmlVector, int[] indices)
+   public static void insertTuple3dIntoEJMLVector(Tuple3DReadOnly tuple3d, DenseMatrix64F ejmlVector, int[] indices)
    {
       ejmlVector.set(indices[0], 0, tuple3d.getX());
       ejmlVector.set(indices[1], 0, tuple3d.getY());
       ejmlVector.set(indices[2], 0, tuple3d.getZ());
-   }
-
-   public static void insertTuple3dIntoEJMLVector(Tuple3d tuple3d, DenseMatrix64F ejmlVector, int startIndex)
-   {
-      ejmlVector.set(startIndex + 0, 0, tuple3d.getX());
-      ejmlVector.set(startIndex + 1, 0, tuple3d.getY());
-      ejmlVector.set(startIndex + 2, 0, tuple3d.getZ());
    }
 
    public static void insertFrameTupleIntoEJMLVector(FrameTuple<?, ?> frameTuple, DenseMatrix64F ejmlVector, int startIndex)
@@ -942,15 +844,6 @@ public class MatrixTools
       matrix.set(index++, 0, frameOrientation.getQy());
       matrix.set(index++, 0, frameOrientation.getQz());
       matrix.set(index++, 0, frameOrientation.getQs());
-   }
-
-   public static void insertQuat4dIntoEJMLVector(DenseMatrix64F matrix, Quat4d quaternion, int rowStart)
-   {
-      int index = rowStart;
-      matrix.set(index++, 0, quaternion.getX());
-      matrix.set(index++, 0, quaternion.getY());
-      matrix.set(index++, 0, quaternion.getZ());
-      matrix.set(index++, 0, quaternion.getW());
    }
 
    public static <T> int computeIndicesIntoVector(List<T> keys, Map<T, Integer> indices, Map<T, Integer> sizes)
@@ -996,22 +889,6 @@ public class MatrixTools
       CommonOps.extract(bigVector, rowStartIndex, rowStartIndex + stateSize, 0, 1, vectorBlockToPack, 0, 0);
    }
 
-   public static boolean isIdentity(Matrix3d matrix3d, double tolerance)
-   {
-      for (int i = 0; i < 3; i++)
-      {
-         for (int j = 0; j < 3; j++)
-         {
-            double expectedValue = i == j ? 1.0 : 0.0;
-            double element = matrix3d.getElement(i, j);
-            if (Math.abs(expectedValue - element) > tolerance)
-               return false;
-         }
-      }
-
-      return true;
-   }
-
    public static String denseMatrixToString(DenseMatrix64F mat)
    {
       ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -1020,7 +897,7 @@ public class MatrixTools
       return stream.toString();
    }
 
-   public static void multOuter(Matrix3d result, Vector3d vector)
+   public static void multOuter(Matrix3D result, Vector3DReadOnly vector)
    {
       double x = vector.getX();
       double y = vector.getY();
@@ -1048,7 +925,7 @@ public class MatrixTools
     * @param matrix
     * @param point
     */
-   public static void mult(DenseMatrix64F matrix, Point3d point)
+   public static void mult(DenseMatrix64F matrix, Point3DBasics point)
    {
       if (matrix.numCols != 3 || matrix.numRows != 3)
       {
@@ -1066,29 +943,9 @@ public class MatrixTools
    /**
     * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be 3x3.
     * @param matrix
-    * @param point
-    */
-   public static void mult(DenseMatrix64F matrix, Point3f point)
-   {
-      if (matrix.numCols != 3 || matrix.numRows != 3)
-      {
-         throw new RuntimeException("Improperly sized matrices.");
-      }
-      double x = point.getX();
-      double y = point.getY();
-      double z = point.getZ();
-
-      point.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z));
-      point.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z));
-      point.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z));
-   }
-
-   /**
-    * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be 3x3.
-    * @param matrix
     * @param vector
     */
-   public static void mult(DenseMatrix64F matrix, Vector3d vector)
+   public static void mult(DenseMatrix64F matrix, Vector3DBasics vector)
    {
       if (matrix.numCols != 3 || matrix.numRows != 3)
       {
@@ -1104,31 +961,11 @@ public class MatrixTools
    }
 
    /**
-    * Multiply a 3x3 matrix by a 3x1 vector. Since result is stored in vector, the matrix must be 3x3.
-    * @param matrix
-    * @param vector
-    */
-   public static void mult(DenseMatrix64F matrix, Vector3f vector)
-   {
-      if (matrix.numCols != 3 || matrix.numRows != 3)
-      {
-         throw new RuntimeException("Improperly sized matrices.");
-      }
-      float x = vector.getX();
-      float y = vector.getY();
-      float z = vector.getZ();
-
-      vector.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z));
-      vector.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z));
-      vector.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z));
-   }
-
-   /**
     * Multiply a 4x4 matrix by a 4x1 vector. Since result is stored in vector, the matrix must be 4x4.
     * @param matrix
     * @param vector
     */
-   public static void mult(DenseMatrix64F matrix, Vector4d vector)
+   public static void mult(DenseMatrix64F matrix, Vector4DBasics vector)
    {
       if (matrix.numCols != 4 || matrix.numRows != 4)
       {
@@ -1137,34 +974,12 @@ public class MatrixTools
       double x = vector.getX();
       double y = vector.getY();
       double z = vector.getZ();
-      double w = vector.getW();
+      double s = vector.getS();
 
-      vector.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w);
-      vector.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w);
-      vector.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w);
-      vector.setW(matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w);
-   }
-
-   /**
-    * Multiply a 4x4 matrix by a 4x1 vector. Since result is stored in vector, the matrix must be 4x4.
-    * @param matrix
-    * @param vector
-    */
-   public static void mult(DenseMatrix64F matrix, Vector4f vector)
-   {
-      if (matrix.numCols != 4 || matrix.numRows != 4)
-      {
-         throw new RuntimeException("Improperly sized matrices.");
-      }
-      float x = vector.getX();
-      float y = vector.getY();
-      float z = vector.getZ();
-      float w = vector.getW();
-
-      vector.setX((float) (matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * w));
-      vector.setY((float) (matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * w));
-      vector.setZ((float) (matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * w));
-      vector.setW((float) (matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * w));
+      vector.setX(matrix.get(0, 0) * x + matrix.get(0, 1) * y + matrix.get(0, 2) * z + matrix.get(0, 3) * s);
+      vector.setY(matrix.get(1, 0) * x + matrix.get(1, 1) * y + matrix.get(1, 2) * z + matrix.get(1, 3) * s);
+      vector.setZ(matrix.get(2, 0) * x + matrix.get(2, 1) * y + matrix.get(2, 2) * z + matrix.get(2, 3) * s);
+      vector.setS(matrix.get(3, 0) * x + matrix.get(3, 1) * y + matrix.get(3, 2) * z + matrix.get(3, 3) * s);
    }
 
    public static void removeRow(DenseMatrix64F matrixToRemoveRowTo, int indexOfRowToRemove)
@@ -1234,6 +1049,15 @@ public class MatrixTools
       }
    }
 
+   /**
+    * <p>
+    * Scales the elements of {@param column} of {@param matrix} by the value {@param alpha}.
+    * </p>
+    *
+    * @param alpha value to scale by
+    * @param column column to scale
+    * @param matrix matrix modify
+    */
    public static void scaleColumn(double alpha, int column, DenseMatrix64F matrix)
    {
       if( column < 0 || column >= matrix.getNumCols())
@@ -1243,6 +1067,15 @@ public class MatrixTools
          matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
    }
 
+   /**
+    * <p>
+    * Scales the elements of {@param row} of {@param matrix} by the value {@param alpha}.
+    * </p>
+    *
+    * @param alpha value to scale by
+    * @param row row to scale
+    * @param matrix matrix modify
+    */
    public static void scaleRow(double alpha, int row, DenseMatrix64F matrix)
    {
       if( row < 0 || row >= matrix.getNumRows())
@@ -1251,7 +1084,33 @@ public class MatrixTools
       for (int column = 0; column < matrix.getNumCols(); column++)
          matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
    }
-   
+
+   /**
+    * <p>
+    * Zeros the elements of {@param column} of {@param matrix}.
+    * </p>
+    *
+    * @param column column to scale
+    * @param matrix matrix modify
+    */
+   public static void zeroColumn(int column, DenseMatrix64F matrix)
+   {
+      scaleColumn(0.0, column, matrix);
+   }
+
+   /**
+    * <p>
+    * Zeros the elements of {@param row} of {@param matrix}.
+    * </p>
+    *
+    * @param row row to scale
+    * @param matrix matrix modify
+    */
+   public static void zeroRow(int row, DenseMatrix64F matrix)
+   {
+      scaleRow(0.0, row, matrix);
+   }
+
    public static void printJavaForConstruction(String name, DenseMatrix64F matrix)
    {
       StringBuffer stringBuffer = new StringBuffer();

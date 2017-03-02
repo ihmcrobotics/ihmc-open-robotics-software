@@ -10,7 +10,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.acsell.hardware.configuration.AcsellNetworkParameters;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -19,6 +18,7 @@ import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PeriodicParameters;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.tools.thread.ThreadTools;

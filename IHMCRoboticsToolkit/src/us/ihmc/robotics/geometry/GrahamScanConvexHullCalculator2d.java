@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import javax.vecmath.Point2d;
-
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 
 /**
  * Adapted from http://algs4.cs.princeton.edu/99hull/GrahamScan.java.html
@@ -22,17 +22,17 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
  */
 public class GrahamScanConvexHullCalculator2d
 {
-   private final Deque<Point2d> hull = new ArrayDeque<Point2d>();
+   private final Deque<Point2D> hull = new ArrayDeque<Point2D>();
    private final PolarOrderComparator polarOrderComparatorComparator = new PolarOrderComparator();
    private final YThenXComparator yThenXComparator = new YThenXComparator();
 
    public static GrahamScanConvexHullCalculator2d createFromPointList(double[][] pointList)
    {
       int numberOfPoints = pointList.length;
-      ArrayList<Point2d> points = new ArrayList<Point2d>(numberOfPoints);
+      ArrayList<Point2D> points = new ArrayList<Point2D>(numberOfPoints);
       for (int i = 0; i < numberOfPoints; i++)
       {
-         points.add(new Point2d(pointList[i]));
+         points.add(new Point2D(pointList[i]));
       }
 
       return new GrahamScanConvexHullCalculator2d(points);
@@ -40,11 +40,11 @@ public class GrahamScanConvexHullCalculator2d
    
 
    
-   public GrahamScanConvexHullCalculator2d(List<Point2d> pointList)
+   public GrahamScanConvexHullCalculator2d(List<Point2D> pointList)
    {
       // defensive copy
       int N = pointList.size();
-      Point2d[] points = new Point2d[N];
+      Point2D[] points = new Point2D[N];
       for (int i = 0; i < N; i++)
       {
          points[i] = pointList.get(i);
@@ -86,7 +86,7 @@ public class GrahamScanConvexHullCalculator2d
       // Graham scan; note that points[N-1] is extreme point different from points[0]
       for (int i = k2; i < N; i++)
       {
-         Point2d top = hull.pop();
+         Point2D top = hull.pop();
          while (ccw(hull.peek(), top, points[i]) <= 0)
          {
             top = hull.pop();
@@ -100,10 +100,10 @@ public class GrahamScanConvexHullCalculator2d
    }
 
    // return extreme points on convex hull in counterclockwise order as an Iterable
-   public Iterable<Point2d> hull()
+   public Iterable<Point2D> hull()
    {
-      Deque<Point2d> s = new ArrayDeque<Point2d>();
-      for (Point2d p : hull)
+      Deque<Point2D> s = new ArrayDeque<Point2D>();
+      for (Point2D p : hull)
       {
          s.push(p);
       }
@@ -118,9 +118,9 @@ public class GrahamScanConvexHullCalculator2d
       if (N <= 2)
          return true;
 
-      Point2d[] points = new Point2d[N];
+      Point2D[] points = new Point2D[N];
       int n = 0;
-      for (Point2d p : hull())
+      for (Point2D p : hull())
       {
          points[n++] = p;
       }
@@ -137,7 +137,7 @@ public class GrahamScanConvexHullCalculator2d
    }
 
 
-   public static boolean equals(Point2d p1, Point2d p2)
+   public static boolean equals(Point2D p1, Point2D p2)
    {
       if (p2 == p1)
          return true;
@@ -151,7 +151,7 @@ public class GrahamScanConvexHullCalculator2d
 
    // is a->b->c a counter-clockwise turn?
    // -1 if clockwise, +1 if counter-clockwise, 0 if collinear
-   public static int ccw(Point2d a, Point2d b, Point2d c)
+   public static int ccw(Point2D a, Point2D b, Point2D c)
    {
       double area2 = (b.getX() - a.getX()) * (c.getY() - a.getY()) - (b.getY() - a.getY()) * (c.getX() - a.getX());
       if (area2 < 0)
@@ -164,11 +164,11 @@ public class GrahamScanConvexHullCalculator2d
 
 
    // compare other points relative to polar angle (between 0 and 2pi) they make with this Point
-   private class PolarOrderComparator implements Comparator<Point2d>
+   private class PolarOrderComparator implements Comparator<Point2D>
    {
-      private Point2d point;
+      private Point2D point;
 
-      public int compare(Point2d q1, Point2d q2)
+      public int compare(Point2D q1, Point2D q2)
       {
          double dx1 = q1.getX() - point.getX();
          double dy1 = q1.getY() - point.getY();
@@ -194,15 +194,15 @@ public class GrahamScanConvexHullCalculator2d
          // Note: ccw() recomputes dx1, dy1, dx2, and dy2
       }
 
-      public void set(Point2d point)
+      public void set(Point2D point)
       {
          this.point = point;
       }
    }
 
-   private static class YThenXComparator implements Comparator<Point2d>
+   private static class YThenXComparator implements Comparator<Point2D>
    {
-      public int compare(Point2d o1, Point2d o2)
+      public int compare(Point2D o1, Point2D o2)
       {
          if (o1.getY() < o2.getY())
             return -1;
@@ -224,7 +224,7 @@ public class GrahamScanConvexHullCalculator2d
 
       Random random = new Random(251253L);
       int size = 8;
-      ArrayList<Point2d> points = new ArrayList<Point2d>(size);
+      ArrayList<Point2D> points = new ArrayList<Point2D>(size);
 
       int nTests = 1000000;
       for (int testNumber = 0; testNumber < nTests; testNumber++)
@@ -233,7 +233,7 @@ public class GrahamScanConvexHullCalculator2d
          {
             double x = random.nextDouble();
             double y = random.nextDouble();
-            points.add(new Point2d(x, y));
+            points.add(new Point2D(x, y));
          }
 
          long startTime = System.nanoTime();
@@ -255,11 +255,11 @@ public class GrahamScanConvexHullCalculator2d
       System.out.println("mean time millis = " + mean);
    }
 
-   public List<Point2d> getClockwiseOrderedListOfPoints()
+   public List<Point2D> getClockwiseOrderedListOfPoints()
    {
-      LinkedList<Point2d> ret = new LinkedList<Point2d>();
+      LinkedList<Point2D> ret = new LinkedList<Point2D>();
 
-      for (Point2d point : hull())
+      for (Point2D point : hull())
       {
          ret.addLast(point);
       }

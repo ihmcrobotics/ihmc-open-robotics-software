@@ -31,6 +31,7 @@ public class MediaCaptureAction extends AbstractAction
       constructor.createVideo(file);
    }
 
+   @Override
    public void actionPerformed(ActionEvent event)
    {
       constructor.constructDialog();

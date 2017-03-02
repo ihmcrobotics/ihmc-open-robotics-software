@@ -54,7 +54,7 @@ public class JointspaceHeadControlState extends HeadControlState
          if (jointsOriginal.length != command.getNumberOfJoints())
             System.err.println("Wrong number of neck joints: expected " + jointsOriginal.length + " got " + command.getNumberOfJoints());
          else
-            System.err.println("Neck comamnd out of joint limits!");
+            System.err.println("Neck command out of joint limits!");
          return false;
       }
 

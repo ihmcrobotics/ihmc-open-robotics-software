@@ -1,9 +1,8 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.Axis;
 
 public class UniversalJoint extends PinJoint
@@ -14,11 +13,11 @@ public class UniversalJoint extends PinJoint
    private static final long serialVersionUID = 3428274232426974681L;
    private PinJoint joint2;
 
-   public UniversalJoint(String jname1, String jname2, Vector3d offset, Robot rob, Axis firstAxis, Axis secondAxis)
+   public UniversalJoint(String jname1, String jname2, Vector3D offset, Robot rob, Axis firstAxis, Axis secondAxis)
    {
       super(jname1, offset, rob, firstAxis);
 
-      joint2 = new PinJoint(jname2, new Vector3d(), rob, secondAxis);
+      joint2 = new PinJoint(jname2, new Vector3D(), rob, secondAxis);
 
       // super.addJoint(joint2); // This crashes.  Instead, add the joint manually:
 
@@ -42,11 +41,13 @@ public class UniversalJoint extends PinJoint
       return this.joint2;
    }
 
+   @Override
    public void addJoint(Joint nextJoint)
    {
       joint2.addJoint(nextJoint);
    }
 
+   @Override
    public void setLink(Link l)
    {
       // Set this joints real link to a null link and set the second Joints link to the given link...
@@ -59,26 +60,31 @@ public class UniversalJoint extends PinJoint
       joint2.setLink(l);
    }
 
+   @Override
    public void addCameraMount(CameraMount mount)
    {
       joint2.addCameraMount(mount);
    }
    
+   @Override
    public void addIMUMount(IMUMount mount)
    {
       joint2.addIMUMount(mount);
    }
 
+   @Override
    public void addKinematicPoint(KinematicPoint point)
    {
       joint2.addKinematicPoint(point);
    }
 
+   @Override
    public void addGroundContactPoint(GroundContactPoint point)
    {
       joint2.addGroundContactPoint(point);
    }
 
+   @Override
    public void addExternalForcePoint(ExternalForcePoint point)
    {
       joint2.addExternalForcePoint(point);
@@ -119,6 +125,7 @@ public class UniversalJoint extends PinJoint
          joint2.setDamping(b_damp);
    }
 
+   @Override
    public void setDamping(double b_damp)
    {
       super.setDamping(b_damp);
@@ -131,6 +138,7 @@ public class UniversalJoint extends PinJoint
       joint2.setInitialState(q2_init, qd2_init);
    }
 
+   @Override
    public void getState(double[] state)
    {
       state[0] = q.getDoubleValue();
@@ -139,17 +147,20 @@ public class UniversalJoint extends PinJoint
       state[3] = joint2.qd.getDoubleValue();
    }
 
-   public void getRotationToWorld(Matrix3d rotation)
+   @Override
+   public void getRotationToWorld(RotationMatrix rotation)
    {
       joint2.transformToNext.getRotation(rotation);
    }
 
-   public void getRotationToWorld(Quat4d rotation)
+   @Override
+   public void getRotationToWorld(Quaternion rotation)
    {
       joint2.transformToNext.getRotation(rotation);
    }
 
-   public void getTranslationToWorld(Vector3d translation)
+   @Override
+   public void getTranslationToWorld(Vector3D translation)
    {
       joint2.transformToNext.getTranslation(translation);
    }

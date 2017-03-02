@@ -2,8 +2,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -40,7 +39,7 @@ public class FootstepTools
       FramePose footstepPose = new FramePose(worldFrame, footstepData.getLocation(), footstepData.getOrientation());
       PoseReferenceFrame footstepPoseFrame = new PoseReferenceFrame("footstepPoseFrame", footstepPose);
 
-      List<Point2d> contactPoints = footstepData.getPredictedContactPoints();
+      List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
       if (contactPoints != null && contactPoints.size() == 0)
          contactPoints = null;
 
@@ -58,8 +57,8 @@ public class FootstepTools
          footstep = new Footstep(id, rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
       }
 
-      footstep.trajectoryType = trajectoryType;
-      footstep.swingHeight = footstepData.swingHeight;
+      footstep.setTrajectoryType(trajectoryType);
+      footstep.setSwingHeight(footstepData.swingHeight);
       switch (footstepData.getOrigin())
       {
       case AT_ANKLE_FRAME:

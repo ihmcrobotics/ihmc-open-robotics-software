@@ -1,11 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Matrix3d;
-
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.geometry.transformables.TransformableMatrix3d;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -13,9 +12,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * This method checks for one matrix argument.
  *
  */
-public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, TransformableMatrix3d>
+public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Matrix3D>
 {
-   private final TransformableMatrix3d matrix;
+   private final Matrix3D matrix;
 
    public FrameMatrix3D()
    {
@@ -24,7 +23,7 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Transforma
 
    public FrameMatrix3D(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new TransformableMatrix3d());
+      super(referenceFrame, new Matrix3D());
       this.matrix = this.getGeometryObject();
    }
 
@@ -34,7 +33,7 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Transforma
       setIncludingFrame(frameMatrix3D);
    }
 
-   public FrameMatrix3D(ReferenceFrame referenceFrame, Matrix3d matrix)
+   public FrameMatrix3D(ReferenceFrame referenceFrame, Matrix3DReadOnly matrix)
    {
       this();
       setIncludingFrame(referenceFrame, matrix);
@@ -46,7 +45,7 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Transforma
       matrix.set(frameMatrix3D.matrix);
    }
 
-   public void set(Matrix3d matrix)
+   public void set(Matrix3DReadOnly matrix)
    {
       this.matrix.set(matrix);
    }
@@ -117,7 +116,7 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Transforma
       matrix.set(frameMatrix3D.matrix);
    }
 
-   public void setIncludingFrame(ReferenceFrame referenceFrame, Matrix3d matrix)
+   public void setIncludingFrame(ReferenceFrame referenceFrame, Matrix3DReadOnly matrix)
    {
       this.referenceFrame = referenceFrame;
       this.matrix.set(matrix);
@@ -169,7 +168,7 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Transforma
       return matrix.getElement(row, column);
    }
 
-   public void getMatrix(Matrix3d matrixToPack)
+   public void getMatrix(Matrix3DBasics matrixToPack)
    {
       matrixToPack.set(matrix);
    }
@@ -181,7 +180,7 @@ public class FrameMatrix3D extends AbstractFrameObject<FrameMatrix3D, Transforma
 
    public void getDenseMatrix(DenseMatrix64F matrixToPack, int startRow, int startColumn)
    {
-      MatrixTools.matrix3DToDenseMatrix(matrix, matrixToPack, startRow, startColumn);
+      matrix.get(startRow, startColumn, matrixToPack);
    }
 
    /**

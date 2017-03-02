@@ -22,8 +22,8 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    private final ArrayList<DoDisconnectListener> doDisconnectListeners = new ArrayList<DoDisconnectListener>();
    private final ArrayList<CreatedNewRegistriesListener> createdNewRegistryListeners = new ArrayList<CreatedNewRegistriesListener>();
 
-   private final LinkedHashMap<YoVariable, Integer> allVariablesIndexMap = new LinkedHashMap<YoVariable, Integer>();
-   private final ArrayList<YoVariable> sendVariables = new ArrayList<YoVariable>();
+   private final LinkedHashMap<YoVariable<?>, Integer> allVariablesIndexMap = new LinkedHashMap<>();
+   private final ArrayList<YoVariable<?>> sendVariables = new ArrayList<>();
 
    private final LinkedHashMap<YoVariableRegistry, Integer> registryIndexMap = new LinkedHashMap<YoVariableRegistry, Integer>();
    private final ArrayList<YoVariableRegistry> allRegistries = new ArrayList<YoVariableRegistry>();
@@ -48,12 +48,14 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       this.receivedDataListener = receivedDataListener;
    }
 
+   @Override
    public void doHello(String name, String info)
    {
       System.out.println("Received Hello from Robot " + name + ". Message: " + info);
       connected = true;
    }
 
+   @Override
    public void doAllRegistriesAndVariables(String[] registryNames, String[][] variableNames, float[][] initialValues)
    {
       if (registryNames.length != variableNames.length) throw new RuntimeException("registryNames.length != variableNames.length");
@@ -187,6 +189,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       variable.setValueFromDouble(initialValue);
    }
 
+   @Override
    public void doRegistrySettingsProcessed(int[] registryIndices, boolean[] isSent, boolean[] isDisallowSendingSet, boolean[] isLogged, int registrySettingsIdentifier)
    {
       if (registrySettingsIdentifier == expectedRegistrySettingsIdentifier)
@@ -235,11 +238,13 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       return registryIndexMap;
    }
 
+   @Override
    public void doSet(int index, float value)
    {
       throw new RuntimeException("PC should never get this since Robot never sends set...");
    }
 
+   @Override
    public void doPeriod(int periodmsec)
    {
       System.out.println("Period set to " + periodmsec + " milliseconds");
@@ -250,6 +255,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       doDisconnectListeners.add(listener);
    }
 
+   @Override
    public void doDisconnect()
    {
       connected = false;
@@ -260,11 +266,13 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       }
    }
 
+   @Override
    public void doUserCommand(String command)
    {
       System.out.println("User Command: " + command);
    }
 
+   @Override
    public void doData(float[] data)
    {
       //    System.out.println("Received data");
@@ -310,6 +318,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
 
    }
 
+   @Override
    public void doTextMessage(String message)
    {
       System.out.println("Text message: " + message);
@@ -322,7 +331,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       {
          dataBuffer.setIndex(dataBuffer.getOutPoint() - 1);
       }
-      this.record = record;
+      GUISideCommandListener.record = record;
    }
 
    public boolean isConnected()

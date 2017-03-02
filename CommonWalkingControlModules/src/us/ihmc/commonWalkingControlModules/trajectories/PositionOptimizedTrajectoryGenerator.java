@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.graphics3DDescription.appearance.YoAppearance;
-import us.ihmc.graphics3DDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -76,6 +76,10 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
    private final int markers = 30;
    private final BagOfBalls trajectoryViz;
    private final FramePoint ballPosition = new FramePoint();
+
+   private final DoubleYoVariable maxSpeed;
+   private final DoubleYoVariable maxSpeedTime;
+   private final FrameVector tempVelocity = new FrameVector();
 
    public PositionOptimizedTrajectoryGenerator()
    {
@@ -157,6 +161,9 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
          trajectoryViz = new BagOfBalls(markers, 0.01, namePrefix + "Trajectory", YoAppearance.Black(), registry, graphicsListRegistry);
       else
          trajectoryViz = null;
+
+      maxSpeed = new DoubleYoVariable("MaxVelocity", registry);
+      maxSpeedTime = new DoubleYoVariable("MaxVelocityTime", registry);
    }
 
    private void extendBySegment(YoVariableRegistry registry)
@@ -310,7 +317,7 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
          return;
       }
 
-      time = MathTools.clipToMinMax(time, 0.0, 1.0);
+      time = MathTools.clamp(time, 0.0, 1.0);
 
       int activeSegment = 0;
       for (int i = 0; i < segments.getIntegerValue()-1; i++)
@@ -413,4 +420,43 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
       trajectoryViz.hideAll();
    }
 
+   /**
+    * Numerically compute the maximum speed along the trajectory and the time at which this speed occurs.
+    */
+   public void computeMaxSpeed()
+   {
+      computeMaxSpeed(1.0E-5);
+   }
+
+   /**
+    * Numerically compute the maximum speed along the trajectory and the time at which this speed occurs.
+    * The time precision can be specified.
+    */
+   public void computeMaxSpeed(double timeIncrement)
+   {
+      maxSpeed.set(Double.NEGATIVE_INFINITY);
+      maxSpeedTime.set(Double.NaN);
+
+      for (double time = 0.0; time <= 1.0; time += timeIncrement)
+      {
+         compute(time);
+         getVelocity(tempVelocity);
+         double speed = tempVelocity.length();
+         if (speed > maxSpeed.getDoubleValue())
+         {
+            maxSpeed.set(speed);
+            maxSpeedTime.set(time);
+         }
+      }
+   }
+
+   public double getMaxSpeed()
+   {
+      return maxSpeed.getDoubleValue();
+   }
+
+   public double getMaxSpeedTime()
+   {
+      return maxSpeedTime.getDoubleValue();
+   }
 }

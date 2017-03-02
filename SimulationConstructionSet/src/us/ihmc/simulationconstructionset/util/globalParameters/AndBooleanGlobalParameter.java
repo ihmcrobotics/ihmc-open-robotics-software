@@ -13,6 +13,7 @@ public class AndBooleanGlobalParameter extends BooleanGlobalParameter
       update("computing initial value from parents.");
    }
 
+   @Override
    public void update(String comment)
    {
       boolean value = true;

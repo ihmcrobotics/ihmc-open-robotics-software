@@ -17,24 +17,24 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.vecmath.Vector3d;
 
 import org.apache.batik.dom.util.HashTable;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.graphics3DAdapter.camera.CameraConfiguration;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.MultiVideoDataPlayer;
 import us.ihmc.robotDataVisualizer.logger.YoVariableLogPlaybackRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.DataBuffer;
@@ -505,9 +505,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          double height = cameraParameters[2];
 
          RigidBodyTransform ret = new RigidBodyTransform();
-         Vector3d cameraFix = new Vector3d();
+         Vector3D cameraFix = new Vector3D();
          double angle = Math.PI / 2 + ((hour) * Math.PI / 6);
-         Vector3d cameraPosition = new Vector3d(radius * Math.sin(angle), radius * Math.cos(angle), height);
+         Vector3D cameraPosition = new Vector3D(radius * Math.sin(angle), radius * Math.cos(angle), height);
 
          Robot[] robot = exportM3Data.scs.getRobots();
          ArrayList<Joint> joint = robot[0].getRootJoints();

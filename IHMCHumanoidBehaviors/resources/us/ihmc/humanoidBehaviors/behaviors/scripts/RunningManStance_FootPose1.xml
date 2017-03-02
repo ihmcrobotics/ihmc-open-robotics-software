@@ -5,7 +5,7 @@
       <x>-6.275758703100774E-6</x>
       <y>0.2534523819183771</y>
       <z>2.543328411021386E-5</z>
-      <w>0.9673478637045021</w>
+      <s>0.9673478637045021</s>
     </quaternion>
   </us.ihmc.humanoidRobotics.communication.packets.walking.ChestOrientationPacket>
   <long>18226637407</long>
@@ -20,7 +20,7 @@
       <x>-4.694358180679243E-6</x>
       <y>8.19403141102138E-7</y>
       <z>5.424911986873032E-4</z>
-      <w>0.9999998528402846</w>
+      <s>0.9999998528402846</s>
     </orientation>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>31737665390</long>
@@ -35,7 +35,7 @@
       <x>-2.4207145262888392E-4</x>
       <y>0.43837179733789644</y>
       <z>4.8553631849713216E-4</z>
-      <w>0.8987935652610323</w>
+      <s>0.8987935652610323</s>
     </orientation>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootPosePacket>
   <long>10999084456</long>
@@ -53,7 +53,7 @@
       <x>-0.11744986967067332</x>
       <y>0.7934951378076702</y>
       <z>0.48307320557002736</z>
-      <w>0.35101463281496736</w>
+      <s>0.35101463281496736</s>
     </orientation>
     <trajectoryTime>1.0</trajectoryTime>
     <jointAngles>
@@ -71,7 +71,7 @@
       <x>0.0</x>
       <y>-0.2714153853317575</y>
       <z>0.0</z>
-      <w>0.9624623050308067</w>
+      <s>0.9624623050308067</s>
     </quaternion>
   </us.ihmc.humanoidRobotics.communication.packets.walking.HeadOrientationPacket>
   <long>12333501457</long>
@@ -89,7 +89,7 @@
       <x>0.23812720092254552</x>
       <y>-0.29256921594931573</y>
       <z>0.018746740617524113</z>
-      <w>0.9259304778307147</w>
+      <s>0.9259304778307147</s>
     </orientation>
     <trajectoryTime>1.0</trajectoryTime>
     <jointAngles>

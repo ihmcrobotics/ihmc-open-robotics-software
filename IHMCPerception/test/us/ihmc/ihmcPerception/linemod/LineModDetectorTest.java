@@ -10,16 +10,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Vector3d;
 
 import org.junit.Test;
 
 import com.jme3.math.FastMath;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE) // Doesn't work right on all machines
 public class LineModDetectorTest
@@ -33,7 +33,7 @@ public class LineModDetectorTest
    public void testGenerateVertexes()
    {
       LineModDetector detector = new LineModDetector(null);
-      ArrayList<Vector3d> vertexes = detector.generateTrainingCameraPoses(3);
+      ArrayList<Vector3D> vertexes = detector.generateTrainingCameraPoses(3);
 //      for (Vector3d vector3d : vertexes)
 //         System.out.println(vector3d.x + " " + vector3d.y + " " + vector3d.z);
       org.junit.Assert.assertEquals(257,vertexes.size());
@@ -147,8 +147,8 @@ public class LineModDetectorTest
               LineModDetection bestDetection = detector.detectObjectAndEstimatePose(cloud, null,true,false);
               if(bestDetection!=null)
               {
-                      Vector3d rollPitchYaw = new Vector3d();
-                      bestDetection.template.transform.getEulerXYZ(rollPitchYaw);
+                      Vector3D rollPitchYaw = new Vector3D();
+                      bestDetection.template.transform.getRotationEuler(rollPitchYaw);
                       double estimatedYaw= rollPitchYaw.getZ();
                       double yawError = Math.min(Math.abs(estimatedYaw-groundTruthYaw),Math.PI*2-Math.abs(estimatedYaw-groundTruthYaw));
                       System.out.println(yawError/UnitConversions.DEG_TO_RAD);

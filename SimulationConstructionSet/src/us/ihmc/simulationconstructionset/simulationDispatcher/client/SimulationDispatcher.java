@@ -56,6 +56,7 @@ public class SimulationDispatcher implements Runnable
    {
       RMISecurityManager laxManager = new RMISecurityManager()
       {
+         @Override
          public void checkPermission(Permission p)
          {
             // System.out.println(p);
@@ -102,8 +103,7 @@ public class SimulationDispatcher implements Runnable
 
       String codebase = System.getProperty("java.rmi.server.codebase");
       if (codebase == "null")
-         ;
-      codebase = "";
+         codebase = "";
 
       if (myCodeBase != null)
          codebase = codebase + myCodeBase;
@@ -153,6 +153,7 @@ public class SimulationDispatcher implements Runnable
       return throwable;
    }
 
+   @Override
    public void run()
    {
       int doneIndex = 0;

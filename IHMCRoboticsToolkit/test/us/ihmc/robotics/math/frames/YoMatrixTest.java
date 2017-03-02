@@ -1,18 +1,19 @@
 package us.ihmc.robotics.math.frames;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class YoMatrixTest
 {
@@ -34,7 +35,7 @@ public class YoMatrixTest
 
       Random random = new Random(1984L);
 
-      DenseMatrix64F randomMatrix = RandomTools.generateRandomMatrix(random, maxNumberOfRows, maxNumberOfColumns);
+      DenseMatrix64F randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.set(randomMatrix);
 
       DenseMatrix64F checkMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
@@ -79,7 +80,7 @@ public class YoMatrixTest
 
       Random random = new Random(1984L);
 
-      DenseMatrix64F randomMatrix = RandomTools.generateRandomMatrix(random, maxNumberOfRows, maxNumberOfColumns);
+      DenseMatrix64F randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.set(randomMatrix);
 
       DenseMatrix64F checkMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
@@ -87,7 +88,7 @@ public class YoMatrixTest
 
       JUnitTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
-      DenseMatrix64F smallerMatrix = RandomTools.generateRandomMatrix(random, smallerRows, smallerColumns);
+      DenseMatrix64F smallerMatrix = RandomGeometry.nextDenseMatrix64F(random, smallerRows, smallerColumns);
       yoMatrix.set(smallerMatrix);
 
       assertEquals(smallerRows, smallerMatrix.getNumRows());
@@ -117,7 +118,7 @@ public class YoMatrixTest
       
       Random random = new Random(1984L);
 
-      DenseMatrix64F randomMatrix = RandomTools.generateRandomMatrix(random, maxNumberOfRows, maxNumberOfColumns);
+      DenseMatrix64F randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.set(randomMatrix);
       
       int numberOfRows = 2;

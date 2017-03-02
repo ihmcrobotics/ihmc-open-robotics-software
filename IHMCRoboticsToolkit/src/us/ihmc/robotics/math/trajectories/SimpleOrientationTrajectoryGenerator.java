@@ -107,7 +107,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    public void compute(double time)
    {
       currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       parameterPolynomial.compute(time);
       boolean shouldBeZero = isDone() || currentTime.getDoubleValue() < 0.0;
       double alphaDot = shouldBeZero ? 0.0 : parameterPolynomial.getVelocity();

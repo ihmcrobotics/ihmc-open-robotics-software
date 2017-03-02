@@ -104,6 +104,7 @@ public class FuzzyStringClassLauncher
    {
       SwingUtilities.invokeLater(new Runnable()
       {
+         @Override
          public void run()
          {
             setupJFrame();
@@ -154,6 +155,7 @@ public class FuzzyStringClassLauncher
 
       item.addActionListener(new ActionListener()
       {
+         @Override
          public void actionPerformed(ActionEvent e)
          {
             System.exit(0);
@@ -163,26 +165,31 @@ public class FuzzyStringClassLauncher
       icon.addMouseListener(new MouseListener()
       {
 
+         @Override
          public void mouseReleased(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mousePressed(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mouseExited(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mouseEntered(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mouseClicked(final MouseEvent e)
          {
             if (SwingUtilities.isRightMouseButton(e))
@@ -202,6 +209,7 @@ public class FuzzyStringClassLauncher
                {
                   SwingUtilities.invokeLater(new Runnable()
                   {
+                     @Override
                      public void run()
                      {
                         frame.setLocation(e.getX() - frame.getWidth() / 2, 10);
@@ -235,6 +243,7 @@ public class FuzzyStringClassLauncher
    {
       searchField.getDocument().addDocumentListener(new DocumentListener()
       {
+         @Override
          public void removeUpdate(DocumentEvent e)
          {
             if (searchField.getText().length() == 0)
@@ -247,6 +256,7 @@ public class FuzzyStringClassLauncher
             }
          }
 
+         @Override
          public void insertUpdate(DocumentEvent e)
          {
             if (searchField.getText().length() == 0)
@@ -259,6 +269,7 @@ public class FuzzyStringClassLauncher
             }
          }
 
+         @Override
          public void changedUpdate(DocumentEvent e)
          {
             if (searchField.getText().length() == 0)
@@ -410,6 +421,7 @@ public class FuzzyStringClassLauncher
       {
          private static final long serialVersionUID = 1L;
 
+         @Override
          public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus)
          {
             JLabel label = (JLabel) super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
@@ -424,26 +436,31 @@ public class FuzzyStringClassLauncher
       tree.addMouseListener(new MouseListener()
       {
 
+         @Override
          public void mouseReleased(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mousePressed(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mouseExited(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mouseEntered(MouseEvent e)
          {
 
          }
 
+         @Override
          public void mouseClicked(MouseEvent e)
          {
             if (e.getClickCount() > 1)

@@ -3,17 +3,16 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.io.IOException;
 import java.net.BindException;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.graphics3DAdapter.GroundProfile3D;
-import us.ihmc.graphics3DDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.quadrupedRobotics.QuadrupedSimulationController;
 import us.ihmc.quadrupedRobotics.communication.QuadrupedGlobalDataProducer;
 import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerManager;
@@ -63,7 +62,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.gui.tools.VisualizerUtils;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.AlternatingSlopesGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -141,13 +140,13 @@ public class QuadrupedSimulationFactory
    {
       if (usePushRobotController.get())
       {
-         PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3d(0.0, -0.00057633, 0.0383928));
+         PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3D(0.0, -0.00057633, 0.0383928));
          yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", bodyPushRobotController.getForceVisualizer());
 
          for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
          {
             String jointName = modelFactory.get().getSDFNameForJointName(quadrupedJointName);
-            PushRobotController jointPushRobotController = new PushRobotController(sdfRobot.get(), jointName, new Vector3d(0.0, 0.0, 0.0));
+            PushRobotController jointPushRobotController = new PushRobotController(sdfRobot.get(), jointName, new Vector3D(0.0, 0.0, 0.0));
             yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", jointPushRobotController.getForceVisualizer());
          }
       }
@@ -249,7 +248,7 @@ public class QuadrupedSimulationFactory
 
    private void createHeadController()
    {
-      if (headControllerFactory.get() != null)
+      if (headControllerFactory.hasValue())
       {
          headControllerFactory.get().setControlDt(controlDT.get());
          headControllerFactory.get().setFullRobotModel(fullRobotModel.get());
@@ -313,7 +312,7 @@ public class QuadrupedSimulationFactory
 
    private void createGroundContactModel()
    {
-      if (providedGroundProfile3D.get() == null)
+      if (!providedGroundProfile3D.hasValue())
       {
          switch (groundContactModelType.get())
          {
@@ -324,7 +323,7 @@ public class QuadrupedSimulationFactory
          groundProfile3D =  new RollingGroundProfile(0.025, 1.0, 0.0, -20.0, 20.0, -20.0, 20.0);
             break;
          case ROTATABLE:
-            groundProfile3D = new RotatablePlaneTerrainProfile(new Point3d(), sdfRobot.get(), yoGraphicsListRegistry, controlDT.get());
+            groundProfile3D = new RotatablePlaneTerrainProfile(new Point3D(), sdfRobot.get(), yoGraphicsListRegistry, controlDT.get());
             break;
          case SLOPES:
             double xMin = -5.0, xMax = 40.0;
@@ -383,12 +382,12 @@ public class QuadrupedSimulationFactory
          throw new RuntimeException("UnreasonableAccelerationException");
       }
 
-      Point3d initialCoMPosition = new Point3d();
+      Point3D initialCoMPosition = new Point3D();
       double totalMass = sdfRobot.get().computeCenterOfMass(initialCoMPosition);
 
       if (useStateEstimator.get())
       {
-         Quat4d initialEstimationLinkOrientation = new Quat4d();
+         Quaternion initialEstimationLinkOrientation = new Quaternion();
          sdfRobot.get().getRootJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
          stateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
       }
@@ -400,10 +399,7 @@ public class QuadrupedSimulationFactory
 
    public SimulationConstructionSet createSimulation() throws IOException
    {
-      simulatedElasticityParameters.setDefaultValue(null);
       groundContactModelType.setDefaultValue(QuadrupedGroundContactModelType.FLAT);
-      headControllerFactory.setDefaultValue(null);
-      providedGroundProfile3D.setDefaultValue(null);
       usePushRobotController.setDefaultValue(false);
       footSwitchType.setDefaultValue(FootSwitchType.TouchdownBased);
       
@@ -440,12 +436,11 @@ public class QuadrupedSimulationFactory
          scs.setCameraTracking(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get());
          scs.setCameraDolly(useTrackAndDolly.get(), useTrackAndDolly.get(), useTrackAndDolly.get(), false);
          scs.setCameraDollyOffsets(4.0, 4.0, 1.0);
-         if (showPlotter.get())
-         {
-            VisualizerUtils.createOverheadPlotter(scs, false, "centerOfMass", yoGraphicsListRegistry);
-            VisualizerUtils.createOverheadPlotterInSeparateWindow(scs, false, "centerOfMass", yoGraphicsListRegistryForDetachedOverhead);
-            scs.getStandardSimulationGUI().selectPanel("Plotter");
-         }
+         SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
+         simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+         simulationOverheadPlotterFactory.setShowOnStart(showPlotter.get());
+         simulationOverheadPlotterFactory.createOverheadPlotter();
       }
       
       FactoryTools.disposeFactory(this);
@@ -457,7 +452,7 @@ public class QuadrupedSimulationFactory
 
    private void setupJointElasticity()
    {
-      if(simulatedElasticityParameters.get() != null)
+      if(simulatedElasticityParameters.hasValue())
       {
          FloatingRootJointRobot floatingRootJointRobot = sdfRobot.get();
          SpringJointOutputWriter springJointOutputWriter = new SpringJointOutputWriter(floatingRootJointRobot, simulatedElasticityParameters.get(), simulationDT.get());

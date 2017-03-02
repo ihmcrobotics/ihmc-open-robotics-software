@@ -1,11 +1,11 @@
 package us.ihmc.robotics.trajectories;
 
+import java.util.ArrayList;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point2d;
-import java.util.ArrayList;
 
 public class ListOfPointsTrajectory
 {
@@ -43,11 +43,11 @@ public class ListOfPointsTrajectory
       setupAlphaArrayAndLinearInterpolator();
    }
 
-   public static ListOfPointsTrajectory createListOfPointsTrajectory(ArrayList<Point2d> points, ReferenceFrame referenceFrame)
+   public static ListOfPointsTrajectory createListOfPointsTrajectory(ArrayList<Point2D> points, ReferenceFrame referenceFrame)
    {
       ArrayList<FramePoint> framePoints = new ArrayList<FramePoint>(points.size());
 
-      for (Point2d point : points)
+      for (Point2D point : points)
       {
          FramePoint framePoint = new FramePoint(referenceFrame, point.getX(), point.getY(), 0.0);
          framePoints.add(framePoint);

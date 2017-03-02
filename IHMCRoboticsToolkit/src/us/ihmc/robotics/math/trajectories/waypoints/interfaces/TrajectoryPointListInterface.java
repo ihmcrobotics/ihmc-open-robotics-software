@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
-import us.ihmc.robotics.EpsilonComparable;
+import us.ihmc.euclid.interfaces.EpsilonComparable;
 
 public interface TrajectoryPointListInterface<T extends TrajectoryPointListInterface<T, P>, P extends TrajectoryPointInterface<P>> extends EpsilonComparable<T>
 {

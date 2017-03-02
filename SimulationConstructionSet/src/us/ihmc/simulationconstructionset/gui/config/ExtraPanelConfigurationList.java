@@ -1,6 +1,7 @@
 package us.ihmc.simulationconstructionset.gui.config;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 
@@ -57,5 +58,9 @@ public class ExtraPanelConfigurationList
 
       return 0;
    }
-
+   
+   public List<ExtraPanelConfiguration> getConfigurationList()
+   {
+      return panels;
+   }
 }

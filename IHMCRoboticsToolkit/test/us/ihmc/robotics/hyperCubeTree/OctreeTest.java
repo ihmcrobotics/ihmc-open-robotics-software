@@ -1,16 +1,17 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.LineSegment3d;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Point3d;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class OctreeTest
 {
@@ -109,17 +110,17 @@ public class OctreeTest
       reportLeafCount(35, tree);
 
 
-      List<RecursableHyperTreeNode<Boolean,Void>> nodes = getNodesIntersectingLine(tree, new Point3d(0.0, 0.0, 0.0), new Point3d(1.0, 1.0, 0.0));
+      List<RecursableHyperTreeNode<Boolean,Void>> nodes = getNodesIntersectingLine(tree, new Point3D(0.0, 0.0, 0.0), new Point3D(1.0, 1.0, 0.0));
       assertEquals(4, nodes.size());
 
-      nodes = getNodesIntersectingLine(tree, new Point3d(0.0, 0.0, 0.0), new Point3d(0.0, 0.0, 0.0));
+      nodes = getNodesIntersectingLine(tree, new Point3D(0.0, 0.0, 0.0), new Point3D(0.0, 0.0, 0.0));
       assertEquals(1, nodes.size());
 
-      nodes = getNodesIntersectingLine(tree, new Point3d(1.0, 0.0, 0.0), new Point3d(1.0, 0.0, 1.0));
+      nodes = getNodesIntersectingLine(tree, new Point3D(1.0, 0.0, 0.0), new Point3D(1.0, 0.0, 1.0));
       //      listBounds(nodes);
       assertEquals(3, nodes.size());
 
-      nodes = getNodesIntersectingLine(tree, new Point3d(0.9, 0.1, 0.9), new Point3d(0.9, 0.9, 0.9));
+      nodes = getNodesIntersectingLine(tree, new Point3D(0.9, 0.1, 0.9), new Point3D(0.9, 0.9, 0.9));
       assertEquals(4, nodes.size());
 
    }
@@ -139,11 +140,11 @@ public class OctreeTest
       Octree tree = createStandardTestOctree();
       assertNull(tree.get(new double[] { 0.0, 0.0, 0.0 }));
       assertNull(tree.get(new double[] { 0.375, 0.0, 0.0 }));
-      tree.putLidarAtGraduallyMoreAccurateResolution(new Point3d(0.0, 0.0, 0.0), new Point3d(0.375, 0.0, 0.0));
+      tree.putLidarAtGraduallyMoreAccurateResolution(new Point3D(0.0, 0.0, 0.0), new Point3D(0.375, 0.0, 0.0));
 
       assertEquals(true, tree.get(new double[] { 0.0, 0.0, 0.0 }).getValue());
       assertEquals(true, tree.get(new double[] { 0.375, 0.0, 0.0 }).getValue());
-      tree.putLidarAtGraduallyMoreAccurateResolution(new Point3d(0.0, 0.0, 0.0), new Point3d(0.375, 0.0, 0.0));
+      tree.putLidarAtGraduallyMoreAccurateResolution(new Point3D(0.0, 0.0, 0.0), new Point3D(0.375, 0.0, 0.0));
 
       assertEquals(false, tree.get(new double[] { 0.0, 0.0, 0.0 }).getValue());
       assertEquals(true, tree.get(new double[] { 0.375, 0.0, 0.0 }).getValue());
@@ -180,7 +181,7 @@ public class OctreeTest
       return tree;
    }
 
-   private static <T,D> List<RecursableHyperTreeNode<T,D>>  getNodesIntersectingLine(HyperCubeTree<T,D> tree, Point3d startPoint, Point3d endPoint)
+   private static <T,D> List<RecursableHyperTreeNode<T,D>>  getNodesIntersectingLine(HyperCubeTree<T,D> tree, Point3D startPoint, Point3D endPoint)
    {
       LineSegment3d lineSegment = new LineSegment3d(startPoint, endPoint);
       LineSegmentSearchVolume hyperVolume = new LineSegmentSearchVolume(lineSegment);

@@ -1,7 +1,7 @@
 package us.ihmc.atlas.parameters;
 
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

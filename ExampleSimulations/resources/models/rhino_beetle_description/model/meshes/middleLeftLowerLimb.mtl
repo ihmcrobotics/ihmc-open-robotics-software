@@ -1,0 +1,15 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 25.01.2017 14:58:36
+
+newmtl skin
+	Ns 49.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0471 0.0000 0.0118
+	Kd 0.0471 0.0000 0.0118
+	Ks 0.8190 0.8190 0.8190
+	Ke 0.0000 0.0000 0.0000
+	map_refl /Users/steel/OneDrive - Georgia Institute of Technology/ihmc/WDI/beetle/meshes/Map__4_Raytrace.tga

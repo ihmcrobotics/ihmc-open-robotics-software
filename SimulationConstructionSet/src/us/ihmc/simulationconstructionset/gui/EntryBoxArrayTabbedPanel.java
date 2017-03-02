@@ -85,6 +85,7 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
       private Dimension dim;
       private Component tabComponent;
 
+      @SuppressWarnings("serial")
       public TabTitleEditListener(final JTabbedPane tabbedPane)
       {
          super();
@@ -203,7 +204,7 @@ public class EntryBoxArrayTabbedPanel extends JTabbedPane
       return returnString;
    }
 
-   public void addEntryBox(YoVariable selectedVariable)
+   public void addEntryBox(YoVariable<?> selectedVariable)
    {
       if (getCurrentPanel() == null)
       {

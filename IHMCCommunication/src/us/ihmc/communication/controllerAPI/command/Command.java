@@ -1,5 +1,6 @@
 package us.ihmc.communication.controllerAPI.command;
 
+import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.Packet;
 
 /**

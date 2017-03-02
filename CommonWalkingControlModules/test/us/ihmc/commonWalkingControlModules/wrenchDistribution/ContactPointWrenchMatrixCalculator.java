@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Wrench;
@@ -87,11 +86,11 @@ public class ContactPointWrenchMatrixCalculator
             for (FrameVector supportVector : normalizedSupportVectors)
             {
                supportVector.changeFrame(centerOfMassFrame);
-               MatrixTools.setDenseMatrixFromTuple3d(q, supportVector.getVector(), Wrench.SIZE / 2, column);
+               supportVector.getVector().get(3, column, q);
 
                tempVector.setToZero(centerOfMassFrame);
                tempVector.cross(tempContactPoint, supportVector);
-               MatrixTools.setDenseMatrixFromTuple3d(q, tempVector.getVector(), 0, column);
+               tempVector.getVector().get(0, column, q);
                column++;
             }
          }

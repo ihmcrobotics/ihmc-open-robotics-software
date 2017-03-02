@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.gui;
 
-import us.ihmc.graphics3DAdapter.camera.TrackingDollyCameraController;
-import us.ihmc.graphics3DAdapter.camera.ViewportAdapter;
+import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 
 public class ViewportAdapterAndCameraControllerHolder
 {
