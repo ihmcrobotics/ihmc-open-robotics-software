@@ -13,8 +13,8 @@ public class RRT2DNodeWalkingPath extends RRTNode
    private SimpleCollisionDetector collisionDetector = new SimpleCollisionDetector();
    private CollisionDetectionResult collisionDetectionResult = new CollisionDetectionResult();
    
-   SimpleCollisionShapeFactory shapeFactory;
-   public static BoxInfo[] boxes;
+   private SimpleCollisionShapeFactory shapeFactory;
+   public static BoxInfo[] boxes = new BoxInfo[9];
    
    public RRT2DNodeWalkingPath()
    {
@@ -42,8 +42,7 @@ public class RRT2DNodeWalkingPath extends RRTNode
       RigidBodyTransform transform;
       transform = new RigidBodyTransform();
       transform.setTranslation(translationOfNode);
-           
-      
+                 
       collisionDetector.getCollisionObjects().get(0).setTransformToWorld(transform);
       collisionDetectionResult.clear();
       collisionDetector.performCollisionDetection(collisionDetectionResult);
@@ -63,17 +62,29 @@ public class RRT2DNodeWalkingPath extends RRTNode
    }
 
    private void setUpCollisionDetector()
-   {            
-      boxes = new BoxInfo[5];
-      boxes[0] = new BoxInfo(new Point3D(1.5, -0.5, 0), new double[]{0.2, 1.0, 0.5});
-      boxes[1] = new BoxInfo(new Point3D(1.0, -2.0, 0), new double[]{0.5, 0.5, 0.5});
-      boxes[2] = new BoxInfo(new Point3D(4.0,  2.0, 0), new double[]{1.0, 1.0, 0.5});
-      boxes[3] = new BoxInfo(new Point3D(4.5, -1.5, 0), new double[]{1.8, 1.0, 0.5});
-      boxes[4] = new BoxInfo(new Point3D(3.5, -5.5, 0), new double[]{1.5, 1.5, 0.5});  
+   {     
+      // door
+      boxes[0] = new BoxInfo(new Point3D(8.6, -4.0, 0), new double[]{0.3, 1.5, 2.0});
+            
+      for(int i =1;i<9;i++)
+      {
+         boxes[i] = new BoxInfo(new Point3D(1.5, -0.5, 0), new double[]{0.2, 1.0, 0.5});
+      }
+      boxes[1] = new BoxInfo(new Point3D(1.5, -0.5, 0), new double[]{0.2, 1.0, 0.5});
+      boxes[2] = new BoxInfo(new Point3D(1.0, -2.0, 0), new double[]{0.5, 0.5, 0.5});
+      boxes[3] = new BoxInfo(new Point3D(4.0,  2.0, 0), new double[]{1.0, 1.0, 0.5});
+      boxes[4] = new BoxInfo(new Point3D(4.5, -1.5, 0), new double[]{1.8, 1.0, 0.5});
+      boxes[5] = new BoxInfo(new Point3D(3.5, -5.5, 0), new double[]{1.5, 1.5, 0.5});
+      boxes[6] = new BoxInfo(new Point3D(6.5, -0.5, 0), new double[]{1.0, 0.7, 0.5});
+      boxes[7] = new BoxInfo(new Point3D(2.5, -3.5, 0), new double[]{0.3, 0.5, 0.5});
+      boxes[8] = new BoxInfo(new Point3D(7.0, -5.5, 0), new double[]{0.3, 0.2, 0.5});
+
             
       shapeFactory = (SimpleCollisionShapeFactory) collisionDetector.getShapeFactory();
       
       shapeFactory.addShape(shapeFactory.createCapsule(0.4, 2.0));
+      collisionDetector.getCollisionObjects().get(0).setCollisionMask(0b10);
+      collisionDetector.getCollisionObjects().get(0).setCollisionGroup(0b01);
             
       for (int i =0;i<boxes.length;i++)
       {
@@ -83,6 +94,9 @@ public class RRT2DNodeWalkingPath extends RRTNode
          transform = new RigidBodyTransform();
          transform.setTranslation(boxes[i].center);
          collisionDetector.getCollisionObjects().get(i+1).setTransformToWorld(transform);
+         
+         collisionDetector.getCollisionObjects().get(i+1).setCollisionMask(0b01);
+         collisionDetector.getCollisionObjects().get(i+1).setCollisionGroup(0b10);
       }      
    }
    

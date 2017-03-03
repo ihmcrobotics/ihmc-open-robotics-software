@@ -212,7 +212,7 @@ public class RRTTree
          pathNodeOne.add(singleNode);
          if(singleNode == rootNode)
          {
-            PrintTools.info("This is Root node");
+            PrintTools.info("node Path is completely built");
             break;            
          }
          singleNode = singleNode.getParentNode();

@@ -35,10 +35,10 @@ class DrawPanel extends JPanel
    DrawPanel(int scaleF, double[] pointInfo, RRTPlanner info)
    {
       this.scale = scaleF;
-      xUpper = info.rrtTree.upperBoundNode.getNodeData(0);
-      xLower = info.rrtTree.lowerBoundNode.getNodeData(0);
-      yUpper = info.rrtTree.upperBoundNode.getNodeData(1);
-      yLower = info.rrtTree.lowerBoundNode.getNodeData(1);
+      xUpper = info.getRRTTree().upperBoundNode.getNodeData(0);
+      xLower = info.getRRTTree().lowerBoundNode.getNodeData(0);
+      yUpper = info.getRRTTree().upperBoundNode.getNodeData(1);
+      yLower = info.getRRTTree().lowerBoundNode.getNodeData(1);
 
       sizeU = (int) Math.round((-yLower + yUpper) * scale);
       sizeV = (int) Math.round((-xLower + xUpper) * scale);
@@ -75,7 +75,7 @@ class DrawPanel extends JPanel
 
       // path
       g.setColor(Color.MAGENTA);      
-      ArrayList<RRTNode> infoPathNode = info.rrtTree.pathNode;
+      ArrayList<RRTNode> infoPathNode = info.getRRTTree().pathNode;
       for (int i =1;i<infoPathNode.size();i++)
       {
          branch(g, infoPathNode.get(i-1).getNodeData(0), infoPathNode.get(i-1).getNodeData(1), infoPathNode.get(i).getNodeData(0), infoPathNode.get(i).getNodeData(1), 6);
@@ -83,7 +83,7 @@ class DrawPanel extends JPanel
 
       // goal node
       g.setColor(Color.blue);
-      point(g, info.goalNode.getNodeData(0), info.goalNode.getNodeData(1), 4);
+      point(g, info.getGoalNode().getNodeData(0), info.getGoalNode().getNodeData(1), 4);
 
 //      g.setColor(Color.red);      
       // box
@@ -94,7 +94,7 @@ class DrawPanel extends JPanel
 
       // piecewise
       g.setColor(Color.green);      
-      ArrayList<RRTNode> piecewisePath = info.rrtPiecewisePath.getPiecewisePath();
+      ArrayList<RRTNode> piecewisePath = info.getPiecewisePath().getPiecewisePath();
       for (int i =0;i< piecewisePath.size()-1;i++)
       {
          double p1x = piecewisePath.get(i).getNodeData(0);
@@ -106,12 +106,13 @@ class DrawPanel extends JPanel
       
       // shortcut
       g.setColor(Color.black);      
-      for (int i =0;i< info.optimalPath.size()-1;i++)
+      ArrayList<RRTNode> optimalPath = info.getOptimalPath();
+      for (int i =0;i< optimalPath.size()-1;i++)
       {
-         double p1x = info.optimalPath.get(i).getNodeData(0);
-         double p1y = info.optimalPath.get(i).getNodeData(1);
-         double p2x = info.optimalPath.get(i+1).getNodeData(0);
-         double p2y = info.optimalPath.get(i+1).getNodeData(1);
+         double p1x = optimalPath.get(i).getNodeData(0);
+         double p1y = optimalPath.get(i).getNodeData(1);
+         double p2x = optimalPath.get(i+1).getNodeData(0);
+         double p2y = optimalPath.get(i+1).getNodeData(1);
          branchFill(g, p1x, p1y, p2x, p2y, 6);
       }
    }
@@ -155,7 +156,7 @@ class DrawPanel extends JPanel
    }
 }
 
-public class RRTTestPro
+public class RRTTestProject
 {
    public static void main(String[] args)
    {
@@ -167,8 +168,8 @@ public class RRTTestPro
 
       RRTNode upperBoundNode = new RRT2DNode(5.0, 4.0);
       RRTNode lowerBoundNode = new RRT2DNode(-5.0, -4.0);
-      rrtPlanner.rrtTree.setUpperBound(upperBoundNode);
-      rrtPlanner.rrtTree.setLowerBound(lowerBoundNode);
+      rrtPlanner.getRRTTree().setUpperBound(upperBoundNode);
+      rrtPlanner.getRRTTree().setLowerBound(lowerBoundNode);
 
       int maxNumberOfExpanding = 1500;
       double[] rrtPointInfo;
@@ -195,7 +196,7 @@ public class RRTTestPro
             for (int j = 0; j < 2; j++)
             {               
                rrtPointInfo[i * 4 + j] = rrtPointInfo[(i-1) * 4 + j];
-               rrtPointInfo[i * 4 + 2+j] = rrtPlanner.goalNode.getNodeData(j);
+               rrtPointInfo[i * 4 + 2+j] = rrtPlanner.getGoalNode().getNodeData(j);
             }
             break;
          }
