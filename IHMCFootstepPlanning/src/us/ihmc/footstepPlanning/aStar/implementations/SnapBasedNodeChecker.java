@@ -1,11 +1,11 @@
 package us.ihmc.footstepPlanning.aStar.implementations;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class SnapBasedNodeChecker implements FootstepNodeChecker
