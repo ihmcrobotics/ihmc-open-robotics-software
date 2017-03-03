@@ -1423,7 +1423,7 @@ public class ConvexPolygonTools
    
          if ((angle1A < angle2B) && (angle2B < Math.PI / 2))
          {
-            Point2D proj = GeometryTools.getOrthogonalProjectionOnLine(polygon2.getVertex(v2MedianIndex), polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
+            Point2D proj = EuclidGeometryTools.orthogonalProjectionOnLine2D(polygon2.getVertex(v2MedianIndex), polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
             LineSegment2d p = new LineSegment2d(polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
             if (p.isBetweenEndpoints(proj, 0))
             {
@@ -1545,10 +1545,10 @@ public class ConvexPolygonTools
    {
       LineSegment2d edge1 = new LineSegment2d(edgePoint1A, edgePoint1B);
       LineSegment2d edge2 = new LineSegment2d(edgePoint2A, edgePoint2B);
-      Point2D proj1AOnto2 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint1A, edgePoint2A, edgePoint2B);
-      Point2D proj1BOnto2 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint1B, edgePoint2A, edgePoint2B);
-      Point2D proj2AOnto1 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint2A, edgePoint1A, edgePoint1B);
-      Point2D proj2BOnto1 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint2B, edgePoint1A, edgePoint1B);
+      Point2D proj1AOnto2 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1A, edgePoint2A, edgePoint2B);
+      Point2D proj1BOnto2 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1B, edgePoint2A, edgePoint2B);
+      Point2D proj2AOnto1 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2A, edgePoint1A, edgePoint1B);
+      Point2D proj2BOnto1 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2B, edgePoint1A, edgePoint1B);
    
       Point2DReadOnly[][] possiblePointPairsWithProj = new Point2DReadOnly[4][2];
       Point2DReadOnly[][] possiblePointPairsWithoutProj = new Point2DReadOnly[4][2];
@@ -1613,7 +1613,7 @@ public class ConvexPolygonTools
     */
    private static Point2DReadOnly[] finalPhasePointAndEdge(Point2DReadOnly edgePoint1, Point2DReadOnly edgePoint2, Point2DReadOnly lonePoint)
    {
-      Point2D proj = GeometryTools.getOrthogonalProjectionOnLine(lonePoint, edgePoint1, edgePoint2);
+      Point2D proj = EuclidGeometryTools.orthogonalProjectionOnLine2D(lonePoint, edgePoint1, edgePoint2);
       LineSegment2d p = new LineSegment2d(edgePoint1, edgePoint2);
       if (p.isBetweenEndpoints(proj, 0))
       {

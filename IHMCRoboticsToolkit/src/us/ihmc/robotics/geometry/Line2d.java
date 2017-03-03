@@ -559,7 +559,7 @@ public class Line2d implements GeometryObject<Line2d>
     */
    public void orthogonalProjection(Point2DBasics point2d)
    {
-      GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, point2d);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(point2d, point, normalizedVector, point2d);
    }
 
    /**
@@ -575,7 +575,7 @@ public class Line2d implements GeometryObject<Line2d>
    {
       Point2D projection = new Point2D();
 
-      boolean success = GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, projection);
+      boolean success = EuclidGeometryTools.orthogonalProjectionOnLine2D(point2d, point, normalizedVector, projection);
       if (!success)
          return null;
       else
