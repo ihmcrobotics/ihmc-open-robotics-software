@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
@@ -365,6 +366,12 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    public void translate(double x, double y, double z)
    {
       pose.translate(x, y, z);
+   }
+   
+   public void translateLocally(Vector3DBasics translation)
+   {
+      pose.transformToWorld(translation);
+      pose.translate(translation);
    }
 
    public double getX()
