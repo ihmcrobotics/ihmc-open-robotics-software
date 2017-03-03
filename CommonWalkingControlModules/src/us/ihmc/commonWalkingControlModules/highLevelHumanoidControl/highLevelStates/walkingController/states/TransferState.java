@@ -14,6 +14,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public abstract class TransferState extends WalkingState
@@ -32,6 +34,8 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2d desiredICPLocal = new FramePoint2d();
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
+
+   private final FramePoint2d filteredDesiredCoP = new FramePoint2d();
    private final FramePoint nextExitCMP = new FramePoint();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
@@ -100,8 +104,10 @@ public abstract class TransferState extends WalkingState
 
          if (doToeOff)
          {
+            momentumBasedController.getFilteredDesiredCenterOfPressure(momentumBasedController.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
             balanceManager.getNextExitCMP(nextExitCMP);
-            feetManager.setExitCMPForToeOff(trailingLeg, nextExitCMP);
+
+            feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(trailingLeg);
             momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }

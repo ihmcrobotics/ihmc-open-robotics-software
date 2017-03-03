@@ -22,10 +22,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -494,9 +491,10 @@ public class FootControlModule
          exploreFootPolygonState.setAttemptToStraightenLegs(attemptToStraightenLegs);
    }
 
-   public void setExitCMPForToeOff(FramePoint exitCMP)
+   public void computeToeOffContactPoint(FramePoint exitCMP, FramePoint2d desiredCMP)
    {
       onToesState.setExitCMP(exitCMP);
+      onToesState.computeToeOffContactPoint(desiredCMP);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
