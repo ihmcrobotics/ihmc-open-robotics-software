@@ -501,7 +501,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     */
    public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
    {
-      return GeometryTools.getOrthogonalProjectionOnLineSegment(point, endpoints[0], endpoints[1]);
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point, endpoints[0], endpoints[1]);
    }
 
    /**
@@ -543,7 +543,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     */
    public boolean orthogonalProjection(Point2DReadOnly point2d, Point2DBasics projectedToPack)
    {
-      return GeometryTools.getOrthogonalProjectionOnLineSegment(point2d, endpoints[0], endpoints[1], projectedToPack);
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(point2d, endpoints[0], endpoints[1], projectedToPack);
    }
 
    public Point2D getClosestPointOnLineSegmentCopy(Point2DReadOnly point2d)

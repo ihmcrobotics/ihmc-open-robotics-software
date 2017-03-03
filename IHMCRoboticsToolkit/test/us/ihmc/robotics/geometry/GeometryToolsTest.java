@@ -882,7 +882,7 @@ public class GeometryToolsTest
       FramePoint lineEnd1 = new FramePoint(ReferenceFrame.getWorldFrame(), -4, 4, 0);
       FramePoint intersectionPoint1 = new FramePoint(ReferenceFrame.getWorldFrame(), -2, 2, 0);
 
-      GeometryTools.getClosestPointToLineSegment(new Point2D(-2.5, 1.5), new Point2D(0, 0), new Point2D(-4, 4));
+      EuclidGeometryTools.orthogonalProjectionOnLineSegment2D(new Point2D(-2.5, 1.5), new Point2D(0, 0), new Point2D(-4, 4));
       FrameVector x1 = new FrameVector(point1.getReferenceFrame());
       x1.sub(point1, intersectionPoint1);
       FrameVector expectedReturn1 = x1;
@@ -2213,53 +2213,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetOrthogonalProjectionOnLine2D() throws Exception
-   {
-      Random random = new Random(1176L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D firstPointOnLine = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D secondPointOnLine = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D expectionProjection = new Point2D();
-         expectionProjection.interpolate(firstPointOnLine, secondPointOnLine, RandomNumbers.nextDouble(random, 10.0));
-         Vector2D perpendicularToLineDirection = new Vector2D();
-         perpendicularToLineDirection.sub(secondPointOnLine, firstPointOnLine);
-         perpendicularToLineDirection.normalize();
-         GeometryTools.getPerpendicularVector(perpendicularToLineDirection, perpendicularToLineDirection);
-
-         Point2D testPoint = new Point2D();
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), perpendicularToLineDirection, expectionProjection);
-
-         Point2D actualProjection = GeometryTools.getOrthogonalProjectionOnLine(testPoint, firstPointOnLine, secondPointOnLine);
-         EuclidCoreTestTools.assertTuple2DEquals(expectionProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetOrthogonalProjectionOnLine3D() throws Exception
-   {
-      Random random = new Random(1176L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point3D pointOnLine = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         Vector3D lineDirection = RandomGeometry.nextVector3D(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
-         Point3D expectedProjection = new Point3D();
-         expectedProjection.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection, pointOnLine);
-         Vector3D perpendicularToLineDirection = RandomGeometry.nextOrthogonalVector3D(random, lineDirection, true);
-
-         Point3D testPoint = new Point3D();
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), perpendicularToLineDirection, expectedProjection);
-
-         Point3D actualProjection = GeometryTools.getOrthogonalProjectionOnLine(testPoint, pointOnLine, lineDirection);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testGetPercentageAlongLineSegment2d() throws Exception
    {
       Random random = new Random(23424L);
@@ -2391,83 +2344,6 @@ public class GeometryToolsTest
          pointOffLineSegment.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, pointOffLineSegment);
          actualPercentage = GeometryTools.getPercentageAlongLineSegment(pointOffLineSegment, lineSegmentStart, lineSegmentEnd);
          assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetOrthogonalProjectionOnLineSegment2D() throws Exception
-   {
-      Random random = new Random(232L);
-
-      for (int i = 0; i < 1000; i++)
-      {
-         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Vector2D orthogonal = new Vector2D();
-         orthogonal.sub(lineSegmentEnd, lineSegmentStart);
-         GeometryTools.getPerpendicularVector(orthogonal, orthogonal);
-         orthogonal.normalize();
-         Point2D expectedProjection = new Point2D();
-         Point2D testPoint = new Point2D();
-
-         // Between end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
-         Point2D actualProjection = GeometryTools.getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
-
-         // Before end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, -10.0, 0.0));
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
-         expectedProjection.set(lineSegmentStart);
-         actualProjection = GeometryTools.getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
-
-         // After end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 1.0, 10.0));
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
-         expectedProjection.set(lineSegmentEnd);
-         actualProjection = GeometryTools.getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetOrthogonalProjectionOnLineSegment3D() throws Exception
-   {
-      Random random = new Random(232L);
-
-      for (int i = 0; i < 1000; i++)
-      {
-         Point3D lineSegmentStart = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         Point3D lineSegmentEnd = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         Vector3D lineSegmentDirection = new Vector3D();
-         lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
-         Vector3D orthogonal = RandomGeometry.nextOrthogonalVector3D(random, lineSegmentDirection, true);
-         Point3D expectedProjection = new Point3D();
-         Point3D testPoint = new Point3D();
-
-         // Between end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
-         Point3D actualProjection = GeometryTools.getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
-
-         // Before end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, -10.0, 0.0));
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
-         expectedProjection.set(lineSegmentStart);
-         actualProjection = GeometryTools.getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
-
-         // After end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 1.0, 10.0));
-         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
-         expectedProjection.set(lineSegmentEnd);
-         actualProjection = GeometryTools.getOrthogonalProjectionOnLineSegment(testPoint, lineSegmentStart, lineSegmentEnd);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
       }
    }
 
@@ -2824,30 +2700,6 @@ public class GeometryToolsTest
          boolean actualCoincidentResult = GeometryTools.arePlanesCoincident(pointOnPlane1, planeNormal1, pointOnPlane2, planeNormal2, angleEpsilon,
                                                                         distanceEpsilon);
          assertEquals(expectedCoincidentResult, actualCoincidentResult);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetOrthogonalProjectionOnPlane() throws Exception
-   {
-      Random random = new Random(23423L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point3D pointOnPlane = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
-         Vector3D planeNormal = RandomGeometry.nextVector3D(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
-
-         Vector3D parallelToPlane = RandomGeometry.nextOrthogonalVector3D(random, planeNormal, true);
-         Point3D expectedProjection = new Point3D();
-         expectedProjection.scaleAdd(RandomNumbers.nextDouble(random, 10.0), parallelToPlane, pointOnPlane);
-
-         Point3D pointToProject = new Point3D();
-         double distanceOffPlane = RandomNumbers.nextDouble(random, 10.0);
-         pointToProject.scaleAdd(distanceOffPlane, planeNormal, expectedProjection);
-
-         Point3D actualProjection = GeometryTools.getOrthogonalProjectionOnPlane(pointToProject, pointOnPlane, planeNormal);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
       }
    }
 

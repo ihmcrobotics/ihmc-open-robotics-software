@@ -292,7 +292,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     */
    public Point3D orthogonalProjectionCopy(Point3DReadOnly pointToProject)
    {
-      return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint);
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(pointToProject, firstEndpoint, secondEndpoint);
    }
 
    /**
@@ -314,7 +314,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     */
    public boolean orthogonalProjection(Point3DReadOnly pointToProject, Point3DBasics projectionToPack)
    {
-      return GeometryTools.getOrthogonalProjectionOnLineSegment(pointToProject, firstEndpoint, secondEndpoint, projectionToPack);
+      return EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(pointToProject, firstEndpoint, secondEndpoint, projectionToPack);
    }
 
    /**
