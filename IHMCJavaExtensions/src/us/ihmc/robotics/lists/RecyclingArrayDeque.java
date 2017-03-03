@@ -30,7 +30,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
 
    public RecyclingArrayDeque(int numElements, Class<T> objectClass)
    {
-      this(16, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
+      this(numElements, GenericTypeBuilder.createBuilderWithEmptyConstructor(objectClass));
    }
 
    public RecyclingArrayDeque(int numElements, GenericTypeBuilder<T> typeBuilder)
@@ -96,7 +96,7 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    public void clear()
    {
       while (!super.isEmpty())
-         unusedObjects.add(super.poll());
+         unusedObjects.add(super.pollFirst());
    }
 
    /** {@inheritDoc} */
