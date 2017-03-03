@@ -254,94 +254,143 @@ public class MathTools
       
       return (Math.min(max, Math.max(value, min)));
    }
+   
+   /**
+    * <p>Rounds <code>value</code> to the given precision.</p>
+    * 
+    * <p>Example: roundToPrecision(19.5, 1.0) = 20.0;</p> 
+    * 
+    * @param value value to round to precision
+    * @param precision precision to round to
+    * @return <code>value</code> rounded to <code>precision</code>
+    */
+   public static double roundToPrecision(double value, double precision)
+   {
+      return Math.round(value / precision) * precision;
+   }
+   
+   /**
+    * <p>Floors <code>value</code> to the given precision.</p>
+    * 
+    * <p>Example: floorToPrecision(19.9, 1.0) = 19.0;</p> 
+    * 
+    * @param value value to floor to precision
+    * @param precision precision to floor to
+    * @return <code>value</code> floored to <code>precision</code>
+    */
+   public static double floorToPrecision(double value, double precision)
+   {
+      return Math.floor(value / precision) * precision;
+   }
+   
+   /**
+    * <p>Ceils <code>value</code> to the given precision.</p>
+    * 
+    * <p>Example: ceilToPrecision(19.2, 1.0) = 20.0;</p> 
+    * 
+    * @param value value to ceil to precision
+    * @param precision precision to ceil to
+    * @return <code>value</code> ceiled to <code>precision</code>
+    */
+   public static double ceilToPrecision(double value, double precision)
+   {
+      return Math.ceil(value / precision) * precision;
+   }
 
    /**
-    * Checks to see if val is Inside Bounds of max and min
-    *
-    * @param val double
-    * @param min double
-    * @param max double
-    * @return boolean
+    * Returns if the interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval can be
+    * open or closed using <code>includeLowerEndpoint</code> and
+    * <code>includeUpperEndpoint</code>.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @param includeLowerEndpoint whether to return true if <code>value == lowerEndpoint</code>
+    * @param includeUpperEndpoint whether to return true if <code>value == upperEndpoint</code>
+    * @return <code>lowerEndpoint <(=) value <(=) upperEndpoint</code>
     */
-   public static boolean isInsideBoundsExclusive(double val, double min, double max)
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, boolean includeLowerEndpoint, boolean includeUpperEndpoint)
    {
-      if (min >= max)
+      if (lowerEndpoint > upperEndpoint + Epsilons.ONE_TEN_BILLIONTH)
       {
-         throw new RuntimeException("tried to check bounds on a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than the min value");
+         throw new RuntimeException(MathTools.class.getSimpleName()
+               + ".intervalContains(double, double, double, boolean, boolean): lowerEndpoint > upperEndpoint (" + lowerEndpoint + " > " + upperEndpoint + ")");
       }
 
-      return ((val > min) && (val < max));
+      return (includeLowerEndpoint ? value >= lowerEndpoint : value > (lowerEndpoint + Epsilons.ONE_TEN_BILLIONTH))
+            && (includeUpperEndpoint ? value <= upperEndpoint : value < (upperEndpoint - Epsilons.ONE_TEN_BILLIONTH));
    }
 
-   public static boolean isBoundedByExclusive(double number, double boundaryOne, double boundaryTwo)
+   /**
+    * Returns if the closed interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * true is returned.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @return <code>lowerEndpoint <= value <= upperEndpoint</code>
+    */
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint)
    {
-      if (boundaryOne < boundaryTwo)
-      {
-         return number > boundaryOne && number < boundaryTwo;
-      }
-      else if (boundaryOne > boundaryTwo)
-      {
-         return number > boundaryTwo && number < boundaryOne;
-      }
-      else // (boundaryOne == boundaryTwo)
-      {
-         return false;
-      }
+      return intervalContains(value, lowerEndpoint, upperEndpoint, true, true);
    }
 
-   public static boolean isInsideBoundsInclusive(double val, double max)
+   /**
+    * Returns if the closed interval contains the given value. Interval is defined by
+    * <code>-endpointMinMax</code> and <code>endpointMinMax</code>. Interval is closed,
+    * meaning that if <code>value == -endpointMinMax</code> or <code>value == endpointMinMax</code>,
+    * true is returned.
+    * 
+    * @param value the values to check contains
+    * @param endpointMinMax min-max style parameter defining the interval endpoints as
+    * <code>-endpointMinMax</code> and <code>endpointMinMax</code>
+    * @return <code>-endpointMinMax <= value <= endpointMinMax</code>
+    */
+   public static boolean intervalContains(double value, double endpointMinMax)
    {
-      return isInsideBoundsInclusive(val, -max, max);
+      return intervalContains(value, -endpointMinMax, endpointMinMax);
    }
 
-   public static boolean isInsideBoundsExclusive(double val, double max)
+   /**
+    * Returns if the closed interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * true is returned. This method rounds <code>value</code>, <code>lowerEndpoint</code>, and <code>upperEndpoint</code>
+    * to the given precision before performing comparisons.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @param precision the precision to round <code>value</code>, <code>lowerEndpoint</code>, and <code>upperEndpoint</code> to
+    * @return <code>lowerEndpoint <= value <= upperEndpoint</code>
+    */
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, double precision)
    {
-      return isInsideBoundsExclusive(val, -max, max);
+      return intervalContains(roundToPrecision(value, precision), roundToPrecision(lowerEndpoint, precision), roundToPrecision(upperEndpoint, precision));
    }
 
-   public static boolean isInsideBoundsInclusive(double val, double min, double max)
+   /**
+    * Returns if the interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval can be
+    * open or closed using <code>includeLowerEndpoint</code> and
+    * <code>includeUpperEndpoint</code>. This method rounds <code>value</code>,
+    * <code>lowerEndpoint</code>, and <code>upperEndpoint</code>
+    * to the given precision before performing comparisons.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @param precision the precision to round <code>value</code>, <code>lowerEndpoint</code>, and <code>upperEndpoint</code> to
+    * @param includeLowerEndpoint whether to return true if <code>value == lowerEndpoint</code>
+    * @param includeUpperEndpoint whether to return true if <code>value == upperEndpoint</code>
+    * @return <code>lowerEndpoint <(=) value <(=) upperEndpoint</code>
+    */
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, double precision, boolean includeLowerEndpoint, boolean includeUpperEndpoint)
    {
-      if (min > max)
-      {
-         throw new RuntimeException("tried to check bounds on a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than the min value");
-      }
-
-      return ((val >= min) && (val <= max));
-   }
-
-   public static boolean isBoundedByInclusive(double number, double boundaryOne, double boundaryTwo)
-   {
-      if (boundaryOne < boundaryTwo)
-      {
-         return number >= boundaryOne && number <= boundaryTwo;
-      }
-      else // (boundaryOne >= boundaryTwo)
-      {
-         return number >= boundaryTwo && number <= boundaryOne;
-      }
-   }
-
-   public static boolean isInsideBoundsInclusive(long val, long min, long max)
-   {
-      if (min > max)
-      {
-         throw new RuntimeException("tried to check bounds on a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than the min value");
-      }
-
-      return ((val >= min) && (val <= max));
-   }
-
-   public static boolean isPreciselyBoundedByInclusive(double number, double boundaryOne, double boundaryTwo, double precision)
-   {
-      return isBoundedByInclusive(roundToPrecision(number, precision), roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision));
-   }
-
-   public static boolean isPreciselyBoundedByExclusive(double boundaryOne, double boundaryTwo, double number, double precision)
-   {
-      return isBoundedByExclusive(roundToPrecision(number, precision), roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision));
+      return intervalContains(roundToPrecision(value, precision), roundToPrecision(lowerEndpoint, precision), roundToPrecision(upperEndpoint, precision), includeLowerEndpoint, includeUpperEndpoint);
    }
 
    /**
@@ -509,7 +558,7 @@ public class MathTools
 
    public static void checkIfInRange(double argument, double min, double max)
    {
-      if (!isInsideBoundsInclusive(argument, min, max))
+      if (!intervalContains(argument, min, max))
       {
          throw new RuntimeException("Argument " + argument + " not in range [" + min + ", " + max + "].");
       }
@@ -517,7 +566,7 @@ public class MathTools
 
    public static void checkIfInRange(long argument, long min, long max)
    {
-      if (!isInsideBoundsInclusive(argument, min, max))
+      if (!intervalContains(argument, min, max))
       {
          throw new RuntimeException("Argument " + argument + " not in range [" + min + ", " + max + "].");
       }
@@ -665,33 +714,18 @@ public class MathTools
       return lcm(a[0], lcm(b));
    }
 
-   public static double floorToGivenPrecision(double value, double precisionFactor)
+   public static double roundToSignificantFigures(double value, int significantFigures)
    {
-      long longValue = (long) (value / precisionFactor); 
-      double roundedValue = ((double) longValue) * precisionFactor;
-      return roundedValue;
-   }
-
-   public static double roundToPrecision(double value, double precision)
-   {
-      double adjustmentFactor = (value > 0.0) ? 0.5 * precision : -0.5 * precision;
-      long longValue = (long) ((value + adjustmentFactor) / precision);
-      double roundedValue = ((double) longValue) * precision;
-      return roundedValue;
-   }
-
-   public static double roundToSignificantFigures(double number, int significantFigures)
-   {
-      if (Math.abs(number) < Double.MIN_VALUE)
+      if (Math.abs(value) < Double.MIN_VALUE)
       {
          return 0.0;
       }
    
-      final double log10 = Math.ceil(Math.log10(Math.abs(number)));
+      final double log10 = Math.ceil(Math.log10(Math.abs(value)));
       final int power = significantFigures - (int) log10;
    
       final double magnitude = Math.pow(10, power);
-      final long shifted = Math.round(number * magnitude);
+      final long shifted = Math.round(value * magnitude);
       return shifted / magnitude;
    }
 
