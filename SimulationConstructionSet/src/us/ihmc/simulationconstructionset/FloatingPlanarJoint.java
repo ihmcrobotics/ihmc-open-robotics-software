@@ -12,7 +12,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatingPlanarJointPhysics;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingPlanarJointPhysics;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>

@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.JointPhysics;
 
 public class ExternalForcePoint extends KinematicPoint
 {

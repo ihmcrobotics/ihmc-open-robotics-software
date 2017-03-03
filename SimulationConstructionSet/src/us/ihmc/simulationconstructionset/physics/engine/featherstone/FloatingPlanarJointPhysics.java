@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.physics.engine.jerry;
+package us.ihmc.simulationconstructionset.physics.engine.featherstone;
 
 import java.util.ArrayList;
 import java.util.Collection;

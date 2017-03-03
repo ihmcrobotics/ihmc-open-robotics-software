@@ -4,7 +4,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.NullJointPhysics;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.NullJointPhysics;
 
 public class NullJoint extends Joint
 {
