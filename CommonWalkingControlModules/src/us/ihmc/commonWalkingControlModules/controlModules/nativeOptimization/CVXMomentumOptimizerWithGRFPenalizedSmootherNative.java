@@ -146,8 +146,8 @@ public class CVXMomentumOptimizerWithGRFPenalizedSmootherNative
 
    public CVXMomentumOptimizerWithGRFPenalizedSmootherNative(int nDoF, int rhoSize)
    {
-      MathTools.checkIfInRange(nDoF, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF);
-      MathTools.checkIfInRange(rhoSize, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
+      MathTools.checkIntervalContains(nDoF, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.nDoF);
+      MathTools.checkIntervalContains(rhoSize, 0, CVXMomentumOptimizerWithGRFPenalizedSmootherNative.rhoSize);
       cvxMomentumOptimizerWithGRFPenalizedSmootherNativeOutput = new CVXMomentumOptimizerWithGRFPenalizedSmootherNativeOutput(nDoF, rhoSize);
    }
 

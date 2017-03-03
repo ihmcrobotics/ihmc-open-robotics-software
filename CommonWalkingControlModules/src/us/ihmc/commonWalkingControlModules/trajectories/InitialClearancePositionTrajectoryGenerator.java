@@ -253,7 +253,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    public void setTrajectoryTime(double newTrajectoryTime, double leaveTime)
    {
       trajectoryTime.set(newTrajectoryTime);
-      MathTools.checkIfInRange(leaveTime, 0.0, newTrajectoryTime);
+      MathTools.checkIntervalContains(leaveTime, 0.0, newTrajectoryTime);
       this.leaveTime.set(leaveTime);
    }
 
@@ -265,7 +265,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       changeFrame(tangentialPlane, false);
 
       currentTime.set(0.0);
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       double tIntermediate = leaveTime.getDoubleValue();
       xyPolynomial.setCubic(tIntermediate, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
       double z0 = initialPosition.getZ();

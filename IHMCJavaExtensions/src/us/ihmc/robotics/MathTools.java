@@ -394,6 +394,44 @@ public class MathTools
    }
 
    /**
+    * Throws exception if the closed interval does not contain the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * no exception is thrown.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @throws RuntimeException if !(<code>lowerEndpoint <= value <= upperEndpoint</code>)
+    */
+   public static void checkIntervalContains(double value, double lowerEndpoint, double upperEndpoint)
+   {
+      if (!intervalContains(value, lowerEndpoint, upperEndpoint))
+      {
+         throw new RuntimeException("Argument " + value + " not in range [" + lowerEndpoint + ", " + upperEndpoint + "].");
+      }
+   }
+
+   /**
+    * Throws exception if the closed interval does not contain the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * no exception is thrown.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @throws RuntimeException if !(<code>lowerEndpoint <= value <= upperEndpoint</code>)
+    */
+   public static void checkIntervalContains(long value, long lowerEndpoint, long upperEndpoint)
+   {
+      if (!intervalContains(value, lowerEndpoint, upperEndpoint))
+      {
+         throw new RuntimeException("Argument " + value + " not in range [" + lowerEndpoint + ", " + upperEndpoint + "].");
+      }
+   }
+
+   /**
     * Sums the integers in a collection
     *
     * @param integers collection of integers
@@ -554,22 +592,6 @@ public class MathTools
       double ret = tot / (array.size());
 
       return ret;
-   }
-
-   public static void checkIfInRange(double argument, double min, double max)
-   {
-      if (!intervalContains(argument, min, max))
-      {
-         throw new RuntimeException("Argument " + argument + " not in range [" + min + ", " + max + "].");
-      }
-   }
-
-   public static void checkIfInRange(long argument, long min, long max)
-   {
-      if (!intervalContains(argument, min, max))
-      {
-         throw new RuntimeException("Argument " + argument + " not in range [" + min + ", " + max + "].");
-      }
    }
 
    public static void checkIfPositive(double argument)

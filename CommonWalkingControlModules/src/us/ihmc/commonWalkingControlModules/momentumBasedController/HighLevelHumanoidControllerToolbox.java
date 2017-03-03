@@ -175,7 +175,7 @@ public class HighLevelHumanoidControllerToolbox
       this.footSwitches = footSwitches;
       this.wristForceSensors = wristForceSensors;
 
-      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = referenceFrames;

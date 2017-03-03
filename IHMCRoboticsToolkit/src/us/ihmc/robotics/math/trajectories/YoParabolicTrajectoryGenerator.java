@@ -39,7 +39,7 @@ public class YoParabolicTrajectoryGenerator
    public void initialize(FramePoint initialPosition, FramePoint finalPosition, double heightAtParameter, double parameter)
    {
       double q = parameter;
-      MathTools.checkIfInRange(q, 0.0, 1.0);
+      MathTools.checkIntervalContains(q, 0.0, 1.0);
 
       initialPosition.changeFrame(referenceFrame);
       finalPosition.changeFrame(referenceFrame);
@@ -58,7 +58,7 @@ public class YoParabolicTrajectoryGenerator
       finalPosition.changeFrame(referenceFrame);
 
       final double q = intermediateParameter;
-      MathTools.checkIfInRange(q, 0.0, 1.0);
+      MathTools.checkIntervalContains(q, 0.0, 1.0);
 
       c0.set(initialPosition);
 
@@ -91,7 +91,7 @@ public class YoParabolicTrajectoryGenerator
    public void getPosition(FramePoint positionToPack, double parameter)
    {
       double q = parameter;
-      MathTools.checkIfInRange(q, 0.0, 1.0);
+      MathTools.checkIntervalContains(q, 0.0, 1.0);
       positionToPack.setToZero(referenceFrame);
 
       // c2 * q^2
@@ -111,7 +111,7 @@ public class YoParabolicTrajectoryGenerator
    public void getVelocity(FrameVector velocityToPack, double parameter)
    {      
       double q = parameter;
-      MathTools.checkIfInRange(q, 0.0, 1.0);
+      MathTools.checkIntervalContains(q, 0.0, 1.0);
       velocityToPack.setToZero(referenceFrame);
 
       // 2 * c2 * q
