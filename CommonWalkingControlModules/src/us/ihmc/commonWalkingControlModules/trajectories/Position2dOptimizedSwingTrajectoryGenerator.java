@@ -293,7 +293,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    @Override
    public void compute(double time)
    {
-      time = MathTools.clipToMinMax(time, 0.0, 1.0);
+      time = MathTools.clamp(time, 0.0, 1.0);
       isDone.set(time == 1.0);
 
       int activeSegment = 0;

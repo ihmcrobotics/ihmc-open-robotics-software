@@ -2,7 +2,7 @@ package us.ihmc.graphicsDescription.yoGraphics;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 
 public class YoGraphicsList

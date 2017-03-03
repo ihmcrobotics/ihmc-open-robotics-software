@@ -5,16 +5,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataProcessingFunction;
@@ -298,7 +297,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
             maxChange = Math.abs(corruptorValue * changeDelta);
          }
          
-         currentCorruptorVariableValues[i] = currentCorruptorVariableValues[i] + RandomTools.generateRandomDouble(random, maxChange);
+         currentCorruptorVariableValues[i] = currentCorruptorVariableValues[i] + RandomNumbers.nextDouble(random, maxChange);
       }
    }
 
@@ -458,8 +457,8 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
             fullRobotModelCorruptor.corruptFullRobotModel();
 
             RigidBodyTransform transform = new RigidBodyTransform();
-            transform.setTranslation(new Vector3d(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue()));
-            transform.setRotation(new Quat4d(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue()));
+            transform.setTranslation(new Vector3D(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue()));
+            transform.setRotation(new Quaternion(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue()));
 
             fullRobotModel.getRootJoint().setPositionAndRotation(transform);
             fullRobotModel.updateFrames();

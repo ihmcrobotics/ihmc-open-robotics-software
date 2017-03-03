@@ -1,8 +1,7 @@
 package us.ihmc.graphicsDescription.input;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
@@ -17,5 +16,5 @@ public interface SelectedListener
     * @param cameraLocation camera position
     * @param cameraRotation camera view direction
     */
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation, Quat4d cameraRotation);
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation, QuaternionReadOnly cameraRotation);
 }

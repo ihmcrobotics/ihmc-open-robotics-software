@@ -174,14 +174,14 @@ public class InverseDynamicsQPBoundCalculator
       {
          double qDotMin = (jointLimitLower - joint.getQ()) / controlDT;
          qDDotMin = (qDotMin - joint.getQd()) / controlDT;
-         qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
+         qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
          qDDotMinToPack.set(index, 0, qDDotMin);
       }
       if (!Double.isInfinite(jointLimitUpper))
       {
          double qDotMax = (jointLimitUpper - joint.getQ()) / controlDT;
          qDDotMax = (qDotMax - joint.getQd()) / controlDT;
-         qDDotMax = MathTools.clipToMinMax(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
+         qDDotMax = MathTools.clamp(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
          qDDotMaxToPack.set(index, 0, qDDotMax);
       }
    }
@@ -208,7 +208,7 @@ public class InverseDynamicsQPBoundCalculator
 
          double qDotMin = - Math.pow(distance, 2) * slope;
          qDDotMin = (qDotMin - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
-         qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
+         qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
       }
       if (!Double.isInfinite(jointLimitUpper))
       {
@@ -217,7 +217,7 @@ public class InverseDynamicsQPBoundCalculator
 
          double qDotMax = Math.pow(distance, 2) * slope;
          qDDotMax = (qDotMax - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
-         qDDotMax = MathTools.clipToMinMax(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
+         qDDotMax = MathTools.clamp(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
       }
       // ---
 

@@ -3,14 +3,13 @@ package us.ihmc.quadrupedRobotics.controller;
 import java.io.IOException;
 import java.net.BindException;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -141,13 +140,13 @@ public class QuadrupedSimulationFactory
    {
       if (usePushRobotController.get())
       {
-         PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3d(0.0, -0.00057633, 0.0383928));
+         PushRobotController bodyPushRobotController = new PushRobotController(sdfRobot.get(), "body", new Vector3D(0.0, -0.00057633, 0.0383928));
          yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", bodyPushRobotController.getForceVisualizer());
 
          for (QuadrupedJointName quadrupedJointName : modelFactory.get().getQuadrupedJointNames())
          {
             String jointName = modelFactory.get().getSDFNameForJointName(quadrupedJointName);
-            PushRobotController jointPushRobotController = new PushRobotController(sdfRobot.get(), jointName, new Vector3d(0.0, 0.0, 0.0));
+            PushRobotController jointPushRobotController = new PushRobotController(sdfRobot.get(), jointName, new Vector3D(0.0, 0.0, 0.0));
             yoGraphicsListRegistry.registerYoGraphic("PushRobotControllers", jointPushRobotController.getForceVisualizer());
          }
       }
@@ -324,7 +323,7 @@ public class QuadrupedSimulationFactory
          groundProfile3D =  new RollingGroundProfile(0.025, 1.0, 0.0, -20.0, 20.0, -20.0, 20.0);
             break;
          case ROTATABLE:
-            groundProfile3D = new RotatablePlaneTerrainProfile(new Point3d(), sdfRobot.get(), yoGraphicsListRegistry, controlDT.get());
+            groundProfile3D = new RotatablePlaneTerrainProfile(new Point3D(), sdfRobot.get(), yoGraphicsListRegistry, controlDT.get());
             break;
          case SLOPES:
             double xMin = -5.0, xMax = 40.0;
@@ -383,12 +382,12 @@ public class QuadrupedSimulationFactory
          throw new RuntimeException("UnreasonableAccelerationException");
       }
 
-      Point3d initialCoMPosition = new Point3d();
+      Point3D initialCoMPosition = new Point3D();
       double totalMass = sdfRobot.get().computeCenterOfMass(initialCoMPosition);
 
       if (useStateEstimator.get())
       {
-         Quat4d initialEstimationLinkOrientation = new Quat4d();
+         Quaternion initialEstimationLinkOrientation = new Quaternion();
          sdfRobot.get().getRootJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
          stateEstimator.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
       }

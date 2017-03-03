@@ -2,8 +2,7 @@ package us.ihmc.exampleSimulations.m2.Sensors;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.exampleSimulations.m2.ContactPointName;
 import us.ihmc.exampleSimulations.m2.JointName;
 import us.ihmc.exampleSimulations.m2.RobotAxis;
@@ -244,7 +243,7 @@ public class ProcessedSensors
 
    private final DoubleYoVariable[] allVariables;
 
-   public void setGroundContactPointsPositions(Point3d[][] groundContactFramePointsPositions)
+   public void setGroundContactPointsPositions(Point3D[][] groundContactFramePointsPositions)
    {
       for (int i = 0; i < RobotSide.values().length; i++)
       {
@@ -257,7 +256,7 @@ public class ProcessedSensors
       }
    }
 
-   public void setGroundContactPointsForces(Point3d[][] groundContactFramePointsForces)
+   public void setGroundContactPointsForces(Point3D[][] groundContactFramePointsForces)
    {
       for (int i = 0; i < RobotSide.values().length; i++)
       {
@@ -382,17 +381,17 @@ public class ProcessedSensors
       return time;
    }
 
-   public Point3d getGroundContactPointsPositions(RobotSide robotSide, ContactPointName contactPointName)
+   public Point3D getGroundContactPointsPositions(RobotSide robotSide, ContactPointName contactPointName)
    {
-      return new Point3d(this.groundContactPointsPositions[robotSide.ordinal()][contactPointName.ordinal() * 3 + 0].getDoubleValue(),
+      return new Point3D(this.groundContactPointsPositions[robotSide.ordinal()][contactPointName.ordinal() * 3 + 0].getDoubleValue(),
                          this.groundContactPointsPositions[robotSide.ordinal()][contactPointName.ordinal() * 3 + 1].getDoubleValue(),
                          this.groundContactPointsPositions[robotSide.ordinal()][contactPointName.ordinal() * 3 + 2].getDoubleValue());
    }
 
    // +++ 100121 pdn: This should be cleaned up.
-   public Point3d getGroundContactPointForces(RobotSide robotSide, ContactPointName contactPointName)
+   public Point3D getGroundContactPointForces(RobotSide robotSide, ContactPointName contactPointName)
    {
-      return new Point3d(this.groundContactPointsForces[robotSide.ordinal()][contactPointName.ordinal() * 3 + 0].getDoubleValue(),
+      return new Point3D(this.groundContactPointsForces[robotSide.ordinal()][contactPointName.ordinal() * 3 + 0].getDoubleValue(),
                          this.groundContactPointsForces[robotSide.ordinal()][contactPointName.ordinal() * 3 + 1].getDoubleValue(),
                          this.groundContactPointsForces[robotSide.ordinal()][contactPointName.ordinal() * 3 + 2].getDoubleValue());
    }

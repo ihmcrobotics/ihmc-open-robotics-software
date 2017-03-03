@@ -15,7 +15,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
@@ -222,6 +221,23 @@ public class ICPOptimizationController
       parentRegistry.addChild(registry);
    }
 
+   public void setFootstepWeights(double forwardWeight, double lateralWeight)
+   {
+      forwardFootstepWeight.set(forwardWeight);
+      lateralFootstepWeight.set(lateralWeight);
+   }
+
+   public void setFeedbackWeights(double forwardWeight, double lateralWeight)
+   {
+      feedbackForwardWeight.set(forwardWeight);
+      feedbackLateralWeight.set(lateralWeight);
+   }
+
+   public void setDynamicRelaxationWeight(double relaxationWeight)
+   {
+      dynamicRelaxationWeight.set(relaxationWeight);
+   }
+
    public void setStepDurations(double doubleSupportDuration, double singleSupportDuration)
    {
       setDoubleSupportDuration(doubleSupportDuration);
@@ -349,12 +365,13 @@ public class ICPOptimizationController
 
    private int initializeOnContactChange(double initialTime)
    {
+      setProblemBooleans();
+
       int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
       this.initialTime.set(initialTime);
       speedUpTime.set(0.0);
 
-      setProblemBooleans();
 
       beginningOfStateICP.set(solutionHandler.getControllerReferenceICP());
       beginningOfStateICPVelocity.set(solutionHandler.getControllerReferenceICPVelocity());
@@ -369,6 +386,12 @@ public class ICPOptimizationController
          */
 
       return numberOfFootstepsToConsider;
+   }
+
+   public void setBeginningOfStateICP(FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity)
+   {
+      this.beginningOfStateICP.set(beginningOfStateICP);
+      this.beginningOfStateICPVelocity.set(beginningOfStateICPVelocity);
    }
 
    private void setProblemBooleans()

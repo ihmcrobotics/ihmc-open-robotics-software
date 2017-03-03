@@ -12,21 +12,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
-import boofcv.abst.fiducial.calib.ConfigChessboard;
-import boofcv.alg.geo.calibration.CalibrationObservation;
-import boofcv.factory.calib.FactoryCalibrationTarget;
-import boofcv.struct.image.GrayF32;
 import org.ejml.data.DenseMatrix64F;
 
+import boofcv.abst.fiducial.calib.CalibrationDetectorChessboard;
+import boofcv.abst.fiducial.calib.ConfigChessboard;
 import boofcv.alg.geo.PerspectiveOps;
+import boofcv.alg.geo.calibration.CalibrationObservation;
 import boofcv.alg.geo.calibration.Zhang99ComputeTargetHomography;
 import boofcv.alg.geo.calibration.Zhang99DecomposeHomography;
+import boofcv.factory.calib.FactoryCalibrationTarget;
 import boofcv.gui.feature.VisualizeFeatures;
 import boofcv.io.UtilIO;
 import boofcv.io.image.ConvertBufferedImage;
 import boofcv.io.image.UtilImageIO;
 import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.image.GrayF32;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector2D_F64;

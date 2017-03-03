@@ -1,8 +1,7 @@
 package us.ihmc.robotics.math.corruptors;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -24,10 +23,10 @@ public class NoisyYoRotationMatrix
    public final static double DEFAULT_BIAS_DIRECTION_ANGLE_MIN = -Math.PI;
    public final static double DEFAULT_BIAS_DIRECTION_ANGLE_DELTA = 0.0;
    
-   private final Matrix3d perfectRotationMatrix = new Matrix3d();
-   private final Matrix3d noisyRotationMatrix = new Matrix3d();
-   private final Matrix3d biasMatrix = new Matrix3d();
-   private final Matrix3d noiseMatrix = new Matrix3d();
+   private final RotationMatrix perfectRotationMatrix = new RotationMatrix();
+   private final RotationMatrix noisyRotationMatrix = new RotationMatrix();
+   private final RotationMatrix biasMatrix = new RotationMatrix();
+   private final RotationMatrix noiseMatrix = new RotationMatrix();
    private final NoisyDoubleYoVariable noiseRotationAngle, noiseDirectionHeight, noiseDirectionAngle;
    private final NoisyDoubleYoVariable biasRotationAngle, biasDirectionHeight, biasDirectionAngle;
    private final DoubleYoVariable noiseDirectionX, noiseDirectionY, noiseDirectionZ;
@@ -67,28 +66,21 @@ public class NoisyYoRotationMatrix
    }
 
 
-   public void update(Matrix3d m)
+   public void update(RotationMatrix m)
    {
       update(m.getM00(), m.getM01(), m.getM02(), m.getM10(), m.getM11(), m.getM12(), m.getM20(), m.getM21(), m.getM22());
    }
    
    public void update(double m00, double m01, double m02, double m10, double m11, double m12, double m20, double m21, double m22)
    {
-      perfectRotationMatrix.setM00(m00);
-      perfectRotationMatrix.setM01(m01);
-      perfectRotationMatrix.setM02(m02);
-      perfectRotationMatrix.setM10(m10);
-      perfectRotationMatrix.setM11(m11);
-      perfectRotationMatrix.setM12(m12);
-      perfectRotationMatrix.setM20(m20);
-      perfectRotationMatrix.setM21(m21);
-      perfectRotationMatrix.setM22(m22);
+      perfectRotationMatrix.set(m00, m01, m02, m10, m11, m12, m20, m21, m22);
       
       generateNoise();
       generateBias();
       
-      noisyRotationMatrix.mul(perfectRotationMatrix, biasMatrix); // NoiseMatrix is transformation from IMU measurement to perfect body orientation
-      noisyRotationMatrix.mul(noisyRotationMatrix, noiseMatrix); // NoiseMatrix is transformation from IMU measurement to perfect body orientation
+      noisyRotationMatrix.set(perfectRotationMatrix); // NoiseMatrix is transformation from IMU measurement to perfect body orientation
+      noisyRotationMatrix.multiply(biasMatrix); // NoiseMatrix is transformation from IMU measurement to perfect body orientation
+      noisyRotationMatrix.multiply(noiseMatrix); // NoiseMatrix is transformation from IMU measurement to perfect body orientation
    
       if (((Double)(noisyRotationMatrix.getM00())).isNaN())
       {
@@ -111,7 +103,7 @@ public class NoisyYoRotationMatrix
       noiseDirectionY.set(radius * Math.sin(angle));
       noiseDirectionZ.set(height);
       
-      noiseMatrix.set(new AxisAngle4d(noiseDirectionX.getDoubleValue(), noiseDirectionY.getDoubleValue(), noiseDirectionZ.getDoubleValue(), noiseRotationAngle.getDoubleValue()));
+      noiseMatrix.set(new AxisAngle(noiseDirectionX.getDoubleValue(), noiseDirectionY.getDoubleValue(), noiseDirectionZ.getDoubleValue(), noiseRotationAngle.getDoubleValue()));
    }
    
    private void generateBias()
@@ -128,10 +120,10 @@ public class NoisyYoRotationMatrix
       biasDirectionY.set(radius * Math.sin(angle));
       biasDirectionZ.set(height);
       
-      biasMatrix.set(new AxisAngle4d(biasDirectionX.getDoubleValue(), biasDirectionY.getDoubleValue(), biasDirectionZ.getDoubleValue(), biasRotationAngle.getDoubleValue()));
+      biasMatrix.set(new AxisAngle(biasDirectionX.getDoubleValue(), biasDirectionY.getDoubleValue(), biasDirectionZ.getDoubleValue(), biasRotationAngle.getDoubleValue()));
    }
 
-   public Matrix3d getMatrix3d()
+   public RotationMatrix getMatrix3d()
    {
       return noisyRotationMatrix;
    }

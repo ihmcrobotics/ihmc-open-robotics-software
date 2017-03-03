@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.controlFlow.ControlFlowGraph;
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFramePointControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameQuaternionControlFlowOutputPort;
 import us.ihmc.sensorProcessing.controlFlowPorts.YoFrameVectorControlFlowOutputPort;
@@ -336,9 +336,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
                                         OrientationSensorConfiguration orientationSensorConfiguration)
       {
          ReferenceFrame measurementFrame = orientationSensorConfiguration.getMeasurementFrame();
-         ControlFlowInputPort<Matrix3d> measurementInputPort = createInputPort("orientationMeasurementInputPort");
+         ControlFlowInputPort<RotationMatrix> measurementInputPort = createInputPort("orientationMeasurementInputPort");
 
-         ControlFlowInputPort<Matrix3d> orientationMeasurementInputPort = measurementInputPort;
+         ControlFlowInputPort<RotationMatrix> orientationMeasurementInputPort = measurementInputPort;
          String name = orientationSensorConfiguration.getName();
          DenseMatrix64F orientationNoiseCovariance = orientationSensorConfiguration.getOrientationNoiseCovariance();
 
@@ -358,9 +358,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
          String biasName = angularVelocitySensorConfiguration.getName() + "BiasEstimate";
          ReferenceFrame measurementFrame = angularVelocitySensorConfiguration.getMeasurementFrame();
          RigidBody measurementLink = angularVelocitySensorConfiguration.getAngularVelocityMeasurementLink();
-         ControlFlowInputPort<Vector3d> measurementInputPort = createInputPort("angularVelocityMeasurementInputPort");
+         ControlFlowInputPort<Vector3D> measurementInputPort = createInputPort("angularVelocityMeasurementInputPort");
 
-         ControlFlowInputPort<Vector3d> angularVelocityMeasurementPort = measurementInputPort;
+         ControlFlowInputPort<Vector3D> angularVelocityMeasurementPort = measurementInputPort;
 
          ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
          BiasProcessModelElement biasProcessModelElement = new BiasProcessModelElement(biasPort, measurementFrame, biasName, registry);
@@ -386,9 +386,9 @@ public class ComposableOrientationAndCoMEstimatorCreator
          String biasName = linearAccelerationSensorConfiguration.getName() + "BiasEstimate";
          ReferenceFrame measurementFrame = linearAccelerationSensorConfiguration.getMeasurementFrame();
          RigidBody measurementLink = linearAccelerationSensorConfiguration.getLinearAccelerationMeasurementLink();
-         ControlFlowInputPort<Vector3d> measurementInputPort = createInputPort("linearAccelerationMeasurementInputPort");
+         ControlFlowInputPort<Vector3D> measurementInputPort = createInputPort("linearAccelerationMeasurementInputPort");
 
-         ControlFlowInputPort<Vector3d> linearAccelerationMeasurementInputPort = measurementInputPort;
+         ControlFlowInputPort<Vector3D> linearAccelerationMeasurementInputPort = measurementInputPort;
 
          ControlFlowOutputPort<FrameVector> biasPort = new YoFrameVectorControlFlowOutputPort(this, biasName, measurementFrame, registry);
 
@@ -532,18 +532,19 @@ public class ComposableOrientationAndCoMEstimatorCreator
          {
             // R^W_M
             OrientationSensorConfiguration firstOrientationSensorConfiguration = orientationSensorConfigurations.get(0);
-            ControlFlowOutputPort<Matrix3d> firstOrientationMeasurementOutputPort = firstOrientationSensorConfiguration.getOutputPort();
-            Matrix3d measurementToWorld = firstOrientationMeasurementOutputPort.getData();
+            ControlFlowOutputPort<RotationMatrix> firstOrientationMeasurementOutputPort = firstOrientationSensorConfiguration.getOutputPort();
+            RotationMatrix measurementToWorld = firstOrientationMeasurementOutputPort.getData();
 
             // R^M_E
             ReferenceFrame measurementFrame = firstOrientationSensorConfiguration.getMeasurementFrame();
             FrameOrientation estimationFrameOrientation = new FrameOrientation(estimationFrame);
             estimationFrameOrientation.changeFrame(measurementFrame);
-            Matrix3d estimationToMeasurement = estimationFrameOrientation.getMatrix3dCopy();
+            RotationMatrix estimationToMeasurement = estimationFrameOrientation.getMatrix3dCopy();
 
             // R^W_E
-            Matrix3d estimationToWorld = new Matrix3d();
-            estimationToWorld.mul(measurementToWorld, estimationToMeasurement);
+            RotationMatrix estimationToWorld = new RotationMatrix();
+            estimationToWorld.set(measurementToWorld);
+            estimationToWorld.multiply(estimationToMeasurement);
             FrameOrientation initialOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), estimationToWorld);
             setEstimatedOrientation(initialOrientation);
          }

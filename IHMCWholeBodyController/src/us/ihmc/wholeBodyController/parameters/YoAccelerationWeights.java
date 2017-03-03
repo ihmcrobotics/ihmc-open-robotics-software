@@ -1,8 +1,7 @@
 package us.ihmc.wholeBodyController.parameters;
 
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-
-import javax.vecmath.Matrix3d;
 
 public class YoAccelerationWeights
 {
@@ -31,12 +30,12 @@ public class YoAccelerationWeights
       yoAngularAccelerationWeights.reset();
    }
 
-   public Matrix3d createAngularAccelerationWeightMatrix()
+   public Matrix3DReadOnly createAngularAccelerationWeightMatrix()
    {
       return yoAngularAccelerationWeights.createAngularAccelerationWeightMatrix();
    }
 
-   public Matrix3d createLinearAccelerationWeightMatrix()
+   public Matrix3DReadOnly createLinearAccelerationWeightMatrix()
    {
       return yoLinearAccelerationWeights.createLinearAccelerationWeightMatrix();
    }

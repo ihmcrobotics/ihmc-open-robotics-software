@@ -1,10 +1,11 @@
 package us.ihmc.convexOptimization.quadraticProgram;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.robotics.linearAlgebra.DiagonalMatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 

@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
@@ -13,11 +11,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class SpatialMotionVectorTest
 {
@@ -42,7 +42,7 @@ public class SpatialMotionVectorTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
+            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };
@@ -56,7 +56,7 @@ public class SpatialMotionVectorTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
+            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };
@@ -75,29 +75,29 @@ public class SpatialMotionVectorTest
 	@Test(timeout = 30000)
    public void testInvert()
    {
-      Vector3d linearPart = RandomTools.generateRandomVector(random);
-      Vector3d angularPart = RandomTools.generateRandomVector(random);
+      Vector3D linearPart = RandomGeometry.nextVector3D(random);
+      Vector3D angularPart = RandomGeometry.nextVector3D(random);
 
-      Vector3d linearPartInverse = new Vector3d(linearPart);
+      Vector3D linearPartInverse = new Vector3D(linearPart);
       linearPartInverse.scale(-1.0);
 
-      Vector3d angularPartInverse = new Vector3d(angularPart);
+      Vector3D angularPartInverse = new Vector3D(angularPart);
       angularPartInverse.scale(-1.0);
 
       SpatialMotionVector twist1 = createSpatialMotionVector(frameB, frameA, frameA, linearPart, angularPart);
       twist1.invert();
 
       double epsilon = 1e-10;
-      JUnitTools.assertTuple3dEquals(angularPartInverse, twist1.getAngularPartCopy(), epsilon);
-      JUnitTools.assertTuple3dEquals(linearPartInverse, twist1.getLinearPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, twist1.getAngularPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, twist1.getLinearPartCopy(), epsilon);
       assertEquals(frameA, twist1.getExpressedInFrame());
       assertEquals(frameB, twist1.getBaseFrame());
       assertEquals(frameA, twist1.getBodyFrame());
 
       SpatialMotionVector twist2 = createSpatialMotionVector(frameB, frameA, frameB, linearPart, angularPart);
       twist2.invert();
-      JUnitTools.assertTuple3dEquals(angularPartInverse, twist2.getAngularPartCopy(), epsilon);
-      JUnitTools.assertTuple3dEquals(linearPartInverse, twist2.getLinearPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(angularPartInverse, twist2.getAngularPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(linearPartInverse, twist2.getLinearPartCopy(), epsilon);
       assertEquals(frameB, twist2.getExpressedInFrame());
       assertEquals(frameB, twist2.getBaseFrame());
       assertEquals(frameA, twist2.getBodyFrame());
@@ -149,8 +149,8 @@ public class SpatialMotionVectorTest
       double linearLength = 10.0;
       double angularLength = 6.3;
 
-      Vector3d linearPart = RandomTools.generateRandomVector(random, linearLength);
-      Vector3d angularPart = RandomTools.generateRandomVector(random, angularLength);
+      Vector3D linearPart = RandomGeometry.nextVector3D(random, linearLength);
+      Vector3D angularPart = RandomGeometry.nextVector3D(random, angularLength);
       
       SpatialMotionVector vector = createSpatialMotionVector(frameB, frameA, frameA, linearPart, angularPart);
             
@@ -175,7 +175,7 @@ public class SpatialMotionVectorTest
    }
 
    protected SpatialMotionVector createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame,
-           Vector3d linearPart, Vector3d angularPart)
+           Vector3D linearPart, Vector3D angularPart)
    {
       return new GenericSpatialMotionVector(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
    }
@@ -188,11 +188,11 @@ public class SpatialMotionVectorTest
 
    public class GenericSpatialMotionVector extends SpatialMotionVector
    {
-      public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3d linearPart,
-                                        Vector3d angularPart)
+      public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearPart,
+                                        Vector3D angularPart)
       {
-         this.angularPart = new Vector3d();
-         this.linearPart = new Vector3d();
+         this.angularPart = new Vector3D();
+         this.linearPart = new Vector3D();
          set(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
       }
 
@@ -202,8 +202,8 @@ public class SpatialMotionVectorTest
       public GenericSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F twistMatrix)
       {
          MatrixTools.checkMatrixDimensions(twistMatrix, SIZE, 1);
-         this.angularPart = new Vector3d();
-         this.linearPart = new Vector3d();
+         this.angularPart = new Vector3D();
+         this.linearPart = new Vector3D();
          set(bodyFrame, baseFrame, expressedInFrame, twistMatrix, 0);
       }
    }
@@ -237,8 +237,8 @@ public class SpatialMotionVectorTest
          assertEquals(vector1.getBaseFrame(), vector2.getBaseFrame());
          assertEquals(vector1.getExpressedInFrame(), vector2.getExpressedInFrame());
 
-         JUnitTools.assertTuple3dEquals(vector1.getAngularPartCopy(), vector2.getAngularPartCopy(), epsilon);
-         JUnitTools.assertTuple3dEquals(vector1.getLinearPartCopy(), vector2.getLinearPartCopy(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(vector1.getAngularPartCopy(), vector2.getAngularPartCopy(), epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(vector1.getLinearPartCopy(), vector2.getLinearPartCopy(), epsilon);
       }
    }
 }

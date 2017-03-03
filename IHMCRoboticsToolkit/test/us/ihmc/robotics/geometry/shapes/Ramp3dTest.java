@@ -6,17 +6,18 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Ramp3dTest
 {
@@ -37,10 +38,10 @@ public class Ramp3dTest
 
       for (int i = 0; i < numberOfShapes; i++)
       {
-         RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
-         double length = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double width = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+         double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Ramp3d box3d = new Ramp3d(transform, width, length, height);
          testHelper.runSimpleTests(box3d, random, numberOfPoints);
       }
@@ -52,11 +53,11 @@ public class Ramp3dTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(Math.PI / 2.0);
-      transform.setTranslation(new Vector3d(2.0, 0.0, 3.0));
+      transform.setTranslation(new Vector3D(2.0, 0.0, 3.0));
 
       // example use
       Ramp3d ramp3d = new Ramp3d(transform, 1.0, 1.0, 1.0);
-      Point3d pointToCheck = new Point3d(2.0, 0.0, 4.0);
+      Point3D pointToCheck = new Point3D(2.0, 0.0, 4.0);
       assertFalse(ramp3d.isInsideOrOnSurface(pointToCheck));
       assertEquals(Math.toRadians(45.0), ramp3d.getRampIncline(), 1e-7);
    }
@@ -72,12 +73,12 @@ public class Ramp3dTest
       ramp2.setWidth(ramp1.getWidth());
       ramp2.setLength(ramp1.getLength());
       ramp2.setHeight(ramp1.getHeight());
-      ramp2.setTransform(ramp1.getTransformUnsafe());
+      ramp2.setPose(ramp1);
 
       assertTrue(ramp1.getWidth() == ramp2.getWidth());
       assertTrue(ramp1.getLength() == ramp2.getLength());
       assertTrue(ramp1.getHeight() == ramp2.getHeight());
-      assertEquals(ramp1.getTransformUnsafe(), ramp2.getTransformUnsafe());
+      ramp1.epsilonEquals(ramp2, 1e-7);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -85,7 +86,7 @@ public class Ramp3dTest
    public void testSurfaceNormal()
    {
       Ramp3d ramp = new Ramp3d(1.0, 1.0, 1.0);
-      Vector3d surfaceNormal = new Vector3d();
+      Vector3D surfaceNormal = new Vector3D();
       ramp.getSurfaceNormal(surfaceNormal);
       assertEquals("not equal", surfaceNormal.getX(), -1.0 / Math.sqrt(2.0), 1e-14);
       assertEquals("not equal", surfaceNormal.getY(), 0.0, 1e-14);
@@ -97,7 +98,7 @@ public class Ramp3dTest
    public void testSimpleOrthogonalProjection()
    {
       Ramp3d ramp3d = new Ramp3d(1.0, 1.0, 1.0);
-      Point3d pointToProject = new Point3d(0.0, 0.0, 1.0);
+      Point3D pointToProject = new Point3D(0.0, 0.0, 1.0);
       ramp3d.orthogonalProjection(pointToProject);
       assertEquals(pointToProject.getX(), 0.5, 1e-14);
       assertEquals(pointToProject.getY(), 0.0, 1e-14);
@@ -118,8 +119,8 @@ public class Ramp3dTest
    public void testSimplePointOutside()
    {
       Ramp3d ramp3d = new Ramp3d(1.0, 1.0, 1.0);
-      assertFalse(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.0, 0.0, 1.0})));
-      assertTrue(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.5, 0.0, 0.1})));
+      assertFalse(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, 0.0, 1.0})));
+      assertTrue(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.5, 0.0, 0.1})));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -132,8 +133,8 @@ public class Ramp3dTest
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(Math.PI / 2.0);
 
-      Point3d p1 = new Point3d(new double[] {0.4, 0.2, 0.0});
-      Point3d p2 = new Point3d(new double[] {0.4, -0.2, 0.0});
+      Point3D p1 = new Point3D(new double[] {0.4, 0.2, 0.0});
+      Point3D p2 = new Point3D(new double[] {0.4, -0.2, 0.0});
 
       assertTrue(ramp3d.isInsideOrOnSurface(p1));
       assertTrue(ramp3d.isInsideOrOnSurface(p2));
@@ -149,20 +150,20 @@ public class Ramp3dTest
    {
       // With default epsilon
       Ramp3d ramp3d = new Ramp3d(new RigidBodyTransform(), 1.0, 1.0, 1.0);
-      assertFalse(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.0, 0.0, 1.0})));
-      assertFalse(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.0, 5.0, 1.0})));
-      assertFalse(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.0, -5.0, 1.0})));
-      assertTrue(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.5, 0.0, 0.2})));
-      assertTrue(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {1.0, 0.3, 0.8})));
+      assertFalse(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, 0.0, 1.0})));
+      assertFalse(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, 5.0, 1.0})));
+      assertFalse(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, -5.0, 1.0})));
+      assertTrue(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.5, 0.0, 0.2})));
+      assertTrue(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {1.0, 0.3, 0.8})));
 
       // With finite epsilon
-      assertTrue(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) + 0.001));
-      assertFalse(ramp3d.isInsideOrOnSurface(new Point3d(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) - 0.001));
+      assertTrue(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) + 0.001));
+      assertFalse(ramp3d.isInsideOrOnSurface(new Point3D(new double[] {0.0, 0.0, 1.0}), 1.0 / Math.sqrt(2.0) - 0.001));
 
       // With default epsilon and translation
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(0.75 * Math.PI);
-      transform.setTranslation(new Vector3d(1.0, -1.0, 2.0));
+      transform.setTranslation(new Vector3D(1.0, -1.0, 2.0));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -178,7 +179,7 @@ public class Ramp3dTest
       for (int i = 0; i < iterations; i++)
       {
          Ramp3d ramp = createRandomRamp(random);
-         Vector3d surfaceNormal = new Vector3d();
+         Vector3D surfaceNormal = new Vector3D();
          ramp.getSurfaceNormal(surfaceNormal);
          
          double insideRamp = 0.1;
@@ -189,15 +190,15 @@ public class Ramp3dTest
          double minZ = 0.0;
          double maxZ = 1.0;
          
-         Point3d pointToTestOnRamp = RandomTools.generateRandomPoint(random, minX, minY, minZ, maxX, maxY, maxZ);
+         Point3D pointToTestOnRamp = RandomGeometry.nextPoint3D(random, minX, minY, minZ, maxX, maxY, maxZ);
          pointToTestOnRamp = transformFromAngledToWorldFrame(ramp, pointToTestOnRamp);
          ramp.orthogonalProjection(pointToTestOnRamp);
 
-         Point3d rampOrigin = new Point3d();
+         Point3D rampOrigin = new Point3D();
          rampOrigin = transformFromAngledToWorldFrame(ramp, rampOrigin);
         
          
-         Vector3d vectorFromOriginToPointOnRamp = new Vector3d(pointToTestOnRamp);
+         Vector3D vectorFromOriginToPointOnRamp = new Vector3D(pointToTestOnRamp);
          vectorFromOriginToPointOnRamp.sub(rampOrigin);
          
          double dotProduct = vectorFromOriginToPointOnRamp.dot(surfaceNormal);
@@ -224,7 +225,7 @@ public class Ramp3dTest
 
       Random random = new Random(314159L);
       Ramp3d ramp = new Ramp3d(1.0, 1.0, 1.0);
-      Point3d pointToTest = new Point3d();
+      Point3D pointToTest = new Point3D();
       double rampLength;
       double epsilon;
 
@@ -256,22 +257,22 @@ public class Ramp3dTest
 
          // x < 0 (in ramp frame) means it's outside the ramp
          pointToTest.set(-random.nextDouble() - 2e-7, random.nextDouble(), random.nextDouble());
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // x > length (in ramp frame) means it's outside the ramp
          pointToTest.set(Math.abs(random.nextDouble()) + ramp.getLength() + 2e-7, random.nextDouble(), random.nextDouble());
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // z < 0 (in ramp frame) means it's outside the ramp
          pointToTest.set(random.nextDouble(), random.nextDouble(), -random.nextDouble() - 2e-7);
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // z > height (in ramp frame) means it's outside the ramp
          pointToTest.set(random.nextDouble(), random.nextDouble(), Math.abs(random.nextDouble()) + ramp.getHeight() + 2e-7);
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertFalse(ramp.isInsideOrOnSurface(pointToTest));
 
          // points below the ramp surface (z < 0 in angled frame) are inside
@@ -284,12 +285,12 @@ public class Ramp3dTest
 
          // points barely above the base (small positive z in ramp frame and x and z so that they fit into the rectangular sides) are inside
          pointToTest.set(random.nextDouble() * ramp.getLength(), 0.5 * random.nextDouble() * ramp.getWidth(), random.nextDouble() * epsilon);
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertTrue(ramp.isInsideOrOnSurface(pointToTest, epsilon));
 
          // points barely inside of the 'backboard', ie x = length
          pointToTest.set(random.nextDouble() * epsilon + ramp.getLength(), 0.5 * random.nextDouble() * ramp.getWidth(), random.nextDouble() * ramp.getHeight());
-         ramp.getTransformUnsafe().transform(pointToTest);
+         ramp.transformToWorld(pointToTest);
          assertTrue(ramp.isInsideOrOnSurface(pointToTest, epsilon));
       }
    }
@@ -313,28 +314,28 @@ public class Ramp3dTest
       
       Ramp3d ramp = new Ramp3d(transform, width, length, height);
 
-      Point3d pointOutside = new Point3d(-0.836744392764021, 0.4813950690183002, -0.7222891854951903);
-      Vector3d surfaceNormal = new Vector3d();
-      Point3d closestPointToPack = new Point3d();
+      Point3D pointOutside = new Point3D(-0.836744392764021, 0.4813950690183002, -0.7222891854951903);
+      Vector3D surfaceNormal = new Vector3D();
+      Point3D closestPointToPack = new Point3D();
       ramp.checkIfInside(pointOutside, closestPointToPack, surfaceNormal);
       
-      Point3d projectionOntoSurface = new Point3d(pointOutside);
+      Point3D projectionOntoSurface = new Point3D(pointOutside);
       ramp.orthogonalProjection(projectionOntoSurface);
 
-      JUnitTools.assertTuple3dEquals(projectionOntoSurface, closestPointToPack, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(projectionOntoSurface, closestPointToPack, 1e-7);
       
-      Point3d newClosestToPack = new Point3d();
-      Vector3d newNormal = new Vector3d();
+      Point3D newClosestToPack = new Point3D();
+      Vector3D newNormal = new Vector3D();
       ramp.checkIfInside(closestPointToPack, newClosestToPack, newNormal);
       
-      JUnitTools.assertTuple3dEquals(closestPointToPack, newClosestToPack, 1e-4);
-      JUnitTools.assertTuple3dEquals(surfaceNormal, newNormal, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(closestPointToPack, newClosestToPack, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(surfaceNormal, newNormal, 1e-4);
 
-      Point3d expectedClosestPoint = new Point3d(-0.2681570466884828, 0.393595239292229, 0.014295093961947069);
-      Vector3d regressionNormal = new Vector3d(-0.9966461747460685, 0.07985119153963215, -0.01789384178230288);
+      Point3D expectedClosestPoint = new Point3D(-0.2681570466884828, 0.393595239292229, 0.014295093961947069);
+      Vector3D regressionNormal = new Vector3D(-0.9966461747460685, 0.07985119153963215, -0.01789384178230288);
       
-      JUnitTools.assertTuple3dEquals(expectedClosestPoint, closestPointToPack, 1e-4);
-      JUnitTools.assertTuple3dEquals(regressionNormal, newNormal, 1e-3);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedClosestPoint, closestPointToPack, 1e-4);
+      EuclidCoreTestTools.assertTuple3DEquals(regressionNormal, newNormal, 1e-3);
 	}
 	
 	
@@ -354,8 +355,8 @@ public class Ramp3dTest
          Ramp3d ramp = createRandomRamp(random);
          
          double insideRamp = 0.02;
-         Point3d pointToTestAboveRamp = RandomTools.generateRandomPoint(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
-         Point3d pointOnRampBelowTestPoint = new Point3d(pointToTestAboveRamp);
+         Point3D pointToTestAboveRamp = RandomGeometry.nextPoint3D(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
+         Point3D pointOnRampBelowTestPoint = new Point3D(pointToTestAboveRamp);
          pointOnRampBelowTestPoint.setZ(0.0);
          double heightAboveRamp = pointToTestAboveRamp.getZ();
          
@@ -391,8 +392,8 @@ public class Ramp3dTest
       int iterations = 1000;
 
       Random random = new Random(897932L);
-      Point3d pointToPack = new Point3d();
-      Vector3d normalToPack = new Vector3d();
+      Point3D pointToPack = new Point3D();
+      Vector3D normalToPack = new Vector3D();
 
       // points that can be projected directly (ie just set z=0 in angled frame) give surface normal
       for (int i = 0; i < iterations; i++)
@@ -401,7 +402,7 @@ public class Ramp3dTest
          printIfDebug("\nramp = " + ramp);
 
          double insideRamp = 0.02;
-         Point3d pointToTestAboveRamp = RandomTools.generateRandomPoint(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
+         Point3D pointToTestAboveRamp = RandomGeometry.nextPoint3D(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
          pointToTestAboveRamp = transformFromAngledToWorldFrame(ramp, pointToTestAboveRamp);
 
          printIfDebug("rampLength = " + ramp.getRampLength());
@@ -413,17 +414,17 @@ public class Ramp3dTest
          double distanceToPointToTest = ramp.distance(pointToTestAboveRamp);
          normalToPack.scale(distanceToPointToTest);
          
-         Point3d pointOnRamp = new Point3d(pointToTestAboveRamp);
+         Point3D pointOnRamp = new Point3D(pointToTestAboveRamp);
          pointOnRamp.sub(normalToPack);
 
          printIfDebug("pointOnRamp = " + pointOnRamp);
          double distanceToPointOnRamp = ramp.distance(pointOnRamp);
          printIfDebug("distanceToPointOnRamp = " + distanceToPointOnRamp);
 
-         Point3d testPointOnRamp = new Point3d(pointToTestAboveRamp);
+         Point3D testPointOnRamp = new Point3D(pointToTestAboveRamp);
          ramp.orthogonalProjection(testPointOnRamp);
          
-         Point3d testPointOnRampAgain = new Point3d(testPointOnRamp);
+         Point3D testPointOnRampAgain = new Point3D(testPointOnRamp);
          ramp.orthogonalProjection(testPointOnRampAgain);
          printIfDebug("testPointOnRampAgain = " + testPointOnRampAgain);
 
@@ -431,7 +432,7 @@ public class Ramp3dTest
          double distanceToTestPointOnRamp = ramp.distance(testPointOnRamp);
          printIfDebug("distanceToTestPointOnRamp = " + distanceToTestPointOnRamp);
 
-         JUnitTools.assertTuple3dEquals(testPointOnRamp, pointOnRamp, 1e-7);
+         EuclidCoreTestTools.assertTuple3DEquals(testPointOnRamp, pointOnRamp, 1e-7);
          
          printIfDebug("isInside = " + isInside);
          printIfDebug("distanceToPointToTest = " + distanceToPointToTest);
@@ -454,14 +455,14 @@ public class Ramp3dTest
       RigidBodyTransform transformAppliedOnlyToCopy = new RigidBodyTransform();
       transformAppliedOnlyToCopy.setRotationPitchAndZeroTranslation(Math.PI / 4);
       rampCopy.applyTransform(transformAppliedOnlyToCopy);
-      assertFalse(rampCopy.getTransformUnsafe().equals(ramp.getTransformUnsafe()));
+      assertFalse(rampCopy.equals(ramp));
 
       Ramp3d rampCopyBySet = new Ramp3d(5.0, 6.0, 7.0);
       rampCopyBySet.set(ramp);
       RigidBodyTransform transformAppliedOnlyToCopyBySet = new RigidBodyTransform();
       transformAppliedOnlyToCopyBySet.setRotationYawAndZeroTranslation(Math.PI / 5);
       rampCopyBySet.applyTransform(transformAppliedOnlyToCopyBySet);
-      assertFalse(rampCopyBySet.getTransformUnsafe().equals(ramp.getTransformUnsafe()));
+      assertFalse(rampCopyBySet.equals(ramp));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -473,8 +474,8 @@ public class Ramp3dTest
       Ramp3d ramp = new Ramp3d(transform, 2.0, 3.0, 4.0);
       Ramp3d rampCopyBySet = new Ramp3d(5.0, 6.0, 7.0);
       rampCopyBySet.set(ramp);
-      Point3d pointProjectedOntoRamp = new Point3d(1.0, 0.0, 5.0);
-      Point3d pointProjectedOntoRampCopy = new Point3d(pointProjectedOntoRamp);
+      Point3D pointProjectedOntoRamp = new Point3D(1.0, 0.0, 5.0);
+      Point3D pointProjectedOntoRampCopy = new Point3D(pointProjectedOntoRamp);
       ramp.orthogonalProjection(pointProjectedOntoRamp);
       rampCopyBySet.orthogonalProjection(pointProjectedOntoRampCopy);
       assertEquals(pointProjectedOntoRamp, pointProjectedOntoRampCopy);
@@ -484,9 +485,9 @@ public class Ramp3dTest
    {
       RigidBodyTransform configuration = createRandomTransform(random);      
       
-      double width = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
-      double length = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
-      double height = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
+      double width = RandomNumbers.nextDouble(random, 0.05, 1.0); 
+      double length = RandomNumbers.nextDouble(random, 0.05, 1.0); 
+      double height = RandomNumbers.nextDouble(random, 0.05, 1.0); 
 
       return new Ramp3d(configuration, length, width, height);
    }
@@ -501,23 +502,23 @@ public class Ramp3dTest
       transformReturn.multiply(transformTemp);
       transformTemp.setRotationYawAndZeroTranslation(random.nextDouble());
       transformReturn.multiply(transformTemp);
-      transformReturn.setTranslation(new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble()));
+      transformReturn.setTranslation(new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
       return transformReturn;
    }
 
-   private static Point3d transformFromAngledToWorldFrame(Ramp3d ramp, Point3d point)
+   private static Point3D transformFromAngledToWorldFrame(Ramp3d ramp, Point3D point)
    {
       RigidBodyTransform angleTransform = new RigidBodyTransform();
       angleTransform.setRotationPitchAndZeroTranslation(-ramp.getRampIncline());
       angleTransform.transform(point);
       
-      ramp.getTransformFromShapeFrameUnsafe().transform(point);
+      ramp.transformToWorld(point);
       
-      return new Point3d(point);
+      return new Point3D(point);
    }
 
-   private static void pointInsideRampSide(Point3d pointToPack, Ramp3d ramp, double epsilon)
+   private static void pointInsideRampSide(Point3D pointToPack, Ramp3d ramp, double epsilon)
    {
       Random random = new Random(97932L);
 
@@ -529,7 +530,7 @@ public class Ramp3dTest
          zVal = xVal * (ramp.getHeight() / ramp.getLength());
 
       pointToPack.set(xVal, yVal, zVal);
-      ramp.getTransformUnsafe().transform(pointToPack);
+      ramp.transformToWorld(pointToPack);
    }
    
    private void printIfDebug(String string)

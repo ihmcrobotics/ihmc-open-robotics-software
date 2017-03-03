@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
@@ -66,12 +65,12 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    private final FrameOrientation tempCurrentOrientation;
    private final FrameVector tempCurrentAngularVelocity;
    private final FrameVector tempCurrentAngularAcceleration;
-   private final AxisAngle4d tempAxisAngle;
-   private final Vector3d tempVector;
+   private final AxisAngle tempAxisAngle;
+   private final Vector3D tempVector;
    double vectorLength;
 
    private final double FDdt = 5e-6;
-   private Quat4d quatFD1, quatFD3, quatFDDelta;
+   private Quaternion quatFD1, quatFD3, quatFDDelta;
    private double deltaAngle, omegaFD;
    private FrameVector omegaVectorDF;
 
@@ -129,9 +128,9 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       this.allowMultipleFrames = allowMultipleFrames;
       this.trajectoryFrame = referenceFrame;
 
-      quatFD1 = new Quat4d();
-      quatFD3 = new Quat4d();
-      quatFDDelta = new Quat4d();
+      quatFD1 = new Quaternion();
+      quatFD3 = new Quaternion();
+      quatFDDelta = new Quaternion();
       omegaVectorDF = new FrameVector();
 
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
@@ -160,8 +159,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       tempCurrentOrientation = new FrameOrientation();
       tempCurrentAngularVelocity = new FrameVector();
       tempCurrentAngularAcceleration = new FrameVector();
-      tempAxisAngle = new AxisAngle4d();
-      tempVector = new Vector3d();
+      tempAxisAngle = new AxisAngle();
+      tempVector = new Vector3D();
 
       tempPosition = new FramePoint();
       tempOrientation = new FrameOrientation(trajectoryFrame);
@@ -189,7 +188,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       interpolationFrame = new ReferenceFrame("interPolationFrame", ReferenceFrame.getWorldFrame())
       {
          private final FrameOrientation localFrameOrientation = new FrameOrientation();
-         private final Matrix3d localRotation = new Matrix3d();
+         private final RotationMatrix localRotation = new RotationMatrix();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -204,7 +203,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       finalFrame = new ReferenceFrame("finalFrame", ReferenceFrame.getWorldFrame())
       {
          private final FrameOrientation localFrameOrientation = new FrameOrientation();
-         private final Matrix3d localRotation = new Matrix3d();
+         private final RotationMatrix localRotation = new RotationMatrix();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -219,7 +218,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       currentTrajectoryFrame = new ReferenceFrame("currentTrajectoryFrame", interpolationFrame)
       {
          private final FrameOrientation localFrameOrientation = new FrameOrientation();
-         private final Matrix3d localRotation = new Matrix3d();
+         private final RotationMatrix localRotation = new RotationMatrix();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -481,7 +480,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    {
       this.currentTime.set(time);
       currentTrajectoryFrame.update();
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
 
       xPolynomial.compute(time);
       yPolynomial.compute(time);
@@ -556,10 +555,10 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
          // Finite Differences using quaternions
          quatFD1.inverse();
-         quatFDDelta.mul(quatFD3, quatFD1);
+         quatFDDelta.multiply(quatFD3, quatFD1);
          quatFDDelta.normalize();
 
-         deltaAngle = Math.acos(quatFDDelta.getW()) * 2.0;
+         deltaAngle = Math.acos(quatFDDelta.getS()) * 2.0;
 
          omegaFD = deltaAngle / (2.0 * FDdt);
          omegaVectorDF.setIncludingFrame(worldFrame, quatFDDelta.getX(), quatFDDelta.getY(), quatFDDelta.getZ());
@@ -681,7 +680,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
       getAngularAcceleration(angularAccelerationToPack);
    }
 
-   private final Quat4d temp = new Quat4d();
+   private final Quaternion temp = new Quaternion();
 
    public void getPose(FramePose framePoseToPack)
    {

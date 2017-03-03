@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.geometry.polytope.CylinderSupportingVertexHolder;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
@@ -37,7 +36,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       cylinder3d = new Cylinder3d(height, radius);
 
       cylinderConsistencyTransform.setTranslation(0.0, 0.0, -height / 2.0);
-      cylinder3d.setTransform(cylinderConsistencyTransform);
+      cylinder3d.setPose(cylinderConsistencyTransform);
       
       boundingBoxNeedsUpdating = true;
    }
@@ -75,8 +74,8 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    private void setSupportingVertexAndCylinder3dTransformFromThisAndConsistencyTransform()
    {
       supportingVertexHolder.setTransform(transform);
-      this.cylinder3d.setTransform(this.transform);
-      this.cylinder3d.applyTransform(cylinderConsistencyTransform);
+      this.cylinder3d.setPose(this.transform);
+      this.cylinder3d.appendTransform(cylinderConsistencyTransform);
       boundingBoxNeedsUpdating = true;
    }
 
@@ -88,7 +87,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    @Override
    public void applyTransform(RigidBodyTransform transformToWorld)
    {
-      transform.multiply(transformToWorld, transform);
+      transform.preMultiply(transformToWorld);
       setSupportingVertexAndCylinder3dTransformFromThisAndConsistencyTransform();
    }
 
@@ -109,7 +108,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       return supportingVertexHolder;
    }
 
-   public void getProjection(Point3d pointToProject, Point3d closestPointOnCylinderToPack)
+   public void getProjection(Point3D pointToProject, Point3D closestPointOnCylinderToPack)
    {
       closestPointOnCylinderToPack.set(pointToProject);
       cylinder3d.orthogonalProjection(closestPointOnCylinderToPack);
@@ -126,12 +125,12 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       boundingBoxToPack.set(boundingBox);
    }
 
-   private final Vector3d supportDirectionForBoundingBox = new Vector3d();
+   private final Vector3D supportDirectionForBoundingBox = new Vector3D();
 
    private void updateBoundingBox()
    {
       supportDirectionForBoundingBox.set(1.0, 0.0, 0.0);
-      Point3d supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
+      Point3D supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirectionForBoundingBox);
       double xMax = supportingVertex.getX();
       
       supportDirectionForBoundingBox.set(-1.0, 0.0, 0.0);
@@ -156,4 +155,17 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
       
       boundingBox.set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
+
+   @Override
+   public boolean isPointInside(Point3D pointInWorld)
+   {
+      return cylinder3d.distance(pointInWorld) <= smoothingRadius;
+   }
+
+   @Override
+   public boolean rollContactIfRolling(Vector3D surfaceNormal, Point3D pointToRoll)
+   {
+      return cylinder3d.projectToBottomOfCurvedSurface(surfaceNormal, pointToRoll);
+   }
+
 }

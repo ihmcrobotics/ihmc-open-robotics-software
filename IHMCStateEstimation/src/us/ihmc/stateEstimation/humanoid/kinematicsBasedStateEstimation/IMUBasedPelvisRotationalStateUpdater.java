@@ -2,16 +2,14 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.filters.FiniteDifferenceAngularVelocityYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -130,13 +128,14 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
-      transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
+      transformFromRootJointFrameToWorld.set(transformFromMeasurementFrameToWorld);
+      transformFromRootJointFrameToWorld.multiply(transformFromRootJointFrameToMeasurementFrame);
       transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
       
-      double initialYaw = RotationTools.computeYaw(rotationFromRootJointFrameToWorld);
+      double initialYaw = rotationFromRootJointFrameToWorld.getYaw();
 
       rootJointYawOffsetFromFrozenState.set(initialYaw);
-      rotationFrozenOffset.rotZ(initialYaw);
+      rotationFrozenOffset.setToYawMatrix(initialYaw);
 
       yoRootJointFrameQuaternion.setToZero();
       yoRootJointFrameOrientation.setToZero();
@@ -150,7 +149,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
    }
 
-   private final Matrix3d rotationFrozenOffset = new Matrix3d();
+   private final RotationMatrix rotationFrozenOffset = new RotationMatrix();
    private final double[] lastComputedYawPitchRoll = new double[3];
 
    @Override
@@ -164,15 +163,16 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
-      transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
+      transformFromRootJointFrameToWorld.set(transformFromMeasurementFrameToWorld);
+      transformFromRootJointFrameToWorld.multiply(transformFromRootJointFrameToMeasurementFrame);
       transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
 
       yoRootJointFrameQuaternion.getYawPitchRoll(lastComputedYawPitchRoll);
-      double currentYaw = RotationTools.computeYaw(rotationFromRootJointFrameToWorld);
+      double currentYaw = rotationFromRootJointFrameToWorld.getYaw();
 
       double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(lastComputedYawPitchRoll[0], currentYaw);
       rootJointYawOffsetFromFrozenState.set(yawDifference);
-      rotationFrozenOffset.rotZ(yawDifference);
+      rotationFrozenOffset.setToYawMatrix(yawDifference);
 
       // Keep setting the orientation so that the localization updater works properly.
       yoRootJointFrameQuaternion.get(rotationFromRootJointFrameToWorld);
@@ -199,10 +199,10 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final RigidBodyTransform transformFromRootJointFrameToWorld = new RigidBodyTransform();
    private final RigidBodyTransform transformFromRootJointFrameToMeasurementFrame = new RigidBodyTransform();
 
-   private final Matrix3d rotationFromRootJointFrameToWorld = new Matrix3d();
-   private final Matrix3d orientationMeasurement = new Matrix3d();
+   private final RotationMatrix rotationFromRootJointFrameToWorld = new RotationMatrix();
+   private final RotationMatrix orientationMeasurement = new RotationMatrix();
 
-   private final Matrix3d yawBiasMatrix = new Matrix3d();
+   private final RotationMatrix yawBiasMatrix = new RotationMatrix();
 
    private void updateRootJointRotation()
    {
@@ -214,10 +214,11 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       rootJointFrame.getTransformToDesiredFrame(transformFromRootJointFrameToMeasurementFrame, measurementFrame);
 
       // R_{root}^{world} = R_{estimationLink}^{world} * R_{root}^{estimationLink}
-      transformFromRootJointFrameToWorld.multiply(transformFromMeasurementFrameToWorld, transformFromRootJointFrameToMeasurementFrame);
+      transformFromRootJointFrameToWorld.set(transformFromMeasurementFrameToWorld);
+      transformFromRootJointFrameToWorld.multiply(transformFromRootJointFrameToMeasurementFrame);
       transformFromRootJointFrameToWorld.getRotation(rotationFromRootJointFrameToWorld);
 
-      rotationFromRootJointFrameToWorld.mul(rotationFrozenOffset, rotationFromRootJointFrameToWorld);
+      rotationFromRootJointFrameToWorld.preMultiply(rotationFrozenOffset);
 
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
@@ -225,17 +226,17 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       if (imuYawDriftEstimator != null)
       {
          imuYawDriftEstimator.update();
-         yawBiasMatrix.rotZ(imuYawDriftEstimator.getYawBiasInWorldFrame());
+         yawBiasMatrix.setToYawMatrix(imuYawDriftEstimator.getYawBiasInWorldFrame());
          yawBiasMatrix.transpose();
-         rotationFromRootJointFrameToWorld.mul(yawBiasMatrix, rotationFromRootJointFrameToWorld);
+         rotationFromRootJointFrameToWorld.preMultiply(yawBiasMatrix);
       }
 
       rootJoint.setRotation(rotationFromRootJointFrameToWorld);
       rootJointFrame.update();
    }
 
-   private final Vector3d angularVelocityMeasurement = new Vector3d();
-   private final Vector3d angularVelocityMeasurementBias = new Vector3d();
+   private final Vector3D angularVelocityMeasurement = new Vector3D();
+   private final Vector3D angularVelocityMeasurementBias = new Vector3D();
 
    /** Angular velocity of the measurement link, with respect to world. */
    private final FrameVector angularVelocityMeasurementLinkRelativeToWorld = new FrameVector();

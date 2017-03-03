@@ -1,21 +1,18 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import java.awt.Color;
-
-import javax.vecmath.Color3f;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -48,7 +45,8 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       this(name, startPoint, frameVector, scale, appearance, true);
    }
 
-   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector directionVector, double scale, AppearanceDefinition appearance, boolean drawArrowhead, double lineRadiusWhenOneMeterLong)
+   public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector directionVector, double scale, AppearanceDefinition appearance,
+                          boolean drawArrowhead, double lineRadiusWhenOneMeterLong)
    {
       this(name, startPoint, directionVector, scale, appearance, drawArrowhead);
       this.setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
@@ -56,22 +54,24 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
 
    public YoGraphicVector(String name, YoFramePoint startPoint, YoFrameVector frameVector, double scale, AppearanceDefinition appearance, boolean drawArrowhead)
    {
-      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), scale, appearance, drawArrowhead);
+      this(name, startPoint.getYoX(), startPoint.getYoY(), startPoint.getYoZ(), frameVector.getYoX(), frameVector.getYoY(), frameVector.getYoZ(), scale,
+           appearance, drawArrowhead);
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicVector. startPoint = " + startPoint + ", frameVector = " + frameVector);
+         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicVector. startPoint = " + startPoint + ", frameVector = "
+               + frameVector);
       }
    }
 
-   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scaleFactor,
-         AppearanceDefinition appearance)
+   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
+                          DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance)
    {
       this(name, baseX, baseY, baseZ, x, y, z, scaleFactor, appearance, true);
    }
 
-   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, double scaleFactor,
-         AppearanceDefinition appearance, boolean drawArrowhead)
+   public YoGraphicVector(String name, DoubleYoVariable baseX, DoubleYoVariable baseY, DoubleYoVariable baseZ, DoubleYoVariable x, DoubleYoVariable y,
+                          DoubleYoVariable z, double scaleFactor, AppearanceDefinition appearance, boolean drawArrowhead)
    {
       super(name);
 
@@ -97,13 +97,12 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       this.maxScaleFactor = maxScaleFactor;
    }
 
-
    public void setDrawArrowhead(boolean drawArrowhead)
    {
       this.drawArrowhead = drawArrowhead;
    }
 
-   public void getBasePosition(Point3d point3d)
+   public void getBasePosition(Point3D point3d)
    {
       point3d.setX(this.baseX.getDoubleValue());
       point3d.setY(this.baseY.getDoubleValue());
@@ -117,7 +116,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       framePoint.setZ(this.baseZ.getDoubleValue());
    }
 
-   public void getVector(Vector3d vector3d)
+   public void getVector(Vector3D vector3d)
    {
       vector3d.setX(x.getDoubleValue());
       vector3d.setY(y.getDoubleValue());
@@ -134,14 +133,12 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       return scaleFactor;
    }
 
-   private Vector3d translationVector = new Vector3d();
-   private Vector3d z_rot = new Vector3d(), y_rot = new Vector3d(), x_rot = new Vector3d();
-   private Matrix3d rotMatrix = new Matrix3d();
-
-   private Transform3d scaleTransform = new Transform3d();
+   private Vector3D translationVector = new Vector3D();
+   private Vector3D z_rot = new Vector3D(), y_rot = new Vector3D(), x_rot = new Vector3D();
+   private RotationMatrix rotMatrix = new RotationMatrix();
 
    @Override
-   protected void computeRotationTranslation(Transform3d transform3D)
+   protected void computeRotationTranslation(AffineTransform transform3D)
    {
       transform3D.setIdentity();
 
@@ -163,9 +160,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       x_rot.cross(y_rot, z_rot);
       x_rot.normalize();
 
-      rotMatrix.setColumn(0, x_rot);
-      rotMatrix.setColumn(1, y_rot);
-      rotMatrix.setColumn(2, z_rot);
+      rotMatrix.setColumns(x_rot, y_rot, z_rot);
 
       translationVector.set(baseX.getDoubleValue(), baseY.getDoubleValue(), baseZ.getDoubleValue());
 
@@ -180,14 +175,9 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
          xyScaleFactor = maxScaleFactor;
       }
 
-      scaleTransform.setScale(xyScaleFactor, xyScaleFactor, length * scaleFactor);
-
-      transform3D.setScale(1.0); //length * scaleFactor, 1.0, length * scaleFactor);
+      transform3D.setScale(xyScaleFactor, xyScaleFactor, length * scaleFactor);
       transform3D.setTranslation(translationVector);
       transform3D.setRotation(rotMatrix);
-
-      transform3D.multiply(transform3D, scaleTransform);
-      //      scaleTransform.multiply(transform3D);
    }
 
    //   @Override
@@ -197,7 +187,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    //      {
    //         if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
    //         {
-   //            instruction.setMesh(MeshDataGenerator.Polygon(new Point3d[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+   //            instruction.setMesh(MeshDataGenerator.Polygon(new Point3D[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
    //         }
    //         else
    //         {
@@ -239,8 +229,8 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    @Override
    public Artifact createArtifact()
    {
-      Color3f color3f = appearance.getColor();
-      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, x, y, ReferenceFrame.getWorldFrame()), new Color(color3f.getX(), color3f.getY(), color3f.getZ()));
+      MutableColor color3f = appearance.getColor();
+      return new YoArtifactLineSegment2d(getName(), new YoFrameLineSegment2d(baseX, baseY, x, y, ReferenceFrame.getWorldFrame()), color3f.get());
    }
 
    @Override
@@ -272,13 +262,13 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
    @Override
    public DoubleYoVariable[] getVariables()
    {
-      return new DoubleYoVariable[] { baseX, baseY, baseZ, x, y, z };
+      return new DoubleYoVariable[] {baseX, baseY, baseZ, x, y, z};
    }
 
    @Override
    public double[] getConstants()
    {
-      return new double[] { scaleFactor };
+      return new double[] {scaleFactor};
    }
 
    public boolean getDrawArrowhead()

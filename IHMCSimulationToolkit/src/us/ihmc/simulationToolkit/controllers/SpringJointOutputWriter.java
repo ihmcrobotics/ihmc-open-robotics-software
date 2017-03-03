@@ -64,7 +64,7 @@ public class SpringJointOutputWriter implements RobotController
          DoubleYoVariable stiffness = jointStiffness.get(simulatedJoint);
          DoubleYoVariable maxDeflection = maxDeflections.get(simulatedJoint);
          AlphaFilteredYoVariable filteredDesired = filteredDesiredJointAngles.get(simulatedJoint);
-         double qDesired = -MathTools.clipToMinMax(tau / stiffness.getDoubleValue(), maxDeflection.getDoubleValue());
+         double qDesired = -MathTools.clamp(tau / stiffness.getDoubleValue(), maxDeflection.getDoubleValue());
          
          filteredDesired.update(qDesired);
          

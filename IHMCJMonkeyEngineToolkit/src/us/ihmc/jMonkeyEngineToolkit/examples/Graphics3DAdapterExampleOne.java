@@ -10,11 +10,11 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -26,9 +26,9 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.geometry.Transform3d;
 
 public class Graphics3DAdapterExampleOne
 {   
@@ -67,8 +67,8 @@ public class Graphics3DAdapterExampleOne
       SelectedListener selectedListener = new SelectedListener()
       {
 
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
-               Quat4d cameraRotation)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+               QuaternionReadOnly cameraRotation)
          {
         	 if(graphics3dNode != null)
         	 {
@@ -211,7 +211,7 @@ public class Graphics3DAdapterExampleOne
          transparency += 0.01;
          if (transparency > 1.0) transparency = 0.0;
          
-         Color3f color = new Color3f((float) Math.random(), (float) Math.random(), (float) Math.random());
+         MutableColor color = new MutableColor((float) Math.random(), (float) Math.random(), (float) Math.random());
          YoAppearanceRGBColor appearance = new YoAppearanceRGBColor(color, 0.0);
          appearance.setTransparency(transparency);
          instruction.setAppearance(appearance);
@@ -248,9 +248,9 @@ public class Graphics3DAdapterExampleOne
             if (scale > 2.0) scalingDown = true;
          }
          
-         Transform3d transform = new Transform3d();
-         transform.setRotationEulerAndZeroTranslation(Math.PI/2.0, 0.0, rotation);
-         transform.setTranslation(new Vector3d(translation, 0.0, 0.0));
+         AffineTransform transform = new AffineTransform();
+         transform.setRotationEuler(Math.PI/2.0, 0.0, rotation);
+         transform.setTranslation(new Vector3D(translation, 0.0, 0.0));
          transform.setScale(scale);
          node.setTransform(transform);
       }

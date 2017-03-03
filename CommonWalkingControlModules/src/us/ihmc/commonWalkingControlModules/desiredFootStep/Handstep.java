@@ -2,18 +2,17 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
 import java.util.Arrays;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -152,7 +151,7 @@ public class Handstep
       return poseReferenceFrame.getRoll();
    }
 
-   public void getPose(Point3d pointToPack, Quat4d quaternionToPack)
+   public void getPose(Point3D pointToPack, Quaternion quaternionToPack)
    {
       poseReferenceFrame.getPose(pointToPack, quaternionToPack);
    }
@@ -182,7 +181,7 @@ public class Handstep
       surfaceNormalToPack.setIncludingFrame(surfaceNormal);
    }
 
-   public void getSurfaceNormal(Vector3d surfaceNormalToPack)
+   public void getSurfaceNormal(Vector3D surfaceNormalToPack)
    {
       this.surfaceNormal.get(surfaceNormalToPack);
    }
@@ -192,7 +191,7 @@ public class Handstep
       return endEffector;
    }
 
-   public void getPosition(Point3d pointToPack)
+   public void getPosition(Point3D pointToPack)
    {
       poseReferenceFrame.getPosition(pointToPack);
    }
@@ -202,12 +201,12 @@ public class Handstep
       poseReferenceFrame.getPositionIncludingFrame(framePointToPack);
    }
 
-   public void getOrientation(Quat4d quaternionToPack)
+   public void getOrientation(Quaternion quaternionToPack)
    {
       poseReferenceFrame.getOrientation(quaternionToPack);
    }
 
-   public void getOrientation(Matrix3d matrixToPack)
+   public void getOrientation(RotationMatrix matrixToPack)
    {
       poseReferenceFrame.getOrientation(matrixToPack);
    }

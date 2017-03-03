@@ -3,12 +3,10 @@ package us.ihmc.exampleSimulations.beetle.footContact;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -219,7 +217,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public void getPosition2d(Point2d position2d)
+      public void getPosition2d(Point2D position2d)
       {
 
       }

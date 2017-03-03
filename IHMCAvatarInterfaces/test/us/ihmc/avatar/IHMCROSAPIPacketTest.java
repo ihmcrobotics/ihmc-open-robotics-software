@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
@@ -40,8 +41,6 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.GlobalTimer;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -86,7 +85,6 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          blockingSimulationRunner = null;
       }
 
-      GlobalTimer.clearTimers();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -187,7 +185,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
          @Override
          public void run()
          {
-            ThreadTools.sleep(TimeTools.secondsToMilliSeconds(180));
+            ThreadTools.sleep(Conversions.secondsToMilliSeconds(180));
             timeNotElapsed.set(false);
          }
       };

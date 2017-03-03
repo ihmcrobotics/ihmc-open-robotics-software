@@ -1,20 +1,27 @@
 package us.ihmc.robotics.screwTheory;
 
-import javax.vecmath.*;
+import java.util.ArrayList;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import java.util.ArrayList;
 
 public class PlanarJoint extends AbstractInverseDynamicsJoint implements FloatingInverseDynamicsJoint
 {
    private final FloatingInverseDynamicsJointReferenceFrame afterJointFrame;
-   private final Quat4d jointRotation = new Quat4d();
-   private final Vector3d jointTranslation = new Vector3d();
+   private final Quaternion jointRotation = new Quaternion();
+   private final Vector3D jointTranslation = new Vector3D();
    private final Twist jointTwist;
    public final SpatialAccelerationVector jointAcceleration;
    protected final SpatialAccelerationVector jointAccelerationDesired;
@@ -25,10 +32,10 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    {
       super(name, predecessor, beforeJointFrame);
 
-      this.afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
-      this.jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
-      this.jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
-      this.jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
+      afterJointFrame = new FloatingInverseDynamicsJointReferenceFrame(name, beforeJointFrame);
+      jointTwist = new Twist(afterJointFrame, beforeJointFrame, afterJointFrame);
+      jointAcceleration = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
+      jointAccelerationDesired = new SpatialAccelerationVector(afterJointFrame, beforeJointFrame, afterJointFrame);
    }
 
    @Override
@@ -78,7 +85,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
 
       ReferenceFrame successorFrame = successor.getBodyFixedFrame();
 
-      this.successorWrench = new Wrench(successorFrame, successorFrame);
+      successorWrench = new Wrench(successorFrame, successorFrame);
    }
 
    @Override
@@ -104,7 +111,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getDesiredJointAcceleration(SpatialAccelerationVector accelerationToPack)
    {
-      accelerationToPack.setToZero(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(), jointAccelerationDesired.getExpressedInFrame());
+      accelerationToPack.setToZero(jointAccelerationDesired.getBodyFrame(), jointAccelerationDesired.getBaseFrame(),
+                                   jointAccelerationDesired.getExpressedInFrame());
 
       accelerationToPack.setAngularPartY(jointAccelerationDesired.getAngularPartY());
       accelerationToPack.setLinearPartX(jointAccelerationDesired.getLinearPartX());
@@ -161,50 +169,49 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       jointAccelerationDesired.setLinearPartZ(matrix.get(rowStart + 2, 0));
    }
 
+   @Override
    public void setRotation(double yaw, double pitch, double roll)
    {
-      RotationTools.convertYawPitchRollToQuaternion(0.0, pitch, 0.0, jointRotation);
+      jointRotation.setToPitchQuaternion(pitch);
+      afterJointFrame.setRotation(jointRotation);
+   }
+
+   @Override
+   public void setRotation(QuaternionReadOnly jointRotation)
+   {
+      this.jointRotation.setToPitchQuaternion(jointRotation.getPitch());
       afterJointFrame.setRotation(this.jointRotation);
    }
 
-   private final double[] yawPitchRoll = new double[3];
-   public void setRotation(Quat4d jointRotation)
+   @Override
+   public void setRotation(double x, double y, double z, double s)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, this.jointRotation);
-      this.afterJointFrame.setRotation(this.jointRotation);
+      jointRotation.set(x, y, z, s);
+      setRotation(jointRotation);
    }
 
-   public void setRotation(double x, double y, double z, double w)
+   @Override
+   public void setRotation(RotationMatrixReadOnly jointRotation)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(x, y, z, w, yawPitchRoll);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, jointRotation);
-      this.afterJointFrame.setRotation(this.jointRotation);
+      this.jointRotation.setToPitchQuaternion(jointRotation.getPitch());
+      afterJointFrame.setRotation(this.jointRotation);
    }
 
-   public void setRotation(Matrix3d jointRotation)
-   {
-      RotationTools.convertMatrixToYawPitchRoll(jointRotation, yawPitchRoll);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, this.jointRotation);
-
-      // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
-      //      this.jointRotation.set(jointRotation);
-
-      this.afterJointFrame.setRotation(this.jointRotation);
-   }
-
-   public void setPosition(Tuple3d jointTranslation)
+   @Override
+   public void setPosition(Tuple3DReadOnly jointTranslation)
    {
       this.jointTranslation.set(jointTranslation.getX(), 0.0, jointTranslation.getZ());
       afterJointFrame.setTranslation(this.jointTranslation);
    }
-   
+
+   @Override
    public void setPosition(double x, double y, double z)
    {
       jointTranslation.set(x, 0.0, z);
-      afterJointFrame.setTranslation(this.jointTranslation);
+      afterJointFrame.setTranslation(jointTranslation);
    }
 
+   @Override
    public void setJointTwist(Twist jointTwist)
    {
       this.jointTwist.checkReferenceFramesMatch(jointTwist.getBodyFrame(), jointTwist.getBaseFrame(), jointTwist.getExpressedInFrame());
@@ -213,6 +220,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       this.jointTwist.setLinearPartZ(jointTwist.getLinearPartZ());
    }
 
+   @Override
    public void setAcceleration(SpatialAccelerationVector jointAcceleration)
    {
       this.jointAcceleration.checkReferenceFramesMatch(jointAcceleration);
@@ -221,15 +229,16 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       this.jointAcceleration.setLinearPartZ(jointAcceleration.getLinearPartZ());
    }
 
+   @Override
    public void setDesiredAcceleration(SpatialAccelerationVector jointAcceleration)
    {
-      this.jointAccelerationDesired.checkReferenceFramesMatch(jointAcceleration);
-      this.jointAccelerationDesired.setAngularPartY(jointAcceleration.getAngularPartY());
-      this.jointAccelerationDesired.setLinearPartX(jointAcceleration.getLinearPartX());
-      this.jointAccelerationDesired.setLinearPartZ(jointAcceleration.getLinearPartZ());
+      jointAccelerationDesired.checkReferenceFramesMatch(jointAcceleration);
+      jointAccelerationDesired.setAngularPartY(jointAcceleration.getAngularPartY());
+      jointAccelerationDesired.setLinearPartX(jointAcceleration.getLinearPartX());
+      jointAccelerationDesired.setLinearPartZ(jointAcceleration.getLinearPartZ());
    }
-   
 
+   @Override
    public void setWrench(Wrench jointWrench)
    {
       successorWrench.getBodyFrame().checkReferenceFrameMatch(jointWrench.getBodyFrame());
@@ -239,98 +248,84 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       successorWrench.setLinearPartZ(jointWrench.getLinearPartZ());
    }
 
-   public void getRotation(Quat4d rotationToPack)
+   @Override
+   public void getRotation(QuaternionBasics rotationToPack)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, yawPitchRoll);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, rotationToPack);
+      rotationToPack.setToPitchQuaternion(jointRotation.getPitch());
    }
 
-   public void getRotation(Quat4f rotationToPack)
+   @Override
+   public void getRotation(RotationMatrix rotationToPack)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, yawPitchRoll);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, this.jointRotation);
-      rotationToPack.set(jointRotation);
+      rotationToPack.setToPitchMatrix(jointRotation.getPitch());
    }
 
-   public void getRotation(Matrix3d rotationToPack)
-   {
-      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, yawPitchRoll);
-      RotationTools.convertYawPitchRollToMatrix(0.0, yawPitchRoll[1], 0.0, rotationToPack);
-   }
-
+   @Override
    public void getRotation(double[] yawPitchRoll)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(this.jointRotation, this.yawPitchRoll);
       yawPitchRoll[0] = 0.0;
-      yawPitchRoll[1] = this.yawPitchRoll[1];
+      yawPitchRoll[1] = jointRotation.getPitch();
       yawPitchRoll[2] = 0.0;
    }
 
-   public void getTranslation(Tuple3d translationToPack)
+   @Override
+   public void getTranslation(Tuple3DBasics translationToPack)
    {
       translationToPack.setX(jointTranslation.getX());
       translationToPack.setZ(jointTranslation.getZ());
    }
 
-   public void getTranslation(Tuple3f translationToPack)
-   {
-      translationToPack.set(jointTranslation);
-      translationToPack.setY((float) 0.0);
-   }
-
+   @Override
    public void setPositionAndRotation(RigidBodyTransform transform)
    {
-      RotationTools.convertTransformToYawPitchRoll(transform, yawPitchRoll);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, yawPitchRoll[1], 0.0, jointRotation);
-
-      if (!RotationTools.isQuaternionNormalized(jointRotation))
-      {
-         throw new AssertionError("quaternion is not normalized.  " + jointRotation);
-      }
+      jointRotation.setToPitchQuaternion(transform.getRotationMatrix().getPitch());
+      jointRotation.checkIfUnitary();
 
       transform.getTranslation(jointTranslation);
       jointTranslation.setY(0.0);
-      this.afterJointFrame.setRotation(jointRotation);
-      this.afterJointFrame.setTranslation(jointTranslation);
+      afterJointFrame.setRotation(jointRotation);
+      afterJointFrame.setTranslation(jointTranslation);
    }
 
-   public Tuple3d getTranslationForReading()
+   @Override
+   public Tuple3DReadOnly getTranslationForReading()
    {
       return jointTranslation;
    }
 
-   public Quat4d getRotationForReading()
+   @Override
+   public QuaternionReadOnly getRotationForReading()
    {
       return jointRotation;
    }
 
-   public Vector3d getLinearVelocityForReading()
+   @Override
+   public Vector3DReadOnly getLinearVelocityForReading()
    {
-      Vector3d linearVelocity = jointTwist.getLinearPart();
-      linearVelocity.setY(0.0);
-
-      return linearVelocity;
+      jointTwist.setLinearPartY(0.0);
+      return jointTwist.getLinearPart();
    }
 
-   public Vector3d getAngularVelocityForReading()
+   @Override
+   public Vector3DReadOnly getAngularVelocityForReading()
    {
-      Vector3d angularVelocity = jointTwist.getAngularPart();
-      angularVelocity.setX(0.0);
-      angularVelocity.setZ(0.0);
+      jointTwist.setAngularPartX(0.0);
+      jointTwist.setAngularPartZ(0.0);
 
-      return angularVelocity;
+      return jointTwist.getAngularPart();
    }
 
-   public void getAngularVelocity(Vector3d angularVelocityToPack)
+   public void getAngularVelocity(Vector3DBasics angularVelocityToPack)
    {
       angularVelocityToPack.set(0.0, jointTwist.getAngularPartY(), 0.0);
    }
 
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       linearVelocityToPack.set(jointTwist.getLinearPartX(), 0.0, jointTwist.getLinearPartZ());
    }
 
+   @Override
    public void getWrench(Wrench wrenchToPack)
    {
       wrenchToPack.setToZero(successorWrench.getBodyFrame(), successorWrench.getExpressedInFrame());
@@ -340,7 +335,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       wrenchToPack.setLinearPartZ(successorWrench.getLinearPartZ());
    }
 
-   public void getLinearAcceleration(Vector3d linearAccelerationToPack)
+   public void getLinearAcceleration(Vector3DBasics linearAccelerationToPack)
    {
       linearAccelerationToPack.setX(jointAcceleration.getLinearPartX());
       linearAccelerationToPack.setY(0.0);
@@ -350,9 +345,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void getConfigurationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
       int index = rowStart;
-      matrix.set(index++, 0, yawPitchRoll[1]);
+      matrix.set(index++, 0, jointRotation.getPitch());
       matrix.set(index++, 0, jointTranslation.getX());
       matrix.set(index++, 0, jointTranslation.getZ());
    }
@@ -364,7 +358,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
       double qRot = matrix.get(index++, 0);
       double x = matrix.get(index++, 0);
       double z = matrix.get(index++, 0);
-      RotationTools.convertYawPitchRollToQuaternion(0.0, qRot, 0.0, jointRotation);
+      jointRotation.setToPitchQuaternion(qRot);
       jointTranslation.set(x, 0.0, z);
       afterJointFrame.setRotation(jointRotation);
       afterJointFrame.setTranslation(jointTranslation);
@@ -385,8 +379,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    @Override
    public void calculateJointStateChecksum(GenericCRC32 checksum)
    {
-      RotationTools.convertQuaternionToYawPitchRoll(jointRotation, yawPitchRoll);
-      checksum.update(yawPitchRoll[1]);
+      checksum.update(jointRotation.getPitch());
       checksum.update(jointTwist.getAngularPartY());
       checksum.update(jointAcceleration.getAngularPartY());
 
@@ -416,12 +409,12 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    {
       int nDegreesOfFreedom = getDegreesOfFreedom();
 
-      ArrayList<Twist> unitTwistsInBodyFrame = new ArrayList<Twist>();
+      ArrayList<Twist> unitTwistsInBodyFrame = new ArrayList<>();
       RigidBodyTransform identity = new RigidBodyTransform();
 
       ReferenceFrame[] intermediateFrames = new ReferenceFrame[nDegreesOfFreedom - 1];
       ReferenceFrame previousFrame = afterJointFrame;
-      for (int i = 0; i < nDegreesOfFreedom - 1; i++)    // from afterJointFrame to beforeJointFrame
+      for (int i = 0; i < nDegreesOfFreedom - 1; i++) // from afterJointFrame to beforeJointFrame
       {
          int index = intermediateFrames.length - i - 1;
          ReferenceFrame frame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("intermediateFrame" + index, previousFrame, identity);
@@ -431,7 +424,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
 
       previousFrame = beforeJointFrame;
 
-      for (int i = 0; i < nDegreesOfFreedom; i++)    // from beforeJointFrame to afterJointFrame
+      for (int i = 0; i < nDegreesOfFreedom; i++) // from beforeJointFrame to afterJointFrame
       {
          ReferenceFrame frame;
          if (i < nDegreesOfFreedom - 1)
@@ -443,7 +436,7 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
             frame = afterJointFrame;
          }
 
-         DenseMatrix64F twistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
+         DenseMatrix64F twistMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
          int startIndex = 0;
          twistMatrix.set(startIndex + i, 0, 1.0);
          Twist twist = new Twist(frame, previousFrame, frame, twistMatrix);
@@ -452,8 +445,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
          previousFrame = frame;
       }
 
-      this.motionSubspace = new GeometricJacobian(this, unitTwistsInBodyFrame, afterJointFrame);
-      this.motionSubspace.compute();
+      motionSubspace = new GeometricJacobian(this, unitTwistsInBodyFrame, afterJointFrame);
+      motionSubspace.compute();
    }
 
    private PlanarJoint checkAndGetAsPlanarJoint(InverseDynamicsJoint originalJoint)

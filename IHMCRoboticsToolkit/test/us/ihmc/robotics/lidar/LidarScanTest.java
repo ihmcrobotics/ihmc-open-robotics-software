@@ -6,18 +6,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.commons.Assertions;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RigidBodyTransformTest;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.thread.RunnableThatThrows;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class LidarScanTest
 {
@@ -53,14 +53,15 @@ public class LidarScanTest
    {
       Random random = new Random();
 
-      float[] ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
-      float[] ranges2 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+      float[] ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
+      float[] ranges2 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
 
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges1, random.nextInt());
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), new RigidBodyTransform(), new RigidBodyTransform(), ranges2, random.nextInt());
 
-      JUnitTools.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
       {
+         @Override
          public void run() throws Throwable
          {
             assertLidarScanRangesEqual(lidarScan1, lidarScan2, 1e-7);
@@ -84,13 +85,13 @@ public class LidarScanTest
    {
       Random random = new Random();
 
-      float[] ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
-      float[] ranges2 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+      float[] ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
+      float[] ranges2 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
 
-      RigidBodyTransform randomTransform1 = RigidBodyTransform.generateRandomTransform(random);
-      RigidBodyTransform randomTransform2 = RigidBodyTransform.generateRandomTransform(random);
-      RigidBodyTransform randomTransform3 = RigidBodyTransform.generateRandomTransform(random);
-      RigidBodyTransform randomTransform4 = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform3 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform4 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges2);
@@ -99,8 +100,9 @@ public class LidarScanTest
 
       final LidarScan lidarScan3 = new LidarScan(new LidarScanParameters(), randomTransform3, randomTransform4, ranges2);
 
-      JUnitTools.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
+      Assertions.assertExceptionThrown(AssertionError.class, new RunnableThatThrows()
       {
+         @Override
          public void run() throws Throwable
          {
             assertLidarScanTransformsEqual(lidarScan1, lidarScan3, 1e-7);
@@ -114,12 +116,12 @@ public class LidarScanTest
    {
       Random random = new Random();
 
-      float[] ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+      float[] ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
 
       float[] ranges1Shortened = ArrayUtils.subarray(ranges1, 0, 3000);
 
-      RigidBodyTransform randomTransform1 = RigidBodyTransform.generateRandomTransform(random);
-      RigidBodyTransform randomTransform2 = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
       final LidarScan lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
       final LidarScan lidarScan2 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1Shortened);
@@ -142,8 +144,8 @@ public class LidarScanTest
 
    public static void assertLidarScanTransformsEqual(LidarScan lidarScan1, LidarScan lidarScan2, double transformTolerance)
    {
-      RigidBodyTransformTest.assertTransformEquals(lidarScan1.getStartTransform(), lidarScan2.getStartTransform(), transformTolerance);
-      RigidBodyTransformTest.assertTransformEquals(lidarScan1.getEndTransform(), lidarScan2.getEndTransform(), transformTolerance);
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(lidarScan1.getStartTransform(), lidarScan2.getStartTransform(), transformTolerance);
+      EuclidCoreTestTools.assertRigidBodyTransformEquals(lidarScan1.getEndTransform(), lidarScan2.getEndTransform(), transformTolerance);
    }
 
    public static void assertLidarScanEquals(LidarScan lidarScan1, LidarScan lidarScan2, double transformTolerance, float rangeTolerance)
@@ -161,10 +163,10 @@ public class LidarScanTest
       LidarScan lidarScan1 = null;
       for(int i = 0; i < 1000; i++)
       {
-    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+    	  ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
 
-          RigidBodyTransform randomTransform1 = RigidBodyTransform.generateRandomTransform(random);
-          RigidBodyTransform randomTransform2 = RigidBodyTransform.generateRandomTransform(random);
+          RigidBodyTransform randomTransform1 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+          RigidBodyTransform randomTransform2 = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
           lidarScan1 = new LidarScan(new LidarScanParameters(), randomTransform1, randomTransform2, ranges1);
       }
@@ -182,7 +184,7 @@ public class LidarScanTest
       for(int i = 0; i < 1000; i++)
       {
     	  int id = random.nextInt();
-    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+    	  ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
           lidarScan1 = new LidarScan(new LidarScanParameters(), ranges1, id);
           assertEquals(lidarScan1.size(), 720, 1e-7f);
           assertEquals(lidarScan1.getSensorId(), id);
@@ -199,7 +201,7 @@ public class LidarScanTest
       for(int i = 0; i < 1000; i++)
       {
     	  int id = random.nextInt();
-    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+    	  ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
           lidarScan1 = new LidarScan(new LidarScanParameters(), ranges1, id);
           assertEquals(lidarScan1.getRanges().length, ranges1.length, 1e-7f);
           
@@ -220,7 +222,7 @@ public class LidarScanTest
       for(int i = 0; i < 1000; i++)
       {
     	  int id = random.nextInt();
-    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+    	  ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
           lidarScan1 = new LidarScan(new LidarScanParameters(), ranges1, id);
           LidarScan lidarScanCopy = lidarScan1.getCopy();
           
@@ -241,7 +243,7 @@ public class LidarScanTest
       for(int i = 0; i < 1000; i++)
       {
     	  int id = random.nextInt();
-    	  ranges1 = RandomTools.generateRandomFloatArray(random, 720, 0, 5000);
+    	  ranges1 = RandomNumbers.nextFloatArray(random, 720, 0, 5000);
     	  
           int pointsPerSweep = random.nextInt();
           int fov = (int) (random.nextFloat() * Math.PI);
@@ -280,7 +282,7 @@ public class LidarScanTest
       for(int i = 0; i < 10; i++)
       {
     	  int id = random.nextInt();
-    	  ranges1 = RandomTools.generateRandomFloatArray(random, 100, 0, 5000);
+    	  ranges1 = RandomNumbers.nextFloatArray(random, 100, 0, 5000);
           int pointsPerSweep = 1080;
           int fov = (int) (random.nextFloat() * Math.PI);
           double minRange = random.nextDouble();
@@ -289,7 +291,7 @@ public class LidarScanTest
           LidarScanParameters lidarScanParameters = new LidarScanParameters(pointsPerSweep, fov, minRange, maxRange);
           lidarScan1 = new LidarScan(lidarScanParameters, new RigidBodyTransform(), new RigidBodyTransform(), ranges1, id);
           
-          ArrayList<Point3d> list = lidarScan1.getAllPoints();
+          ArrayList<Point3D> list = lidarScan1.getAllPoints();
           assertEquals(list.size(), 100, 1e-7);
           assertEquals(lidarScan1.getAllPoints3f().size(), 100, 1e-7);
           

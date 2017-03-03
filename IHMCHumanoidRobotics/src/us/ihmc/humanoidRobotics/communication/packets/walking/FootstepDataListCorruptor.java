@@ -2,21 +2,21 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class FootstepDataListCorruptor
 {
    private final Random random = new Random(1778L);
-   private final Vector3d minLocationCorruption = new Vector3d();
-   private final Vector3d maxLocationCorruption = new Vector3d();
+   private final Vector3D minLocationCorruption = new Vector3D();
+   private final Vector3D maxLocationCorruption = new Vector3D();
    private final double maxRotationCorruption;
    
-   public FootstepDataListCorruptor(Vector3d minLocationCorruption, Vector3d maxLocationCorruption, double maxRotationCorruption)
+   public FootstepDataListCorruptor(Vector3D minLocationCorruption, Vector3D maxLocationCorruption, double maxRotationCorruption)
    {
       this.minLocationCorruption.set(minLocationCorruption);
       this.maxLocationCorruption.set(maxLocationCorruption);
@@ -39,8 +39,8 @@ public class FootstepDataListCorruptor
    {
       FootstepDataMessage ret = footstepData.clone();
       
-      Point3d location = new Point3d();
-      Quat4d orientation = new Quat4d();
+      Point3D location = new Point3D();
+      Quaternion orientation = new Quaternion();
       
       ret.getOrientation(orientation);
       corruptOrientation(orientation);
@@ -52,23 +52,23 @@ public class FootstepDataListCorruptor
       return ret;
    }
    
-   private void corruptOrientation(Quat4d orientation)
+   private void corruptOrientation(Quaternion orientation)
    {
-      Vector3d axis = RandomTools.generateRandomVector(random);
-      double angle = RandomTools.generateRandomDouble(random, -maxRotationCorruption, maxRotationCorruption);
+      Vector3D axis = RandomGeometry.nextVector3D(random);
+      double angle = RandomNumbers.nextDouble(random, -maxRotationCorruption, maxRotationCorruption);
       
-      AxisAngle4d axisAngle4d = new AxisAngle4d();
+      AxisAngle axisAngle4d = new AxisAngle();
       axisAngle4d.set(axis, angle);
       
-      Quat4d corruption = new Quat4d();
+      Quaternion corruption = new Quaternion();
       corruption.set(axisAngle4d);
             
-      orientation.mul(corruption);
+      orientation.multiply(corruption);
    }
 
-   private void corruptLocationVector(Point3d location)
+   private void corruptLocationVector(Point3D location)
    {
-      Vector3d randomVector = RandomTools.generateRandomVector(random, minLocationCorruption, maxLocationCorruption);
+      Vector3D randomVector = RandomGeometry.nextVector3D(random, minLocationCorruption, maxLocationCorruption);
       location.add(randomVector);
    }
    

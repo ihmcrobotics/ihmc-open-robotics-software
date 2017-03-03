@@ -4,21 +4,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -78,15 +77,15 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testComputedRotationError()
    {
       Random random = new Random(1987L);
       int numberOfUpToDateTransforms = 1000;
       int numberOfOutdatedTransforms = numberOfUpToDateTransforms / 2;
       
-      Vector3d[] translationOffsets = new Vector3d[numberOfOutdatedTransforms];
-      Quat4d[] orientationOffsets = new Quat4d[numberOfOutdatedTransforms];
+      Vector3D[] translationOffsets = new Vector3D[numberOfOutdatedTransforms];
+      Quaternion[] orientationOffsets = new Quaternion[numberOfOutdatedTransforms];
       long[] outdatedTimeStamps = new long[numberOfOutdatedTransforms];
       
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -110,8 +109,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
-         translationOffsets[j] = new Vector3d();//RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);
+         translationOffsets[j] = new Vector3D();//RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
 
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -128,24 +127,24 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          
          RigidBodyTransform totalError = new RigidBodyTransform();
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
-         Quat4d calculatedRotationError = new Quat4d();
+         Quaternion calculatedRotationError = new Quaternion();
          totalError.getRotation(calculatedRotationError);
-         Quat4d actualError = orientationOffsets[i];
+         Quaternion actualError = orientationOffsets[i];
          
          assertTrue(calculatedRotationError.epsilonEquals(actualError, 1e-4));
       }
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testComputedTranslationError()
    {
       Random random = new Random(1987L);
       int numberOfUpToDateTransforms = 1000;
       int numberOfOutdatedTransforms = numberOfUpToDateTransforms / 2;
       
-      Vector3d[] translationOffsets = new Vector3d[numberOfOutdatedTransforms];
-      Quat4d[] orientationOffsets = new Quat4d[numberOfOutdatedTransforms];
+      Vector3D[] translationOffsets = new Vector3D[numberOfOutdatedTransforms];
+      Quaternion[] orientationOffsets = new Quaternion[numberOfOutdatedTransforms];
       long[] outdatedTimeStamps = new long[numberOfOutdatedTransforms];
       
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -169,8 +168,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
-         translationOffsets[j] = RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);
+         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
          
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -188,13 +187,13 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          RigidBodyTransform totalError = new RigidBodyTransform();
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
          
-         Point3d calculatedTranslationError = new Point3d();
+         Point3D calculatedTranslationError = new Point3D();
          totalError.getTranslation(calculatedTranslationError);
-         Vector3d actualTranslationError = translationOffsets[i];
+         Vector3D actualTranslationError = translationOffsets[i];
          
-         Quat4d calculatedRotationError = new Quat4d();
+         Quaternion calculatedRotationError = new Quaternion();
          totalError.getRotation(calculatedRotationError);
-         Quat4d actualRotationError = orientationOffsets[i];
+         Quaternion actualRotationError = orientationOffsets[i];
          
          assertTrue(calculatedTranslationError.epsilonEquals(actualTranslationError, 1e-4));
          assertTrue(calculatedRotationError.epsilonEquals(actualRotationError, 1e-4));
@@ -202,15 +201,15 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testComputedError()
    {
       Random random = new Random(1987L);
       int numberOfUpToDateTransforms = 1000;
       int numberOfOutdatedTransforms = numberOfUpToDateTransforms / 2;
       
-      Vector3d[] translationOffsets = new Vector3d[numberOfOutdatedTransforms];
-      Quat4d[] orientationOffsets = new Quat4d[numberOfOutdatedTransforms];
+      Vector3D[] translationOffsets = new Vector3D[numberOfOutdatedTransforms];
+      Quaternion[] orientationOffsets = new Quaternion[numberOfOutdatedTransforms];
       long[] outdatedTimeStamps = new long[numberOfOutdatedTransforms];
       
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -234,8 +233,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       {
          int timeStamp = j * 2;
          outdatedTimeStamps[j] = timeStamp;
-         translationOffsets[j] = RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);
+         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);
          
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -252,9 +251,9 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          
          RigidBodyTransform totalError = new RigidBodyTransform();
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
-         Point3d calculatedTranslationError = new Point3d();
+         Point3D calculatedTranslationError = new Point3D();
          totalError.getTranslation(calculatedTranslationError);
-         Vector3d actualError = translationOffsets[i];
+         Vector3D actualError = translationOffsets[i];
          
          assertTrue(calculatedTranslationError.epsilonEquals(actualError, 1e-4));
       }
@@ -273,7 +272,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
 
       outdatedPoseToUpToDateReferenceFrameUpdater.putStateEstimatorTransformInBuffer(new RigidBodyTransform(), 1);
 
-      RigidBodyTransform localizationRigidBody = new RigidBodyTransform(new Quat4d(), new Point3d(1.0, 1.0, 1.0));
+      RigidBodyTransform localizationRigidBody = new RigidBodyTransform(new Quaternion(), new Point3D(1.0, 1.0, 1.0));
       FramePose expectedPose = new FramePose(worldFrame);
       expectedPose.setPosition(1.0, 1.0, 1.0);
       
@@ -491,7 +490,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    //this tests fails, I don't think OutdatedPoseToUpToDateReferenceFrameUpdater can support more than a single rotation at a time
    @Ignore
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test//(timeout = 30000)
+   @Test(timeout = 30000)
    public void testUpdateOutdatedTransformWithKnownOffsets()
    {
       int numberOfUpToDateTransforms = 10;
@@ -501,8 +500,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       int numberOfTicksOfDelay = 100;
       Random random = new Random(1987L);
 
-      Vector3d[] translationOffsets = new Vector3d[numberOfOutdatedTransforms];
-      Quat4d[] orientationOffsets = new Quat4d[numberOfOutdatedTransforms];
+      Vector3D[] translationOffsets = new Vector3D[numberOfOutdatedTransforms];
+      Quaternion[] orientationOffsets = new Quaternion[numberOfOutdatedTransforms];
       long[] outdatedTimeStamps = new long[numberOfOutdatedTransforms];
 
       FramePose upToDatePoseInPresent = new FramePose(worldFrame);
@@ -530,8 +529,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          long timeStamp = (long) (j * (lastTimeStamp * 0.8 - firstTimeStamp * 0.8) / numberOfOutdatedTransforms + firstTimeStamp * 1.2);
          outdatedTimeStamps[j] = timeStamp;
 
-         translationOffsets[j] = RandomTools.generateRandomVector(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
-         orientationOffsets[j] = RandomTools.generateRandomQuaternion(random, Math.PI / 2.0);//RandomTools.generateRandomQuaternion(random, Math.PI);
+         translationOffsets[j] = RandomGeometry.nextVector3D(random, -2.0, -2.0, 0.0, 2.0, 2.0, 2.0);
+         orientationOffsets[j] = RandomGeometry.nextQuaternion(random, Math.PI / 2.0);//RandomTools.generateRandomQuaternion(random, Math.PI);
 
          RigidBodyTransform outdatedTransform = generateOutdatedTransformWithTranslationAndOrientationOffset(upToDateTimeStampedTransformPoseBuffer, timeStamp,
                orientationOffsets[j], translationOffsets[j]);
@@ -565,24 +564,24 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          FramePose outdatedPoseUpdatedInWorldFrame = new FramePose(outdatedReferenceFrame_ToBeUpdated);
          outdatedPoseUpdatedInWorldFrame.changeFrame(worldFrame);
 
-         Vector3d upToDateReferenceFrameInPresent_Translation = new Vector3d();
+         Vector3D upToDateReferenceFrameInPresent_Translation = new Vector3D();
          upToDatePoseInPresent.getPosition(upToDateReferenceFrameInPresent_Translation);
-         Vector3d outdatedPoseUpdatedInWorldFrame_Translation = new Vector3d();
+         Vector3D outdatedPoseUpdatedInWorldFrame_Translation = new Vector3D();
          outdatedPoseUpdatedInWorldFrame.getPosition(outdatedPoseUpdatedInWorldFrame_Translation);
          
          FramePose testedPose = new FramePose(worldFrame);
          testedPose.setPose(outdatedPoseUpdatedInWorldFrame);
          testedPose.changeFrame(upToDateReferenceFrameInPresent);
 
-         Vector3d testedTranslation = new Vector3d();
+         Vector3D testedTranslation = new Vector3D();
          testedTranslation.sub(outdatedPoseUpdatedInWorldFrame_Translation, upToDateReferenceFrameInPresent_Translation);
-         Quat4d testedOrientation = new Quat4d();
+         Quaternion testedOrientation = new Quaternion();
          testedPose.getOrientation(testedOrientation);
 
          if (timeStamp < (int) (firstTimeStamp * 1.2 + numberOfTicksOfDelay))
          {
-            assertTrue(testedOrientation.epsilonEquals(new Quat4d(0.0, 0.0, 0.0, 1.0), 1e-4));
-            assertTrue(testedTranslation.epsilonEquals(new Vector3d(0.0, 0.0, 0.0), 1e-8));
+            assertTrue(testedOrientation.epsilonEquals(new Quaternion(0.0, 0.0, 0.0, 1.0), 1e-4));
+            assertTrue(testedTranslation.epsilonEquals(new Vector3D(0.0, 0.0, 0.0), 1e-8));
          }
          else
          {
@@ -593,18 +592,18 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    }
 
    private RigidBodyTransform generateOutdatedTransformWithTranslationAndOrientationOffset(TimeStampedTransformBuffer upToDateTimeStampedTransformPoseBuffer,
-         long timeStamp, Quat4d orientationOffset, Vector3d translationOffset)
+         long timeStamp, Quaternion orientationOffset, Vector3D translationOffset)
    {
       TimeStampedTransform3D upToDateTimeStampedTransformInPast = new TimeStampedTransform3D();
       upToDateTimeStampedTransformPoseBuffer.findTransform(timeStamp, upToDateTimeStampedTransformInPast);
       
       RigidBodyTransform upToDateTransformInPast_Translation = new RigidBodyTransform(upToDateTimeStampedTransformInPast.getTransform3D());
       RigidBodyTransform upToDateTransformInPast_Rotation = new RigidBodyTransform(upToDateTransformInPast_Translation);
-      upToDateTransformInPast_Translation.setRotationToIdentity();
-      upToDateTransformInPast_Rotation.zeroTranslation();
+      upToDateTransformInPast_Translation.setRotationToZero();
+      upToDateTransformInPast_Rotation.setTranslationToZero();
       
-      RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3d());
-      RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quat4d(), translationOffset);
+      RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3D());
+      RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quaternion(), translationOffset);
       RigidBodyTransform transformedOutdatedTransform = new RigidBodyTransform();
 
       transformedOutdatedTransform.multiply(upToDateTransformInPast_Translation);
@@ -618,8 +617,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    private RigidBodyTransform generateRandomUpToDateTransforms(Random random)
    {
       RigidBodyTransform upToDateTransform = new RigidBodyTransform();
-      upToDateTransform.setTranslation(RandomTools.generateRandomVector(random));
-      upToDateTransform.setRotation(RandomTools.generateRandomQuaternion(random));
+      upToDateTransform.setTranslation(RandomGeometry.nextVector3D(random));
+      upToDateTransform.setRotation(RandomGeometry.nextQuaternion(random));
       return upToDateTransform;
    }
 

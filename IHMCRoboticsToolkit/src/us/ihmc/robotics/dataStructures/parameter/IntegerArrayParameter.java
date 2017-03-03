@@ -1,7 +1,8 @@
 package us.ihmc.robotics.dataStructures.parameter;
 
-import com.google.common.primitives.Ints;
 import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.primitives.Ints;
 
 public class IntegerArrayParameter extends Parameter
 {

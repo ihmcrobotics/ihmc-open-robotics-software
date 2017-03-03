@@ -3,9 +3,8 @@ package us.ihmc.simulationToolkit.visualizers;
 import java.awt.Color;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicText;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
@@ -311,7 +310,7 @@ public class FootstepVisualizer
          }
       }
 
-      new FramePose2d(worldFrame, new Point2d(0.0, 0.0), 0);
+      new FramePose2d(worldFrame, new Point2D(0.0, 0.0), 0);
       FramePoint2d endPoint = new FramePoint2d(worldFrame, 3.0, 0.0);
 
       SimplePathParameters pathType = new SimplePathParameters(0.5, 0.2, 0.0, Math.PI / 6, Math.PI / 12, 0.3);
@@ -322,12 +321,12 @@ public class FootstepVisualizer
 //      FootstepSnapper footstepSnapper = new SimpleFootstepSnapper();
 
 
-      FramePose2d leftFootPose2d = new FramePose2d(worldFrame, new Point2d(0.0, 0.1), 0);
+      FramePose2d leftFootPose2d = new FramePose2d(worldFrame, new Point2D(0.0, 0.1), 0);
       Footstep leftStart = footstepSnapper.generateFootstepWithoutHeightMap(leftFootPose2d, feetRigidBodies.get(RobotSide.LEFT),
-                              soleFrames.get(RobotSide.LEFT), RobotSide.LEFT, 0.0, new Vector3d(0.0, 0.0, 1.0));
-      FramePose2d rightFootPose2d = new FramePose2d(worldFrame, new Point2d(0.0, -0.1), 0);
+                              soleFrames.get(RobotSide.LEFT), RobotSide.LEFT, 0.0, new Vector3D(0.0, 0.0, 1.0));
+      FramePose2d rightFootPose2d = new FramePose2d(worldFrame, new Point2D(0.0, -0.1), 0);
       Footstep rightStart = footstepSnapper.generateFootstepWithoutHeightMap(rightFootPose2d, feetRigidBodies.get(RobotSide.RIGHT),
-                               soleFrames.get(RobotSide.RIGHT), RobotSide.RIGHT, 0.0, new Vector3d(0.0, 0.0, 1.0));
+                               soleFrames.get(RobotSide.RIGHT), RobotSide.RIGHT, 0.0, new Vector3D(0.0, 0.0, 1.0));
 
       TurningThenStraightFootstepGenerator generator = new TurningThenStraightFootstepGenerator(feetRigidBodies, soleFrames, endPoint, pathType,
                                                           RobotSide.RIGHT);

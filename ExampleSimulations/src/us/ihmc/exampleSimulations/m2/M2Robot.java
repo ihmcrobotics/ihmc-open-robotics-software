@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.m2;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
@@ -32,51 +31,51 @@ public class M2Robot extends Robot
       this.m2Parameters = m2Parameters;
 
       this.addYoVariableRegistry(registry);
-      bodyJoint = new FloatingJoint("body", new Vector3d(), this);
+      bodyJoint = new FloatingJoint("body", new Vector3D(), this);
       Link bodyLink = body();
       bodyJoint.setLink(bodyLink);
       this.addRootJoint(bodyJoint);
 
       // RIGHT LEG.
 
-      Joint rightHipUni = new UniversalJoint("right_hip_yaw", "right_hip_roll", new Vector3d(0.0, -m2Parameters.HIP_OFFSET_Y.value, 0.0), this, Axis.Z,
+      Joint rightHipUni = new UniversalJoint("right_hip_yaw", "right_hip_roll", new Vector3D(0.0, -m2Parameters.HIP_OFFSET_Y.value, 0.0), this, Axis.Z,
                              Axis.X);
       Link rightWaistLink = waist();
       rightHipUni.setLink(rightWaistLink);
       bodyJoint.addJoint(rightHipUni);
 
-      Joint rightHipPitch = new PinJoint("right_hip_pitch", new Vector3d(0.0, 0.0, -m2Parameters.HIP_JOINT_OFF.value), this, Axis.Y);
+      Joint rightHipPitch = new PinJoint("right_hip_pitch", new Vector3D(0.0, 0.0, -m2Parameters.HIP_JOINT_OFF.value), this, Axis.Y);
       Link rightThighLink = rightThigh();
       rightHipPitch.setLink(rightThighLink);
       rightHipUni.addJoint(rightHipPitch);
 
-      PinJoint rightKnee = new PinJoint("right_knee", new Vector3d(0.0, -m2Parameters.HIP_TO_THIGH_OFF.value, -m2Parameters.THIGH_LENGTH.value), this, Axis.Y);
+      PinJoint rightKnee = new PinJoint("right_knee", new Vector3D(0.0, -m2Parameters.HIP_TO_THIGH_OFF.value, -m2Parameters.THIGH_LENGTH.value), this, Axis.Y);
       Link rightShinLink = shin();
       rightKnee.setLink(rightShinLink);
       rightKnee.setLimitStops(0.0, Math.PI, 5000.0, 400.0);
       rightHipPitch.addJoint(rightKnee);
 
-      Joint rightAnkleRoll = new PinJoint("right_ankle_roll", new Vector3d(0.0, 0.0, -m2Parameters.SHIN_LENGTH.value), this, Axis.X);
+      Joint rightAnkleRoll = new PinJoint("right_ankle_roll", new Vector3D(0.0, 0.0, -m2Parameters.SHIN_LENGTH.value), this, Axis.X);
       Link rightRetinaculumLink = retinaculum();
       rightAnkleRoll.setLink(rightRetinaculumLink);
       rightKnee.addJoint(rightAnkleRoll);
 
-      Joint rightAnklePitch = new PinJoint("right_ankle_pitch", new Vector3d(0.0, 0.0, -m2Parameters.ANKLE_JOINT_OFF.value), this, Axis.Y);
+      Joint rightAnklePitch = new PinJoint("right_ankle_pitch", new Vector3D(0.0, 0.0, -m2Parameters.ANKLE_JOINT_OFF.value), this, Axis.Y);
       Link rightFootLink = foot();
       rightAnklePitch.setLink(rightFootLink);
       rightAnkleRoll.addJoint(rightAnklePitch);
 
       GroundContactPoint right_toe_in = new GroundContactPoint("gc_right_toe_in",
-                                           new Vector3d(m2Parameters.FOOT_FORWARD.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
+                                           new Vector3D(m2Parameters.FOOT_FORWARD.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
                                            this);
       GroundContactPoint right_toe_out = new GroundContactPoint("gc_right_toe_out",
-                                            new Vector3d(m2Parameters.FOOT_FORWARD.value, -m2Parameters.FOOT_WIDTH.value / 2.0,
+                                            new Vector3D(m2Parameters.FOOT_FORWARD.value, -m2Parameters.FOOT_WIDTH.value / 2.0,
                                                -m2Parameters.FOOT_HEIGHT.value), this);
       GroundContactPoint right_heel_in = new GroundContactPoint("gc_right_heel_in",
-                                            new Vector3d(-m2Parameters.FOOT_BACK.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
+                                            new Vector3D(-m2Parameters.FOOT_BACK.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
                                             this);
       GroundContactPoint right_heel_out = new GroundContactPoint("gc_right_heel_out",
-                                             new Vector3d(-m2Parameters.FOOT_BACK.value, -m2Parameters.FOOT_WIDTH.value / 2.0,
+                                             new Vector3D(-m2Parameters.FOOT_BACK.value, -m2Parameters.FOOT_WIDTH.value / 2.0,
                                                 -m2Parameters.FOOT_HEIGHT.value), this);
 
       rightAnklePitch.addGroundContactPoint(right_toe_in);
@@ -86,43 +85,43 @@ public class M2Robot extends Robot
 
       // LEFT LEG.
 
-      Joint leftHipUni = new UniversalJoint("left_hip_yaw", "left_hip_roll", new Vector3d(0.0, m2Parameters.HIP_OFFSET_Y.value, 0.0), this, Axis.Z, Axis.X);
+      Joint leftHipUni = new UniversalJoint("left_hip_yaw", "left_hip_roll", new Vector3D(0.0, m2Parameters.HIP_OFFSET_Y.value, 0.0), this, Axis.Z, Axis.X);
       Link leftWaistLink = waist();
       leftHipUni.setLink(leftWaistLink);
       bodyJoint.addJoint(leftHipUni);
 
-      Joint leftHipPitch = new PinJoint("left_hip_pitch", new Vector3d(0.0, 0.0, -m2Parameters.HIP_JOINT_OFF.value), this, Axis.Y);
+      Joint leftHipPitch = new PinJoint("left_hip_pitch", new Vector3D(0.0, 0.0, -m2Parameters.HIP_JOINT_OFF.value), this, Axis.Y);
       Link leftThighLink = leftThigh();
       leftHipPitch.setLink(leftThighLink);
       leftHipUni.addJoint(leftHipPitch);
 
-      PinJoint leftKnee = new PinJoint("left_knee", new Vector3d(0.0, m2Parameters.HIP_TO_THIGH_OFF.value, -m2Parameters.THIGH_LENGTH.value), this, Axis.Y);
+      PinJoint leftKnee = new PinJoint("left_knee", new Vector3D(0.0, m2Parameters.HIP_TO_THIGH_OFF.value, -m2Parameters.THIGH_LENGTH.value), this, Axis.Y);
       Link leftShinLink = shin();
       leftKnee.setLink(leftShinLink);
       leftKnee.setLimitStops(0.0, Math.PI, 5000.0, 400.0);
       leftHipPitch.addJoint(leftKnee);
 
-      Joint leftAnkleRoll = new PinJoint("left_ankle_roll", new Vector3d(0.0, 0.0, -m2Parameters.SHIN_LENGTH.value), this, Axis.X);
+      Joint leftAnkleRoll = new PinJoint("left_ankle_roll", new Vector3D(0.0, 0.0, -m2Parameters.SHIN_LENGTH.value), this, Axis.X);
       Link leftRetinaculumLink = retinaculum();
       leftAnkleRoll.setLink(leftRetinaculumLink);
       leftKnee.addJoint(leftAnkleRoll);
 
-      Joint leftAnklePitch = new PinJoint("left_ankle_pitch", new Vector3d(0.0, 0.0, -m2Parameters.ANKLE_JOINT_OFF.value), this, Axis.Y);
+      Joint leftAnklePitch = new PinJoint("left_ankle_pitch", new Vector3D(0.0, 0.0, -m2Parameters.ANKLE_JOINT_OFF.value), this, Axis.Y);
       Link leftFootLink = foot();
       leftAnklePitch.setLink(leftFootLink);
       leftAnkleRoll.addJoint(leftAnklePitch);
 
       GroundContactPoint left_toe_in = new GroundContactPoint("gc_left_toe_in",
-                                          new Vector3d(m2Parameters.FOOT_FORWARD.value, -m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
+                                          new Vector3D(m2Parameters.FOOT_FORWARD.value, -m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
                                           this);
       GroundContactPoint left_toe_out = new GroundContactPoint("gc_left_toe_out",
-                                           new Vector3d(m2Parameters.FOOT_FORWARD.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
+                                           new Vector3D(m2Parameters.FOOT_FORWARD.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
                                            this);
       GroundContactPoint left_heel_in = new GroundContactPoint("gc_left_heel_in",
-                                           new Vector3d(-m2Parameters.FOOT_BACK.value, -m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
+                                           new Vector3D(-m2Parameters.FOOT_BACK.value, -m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
                                            this);
       GroundContactPoint left_heel_out = new GroundContactPoint("gc_left_heel_out",
-                                            new Vector3d(-m2Parameters.FOOT_BACK.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
+                                            new Vector3D(-m2Parameters.FOOT_BACK.value, m2Parameters.FOOT_WIDTH.value / 2.0, -m2Parameters.FOOT_HEIGHT.value),
                                             this);
 
       leftAnklePitch.addGroundContactPoint(left_toe_in);

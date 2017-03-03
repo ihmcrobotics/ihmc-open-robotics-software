@@ -2,19 +2,18 @@ package us.ihmc.simulationconstructionset.util.tracks;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FunctionToIntegrate;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.simulationconstructionset.FunctionToIntegrate;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
 
 public class Track implements FunctionToIntegrate
 {
@@ -22,8 +21,8 @@ public class Track implements FunctionToIntegrate
 
    private String name;
    private Joint joint;
-   private Vector3d track_offset;
-   private Matrix3d track_rotation;
+   private Vector3D track_offset;
+   private RotationMatrix track_rotation;
 
    private double trackLength, trackRadius, trackWidth, trackPerimeter;
 
@@ -32,7 +31,7 @@ public class Track implements FunctionToIntegrate
    private final YoVariableRegistry registry;
    private final DoubleYoVariable track_linear_velocity, track_linear_position, track_linear_force;
 
-   public Track(String name, Joint joint, Robot rob, Vector3d offset, Matrix3d rotation, double trackLength, double trackRadius, double trackWidth,
+   public Track(String name, Joint joint, Robot rob, Vector3D offset, RotationMatrix rotation, double trackLength, double trackRadius, double trackWidth,
                 int numPointsPerTread, int numTreads)
    {
       registry = new YoVariableRegistry(name);
@@ -42,7 +41,7 @@ public class Track implements FunctionToIntegrate
       this.joint = joint;
       this.track_offset = offset;
       if (rotation != null)
-         this.track_rotation = new Matrix3d(rotation);
+         this.track_rotation = new RotationMatrix(rotation);
 
       this.trackLength = trackLength;
       this.trackRadius = trackRadius;
@@ -124,17 +123,17 @@ public class Track implements FunctionToIntegrate
       link.setLinkGraphics(linkGraphics);
    }
 
-   private Matrix3d temp_rotation = new Matrix3d();
-   private Vector3d temp_vector = new Vector3d();
+   private RotationMatrix temp_rotation = new RotationMatrix();
+   private Vector3D temp_vector = new Vector3D();
 
-   private Vector3d bottom_velocity = new Vector3d();
-   private Vector3d velocity = new Vector3d();
+   private Vector3D bottom_velocity = new Vector3D();
+   private Vector3D velocity = new Vector3D();
 
    private void setGroundContactOffsetsAndVelocities(double track_linear_position, double track_linear_velocity)
    {
       joint.getRotationToWorld(temp_rotation);
       if (track_rotation != null)
-         temp_rotation.mul(track_rotation);    // temp_rotation = temp_rotation * rotation;
+         temp_rotation.multiply(track_rotation);    // temp_rotation = temp_rotation * rotation;
 
 
       bottom_velocity.set(-track_linear_velocity, 0.0, 0.0);
@@ -239,14 +238,14 @@ public class Track implements FunctionToIntegrate
       }
    }
 
-   private Vector3d force = new Vector3d();
+   private Vector3D force = new Vector3D();
 
    private double computeTotalTrackLinearForce(double track_linear_position)
    {
       double total_force = 0.0;
       joint.getRotationToWorld(temp_rotation);
       if (track_rotation != null)
-         temp_rotation.mul(track_rotation);    // temp_rotation = temp_rotation * rotation;
+         temp_rotation.multiply(track_rotation);    // temp_rotation = temp_rotation * rotation;
       temp_rotation.transpose();
 
       for (int i = 0; i < numTreads; i++)

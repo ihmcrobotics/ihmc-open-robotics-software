@@ -2,16 +2,6 @@ package us.ihmc.humanoidRobotics.kryo;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point2f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector2f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import org.ejml.data.DenseMatrix64F;
 
 import boofcv.struct.calib.IntrinsicParameters;
@@ -36,6 +26,16 @@ import us.ihmc.communication.packets.ToolboxStateMessage;
 import us.ihmc.communication.packets.ToolboxStateMessage.ToolboxState;
 import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.communication.producers.VideoSource;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Vector2D32;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.EuclideanTrajectoryPointMessage;
@@ -181,9 +181,6 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAngle
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.remote.serialization.JointConfigurationData;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestMessage;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -220,8 +217,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(IMUPacket.class);
 
       registerPacketField(byte[].class);
-      registerPacketField(Point3d.class);
-      registerPacketField(Quat4d.class);
+      registerPacketField(Point3D.class);
+      registerPacketField(Quaternion.class);
       registerPacketField(TimeStampedTransform3D.class);
 
       registerPacketField(PacketDestination.class);
@@ -237,14 +234,14 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HandRotateAboutAxisPacket.DataType.class);
       registerPacketClass(SteeringWheelInformationPacket.class);
       registerPacketField(RobotSide.class);
-      registerPacketField(Point3d.class);
-      registerPacketField(Point3f.class);
-      registerPacketField(Vector3d.class);
-      registerPacketField(Vector2f.class);
+      registerPacketField(Point3D.class);
+      registerPacketField(Point3D32.class);
+      registerPacketField(Vector3D.class);
+      registerPacketField(Vector2D32.class);
       registerPacketClass(DesiredSteeringAnglePacket.class);
 
       registerPacketClass(HandComplianceControlParametersMessage.class);
-      registerPacketField(Vector3f.class);
+      registerPacketField(Vector3D32.class);
       registerPacketField(boolean[].class);
 
       // Endeffector load bearing message
@@ -326,7 +323,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
-      registerPacketFields(double[].class, Vector3d.class);
+      registerPacketFields(double[].class, Vector3D.class);
       registerPacketFields(DenseMatrix64F.class);
       registerPacketFields(DenseMatrix64F[].class);
 
@@ -340,7 +337,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(ArrayList.class);
 
       registerPacketClass(BlindWalkingPacket.class);
-      registerPacketFields(Point2d.class, BlindWalkingDirection.class, BlindWalkingSpeed.class);
+      registerPacketFields(Point2D.class, BlindWalkingDirection.class, BlindWalkingSpeed.class);
 
       registerPacketClass(PauseWalkingMessage.class);
       registerPacketClass(FootstepStatus.class);
@@ -357,10 +354,10 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(PlanarRegionMessage.class);
       registerPacketClass(RequestPlanarRegionsListMessage.class);
       registerPacketClass(RequestPlanarRegionsListMessage.RequestType.class);
-      registerPacketField(Point3f.class);
-      registerPacketField(Vector3f.class);
-      registerPacketField(Point2f.class);
-      registerPacketField(Point2f[].class);
+      registerPacketField(Point3D32.class);
+      registerPacketField(Vector3D32.class);
+      registerPacketField(Point2D32.class);
+      registerPacketField(Point2D32[].class);
 
       //SCS
       registerPacketClass(SCSListenerPacket.class);
@@ -374,8 +371,8 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       registerPacketField(int[].class);
       registerPacketField(float[].class);
-      registerPacketField(Quat4f.class);
-      registerPacketField(Vector3f.class);
+      registerPacketField(Quaternion32.class);
+      registerPacketField(Vector3D32.class);
       registerPacketField(LidarScanParameters.class);
 
       // Robot pose estimation
@@ -460,7 +457,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(ValveLocationPacket.class);
 
       registerPacketClass(CapturabilityBasedStatus.class);
-      registerPacketFields(Point2d.class, Point2d[].class);
+      registerPacketFields(Point2D.class, Point2D[].class);
 
       registerPacketClass(ButtonData.class);
       registerPacketClass(HumanoidBehaviorButtonPacket.class);
@@ -483,9 +480,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(SingleJointAnglePacket[].class);
       registerPacketClass(MultiJointAnglePacket.class);
 
-      registerPacketField(Vector3d[].class);
-      registerPacketField(Quat4d[].class);
-      registerPacketField(Point3d[].class);
+      registerPacketField(Vector3D[].class);
+      registerPacketField(Quaternion[].class);
+      registerPacketField(Point3D[].class);
 
       registerPacketClass(PointCloudWorldPacket.class);
       registerPacketClass(LidarPosePacket.class);
@@ -532,8 +529,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(TextToSpeechPacket.class);
       registerPacketField(VideoSource.class);
 
-      registerPacketField(TransformableQuat4d.class);
-      registerPacketField(TransformablePoint3d.class);
+      registerPacketField(Quaternion.class);
 
       registerPacketClass(HeatMapPacket.class);
       registerPacketClass(BoundingBoxesPacket.class);

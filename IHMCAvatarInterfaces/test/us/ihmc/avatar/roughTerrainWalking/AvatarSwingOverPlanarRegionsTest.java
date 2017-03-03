@@ -1,9 +1,5 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 
@@ -15,6 +11,9 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -124,8 +123,8 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          RobotSide robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide.negateIfRightSide(stepWidth);
          double footstepX = stepLength * i;
-         Point3d location = new Point3d(footstepX, footstepY, 0.0);
-         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         Point3D location = new Point3D(footstepX, footstepY, 0.0);
+         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
@@ -147,11 +146,11 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          PrintTools.info("Foot: " + robotSide + "  X: " + footstepX + "  Y: " + footstepY);
 
          footstepData.setTrajectoryType(TrajectoryType.CUSTOM);
-         Point3d waypointOne = new Point3d();
-         Point3d waypointTwo = new Point3d();
+         Point3D waypointOne = new Point3D();
+         Point3D waypointTwo = new Point3D();
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypointOne);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypointTwo);
-         footstepData.setTrajectoryWaypoints(new Point3d[] {waypointOne, waypointTwo});
+         footstepData.setTrajectoryWaypoints(new Point3D[] {waypointOne, waypointTwo});
 
          double maxSpeed = maxSpeedDimensionless / swingTime;
          if (maxSpeed > maxSwingSpeed)
@@ -169,10 +168,10 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       drcSimulationTestHelper.send(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
-      Point3d rootJointPosition = new Point3d(2.81, 0.0, 0.79);
-      Vector3d epsilon = new Vector3d(0.05, 0.05, 0.05);
-      Point3d min = new Point3d(rootJointPosition);
-      Point3d max = new Point3d(rootJointPosition);
+      Point3D rootJointPosition = new Point3D(2.81, 0.0, 0.79);
+      Vector3D epsilon = new Vector3D(0.05, 0.05, 0.05);
+      Point3D min = new Point3D(rootJointPosition);
+      Point3D max = new Point3D(rootJointPosition);
       min.sub(epsilon);
       max.add(epsilon);
 

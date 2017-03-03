@@ -1,8 +1,7 @@
 package us.ihmc.ihmcPerception.depthData.collisionShapes;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public abstract class CollisionShape
 {
@@ -18,5 +17,5 @@ public abstract class CollisionShape
       return new RigidBodyTransform(pose);
    }
 
-   public abstract boolean contains(Point3d point);
+   public abstract boolean contains(Point3D point);
 }

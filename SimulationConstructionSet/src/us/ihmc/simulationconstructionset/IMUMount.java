@@ -1,11 +1,10 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
@@ -73,12 +72,12 @@ public class IMUMount
       return parentJoint;
    }
 
-   private final Vector3d tempLinearVelocity = new Vector3d();
-   private final Vector3d tempAngularVelocityInBody = new Vector3d();
+   private final Vector3D tempLinearVelocity = new Vector3D();
+   private final Vector3D tempAngularVelocityInBody = new Vector3D();
 
-   private final Matrix3d tempRotationToWorld = new Matrix3d();
-   private final Vector3d tempIMUOffset = new Vector3d();
-   private final Matrix3d tempIMURotation = new Matrix3d();
+   private final RotationMatrix tempRotationToWorld = new RotationMatrix();
+   private final Vector3D tempIMUOffset = new Vector3D();
+   private final RotationMatrix tempIMURotation = new RotationMatrix();
 
    protected void updateIMUMountPositionAndVelocity()
    {
@@ -88,7 +87,7 @@ public class IMUMount
 
       // Orientation:
       parentJoint.getRotationToWorld(tempRotationToWorld);
-      tempRotationToWorld.mul(tempIMURotation);
+      tempRotationToWorld.multiply(tempIMURotation);
       orientation.set(tempRotationToWorld);
 
       tempIMURotation.transpose();
@@ -109,9 +108,9 @@ public class IMUMount
       angularVelocityInBody.set(tempAngularVelocityInBody);
    }
 
-   private final Vector3d tempGravity = new Vector3d();
-   private final Vector3d tempLinearAcceleration = new Vector3d();
-   private final Vector3d tempAngularAccelerationInBody = new Vector3d();
+   private final Vector3D tempGravity = new Vector3D();
+   private final Vector3D tempLinearAcceleration = new Vector3D();
+   private final Vector3D tempAngularAccelerationInBody = new Vector3D();
    
    protected void updateIMUMountAcceleration()
    {
@@ -124,7 +123,7 @@ public class IMUMount
 
       // Orientation:
       parentJoint.getRotationToWorld(tempRotationToWorld);
-      tempRotationToWorld.mul(tempIMURotation);
+      tempRotationToWorld.multiply(tempIMURotation);
       tempIMURotation.transpose();
       
       // Linear Acceleration
@@ -152,47 +151,47 @@ public class IMUMount
       angularAccelerationInBody.set(tempAngularAccelerationInBody);
    }
    
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(Quaternion orientation)
    {
       this.orientation.set(orientation);
    }
 
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(Quaternion orientationToPack)
    {
       orientation.get(orientationToPack);
    }
 
-   public void getOrientation(Matrix3d rotationMatrixToPack)
+   public void getOrientation(RotationMatrix rotationMatrixToPack)
    {
       orientation.get(rotationMatrixToPack);
    }
 
-   public void setAngularVelocityInBody(Vector3d angularVelocityInBody)
+   public void setAngularVelocityInBody(Vector3D angularVelocityInBody)
    {
       this.angularVelocityInBody.set(angularVelocityInBody);
    }
    
-   public void getAngularVelocityInBody(Vector3d angularVelocityInBodyToPack)
+   public void getAngularVelocityInBody(Vector3D angularVelocityInBodyToPack)
    {
       angularVelocityInBody.get(angularVelocityInBodyToPack);
    }
    
-   public void setAngularAccelerationInBody(Vector3d angularAccelerationInBody)
+   public void setAngularAccelerationInBody(Vector3D angularAccelerationInBody)
    {
       this.angularAccelerationInBody.set(angularAccelerationInBody);
    }
    
-   public void getAngularAccelerationInBody(Vector3d angularAccelerationInBodyToPack)
+   public void getAngularAccelerationInBody(Vector3D angularAccelerationInBodyToPack)
    {
       angularAccelerationInBody.get(angularAccelerationInBodyToPack);
    }
 
-   public void setLinearAccelerationInBody(Vector3d linearAccelerationInBody)
+   public void setLinearAccelerationInBody(Vector3D linearAccelerationInBody)
    {
       this.linearAccelerationInBody.set(linearAccelerationInBody);
    }
    
-   public void getLinearAccelerationInBody(Vector3d linearAccelerationInBodyToPack)
+   public void getLinearAccelerationInBody(Vector3D linearAccelerationInBodyToPack)
    {
       linearAccelerationInBody.get(linearAccelerationInBodyToPack);
    }

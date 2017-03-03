@@ -2,32 +2,31 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ButtonData extends Packet<ButtonData>
 {
-   public Vector3d pushDirection;
-   public Point3d pushPoint;
+   public Vector3D pushDirection;
+   public Point3D pushPoint;
    
    public ButtonData(Random random)
    {
       double max = Double.MAX_VALUE / 2;
-      pushPoint = RandomTools.generateRandomPoint(random, max, max, max);
-      pushDirection = RandomTools.generateRandomVector(random, max, max, max, max, max, max);
+      pushPoint = RandomGeometry.nextPoint3D(random, max, max, max);
+      pushDirection = RandomGeometry.nextVector3D(random, max, max, max, max, max, max);
    }
    
    public ButtonData()
    {
-      this.pushDirection = new Vector3d();
-      this.pushPoint = new Point3d();
+      this.pushDirection = new Vector3D();
+      this.pushPoint = new Point3D();
    }
 
    
-   public ButtonData(Vector3d pushVector, Point3d attackPoint)
+   public ButtonData(Vector3D pushVector, Point3D attackPoint)
    {
     
       this.pushDirection = pushVector;
@@ -40,12 +39,12 @@ public class ButtonData extends Packet<ButtonData>
       this.pushPoint = buttonData.getPushPosition();
    }
       
-   public Vector3d getPushDirection()
+   public Vector3D getPushDirection()
    {
       return pushDirection;
    }
    
-   public Point3d getPushPosition()
+   public Point3D getPushPosition()
    {
       return pushPoint;
    }

@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -62,7 +62,7 @@ public class Step5SCSRobot extends Robot
       for (RobotSide robotSide : RobotSide.values())
       {
 
-         PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3d(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
+         PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3D(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
                Axis.Y);
          hipJoints.put(robotSide, hipJoint);
          hipJoint.setDynamic(true);
@@ -71,7 +71,7 @@ public class Step5SCSRobot extends Robot
          hipJoint.setLink(upperLink);
          bodyJoint.addJoint(hipJoint);
 
-         KinematicPoint hipPoint = new KinematicPoint(robotSide.getSideNameFirstLetter() + "hipPoint", new Vector3d(0.0, 0.0, 0.0), this);
+         KinematicPoint hipPoint = new KinematicPoint(robotSide.getSideNameFirstLetter() + "hipPoint", new Vector3D(0.0, 0.0, 0.0), this);
          hipPoints.put(robotSide, hipPoint);
          hipJoint.addKinematicPoint(hipPoint);
          
@@ -87,7 +87,7 @@ public class Step5SCSRobot extends Robot
          
          /************************************************************/
 
-         SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3d(0.0, 0.0, -upperLinkLength + 0.4), this, Axis.Z); //TODO change offset depending on height
+         SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3D(0.0, 0.0, -upperLinkLength + 0.4), this, Axis.Z); //TODO change offset depending on height
          kneeJoints.put(robotSide, kneeJoint);
          kneeJoint.setDynamic(true);
          kneeJoint.setLimitStops(-0.4, 0.4, 1e5, 1e4); //TODO change limits depending on initial position. Eg: (0.0, 0.6)
@@ -95,13 +95,13 @@ public class Step5SCSRobot extends Robot
          kneeJoint.setLink(lowerLink);
          hipJoint.addJoint(kneeJoint);
 
-         KinematicPoint footPoint = new KinematicPoint(robotSide.getSideNameFirstLetter() + "footPoint", new Vector3d(0.0, 0.0, -upperLinkLength + 0.4), this);
+         KinematicPoint footPoint = new KinematicPoint(robotSide.getSideNameFirstLetter() + "footPoint", new Vector3D(0.0, 0.0, -upperLinkLength + 0.4), this);
          feetPoints.put(robotSide, footPoint); //PUT is only used while constructing the list. It is NOT the same as SET, which is used to change the value if needed in the future
          kneeJoint.addKinematicPoint(footPoint);
 
          /*************************************************************/
 
-         GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3d(0.0, 0.0, gcOffset), this);
+         GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3D(0.0, 0.0, gcOffset), this);
          GCpoints.set(robotSide, contactPoint);
          kneeJoints.get(robotSide).addGroundContactPoint(contactPoint);
          Graphics3DObject graphics = kneeJoints.get(robotSide).getLink().getLinkGraphics();
@@ -129,7 +129,7 @@ public class Step5SCSRobot extends Robot
       ret.setMass(bodyMass);
 
       // Inertia tensor
-      Matrix3d inertiaCube = new Matrix3d();
+      Matrix3D inertiaCube = new Matrix3D();
       inertiaCube = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidBox(cubeL, cubeW, cubeH, bodyMass);
       ret.setMomentOfInertia(inertiaCube);
 
@@ -151,7 +151,7 @@ public class Step5SCSRobot extends Robot
       ret.setMass(upperLinkMass);
 
       // Inertia tensor
-      Matrix3d inertiaUpperCylinder = new Matrix3d();
+      Matrix3D inertiaUpperCylinder = new Matrix3D();
       inertiaUpperCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(upperLinkMass, upperLinkRadius, upperLinkLength, Axis.Z);
       ret.setMomentOfInertia(inertiaUpperCylinder);
 
@@ -179,7 +179,7 @@ public class Step5SCSRobot extends Robot
       ret.setMass(lowerLinkMass);
 
       // Inertia tensor
-      Matrix3d inertiaLowerCylinder = new Matrix3d();
+      Matrix3D inertiaLowerCylinder = new Matrix3D();
       inertiaLowerCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(lowerLinkMass, lowerLinkRadius, lowerLinkLength, Axis.Z);
       ret.setMomentOfInertia(inertiaLowerCylinder);
 

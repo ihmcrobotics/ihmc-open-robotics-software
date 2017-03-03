@@ -1,20 +1,19 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.CommonJoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
 
 public interface FloatingSCSJoint extends CommonJoint
 {
    public void setRotationAndTranslation(RigidBodyTransform transform);
 
-   public void setVelocity(Tuple3d velocity);
+   public void setVelocity(Tuple3DBasics velocity);
 
-   public void setAngularVelocityInBody(Vector3d angularVelocityInBody);
+   public void setAngularVelocityInBody(Vector3D angularVelocityInBody);
 
    public void getVelocity(FrameVector linearVelocityToPack);
 

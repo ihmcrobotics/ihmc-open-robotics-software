@@ -8,13 +8,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class AngleToolsTest
@@ -45,8 +44,8 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         angleA = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
-         angleB = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         angleA = RandomNumbers.nextDouble(random, -128.0, 128.0);
+         angleB = RandomNumbers.nextDouble(random, -128.0, 128.0);
 
          double ret = AngleTools.computeAngleDifferenceMinusTwoPiToZero(angleA, angleB);
 
@@ -69,8 +68,8 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         angleA = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
-         angleB = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         angleA = RandomNumbers.nextDouble(random, -128.0, 128.0);
+         angleB = RandomNumbers.nextDouble(random, -128.0, 128.0);
 
          double ret = AngleTools.computeAngleDifferenceMinusPiToPi(angleA, angleB);
 
@@ -93,8 +92,8 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         angleA = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
-         angleB = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         angleA = RandomNumbers.nextDouble(random, -128.0, 128.0);
+         angleB = RandomNumbers.nextDouble(random, -128.0, 128.0);
 
          double ret = AngleTools.trimAngleMinusPiToPi(angleA - angleB);
 
@@ -337,7 +336,7 @@ public class AngleToolsTest
 
       for (int i = 0; i < 25; i++)
       {
-         double randomAngle = RandomTools.generateRandomDoubleInRange(random, -128.0, 128.0);
+         double randomAngle = RandomNumbers.nextDouble(random, -128.0, 128.0);
          randomAngle = AngleTools.trimAngleMinusPiToPi(randomAngle);
          assertTrue(randomAngle <= Math.PI);
          assertTrue(randomAngle >= -Math.PI);
@@ -390,82 +389,91 @@ public class AngleToolsTest
    @Test(timeout = 30000)
    public void testAngleMinusPiToPi()
    {
-      Vector2d vectorA, vectorB;
+      Vector2D vectorA, vectorB;
       double expected, actual;
 
 
-      vectorA = new Vector2d(0.0, 1.0);
-      vectorB = new Vector2d(1.0, 0.0);
+      vectorA = new Vector2D(0.0, 1.0);
+      vectorB = new Vector2D(1.0, 0.0);
       expected = -0.5 * Math.PI;
       actual = AngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertEquals(expected, actual, 1e-12);
 
-      vectorA = new Vector2d(0.0, 1.0);
-      vectorB = new Vector2d(-1.0, 0.0);
+      vectorA = new Vector2D(0.0, 1.0);
+      vectorB = new Vector2D(-1.0, 0.0);
       expected = 0.5 * Math.PI;
       actual = AngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertEquals(expected, actual, 1e-12);
 
 
-      vectorA = new Vector2d(1.0, 1.0);
-      vectorB = new Vector2d(-1.0, 0.0);
+      vectorA = new Vector2D(1.0, 1.0);
+      vectorB = new Vector2D(-1.0, 0.0);
       expected = 0.75 * Math.PI;
       actual = AngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertEquals(expected, actual, 1e-12);
 
 
 
-      vectorA = new Vector2d(0.0, 1.0);
-      vectorB = new Vector2d(0.0, 0.0);
+      vectorA = new Vector2D(0.0, 1.0);
+      vectorB = new Vector2D(0.0, 0.0);
       expected = AngleTools.angleMinusPiToPi(vectorA, vectorB);
       assertTrue(Double.isNaN(expected));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testAngleFromZeroToTwoPi()
+   {
+      assertEquals("not equal", 0.0, AngleTools.angleFromZeroToTwoPi(0.0, 0.0), 1e-7);
+      assertEquals("not equal", Math.PI / 4.0, AngleTools.angleFromZeroToTwoPi(1.0, 1.0), 1e-7);
+      assertEquals("not equal", 7.0 * Math.PI / 4.0, AngleTools.angleFromZeroToTwoPi(1.0, -1.0), 1e-7);
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCalculateHeading()
    {
-	   FramePose2d start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   FramePose2d start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   FramePoint2d end = new FramePoint2d(ReferenceFrame.getWorldFrame(), 1.0, 1.0);
 	   double heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 45.0, 1e-7);
 	   
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), 1.0, 0.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 0.0, 1e-7);
 	   
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 0.0, 1e-7);
 	   
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, 1.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 90.0, 1e-7);
 
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), 0.0, -1.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -90.0, 1e-7);
 	   
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), -1.0, -1.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -135.0, 1e-7);
 
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), -1.0, 0.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -180.0, 1e-7);
 	   
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), 1.0, -1.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, -45, 1e-7);
 	   
-	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2d(0.0,0.0), 0.0);
+	   start = new FramePose2d(ReferenceFrame.getWorldFrame(), new Point2D(0.0,0.0), 0.0);
 	   end = new FramePoint2d(ReferenceFrame.getWorldFrame(), -1.0, 1.0);
 	   heading = Math.toDegrees(AngleTools.calculateHeading(start, end, 0.0, 0.0));
 	   assertEquals(heading, 135.0, 1e-7);

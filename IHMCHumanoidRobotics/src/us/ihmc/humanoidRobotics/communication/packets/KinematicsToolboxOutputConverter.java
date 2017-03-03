@@ -1,15 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Quat4f;
-import javax.vecmath.Vector3f;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
@@ -17,16 +12,20 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 
 public class KinematicsToolboxOutputConverter
 {
@@ -56,10 +55,10 @@ public class KinematicsToolboxOutputConverter
          OneDoFJoint joint = oneDoFJoints[i];
          joint.setQ(q);
       }
-      Vector3f translation = solution.getPelvisTranslation();
+      Vector3D32 translation = solution.getPelvisTranslation();
       rootJoint.setPosition(translation.getX(), translation.getY(), translation.getZ());
-      Quat4f orientation = solution.getPelvisOrientation();
-      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getW());
+      Quaternion32 orientation = solution.getPelvisOrientation();
+      rootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       fullRobotModelToUseForConversion.updateFrames();
    }
 
@@ -93,7 +92,7 @@ public class KinematicsToolboxOutputConverter
       for (int i = 0; i < numberOfArmJoints; i++)
       {
          OneDoFJoint armJoint = armJoints[i];
-         desiredJointPositions[i] = MathTools.clipToMinMax(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
+         desiredJointPositions[i] = MathTools.clamp(armJoint.getQ(), armJoint.getJointLimitLower(), armJoint.getJointLimitUpper());
       }
       ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
       output.setArmTrajectoryMessage(armTrajectoryMessage);
@@ -110,8 +109,8 @@ public class KinematicsToolboxOutputConverter
       checkIfDataHasBeenSet();
 
       BaseForControl baseForControl = BaseForControl.WORLD;
-      Point3d desiredPosition = new Point3d();
-      Quat4d desiredOrientation = new Quat4d();
+      Point3D desiredPosition = new Point3D();
+      Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame handControlFrame = fullRobotModelToUseForConversion.getHandControlFrame(robotSide);
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(worldFrame);
@@ -125,7 +124,7 @@ public class KinematicsToolboxOutputConverter
       checkIfDataHasBeenSet();
 
       ReferenceFrame chestFrame = fullRobotModelToUseForConversion.getChest().getBodyFixedFrame();
-      Quat4d desiredQuaternion = new Quat4d();
+      Quaternion desiredQuaternion = new Quaternion();
       FrameOrientation desiredOrientation = new FrameOrientation(chestFrame);
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getQuaternion(desiredQuaternion);
@@ -137,8 +136,8 @@ public class KinematicsToolboxOutputConverter
    {
       checkIfDataHasBeenSet();
 
-      Point3d desiredPosition = new Point3d();
-      Quat4d desiredOrientation = new Quat4d();
+      Point3D desiredPosition = new Point3D();
+      Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame pelvisFrame = fullRobotModelToUseForConversion.getRootJoint().getFrameAfterJoint();
       FramePose desiredPelvisPose = new FramePose(pelvisFrame);
       desiredPelvisPose.changeFrame(worldFrame);
@@ -157,8 +156,8 @@ public class KinematicsToolboxOutputConverter
    {
       checkIfDataHasBeenSet();
 
-      Point3d desiredPosition = new Point3d();
-      Quat4d desiredOrientation = new Quat4d();
+      Point3D desiredPosition = new Point3D();
+      Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame footFrame = fullRobotModelToUseForConversion.getEndEffectorFrame(robotSide, LimbName.LEG);
       FramePose desiredFootPose = new FramePose(footFrame);
       desiredFootPose.changeFrame(worldFrame);

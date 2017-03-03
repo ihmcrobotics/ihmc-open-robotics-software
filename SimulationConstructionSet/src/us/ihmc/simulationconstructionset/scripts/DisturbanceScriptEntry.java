@@ -1,22 +1,22 @@
 package us.ihmc.simulationconstructionset.scripts;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class DisturbanceScriptEntry implements Comparable<Object>
 {
 
    private final double time;
-   private final Vector3d forceVector = new Vector3d();
+   private final Vector3D forceVector = new Vector3D();
    private final double duration;
 
-   public DisturbanceScriptEntry(double time, double magnitude, Vector3d direction, double duration)
+   public DisturbanceScriptEntry(double time, double magnitude, Vector3D direction, double duration)
    {
       this(time, direction, duration);
       forceVector.normalize();
       forceVector.scale(magnitude);
    }
 
-   public DisturbanceScriptEntry(double time, Vector3d forceVector, double duration)
+   public DisturbanceScriptEntry(double time, Vector3D forceVector, double duration)
    {
       this.time = time;
       this.forceVector.set(forceVector);
@@ -39,7 +39,7 @@ public class DisturbanceScriptEntry implements Comparable<Object>
       return this.time;
    }
 
-   public Vector3d getForceVector()
+   public Vector3D getForceVector()
    {
       return forceVector;
    }

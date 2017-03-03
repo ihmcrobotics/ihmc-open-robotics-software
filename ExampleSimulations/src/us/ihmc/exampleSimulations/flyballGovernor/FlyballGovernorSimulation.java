@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.flyballGovernor;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -15,8 +14,8 @@ public class FlyballGovernorSimulation
    {
       FlyballGovernorCommonControllerParameters controllerParameters = new FlyballGovernorCommonControllerParameters();
       
-      FlyballGovernorRobot flyballGovernor1 = new FlyballGovernorRobot("UsualConstraint", controllerParameters, new Vector3d());
-      FlyballGovernorRobot flyballGovernor2 = new FlyballGovernorRobot("IntegratedConstraint", controllerParameters, new Vector3d(0.5, 0.0, 0.0));
+      FlyballGovernorRobot flyballGovernor1 = new FlyballGovernorRobot("UsualConstraint", controllerParameters, new Vector3D());
+      FlyballGovernorRobot flyballGovernor2 = new FlyballGovernorRobot("IntegratedConstraint", controllerParameters, new Vector3D(0.5, 0.0, 0.0));
 
       flyballGovernor1.setController(new FlyballGovernorSimpleClosedLoopConstraintController(flyballGovernor1));
 

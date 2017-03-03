@@ -7,14 +7,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameOrientationTest;
@@ -338,8 +337,8 @@ public class CirclePoseTrajectoryGeneratorTest
          trajectoryGenerator.getPosition(newPosition);
          trajectoryGenerator.getOrientation(orientation);
 
-         AxisAngle4d difference = FrameOrientationTest.computeDifferenceAxisAngle(initialOrientation, orientation);
-         Matrix3d rotationMatrix = new Matrix3d();
+         AxisAngle difference = FrameOrientationTest.computeDifferenceAxisAngle(initialOrientation, orientation);
+         RotationMatrix rotationMatrix = new RotationMatrix();
          rotationMatrix.set(difference);
 
          FramePoint rotatedInitialPosition = new FramePoint(initialPosition);

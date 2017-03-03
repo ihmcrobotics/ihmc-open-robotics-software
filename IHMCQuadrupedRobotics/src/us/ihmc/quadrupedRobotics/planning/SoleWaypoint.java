@@ -1,20 +1,19 @@
 package us.ihmc.quadrupedRobotics.planning;
 
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 public class SoleWaypoint
 {
-   private Point3d position;
-   private Vector3d velocity;
+   private Point3D position;
+   private Vector3D velocity;
    private double time;
 
    public SoleWaypoint()
    {
-      position = new Point3d(0, 0, 0);
-      velocity = new Vector3d(0, 0, 0);
+      position = new Point3D(0, 0, 0);
+      velocity = new Vector3D(0, 0, 0);
       time = 0.0;
    }
 
@@ -24,28 +23,28 @@ public class SoleWaypoint
       set(other);
    }
 
-   public SoleWaypoint(Point3d position, Vector3d velocity, double time)
+   public SoleWaypoint(Point3D position, Vector3D velocity, double time)
    {
       this();
       set(position, velocity, time);
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
 
-   public Vector3d getVelocity()
+   public Vector3D getVelocity()
    {
       return velocity;
    }
 
-   public void getPosition(Point3d position)
+   public void getPosition(Point3D position)
    {
       position.set(this.position);
    }
 
-   public void getVelocity(Vector3d velocity)
+   public void getVelocity(Vector3D velocity)
    {
       velocity.set(this.velocity);
    }
@@ -55,7 +54,7 @@ public class SoleWaypoint
       return time;
    }
 
-   public void set(Point3d position, Vector3d velocity, Double time)
+   public void set(Point3D position, Vector3D velocity, Double time)
    {
       this.position.set(position);
       this.velocity.set(velocity);
@@ -69,12 +68,12 @@ public class SoleWaypoint
       this.time = other.time;
    }
 
-   public void setPosition(Point3d position)
+   public void setPosition(Point3D position)
    {
       this.position.set(position);
    }
 
-   public void setVelocity(Vector3d velocity)
+   public void setVelocity(Vector3D velocity)
    {
       this.velocity.set(velocity);
    }

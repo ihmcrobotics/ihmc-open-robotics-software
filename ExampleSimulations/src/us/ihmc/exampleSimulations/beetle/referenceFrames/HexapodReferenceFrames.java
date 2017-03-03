@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.referenceFrames;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -30,7 +29,7 @@ public class HexapodReferenceFrames implements ReferenceFrames
    private final FramePoint centroid = new FramePoint();
    private final FramePoint currentFoot = new FramePoint();
 
-   public HexapodReferenceFrames(FullRobotModel fullRobotModel, SegmentDependentList<RobotSextant, Vector3d> offsetsFromJointBeforeFootToSole)
+   public HexapodReferenceFrames(FullRobotModel fullRobotModel, SegmentDependentList<RobotSextant, Vector3D> offsetsFromJointBeforeFootToSole)
    {
       this.fullRobotModel = fullRobotModel;
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
@@ -43,7 +42,7 @@ public class HexapodReferenceFrames implements ReferenceFrames
          InverseDynamicsJoint parentJoint = endEffector.getParentJoint();
          ReferenceFrame frameAfterJoint = parentJoint.getFrameAfterJoint();
          TranslationReferenceFrame footFrame = new TranslationReferenceFrame(robotSextant.name() + "footFrame", frameAfterJoint);
-         Vector3d offsetFromJointBeforeFootToSole = offsetsFromJointBeforeFootToSole.get(robotSextant);
+         Vector3D offsetFromJointBeforeFootToSole = offsetsFromJointBeforeFootToSole.get(robotSextant);
          footFrame.updateTranslation(offsetFromJointBeforeFootToSole);
          feetFrames.set(robotSextant, footFrame);
       }

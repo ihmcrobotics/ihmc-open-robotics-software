@@ -1,10 +1,9 @@
 package us.ihmc.avatar.initialSetup;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -13,7 +12,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<Human
 {
    private double groundZ;
    private final RigidBodyTransform rootToWorld = new RigidBodyTransform();
-   private final Vector3d offset = new Vector3d();
+   private final Vector3D offset = new Vector3D();
 
    public SquaredUpDRCRobotInitialSetup()
    {
@@ -37,7 +36,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<Human
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
       rootToWorld.getTranslation(offset);
-      Vector3d positionInWorld = new Vector3d();
+      Vector3D positionInWorld = new Vector3D();
       
       rootToWorld.getTranslation(positionInWorld);
       
@@ -76,12 +75,12 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<Human
 //      }
    }
 
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
       offsetToPack.set(offset);
    }
 
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
       this.offset.set(offset);
    }

@@ -1,13 +1,12 @@
 package us.ihmc.commonWalkingControlModules.touchdownDetector;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredBooleanYoVariable;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
-
-import javax.vecmath.Vector3d;
 
 public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
 {
@@ -20,7 +19,7 @@ public class ActuatorForceBasedTouchdownDetector implements TouchdownDetector
    private final DoubleYoVariable touchdownForceThreshold;
 
    private final Wrench wrenchToPack = new Wrench();
-   private final Vector3d vectorToPack = new Vector3d();
+   private final Vector3D vectorToPack = new Vector3D();
 
    public ActuatorForceBasedTouchdownDetector(String name, ForceSensorDataReadOnly forceSensorData, double touchdownForceThreshold, YoVariableRegistry registry)
    {

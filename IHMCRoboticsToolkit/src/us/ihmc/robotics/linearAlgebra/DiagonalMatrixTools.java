@@ -1,9 +1,9 @@
 package us.ihmc.robotics.linearAlgebra;
 
+import java.util.Arrays;
+
 import org.ejml.data.RowD1Matrix64F;
 import org.ejml.ops.MatrixDimensionException;
-
-import java.util.Arrays;
 
 public class DiagonalMatrixTools
 {

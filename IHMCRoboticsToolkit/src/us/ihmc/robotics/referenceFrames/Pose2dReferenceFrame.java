@@ -1,9 +1,9 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class Pose2dReferenceFrame extends ReferenceFrame
 {

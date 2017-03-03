@@ -6,18 +6,20 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.Epsilons;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameBox3dTest
@@ -104,9 +106,55 @@ public class FrameBox3dTest
       };
       frame.update();
       box.changeFrame(frame);
-      
+
       assertTrue(box.getReferenceFrame().getName().contains(frame.getName()));
 
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testChangeFrame() throws Exception
+   {
+      // This test ensures consistency between the changeFrame of FrameBox3d and FramePose.
+      double epsilon = 1.0e-12;
+      Random random = new Random(342554L);
+
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      ReferenceFrame frameA = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("A", worldFrame,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame frameB = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("B", worldFrame,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame frameC = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("C", frameB,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame frameD = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("D", frameA,
+                                                                                             EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+      ReferenceFrame[] frames = {worldFrame, frameA, frameB, frameC, frameD};
+
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      Box3d expectedBox = new Box3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      FramePose expectedBoxPose = new FramePose(worldFrame, randomTransform);
+      FramePose actualBoxPose = new FramePose();
+      FrameBox3d frameBox = new FrameBox3d(worldFrame, expectedBox);
+      frameBox.setPose(expectedBoxPose.getGeometryObject());
+      frameBox.getFramePose(actualBoxPose);
+
+      expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
+      EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPosition(), actualBoxPose.getPosition(), epsilon);
+      EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
+
+      for (int i = 0; i < 100; i++)
+      {
+         ReferenceFrame newFrame = frames[random.nextInt(frames.length)];
+
+         expectedBoxPose.changeFrame(newFrame);
+         frameBox.changeFrame(newFrame);
+         frameBox.getFramePose(actualBoxPose);
+
+         assertTrue(expectedBox.epsilonEquals(frameBox.getBox3d(), epsilon));
+         expectedBoxPose.checkReferenceFrameMatch(actualBoxPose);
+         EuclidCoreTestTools.assertTuple3DEquals(expectedBoxPose.getPosition(), actualBoxPose.getPosition(), epsilon);
+         EuclidCoreTestTools.assertQuaternionEqualsSmart(expectedBoxPose.getOrientation(), actualBoxPose.getOrientation(), epsilon);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -137,7 +185,7 @@ public class FrameBox3dTest
       assertTrue(expectedPoint.epsilonEquals(returnedPoint, 1e-14));
       assertTrue(expectedNormal.epsilonEquals(returnedNormal, 1e-14));
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsInsideOrOnSurface()
@@ -148,21 +196,20 @@ public class FrameBox3dTest
 
       FramePoint pointOnXFace = new FramePoint(worldFrame);
       pointOnXFace.set(0.4, 0.3, -0.1);
-      
-      assertTrue(box.isInsideOrOnSurface(pointOnXFace, 1e-7));
 
+      assertTrue(box.isInsideOrOnSurface(pointOnXFace, 1e-7));
 
       FramePoint pointOnYFace = new FramePoint(worldFrame);
       pointOnYFace.set(-0.2, 0.4, -0.1);
-      
+
       assertTrue(box.isInsideOrOnSurface(pointOnYFace, 1e-7));
-      
+
       FramePoint pointOutsideBox = new FramePoint(worldFrame);
       pointOutsideBox.set(10, 10, 10);
-      
+
       assertFalse(box.isInsideOrOnSurface(pointOutsideBox, 1e-7));
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testApplyTransform()
@@ -174,26 +221,26 @@ public class FrameBox3dTest
       for (int boxNumber = 0; boxNumber < nBoxes; boxNumber++)
       {
          FrameBox3d box = createRandomBox(worldFrame, random);
-         RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+         RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          FrameBox3d boxTransformed = new FrameBox3d(box);
          boxTransformed.applyTransform(transform);
          FrameBox3d biggerBox = new FrameBox3d(box);
          biggerBox.scale(2.0);
 
-         Point3d[] vertices = new Point3d[Box3d.NUM_VERTICES];
+         Point3D[] vertices = new Point3D[Box3d.NUM_VERTICES];
          for (int i = 0; i < vertices.length; i++)
          {
-            vertices[i] = new Point3d();
+            vertices[i] = new Point3D();
          }
 
          biggerBox.computeVertices(vertices);
 
          for (int testNumber = 0; testNumber < nTestsPerBox; testNumber++)
          {
-            Point3d point = getRandomConvexCombination(random, vertices);
-            Point3d pointTransformed = new Point3d(point);
-            box.getGeometryObject().getTransformToShapeFrameUnsafe().transform(pointTransformed);
-            boxTransformed.getGeometryObject().getTransformFromShapeFrameUnsafe().transform(pointTransformed);
+            Point3D point = getRandomConvexCombination(random, vertices);
+            Point3D pointTransformed = new Point3D(point);
+            box.getGeometryObject().transformToLocal(pointTransformed);
+            boxTransformed.getGeometryObject().transformToWorld(pointTransformed);
 
             assertEquals(box.isInsideOrOnSurface(new FramePoint(worldFrame, point)),
                          boxTransformed.isInsideOrOnSurface(new FramePoint(worldFrame, pointTransformed)));
@@ -208,7 +255,7 @@ public class FrameBox3dTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(351235L);
       FrameBox3d box = new FrameBox3d(worldFrame);
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       box.setTransform(transform);
 
       RigidBodyTransform transformBack = new RigidBodyTransform();
@@ -216,11 +263,11 @@ public class FrameBox3dTest
       assertTrue(transform.epsilonEquals(transformBack, Epsilons.ONE_TRILLIONTH));
       assertTrue(transform.epsilonEquals(box.getTransformCopy(), Epsilons.ONE_TRILLIONTH));
 
-      Matrix3d matrix = new Matrix3d();
-      Vector3d vector = new Vector3d();
+      RotationMatrix matrix = new RotationMatrix();
+      Vector3D vector = new Vector3D();
       transform.get(matrix, vector);
 
-      Matrix3d matrixBack = new Matrix3d();
+      RotationMatrix matrixBack = new RotationMatrix();
       FramePoint CenterBack = new FramePoint(worldFrame);
 
       box.getRotation(matrixBack);
@@ -228,17 +275,16 @@ public class FrameBox3dTest
       assertTrue(matrix.epsilonEquals(box.getRotationCopy(), Epsilons.ONE_TRILLIONTH));
 
       box.getCenter(CenterBack);
-      assertTrue(vector.epsilonEquals(new Vector3d(CenterBack.getVectorCopy()), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(CenterBack.getVectorCopy()), 0.0));
       assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
 
-      assertTrue(vector.epsilonEquals(new Vector3d(box.getCenter().getVectorCopy()), 0.0));
+      assertTrue(vector.epsilonEquals(new Vector3D(box.getCenter().getVectorCopy()), 0.0));
       assertTrue(vector.epsilonEquals(box.getCenterCopy().getVectorCopy(), 0.0));
    }
 
-
    private static FrameBox3d createRandomBox(ReferenceFrame referenceFrame, Random random)
    {
-      RigidBodyTransform configuration = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform configuration = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       double lengthX = random.nextDouble();
       double widthY = random.nextDouble();
       double heightZ = random.nextDouble();
@@ -246,7 +292,7 @@ public class FrameBox3dTest
       return new FrameBox3d(referenceFrame, configuration, lengthX, widthY, heightZ);
    }
 
-   private static Point3d getRandomConvexCombination(Random random, Point3d[] vertices)
+   private static Point3D getRandomConvexCombination(Random random, Point3D[] vertices)
    {
       double[] weightings = new double[vertices.length];
       for (int j = 0; j < weightings.length; j++)
@@ -260,16 +306,15 @@ public class FrameBox3dTest
          weightings[j] /= sum;
       }
 
-      Point3d pointToTest = new Point3d();
+      Point3D pointToTest = new Point3D();
       for (int j = 0; j < weightings.length; j++)
       {
-         Point3d tempPoint = new Point3d(vertices[j]);
+         Point3D tempPoint = new Point3D(vertices[j]);
          tempPoint.scale(weightings[j]);
          pointToTest.add(tempPoint);
       }
 
       return pointToTest;
    }
-
 
 }

@@ -5,9 +5,6 @@ import java.util.EnumMap;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -20,6 +17,8 @@ import us.ihmc.communication.packets.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage;
 import us.ihmc.communication.packets.RequestPlanarRegionsListMessage.RequestType;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -216,12 +215,12 @@ public class FootstepPlanningToolboxController extends ToolboxController
       usePlanarRegions.set(!request.assumeFlatGround);
 
       FramePose initialStancePose = new FramePose(ReferenceFrame.getWorldFrame());
-      initialStancePose.setPosition(new Point3d(request.stanceFootPositionInWorld));
-      initialStancePose.setOrientation(new Quat4d(request.stanceFootOrientationInWorld));
+      initialStancePose.setPosition(new Point3D(request.stanceFootPositionInWorld));
+      initialStancePose.setOrientation(new Quaternion(request.stanceFootOrientationInWorld));
 
       FramePose goalPose = new FramePose(ReferenceFrame.getWorldFrame());
-      goalPose.setPosition(new Point3d(request.goalPositionInWorld));
-      goalPose.setOrientation(new Quat4d(request.goalOrientationInWorld));
+      goalPose.setPosition(new Point3D(request.goalPositionInWorld));
+      goalPose.setOrientation(new Quaternion(request.goalOrientationInWorld));
 
       FootstepPlanner planner = plannerMap.get(activePlanner.getEnumValue());
       planner.setInitialStanceFoot(initialStancePose, request.initialStanceSide);

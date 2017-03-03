@@ -4,8 +4,6 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -13,6 +11,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -27,7 +27,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -78,8 +77,8 @@ public class TaskspaceHandControlState extends HandControlState
    private final YoSE3PIDGainsInterface gains;
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
-   private final Vector3d angularWeight = new Vector3d();
-   private final Vector3d linearWeight = new Vector3d();
+   private final Vector3D angularWeight = new Vector3D();
+   private final Vector3D linearWeight = new Vector3D();
 
    private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap;
 
@@ -128,8 +127,6 @@ public class TaskspaceHandControlState extends HandControlState
 
       setupVisualization(namePrefix, yoGraphicsListRegistry);
 
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(chest, endEffector);
-
       abortTaskspaceControlState = new BooleanYoVariable(namePrefix + "AbortTaskspaceControlState", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
@@ -157,7 +154,7 @@ public class TaskspaceHandControlState extends HandControlState
       yoLinearWeight.set(weight, weight, weight);
    }
 
-   public void setWeights(Vector3d angularWeight, Vector3d linearWeight)
+   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
    {
       yoAngularWeight.set(angularWeight);
       yoLinearWeight.set(linearWeight);
@@ -370,7 +367,8 @@ public class TaskspaceHandControlState extends HandControlState
 
       framePoseToModify.getPose(oldTrackingFrameDesiredTransform);
       newControlFrame.getTransformToDesiredFrame(transformFromNewTrackingFrameToOldTrackingFrame, oldControlFrame);
-      newTrackingFrameDesiredTransform.multiply(oldTrackingFrameDesiredTransform, transformFromNewTrackingFrameToOldTrackingFrame);
+      newTrackingFrameDesiredTransform.set(oldTrackingFrameDesiredTransform);
+      newTrackingFrameDesiredTransform.multiply(transformFromNewTrackingFrameToOldTrackingFrame);
       framePoseToModify.setPose(newTrackingFrameDesiredTransform);
    }
 

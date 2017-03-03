@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -16,6 +15,11 @@ public class StackOfBouncyBallsRobot extends Robot
 {
    public StackOfBouncyBallsRobot()
    {
+      this(4, 0.6, 0.2);
+   }
+
+   public StackOfBouncyBallsRobot(int numberOfBalls, double radiusScaleFactor, double massScaleFactor)
+   {
       super("StackOfBouncyBalls");
 
       double gravity = -9.81;
@@ -25,10 +29,6 @@ public class StackOfBouncyBallsRobot extends Robot
       final DoubleYoVariable potentialEnergy = new DoubleYoVariable("potentialEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
-
-      int numberOfBalls = 4;
-      double radiusScaleFactor = 0.6;
-      double massScaleFactor = 0.2;
 
       double largestBallRadius = 0.25;
       double largestBallMass = 2000.0;
@@ -47,7 +47,7 @@ public class StackOfBouncyBallsRobot extends Robot
             ballMass = ballMass * massScaleFactor;
          }
 
-         Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D offset = new Vector3D(0.0, 0.0, 0.0);
          FloatingJoint floatingJoint = new FloatingJoint("ball" + i, "ball" + i, offset, this);
 
          Link link = new Link("ball" + i);
@@ -85,7 +85,7 @@ public class StackOfBouncyBallsRobot extends Robot
          @Override
          public double[] computeDerivativeVector()
          {
-            Vector3d linearMomentum = new Vector3d();
+            Vector3D linearMomentum = new Vector3D();
             computeLinearMomentum(linearMomentum);
             kineticEnergy.set(computeTranslationalKineticEnergy());
             potentialEnergy.set(computeGravitationalPotentialEnergy());

@@ -18,10 +18,10 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
+import java.util.List;
+
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Cylinder3D_F64;
-
-import java.util.List;
 
 /**
  * Given an equation for a cylinder and a set of points which belong to the cylinder, bound the length of the

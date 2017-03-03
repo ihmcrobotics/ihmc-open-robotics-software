@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
@@ -17,7 +13,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -29,7 +29,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -101,15 +100,15 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       CameraConfiguration cameraConfigurationOne = new CameraConfiguration("one");
       cameraConfigurationOne.setCameraTracking(false, false, false, false);
       cameraConfigurationOne.setCameraDolly(false, false, false, false);
-      cameraConfigurationOne.setCameraFix(new Point3d(11.25, 11.8, 0.6));
-      cameraConfigurationOne.setCameraPosition(new Point3d(10.1, 10.3, 0.3));
+      cameraConfigurationOne.setCameraFix(new Point3D(11.25, 11.8, 0.6));
+      cameraConfigurationOne.setCameraPosition(new Point3D(10.1, 10.3, 0.3));
       scs.setupCamera(cameraConfigurationOne);
 
       CameraConfiguration cameraConfigurationTwo = new CameraConfiguration("two");
       cameraConfigurationTwo.setCameraTracking(false, false, false, false);
       cameraConfigurationTwo.setCameraDolly(false, false, false, false);
-      cameraConfigurationTwo.setCameraFix(new Point3d(11.5, 14.25, 1.1));
-      cameraConfigurationTwo.setCameraPosition(new Point3d(16.5, 10.9, 0.3));
+      cameraConfigurationTwo.setCameraFix(new Point3D(11.5, 14.25, 1.1));
+      cameraConfigurationTwo.setCameraPosition(new Point3D(16.5, 10.9, 0.3));
       scs.setupCamera(cameraConfigurationTwo);
 
       ViewportConfiguration viewportConfiguration = new ViewportConfiguration("twoViews");
@@ -157,7 +156,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          transferToFootstep = footsteps.remove(0);
 
          if (changeZRandomly)
-            transferToFootstep.setZ(transferToFootstep.getZ() + RandomTools.generateRandomDouble(random, 0.0, maxZChange));
+            transferToFootstep.setZ(transferToFootstep.getZ() + RandomNumbers.nextDouble(random, 0.0, maxZChange));
          previousFootstep = transferToFootstep;
 
          Footstep upcomingFootstep = footsteps.get(0);
@@ -238,7 +237,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             pelvisFrame.setY(queryPosition.getY());
             pelvisFrame.update();
 
-            boolean switchSupportSides = RandomTools.generateRandomBoolean(random);
+            boolean switchSupportSides = random.nextBoolean();
             if (switchSupportSides)
             {
                supportLegFrameSide.set(supportLegFrameSide.getEnumValue().getOppositeSide());
@@ -302,15 +301,15 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          double xToAnkle = 0.0;
          double yToAnkle = 0.0;
          double zToAnkle = 0.084;
-         List<Point2d> contactPointsInSoleFrame = new ArrayList<Point2d>();
+         List<Point2D> contactPointsInSoleFrame = new ArrayList<Point2D>();
          double footLengthForControl = 0.3;
          double toeWidthForControl = 0.15;
          double footWidthForControl = 0.2;
 
-         contactPointsInSoleFrame.add(new Point2d(footLengthForControl / 2.0, toeWidthForControl / 2.0));
-         contactPointsInSoleFrame.add(new Point2d(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
-         contactPointsInSoleFrame.add(new Point2d(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
-         contactPointsInSoleFrame.add(new Point2d(-footLengthForControl / 2.0, footWidthForControl / 2.0));
+         contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, toeWidthForControl / 2.0));
+         contactPointsInSoleFrame.add(new Point2D(footLengthForControl / 2.0, -toeWidthForControl / 2.0));
+         contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, -footWidthForControl / 2.0));
+         contactPointsInSoleFrame.add(new Point2D(-footLengthForControl / 2.0, footWidthForControl / 2.0));
          FootSpoof contactableFoot = new FootSpoof(sidePrefix + "Foot", xToAnkle, yToAnkle, zToAnkle, contactPointsInSoleFrame, 0.0);
 
          FramePose startingPose = footPosesAtTouchdown.get(robotSide);
@@ -350,25 +349,25 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
    {
       ArrayList<Footstep> footsteps = new ArrayList<Footstep>();
 
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3d(13.498008237591158, 12.933984676794712, 0.08304866902498514),
-            new Quat4d(0.712207206856358, -0.002952488685311897, 0.003108390899721778, 0.7019562060545106)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3d(13.170202005363656, 12.938562106620529, 0.08304880466443637),
-            new Quat4d(0.7118317189761082, -0.0030669544205584594, 0.002995905842662467, 0.7023369719716335)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3d(13.331337238526865, 13.209631212022698, 0.07946232652345472),
-            new Quat4d(0.7118303580231159, -0.0031545801122483245, 0.018597667622730154, 0.7020980820227274)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3d(13.080837909205398, 13.505772370798573, 0.07489977483062672),
-            new Quat4d(0.7118264756261261, -0.003742268262861186, 0.003495827367880344, 0.7023367021713666)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3d(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-            new Quat4d(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3d(12.979449419903972, 14.098074875951077, 0.37701256522207105),
-            new Quat4d(0.7118265348281387, -0.00374226855753469, 0.003495827052433593, 0.7023366421694281)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.498008237591158, 12.933984676794712, 0.08304866902498514),
+            new Quaternion(0.712207206856358, -0.002952488685311897, 0.003108390899721778, 0.7019562060545106)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(13.170202005363656, 12.938562106620529, 0.08304880466443637),
+            new Quaternion(0.7118317189761082, -0.0030669544205584594, 0.002995905842662467, 0.7023369719716335)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.331337238526865, 13.209631212022698, 0.07946232652345472),
+            new Quaternion(0.7118303580231159, -0.0031545801122483245, 0.018597667622730154, 0.7020980820227274)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(13.080837909205398, 13.505772370798573, 0.07489977483062672),
+            new Quaternion(0.7118264756261261, -0.003742268262861186, 0.003495827367880344, 0.7023367021713666)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
+            new Quaternion(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
+            new Quaternion(0.7118265348281387, -0.00374226855753469, 0.003495827052433593, 0.7023366421694281)));
 
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3d(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-            new Quat4d(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3d(12.979449419903972, 14.098074875951077, 0.37701256522207105),
-            new Quat4d(0.7118265348281387, -0.00374226855753469, 0.003495827052433593, 0.7023366421694281)));
-      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3d(13.370848128885667, 13.814155292179699, 0.3745783670265563),
-            new Quat4d(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
+            new Quaternion(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.LEFT, new Point3D(12.979449419903972, 14.098074875951077, 0.37701256522207105),
+            new Quaternion(0.7118265348281387, -0.00374226855753469, 0.003495827052433593, 0.7023366421694281)));
+      footsteps.add(footstepProviderTestHelper.createFootstep(RobotSide.RIGHT, new Point3D(13.370848128885667, 13.814155292179699, 0.3745783670265563),
+            new Quaternion(0.7116005831473223, 0.01831580652938022, 0.024589083079517595, 0.7019148939072867)));
 
       return footsteps;
    }

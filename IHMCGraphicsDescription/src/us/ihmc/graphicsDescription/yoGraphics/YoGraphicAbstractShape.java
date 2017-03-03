@@ -1,15 +1,14 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,9 +18,9 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
    protected final YoFramePoint yoFramePoint;
    protected final YoFrameOrientation yoFrameOrientation;
    protected final double scale;
-   private final Vector3d translationVector = new Vector3d();
-   private final Point3d tempPoint = new Point3d();
-   private final Quat4d tempQuaternion = new Quat4d();
+   private final Vector3D translationVector = new Vector3D();
+   private final Point3D tempPoint = new Point3D();
+   private final Quaternion tempQuaternion = new Quaternion();
 
    protected YoGraphicAbstractShape(String name, YoFramePoint framePoint, YoFrameOrientation frameOrientation, double scale)
    {
@@ -77,7 +76,7 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
 
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      Vector3d translationToWorld = new Vector3d();
+      Vector3D translationToWorld = new Vector3D();
 
       transformToWorld.getTranslation(translationToWorld);
 
@@ -117,16 +116,16 @@ public abstract class YoGraphicAbstractShape extends YoGraphic
       setTransformToWorld(transformToWorld);
    }
 
-   private Vector3d rotationEulerVector = new Vector3d();
+   private Vector3D rotationEulerVector = new Vector3D();
 
    @Override
-   protected void computeRotationTranslation(Transform3d transform3D)
+   protected void computeRotationTranslation(AffineTransform transform3D)
    {
       transform3D.setIdentity();
       translationVector.set(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
       yoFrameOrientation.getEulerAngles(rotationEulerVector);
 
-      transform3D.setRotationEulerAndZeroTranslation(rotationEulerVector);
+      transform3D.setRotationEuler(rotationEulerVector);
       transform3D.setTranslation(translationVector);
       transform3D.setScale(scale);
    }

@@ -3,8 +3,6 @@ package us.ihmc.jMonkeyEngineToolkit.jme;
 import java.awt.GraphicsDevice;
 import java.net.URL;
 
-import javax.vecmath.Color3f;
-
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 
@@ -19,6 +17,7 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DBackgroundScaleMode;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer.RenderType;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.JMEGPULidar;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.mouse.MouseListener;
@@ -90,7 +89,7 @@ public class JMEGraphics3DAdapter implements Graphics3DAdapter
       jmeRenderer = null;
    }
 
-   public void setBackgroundColor(Color3f color)
+   public void setBackgroundColor(MutableColor color)
    {
       jmeRenderer.setBackgroundColor(color);
    }

@@ -27,10 +27,10 @@ import org.opencv.videoio.VideoCapture;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
-import us.ihmc.tools.time.Timer;
 
 public class OpenCVFaceDetector
 {
@@ -75,7 +75,7 @@ public class OpenCVFaceDetector
    }
    
    int count = 0;
-   Timer timer = null;
+   Stopwatch timer = null;
    double conversion = 0.0;
    double resize = 0.0;
    double detection = 0.0;
@@ -83,7 +83,7 @@ public class OpenCVFaceDetector
    {
       if (DEBUG)
       {
-         timer = new Timer().start();
+         timer = new Stopwatch().start();
       }
    }
 

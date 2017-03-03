@@ -7,9 +7,10 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -20,7 +21,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
@@ -238,13 +238,13 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    {
       if (startTime == -1)
          startTime = time;
-      yoTime.set(TimeTools.nanoSecondstoSeconds(time - startTime));
+      yoTime.set(Conversions.nanoSecondstoSeconds(time - startTime));
 
       tauFunctionSelected.set(selectedFunctionGenerator.getValue());
 
-      masterScaleFactor.set(MathTools.clipToMinMax(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
+      masterScaleFactor.set(MathTools.clamp(masterScaleFactor.getDoubleValue(), 0.0, 1.0));
       ValkyrieSliderBoardJointHolder selected = jointHolders.get(selectedJoint.getOrdinal());
-      selected.q_d.set(MathTools.clipToMinMax(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
+      selected.q_d.set(MathTools.clamp(qDesiredSelected.getDoubleValue(), selected.joint.getJointLimitLower(), selected.joint.getJointLimitUpper()));
       selected.qd_d.set(qdDesiredSelected.getDoubleValue());
       selected.pdController.setProportionalGain(kpSelected.getDoubleValue());
       selected.pdController.setDerivativeGain(kdSelected.getDoubleValue());

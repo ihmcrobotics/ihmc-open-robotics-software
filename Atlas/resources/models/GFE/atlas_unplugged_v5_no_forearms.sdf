@@ -1,0 +1,3509 @@
+<sdf version='1.5'>
+  <model name='atlas'>
+    <link name='pelvis'>
+      <pose>0 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>0.011608 0 0.0266707 0 -0 0</pose>
+        <mass>9.609</mass>
+        <inertia>
+          <ixx>0.125568</ixx>
+          <ixy>0.0008</ixy>
+          <ixz>-0.000500733</ixz>
+          <iyy>0.0972042</iyy>
+          <iyz>-0.0005</iyz>
+          <izz>0.117936</izz>
+        </inertia>
+      </inertial>
+      <collision name='pelvis_collision'>
+        <pose>0.046 0 0.01 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.06</length>
+            <radius>0.11</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='pelvis_collision_pelvis_1'>
+        <pose>-0.03 0 0.01 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.06</length>
+            <radius>0.11</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='pelvis_collision_pelvis_2'>
+        <pose>0.01 0.042 0.09 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.16</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='pelvis_collision_pelvis_3'>
+        <pose>0.01 -0.042 0.09 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.05</length>
+            <radius>0.16</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='pelvis_collision_pelvis_4'>
+        <pose>-0.1 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.15 0.2</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='pelvis_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/pelvis.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='pelvis_visual_pelvis_1'>
+        <pose>0.0599153 0 -0.01415 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='imu_sensor_at_pelvis_frame' type='imu'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <pose>-0.0905 -0.04 -0.0125 0 0 0</pose>
+      </sensor>
+      
+    </link>
+    <link name='ltorso'>
+      <pose>-0.0125 0 0 0 -0 0</pose>
+      <inertial>
+        <pose>-0.0112984 -3.15366e-06 0.0746835 0 -0 0</pose>
+        <mass>2.27</mass>
+        <inertia>
+          <ixx>0.0039092</ixx>
+          <ixy>-5.04491e-08</ixy>
+          <ixz>-0.000342157</ixz>
+          <iyy>0.00341694</iyy>
+          <iyz>4.87119e-07</iyz>
+          <izz>0.00174492</izz>
+        </inertia>
+      </inertial>
+      <visual name='ltorso_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/ltorso.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='back_bkz' type='revolute'>
+      <child>ltorso</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.663225</lower>
+          <upper>0.663225</upper>
+          <effort>106</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='mtorso'>
+      <pose>-0.0125 0 0.162 0 -0 0</pose>
+      <inertial>
+        <pose>-0.00816266 -0.0131245 0.0305974 0 -0 0</pose>
+        <mass>0.799</mass>
+        <inertia>
+          <ixx>0.000454181</ixx>
+          <ixy>-6.10764e-05</ixy>
+          <ixz>3.94009e-05</ixz>
+          <iyy>0.000483282</iyy>
+          <iyz>5.27463e-05</iyz>
+          <izz>0.000444215</izz>
+        </inertia>
+      </inertial>
+      <collision name='mtorso_collision'>
+        <pose>0 0 -0.02 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.02</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='mtorso_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/mtorso.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='back_bky' type='revolute'>
+      <child>mtorso</child>
+      <parent>ltorso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.219388</lower>
+          <upper>0.538783</upper>
+          <effort>445</effort>
+          <velocity>9</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='utorso'>
+      <pose>-0.0125 0 0.212 0 -0 0</pose>
+      <inertial>
+        <pose>-0.0345509 0.00229456 0.316809 0 -0 0</pose>
+        <mass>84.609</mass>
+        <inertia>
+          <ixx>1.62389</ixx>
+          <ixy>-0.0319003</ixy>
+          <ixz>0.0816618</ixz>
+          <iyy>1.65538</iyy>
+          <iyz>0.0472154</iyz>
+          <izz>0.577362</izz>
+        </inertia>
+      </inertial>
+      <collision name='utorso_collision'>
+        <pose>-0.102 0 0.25 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.4 0.35 0.5</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='utorso_collision_utorso_1'>
+        <pose>0.2 0 0.46 0 1.5707 0</pose>
+        <geometry>
+          <box>
+            <size>0.13 0.5 0.1</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='utorso_collision_utorso_2'>
+        <pose>0.2 0 0.285 3.14159 1.44159 3.14159</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.23 0.1</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_3'>
+        <pose>0.15 0 0.1 3.14159 1.14159 3.14159</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.18 0.1</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_4'>
+        <pose>-0.035 0 0.6265 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.506306 0.341719 0.12</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_5'>
+        <pose>0.208 0 0.8215 1.5707 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.13</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_6'>
+        <pose>0.208 -0.125 0.745 -0.38535 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_7'>
+        <pose>0.208 0.125 0.745 0.38535 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_8'>
+        <pose>0.063 -0.125 0.745 -0.38535 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_9'>
+        <pose>0.063 0.125 0.745 0.38535 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_10'>
+        <pose>0.14 0.06 0.8215 1.5707 5.55112e-17 1.5707</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_11'>
+        <pose>0.14 -0.06 0.8215 1.5707 5.55112e-17 1.5707</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_12'>
+        <pose>-0.029 0 0.731 0 -0.65 0</pose>
+        <geometry>
+          <box>
+            <size>0.2 0.25 0.01</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_13'>
+        <pose>0.063 0 0.8215 1.5707 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.13</length>
+            <radius>0.008</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_14'>
+        <pose>0.261 0.156 0.6215 1.5707 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.016</length>
+            <radius>0.055</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='utorso_collision_utorso_15'>
+        <pose>0.261 -0.156 0.6215 1.5707 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.016</length>
+            <radius>0.055</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='utorso_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/utorso.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='utorso_crash_visual'>
+      	<material>
+        	<lighting>1</lighting>
+        	<ambient>0.75686275 0 0.75686275 1</ambient>
+        	<diffuse>.7 0 .7 1</diffuse>
+        	<specular>1 0 1 1</specular>
+        	<emmisive>0 0 1 1</emmisive>
+        </material>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/ATLAS_UNPLUGGED_UPPER_BODY_CRASH_PROTECTION_NO_SHOULDER.stl</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='utorso_visual_utorso_1'>
+        <pose>0.155 0.121 0.785 0 -0 1.309</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+      </visual>
+      <visual name='utorso_visual_utorso_2'>
+        <pose>0.155 -0.121 0.785 0 0 -1.309</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <velocity_decay/>
+      <sensor name='l_situational_awareness_camera_sensor' type='camera'>
+        <update_rate>60</update_rate>
+        <camera name='l_situational_awareness_camera'>
+          <pose>0 0 0 0 -0 0</pose>
+          <horizontal_fov>2</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>1024</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <plugin name='l_situational_awareness_camera_controller' filename='libgazebo_ros_camera.so'>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>l_situational_awareness_camera</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>l_situational_awareness_camera_optical_frame</frameName>
+          <hackBaseline>0.0</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+        <pose>0.155 0.121 0.785 0 -0 1.309</pose>
+      </sensor>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='r_situational_awareness_camera_sensor' type='camera'>
+        <update_rate>60</update_rate>
+        <camera name='r_situational_awareness_camera'>
+          <pose>0 0 0 0 -0 0</pose>
+          <horizontal_fov>2</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>1024</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <plugin name='r_situational_awareness_camera_controller' filename='libgazebo_ros_camera.so'>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>r_situational_awareness_camera</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>r_situational_awareness_camera_optical_frame</frameName>
+          <hackBaseline>0.0</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+        <pose>0.155 -0.121 0.785 0 0 -1.309</pose>
+      </sensor>
+    </link>
+    <joint name='back_bkx' type='revolute'>
+      <child>utorso</child>
+      <parent>mtorso</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.40</lower>
+          <upper>0.40</upper>
+          <effort>300</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_clav'>
+      <pose>0.1281 0.2256 0.6896 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 -0.084 0 -0 0</pose>
+        <mass>4.466</mass>
+        <inertia>
+          <ixx>0.011</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.009</iyy>
+          <iyz>-0.004</iyz>
+          <izz>0.004</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_clav_collision'>
+        <pose>0 0.11 -0.248 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1525</length>
+            <radius>0.0555</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_clav_collision_l_clav_1'>
+        <pose>0.005 0.015 -0.08 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.26</length>
+            <radius>0.067</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_clav_collision_l_clav_2'>
+        <pose>0.004 0.064 -0.247 -1.05 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.07 0.072</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_clav_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_clav.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_arm_shz' type='revolute'>
+      <child>l_clav</child>
+      <parent>utorso</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>0.785398</upper>
+          <effort>87</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_scap'>
+      <pose>0.1281 0.3356 0.4446 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>3.899</mass>
+        <inertia>
+          <ixx>0.00319</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00583</iyy>
+          <iyz>0</iyz>
+          <izz>0.00583</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_scap_collision'>
+        <pose>-0.005 0.115 -0.014 -1.5708 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.105</length>
+            <radius>0.057</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_scap_collision_l_scap_1'>
+        <pose>-0.005 0.075 -0.015 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.16 0.17 0.08</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_scap_collision_l_scap_2'>
+        <pose>0.076 0.0615 0.0128 -2.25 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.02 0.029 0.018</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_scap_collision_l_scap_3'>
+        <pose>-0.075 -0.015 0.019 -1 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.028 0.09 0.05</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_scap_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_scap.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_arm_shx' type='revolute'>
+      <child>l_scap</child>
+      <parent>l_clav</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>99</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_uarm'>
+      <pose>0.1281 0.5226 0.4286 0 -0 0</pose>
+      <inertial>
+        <pose>0 -0.065 0 0 -0 0</pose>
+        <mass>4.386</mass>
+        <inertia>
+          <ixx>0.00656</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00358</iyy>
+          <iyz>0</iyz>
+          <izz>0.00656</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_uarm_collision'>
+        <pose>0 0.035 -0.005 -1.5708 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.11</length>
+            <radius>0.065</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_uarm_collision_l_uarm_1'>
+        <pose>-0.01 0.043 0.002 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.07 0.15</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_uarm_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_uarm.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_arm_ely' type='revolute'>
+      <child>l_uarm</child>
+      <parent>l_scap</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>3.14159</upper>
+          <effort>63</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_larm'>
+      <pose>0.1281 0.6416 0.4378 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>3.248</mass>
+        <inertia>
+          <ixx>0.00265</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00446</iyy>
+          <iyz>0</iyz>
+          <izz>0.00446</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_larm_collision'>
+        <pose>0 0.075 -0.01 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.051</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_larm_collision_l_larm_1'>
+        <pose>-0.012 0 0.0025 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.147</length>
+            <radius>0.045</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_larm_collision_l_larm_2'>
+        <pose>-0.07 0.077 -0.015 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.025 0.155 0.07</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_larm_collision_l_larm_3'>
+        <pose>0.05 0.067 -0.009 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.025 0.06 0.06</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_larm_collision_l_larm_4'>
+        <pose>-0.032 0.071 -0.06 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.115 0.05</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_larm_collision_l_larm_5'>
+        <pose>0.03 0.01 -0.05 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.045 0.055 0.023</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_larm_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_larm.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_arm_elx' type='revolute'>
+      <child>l_larm</child>
+      <parent>l_uarm</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>2.35619</upper>
+          <effort>112</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='head'>
+      <pose>0.2421 0 0.8335 0 -0 0</pose>
+      <inertial>
+        <pose>-0.0754942 3.38765e-05 0.0277411 0 -0 0</pose>
+        <mass>1.41991</mass>
+        <inertia>
+          <ixx>0.00397627</ixx>
+          <ixy>-1.51324e-06</ixy>
+          <ixz>-0.000892818</ixz>
+          <iyy>0.00412515</iyy>
+          <iyz>-6.83342e-07</iyz>
+          <izz>0.00353178</izz>
+        </inertia>
+      </inertial>
+      <collision name='head_collision'>
+        <pose>-0.0503 0 -0.00195 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1311 0.12 0.0591</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='head_collision_head_1'>
+        <pose>-0.093 0 0.0868 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.0468 0.12 0.1184</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='head_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://multisense_sl_description/meshes/head.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <visual name='head_visual_head_1'>
+        <pose>-0.0475 0.035 0 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.01 0.01 0.01</size>
+          </box>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <velocity_decay/>
+      <sensor name='head_imu_sensor' type='imu'>
+        <always_on>1</always_on>
+        <update_rate>1000</update_rate>
+        <imu>
+          <noise>
+            <type>gaussian</type>
+            <rate>
+              <mean>0</mean>
+              <stddev>0.0002</stddev>
+              <bias_mean>7.5e-06</bias_mean>
+              <bias_stddev>8e-07</bias_stddev>
+            </rate>
+            <accel>
+              <mean>0</mean>
+              <stddev>0.017</stddev>
+              <bias_mean>0.1</bias_mean>
+              <bias_stddev>0.001</bias_stddev>
+            </accel>
+          </noise>
+        </imu>
+        <pose>-0.0475 0.035 0 0 -0 0</pose>
+      </sensor>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='stereo_camera' type='multicamera'>
+        <update_rate>10</update_rate>
+        <camera name='left'>
+          <horizontal_fov>1.39626</horizontal_fov>
+          <image>
+            <width>1024</width>
+            <height>544</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <camera name='right'>
+          <pose>0 -0.07 0 0 -0 0</pose>
+          <horizontal_fov>1.39626</horizontal_fov>
+          <image>
+            <width>1024</width>
+            <height>544</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.02</near>
+            <far>300</far>
+          </clip>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.007</stddev>
+          </noise>
+        </camera>
+        <plugin name='stereo_camera_controller' filename='libgazebo_ros_multicamera.so'>
+          <alwaysOn>true</alwaysOn>
+          <updateRate>0.0</updateRate>
+          <cameraName>multisense/camera</cameraName>
+          <imageTopicName>image_raw</imageTopicName>
+          <cameraInfoTopicName>camera_info</cameraInfoTopicName>
+          <frameName>left_camera_optical_frame</frameName>
+          <hackBaseline>0.07</hackBaseline>
+          <distortionK1>0.0</distortionK1>
+          <distortionK2>0.0</distortionK2>
+          <distortionK3>0.0</distortionK3>
+          <distortionT1>0.0</distortionT1>
+          <distortionT2>0.0</distortionT2>
+        </plugin>
+        <pose>0 0.035 -0.002 0 -0 0</pose>
+      </sensor>
+    </link>
+    <joint name='neck_ry' type='revolute'>
+      <child>head</child>
+      <parent>utorso</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.602139</lower>
+          <upper>1.14319</upper>
+          <effort>25</effort>
+          <velocity>6.28</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='hokuyo_link'>
+      <pose>0.1975 0 0.9215 0 -0 0</pose>
+      <inertial>
+        <pose>0.0324349 0.0004084 -0.0041783 0 -0 0</pose>
+        <mass>0.057664</mass>
+                <!-- new inertia but causes unreasonable accel. inertia>
+          <ixx>3.8183e-05</ixx>
+          <ixy>4.9927e-08</ixy>
+          <ixz>1.1003e-05</ixz>
+          <iyy>4.3437e-05</iyy>
+          <iyz>-9.8165e-09</iyz>
+          <izz>4.2686e-05</izz>
+        </inertia-->
+        
+        <!-- Larger inertia so sim doesn't blow up -->
+        <inertia>
+          <ixx>0.000401606</ixx>
+          <ixy>4.9927e-08</ixy>
+          <ixz>1.0997e-05</ixz>
+          <iyy>0.00208115</iyy>
+          <iyz>-9.8165e-09</iyz>
+          <izz>0.00178402</izz>
+        </inertia>
+      </inertial>
+      <collision name='hokuyo_link_collision'>
+        <pose>0.01885 0 -0.02119 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.08 0.06 0.04238</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='hokuyo_link_collision_hokuyo_link_1'>
+        <pose>0.03 0 0.0235 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.047</length>
+            <radius>0.024425</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='hokuyo_link_visual'>
+        <pose>0.045 -0.0261018 -0.0834237 -0.314 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://multisense_sl_description/meshes/head_camera.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='head_hokuyo_sensor' type='gpu_ray'>
+        <visualize>0</visualize>
+        <update_rate>40</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-1.5708</min_angle>
+              <max_angle>1.5708</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.1</min>
+            <max>30</max>
+            <resolution>0.01</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0</mean>
+            <stddev>0.01</stddev>
+          </noise>
+        </ray>
+        <plugin name='gazebo_ros_head_hokuyo_controller' filename='libgazebo_ros_gpu_laser.so'>
+          <topicName>/multisense/lidar_scan</topicName>
+          <frameName>head_hokuyo_frame</frameName>
+        </plugin>
+        <pose>0.03 0 0.015 0 -0 0</pose>
+      </sensor>
+    </link>
+    <joint name='hokuyo_joint' type='revolute'>
+      <child>hokuyo_link</child>
+      <parent>head</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <damping>0.01</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_clav'>
+      <pose>0.1281 -0.2256 0.6896 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 -0.084 0 -0 0</pose>
+        <mass>4.466</mass>
+        <inertia>
+          <ixx>0.011</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.009</iyy>
+          <iyz>0.004</iyz>
+          <izz>0.004</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_clav_collision'>
+        <pose>0 -0.11 -0.248 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.1525</length>
+            <radius>0.0555</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_clav_collision_r_clav_1'>
+        <pose>0.005 -0.015 -0.08 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.26</length>
+            <radius>0.067</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_clav_collision_r_clav_2'>
+        <pose>0.004 -0.064 -0.247 1.05 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.07 0.072</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_clav_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_clav.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_arm_shz' type='revolute'>
+      <child>r_clav</child>
+      <parent>utorso</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.785398</lower>
+          <upper>1.5708</upper>
+          <effort>87</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_scap'>
+      <pose>0.1281 -0.3356 0.4446 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>3.899</mass>
+        <inertia>
+          <ixx>0.00319</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00583</iyy>
+          <iyz>0</iyz>
+          <izz>0.00583</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_scap_collision'>
+        <pose>-0.005 -0.115 -0.014 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.105</length>
+            <radius>0.057</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_scap_collision_r_scap_1'>
+        <pose>-0.005 -0.075 -0.015 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.16 0.17 0.08</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_scap_collision_r_scap_2'>
+        <pose>0.076 -0.0615 0.0128 2.25 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.02 0.029 0.018</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_scap_collision_r_scap_3'>
+        <pose>-0.075 0.015 0.019 1 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.028 0.09 0.05</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_scap_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_scap.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_arm_shx' type='revolute'>
+      <child>r_scap</child>
+      <parent>r_clav</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.5708</lower>
+          <upper>1.5708</upper>
+          <effort>99</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_uarm'>
+      <pose>0.1281 -0.5226 0.4286 0 -0 0</pose>
+      <inertial>
+        <pose>0 0.065 0 0 -0 0</pose>
+        <mass>4.386</mass>
+        <inertia>
+          <ixx>0.00656</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00358</iyy>
+          <iyz>0</iyz>
+          <izz>0.00656</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_uarm_collision'>
+        <pose>0 -0.035 -0.005 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.11</length>
+            <radius>0.065</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_uarm_collision_r_uarm_1'>
+        <pose>-0.01 -0.043 0.002 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.07 0.15</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_uarm_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_uarm.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_arm_ely' type='revolute'>
+      <child>r_uarm</child>
+      <parent>r_scap</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>3.14159</upper>
+          <effort>63</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_larm'>
+      <pose>0.1281 -0.6416 0.4378 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>3.248</mass>
+        <inertia>
+          <ixx>0.00265</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00446</iyy>
+          <iyz>0</iyz>
+          <izz>0.00446</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_larm_collision'>
+        <pose>0 -0.075 -0.01 -1.5708 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.04</length>
+            <radius>0.051</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_larm_collision_r_larm_1'>
+        <pose>-0.012 0 0.0025 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.147</length>
+            <radius>0.045</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_larm_collision_r_larm_2'>
+        <pose>-0.07 -0.077 -0.015 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.025 0.155 0.07</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_larm_collision_r_larm_3'>
+        <pose>0.05 -0.067 -0.009 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.025 0.06 0.06</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_larm_collision_r_larm_4'>
+        <pose>-0.032 -0.071 -0.06 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.04 0.115 0.05</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_larm_collision_r_larm_5'>
+        <pose>0.03 0.01 -0.05 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.045 0.055 0.023</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_larm_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_larm.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_arm_elx' type='revolute'>
+      <child>r_larm</child>
+      <parent>r_uarm</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-2.35619</lower>
+          <upper>0</upper>
+          <effort>112</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_uglut'>
+      <pose>0 0.089 0 0 -0 0</pose>
+      <inertial>
+        <pose>0.00529262 -0.00344732 0.00313046 0 -0 0</pose>
+        <mass>1.959</mass>
+        <inertia>
+          <ixx>0.00074276</ixx>
+          <ixy>-3.79607e-08</ixy>
+          <ixz>-2.79549e-05</ixz>
+          <iyy>0.000688179</iyy>
+          <iyz>-3.2735e-08</iyz>
+          <izz>0.00041242</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_uglut_collision'>
+        <pose>0.01 0.005 0 0.52539 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.1 0.1</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_uglut_collision_l_uglut_1'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.080842</length>
+            <radius>0.019841</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_uglut_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_uglut.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_leg_hpz' type='revolute'>
+      <child>l_uglut</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.174358</lower>
+          <upper>0.786794</upper>
+          <effort>275</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_lglut'>
+      <pose>0 0.089 0 0 -0 0</pose>
+      <inertial>
+        <pose>0.0133341 0.0170484 -0.0312052 0 -0 0</pose>
+        <mass>0.898</mass>
+        <inertia>
+          <ixx>0.000691326</ixx>
+          <ixy>-2.24344e-05</ixy>
+          <ixz>2.50508e-06</ixz>
+          <iyy>0.00126856</iyy>
+          <iyz>0.000137862</iyz>
+          <izz>0.00106487</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_lglut_collision'>
+        <pose>0.015 0.026 -0.028 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.125 0.05 0.08</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_lglut_collision_l_lglut_1'>
+        <pose>0.05 0.027488 -0.067 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.060306</length>
+            <radius>0.0200969</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_lglut_collision_l_lglut_2'>
+        <pose>0.0115 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.144</length>
+            <radius>0.02</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_lglut_collision_l_lglut_3'>
+        <pose>0.01 0.02 0.01 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.0975 0.069 0.103</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_lglut_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_lglut.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_leg_hpx' type='revolute'>
+      <child>l_lglut</child>
+      <parent>l_uglut</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.523599</lower>
+          <upper>0.523599</upper>
+          <effort>530</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_uleg'>
+      <pose>0.05 0.1115 -0.066 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 -0.21 0 -0 0</pose>
+        <mass>8.204</mass>
+        <inertia>
+          <ixx>0.09</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.09</iyy>
+          <iyz>0</iyz>
+          <izz>0.02</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_uleg_collision'>
+        <pose>-0.0199 0.00585 -0.122 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.09</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_uleg_collision_l_uleg_1'>
+        <pose>-0.032 -0.005 -0.224 0 -0.3 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.07</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_uleg_collision_l_uleg_2'>
+        <pose>0.003 0.015 -0.254 -0.15 0.13 3.49897e-18</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.05</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_uleg_collision_l_uleg_3'>
+        <pose>-0.007 -0.053 -0.052 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.07 0.038 0.15</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_uleg_collision_l_uleg_4'>
+        <pose>-0.017 0.0595 -0.049 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.07 0.038 0.14</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_uleg_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_uleg.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_leg_hpy' type='revolute'>
+      <child>l_uleg</child>
+      <parent>l_lglut</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.61234</lower>
+          <upper>0.65764</upper>
+          <effort>840</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_lleg'>
+      <pose>0 0.1115 -0.44 0 -0 0</pose>
+      <inertial>
+        <pose>0.001 0 -0.187 0 -0 0</pose>
+        <mass>4.515</mass>
+        <inertia>
+          <ixx>0.077</ixx>
+          <ixy>0</ixy>
+          <ixz>-0.003</ixz>
+          <iyy>0.076</iyy>
+          <iyz>0</iyz>
+          <izz>0.01</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_lleg_collision'>
+        <pose>0.02 0.00295 -0.182 0 0.1 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.4</length>
+            <radius>0.07</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_lleg_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_lleg.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_leg_kny' type='revolute'>
+      <child>l_lleg</child>
+      <parent>l_uleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>2.35637</upper>
+          <effort>890</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_talus'>
+      <pose>0 0.1115 -0.862 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.125</mass>
+        <inertia>
+          <ixx>1.01674e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>8.42775e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.30101e-05</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_talus_collision'>
+        <pose>0 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.029542</length>
+            <radius>0.010181</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_talus_collision_l_talus_1'>
+        <pose>0 0 0 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.010059</length>
+            <radius>0.010348</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_talus_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_talus.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='l_leg_aky' type='revolute'>
+      <child>l_talus</child>
+      <parent>l_lleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1</lower>
+          <upper>0.7</upper>
+          <effort>740</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='l_foot'>
+      <pose>0 0.1115 -0.862 0 -0 0</pose>
+      <inertial>
+        <pose>0.027 0 -0.067 0 -0 0</pose>
+        <mass>2.41</mass>
+        <inertia>
+          <ixx>0.002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.007</iyy>
+          <iyz>0</iyz>
+          <izz>0.008</izz>
+        </inertia>
+      </inertial>
+      <collision name='l_foot_collision'>
+        <pose>0.023 0 -0.049119 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.227 0.133887 0.05</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+06</kp>
+              <kd>100</kd>
+              <max_vel>1</max_vel>
+              <min_depth>0</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.5</mu>
+              <mu2>1.5</mu2>
+              <fdir1>1 0 0</fdir1>
+            </ode>
+          </friction>
+        </surface>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='l_foot_collision_l_foot_1'>
+        <pose>0.1225 0 -0.0641 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.08 0.02</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+06</kp>
+              <kd>100</kd>
+              <max_vel>1</max_vel>
+              <min_depth>0</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.5</mu>
+              <mu2>1.5</mu2>
+              <fdir1>1 0 0</fdir1>
+            </ode>
+          </friction>
+        </surface>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='l_foot_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/l_foot.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='l_foot_contact_sensor' type='contact'>
+        <update_rate>1000</update_rate>
+        <always_on>1</always_on>
+        <contact>
+          <collision>l_foot_collision</collision>
+          <topic>/l_foot_contact</topic>
+        </contact>
+      </sensor>
+    </link>
+    <joint name='l_leg_akx' type='revolute'>
+      <child>l_foot</child>
+      <parent>l_talus</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.8</lower>
+          <upper>0.8</upper>
+          <effort>360</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_uglut'>
+      <pose>0 -0.089 0 0 -0 0</pose>
+      <inertial>
+        <pose>0.00529262 0.00344732 0.00313046 0 -0 0</pose>
+        <mass>1.959</mass>
+        <inertia>
+          <ixx>0.00074276</ixx>
+          <ixy>3.79607e-08</ixy>
+          <ixz>-2.79549e-05</ixz>
+          <iyy>0.000688179</iyy>
+          <iyz>3.2735e-08</iyz>
+          <izz>0.00041242</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_uglut_collision'>
+        <pose>0.01 -0.005 0 -0.52539 0 0</pose>
+        <geometry>
+          <box>
+            <size>0.05 0.1 0.1</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_uglut_collision_r_uglut_1'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.080842</length>
+            <radius>0.019841</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_uglut_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_uglut.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_leg_hpz' type='revolute'>
+      <child>r_uglut</child>
+      <parent>pelvis</parent>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-0.786794</lower>
+          <upper>0.174358</upper>
+          <effort>275</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_lglut'>
+      <pose>0 -0.089 0 0 -0 0</pose>
+      <inertial>
+        <pose>0.0133341 -0.0170484 -0.0312052 0 -0 0</pose>
+        <mass>0.898</mass>
+        <inertia>
+          <ixx>0.000691326</ixx>
+          <ixy>2.24344e-05</ixy>
+          <ixz>2.50508e-06</ixz>
+          <iyy>0.00126856</iyy>
+          <iyz>-0.000137862</iyz>
+          <izz>0.00106487</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_lglut_collision'>
+        <pose>0.015 -0.026 -0.028 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.125 0.05 0.08</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_lglut_collision_r_lglut_1'>
+        <pose>0.05 -0.027488 -0.067 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.060306</length>
+            <radius>0.0200969</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_lglut_collision_r_lglut_2'>
+        <pose>0.0105 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.142</length>
+            <radius>0.02</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_lglut_collision_r_lglut_3'>
+        <pose>0.01 -0.02 0.01 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.0975 0.069 0.103</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_lglut_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_lglut.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_leg_hpx' type='revolute'>
+      <child>r_lglut</child>
+      <parent>r_uglut</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.523599</lower>
+          <upper>0.523599</upper>
+          <effort>530</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_uleg'>
+      <pose>0.05 -0.1115 -0.066 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 -0.21 0 -0 0</pose>
+        <mass>8.204</mass>
+        <inertia>
+          <ixx>0.09</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.09</iyy>
+          <iyz>0</iyz>
+          <izz>0.02</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_uleg_collision'>
+        <pose>-0.0199 -0.00585 -0.122 0 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.09</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_uleg_collision_r_uleg_1'>
+        <pose>-0.032 0.005 -0.224 0 -0.3 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.07</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_uleg_collision_r_uleg_2'>
+        <pose>0.003 -0.015 -0.254 0.15 0.13 -3.49897e-18</pose>
+        <geometry>
+          <cylinder>
+            <length>0.15</length>
+            <radius>0.05</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_uleg_collision_r_uleg_3'>
+        <pose>-0.007 0.053 -0.052 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.07 0.038 0.15</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_uleg_collision_r_uleg_4'>
+        <pose>-0.017 -0.0595 -0.049 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.07 0.038 0.14</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_uleg_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_uleg.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_leg_hpy' type='revolute'>
+      <child>r_uleg</child>
+      <parent>r_lglut</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1.61234</lower>
+          <upper>0.65764</upper>
+          <effort>840</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_lleg'>
+      <pose>0 -0.1115 -0.44 0 -0 0</pose>
+      <inertial>
+        <pose>0.001 0 -0.187 0 -0 0</pose>
+        <mass>4.515</mass>
+        <inertia>
+          <ixx>0.077</ixx>
+          <ixy>-0</ixy>
+          <ixz>-0.003</ixz>
+          <iyy>0.076</iyy>
+          <iyz>-0</iyz>
+          <izz>0.01</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_lleg_collision'>
+        <pose>0.02 -0.00295 -0.182 0 0.1 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.4</length>
+            <radius>0.07</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_lleg_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_lleg.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_leg_kny' type='revolute'>
+      <child>r_lleg</child>
+      <parent>r_uleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>2.35637</upper>
+          <effort>890</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_talus'>
+      <pose>0 -0.1115 -0.862 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 -0 0</pose>
+        <mass>0.125</mass>
+        <inertia>
+          <ixx>1.01674e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>8.42775e-06</iyy>
+          <iyz>0</iyz>
+          <izz>1.30101e-05</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_talus_collision'>
+        <pose>0 0 0 -2.65359e-06 1.57079 -2.65359e-06</pose>
+        <geometry>
+          <cylinder>
+            <length>0.029542</length>
+            <radius>0.010181</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_talus_collision_r_talus_1'>
+        <pose>0 0 0 1.5708 -0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.010059</length>
+            <radius>0.010348</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.9</mu>
+              <mu2>0.9</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_talus_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_talus.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='r_leg_aky' type='revolute'>
+      <child>r_talus</child>
+      <parent>r_lleg</parent>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-1</lower>
+          <upper>0.7</upper>
+          <effort>740</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <link name='r_foot'>
+      <pose>0 -0.1115 -0.862 0 -0 0</pose>
+      <inertial>
+        <pose>0.027 0 -0.067 0 -0 0</pose>
+        <mass>2.41</mass>
+        <inertia>
+          <ixx>0.002</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.007</iyy>
+          <iyz>0</iyz>
+          <izz>0.008</izz>
+        </inertia>
+      </inertial>
+      <collision name='r_foot_collision'>
+        <pose>0.023 0 -0.049119 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.227 0.133887 0.05</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+06</kp>
+              <kd>100</kd>
+              <max_vel>1</max_vel>
+              <min_depth>0</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.5</mu>
+              <mu2>1.5</mu2>
+              <fdir1>1 0 0</fdir1>
+            </ode>
+          </friction>
+        </surface>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <collision name='r_foot_collision_r_foot_1'>
+        <pose>0.1225 0 -0.0641 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.1 0.08 0.02</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>1e+06</kp>
+              <kd>100</kd>
+              <max_vel>1</max_vel>
+              <min_depth>0</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>1.5</mu>
+              <mu2>1.5</mu2>
+              <fdir1>1 0 0</fdir1>
+            </ode>
+          </friction>
+        </surface>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='r_foot_visual'>
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://atlas_description/meshes_unplugged/r_foot.obj</uri>
+          </mesh>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+      <sensor name='r_foot_contact_sensor' type='contact'>
+        <update_rate>1000</update_rate>
+        <always_on>1</always_on>
+        <contact>
+          <collision>r_foot_collision</collision>
+          <topic>/r_foot_contact</topic>
+        </contact>
+      </sensor>
+    </link>
+    <joint name='r_leg_akx' type='revolute'>
+      <child>r_foot</child>
+      <parent>r_talus</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.8</lower>
+          <upper>0.8</upper>
+          <effort>360</effort>
+          <velocity>12</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+      <physics>
+        <provide_feedback>1</provide_feedback>
+        <ode>
+          <provide_feedback>1</provide_feedback>
+          <implicit_spring_damper>1</implicit_spring_damper>
+          <cfm_damping>1</cfm_damping>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+        </ode>
+      </physics>
+    </joint>
+    <pose>0 0 0.93 0 -0 0</pose>
+    <plugin name='atlas_plugin' filename='libAtlasV4Plugin.so'/>
+    <plugin name='joint_trajectory_plugin' filename='libgazebo_ros_joint_pose_trajectory.so'>
+      <topicName>joint_trajectory</topicName>
+      <updateRate>1000.0</updateRate>
+    </plugin>
+    <plugin name='gazebo_ros_p3d' filename='libgazebo_ros_p3d.so'>
+      <bodyName>pelvis</bodyName>
+      <topicName>/ground_truth_odom</topicName>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100.0</updateRate>
+    </plugin>
+    <plugin name='gazebo_ros_force' filename='libgazebo_ros_force.so'>
+      <bodyName>pelvis</bodyName>
+      <topicName>/atlas/apply_pelvis_force</topicName>
+    </plugin>
+    <static>0</static>
+    <plugin name='multisense_plugin' filename='libMultiSenseSLPlugin.so'/>
+  </model>
+</sdf>

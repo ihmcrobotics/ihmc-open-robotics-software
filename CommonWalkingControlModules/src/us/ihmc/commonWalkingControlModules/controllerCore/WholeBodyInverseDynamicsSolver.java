@@ -36,12 +36,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 
@@ -65,10 +65,13 @@ public class WholeBodyInverseDynamicsSolver
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
 
    private final YoFrameVector yoDesiredMomentumRateLinear;
+   private final YoFrameVector yoDesiredMomentumRateAngular;
    // TODO It seems that the achieved CMP (computed from this guy) can be off sometimes.
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFrameVector yoAchievedMomentumRateLinear;
+   private final YoFrameVector yoAchievedMomentumRateAngular;
    private final FrameVector achievedMomentumRateLinear = new FrameVector();
+   private final FrameVector achievedMomentumRateAngular = new FrameVector();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector residualRootJointForce = new FrameVector();
@@ -106,6 +109,8 @@ public class WholeBodyInverseDynamicsSolver
 
       yoDesiredMomentumRateLinear = toolbox.getYoDesiredMomentumRateLinear();
       yoAchievedMomentumRateLinear = toolbox.getYoAchievedMomentumRateLinear();
+      yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
+      yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
 
       yoResidualRootJointForce = toolbox.getYoResidualRootJointForce();
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
@@ -150,6 +155,9 @@ public class WholeBodyInverseDynamicsSolver
 
       yoAchievedMomentumRateLinear.set(centroidalMomentumRateSolution.getLinearPart());
       yoAchievedMomentumRateLinear.getFrameTupleIncludingFrame(achievedMomentumRateLinear);
+
+      yoAchievedMomentumRateAngular.set(centroidalMomentumRateSolution.getAngularPart());
+      yoAchievedMomentumRateAngular.getFrameTupleIncludingFrame(achievedMomentumRateAngular);
 
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
@@ -240,6 +248,7 @@ public class WholeBodyInverseDynamicsSolver
    private void recordMomentumRate(MomentumRateCommand command)
    {
       DenseMatrix64F momentumRate = command.getMomentumRate();
+      MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateAngular, momentumRate, 0);
       MatrixTools.extractYoFrameTupleFromEJMLVector(yoDesiredMomentumRateLinear, momentumRate, 3);
    }
 
@@ -261,6 +270,11 @@ public class WholeBodyInverseDynamicsSolver
    public FrameVector getAchievedMomentumRateLinear()
    {
       return achievedMomentumRateLinear;
+   }
+
+   public FrameVector getAchievedMomentumRateAngular()
+   {
+      return achievedMomentumRateAngular;
    }
 
    public InverseDynamicsJoint[] getJointsToOptimizeFors()

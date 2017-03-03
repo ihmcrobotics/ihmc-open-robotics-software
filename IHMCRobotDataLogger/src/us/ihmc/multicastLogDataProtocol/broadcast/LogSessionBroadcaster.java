@@ -19,11 +19,11 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class LogSessionBroadcaster extends Thread
@@ -283,7 +283,7 @@ public class LogSessionBroadcaster extends Thread
    private static long createTempSessionID() throws IOException
    {
       String prefix = "LogSession";
-      Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+      Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
 
       SecureRandom random = new SecureRandom();
 

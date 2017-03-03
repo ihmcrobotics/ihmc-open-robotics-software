@@ -12,9 +12,9 @@ import javax.swing.JFrame;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.io.files.BasicPathVisitor;
-import us.ihmc.tools.io.files.PathTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class BambooVideoWall

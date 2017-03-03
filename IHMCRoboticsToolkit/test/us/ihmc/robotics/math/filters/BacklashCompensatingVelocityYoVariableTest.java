@@ -8,13 +8,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.trajectories.ConstantVelocityTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
@@ -30,7 +30,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      double dt = RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
+      double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
       BacklashCompensatingVelocityYoVariable unprocessed = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, dt, slopTime, registry);
 
@@ -39,7 +39,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 1000; i++)
       {
-         rawPosition = RandomTools.generateRandomDouble(rand, -100.0, 100.0);
+         rawPosition = RandomNumbers.nextDouble(rand, -100.0, 100.0);
          unprocessed.update(rawPosition);
 
          double rawVelocity = (rawPosition - rawPositionPrevValue) / dt;
@@ -58,7 +58,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      double dt = RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
+      double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
       DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
       BacklashCompensatingVelocityYoVariable unprocessed = new BacklashCompensatingVelocityYoVariable("", "", alphaVariable, rawPosition, dt, slopTime,
@@ -69,7 +69,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 1000; i++)
       {
-         rawPosition.set(RandomTools.generateRandomDouble(rand, -100.0, 100.0));
+         rawPosition.set(RandomNumbers.nextDouble(rand, -100.0, 100.0));
          unprocessed.update();
 
          double rawVelocity = (rawPosition.getDoubleValue() - rawPositionPrevValue) / dt;
@@ -88,8 +88,8 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.1, 1.0));
-      double dt = RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
+      alphaVariable.set(RandomNumbers.nextDouble(rand, 0.1, 1.0));
+      double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
       DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
@@ -100,8 +100,8 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 1000; i++)
       {
-         alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.1, 1.0));
-         rawPosition.set(RandomTools.generateRandomDouble(rand, -100.0, 100.0));
+         alphaVariable.set(RandomNumbers.nextDouble(rand, 0.1, 1.0));
+         rawPosition.set(RandomNumbers.nextDouble(rand, -100.0, 100.0));
          filtVelocity.update();
          filteredOnly.update(rawPosition.getDoubleValue());
 
@@ -117,8 +117,8 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.0, 1.0));
-      double dt = RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
+      alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
+      double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
       DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
@@ -130,8 +130,8 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 1000; i++)
       {
-         alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.1, 1.0));
-         rawPosition.set(RandomTools.generateRandomDouble(rand, -100.0, 100.0));
+         alphaVariable.set(RandomNumbers.nextDouble(rand, 0.1, 1.0));
+         rawPosition.set(RandomNumbers.nextDouble(rand, -100.0, 100.0));
          filtVelocity.update();
          filteredOnly.update();
 
@@ -147,8 +147,8 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.0, 1.0));
-      double dt = RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
+      alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
+      double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
       DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
@@ -160,9 +160,9 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 1000; i++)
       {
-         slopTime.set(RandomTools.generateRandomDouble(rand, 0.0, 100.0));
-         alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.1, 1.0));
-         rawPosition.add(RandomTools.generateRandomDouble(rand, 0.0, 101.0));
+         slopTime.set(RandomNumbers.nextDouble(rand, 0.0, 100.0));
+         alphaVariable.set(RandomNumbers.nextDouble(rand, 0.1, 1.0));
+         rawPosition.add(RandomNumbers.nextDouble(rand, 0.0, 101.0));
          filtVelocity.update();
          backlashAndFiltered.update();
 
@@ -178,8 +178,8 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       DoubleYoVariable alphaVariable = new DoubleYoVariable("alpha", registry);
-      alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.0, 1.0));
-      double dt = RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
+      alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
+      double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       DoubleYoVariable slopTime = new DoubleYoVariable("slop", registry);
       DoubleYoVariable rawPosition = new DoubleYoVariable("rawPosition", registry);
       FilteredVelocityYoVariable filtVelocity = new FilteredVelocityYoVariable("filtVelocity", "", alphaVariable, rawPosition, dt, registry);
@@ -191,9 +191,9 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 1000; i++)
       {
-         slopTime.set(RandomTools.generateRandomDouble(rand, 0.0, 100.0));
-         alphaVariable.set(RandomTools.generateRandomDouble(rand, 0.0, 1.0));
-         rawPosition.sub(RandomTools.generateRandomDouble(rand, 0.0, 101.0));
+         slopTime.set(RandomNumbers.nextDouble(rand, 0.0, 100.0));
+         alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
+         rawPosition.sub(RandomNumbers.nextDouble(rand, 0.0, 101.0));
          filtVelocity.update();
          backlashAndFiltered.update();
 
@@ -217,12 +217,12 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 100; i++)
       {
-         slopTime.set(RandomTools.generateRandomDouble(rand, 0.0, 0.9));
-         double crossZeroAtT = RandomTools.generateRandomDouble(rand, 3.0, 9.0);
-         double trajectoryTime = RandomTools.generateRandomDouble(rand, 2.0, 10.0);
+         slopTime.set(RandomNumbers.nextDouble(rand, 0.0, 0.9));
+         double crossZeroAtT = RandomNumbers.nextDouble(rand, 3.0, 9.0);
+         double trajectoryTime = RandomNumbers.nextDouble(rand, 2.0, 10.0);
          DoubleTrajectoryGenerator trajectory = createConstantAccelerationTrajectoryCrossingZeroAtCrossTime(rand, crossZeroAtT, trajectoryTime, true);
          trajectory.compute(0.0);
-         double initialPosition = RandomTools.generateRandomDouble(rand, -10000.0, 10000.0);
+         double initialPosition = RandomNumbers.nextDouble(rand, -10000.0, 10000.0);
          rawPosition.set(initialPosition);
          double rawPositionPrevValue = initialPosition;
          backlashOnly.set(0.0);
@@ -246,7 +246,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
                double timeInSlop = t - crossTime;
                double percent = timeInSlop / slopTime.getDoubleValue();
-               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               percent = MathTools.clamp(percent, 0.0, 1.0);
                if (Double.isNaN(percent))
                {
                   percent = 1.0;
@@ -282,12 +282,12 @@ public class BacklashCompensatingVelocityYoVariableTest
 
       for (int i = 0; i < 100; i++)
       {
-         slopTime.set(RandomTools.generateRandomDouble(rand, 0.0, 0.9));
-         double crossZeroAtT = RandomTools.generateRandomDouble(rand, 3.0, 9.0);
-         double trajectoryTime = RandomTools.generateRandomDouble(rand, 2.0, 10.0);
+         slopTime.set(RandomNumbers.nextDouble(rand, 0.0, 0.9));
+         double crossZeroAtT = RandomNumbers.nextDouble(rand, 3.0, 9.0);
+         double trajectoryTime = RandomNumbers.nextDouble(rand, 2.0, 10.0);
          DoubleTrajectoryGenerator trajectory = createConstantAccelerationTrajectoryCrossingZeroAtCrossTime(rand, crossZeroAtT, trajectoryTime, false);
          trajectory.compute(0.0);
-         double initialPosition = RandomTools.generateRandomDouble(rand, -10000.0, 10000.0);
+         double initialPosition = RandomNumbers.nextDouble(rand, -10000.0, 10000.0);
          rawPosition.set(initialPosition);
          double rawPositionPrevValue = initialPosition;
          backlashOnly.set(0.0);
@@ -311,7 +311,7 @@ public class BacklashCompensatingVelocityYoVariableTest
 
                double timeInSlop = t - crossTime;
                double percent = timeInSlop / slopTime.getDoubleValue();
-               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               percent = MathTools.clamp(percent, 0.0, 1.0);
                if (Double.isNaN(percent))
                {
                   percent = 1.0;
@@ -381,7 +381,7 @@ public class BacklashCompensatingVelocityYoVariableTest
          cleanVelocity.set(-2.0 * Math.PI * amplitude * frequency * Math.sin(2.0 * Math.PI * frequency * time));
          
          noisyPosition.set(cleanPosition.getDoubleValue());
-         noisyPosition.add(RandomTools.generateRandomDouble(random, noiseAmplitude));
+         noisyPosition.add(RandomNumbers.nextDouble(random, noiseAmplitude));
          
          backlashCompensatingVelocity.update();
          revisedBacklashCompensatingVelocity.update();
@@ -535,7 +535,7 @@ public class BacklashCompensatingVelocityYoVariableTest
          boolean positiveVelocity)
    {
       double initialPositionSign = positiveVelocity ? -1.0 : 1.0;
-      DoubleProvider initialPositionProvider = new ConstantDoubleProvider(initialPositionSign * RandomTools.generateRandomDouble(rand, 0.1, 1000.0));
+      DoubleProvider initialPositionProvider = new ConstantDoubleProvider(initialPositionSign * RandomNumbers.nextDouble(rand, 0.1, 1000.0));
       DoubleProvider velocityProvider = new ConstantDoubleProvider(-initialPositionProvider.getValue() / crossTime);
       DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
       YoVariableRegistry registry = new YoVariableRegistry("osenroi");

@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ReferenceCentroidalMomentumPivotLocationsCalculator;
@@ -7,9 +9,9 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -24,8 +26,6 @@ import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.ArrayList;
 
 public class ICPOptimizationInputHandler
 {
@@ -135,7 +135,7 @@ public class ICPOptimizationInputHandler
       referenceCMPsCalculator.update();
 
       initializeCornerPoints(useTwoCMPs, omega0);
-      computeFinalICP(numberOfFootstepsToConsider, useTwoCMPs, true);
+      computeFinalICP(numberOfFootstepsToConsider);
 
       stateMultiplierCalculator.initializeForDoubleSupport();
 
@@ -150,7 +150,7 @@ public class ICPOptimizationInputHandler
       referenceCMPsCalculator.update();
 
       initializeCornerPoints(useTwoCMPs, omega0);
-      computeFinalICP(numberOfFootstepsToConsider, useTwoCMPs, false);
+      computeFinalICP(numberOfFootstepsToConsider);
 
       stateMultiplierCalculator.initializeForSingleSupport();
 
@@ -205,12 +205,9 @@ public class ICPOptimizationInputHandler
       finalICPRecursionToPack.scale(stateMultiplierCalculator.getStateEndCurrentMultiplier());
    }
 
-   private void computeFinalICP(int numberOfFootstepsToConsider, boolean useTwoCMPs, boolean isInTransfer)
+   private void computeFinalICP(int numberOfFootstepsToConsider)
    {
-      if (!useTwoCMPs || isInTransfer)
-         finalICP.set(entryCornerPoints.get(numberOfFootstepsToConsider + 1));
-      else
-         finalICP.set(exitCornerPoints.get(numberOfFootstepsToConsider + 1));
+      finalICP.set(entryCornerPoints.get(numberOfFootstepsToConsider + 1));
    }
 
    private final FramePoint2d stanceCMPProjection = new FramePoint2d();

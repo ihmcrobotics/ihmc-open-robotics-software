@@ -9,13 +9,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -61,7 +60,7 @@ public class DataExporterGraphCreatorTest
     {
         Robot robot = new Robot("RandomRobot");
 
-        PinJoint pinJoint = new PinJoint("TestPinJoint", new Vector3d(), robot, new Vector3d(0, 0, 1));
+        PinJoint pinJoint = new PinJoint("TestPinJoint", new Vector3D(), robot, new Vector3D(0, 0, 1));
         robot.addRootJoint(pinJoint);
 
         return robot;

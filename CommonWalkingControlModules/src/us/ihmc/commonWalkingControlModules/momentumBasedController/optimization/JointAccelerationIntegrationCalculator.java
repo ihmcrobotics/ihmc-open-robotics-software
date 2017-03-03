@@ -106,12 +106,12 @@ public class JointAccelerationIntegrationCalculator
 
          desiredVelocity *= alphaVelocity;
          desiredVelocity += desiredAcceleration * controlDT;
-         desiredVelocity = MathTools.clipToMinMax(desiredVelocity, maxVelocity);
+         desiredVelocity = MathTools.clamp(desiredVelocity, maxVelocity);
          desiredPosition += desiredVelocity * controlDT;
 
-         double errorPosition = MathTools.clipToMinMax(desiredPosition - joint.getQ(), maxPositionError);
+         double errorPosition = MathTools.clamp(desiredPosition - joint.getQ(), maxPositionError);
          desiredPosition = joint.getQ() + errorPosition;
-         desiredPosition = MathTools.clipToMinMax(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
          desiredPosition = alphaPosition * desiredPosition + (1.0 - alphaPosition) * joint.getQ();
          desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 

@@ -1,11 +1,11 @@
 package us.ihmc.communication.net.local;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
-import us.ihmc.tools.thread.ThreadTools;
-
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import gnu.trove.map.hash.TIntObjectHashMap;
+import us.ihmc.tools.thread.ThreadTools;
 
 /* package-private */class IntraprocessCommunicationNetwork
 {

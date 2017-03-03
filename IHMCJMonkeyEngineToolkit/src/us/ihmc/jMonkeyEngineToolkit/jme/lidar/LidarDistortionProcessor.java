@@ -5,10 +5,6 @@ import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
 
-import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.post.SceneProcessor;
@@ -22,6 +18,10 @@ import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.Image.Format;
 import com.jme3.ui.Picture;
 import com.jme3.util.BufferUtils;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
 
 public class LidarDistortionProcessor implements SceneProcessor
 {

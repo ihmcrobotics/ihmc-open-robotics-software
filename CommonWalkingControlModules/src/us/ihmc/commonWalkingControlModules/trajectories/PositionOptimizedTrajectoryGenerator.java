@@ -317,7 +317,7 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
          return;
       }
 
-      time = MathTools.clipToMinMax(time, 0.0, 1.0);
+      time = MathTools.clamp(time, 0.0, 1.0);
 
       int activeSegment = 0;
       for (int i = 0; i < segments.getIntegerValue()-1; i++)

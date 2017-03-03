@@ -3,9 +3,9 @@ package us.ihmc.robotics.geometry.transformables;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
 import us.ihmc.robotics.geometry.interfaces.OneDoFWaypointInterface;
 
 public class OneDoFWaypoint implements GeometryObject<OneDoFWaypoint>, OneDoFWaypointInterface<OneDoFWaypoint>
@@ -94,7 +94,7 @@ public class OneDoFWaypoint implements GeometryObject<OneDoFWaypoint>, OneDoFWay
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       // Do nothing since they are just numbers here.
    }

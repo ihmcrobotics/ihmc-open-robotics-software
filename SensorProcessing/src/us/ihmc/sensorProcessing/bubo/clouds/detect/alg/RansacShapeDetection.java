@@ -18,11 +18,11 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
+import java.util.List;
+
 import org.ddogleg.fitting.modelset.DistanceFromModel;
 import org.ddogleg.fitting.modelset.ransac.RansacMulti;
 import org.ddogleg.struct.FastQueue;
-
-import java.util.List;
 
 /**
  * Customized version of {@link RansacMulti}.  Instead of finding the inlier set using the sampling set it uses the

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.kinematics;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class TimeStampedTransform3D
 {

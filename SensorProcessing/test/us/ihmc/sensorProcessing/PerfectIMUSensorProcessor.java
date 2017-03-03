@@ -1,8 +1,7 @@
 package us.ihmc.sensorProcessing;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -19,9 +18,9 @@ public class PerfectIMUSensorProcessor implements SensorProcessor
    private final ProcessedIMUSensorsWriteOnlyInterface processedIMUSensors;
    private final int imuIndex = 0;
 
-   private final Matrix3d rotationMatrix = new Matrix3d();
-   private final Vector3d angRate = new Vector3d();
-   private final Vector3d acceleration = new Vector3d();
+   private final RotationMatrix rotationMatrix = new RotationMatrix();
+   private final Vector3D angRate = new Vector3D();
+   private final Vector3D acceleration = new Vector3D();
    private final FrameVector accelerationInWorld = new FrameVector(ReferenceFrame.getWorldFrame());
 
    public PerfectIMUSensorProcessor(RawIMUSensorsInterface rawIMUSensors, ProcessedIMUSensorsWriteOnlyInterface processedIMUSensors)

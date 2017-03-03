@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 import com.esotericsoftware.kryo.Kryo;
+
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.NetStateListener;
