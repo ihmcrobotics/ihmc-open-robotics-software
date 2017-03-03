@@ -9,16 +9,13 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -604,142 +601,15 @@ public class GeometryTools
 
       if (orthogonalProjectionToPack == null)
       {
-         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), null,
+         return EuclidGeometryTools.perpendicularVector3DFromLine3DToPoint3D(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(), null,
                                                       perpendicularVectorToPack.getVector());
       }
       else
       {
          orthogonalProjectionToPack.setToZero(point.getReferenceFrame());
-         return getPerpendicularVectorFromLineToPoint(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(),
+         return EuclidGeometryTools.perpendicularVector3DFromLine3DToPoint3D(point.getPoint(), firstPointOnLine.getPoint(), secondPointOnLine.getPoint(),
                                                       orthogonalProjectionToPack.getPoint(), perpendicularVectorToPack.getVector());
       }
-   }
-
-   /**
-    * Computes the perpendicular defined by an infinitely long 3D line (defined by two 3D points) and a 3D point.
-    * To do so, the orthogonal projection of the {@code point} on line is first computed.
-    * The perpendicular vector is computed as follows: {@code perpendicularVector = point - orthogonalProjection},
-    * resulting in a vector going from the computed projection to the given {@code point}
-    * with a length equal to the distance between the point and the line.
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> when the distance between the two points defining the line is below {@value Epsilons#ONE_TRILLIONTH}, the method fails and returns {@code null}.
-    * </ul>
-    * </p>
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    * 
-    * @param point the 3D point towards which the perpendicular vector should be pointing at. Not modified.
-    * @param firstPointOnLine a first point on the line. Not modified.
-    * @param secondPointOnLine a second point on the line. Not modified.
-    * @param orthogonalProjectionToPack a 3D point in which the projection of {@code point} onto the line is stored. Modified. Can be {@code null}.
-    * @return the vector perpendicular to the line and pointing to the {@code point}, or {@code null} when the method fails.
-    */
-   public static Vector3D getPerpendicularVectorFromLineToPoint(Point3DReadOnly point, Point3DReadOnly firstPointOnLine, Point3DReadOnly secondPointOnLine,
-                                                                Point3DBasics orthogonalProjectionToPack)
-   {
-      Vector3D perpendicularVector = new Vector3D();
-      boolean success = getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, orthogonalProjectionToPack, perpendicularVector);
-      if (!success)
-         return null;
-      else
-         return perpendicularVector;
-   }
-
-   /**
-    * Computes the perpendicular defined by an infinitely long 3D line (defined by two 3D points) and a 3D point.
-    * To do so, the orthogonal projection of the {@code point} on line is first computed.
-    * The perpendicular vector is computed as follows: {@code perpendicularVector = point - orthogonalProjection},
-    * resulting in a vector going from the computed projection to the given {@code point}
-    * with a length equal to the distance between the point and the line.
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> when the distance between the two points defining the line is below {@value Epsilons#ONE_TRILLIONTH}, the method fails and returns {@code false}.
-    * </ul>
-    * </p>
-    * 
-    * @param point the 3D point towards which the perpendicular vector should be pointing at. Not modified.
-    * @param firstPointOnLine a first point on the line. Not modified.
-    * @param secondPointOnLine a second point on the line. Not modified.
-    * @param orthogonalProjectionToPack a 3D point in which the projection of {@code point} onto the line is stored. Modified. Can be {@code null}.
-    * @param perpendicularVectorToPack a 3D vector in which the vector perpendicular to the line and pointing to the {@code point} is stored. Modified. Can NOT be {@code null}.
-    * @return {@code true} if the method succeeded, {@code false} otherwise.
-    */
-   public static boolean getPerpendicularVectorFromLineToPoint(Point3DReadOnly point, Point3DReadOnly firstPointOnLine, Point3DReadOnly secondPointOnLine,
-                                                               Point3DBasics orthogonalProjectionToPack, Vector3DBasics perpendicularVectorToPack)
-   {
-      double lineDirectionX = secondPointOnLine.getX() - firstPointOnLine.getX();
-      double lineDirectionY = secondPointOnLine.getY() - firstPointOnLine.getY();
-      double lineDirectionZ = secondPointOnLine.getZ() - firstPointOnLine.getZ();
-      double lineLength = 1.0 / Math.sqrt(lineDirectionX * lineDirectionX + lineDirectionY * lineDirectionY + lineDirectionZ * lineDirectionZ);
-
-      if (lineLength < Epsilons.ONE_TRILLIONTH)
-         return false;
-
-      lineDirectionX *= lineLength;
-      lineDirectionY *= lineLength;
-      lineDirectionZ *= lineLength;
-
-      double dx = point.getX() - firstPointOnLine.getX();
-      double dy = point.getY() - firstPointOnLine.getY();
-      double dz = point.getZ() - firstPointOnLine.getZ();
-
-      double distanceFromFirstPointOnLine = lineDirectionX * dx + lineDirectionY * dy + lineDirectionZ * dz;
-
-      if (orthogonalProjectionToPack != null)
-      {
-         orthogonalProjectionToPack.set(lineDirectionX, lineDirectionY, lineDirectionZ);
-         orthogonalProjectionToPack.scaleAdd(distanceFromFirstPointOnLine, orthogonalProjectionToPack, firstPointOnLine);
-         perpendicularVectorToPack.sub(point, orthogonalProjectionToPack);
-      }
-      else
-      {
-         perpendicularVectorToPack.set(lineDirectionX, lineDirectionY, lineDirectionZ);
-         perpendicularVectorToPack.scale(distanceFromFirstPointOnLine);
-         perpendicularVectorToPack.add(firstPointOnLine);
-         perpendicularVectorToPack.negate();
-         perpendicularVectorToPack.add(point);
-      }
-      return true;
-   }
-
-   /**
-    * Computes the vector perpendicular to the given {@code vector} such that:
-    * <ul>
-    *    <li> {@code vector.dot(perpendicularVector) == 0.0}.
-    *    <li> {@code vector.angle(perpendicularVector) == Math.PI / 2.0}.
-    * </ul>
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    * 
-    * @param vector the vector to compute the perpendicular of. Not modified.
-    * @return the perpendicular vector.
-    */
-   public static Vector2D getPerpendicularVector(Vector2DReadOnly vector)
-   {
-      Vector2D perpendicularVector = new Vector2D();
-      getPerpendicularVector(vector, perpendicularVector);
-
-      return new Vector2D(-vector.getY(), vector.getX());
-   }
-
-   /**
-    * Computes the vector perpendicular to the given {@code vector} such that:
-    * <ul>
-    *    <li> {@code vector.dot(perpendicularVector) == 0.0}.
-    *    <li> {@code vector.angle(perpendicularVector) == Math.PI / 2.0}.
-    * </ul>
-    * 
-    * @param vector the vector to compute the perpendicular of. Not modified.
-    * @param perpendicularVectorToPack a 2D vector in which the perpendicular vector is stored. Modified.
-    */
-   public static void getPerpendicularVector(Vector2DReadOnly vector, Vector2DBasics perpendicularVectorToPack)
-   {
-      perpendicularVectorToPack.set(-vector.getY(), vector.getX());
    }
 
    /**
@@ -784,62 +654,8 @@ public class GeometryTools
       trianglePlaneNormal.checkReferenceFrameMatch(commonFrame);
       topVertexBToPack.setToZero(commonFrame);
 
-      getTopVertexOfIsoscelesTriangle(baseVertexA.getPoint(), baseVertexC.getPoint(), trianglePlaneNormal.getVector(), ccwAngleAboutNormalAtTopVertex,
+      EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(baseVertexA.getPoint(), baseVertexC.getPoint(), trianglePlaneNormal.getVector(), ccwAngleAboutNormalAtTopVertex,
                                       topVertexBToPack.getPoint());
-   }
-
-   /**
-    * Assuming an isosceles triangle defined by three vertices A, B, and C, with |AB| == |BC|, this methods computes the missing vertex B
-    * given the vertices A and C, the normal of the triangle, the angle ABC that is equal to the angle at B from the the leg BA to the leg BC.
-    * <a href="https://en.wikipedia.org/wiki/Isosceles_triangle"> Useful link</a>.
-    * 
-    * @param baseVertexA the first base vertex of the isosceles triangle ABC. Not modified.
-    * @param baseVertexC the second base vertex of the isosceles triangle ABC. Not modified.
-    * @param trianglePlaneNormal  the normal of the plane on which is lying. Not modified.
-    * @param ccwAngleAboutNormalAtTopVertex the angle at B from the the leg BA to the leg BC.
-    * @param topVertexBToPack the missing vertex B. Modified.
-    */
-   public static void getTopVertexOfIsoscelesTriangle(Point3DReadOnly baseVertexA, Point3DReadOnly baseVertexC, Vector3DReadOnly trianglePlaneNormal,
-                                                      double ccwAngleAboutNormalAtTopVertex, Point3DBasics topVertexBToPack)
-   {
-      double baseEdgeACx = baseVertexC.getX() - baseVertexA.getX();
-      double baseEdgeACy = baseVertexC.getY() - baseVertexA.getY();
-      double baseEdgeACz = baseVertexC.getZ() - baseVertexA.getZ();
-      double baseEdgeACLength = Math.sqrt(baseEdgeACx * baseEdgeACx + baseEdgeACy * baseEdgeACy + baseEdgeACz * baseEdgeACz);
-
-      double legLengthABorCB = getRadiusOfArc(baseEdgeACLength, ccwAngleAboutNormalAtTopVertex);
-      double lengthOfBisectorOfBase = pythagorasGetCathetus(legLengthABorCB, 0.5 * baseEdgeACLength);
-
-      double perpendicularBisectorX = trianglePlaneNormal.getY() * baseEdgeACz - trianglePlaneNormal.getZ() * baseEdgeACy;
-      double perpendicularBisectorY = trianglePlaneNormal.getZ() * baseEdgeACx - trianglePlaneNormal.getX() * baseEdgeACz;
-      double perpendicularBisectorZ = trianglePlaneNormal.getX() * baseEdgeACy - trianglePlaneNormal.getY() * baseEdgeACx;
-      double scale = lengthOfBisectorOfBase;
-      scale /= Math.sqrt(perpendicularBisectorX * perpendicularBisectorX + perpendicularBisectorY * perpendicularBisectorY
-            + perpendicularBisectorZ * perpendicularBisectorZ);
-      perpendicularBisectorX *= scale;
-      perpendicularBisectorY *= scale;
-      perpendicularBisectorZ *= scale;
-
-      topVertexBToPack.interpolate(baseVertexA, baseVertexC, 0.5);
-      topVertexBToPack.setX(topVertexBToPack.getX() + perpendicularBisectorX);
-      topVertexBToPack.setY(topVertexBToPack.getY() + perpendicularBisectorY);
-      topVertexBToPack.setZ(topVertexBToPack.getZ() + perpendicularBisectorZ);
-   }
-
-   /**
-    * Returns the radius of an arc with the specified chord length and angle.
-    * <a href="http://planetcalc.com/1421/"> Useful link</a>.
-    *
-    * @param chordLength the length of the chord.
-    * @param chordAngle angle covered by the chord.
-    * @return the radius of the arc, or {@code Double.NaN} if {@code chordAngle % Math.PI == 0.0}.
-    */
-   public static double getRadiusOfArc(double chordLength, double chordAngle)
-   {
-      if (chordAngle % Math.PI == 0.0)
-         return Double.NaN;
-      else
-         return chordLength / (2.0 * Math.sin(0.5 * chordAngle));
    }
 
    /**
@@ -861,126 +677,6 @@ public class GeometryTools
       tupleToClip.setX(x1 < x2 ? MathTools.clamp(tupleToClip.getX(), x1, x2) : MathTools.clamp(tupleToClip.getX(), x2, x1));
       tupleToClip.setY(y1 < y2 ? MathTools.clamp(tupleToClip.getY(), y1, y2) : MathTools.clamp(tupleToClip.getY(), y2, y1));
       tupleToClip.setZ(z1 < z2 ? MathTools.clamp(tupleToClip.getZ(), z1, z2) : MathTools.clamp(tupleToClip.getZ(), z2, z1));
-   }
-
-   /**
-    * Computes the perpendicular bisector of line segment defined by its two endpoints.
-    * The bisector starts off the the middle of the line segment and points toward the left side of the line segment.
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> when the line segment endpoints are equal,
-    *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *     the method fails and returns {@code false}.
-    * </ul>
-    * </p>
-    * 
-    * @param lineSegmentStart the first endpoint of the line segment. Not modified.
-    * @param lineSegmentEnd the second endpoint of the line segment. Not modified.
-    * @param bisectorStartToPack a 2D point in which the origin of the bisector is stored. Modified.
-    * @param bisectorDirectionToPack a 2D vector in which the direction of the bisector is stored. Modified.
-    * @return whether the perpendicular bisector could be determined or not.
-    */
-   public static boolean getPerpendicularBisector(Point2DReadOnly lineSegmentStart, Point2DReadOnly lineSegmentEnd, Point2DBasics bisectorStartToPack,
-                                                  Vector2DBasics bisectorDirectionToPack)
-   {
-      if (lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH)
-         return false;
-
-      // direction will be on left side of line
-      bisectorStartToPack.interpolate(lineSegmentStart, lineSegmentEnd, 0.5);
-      bisectorDirectionToPack.sub(lineSegmentEnd, lineSegmentStart);
-      getPerpendicularVector(bisectorDirectionToPack, bisectorDirectionToPack);
-      bisectorDirectionToPack.normalize();
-      return true;
-   }
-
-   /**
-    * Computes the endpoints of the perpendicular bisector segment to a line segment defined by its endpoints, such that:
-    * <ul>
-    *    <li> each endpoint of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
-    *    <li> the first perpendicular bisector endpoint is located on the left side on the line segment.
-    *    <li> the second perpendicular bisector endpoint is located on the right side on the line segment.
-    * </ul>
-    * <p>
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> when the line segment endpoints are equal,
-    *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *     the method fails and returns {@code null}.
-    * </ul>
-    * </p>
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    * 
-    * @param lineSegmentStart the first endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param lineSegmentEnd the second endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param bisectorSegmentHalfLength distance from the line segment each endpoint of the perpendicular bisector segment will be positioned.
-    * @return a list containing the two endpoints of the perpendicular bisector segment.
-    */
-   public static List<Point2D> getPerpendicularBisectorSegment(Point2DReadOnly lineSegmentStart, Point2DReadOnly lineSegmentEnd, double bisectorSegmentHalfLength)
-   {
-      Point2D bisectorSegmentStart = new Point2D();
-      Point2D bisectorSegmentEnd = new Point2D();
-
-      boolean success = getPerpendicularBisectorSegment(lineSegmentStart, lineSegmentEnd, bisectorSegmentHalfLength, bisectorSegmentStart, bisectorSegmentEnd);
-      if (!success)
-         return null;
-
-      List<Point2D> bisectorEndpoints = new ArrayList<>();
-      bisectorEndpoints.add(bisectorSegmentStart);
-      bisectorEndpoints.add(bisectorSegmentEnd);
-      return bisectorEndpoints;
-   }
-
-   /**
-    * Computes the endpoints of the perpendicular bisector segment to a line segment defined by its endpoints, such that:
-    * <ul>
-    *    <li> each endpoint of the perpendicular bisector is at a distance of {@code bisectorSegmentHalfLength} from the line segment.
-    *    <li> the first perpendicular bisector endpoint is located on the left side on the line segment.
-    *    <li> the second perpendicular bisector endpoint is located on the right side on the line segment.
-    * </ul>
-    * <p>
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> when the line segment endpoints are equal,
-    *     more precisely when {@code lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH},
-    *     the method fails and returns false.
-    * </ul>
-    * </p>
-    * 
-    * @param lineSegmentStart the first endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param lineSegmentEnd the second endpoint of the line segment from which the perpendicular bisector is to be computed. Not modified.
-    * @param bisectorSegmentHalfLength distance from the line segment each endpoint of the perpendicular bisector segment will be positioned.
-    * @param bisectorSegmentStartToPack the first endpoint of the perpendicular bisector segment to be computed. Modified.
-    * @param bisectorSegmentEndToPack the second endpoint of the perpendicular bisector segment to be computed. Modified.
-    * @return whether the perpendicular bisector could be determined or not.
-    */
-   public static boolean getPerpendicularBisectorSegment(Point2DReadOnly lineSegmentStart, Point2DReadOnly lineSegmentEnd, double bisectorSegmentHalfLength,
-                                                         Point2DBasics bisectorSegmentStartToPack, Point2DBasics bisectorSegmentEndToPack)
-   {
-      if (lineSegmentStart.distance(lineSegmentEnd) < Epsilons.ONE_TRILLIONTH)
-         return false;
-
-      // direction will be on left side of line
-      double bisectorDirectionX = -(lineSegmentEnd.getY() - lineSegmentStart.getY());
-      double bisectorDirectionY = lineSegmentEnd.getX() - lineSegmentStart.getX();
-      double directionInverseMagnitude = 1.0 / Math.sqrt(bisectorDirectionX * bisectorDirectionX + bisectorDirectionY * bisectorDirectionY);
-      bisectorDirectionX *= directionInverseMagnitude;
-      bisectorDirectionY *= directionInverseMagnitude;
-
-      double midPointX = 0.5 * (lineSegmentStart.getX() + lineSegmentEnd.getX());
-      double midPointY = 0.5 * (lineSegmentStart.getY() + lineSegmentEnd.getY());
-
-      bisectorSegmentStartToPack.setX(midPointX + bisectorDirectionX * bisectorSegmentHalfLength);
-      bisectorSegmentStartToPack.setY(midPointY + bisectorDirectionY * bisectorSegmentHalfLength);
-      bisectorSegmentEndToPack.setX(midPointX - bisectorDirectionX * bisectorSegmentHalfLength);
-      bisectorSegmentEndToPack.setY(midPointY - bisectorDirectionY * bisectorSegmentHalfLength);
-
-      return true;
    }
 
    /**
