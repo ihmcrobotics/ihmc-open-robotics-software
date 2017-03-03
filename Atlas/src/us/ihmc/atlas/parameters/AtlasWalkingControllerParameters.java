@@ -1,7 +1,9 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -66,6 +68,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   private ArrayList<String> positionControlledJoints = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
@@ -708,6 +711,30 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       }
 
       return jointHomeConfiguration;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      if (positionControlledJoints != null)
+         return positionControlledJoints;
+
+      positionControlledJoints = new ArrayList<String>();
+
+      if (runningOnRealRobot)
+      {
+         for (NeckJointName name : jointMap.getNeckJointNames())
+            positionControlledJoints.add(jointMap.getNeckJointName(name));
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (ArmJointName name : jointMap.getArmJointNames())
+               positionControlledJoints.add(jointMap.getArmJointName(robotSide, name));
+         }
+      }
+
+      return positionControlledJoints;
    }
 
    @Override

@@ -52,6 +52,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   private ArrayList<String> positionControlledJoints = null;
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
@@ -722,6 +723,31 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       return jointHomeConfiguration;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      if (positionControlledJoints != null)
+         return positionControlledJoints;
+
+      positionControlledJoints = new ArrayList<String>();
+
+      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT || target == DRCRobotModel.RobotTarget.GAZEBO)
+      {
+         for (NeckJointName name : jointMap.getNeckJointNames())
+            positionControlledJoints.add(jointMap.getNeckJointName(name));
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL));
+            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH));
+            positionControlledJoints.add(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL));
+         }
+      }
+
+      return positionControlledJoints;
    }
 
    @Override

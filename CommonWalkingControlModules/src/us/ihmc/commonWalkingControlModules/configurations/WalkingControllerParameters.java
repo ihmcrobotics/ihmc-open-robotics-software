@@ -1,7 +1,9 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -189,6 +191,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
    {
       return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * The list of strings returned contains all joint names that are position controlled. The names
+    * of the joints are defined in the robots joint map.
+    *
+    * @return list of position controlled joint names
+    */
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      return new ArrayList<String>();
    }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);

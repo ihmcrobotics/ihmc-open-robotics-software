@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
@@ -28,6 +29,7 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -159,7 +161,12 @@ public class HighLevelControlManagerFactory
       Vector3D taskspaceLinearWeight = momentumOptimizationSettings.getTaskspaceLinearWeights().get(bodyName);
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, homeConfiguration, momentumBasedController, controlFrameMap, rootFrame, registry);
+      List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
+      RigidBody elevator = momentumBasedController.getFullRobotModel().getElevator();
+      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
+
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, elevator, homeConfiguration, positionControlledJoints,
+            controlFrameMap, rootFrame, yoTime, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 
