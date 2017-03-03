@@ -2,8 +2,7 @@ package us.ihmc.footstepPlanning.aStar.implementations;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.footstepPlanning.aStar.FootstepNodeChecker;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -19,7 +18,7 @@ public class SimpleNodeChecker implements FootstepNodeChecker
       if (planarRegions == null)
          return true;
 
-      Point2d nodePosition = new Point2d(node.getX(), node.getY());
+      Point2D nodePosition = new Point2D(node.getX(), node.getY());
       List<PlanarRegion> intersection = planarRegions.findPlanarRegionsContainingPointByProjectionOntoXYPlane(nodePosition);
       return intersection != null;
    }

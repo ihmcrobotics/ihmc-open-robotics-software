@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.TimeTools;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
@@ -186,7 +186,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          }
 
          long timeInNano = System.nanoTime();
-         if (TimeTools.nanoSecondstoSeconds(timeInNano - planningStartTime) > timeout)
+         if (Conversions.nanoSecondstoSeconds(timeInNano - planningStartTime) > timeout)
             break;
       }
    }

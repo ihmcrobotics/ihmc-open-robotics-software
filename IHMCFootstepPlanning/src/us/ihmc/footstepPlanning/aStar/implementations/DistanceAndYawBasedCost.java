@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.aStar.implementations;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.aStar.FootstepCost;
 import us.ihmc.footstepPlanning.aStar.FootstepNode;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -26,14 +25,14 @@ public class DistanceAndYawBasedCost implements FootstepCost
    @Override
    public double compute(FootstepNode startNode, FootstepNode endNode)
    {
-      Point2d startPoint = computeMidFootPoint(startNode);
-      Point2d endPoint = computeMidFootPoint(endNode);
+      Point2D startPoint = computeMidFootPoint(startNode);
+      Point2D endPoint = computeMidFootPoint(endNode);
       double euclideanDistance = startPoint.distance(endPoint);
       double yaw = AngleTools.computeAngleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw());
       return euclideanDistance + yawWeight * Math.abs(yaw) + costPerStep;
    }
 
-   public static Point2d computeMidFootPoint(FootstepNode node)
+   public static Point2D computeMidFootPoint(FootstepNode node)
    {
       FramePose stanceFootPose = new FramePose(ReferenceFrame.getWorldFrame());
       stanceFootPose.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
