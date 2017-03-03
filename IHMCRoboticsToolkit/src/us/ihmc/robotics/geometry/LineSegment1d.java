@@ -69,12 +69,12 @@ public class LineSegment1d
 
    public boolean isBetweenEndpointsInclusive(double point)
    {
-      return MathTools.isInsideBoundsInclusive(point, getMinPoint(), getMaxPoint());
+      return MathTools.intervalContains(point, getMinPoint(), getMaxPoint());
    }
 
    public boolean isBetweenEndpointsExclusive(double point)
    {
-      return MathTools.isInsideBoundsExclusive(point, getMinPoint(), getMaxPoint());
+      return MathTools.intervalContains(point, getMinPoint(), getMaxPoint(), false, false);
    }
 
    public boolean isBetweenEndpoints(double point, double epsilon)

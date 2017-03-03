@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
@@ -62,12 +63,14 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint2d exitCMP2d = new FramePoint2d();
    private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
    private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
-   private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithRayIntersector2d;
 
    private final TwistCalculator twistCalculator;
 
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
+
+   private final DoubleYoVariable toeOffContactInterpolation;
+   private final BooleanYoVariable hasComputedToeOffContactPoint;
 
    public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -118,7 +121,11 @@ public class OnToesState extends AbstractFootControlState
       exitCMP2d.setToNaN(soleFrame);
       exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
       rayThroughExitCMP.setToNaN(soleFrame);
-      frameConvexPolygonWithRayIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
+
+      toeOffContactInterpolation = new DoubleYoVariable(namePrefix + "ToeOffContactInterpolation", registry);
+      toeOffContactInterpolation.set(footControlHelper.getWalkingControllerParameters().getToeOffContactInterpolation());
+
+      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
    }
 
    public void setWeight(double weight)
@@ -209,26 +216,8 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      footPolygon.clear(soleFrame);
-
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         contactPoints.get(i).getPosition2d(toeOffContactPoint2d);
-         footPolygon.addVertex(toeOffContactPoint2d);
-      }
-
-      footPolygon.update();
-
-      FramePoint2d rayOrigin;
-
-      if (!exitCMP2d.containsNaN() && footPolygon.isPointInside(exitCMP2d))
-         rayOrigin = exitCMP2d;
-      else
-         rayOrigin = footPolygon.getCentroid();
-
-      rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
-      frameConvexPolygonWithRayIntersector2d.intersectWithRay(footPolygon, rayThroughExitCMP);
-      toeOffContactPoint2d.set(frameConvexPolygonWithRayIntersector2d.getIntersectionPointOne());
+      if (!hasComputedToeOffContactPoint.getBooleanValue())
+         computeToeOffContactPoint(null);
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -256,6 +245,8 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
       exitCMP2d.setToNaN();
+
+      hasComputedToeOffContactPoint.set(false);
    }
 
    public void setExitCMP(FramePoint exitCMP)
@@ -263,6 +254,47 @@ public class OnToesState extends AbstractFootControlState
       this.exitCMP.setIncludingFrame(exitCMP);
       this.exitCMP.changeFrame(soleFrame);
       exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
+   }
+
+   private final FramePoint2d interpolatedRayOrigin = new FramePoint2d();
+   public void computeToeOffContactPoint(FramePoint2d desiredCMP)
+   {
+      footPolygon.clear(soleFrame);
+
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         contactPoints.get(i).getPosition2d(toeOffContactPoint2d);
+         footPolygon.addVertex(toeOffContactPoint2d);
+      }
+
+      footPolygon.update();
+
+      FramePoint2d rayOrigin;
+      if (!exitCMP2d.containsNaN() && footPolygon.isPointInside(exitCMP2d))
+         rayOrigin = exitCMP2d;
+      else
+         rayOrigin = footPolygon.getCentroid();
+
+      if (desiredCMP != null && !desiredCMP.containsNaN())
+      {
+         interpolatedRayOrigin.setToZero(soleFrame);
+         desiredCMP.changeFrameAndProjectToXYPlane(soleFrame);
+         interpolatedRayOrigin.interpolate(rayOrigin, desiredCMP, toeOffContactInterpolation.getDoubleValue());
+
+         if (footPolygon.isPointInside(interpolatedRayOrigin))
+            rayThroughExitCMP.set(interpolatedRayOrigin, exitCMPRayDirection2d);
+         else
+            rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
+      }
+      else
+      {
+         rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
+      }
+
+      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRayCopy(rayThroughExitCMP);
+      toeOffContactPoint2d.set(intersectionWithRay[0]);
+
+      hasComputedToeOffContactPoint.set(true);
    }
 
    @Override

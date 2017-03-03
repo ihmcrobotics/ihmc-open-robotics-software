@@ -328,9 +328,9 @@ public class FeetManager
       setOnToesContactState(trailingLeg);
    }
 
-   public void setExitCMPForToeOff(RobotSide robotSide, FramePoint exitCMP)
+   public void computeToeOffContactPoint(RobotSide robotSide, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
-      footControlModules.get(robotSide).setExitCMPForToeOff(exitCMP);
+      footControlModules.get(robotSide).computeToeOffContactPoint(exitCMP, desiredCMP);
    }
 
    public void reset()

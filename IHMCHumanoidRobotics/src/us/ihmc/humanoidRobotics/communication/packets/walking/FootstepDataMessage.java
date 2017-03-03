@@ -13,7 +13,9 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -97,7 +99,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
-
+   
+   public FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
+   {
+      this(robotSide, new Point3D(location), new Quaternion(orientation), null);
+   }
+   
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
    {
       this(robotSide, location, orientation, null);
@@ -164,6 +171,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.swingStartTime = footstepData.swingStartTime;
    }
 
+   @Override
    public FootstepDataMessage clone()
    {
       return new FootstepDataMessage(this);
@@ -357,6 +365,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return swingStartTime;
    }
 
+   @Override
    public String toString()
    {
       String ret = "";
@@ -389,6 +398,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return ret;
    }
 
+   @Override
    public boolean epsilonEquals(FootstepDataMessage footstepData, double epsilon)
    {
       boolean robotSideEquals = robotSide == footstepData.robotSide;
@@ -464,6 +474,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings && sameAbsoluteTime;
    }
 
+   @Override
    public FootstepDataMessage transform(RigidBodyTransform transform)
    {
       FootstepDataMessage ret = this.clone();
