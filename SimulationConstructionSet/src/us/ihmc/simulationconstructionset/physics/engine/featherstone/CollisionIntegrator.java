@@ -1,9 +1,10 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationconstructionset.physics.engine.featherstone;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.numericalMethods.QuarticRootFinder;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.CollisionRungeKutta.ODEException;
 
 
 public class CollisionIntegrator implements java.io.Serializable
