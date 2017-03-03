@@ -1,17 +1,13 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
-import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_LEFT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_RIGHT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_LEFT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_RIGHT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrant;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 
 import java.io.Serializable;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -846,7 +842,7 @@ public class QuadrupedSupportPolygon implements Serializable
       {
          FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
          FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
-         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX() - pointOne.getX(), pointTwo.getY() - pointOne.getY()));
+         return -Math.abs(EuclidGeometryTools.distanceFromPoint2DToLine2D(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX() - pointOne.getX(), pointTwo.getY() - pointOne.getY()));
       }
       else
       {

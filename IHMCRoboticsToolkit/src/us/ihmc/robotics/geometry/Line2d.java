@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -379,7 +380,7 @@ public class Line2d implements GeometryObject<Line2d>
       tempPoint2d.set(this.point);
       tempPoint2d.add(normalizedVector);
 
-      return GeometryTools.distanceFromPointToLine(point, this.point, tempPoint2d);
+      return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, tempPoint2d);
    }
 
    public double distanceSquared(Point2DReadOnly point)

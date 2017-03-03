@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -479,7 +480,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
       {
          // Here we know the projection of the point belongs to the line segment.
          // In this case computing the distance from the point to the line segment is the same as computing the distance from the point the equivalent line.
-         return GeometryTools.distanceFromPointToLine(point, endpoints[0], endpoints[1]);
+         return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, endpoints[0], endpoints[1]);
       }
    }
 
