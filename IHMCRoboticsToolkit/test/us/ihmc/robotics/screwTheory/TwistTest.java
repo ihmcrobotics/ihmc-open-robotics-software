@@ -8,24 +8,26 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.RandomMatrices;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class TwistTest extends SpatialMotionVectorTest
 {
@@ -43,32 +45,32 @@ public class TwistTest extends SpatialMotionVectorTest
    public void testConstructionAndGettersAndSetters()
    {
       // construct a random twist that expresses the motion of frame A with respect to B, expressed in frame C
-      Vector3d angularVelocity = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist = new Twist(frameB, frameA, frameC, linearVelocity, angularVelocity);
 
       // test getters
       double epsilon = 1e-14;
-      Vector3d angularVelocity2 = twist.getAngularPartCopy();
-      JUnitTools.assertTuple3dEquals(angularVelocity, angularVelocity2, epsilon);
+      Vector3D angularVelocity2 = twist.getAngularPartCopy();
+      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, angularVelocity2, epsilon);
 
-      Vector3d linearVelocity2 = twist.getLinearPartCopy();
-      JUnitTools.assertTuple3dEquals(linearVelocity, linearVelocity2, epsilon);
+      Vector3D linearVelocity2 = twist.getLinearPartCopy();
+      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, linearVelocity2, epsilon);
 
-      JUnitTools.assertTuple3dEquals(angularVelocity, angularVelocity2, epsilon);    // make sure the linear velocity setter didn't change the angular velocity
+      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, angularVelocity2, epsilon);    // make sure the linear velocity setter didn't change the angular velocity
 
       // test setters
-      Vector3d angularVelocity3 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity3 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       twist.setAngularPart(angularVelocity3);
 
-      Vector3d linearVelocity3 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity3 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       twist.setLinearPart(linearVelocity3);
 
-      Vector3d angularVelocity4 = twist.getAngularPartCopy();
-      Vector3d linearVelocity4 = twist.getLinearPartCopy();
+      Vector3D angularVelocity4 = twist.getAngularPartCopy();
+      Vector3D linearVelocity4 = twist.getLinearPartCopy();
 
-      JUnitTools.assertTuple3dEquals(angularVelocity3, angularVelocity4, epsilon);
-      JUnitTools.assertTuple3dEquals(linearVelocity3, linearVelocity4, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity3, angularVelocity4, epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity3, linearVelocity4, epsilon);
    }
 
    /**
@@ -83,8 +85,8 @@ public class TwistTest extends SpatialMotionVectorTest
       assertNull(twist.getBaseFrame());
       assertNull(twist.getBodyFrame());
       assertNull(twist.getExpressedInFrame());
-      JUnitTools.assertTuple3dEquals(new Vector3d(), twist.getAngularPart(), 0.0);
-      JUnitTools.assertTuple3dEquals(new Vector3d(), twist.getLinearPart(), 0.0);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), twist.getAngularPart(), 0.0);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), twist.getLinearPart(), 0.0);
    }
 
    /**
@@ -199,8 +201,8 @@ public class TwistTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddExpressedInDifferentFrames()
    {
-      Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3d(), new Vector3d());
-      Twist twist2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3d(), new Vector3d());
+      Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+      Twist twist2 = createSpatialMotionVector(frameB, frameA, frameA, new Vector3D(), new Vector3D());
 
       twist1.add(twist2);
    }
@@ -213,8 +215,8 @@ public class TwistTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000,expected = ReferenceFrameMismatchException.class)
    public void testAddNotRelative()
    {
-      Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3d(), new Vector3d());
-      Twist twist2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3d(), new Vector3d());
+      Twist twist1 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
+      Twist twist2 = createSpatialMotionVector(frameB, frameA, frameC, new Vector3D(), new Vector3D());
 
       twist1.add(twist2);
    }
@@ -228,12 +230,12 @@ public class TwistTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000)
    public void testAdd()
    {
-      Vector3d angularVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameD, linearVelocity1, angularVelocity1);
 
-      Vector3d angularVelocity2 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity2 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity2 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity2 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist2 = new Twist(frameC, frameB, frameD, linearVelocity2, angularVelocity2);
 
       twist1.add(twist2);
@@ -246,11 +248,11 @@ public class TwistTest extends SpatialMotionVectorTest
       linearVelocity1.add(linearVelocity2);
 
       double epsilon = 1e-14;
-      Vector3d angularVelocity1Plus2 = twist1.getAngularPartCopy();
-      JUnitTools.assertTuple3dEquals(angularVelocity1, angularVelocity1Plus2, epsilon);
+      Vector3D angularVelocity1Plus2 = twist1.getAngularPartCopy();
+      EuclidCoreTestTools.assertTuple3DEquals(angularVelocity1, angularVelocity1Plus2, epsilon);
 
-      Vector3d linearVelocity1Plus2 = twist1.getLinearPartCopy();
-      JUnitTools.assertTuple3dEquals(linearVelocity1, linearVelocity1Plus2, epsilon);
+      Vector3D linearVelocity1Plus2 = twist1.getLinearPartCopy();
+      EuclidCoreTestTools.assertTuple3DEquals(linearVelocity1, linearVelocity1Plus2, epsilon);
 
       // Should throw exception if try it the other way:
 
@@ -285,8 +287,8 @@ public class TwistTest extends SpatialMotionVectorTest
    public void testSub()
    {
       Random random = new Random(3454L);
-      Twist twist1 = new Twist(frameB, frameA, frameD, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
-      Twist twist2 = new Twist(frameC, frameB, frameD, RandomTools.generateRandomVector(random), RandomTools.generateRandomVector(random));
+      Twist twist1 = new Twist(frameB, frameA, frameD, RandomGeometry.nextVector3D(random), RandomGeometry.nextVector3D(random));
+      Twist twist2 = new Twist(frameC, frameB, frameD, RandomGeometry.nextVector3D(random), RandomGeometry.nextVector3D(random));
       Twist twist3 = new Twist(twist1);
       twist3.add(twist2);
 
@@ -332,8 +334,8 @@ public class TwistTest extends SpatialMotionVectorTest
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
       {
-         Vector3d angularVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Vector3d linearVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
 
          // first transform using 2.8 (b)
@@ -349,20 +351,20 @@ public class TwistTest extends SpatialMotionVectorTest
          CommonOps.mult(twist1TildeInC, twist1TildeInA, temp);
          CommonOps.mult(temp, transformFromAToCMatrixInv, twist1TildeInC);
 
-         Vector3d omega1InC = new Vector3d();
-         Vector3d v1InC = new Vector3d();
+         Vector3D omega1InC = new Vector3D();
+         Vector3D v1InC = new Vector3D();
          fromTildeForm(twist1TildeInC, omega1InC, v1InC);
 
          // then transform using 2.8 (c)
          twist1.changeFrame(frameC);
          assertEquals(frameC, twist1.getExpressedInFrame());
 
-         Vector3d omega1InC2 = twist1.getAngularPartCopy();
-         Vector3d v1InC2 = twist1.getLinearPartCopy();
+         Vector3D omega1InC2 = twist1.getAngularPartCopy();
+         Vector3D v1InC2 = twist1.getLinearPartCopy();
 
          double epsilon = 1e-8;
-         JUnitTools.assertTuple3dEquals(omega1InC, omega1InC2, epsilon);
-         JUnitTools.assertTuple3dEquals(v1InC, v1InC2, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(omega1InC, omega1InC2, epsilon);
+         EuclidCoreTestTools.assertTuple3DEquals(v1InC, v1InC2, epsilon);
       }
    }
 
@@ -370,8 +372,8 @@ public class TwistTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000)
    public void testChangeFrameSameFrame()
    {
-      Vector3d angularVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
       Twist twist2 = new Twist(twist1);
       twist1.changeFrame(twist1.getExpressedInFrame());
@@ -393,8 +395,8 @@ public class TwistTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000)
    public void testGetMatrix()
    {
-      Vector3d angularVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameA, linearVelocity1, angularVelocity1);
 
       DenseMatrix64F twistMatrix = twist1.toMatrix();
@@ -413,12 +415,12 @@ public class TwistTest extends SpatialMotionVectorTest
 	@Test(timeout = 30000)
    public void testVelocityOfPointConsistency()
    {
-      Vector3d angularVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist1 = new Twist(frameB, frameA, frameB, linearVelocity1, angularVelocity1);
 
       FrameVector expectedFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
-      Vector3d expected = expectedFrameVector.getVector();
+      Vector3D expected = expectedFrameVector.getVector();
       twist1.getBodyOriginLinearPartInBaseFrame(expectedFrameVector);
 
       FrameVector actual = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -427,18 +429,18 @@ public class TwistTest extends SpatialMotionVectorTest
       bodyFrameOrigin.changeFrame(twist1.getBaseFrame());
       twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
-      JUnitTools.assertTuple3dEquals(expected, actual.getVectorCopy(), 1e-6);
+      EuclidCoreTestTools.assertTuple3DEquals(expected, actual.getVectorCopy(), 1e-6);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout = 30000)
    public void testBodyOriginLinearPartInBaseFrameAndAngularVelocity()
    {
-      Vector3d angularVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      Vector3d linearVelocity1 = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D angularVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      Vector3D linearVelocity1 = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
       Twist twist = new Twist(frameA, frameB, frameC, linearVelocity1, angularVelocity1);
 
-      Vector3d angularVelocityInBaseFrame = new Vector3d();
+      Vector3D angularVelocityInBaseFrame = new Vector3D();
       twist.getAngularVelocityInBaseFrame(angularVelocityInBaseFrame);
       FrameVector bodyOriginLinearPart = new FrameVector();
       twist.getBodyOriginLinearPartInBaseFrame(bodyOriginLinearPart);
@@ -447,32 +449,32 @@ public class TwistTest extends SpatialMotionVectorTest
       double dt = 1e-8;
       RigidBodyTransform transform = twist.getBodyFrame().getTransformToDesiredFrame(twist.getBaseFrame());
 
-      Matrix3d oldRotation = new Matrix3d();
-      Matrix3d newRotation = new Matrix3d();
+      RotationMatrix oldRotation = new RotationMatrix();
+      RotationMatrix newRotation = new RotationMatrix();
       transform.getRotation(oldRotation);
       transform.getRotation(newRotation);
 
-      Vector3d oldPosition = new Vector3d();
-      Vector3d newPosition = new Vector3d();
+      Vector3D oldPosition = new Vector3D();
+      Vector3D newPosition = new Vector3D();
       transform.getTranslation(oldPosition);
       transform.getTranslation(newPosition);
 
       ScrewTestTools.integrate(newRotation, newPosition, dt, twist);
 
-      Vector3d velocityNumerical = new Vector3d(newPosition);
+      Vector3D velocityNumerical = new Vector3D(newPosition);
       velocityNumerical.sub(oldPosition);
       velocityNumerical.scale(1.0 / dt);
-      JUnitTools.assertTuple3dEquals(velocityNumerical, bodyOriginLinearPart.getVector(), 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(velocityNumerical, bodyOriginLinearPart.getVector(), 1e-5);
 
-      Matrix3d angularVelocityMatrix = new Matrix3d(newRotation);
+      Matrix3D angularVelocityMatrix = new Matrix3D(newRotation);
       angularVelocityMatrix.sub(oldRotation);
-      angularVelocityMatrix.mul(1.0 / dt);
-      angularVelocityMatrix.mulTransposeRight(angularVelocityMatrix, oldRotation);
+      angularVelocityMatrix.scale(1.0 / dt);
+      angularVelocityMatrix.multiplyTransposeOther(oldRotation);
 
-      JUnitTools.assertSkewSymmetric(angularVelocityMatrix, 1e-5);
-      Vector3d angularVelocityNumerical = new Vector3d();
+      Assert.assertTrue(angularVelocityMatrix.isMatrixSkewSymmetric(1.0e-5));
+      Vector3D angularVelocityNumerical = new Vector3D();
       fromTildeForm(angularVelocityNumerical, angularVelocityMatrix);
-      JUnitTools.assertTuple3dEquals(angularVelocityNumerical, angularVelocityInBaseFrame, 1e-5);
+      EuclidCoreTestTools.assertTuple3DEquals(angularVelocityNumerical, angularVelocityInBaseFrame, 1e-5);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -481,9 +483,9 @@ public class TwistTest extends SpatialMotionVectorTest
    {
       double angularVelocityMagnitude = random.nextDouble();
       double linearVelocityMagnitude = 0.0;
-      Vector3d axisOfRotation = RandomTools.generateRandomVector(random);
+      Vector3D axisOfRotation = RandomGeometry.nextVector3D(random);
       axisOfRotation.normalize();
-      Vector3d offset = RandomTools.generateRandomVector(random);
+      Vector3D offset = RandomGeometry.nextVector3D(random);
 
       Twist twist = new Twist(frameB, frameA, frameB, angularVelocityMagnitude, linearVelocityMagnitude, axisOfRotation, offset);
       twist.changeFrame(frameA);
@@ -498,7 +500,7 @@ public class TwistTest extends SpatialMotionVectorTest
       twist.getLinearVelocityOfPointFixedInBodyFrame(velocityOfStationaryPoint, pointThatShouldBeStationary);
 
       double delta = 1e-15;
-      JUnitTools.assertTuple3dEquals(new Vector3d(), velocityOfStationaryPoint.getVector(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), velocityOfStationaryPoint.getVector(), delta);
    }
 
    /**
@@ -508,8 +510,8 @@ public class TwistTest extends SpatialMotionVectorTest
     */
    private static DenseMatrix64F toTildeForm(Twist twist)
    {
-      Vector3d angularVelocity = twist.getAngularPartCopy();
-      Vector3d linearVelocity = twist.getLinearPartCopy();
+      Vector3D angularVelocity = twist.getAngularPartCopy();
+      Vector3D linearVelocity = twist.getLinearPartCopy();
 
       DenseMatrix64F ret = new DenseMatrix64F(4, 4);
       MatrixTools.vectorToSkewSymmetricMatrix(ret, angularVelocity);
@@ -522,20 +524,20 @@ public class TwistTest extends SpatialMotionVectorTest
    /**
     * Converts a twist in tilde form back to twist coordinates (angular velocity and linear velocity)
     */
-   private static void fromTildeForm(DenseMatrix64F twistTilde, Vector3d angularVelocityToPack, Vector3d linearVelocityToPack)
+   private static void fromTildeForm(DenseMatrix64F twistTilde, Vector3D angularVelocityToPack, Vector3D linearVelocityToPack)
    {
       linearVelocityToPack.set(twistTilde.get(0, 3), twistTilde.get(1, 3), twistTilde.get(2, 3));
       angularVelocityToPack.set(twistTilde.get(2, 1), twistTilde.get(0, 2), twistTilde.get(1, 0));
    }
 
-   private static void fromTildeForm(Vector3d omegaToPack, Matrix3d omegaTilde)
+   private static void fromTildeForm(Vector3D omegaToPack, Matrix3D omegaTilde)
    {
       omegaToPack.set(omegaTilde.getM21(), omegaTilde.getM02(), omegaTilde.getM10());
    }
 
    @Override
-   protected Twist createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3d linearPart,
-           Vector3d angularPart)
+   protected Twist createSpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3D linearPart,
+           Vector3D angularPart)
    {
       return new Twist(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
    }

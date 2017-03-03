@@ -2,14 +2,13 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class PolytopeVertex
 {
-   private final Point3d position = new Point3d();
+   private final Point3D position = new Point3D();
    private final ArrayList<PolytopeVertex> connectingVertices = new ArrayList<>();
 
    public PolytopeVertex(double x, double y, double z)
@@ -17,7 +16,7 @@ public class PolytopeVertex
       position.set(x, y, z);
    }
 
-   public PolytopeVertex(Point3d position)
+   public PolytopeVertex(Point3D position)
    {
       this.position.set(position);
    }
@@ -49,7 +48,7 @@ public class PolytopeVertex
       return connectingVertices.get(index);
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
@@ -59,7 +58,7 @@ public class PolytopeVertex
       transform.transform(position);
    }
 
-   public double dot(Vector3d vector)
+   public double dot(Vector3D vector)
    {
       return position.getX() * vector.getX() + position.getY() * vector.getY() + position.getZ() * vector.getZ();
    }

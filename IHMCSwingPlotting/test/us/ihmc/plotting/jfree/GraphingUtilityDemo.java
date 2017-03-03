@@ -6,11 +6,12 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 
 public class GraphingUtilityDemo
 {
@@ -18,36 +19,36 @@ public class GraphingUtilityDemo
    {
       ArrayList<XYSeries> data = new ArrayList<XYSeries>();
 
-      ArrayList<Point2d> series1 = new ArrayList<Point2d>();
-      series1.add(new Point2d(3.0, 19.0));
-      series1.add(new Point2d(6.0, 22.0));
-      series1.add(new Point2d(9.0, 27.0));
-      series1.add(new Point2d(12.0, 31.0));
-      series1.add(new Point2d(15.0, 28.0));
-      series1.add(new Point2d(18.0, 22.0));
-      series1.add(new Point2d(21.0, 18.0));
+      ArrayList<Point2D> series1 = new ArrayList<Point2D>();
+      series1.add(new Point2D(3.0, 19.0));
+      series1.add(new Point2D(6.0, 22.0));
+      series1.add(new Point2D(9.0, 27.0));
+      series1.add(new Point2D(12.0, 31.0));
+      series1.add(new Point2D(15.0, 28.0));
+      series1.add(new Point2D(18.0, 22.0));
+      series1.add(new Point2D(21.0, 18.0));
       XYSeries series1Set = GraphingUtility.createXYSeries("0 Acceleration", series1);
       data.add(series1Set);
 
-      ArrayList<Point2d> series2 = new ArrayList<Point2d>();
-      series2.add(new Point2d(3.0, 18.0));
-      series2.add(new Point2d(6.0, 20.0));
-      series2.add(new Point2d(9.0, 22.0));
-      series2.add(new Point2d(12.0, 24.0));
-      series2.add(new Point2d(15.0, 31.0));
-      series2.add(new Point2d(18.0, 28.0));
-      series2.add(new Point2d(21.0, 21.0));
+      ArrayList<Point2D> series2 = new ArrayList<Point2D>();
+      series2.add(new Point2D(3.0, 18.0));
+      series2.add(new Point2D(6.0, 20.0));
+      series2.add(new Point2D(9.0, 22.0));
+      series2.add(new Point2D(12.0, 24.0));
+      series2.add(new Point2D(15.0, 31.0));
+      series2.add(new Point2D(18.0, 28.0));
+      series2.add(new Point2D(21.0, 21.0));
       XYSeries series2Set = GraphingUtility.createXYSeries("-1 Acceleration", series2);
       data.add(series2Set);
 
-      ArrayList<Point2d> series3 = new ArrayList<Point2d>();
-      series3.add(new Point2d(3.0, 20.0));
-      series3.add(new Point2d(6.0, 23.0));
-      series3.add(new Point2d(9.0, 31.0));
-      series3.add(new Point2d(12.0, 26.0));
-      series3.add(new Point2d(15.0, 21.0));
-      series3.add(new Point2d(18.0, 19.0));
-      series3.add(new Point2d(21.0, 17.0));
+      ArrayList<Point2D> series3 = new ArrayList<Point2D>();
+      series3.add(new Point2D(3.0, 20.0));
+      series3.add(new Point2D(6.0, 23.0));
+      series3.add(new Point2D(9.0, 31.0));
+      series3.add(new Point2D(12.0, 26.0));
+      series3.add(new Point2D(15.0, 21.0));
+      series3.add(new Point2D(18.0, 19.0));
+      series3.add(new Point2D(21.0, 17.0));
       XYSeries series3Set = GraphingUtility.createXYSeries("+1 Acceleration", series3);
       data.add(series3Set);
 

@@ -2,8 +2,8 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
 
 @RosMessagePacket(documentation = "Stop the execution of any trajectory being executed."
       + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller.",

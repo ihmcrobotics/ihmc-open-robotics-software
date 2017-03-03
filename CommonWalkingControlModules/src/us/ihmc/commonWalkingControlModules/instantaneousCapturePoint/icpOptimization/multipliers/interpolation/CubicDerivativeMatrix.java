@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiz
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.robotics.MathTools;
 
 public class CubicDerivativeMatrix extends DenseMatrix64F
@@ -29,7 +30,7 @@ public class CubicDerivativeMatrix extends DenseMatrix64F
 
    public void update(double timeInCurrentState)
    {
-      timeInCurrentState = MathTools.clipToMinMax(timeInCurrentState, 0.0, duration);
+      timeInCurrentState = MathTools.clamp(timeInCurrentState, 0.0, duration);
       cubicTimeMatrix.setCurrentTime(timeInCurrentState);
 
       CommonOps.mult(cubicTimeMatrix, cubicSplineCoefficientMatrix, this);

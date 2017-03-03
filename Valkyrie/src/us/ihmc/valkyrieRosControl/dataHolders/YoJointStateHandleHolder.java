@@ -4,7 +4,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.wholeRobot.JointStateHandle;
-import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
 
 /**
  * Created by parallels on 7/6/16.

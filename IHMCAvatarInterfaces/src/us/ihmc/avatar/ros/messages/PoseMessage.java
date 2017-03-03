@@ -2,8 +2,8 @@ package us.ihmc.avatar.ros.messages;
 
 import java.nio.DoubleBuffer;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class PoseMessage
 {
@@ -28,19 +28,21 @@ public class PoseMessage
    private final double[] position = new double[3];
    private final double[] orientation = new double[4];
 
-   public void packPosition(Vector3d position)
+   public void packPosition(Vector3D position)
    {
       position.setX(this.position[0]);
       position.setY(this.position[1]);
       position.setZ(this.position[2]);
    }
 
-   public void packOrientation(Quat4d orientation)
+   public void packOrientation(Quaternion orientation)
    {
-      orientation.setW((this.orientation[0]));
-      orientation.setW((this.orientation[1]));
-      orientation.setW((this.orientation[2]));
-      orientation.setW((this.orientation[3]));
+      // FIXME used to be that before switching to EuclidCore
+//      orientation.setW((this.orientation[0]));
+//      orientation.setW((this.orientation[1]));
+//      orientation.setW((this.orientation[2]));
+//      orientation.setW((this.orientation[3]));
+      orientation.set(this.orientation);
    }
 
    public void setFromBuffer(DoubleBuffer buffer)

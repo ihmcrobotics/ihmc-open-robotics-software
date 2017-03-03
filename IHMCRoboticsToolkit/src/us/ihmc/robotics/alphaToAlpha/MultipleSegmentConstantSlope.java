@@ -1,14 +1,12 @@
 package us.ihmc.robotics.alphaToAlpha;
 
-import javax.vecmath.Point2d;
-
-import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
+import us.ihmc.euclid.tuple2D.Point2D;
 
 @SuppressWarnings("all") public class MultipleSegmentConstantSlope implements AlphaToAlphaFunction
 {
-   private Point2d[] segmentPoints;
+   private Point2D[] segmentPoints;
 
-   public MultipleSegmentConstantSlope(Point2d[] segmentPoints)
+   public MultipleSegmentConstantSlope(Point2D[] segmentPoints)
    {
       // slope betwen points must be positive
       for (int i = 0; i < segmentPoints.length - 1; i++)
@@ -55,7 +53,7 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
       //        new Point2d(0.5, 1.0),
       //    };
 
-      Point2d[] listOfPoints = new Point2d[] {new Point2d(0.0, 0.0), new Point2d(0.5, 0.0), new Point2d(2.0, 1.0)};
+      Point2D[] listOfPoints = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.5, 0.0), new Point2D(2.0, 1.0)};
 
       MultipleSegmentConstantSlope multipleSegmentConstantSlope = new MultipleSegmentConstantSlope(listOfPoints);
 
@@ -68,7 +66,7 @@ import us.ihmc.robotics.alphaToAlpha.AlphaToAlphaFunction;
 
    public double getMaxAlpha()
    {
-      Point2d lastPoint = this.segmentPoints[segmentPoints.length];
+      Point2D lastPoint = this.segmentPoints[segmentPoints.length];
 
       return lastPoint.getX();
    }

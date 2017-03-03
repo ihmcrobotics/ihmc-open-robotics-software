@@ -34,6 +34,14 @@ public class CommonHumanoidReferenceFramesVisualizer
       YoGraphicReferenceFrame pelvisFrame = new YoGraphicReferenceFrame(referenceFrames.getPelvisFrame(), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, pelvisFrame);
       referenceFramesVisualizers.add(pelvisFrame);
+      
+      YoGraphicReferenceFrame leftSoleFrmae = new YoGraphicReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT), registry, 0.2);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, leftSoleFrmae);
+      referenceFramesVisualizers.add(leftSoleFrmae);
+      
+      YoGraphicReferenceFrame rightSoleFrame = new YoGraphicReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT), registry, 0.2);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, rightSoleFrame);
+      referenceFramesVisualizers.add(rightSoleFrame);
 
       parentRegistry.addChild(registry);
    }

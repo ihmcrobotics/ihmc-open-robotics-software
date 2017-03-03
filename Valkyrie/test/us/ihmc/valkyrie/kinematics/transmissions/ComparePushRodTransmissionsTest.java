@@ -8,13 +8,13 @@ import java.util.Random;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
@@ -249,8 +249,8 @@ public class ComparePushRodTransmissionsTest
             bottomJointAngle.set(bottomJoint);
 
             // Check the jointToActuatorEffort
-            topJointTorque.set(RandomTools.generateRandomDouble(random, -40.0, 40.0));
-            bottomJointTorque.set(RandomTools.generateRandomDouble(random, -40.0, 40.0));
+            topJointTorque.set(RandomNumbers.nextDouble(random, -40.0, 40.0));
+            bottomJointTorque.set(RandomNumbers.nextDouble(random, -40.0, 40.0));
 
             jointData[0].setDesiredEffort(topJointTorque.getDoubleValue());
             jointData[1].setDesiredEffort(bottomJointTorque.getDoubleValue());
@@ -310,8 +310,8 @@ public class ComparePushRodTransmissionsTest
             
             // Check the actuatorToJointEffort
 
-            force0.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
-            force1.set(RandomTools.generateRandomDouble(random, -100.0, 100.0));
+            force0.set(RandomNumbers.nextDouble(random, -100.0, 100.0));
+            force1.set(RandomNumbers.nextDouble(random, -100.0, 100.0));
 //            force0.set(1.0);
 //            force1.set(1.0);
 
@@ -427,8 +427,8 @@ public class ComparePushRodTransmissionsTest
             
             // Check the actuatorToJointEffort
 
-            actuatorVelocity0.set(RandomTools.generateRandomDouble(random, -10.0, 10.0));
-            actuatorVelocity1.set(RandomTools.generateRandomDouble(random, -10.0, 10.0));
+            actuatorVelocity0.set(RandomNumbers.nextDouble(random, -10.0, 10.0));
+            actuatorVelocity1.set(RandomNumbers.nextDouble(random, -10.0, 10.0));
 
             actuatorData[0].setVelocityCommand(actuatorVelocity0.getDoubleValue());
             actuatorData[1].setVelocityCommand(actuatorVelocity1.getDoubleValue());

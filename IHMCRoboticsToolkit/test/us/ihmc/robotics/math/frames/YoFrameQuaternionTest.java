@@ -6,19 +6,19 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoFrameQuaternionTest
@@ -36,19 +36,19 @@ public class YoFrameQuaternionTest
 
       yoFrameQuaternion.checkReferenceFrameMatch(worldFrame);
 
-      Quat4d quat4dActual = new Quat4d();
+      Quaternion quat4dActual = new Quaternion();
       yoFrameQuaternion.get(quat4dActual);
-      Quat4d quat4dExpected = new Quat4d(0.0, 0.0, 0.0, 1.0);
+      Quaternion quat4dExpected = new Quaternion(0.0, 0.0, 0.0, 1.0);
       assertTrue(quat4dActual.epsilonEquals(quat4dExpected, EPS));
 
-      AxisAngle4d axisAngle4dActual = new AxisAngle4d();
+      AxisAngle axisAngle4dActual = new AxisAngle();
       yoFrameQuaternion.get(axisAngle4dActual);
-      AxisAngle4d axisAngle4dExpected = new AxisAngle4d(0.0, 1.0, 0.0, 0.0);
+      AxisAngle axisAngle4dExpected = new AxisAngle(1.0, 0.0, 0.0, 0.0);
       assertTrue(axisAngle4dActual.epsilonEquals(axisAngle4dExpected, EPS));
 
-      Matrix3d matrix3dActual = new Matrix3d();
+      RotationMatrix matrix3dActual = new RotationMatrix();
       yoFrameQuaternion.get(matrix3dActual);
-      Matrix3d matrix3dExpected = new Matrix3d();
+      RotationMatrix matrix3dExpected = new RotationMatrix();
       matrix3dExpected.setIdentity();
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
 
@@ -72,40 +72,40 @@ public class YoFrameQuaternionTest
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
-      Matrix3d matrix3dExpected = new Matrix3d();
-      Matrix3d matrix3dActual = new Matrix3d();
+      RotationMatrix matrix3dExpected = new RotationMatrix();
+      RotationMatrix matrix3dActual = new RotationMatrix();
 
-      Quat4d quat4dExpected = RandomTools.generateRandomQuaternion(random);
+      Quaternion quat4dExpected = RandomGeometry.nextQuaternion(random);
       yoFrameQuaternion.set(quat4dExpected);
-      Quat4d quat4dActual = new Quat4d();
+      Quaternion quat4dActual = new Quaternion();
       yoFrameQuaternion.get(quat4dActual);
       assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
-      AxisAngle4d axisAngle4dExpected = RandomTools.generateRandomRotation(random);
+      AxisAngle axisAngle4dExpected = RandomGeometry.nextAxisAngle(random);
       yoFrameQuaternion.set(axisAngle4dExpected);
-      AxisAngle4d axisAngle4dActual = new AxisAngle4d();
+      AxisAngle axisAngle4dActual = new AxisAngle();
       yoFrameQuaternion.get(axisAngle4dActual);
       assertTrue(RotationTools.axisAngleEpsilonEqualsIgnoreFlippedAxes(axisAngle4dExpected, axisAngle4dActual, EPS));
 
-      matrix3dExpected.set(RandomTools.generateRandomRotation(random));
+      matrix3dExpected.set(RandomGeometry.nextAxisAngle(random));
       yoFrameQuaternion.set(matrix3dExpected);
       yoFrameQuaternion.get(matrix3dActual);
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
 
       FrameOrientation frameOrientationExpected = new FrameOrientation(worldFrame);
-      frameOrientationExpected.set(RandomTools.generateRandomQuaternion(random));
+      frameOrientationExpected.set(RandomGeometry.nextQuaternion(random));
       yoFrameQuaternion.set(frameOrientationExpected);
       FrameOrientation frameOrientationActual = new FrameOrientation(worldFrame);
       yoFrameQuaternion.getFrameOrientationIncludingFrame(frameOrientationActual);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
-      double[] yawPitchRollExpected = RandomTools.generateRandomDoubleArray(random, 3, 2.0 * Math.PI);
+      double[] yawPitchRollExpected = RandomNumbers.nextDoubleArray(random, 3, 2.0 * Math.PI);
       yoFrameQuaternion.set(yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
       double[] yawPitchRollActual = new double[3];
       yoFrameQuaternion.getYawPitchRoll(yawPitchRollActual);
 
-      RotationTools.convertYawPitchRollToMatrix(yawPitchRollActual[0], yawPitchRollActual[1], yawPitchRollActual[2], matrix3dActual);
-      RotationTools.convertYawPitchRollToMatrix(yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2], matrix3dExpected);
+      matrix3dActual.setYawPitchRoll(yawPitchRollActual);
+      matrix3dExpected.setYawPitchRoll(yawPitchRollExpected);
 
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
    }
@@ -115,8 +115,7 @@ public class YoFrameQuaternionTest
    public void testReferenceFramesMismatching()
    {
       Random random = new Random(1984L);
-      ReferenceFrame testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("chou", worldFrame, RigidBodyTransform
-            .generateRandomTransform(random));
+      ReferenceFrame testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
@@ -155,25 +154,25 @@ public class YoFrameQuaternionTest
       YoVariableRegistry registry = new YoVariableRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
-      Quat4d quat4dActual = new Quat4d(), quat4dExpected = new Quat4d();
-      Quat4d quat4dA, quat4dB;
+      Quaternion quat4dActual = new Quaternion(), quat4dExpected = new Quaternion();
+      Quaternion quat4dA, quat4dB;
 
       FrameOrientation frameOrientation = new FrameOrientation(worldFrame);
 
       for (int i = 0; i < 1000; i++)
       {
-         quat4dA = RandomTools.generateRandomQuaternion(random);
-         quat4dB = RandomTools.generateRandomQuaternion(random);
-         quat4dExpected.mul(quat4dA, quat4dB);
+         quat4dA = RandomGeometry.nextQuaternion(random);
+         quat4dB = RandomGeometry.nextQuaternion(random);
+         quat4dExpected.multiply(quat4dA, quat4dB);
 
          yoFrameQuaternion.set(quat4dA);
-         yoFrameQuaternion.mul(quat4dB);
+         yoFrameQuaternion.multiply(quat4dB);
          yoFrameQuaternion.get(quat4dActual);
          assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 
          yoFrameQuaternion.set(quat4dA);
          frameOrientation.set(quat4dB);
-         yoFrameQuaternion.mul(frameOrientation);
+         yoFrameQuaternion.multiply(frameOrientation);
          yoFrameQuaternion.get(quat4dActual);
          assertTrue(RotationTools.quaternionEpsilonEquals(quat4dExpected, quat4dActual, EPS));
 

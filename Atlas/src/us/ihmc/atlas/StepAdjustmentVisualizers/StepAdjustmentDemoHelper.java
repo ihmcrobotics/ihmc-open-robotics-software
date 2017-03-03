@@ -1,25 +1,27 @@
 package us.ihmc.atlas.StepAdjustmentVisualizers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Random;
+
 import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -32,12 +34,6 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Random;
 
 public class StepAdjustmentDemoHelper
 {
@@ -168,7 +164,7 @@ public class StepAdjustmentDemoHelper
       }
    }
 
-   public void applyForceDelayed(StateTransitionCondition pushCondition, double delay, Vector3d forceDirection, double magnitude, double duration)
+   public void applyForceDelayed(StateTransitionCondition pushCondition, double delay, Vector3D forceDirection, double magnitude, double duration)
    {
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
    }
@@ -225,13 +221,13 @@ public class StepAdjustmentDemoHelper
 
    private void setupCamera(SimulationConstructionSet scs)
    {
-      Point3d cameraFix = new Point3d(0.0, 0.0, 0.89);
-      Point3d cameraPosition = new Point3d(10.0, 2.0, 1.37);
+      Point3D cameraFix = new Point3D(0.0, 0.0, 0.89);
+      Point3D cameraPosition = new Point3D(10.0, 2.0, 1.37);
 
       CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
 
       Random randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent = new Random();
-      Vector3d randomCameraOffset = RandomTools.generateRandomVector(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
+      Vector3D randomCameraOffset = RandomGeometry.nextVector3D(randomForSlightlyMovingCameraSoThatYouTubeVideosAreDifferent, 0.05);
       cameraFix.add(randomCameraOffset);
 
       cameraConfiguration.setCameraFix(cameraFix);

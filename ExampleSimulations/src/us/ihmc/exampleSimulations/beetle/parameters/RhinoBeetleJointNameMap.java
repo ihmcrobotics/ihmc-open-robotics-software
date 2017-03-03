@@ -6,12 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.robotics.partNames.JointNameMap;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -24,7 +23,7 @@ public class RhinoBeetleJointNameMap implements JointNameMap
    private final String modelName = RhinoBeetleSDFParameters.SDF_MODEL_NAME;
    private final String rootJoint = "BODY";
    
-   private final List<ImmutablePair<String, Vector3d>> jointNameGroundContactPointMap = new ArrayList<ImmutablePair<String, Vector3d>>();
+   private final List<ImmutablePair<String, Vector3D>> jointNameGroundContactPointMap = new ArrayList<ImmutablePair<String, Vector3D>>();
    private final SegmentDependentList<RobotSextant, HashMap<LegJointName, RhinoBeetleJointName>> jointIdsBySextant = new SegmentDependentList<>(RobotSextant.class);
    private final HashSet<String> lastSimulatedJoints = new HashSet<>();
    private final String[] jointNamesBeforeFeet = new String[6];
@@ -54,8 +53,8 @@ public class RhinoBeetleJointNameMap implements JointNameMap
                lastSimulatedJoints.add(jointId.toString());
                
                //contact points
-               Vector3d contactPoint = RhinoBeetlePhysicalProperties.getOffsetFromJointBeforeFootToSoleAlignedWithWorld(sextant);
-               jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3d>(jointId.toString(), contactPoint));
+               Vector3D contactPoint = RhinoBeetlePhysicalProperties.getOffsetFromJointBeforeFootToSoleAlignedWithWorld(sextant);
+               jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3D>(jointId.toString(), contactPoint));
             }
          }
          else
@@ -91,7 +90,7 @@ public class RhinoBeetleJointNameMap implements JointNameMap
    }
 
    @Override
-   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
+   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
    {
       return jointNameGroundContactPointMap;
    }

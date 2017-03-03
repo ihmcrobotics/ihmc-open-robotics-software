@@ -7,8 +7,6 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -19,10 +17,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class WrenchTest
 {
@@ -43,7 +42,7 @@ public class WrenchTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
+            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };
@@ -57,7 +56,7 @@ public class WrenchTest
          {
             transformToParent.setRotationEulerAndZeroTranslation(1.0, 2.0, 3.0);
             RigidBodyTransform translation = new RigidBodyTransform();
-            translation.setTranslation(new Vector3d(3.0, 4.0, 5.0));
+            translation.setTranslation(new Vector3D(3.0, 4.0, 5.0));
             transformToParent.multiply(translation);
          }
       };
@@ -82,12 +81,12 @@ public class WrenchTest
       int nTests = 10;
       for (int i = 0; i < nTests; i++)
       {
-         Vector3d angularVelocity = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Vector3d linearVelocity = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D angularVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D linearVelocity = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          Twist twist = new Twist(frameC, frameA, frameA, linearVelocity, angularVelocity);
 
-         Vector3d torque = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-         Vector3d force = new Vector3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D torque = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
+         Vector3D force = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
          Wrench wrench = new Wrench(frameC, frameA, force, torque);    // baseFrame doesn't matter
 
          double power1 = twist.dot(wrench);
@@ -108,8 +107,8 @@ public class WrenchTest
       Wrench wrench = new Wrench();
       assertNull(wrench.getBodyFrame());
       assertNull(wrench.getExpressedInFrame());
-      JUnitTools.assertTuple3dEquals(new Vector3d(), wrench.getAngularPart(), 0.0);
-      JUnitTools.assertTuple3dEquals(new Vector3d(), wrench.getLinearPart(), 0.0);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), wrench.getAngularPart(), 0.0);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), wrench.getLinearPart(), 0.0);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -123,12 +122,12 @@ public class WrenchTest
       wrench.getMatrix(matrixBack);
       JUnitTools.assertMatrixEquals(matrix, matrixBack, 0.0);
 
-      Vector3d torque = new Vector3d();
-      Vector3d force = new Vector3d();
-      MatrixTools.denseMatrixToVector3d(matrix, torque, 0, 0);
-      MatrixTools.denseMatrixToVector3d(matrix, force, 3, 0);
-      JUnitTools.assertTuple3dEquals(torque, wrench.getAngularPartCopy(), 0.0);
-      JUnitTools.assertTuple3dEquals(force, wrench.getLinearPartCopy(), 0.0);
+      Vector3D torque = new Vector3D();
+      Vector3D force = new Vector3D();
+      torque.set(matrix);
+      force.set(3, matrix);
+      EuclidCoreTestTools.assertTuple3DEquals(torque, wrench.getAngularPartCopy(), 0.0);
+      EuclidCoreTestTools.assertTuple3DEquals(force, wrench.getLinearPartCopy(), 0.0);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -170,8 +169,8 @@ public class WrenchTest
       assertEquals(wrench.getBodyFrame(), frameC);
       assertEquals(wrench.getExpressedInFrame(), frameA);
       double epsilon = 0.0;
-      JUnitTools.assertTuple3dEquals(new Vector3d(angularArray), wrench.getAngularPartCopy(), epsilon);
-      JUnitTools.assertTuple3dEquals(new Vector3d(linearArray), wrench.getLinearPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(angularArray), wrench.getAngularPartCopy(), epsilon);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(linearArray), wrench.getLinearPartCopy(), epsilon);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -234,14 +233,14 @@ public class WrenchTest
       Wrench wrench3 = new Wrench(wrench1);
       wrench3.add(wrench2);
 
-      Vector3d linearPart = wrench1.getLinearPartCopy();
+      Vector3D linearPart = wrench1.getLinearPartCopy();
       linearPart.add(wrench2.getLinearPartCopy());
 
-      Vector3d angularPart = wrench1.getAngularPartCopy();
+      Vector3D angularPart = wrench1.getAngularPartCopy();
       angularPart.add(wrench2.getAngularPartCopy());
 
-      JUnitTools.assertTuple3dEquals(wrench3.getLinearPartCopy(), linearPart, 1e-24);
-      JUnitTools.assertTuple3dEquals(wrench3.getAngularPartCopy(), angularPart, 1e-24);
+      EuclidCoreTestTools.assertTuple3DEquals(wrench3.getLinearPartCopy(), linearPart, 1e-24);
+      EuclidCoreTestTools.assertTuple3DEquals(wrench3.getAngularPartCopy(), angularPart, 1e-24);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -290,14 +289,14 @@ public class WrenchTest
       Wrench wrench3 = new Wrench(wrench1);
       wrench3.sub(wrench2);
 
-      Vector3d linearPart = wrench1.getLinearPartCopy();
+      Vector3D linearPart = wrench1.getLinearPartCopy();
       linearPart.sub(wrench2.getLinearPartCopy());
 
-      Vector3d angularPart = wrench1.getAngularPartCopy();
+      Vector3D angularPart = wrench1.getAngularPartCopy();
       angularPart.sub(wrench2.getAngularPartCopy());
 
-      JUnitTools.assertTuple3dEquals(wrench3.getLinearPartCopy(), linearPart, 1e-24);
-      JUnitTools.assertTuple3dEquals(wrench3.getAngularPartCopy(), angularPart, 1e-24);
+      EuclidCoreTestTools.assertTuple3DEquals(wrench3.getLinearPartCopy(), linearPart, 1e-24);
+      EuclidCoreTestTools.assertTuple3DEquals(wrench3.getAngularPartCopy(), angularPart, 1e-24);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)

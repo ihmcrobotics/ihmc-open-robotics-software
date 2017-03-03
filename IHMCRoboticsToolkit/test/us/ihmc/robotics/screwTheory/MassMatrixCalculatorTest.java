@@ -5,8 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.simple.SimpleMatrix;
@@ -14,13 +12,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class MassMatrixCalculatorTest
 {
-   protected static final Vector3d X = new Vector3d(1.0, 0.0, 0.0);
-   protected static final Vector3d Y = new Vector3d(0.0, 1.0, 0.0);
-   protected static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
+   protected static final Vector3D X = new Vector3D(1.0, 0.0, 0.0);
+   protected static final Vector3D Y = new Vector3D(0.0, 1.0, 0.0);
+   protected static final Vector3D Z = new Vector3D(0.0, 0.0, 1.0);
 
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected ArrayList<RevoluteJoint> joints;
@@ -38,7 +37,7 @@ public abstract class MassMatrixCalculatorTest
    {
       Random random = new Random();
       joints = new ArrayList<RevoluteJoint>();
-      Vector3d[] jointAxes = {X, Y, Z, X ,Z, Z, X, Y, Z, X};
+      Vector3D[] jointAxes = {X, Y, Z, X ,Z, Z, X, Y, Z, X};
       ScrewTestTools.createRandomChainRobot("", joints, elevator, jointAxes, random);
       ScrewTestTools.setRandomPositions(joints, random);
       elevator.updateFramesRecursively();

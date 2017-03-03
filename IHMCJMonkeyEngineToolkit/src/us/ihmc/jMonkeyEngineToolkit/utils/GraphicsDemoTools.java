@@ -11,11 +11,14 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -28,12 +31,10 @@ import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.robotics.dataStructures.MutableColor;
+import us.ihmc.robotics.geometry.shapes.Sphere3d;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-
-import us.ihmc.robotics.geometry.shapes.Sphere3d;
-import us.ihmc.robotics.geometry.Transform3d;
 
 public class GraphicsDemoTools
 {
@@ -86,8 +87,8 @@ public class GraphicsDemoTools
    {
       SelectedListener selectedListener = new SelectedListener()
       {
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
-                              Quat4d cameraRotation)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+                              QuaternionReadOnly cameraRotation)
          {
             System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);
 
@@ -215,7 +216,7 @@ public class GraphicsDemoTools
       jFrame.setSize(800, 600);
    }
    
-   public static Graphics3DNode createPointCloud(String name, List<Point3d> worldPoints, double pointRadius, AppearanceDefinition appearance)
+   public static Graphics3DNode createPointCloud(String name, List<Point3D> worldPoints, double pointRadius, AppearanceDefinition appearance)
    {
       // TODO Change to point sprite mesh
       Graphics3DNode pointCloud = new Graphics3DNode("PointCloud" + name);
@@ -266,7 +267,7 @@ public class GraphicsDemoTools
          if (transparency > 1.0)
             transparency = 0.0;
 
-         Color3f color = new Color3f((float) Math.random(), (float) Math.random(), (float) Math.random());
+         MutableColor color = new MutableColor((float) Math.random(), (float) Math.random(), (float) Math.random());
          YoAppearanceRGBColor appearance = new YoAppearanceRGBColor(color, 0.0);
          appearance.setTransparency(transparency);
          instruction.setAppearance(appearance);
@@ -340,15 +341,15 @@ public class GraphicsDemoTools
 
       public void run()
       {
-         Transform3d transform = new Transform3d();
-         transform.setRotationEulerAndZeroTranslation(nextVector3d(parametersHolder.getRotationTrajectory()));
+         AffineTransform transform = new AffineTransform();
+         transform.setRotationEuler(nextVector3d(parametersHolder.getRotationTrajectory()));
          transform.setTranslation(nextVector3d(parametersHolder.getTranslationTrajectory()));
          transform.setScale(parametersHolder.getScaleTrajectory().getNextValue());
          node.setTransform(transform);
       }
-      public static Vector3d nextVector3d(ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> trajectoryVector)
+      public static Vector3D nextVector3d(ImmutableTriple<SimpleBounceTrajectory, SimpleBounceTrajectory, SimpleBounceTrajectory> trajectoryVector)
       {
-         return new Vector3d(trajectoryVector.getLeft().getNextValue(),trajectoryVector.getMiddle().getNextValue(),trajectoryVector.getRight().getNextValue());
+         return new Vector3D(trajectoryVector.getLeft().getNextValue(),trajectoryVector.getMiddle().getNextValue(),trajectoryVector.getRight().getNextValue());
       }
    }
 

@@ -5,7 +5,6 @@ import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisua
 /**
  * Data structure which contains references to high level implementations of the physics code
  *
- * @author Peter Abeles
  */
 public class ScsPhysics
 {
@@ -13,16 +12,19 @@ public class ScsPhysics
    //      at the same time by the simulation
    public ScsCollisionConfigure collisionConfigure;
    public ScsCollisionDetector collisionDetector;
+   public CollisionArbiter collisionArbiter;
    public CollisionHandler collisionHandler;
    public DefaultCollisionVisualizer visualize;
 
    public ScsPhysics(ScsCollisionConfigure collisionConfigure,
                      ScsCollisionDetector collisionDetector,
+                     CollisionArbiter collisionArbiter,
                      CollisionHandler collisionHandler,
                      DefaultCollisionVisualizer visualize )
    {
       this.collisionConfigure = collisionConfigure;
       this.collisionDetector = collisionDetector;
+      this.collisionArbiter = collisionArbiter;
       this.collisionHandler = collisionHandler;
       this.visualize = visualize;
    }

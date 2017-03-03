@@ -26,16 +26,16 @@ public class AtlasNetworkProcessor
    private static final boolean ENABLE_KINEMATICS_TOOLBOX_SERVER = true;
    private static final boolean ENABLE_MOCAP_MODULE = true;
    private static String defaultRosNameSpace = "/ihmc_ros/atlas";
-   
+
    public static void main(String[] args) throws URISyntaxException, JSAPException
    {
       JSAP jsap = new JSAP();
 
       FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
-      
+
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
       Switch runningOnGazebo = new Switch("runningOnGazebo").setLongFlag("gazebo");
-      
+
       FlaggedOption leftHandHost = new FlaggedOption("leftHandHost").setLongFlag("lefthand").setShortFlag('l').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       FlaggedOption rightHandHost = new FlaggedOption("rightHandHost").setLongFlag("righthand").setShortFlag('r').setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
@@ -52,9 +52,9 @@ public class AtlasNetworkProcessor
       if (config.success())
       {
     	  DRCRobotModel model;
-    	  
+
     	  DRCNetworkModuleParameters networkModuleParams = new DRCNetworkModuleParameters();
-       
+
         networkModuleParams.enableUiModule(true);
         networkModuleParams.enableBehaviorModule(ENABLE_BEHAVIOR_MODULE);
         networkModuleParams.enableSensorModule(true);
@@ -71,7 +71,7 @@ public class AtlasNetworkProcessor
            networkModuleParams.enableRosModule(true);
            networkModuleParams.setRosUri(rosuri);
            System.out.println("ROS_MASTER_URI="+rosuri);
-           
+
             createAuxiliaryRobotDataRosPublisher(networkModuleParams, rosuri);
         }
     	  try
@@ -91,24 +91,24 @@ public class AtlasNetworkProcessor
     	     }
     		  model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
            if(model.getHandModel()!=null)
-              networkModuleParams.enableHandModule(true);       
+              networkModuleParams.enableHandModule(true);
     	  }
     	  catch (IllegalArgumentException e)
     	  {
     		  System.err.println("Incorrect robot model " + config.getString("robotModel"));
     		  System.out.println(jsap.getHelp());
-    		  
+
     		  return;
     	  }
-    	  
+
     	  System.out.println("Using the " + model + " model");
-    	  
+
         URI rosMasterURI = NetworkParameters.getROSURI();
         networkModuleParams.setRosUri(rosMasterURI);
-        
-    	  
+
+
     	  networkModuleParams.enableLocalControllerCommunicator(false);
-    	  
+
     	  new DRCNetworkProcessor(model, networkModuleParams);
       }
       else

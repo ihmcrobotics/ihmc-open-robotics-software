@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
 import org.ejml.data.DenseMatrix64F;
+
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class SwingInitialICPMatrix extends DenseMatrix64F

@@ -5,16 +5,15 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.JUnitTools;
-import us.ihmc.tools.testing.MutationTestingTools;
 
 public class ConvexPolytopeTest
 {
@@ -29,14 +28,14 @@ public class ConvexPolytopeTest
       PolytopeVertex vertexThree = polytope.addVertex(1.0, 1.0, 0.0);
       PolytopeVertex vertexFour = polytope.addVertex(0.0, 1.0, 0.0);
 
-      PolytopeVertex vertexFive = polytope.addVertex(new Point3d(0.0, 0.0, 1.0));
-      PolytopeVertex vertexSix = polytope.addVertex(new Point3d(1.0, 0.0, 1.0));
-      PolytopeVertex vertexSeven = polytope.addVertex(new Point3d(1.0, 1.0, 1.0));
-      PolytopeVertex vertexEight = polytope.addVertex(new Point3d(0.0, 1.0, 1.0));
+      PolytopeVertex vertexFive = polytope.addVertex(new Point3D(0.0, 0.0, 1.0));
+      PolytopeVertex vertexSix = polytope.addVertex(new Point3D(1.0, 0.0, 1.0));
+      PolytopeVertex vertexSeven = polytope.addVertex(new Point3D(1.0, 1.0, 1.0));
+      PolytopeVertex vertexEight = polytope.addVertex(new Point3D(0.0, 1.0, 1.0));
 
-      JUnitTools.assertPoint3dEquals("", new Point3d(0.0, 0.0, 0.0), vertexOne.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 1.0, 0.0), vertexThree.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 0.0, 1.0), vertexSix.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(0.0, 0.0, 0.0), vertexOne.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(1.0, 1.0, 0.0), vertexThree.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(1.0, 0.0, 1.0), vertexSix.getPosition(), 1e-7);
 
       polytope.addEdge(vertexOne, vertexTwo);
       polytope.addEdge(vertexTwo, vertexThree);
@@ -72,34 +71,34 @@ public class ConvexPolytopeTest
       transform.setTranslation(1.0, 2.0, 3.0);
       polytope.applyTransform(transform);
 
-      JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 2.0, 3.0), vertexOne.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(2.0, 3.0, 3.0), vertexThree.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(2.0, 2.0, 4.0), vertexSix.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(1.0, 2.0, 3.0), vertexOne.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(2.0, 3.0, 3.0), vertexThree.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(2.0, 2.0, 4.0), vertexSix.getPosition(), 1e-7);
 
       transform.setRotationEulerAndZeroTranslation(0.0, 0.0, Math.PI / 2.0);
       polytope.applyTransform(transform);
-      JUnitTools.assertPoint3dEquals("", new Point3d(-2.0, 1.0, 3.0), vertexOne.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(-3.0, 2.0, 3.0), vertexThree.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(-2.0, 2.0, 4.0), vertexSix.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(-2.0, 1.0, 3.0), vertexOne.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(-3.0, 2.0, 3.0), vertexThree.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(-2.0, 2.0, 4.0), vertexSix.getPosition(), 1e-7);
 
       // Apply in reverse order to get back to unit box at origin.
       transform.setRotationEulerAndZeroTranslation(0.0, 0.0, -Math.PI / 2.0);
       polytope.applyTransform(transform);
       transform.setTranslationAndIdentityRotation(-1.0, -2.0, -3.0);
       polytope.applyTransform(transform);
-      JUnitTools.assertPoint3dEquals("", new Point3d(0.0, 0.0, 0.0), vertexOne.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 1.0, 0.0), vertexThree.getPosition(), 1e-7);
-      JUnitTools.assertPoint3dEquals("", new Point3d(1.0, 0.0, 1.0), vertexSix.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(0.0, 0.0, 0.0), vertexOne.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(1.0, 1.0, 0.0), vertexThree.getPosition(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals("", new Point3D(1.0, 0.0, 1.0), vertexSix.getPosition(), 1e-7);
 
-      Vector3d supportDirection = new Vector3d(1.0, 1.0, 1.0);
-      Point3d supportingVertex = polytope.getSupportingVertex(supportDirection);
+      Vector3D supportDirection = new Vector3D(1.0, 1.0, 1.0);
+      Point3D supportingVertex = polytope.getSupportingVertex(supportDirection);
       assertTrue(supportingVertex == vertexSeven.getPosition());
 
-      supportDirection = new Vector3d(-1.0, -1.0, -1.0);
+      supportDirection = new Vector3D(-1.0, -1.0, -1.0);
       supportingVertex = polytope.getSupportingVertex(supportDirection);
       assertTrue(supportingVertex == vertexOne.getPosition());
 
-      supportDirection = new Vector3d(100.0, 0.01, -0.01);
+      supportDirection = new Vector3D(100.0, 0.01, -0.01);
       supportingVertex = polytope.getSupportingVertex(supportDirection);
       assertTrue(supportingVertex == vertexThree.getPosition());
    }
@@ -136,10 +135,10 @@ public class ConvexPolytopeTest
       PolytopeVertex vertexThree = polytope.addVertex(1.0, 1.0, 0.0);
       PolytopeVertex vertexFour = polytope.addVertex(0.0, 1.0, 0.0);
 
-      PolytopeVertex vertexFive = polytope.addVertex(new Point3d(0.0, 0.0, 1.0));
-      PolytopeVertex vertexSix = polytope.addVertex(new Point3d(1.0, 0.0, 1.0));
-      PolytopeVertex vertexSeven = polytope.addVertex(new Point3d(1.0, 1.0, 1.0));
-      PolytopeVertex vertexEight = polytope.addVertex(new Point3d(0.0, 1.0, 1.0));
+      PolytopeVertex vertexFive = polytope.addVertex(new Point3D(0.0, 0.0, 1.0));
+      PolytopeVertex vertexSix = polytope.addVertex(new Point3D(1.0, 0.0, 1.0));
+      PolytopeVertex vertexSeven = polytope.addVertex(new Point3D(1.0, 1.0, 1.0));
+      PolytopeVertex vertexEight = polytope.addVertex(new Point3D(0.0, 1.0, 1.0));
 
       polytope.addEdge(vertexOne, vertexTwo);
       polytope.addEdge(vertexTwo, vertexThree);
@@ -158,14 +157,14 @@ public class ConvexPolytopeTest
       
       polytope.getBoundingBox(boundingBox);
       
-      Point3d minimumPoint = new Point3d();
+      Point3D minimumPoint = new Point3D();
       boundingBox.getMinPoint(minimumPoint);
       
-      Point3d maximumPoint = new Point3d();
+      Point3D maximumPoint = new Point3D();
       boundingBox.getMaxPoint(maximumPoint);
       
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, 0.0), minimumPoint, 1e-10);
-      JUnitTools.assertTuple3dEquals(new Point3d(1.0, 1.0, 1.0), maximumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.0), minimumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 1.0, 1.0), maximumPoint, 1e-10);
       
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(10, 20, 30);
@@ -176,15 +175,13 @@ public class ConvexPolytopeTest
       boundingBox.getMinPoint(minimumPoint);
       boundingBox.getMaxPoint(maximumPoint);
       
-      JUnitTools.assertTuple3dEquals(new Point3d(10.0, 20.0, 30.0), minimumPoint, 1e-10);
-      JUnitTools.assertTuple3dEquals(new Point3d(11.0, 21.0, 31.0), maximumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(10.0, 20.0, 30.0), minimumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(11.0, 21.0, 31.0), maximumPoint, 1e-10);
       
    }
 
    public static void main(String[] args)
    {
-      String targetTests = ConvexPolytopeTest.class.getName();
-      String targetClassesInSamePackage = MutationTestingTools.createClassSelectorStringFromTargetString(targetTests);
-      MutationTestingTools.doPITMutationTestAndOpenResult(targetTests, targetClassesInSamePackage);
+      MutationTestFacilitator.facilitateMutationTestForPackage(ConvexPolytopeTest.class);
    }
 }

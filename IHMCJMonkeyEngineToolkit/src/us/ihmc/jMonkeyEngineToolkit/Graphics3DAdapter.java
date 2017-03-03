@@ -3,13 +3,12 @@ package us.ihmc.jMonkeyEngineToolkit;
 import java.awt.GraphicsDevice;
 import java.net.URL;
 
-import javax.vecmath.Color3f;
-
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.mouse.MouseListener;
@@ -43,7 +42,7 @@ public interface Graphics3DAdapter
 
    public void closeAndDispose();
 
-   public void setBackgroundColor(Color3f color);
+   public void setBackgroundColor(MutableColor color);
 
    public void setBackgroundImage(URL fileURL, Graphics3DBackgroundScaleMode backgroundScaleMode);
 

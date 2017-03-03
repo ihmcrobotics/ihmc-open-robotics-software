@@ -2,13 +2,12 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import static org.junit.Assert.assertTrue;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -60,8 +59,8 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
 
       if (visualize)
       {
-         Point3d cameraPosition = new Point3d(4.5, -8.0, 12.0);
-         Point3d cameraFix = new Point3d(4.5, 0.0, 0.25);
+         Point3D cameraPosition = new Point3D(4.5, -8.0, 12.0);
+         Point3D cameraFix = new Point3D(4.5, 0.0, 0.25);
          
          visualizerOne = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition, footPolygonsInSoleFrameOne, registryOne);
          visualizerTwo = SCSPlanarRegionBipedalFootstepPlannerVisualizer.createWithSimulationConstructionSet(0.01, cameraFix, cameraPosition,  footPolygonsInSoleFrameTwo, registryTwo);
@@ -178,13 +177,13 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
       double xGoal = 9.0;
       double yGoal = 0.3;
       double yawGoal = 0.2;
-      Point2d goalPosition = new Point2d(xGoal, yGoal);
+      Point2D goalPosition = new Point2D(xGoal, yGoal);
       FramePose2d goalPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), goalPosition, yawGoal);
 
       double xInitialStanceFoot = 0.0;
       double yInitialStanceFoot = 0.0;
       double yawInitial = 0.0;
-      Point2d initialStanceFootPosition = new Point2d(xInitialStanceFoot, yInitialStanceFoot);
+      Point2D initialStanceFootPosition = new Point2D(xInitialStanceFoot, yInitialStanceFoot);
       FramePose2d initialStanceFootPose2d = new FramePose2d(ReferenceFrame.getWorldFrame(), initialStanceFootPosition, yawInitial);
 
       FramePose initialStanceFootPose3d = FlatGroundPlanningUtils.poseFormPose2d(initialStanceFootPose2d);
@@ -193,7 +192,7 @@ public class SimplePlanarRegionBipedalAnytimeFootstepPlannerTest
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       goal.setGoalPoseBetweenFeet(goalPose);
-      goal.setXYGoal(new Point2d(goalPose.getX(), goalPose.getY()), 0.5);
+      goal.setXYGoal(new Point2D(goalPose.getX(), goalPose.getY()), 0.5);
 
       planner.setInitialStanceFoot(initialStanceFootPose3d, initialStanceSide);
       planner.setGoal(goal);

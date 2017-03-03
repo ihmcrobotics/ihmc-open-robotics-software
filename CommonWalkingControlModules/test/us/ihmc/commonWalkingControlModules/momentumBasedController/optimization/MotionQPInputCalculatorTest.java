@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
@@ -18,11 +16,13 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -49,9 +49,9 @@ public class MotionQPInputCalculatorTest
          ReferenceFrame elevatorFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
          RigidBody elevator = new RigidBody("elevator", elevatorFrame);
          int numberOfJoints = 10;
-         Vector3d[] jointAxes = new Vector3d[numberOfJoints];
+         Vector3D[] jointAxes = new Vector3D[numberOfJoints];
          for (int i = 0; i < numberOfJoints; i++)
-            jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
+            jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
          ScrewTestTools.createRandomChainRobot("blop", joints, elevator, jointAxes, random);
          ScrewTestTools.setRandomPositions(joints, random);
@@ -99,7 +99,8 @@ public class MotionQPInputCalculatorTest
          FrameVector actualLinearAcceleration = new FrameVector();
          spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
 
-         assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0-7));
+         desiredLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
+         EuclidCoreTestTools.assertTuple3DEquals(desiredLinearAcceleration.getVector(), actualLinearAcceleration.getVector(), 1.0e-7);
       }
    }
 
@@ -112,9 +113,9 @@ public class MotionQPInputCalculatorTest
       for (int iteration = 0; iteration < 100; iteration++)
       {
          int numberOfJoints = 10;
-         Vector3d[] jointAxes = new Vector3d[numberOfJoints];
+         Vector3D[] jointAxes = new Vector3D[numberOfJoints];
          for (int i = 0; i < numberOfJoints; i++)
-            jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
+            jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
 
          ScrewTestTools.RandomFloatingChain randomFloatingChain = new ScrewTestTools.RandomFloatingChain(random, jointAxes);
          List<RevoluteJoint> joints = randomFloatingChain.getRevoluteJoints();
@@ -165,7 +166,7 @@ public class MotionQPInputCalculatorTest
          FrameVector actualLinearAcceleration = new FrameVector();
          spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
 
-         assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0-7));
+         assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0e-7));
       }
    }
 }

@@ -5,20 +5,6 @@ import java.awt.Color;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.jMonkeyEngineToolkit.ContextSwitchedListener;
-import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
-import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
-import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
-import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-import us.ihmc.jMonkeyEngineToolkit.jme.context.PBOAwtPanel;
-import us.ihmc.jMonkeyEngineToolkit.jme.context.PBOAwtPanelsContext;
-import us.ihmc.jMonkeyEngineToolkit.jme.input.JMEInputManager;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.tools.time.Timer;
-
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.light.DirectionalLight;
@@ -39,6 +25,19 @@ import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.system.awt.PaintMode;
 import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.Image.Format;
+
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.jMonkeyEngineToolkit.ContextSwitchedListener;
+import us.ihmc.jMonkeyEngineToolkit.Graphics3DFrameListener;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.jMonkeyEngineToolkit.jme.context.PBOAwtPanel;
+import us.ihmc.jMonkeyEngineToolkit.jme.context.PBOAwtPanelsContext;
+import us.ihmc.jMonkeyEngineToolkit.jme.input.JMEInputManager;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 
 public class JMEViewportAdapter extends ViewportAdapter implements InputMapSetter, SceneProcessor
 {
@@ -70,7 +69,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
 
    private final JMERenderer jmeRenderer;
 
-   private Timer frameTimer = new Timer().start();
+   private Stopwatch frameTimer = new Stopwatch().start();
 
    public JMEViewportAdapter(JMERenderer jmeRenderer, Node rootNode, boolean isMainViewport, ViewportType viewportType)
    {
@@ -382,7 +381,7 @@ public class JMEViewportAdapter extends ViewportAdapter implements InputMapSette
     * @param y Y coordinate on screen
     * @param z Depth as relative value between near and far frustrum
     */
-   public Point3d getWorldCoordinatesFromScreenCoordinates(float x, float y, double z)
+   public Point3D getWorldCoordinatesFromScreenCoordinates(float x, float y, double z)
    {
       Vector3f worldCoordinates = jmeCamera.getWorldCoordinates(new Vector2f(x, y), (float) z);
       JMEGeometryUtils.transformFromJMECoordinatesToZup(worldCoordinates);

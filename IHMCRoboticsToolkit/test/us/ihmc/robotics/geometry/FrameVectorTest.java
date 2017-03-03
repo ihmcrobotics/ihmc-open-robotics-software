@@ -6,18 +6,19 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
 
 /**
  * <p>Title: </p>
@@ -31,7 +32,7 @@ import us.ihmc.tools.testing.JUnitTools;
  * @author not attributable
  * @version 1.0
  */
-public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
+public class FrameVectorTest extends FrameTupleTest<Vector3D>
 {
 
    @After
@@ -52,7 +53,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
    }
 
    @Override
-   public FrameTuple<FrameVector, TransformableVector3d> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
+   public FrameTuple<FrameVector, Vector3D> createFrameTuple(ReferenceFrame referenceFrame, double x, double y, double z, String name)
    {
       return new FrameVector(referenceFrame, x, y, z, name);
    }
@@ -61,10 +62,10 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
 	@Test(timeout = 30000)
    public void allConstructorsWork() //Brett
    {
-      Tuple3d tuple = new Point3d(1.0, 1.0, 1.0);
+      Tuple3DBasics tuple = new Point3D(1.0, 1.0, 1.0);
       String name = "VectorName";
       double[] doubleArray = {10.0, -20.0, 35.0};
-      Vector3d zeroVector = new Vector3d(0.0, 0.0, 0.0);
+      Vector3D zeroVector = new Vector3D(0.0, 0.0, 0.0);
 
       FrameVector frameTuple = new FrameVector(theFrame, tuple);
       assertEquals("These should be equal", tuple, frameTuple.getVector());
@@ -79,7 +80,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       assertEquals("These should be equal", theFrame, frameTupleString.getReferenceFrame());
 
       FrameVector frameDoubles = new FrameVector(theFrame, doubleArray);
-      Tuple3d position = new Vector3d(doubleArray);
+      Tuple3DBasics position = new Vector3D(doubleArray);
       assertEquals("These should be equal", position, frameDoubles.getVector());
       frameDoubles.setName(name);
       assertEquals("These should be equal", name, frameDoubles.getName());
@@ -142,7 +143,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
    public void testGetVector()
    {
       FrameVector frameVector = new FrameVector(theFrame, 10.0, 20.0, 30.0);
-      Vector3d expected = frameVector.getVector();
+      Vector3D expected = frameVector.getVector();
       assertEquals("These should be equal", 10.0, expected.getX(), epsilon);
       assertEquals("These should be equal", 20.0, expected.getY(), epsilon);
    }
@@ -199,9 +200,9 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
    {
       Random random = new Random(100L);
 
-      FrameVector randomFrameVector = new FrameVector(theFrame, RandomTools.generateRandomVector(random));
+      FrameVector randomFrameVector = new FrameVector(theFrame, RandomGeometry.nextVector3D(random));
       FrameVector parallelVector = new FrameVector(randomFrameVector);
-      parallelVector.scale(RandomTools.generateRandomDouble(random, -1.0, 1.0));
+      parallelVector.scale(RandomNumbers.nextDouble(random, -1.0, 1.0));
 
       String errorMsg = "\n" + randomFrameVector + "\n should be parallel to: \n" + parallelVector + "\n Angle between vectors = " + randomFrameVector.angle(parallelVector);
       assertTrue(errorMsg, randomFrameVector.isEpsilonParallel(parallelVector, 1e-7));
@@ -214,7 +215,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       for(int i = 0; i < 100; i++) //compare against Vector3d.length()
       {
          Random random = new Random(45456L);
-         Vector3d vector3d = RandomTools.generateRandomVector(random);
+         Vector3D vector3d = RandomGeometry.nextVector3D(random);
          FrameVector frameVector= new FrameVector(theFrame, vector3d);
          double vector3dResult = vector3d.length();
          double frameVectorResult = frameVector.length();
@@ -237,9 +238,9 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       for(int i = 0; i < 100; i++)
       {
          Random random = new Random(45456L);
-         Vector3d vector3d = RandomTools.generateRandomVector(random);
+         Vector3D vector3d = RandomGeometry.nextVector3D(random);
          FrameVector frameVector = new FrameVector(theFrame, vector3d);
-         RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+         RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
          frameVector.applyTransform(transform);  //Compare transform of Vector3d and FrameVector
          transform.transform(vector3d);
@@ -255,7 +256,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       FrameVector frameVector2 = createFrameTuple(theFrame, 0, 1, 2);
       FrameVector v2other = createFrameTuple(aFrame, 0, 1, 2);
       FrameVector result = createFrameTuple(theFrame, 0, 0, 0);
-      Vector3d expected = new Vector3d(1, -2, 1);
+      Vector3D expected = new Vector3D(1, -2, 1);
 
       result.cross(frameVector1, frameVector2);
       assertTrue(result.getVector().epsilonEquals(expected, epsilon)); //correctly calculates cross product
@@ -285,10 +286,10 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       for(int i = 0; i < 100; i++) //compare against Vector3d.cross()
       {
          Random random = new Random(45456L);
-         Vector3d v1 = RandomTools.generateRandomVector(random);
-         Vector3d v2 = RandomTools.generateRandomVector(random);
-         Vector3d v3 = RandomTools.generateRandomVector(random);
-         Vector3d staticResult = RandomTools.generateRandomVector(random);
+         Vector3D v1 = RandomGeometry.nextVector3D(random);
+         Vector3D v2 = RandomGeometry.nextVector3D(random);
+         Vector3D v3 = RandomGeometry.nextVector3D(random);
+         Vector3D staticResult = RandomGeometry.nextVector3D(random);
          FrameVector fv1 = new FrameVector(theFrame, v1);
          FrameVector fv2 = new FrameVector(theFrame, v2);
          FrameVector fv3 = new FrameVector(theFrame, v3);
@@ -312,9 +313,9 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
 
       for(int i = 0; i < 100; i++) //compare against Vector3d.cross()
       {
-         Vector3d v1 = RandomTools.generateRandomVector(random);
-         Vector3d v2 = RandomTools.generateRandomVector(random);
-         Vector3d v3 = RandomTools.generateRandomVector(random);
+         Vector3D v1 = RandomGeometry.nextVector3D(random);
+         Vector3D v2 = RandomGeometry.nextVector3D(random);
+         Vector3D v3 = RandomGeometry.nextVector3D(random);
          
 
          v3.cross(v1, v2);  //Compare cross of Vector3d and FrameVector
@@ -331,7 +332,7 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
       for(int i = 0; i < 100; i++) //sum of squares of normalized vector equals 1
       {
          Random random = new Random(45456L);
-         Vector3d vector3d = RandomTools.generateRandomVector(random);
+         Vector3D vector3d = RandomGeometry.nextVector3D(random);
          FrameVector v1 = new FrameVector(theFrame, vector3d);
          v1.normalize();
          double sumOfSquares = v1.getX()*v1.getX() + v1.getY()*v1.getY() + v1.getZ()*v1.getZ(); 
@@ -342,6 +343,6 @@ public class FrameVectorTest extends FrameTupleTest<TransformableVector3d>
    public static void assertFrameVectorEquals(FrameVector expected, FrameVector actual, double delta)
    {
       expected.checkReferenceFrameMatch(actual);
-      JUnitTools.assertTuple3dEquals(expected.getVector(), actual.getVector(), delta);
+      EuclidCoreTestTools.assertTuple3DEquals(expected.getVector(), actual.getVector(), delta);
    }
 }

@@ -18,12 +18,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -216,9 +215,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 
    private final double updateDT;
 
-   private final Matrix3d tempOrientation = new Matrix3d();
-   private final Vector3d tempAngularVelocity = new Vector3d();
-   private final Vector3d tempLinearAcceleration = new Vector3d();
+   private final RotationMatrix tempOrientation = new RotationMatrix();
+   private final Vector3D tempAngularVelocity = new Vector3D();
+   private final Vector3D tempLinearAcceleration = new Vector3D();
 
    private final FrameVector tempForce = new FrameVector();
    private final FrameVector tempTorque = new FrameVector();
@@ -1387,22 +1386,22 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       inputJointTaus.get(oneDoFJoint).set(value);
    }
 
-   public void setOrientationSensorValue(IMUDefinition imuDefinition, Quat4d value)
+   public void setOrientationSensorValue(IMUDefinition imuDefinition, Quaternion value)
    {
       inputOrientations.get(imuDefinition).set(value);
    }
 
-   public void setOrientationSensorValue(IMUDefinition imuDefinition, Matrix3d value)
+   public void setOrientationSensorValue(IMUDefinition imuDefinition, RotationMatrix value)
    {
       inputOrientations.get(imuDefinition).set(value);
    }
 
-   public void setAngularVelocitySensorValue(IMUDefinition imuDefinition, Vector3d value)
+   public void setAngularVelocitySensorValue(IMUDefinition imuDefinition, Vector3D value)
    {
       inputAngularVelocities.get(imuDefinition).set(value);
    }
 
-   public void setLinearAccelerationSensorValue(IMUDefinition imuDefinition, Vector3d value)
+   public void setLinearAccelerationSensorValue(IMUDefinition imuDefinition, Vector3D value)
    {
       inputLinearAccelerations.get(imuDefinition).set(value);
    }

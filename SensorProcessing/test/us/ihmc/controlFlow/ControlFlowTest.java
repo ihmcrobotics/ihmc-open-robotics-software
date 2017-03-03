@@ -6,12 +6,11 @@ import static org.junit.Assert.fail;
 
 import java.util.List;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class ControlFlowTest
@@ -279,7 +278,7 @@ public class ControlFlowTest
       DataTypeFour dataTypeFour = dataTypeFourOutputPort.getData();
       DataTypeFive dataTypeFive = dataTypeFiveOutputPort.getData();
 
-      JUnitTools.assertTuple3dEquals(new Point3d(x, y, q), dataTypeFour.getPoint(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(x, y, q), dataTypeFour.getPoint(), 1e-7);
 
       String expectedString = "scale";
       assertTrue(expectedString.equals(dataTypeFive.getString()));
@@ -347,12 +346,12 @@ public class ControlFlowTest
       DataTypeFour dataTypeFourOutput = graphDataTypeFourOutputPort.getData();
       DataTypeFive dataTypeFiveOutput = graphDataTypeFiveOutputPort.getData();
 
-      Point3d point3dOut = dataTypeFourOutput.getPoint();
+      Point3D point3dOut = dataTypeFourOutput.getPoint();
       String stringOut = dataTypeFiveOutput.getString();
 
-      Point3d expectePoint3d = new Point3d(x, y, (x + y) * z);
+      Point3D expectePoint3d = new Point3D(x, y, (x + y) * z);
       expectePoint3d.scale(2.0);
-      JUnitTools.assertTuple3dEquals(expectePoint3d, point3dOut, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(expectePoint3d, point3dOut, 1e-7);
 
       assertEquals("testingOneTwoThree, q = " + (x + y) * z, stringOut);
 

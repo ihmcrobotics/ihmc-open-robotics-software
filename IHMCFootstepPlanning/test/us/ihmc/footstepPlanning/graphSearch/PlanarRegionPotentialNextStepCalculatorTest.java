@@ -4,22 +4,23 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
 import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -65,20 +66,26 @@ public class PlanarRegionPotentialNextStepCalculatorTest
          listener.setTickAndUpdatable(scs);
       }
 
-      Point3d goalPosition = new Point3d(5.0, 0.0, 0.0);
-      AxisAngle4d goalOrientation = new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), 0.0);
+      Point3D goalPosition = new Point3D(0.0, 0.0, 0.0);
+      AxisAngle goalOrientation = new AxisAngle(new Vector3D(0.0, 0.0, 1.0), Math.PI/2.0);
       int maxNumberOfExpectedFootsteps = 20;
 
       testAndVisualizeToGoal(goalPosition, goalOrientation, calculator, listener, maxNumberOfExpectedFootsteps);
+      
+      goalPosition = new Point3D(5.0, 0.0, 0.0);
+      goalOrientation = new AxisAngle(new Vector3D(0.0, 0.0, 1.0), 0.0);
+      maxNumberOfExpectedFootsteps = 20;
 
-      goalPosition = new Point3d(0.0, 5.0, 0.0);
-      goalOrientation = new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), 0.0);
+      testAndVisualizeToGoal(goalPosition, goalOrientation, calculator, listener, maxNumberOfExpectedFootsteps);
+
+      goalPosition = new Point3D(0.0, 5.0, 0.0);
+      goalOrientation = new AxisAngle(new Vector3D(0.0, 0.0, 1.0), 0.0);
       maxNumberOfExpectedFootsteps = 40;
 
       testAndVisualizeToGoal(goalPosition, goalOrientation, calculator, listener, maxNumberOfExpectedFootsteps);
 
-      goalPosition = new Point3d(5.0, 0.0, 0.0);
-      goalOrientation = new AxisAngle4d(new Vector3d(0.0, 0.0, 1.0), Math.PI);
+      goalPosition = new Point3D(5.0, 0.0, 0.0);
+      goalOrientation = new AxisAngle(new Vector3D(0.0, 0.0, 1.0), Math.PI);
       maxNumberOfExpectedFootsteps = 40;
 
       testAndVisualizeToGoal(goalPosition, goalOrientation, calculator, listener, maxNumberOfExpectedFootsteps);
@@ -92,13 +99,22 @@ public class PlanarRegionPotentialNextStepCalculatorTest
       }
    }
 
-   private void testAndVisualizeToGoal(Point3d goalPosition, AxisAngle4d goalOrientation, PlanarRegionPotentialNextStepCalculator calculator, PlanarRegionBipedalFootstepPlannerVisualizer listener, int maxNumberOfExpectedFootsteps)
+   private void testAndVisualizeToGoal(Point3D goalPosition, AxisAngle goalOrientation, PlanarRegionPotentialNextStepCalculator calculator, PlanarRegionBipedalFootstepPlannerVisualizer listener, int maxNumberOfExpectedFootsteps)
    {
       FootstepPlannerGoal goal = new FootstepPlannerGoal();
       goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
       FramePose goalPoseBetweenFeet = new FramePose(ReferenceFrame.getWorldFrame(), goalPosition, goalOrientation);
       goal.setGoalPoseBetweenFeet(goalPoseBetweenFeet);
       calculator.setGoal(goal);
+      
+      Point3D leftGoalPosition = calculator.getGoalPosition(RobotSide.LEFT);
+      EuclidCoreTestTools.assertTuple3DEquals(goalPosition, leftGoalPosition, 0.1);
+      Point3D rightGoalPosition = calculator.getGoalPosition(RobotSide.RIGHT);
+      EuclidCoreTestTools.assertTuple3DEquals(goalPosition, rightGoalPosition, 0.1);
+      Point3D averageGoalPosition = new Point3D(leftGoalPosition);
+      averageGoalPosition.add(rightGoalPosition);
+      averageGoalPosition.scale(0.5);
+      EuclidCoreTestTools.assertTuple3DEquals(goalPosition, averageGoalPosition, 0.001);
 
       RobotSide footstepSide = RobotSide.LEFT;
       RigidBodyTransform soleTransform = new RigidBodyTransform();
@@ -127,6 +143,15 @@ public class PlanarRegionPotentialNextStepCalculatorTest
             node = null;
       }
 
+      Point3D solePosition = endNode.getSolePosition();
+      EuclidCoreTestTools.assertTuple3DEquals(goalPosition, solePosition, 0.25);
+
+      double soleYaw = endNode.getSoleYaw();
+      double goalYaw = goalOrientation.getYaw();
+      double angleDifference = AngleTools.computeAngleDifferenceMinusPiToPi(soleYaw, goalYaw);
+
+      assertTrue("didn't reach goal yaw of " + goalYaw + ". Instead last foot was at yaw of " + soleYaw, Math.abs(angleDifference) < 0.1);
+
       FootstepPlan footstepPlan = new FootstepPlan(endNode);
 //      System.out.println(footstepPlan.getNumberOfSteps());
       listener.solutionWasFound(footstepPlan);
@@ -152,6 +177,8 @@ public class PlanarRegionPotentialNextStepCalculatorTest
       parameters.setWiggleInsideDelta(0.08);
       parameters.setMaximumXYWiggleDistance(1.0);
       parameters.setMaximumYawWiggle(0.1);
+
+      parameters.setMinimumStepLength(-0.2);
 
       double idealFootstepLength = 0.3;
       double idealFootstepWidth = 0.2;

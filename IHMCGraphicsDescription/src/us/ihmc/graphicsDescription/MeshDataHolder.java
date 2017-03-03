@@ -2,15 +2,12 @@ package us.ihmc.graphicsDescription;
 
 import java.lang.reflect.Array;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4f;
-import javax.vecmath.TexCoord2f;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector3f;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 
 /**
  * This class provides an immutable data structure for 3D graphic mesh that is independent from the graphics engine to be used.
@@ -19,10 +16,10 @@ import javax.vecmath.Vector3f;
  */
 public class MeshDataHolder
 {
-   private final Point3f[] vertices;
+   private final Point3D32[] vertices;
    private final TexCoord2f[] texturePoints;
    private final int[] triangleIndices;
-   private final Vector3f[] vertexNormals;
+   private final Vector3D32[] vertexNormals;
    private String name = "MeshDataHolder";
 
    /**
@@ -32,7 +29,7 @@ public class MeshDataHolder
     * @param triangleIndices a list of triplet indices. Each triplet describes the three indices used to pick the three vertex coordinates, texture coordinates, and normal coordinates to render a 3D triangle.
     * @param vertexNormals the 3D normal coordinates to be used for each vertex of the mesh.
     */
-   public MeshDataHolder(Point3f[] vertices, TexCoord2f[] texturePoints, int[] triangleIndices, Vector3f[] vertexNormals)
+   public MeshDataHolder(Point3D32[] vertices, TexCoord2f[] texturePoints, int[] triangleIndices, Vector3D32[] vertexNormals)
    {
       this.vertices = vertices;
       this.texturePoints = texturePoints;
@@ -43,7 +40,7 @@ public class MeshDataHolder
    /**
     * @return the 3D coordinates of the mesh vertices.
     */
-   public Point3f[] getVertices()
+   public Point3D32[] getVertices()
    {
       return vertices;
    }
@@ -67,7 +64,7 @@ public class MeshDataHolder
    /**
     * @return the 3D normal coordinates to be used for each vertex of the mesh.
     */
-   public Vector3f[] getVertexNormals()
+   public Vector3D32[] getVertexNormals()
    {
       return vertexNormals;
    }
@@ -88,20 +85,20 @@ public class MeshDataHolder
     * @param matrix the rotation to apply to the mesh. Not Modified.
     * @return the rotated mesh.
     */
-   public static MeshDataHolder rotate(MeshDataHolder input, Matrix3f matrix)
+   public static MeshDataHolder rotate(MeshDataHolder input, RotationMatrix matrix)
    {
       TexCoord2f[] texturePoints = input.getTexturePoints();
       int[] triangleIndices = input.getTriangleIndices();
-      Point3f[] inputVertices = input.getVertices();
-      Vector3f[] inputNormals = input.getVertexNormals();
+      Point3D32[] inputVertices = input.getVertices();
+      Vector3D32[] inputNormals = input.getVertexNormals();
 
-      Point3f[] outputVertices = new Point3f[inputVertices.length];
-      Vector3f[] outputNormals = new Vector3f[inputNormals.length];
+      Point3D32[] outputVertices = new Point3D32[inputVertices.length];
+      Vector3D32[] outputNormals = new Vector3D32[inputNormals.length];
 
       for (int i = 0; i < inputVertices.length; i++)
       {
-         outputVertices[i] = new Point3f();
-         outputNormals[i] = new Vector3f();
+         outputVertices[i] = new Point3D32();
+         outputNormals[i] = new Vector3D32();
          matrix.transform(inputVertices[i], outputVertices[i]);
          matrix.transform(inputNormals[i], outputNormals[i]);
       }
@@ -111,23 +108,12 @@ public class MeshDataHolder
    /**
     * Utility method to rotate a given mesh using a given rotation matrix.
     * @param input the mesh to rotate. Not modified.
-    * @param matrix the rotation to apply to the mesh. Not Modified.
-    * @return the rotated mesh.
-    */
-   public static MeshDataHolder rotate(MeshDataHolder input, Matrix3d matrix)
-   {
-      return rotate(input, new Matrix3f(matrix));
-   }
-
-   /**
-    * Utility method to rotate a given mesh using a given rotation matrix.
-    * @param input the mesh to rotate. Not modified.
     * @param axisAngle the axis-angle describing the rotation to apply to the mesh. Not Modified.
     * @return the rotated mesh.
     */
-   public static MeshDataHolder rotate(MeshDataHolder input, AxisAngle4d axisAngle)
+   public static MeshDataHolder rotate(MeshDataHolder input, AxisAngle axisAngle)
    {
-      Matrix3f matrix = new Matrix3f();
+      RotationMatrix matrix = new RotationMatrix();
       matrix.set(axisAngle);
       return rotate(input, matrix);
    }
@@ -138,9 +124,9 @@ public class MeshDataHolder
     * @param quaternion the quaternion describing the rotation to apply to the mesh. Not Modified.
     * @return the rotated mesh.
     */
-   public static MeshDataHolder rotate(MeshDataHolder input, Quat4f quaternion)
+   public static MeshDataHolder rotate(MeshDataHolder input, Quaternion32 quaternion)
    {
-      Matrix3f matrix = new Matrix3f();
+      RotationMatrix matrix = new RotationMatrix();
       matrix.set(quaternion);
       return rotate(input, matrix);
    }
@@ -155,15 +141,15 @@ public class MeshDataHolder
     */
    public static MeshDataHolder translate(MeshDataHolder input, float offsetX, float offsetY, float offsetZ)
    {
-      Point3f[] inputVertices = input.getVertices();
+      Point3D32[] inputVertices = input.getVertices();
       TexCoord2f[] texturePoints = input.getTexturePoints();
       int[] triangleIndices = input.getTriangleIndices();
-      Vector3f[] normals = input.getVertexNormals();
+      Vector3D32[] normals = input.getVertexNormals();
 
-      Point3f[] outputVertices = new Point3f[inputVertices.length];
+      Point3D32[] outputVertices = new Point3D32[inputVertices.length];
       for (int i = 0; i < inputVertices.length; i++)
       {
-         outputVertices[i] = new Point3f(offsetX, offsetY, offsetZ);
+         outputVertices[i] = new Point3D32(offsetX, offsetY, offsetZ);
          outputVertices[i].add(inputVertices[i]);
       }
       return new MeshDataHolder(outputVertices, texturePoints, triangleIndices, normals);
@@ -175,14 +161,9 @@ public class MeshDataHolder
     * @param offset translation to apply to the mesh. Not modified.
     * @return the translated mesh.
     */
-   public static MeshDataHolder translate(MeshDataHolder input, Tuple3f offset)
+   public static MeshDataHolder translate(MeshDataHolder input, Tuple3DReadOnly offset)
    {
-      return translate(input, offset.getX(), offset.getY(), offset.getZ());
-   }
-
-   public static MeshDataHolder translate(MeshDataHolder input, Tuple3d offset)
-   {
-      return translate(input, (float) offset.getX(), (float) offset.getY(), (float) offset.getZ());
+      return translate(input, offset.getX32(), offset.getY32(), offset.getZ32());
    }
 
    /**
@@ -195,9 +176,9 @@ public class MeshDataHolder
     */
    public static MeshDataHolder combine(MeshDataHolder meshData1, MeshDataHolder meshData2, boolean updateMeshData2TrianglesIndices)
    {
-      Point3f[] vertices = combineArrays(meshData1.vertices, meshData2.vertices);
+      Point3D32[] vertices = combineArrays(meshData1.vertices, meshData2.vertices);
       TexCoord2f[] texturePoints = combineArrays(meshData1.texturePoints, meshData2.texturePoints);
-      Vector3f[] vertexNormals = combineArrays(meshData1.vertexNormals, meshData2.vertexNormals);
+      Vector3D32[] vertexNormals = combineArrays(meshData1.vertexNormals, meshData2.vertexNormals);
       int[] triangleIndices = combineArrays(meshData1.triangleIndices, meshData2.triangleIndices);
 
       if (updateMeshData2TrianglesIndices)

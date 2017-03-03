@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionAction;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.communication.subscribers.RobotDataReceiver;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -181,7 +181,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       if (simTimestamp < 0)
          return;
 
-      double currentTimeInSeconds = TimeTools.nanoSecondstoSeconds(simTimestamp);
+      double currentTimeInSeconds = Conversions.nanoSecondstoSeconds(simTimestamp);
       yoTime.set(currentTimeInSeconds);
    }
 
@@ -233,7 +233,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
          if (yoVaribleServer != null)
          {
-            yoVaribleServer.update(TimeTools.secondsToNanoSeconds(yoTime.getDoubleValue()));
+            yoVaribleServer.update(Conversions.secondsToNanoSeconds(yoTime.getDoubleValue()));
          }
       }
       catch (Exception e)

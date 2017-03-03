@@ -58,12 +58,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
-import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
-import us.ihmc.tools.thread.ThreadTools;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -77,6 +71,14 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.FrameBuffer.RenderBuffer;
 import com.jme3.util.BufferUtils;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * Transfer data from GPU to CPU quickly by using two Pixel Buffer Objects (PBO's).
@@ -274,8 +276,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private class GraphicsUpdater implements Runnable
    {
       public long timeStamp = 0;
-      public Point3d position = new Point3d();
-      public Quat4d orientation = new Quat4d();
+      public Point3DReadOnly position = new Point3D();
+      public QuaternionReadOnly orientation = new Quaternion();
       public double fov = Math.PI / 2.0;
 
       public void run()

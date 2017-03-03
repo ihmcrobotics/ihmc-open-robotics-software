@@ -7,10 +7,11 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -22,7 +23,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.jMonkeyEngineToolkit.utils.GraphicsDemoTools;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class Graphics3DAdapterExampleTwo
 {
@@ -33,7 +33,7 @@ public class Graphics3DAdapterExampleTwo
       Graphics3DNode node1 = new Graphics3DNode("node1", Graphics3DNodeType.JOINT);
       
       RigidBodyTransform transform1 = new RigidBodyTransform();
-      transform1.setTranslation(new Vector3d(2.0, 0.0, 0.0));
+      transform1.setTranslation(new Vector3D(2.0, 0.0, 0.0));
       node1.setTransform(transform1);
       
       Graphics3DNode node2 = new Graphics3DNode("node2", Graphics3DNodeType.JOINT);
@@ -52,8 +52,8 @@ public class Graphics3DAdapterExampleTwo
       
       SelectedListener selectedListener = new SelectedListener()
       {
-         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation,
-               Quat4d cameraRotation)
+         public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+               QuaternionReadOnly cameraRotation)
          {
             System.out.println("Selected " + graphics3dNode.getName() + " @ location " + location);                        
             
@@ -87,7 +87,8 @@ public class Graphics3DAdapterExampleTwo
       while (true)
       {
          rotation = rotation + 0.01;
-         node2.getTransform().setRotationYawAndZeroTranslation(rotation);
+         node2.getTransform().setRotationYaw(rotation);
+         node2.getTransform().setTranslationToZero();
          
          count++;
          if (count > 200)

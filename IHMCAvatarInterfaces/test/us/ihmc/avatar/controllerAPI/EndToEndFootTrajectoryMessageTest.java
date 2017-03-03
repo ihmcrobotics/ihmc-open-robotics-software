@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +20,9 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -41,7 +40,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoin
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -83,8 +82,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
@@ -96,8 +95,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          // Now we can do the usual test.
          double trajectoryTime = 1.0;
          FramePose desiredRandomFootPose = new FramePose(foot.getBodyFixedFrame());
-         desiredRandomFootPose.setOrientation(RandomTools.generateRandomQuaternion(random, 1.0));
-         desiredRandomFootPose.setPosition(RandomTools.generateRandomPoint(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
+         desiredRandomFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+         desiredRandomFootPose.setPosition(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
          desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          desiredRandomFootPose.getPose(desiredPosition, desiredOrientation);
@@ -150,8 +149,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
@@ -195,10 +194,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
-            desiredPosition = new Point3d();
-            Vector3d desiredLinearVelocity = new Vector3d();
-            desiredOrientation = new Quat4d();
-            Vector3d desiredAngularVelocity = new Vector3d();
+            desiredPosition = new Point3D();
+            Vector3D desiredLinearVelocity = new Vector3D();
+            desiredOrientation = new Quaternion();
+            Vector3D desiredAngularVelocity = new Vector3D();
             tempOrientation.getQuaternion(desiredOrientation);
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
@@ -274,8 +273,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
@@ -303,7 +302,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
          euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
 
-         Point3d[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(1.0, numberOfTrajectoryPoints);
+         Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(1.0, numberOfTrajectoryPoints);
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
@@ -325,10 +324,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
-            desiredPosition = new Point3d();
-            Vector3d desiredLinearVelocity = new Vector3d();
-            desiredOrientation = new Quat4d();
-            Vector3d desiredAngularVelocity = new Vector3d();
+            desiredPosition = new Point3D();
+            Vector3D desiredLinearVelocity = new Vector3D();
+            desiredOrientation = new Quaternion();
+            Vector3D desiredAngularVelocity = new Vector3D();
             tempOrientation.getQuaternion(desiredOrientation);
 
             double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
@@ -425,8 +424,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
@@ -490,10 +489,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             for (int i = 0; i < numberOfTrajectoryPoints; i++)
             {
-               desiredPosition = new Point3d();
-               Vector3d desiredLinearVelocity = new Vector3d();
-               desiredOrientation = new Quat4d();
-               Vector3d desiredAngularVelocity = new Vector3d();
+               desiredPosition = new Point3D();
+               Vector3D desiredLinearVelocity = new Vector3D();
+               desiredOrientation = new Quaternion();
+               Vector3D desiredAngularVelocity = new Vector3D();
                tempOrientation.getQuaternion(desiredOrientation);
 
                double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
@@ -583,8 +582,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
@@ -654,10 +653,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             for (int i = 0; i < numberOfTrajectoryPoints; i++)
             {
-               desiredPosition = new Point3d();
-               Vector3d desiredLinearVelocity = new Vector3d();
-               desiredOrientation = new Quat4d();
-               Vector3d desiredAngularVelocity = new Vector3d();
+               desiredPosition = new Point3D();
+               Vector3D desiredLinearVelocity = new Vector3D();
+               desiredOrientation = new Quaternion();
+               Vector3D desiredAngularVelocity = new Vector3D();
                tempOrientation.getQuaternion(desiredOrientation);
 
                double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
@@ -719,8 +718,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          FramePose footPoseCloseToActual = new FramePose(foot.getBodyFixedFrame());
          footPoseCloseToActual.setPosition(0.0, 0.0, 0.10);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
-         Point3d desiredPosition = new Point3d();
-         Quat4d desiredOrientation = new Quat4d();
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
@@ -784,10 +783,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
             for (int i = 0; i < numberOfTrajectoryPoints; i++)
             {
-               desiredPosition = new Point3d();
-               Vector3d desiredLinearVelocity = new Vector3d();
-               desiredOrientation = new Quat4d();
-               Vector3d desiredAngularVelocity = new Vector3d();
+               desiredPosition = new Point3D();
+               Vector3D desiredLinearVelocity = new Vector3D();
+               desiredOrientation = new Quaternion();
+               Vector3D desiredAngularVelocity = new Vector3D();
                tempOrientation.getQuaternion(desiredOrientation);
 
                double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
@@ -814,8 +813,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          trajectoryTime = 1.0;
          FramePose desiredRandomFootPose = new FramePose(foot.getBodyFixedFrame());
          Random random = new Random(545L);
-         desiredRandomFootPose.setOrientation(RandomTools.generateRandomQuaternion(random, 1.0));
-         desiredRandomFootPose.setPosition(RandomTools.generateRandomPoint(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
+         desiredRandomFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
+         desiredRandomFootPose.setPosition(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
          desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          desiredRandomFootPose.getPose(desiredPosition, desiredOrientation);
@@ -840,7 +839,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   public static Point3d findControllerDesiredPosition(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Point3D findControllerDesiredPosition(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
@@ -850,7 +849,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       return findPoint3d(subTrajectoryName, currentPositionVarNamePrefix, scs);
    }
 
-   public static Quat4d findControllerDesiredOrientation(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Quaternion findControllerDesiredOrientation(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
@@ -860,7 +859,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       return findQuat4d(subTrajectoryName, currentOrientationVarNamePrefix, scs);
    }
 
-   public static Vector3d findControllerDesiredLinearVelocity(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Vector3D findControllerDesiredLinearVelocity(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
@@ -870,7 +869,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       return findVector3d(subTrajectoryName, currentLinearVelocityVarNamePrefix, scs);
    }
 
-   public static Vector3d findControllerDesiredAngularVelocity(RobotSide robotSide, SimulationConstructionSet scs)
+   public static Vector3D findControllerDesiredAngularVelocity(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String footPrefix = sidePrefix + "FootMoveViaWaypoints";
@@ -938,20 +937,20 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       return simpleSE3TrajectoryPoint;
    }
 
-   public static void assertSingleWaypointExecuted(RobotSide robotSide, Point3d desiredPosition, Quat4d desiredOrientation, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(RobotSide robotSide, Point3D desiredPosition, Quaternion desiredOrientation, SimulationConstructionSet scs)
    {
       assertNumberOfWaypoints(robotSide, 2, scs);
 
-      Point3d controllerDesiredPosition = findControllerDesiredPosition(robotSide, scs);
+      Point3D controllerDesiredPosition = findControllerDesiredPosition(robotSide, scs);
       assertEquals(desiredPosition.getX(), controllerDesiredPosition.getX(), EPSILON_FOR_DESIREDS);
       assertEquals(desiredPosition.getY(), controllerDesiredPosition.getY(), EPSILON_FOR_DESIREDS);
       assertEquals(desiredPosition.getZ(), controllerDesiredPosition.getZ(), EPSILON_FOR_DESIREDS);
 
-      Quat4d controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
+      Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
       assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.getX(), EPSILON_FOR_DESIREDS);
       assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.getY(), EPSILON_FOR_DESIREDS);
       assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.getZ(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getW(), controllerDesiredOrientation.getW(), EPSILON_FOR_DESIREDS);
+      assertEquals(desiredOrientation.getS(), controllerDesiredOrientation.getS(), EPSILON_FOR_DESIREDS);
    }
 
    public static void assertNumberOfWaypoints(RobotSide robotSide, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)

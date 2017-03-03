@@ -10,7 +10,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePointTest;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVectorTest;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.ConstantPositionProvider;
@@ -70,7 +70,7 @@ public class CirclePositionTrajectoryGeneratorTest
 
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
-      FramePoint offset = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
+      FramePoint offset = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
       double rotationAngle = 2.0 * Math.PI;
       double trajectoryTime = random.nextDouble();
 

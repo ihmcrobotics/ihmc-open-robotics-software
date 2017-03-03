@@ -1,15 +1,14 @@
 package us.ihmc.simulationToolkit.visualizers;
 
-import javax.vecmath.Matrix3d;
-
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.InertiaTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -24,7 +23,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint rootJoint = new SixDoFJoint("sixdof", elevator, ReferenceFrame.getWorldFrame());
       RigidBodyTransform inertiaPose = new RigidBodyTransform();
-      Matrix3d momentOfInertia = new Matrix3d();
+      Matrix3D momentOfInertia = new Matrix3D();
 
       double mass = 0.7854;
       double a = 0.1;

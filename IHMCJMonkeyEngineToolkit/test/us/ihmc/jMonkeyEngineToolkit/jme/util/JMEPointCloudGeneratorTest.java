@@ -4,14 +4,14 @@ import java.util.Random;
 
 import com.jme3.scene.Node;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DWorld;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.robotics.random.RandomTools;
 
 public class JMEPointCloudGeneratorTest
 {
@@ -37,7 +37,7 @@ public class JMEPointCloudGeneratorTest
       
       int numPoints = 1000;
       
-      float[] ranges = RandomTools.generateRandomFloatArray(random, numPoints, 5.0f);
+      float[] ranges = RandomNumbers.nextFloatArray(random, numPoints, 5.0f);
       
       LidarScanParameters lidarScanParameters = new LidarScanParameters(numPoints, 2* Math.PI, 0, Double.POSITIVE_INFINITY);
       

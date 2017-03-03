@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class StringStretcher2dTest
 {
@@ -26,34 +26,34 @@ public class StringStretcher2dTest
    {
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
 
-      Point2d startPoint = new Point2d(0.0, 1.0);
-      Point2d endPoint = new Point2d(1.0, 1.0);
+      Point2D startPoint = new Point2D(0.0, 1.0);
+      Point2D endPoint = new Point2D(1.0, 1.0);
 
       stringStretcher2d.setStartPoint(startPoint);
       stringStretcher2d.setEndPoint(endPoint);
 
-      Point2d minPoint1 = new Point2d(0.5, 0.0);
-      Point2d maxPoint1 = new Point2d(0.5, 2.0);
+      Point2D minPoint1 = new Point2D(0.5, 0.0);
+      Point2D maxPoint1 = new Point2D(0.5, 2.0);
 
       stringStretcher2d.addMinMaxPoints(minPoint1, maxPoint1);
 
-      Point2d worstMinViolator = stringStretcher2d.findWorstMinViolator(startPoint, endPoint);
-      Point2d worstMaxViolator = stringStretcher2d.findWorstMaxViolator(startPoint, endPoint);
+      Point2D worstMinViolator = stringStretcher2d.findWorstMinViolator(startPoint, endPoint);
+      Point2D worstMaxViolator = stringStretcher2d.findWorstMaxViolator(startPoint, endPoint);
 
       assertNull(worstMinViolator);
       assertNull(worstMaxViolator);
 
-      ArrayList<Point2d> waypoints = new ArrayList<Point2d>();
+      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
       stringStretcher2d.findWaypoints(waypoints);
 
       assertEquals(0, waypoints.size());
 
-      List<Point2d> solution = stringStretcher2d.stretchString();
+      List<Point2D> solution = stringStretcher2d.stretchString();
       assertEquals(3, solution.size());
 
-      JUnitTools.assertTuple2dEquals(startPoint, solution.get(0), 1e-7);
-      JUnitTools.assertTuple2dEquals(new Point2d(0.5, 1.0), solution.get(1), 1e-7);
-      JUnitTools.assertTuple2dEquals(endPoint, solution.get(2), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(startPoint, solution.get(0), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.5, 1.0), solution.get(1), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(endPoint, solution.get(2), 1e-7);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -62,18 +62,18 @@ public class StringStretcher2dTest
    {
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
 
-      Point2d startPoint = new Point2d(0.0, 1.0);
-      Point2d endPoint = new Point2d(10.0, 1.0);
+      Point2D startPoint = new Point2D(0.0, 1.0);
+      Point2D endPoint = new Point2D(10.0, 1.0);
 
       stringStretcher2d.setStartPoint(startPoint);
       stringStretcher2d.setEndPoint(endPoint);
 
-      Point2d minPoint = new Point2d(5.0, -1.0);
-      Point2d maxPoint = new Point2d(5.0, 0.0);
+      Point2D minPoint = new Point2D(5.0, -1.0);
+      Point2D maxPoint = new Point2D(5.0, 0.0);
 
       stringStretcher2d.addMinMaxPoints(minPoint, maxPoint);
 
-      ArrayList<Point2d> waypoints = new ArrayList<Point2d>();
+      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
       stringStretcher2d.findWaypoints(waypoints);
 
       assertEquals(1, waypoints.size());
@@ -87,28 +87,28 @@ public class StringStretcher2dTest
    {
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
 
-      Point2d startPoint = new Point2d(0.0, 1.0);
-      Point2d endPoint = new Point2d(10.0, 1.0);
+      Point2D startPoint = new Point2D(0.0, 1.0);
+      Point2D endPoint = new Point2D(10.0, 1.0);
 
       stringStretcher2d.setStartPoint(startPoint);
       stringStretcher2d.setEndPoint(endPoint);
 
-      Point2d minPoint1 = new Point2d(2.0, 2.0);
-      Point2d maxPoint1 = new Point2d(2.0, 3.0);
+      Point2D minPoint1 = new Point2D(2.0, 2.0);
+      Point2D maxPoint1 = new Point2D(2.0, 3.0);
 
       stringStretcher2d.addMinMaxPoints(minPoint1, maxPoint1);
 
-      Point2d minPoint2 = new Point2d(8.0, 2.0);
-      Point2d maxPoint2 = new Point2d(8.0, 3.0);
+      Point2D minPoint2 = new Point2D(8.0, 2.0);
+      Point2D maxPoint2 = new Point2D(8.0, 3.0);
 
       stringStretcher2d.addMinMaxPoints(minPoint2, maxPoint2);
 
-      Point2d minPoint3 = new Point2d(5.0, -1.0);
-      Point2d maxPoint3 = new Point2d(5.0, 0.0);
+      Point2D minPoint3 = new Point2D(5.0, -1.0);
+      Point2D maxPoint3 = new Point2D(5.0, 0.0);
 
       stringStretcher2d.addMinMaxPoints(minPoint3, maxPoint3);
 
-      ArrayList<Point2d> waypoints = new ArrayList<Point2d>();
+      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
       stringStretcher2d.findWaypoints(waypoints);
 
       assertEquals(3, waypoints.size());
@@ -126,16 +126,16 @@ public class StringStretcher2dTest
    {
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
 
-      Point2d startPoint = new Point2d(0.0, 1.0);
-      Point2d endPoint = new Point2d(1.0, 1.0);
+      Point2D startPoint = new Point2D(0.0, 1.0);
+      Point2D endPoint = new Point2D(1.0, 1.0);
 
       stringStretcher2d.setStartPoint(startPoint);
       stringStretcher2d.setEndPoint(endPoint);
 
-      List<Point2d> waypoints = stringStretcher2d.stretchString();
+      List<Point2D> waypoints = stringStretcher2d.stretchString();
       assertEquals(2, waypoints.size());
-      JUnitTools.assertTuple2dEquals(startPoint, waypoints.get(0), 1e-7);
-      JUnitTools.assertTuple2dEquals(endPoint, waypoints.get(1), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(startPoint, waypoints.get(0), 1e-7);
+      EuclidCoreTestTools.assertTuple2DEquals(endPoint, waypoints.get(1), 1e-7);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -144,9 +144,9 @@ public class StringStretcher2dTest
    {
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
 
-      Point2d startPoint = new Point2d(-10.0, 0.0);
+      Point2D startPoint = new Point2D(-10.0, 0.0);
       stringStretcher2d.setStartPoint(startPoint);
-      Point2d endPoint = new Point2d(10.0, 0.0);
+      Point2D endPoint = new Point2D(10.0, 0.0);
       stringStretcher2d.setEndPoint(endPoint);
 
       Random random = new Random(1776L);
@@ -155,9 +155,9 @@ public class StringStretcher2dTest
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point2d point = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2d otherPoint = new Point2d(point);
-         otherPoint.setY(RandomTools.generateRandomDouble(random, -10.0, 10.0));
+         Point2D point = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D otherPoint = new Point2D(point);
+         otherPoint.setY(RandomNumbers.nextDouble(random, -10.0, 10.0));
 
          if (point.getY() < otherPoint.getY())
          {
@@ -171,15 +171,15 @@ public class StringStretcher2dTest
 
       }
 
-      ArrayList<Point2d> waypoints = new ArrayList<Point2d>();
+      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
       stringStretcher2d.findWaypoints(waypoints);
 
 
-      List<Point2d> stretchedString = stringStretcher2d.stretchString();
+      List<Point2D> stretchedString = stringStretcher2d.stretchString();
       assertEquals(numberOfPoints + 2, stretchedString.size());
 
       double previousX = Double.NEGATIVE_INFINITY;
-      for (Point2d point2d : stretchedString)
+      for (Point2D point2d : stretchedString)
       {
          double x = point2d.getX();
          if (x <= previousX)
@@ -193,14 +193,14 @@ public class StringStretcher2dTest
 
          if ((!hasSameX(point2d, startPoint)) && (!hasSameX(point2d, endPoint)))
          {
-            Point2d[] minMaxPoints = stringStretcher2d.findMinMaxPoints(x);
+            Point2D[] minMaxPoints = stringStretcher2d.findMinMaxPoints(x);
             assertTrue(point2d.getY() >= minMaxPoints[0].getY());
             assertTrue(point2d.getY() <= minMaxPoints[1].getY());
          }
       }
    }
 
-   private boolean hasSameX(Point2d pointA, Point2d pointB)
+   private boolean hasSameX(Point2D pointA, Point2D pointB)
    {
       return (Math.abs(pointA.getX() - pointB.getX()) < 1e-7);
    }

@@ -4,8 +4,8 @@ import java.awt.Container;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.swing.JFrame;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
@@ -96,7 +96,7 @@ public class Graphics3DWorld implements Graphics3DFrameListener
    {
       start();
 
-      cameraController = Graphics3DAdapterTools.createCameraController(graphics3dAdapter, viewportAdapter, new Vector3d(camX, camY, camZ));
+      cameraController = Graphics3DAdapterTools.createCameraController(graphics3dAdapter, viewportAdapter, new Vector3D(camX, camY, camZ));
       addChild(cameraController.getFixPointNode());
       jFrame = Graphics3DAdapterTools.createNewWindow(viewportAdapter, worldName, windowWidth, windowHeight, cameraController);
    }

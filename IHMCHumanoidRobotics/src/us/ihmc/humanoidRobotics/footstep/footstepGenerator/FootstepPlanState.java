@@ -1,10 +1,8 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepPlanState implements Comparable<FootstepPlanState>
@@ -36,9 +34,11 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
 
    public FootstepPlanState(double x, double y, double theta, RobotSide side)
    {
-      footstepData.location = new Point3d(x, y, 0);
-      footstepData.orientation = new Quat4d();
-      RotationTools.convertYawPitchRollToQuaternion(theta, 0, 0, footstepData.orientation);
+      footstepData.location = new Point3D(x, y, 0);
+      
+      Quaternion orientation = new Quaternion();
+      orientation.setToYawQuaternion(theta);
+      footstepData.setOrientation(orientation);
       footstepData.robotSide = side;
       this.theta = theta;
    }
@@ -51,7 +51,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
 
    public void setHeight(double z) { this.footstepData.location.setZ(z);}
 
-   public Point3d getPosition() { return footstepData.location;}
+   public Point3D getPosition() { return footstepData.location;}
 
    public boolean equals(Object o)
    {
@@ -89,7 +89,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
    }
 
 
-   public Point3d getPoint3d()
+   public Point3D getPoint3d()
    {
       return footstepData.location;
    }

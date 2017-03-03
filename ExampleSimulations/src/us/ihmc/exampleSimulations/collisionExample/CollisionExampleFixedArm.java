@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.collisionExample;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
@@ -13,6 +12,7 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -20,6 +20,7 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
+import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 
 public class CollisionExampleFixedArm
@@ -50,7 +51,7 @@ public class CollisionExampleFixedArm
       {
          super("DoublePendulum"); // create and instance of Robot
          // Create joints and assign links. Pin joints have a single axis of rotation.
-         pin1 = new PinJoint("joint1", new Vector3d(0.0, 0.0, 0), this, Axis.Y);
+         pin1 = new PinJoint("joint1", new Vector3D(0.0, 0.0, 0), this, Axis.Y);
          // pin1.setInitialState(0.0, 0.0);
          Link link1 = link1();
          pin1.setLink(link1); // associate link1 with the joint pin1
@@ -63,10 +64,10 @@ public class CollisionExampleFixedArm
           * since it should be placed a distance of L1 in the Z direction from
           * the previous joint.
           */
-         pin2 = new PinJoint("joint2", new Vector3d(0.0, 0.0, L1), this, Axis.Y);
+         pin2 = new PinJoint("joint2", new Vector3D(0.0, 0.0, L1), this, Axis.Y);
          Link link2 = link2();
 
-         Joint pin3 = new PinJoint("joint3", new Vector3d(0.0, 0.0, L2), this, Axis.Y);
+         Joint pin3 = new PinJoint("joint3", new Vector3D(0.0, 0.0, L2), this, Axis.Y);
          Link linkBlock = endBlock();
 
          pin3.setLink(linkBlock);
@@ -170,13 +171,13 @@ public class CollisionExampleFixedArm
          CollisionShapeDescription shapeDesc = factory.createBox(size / 2.0, size / 2.0, size / 2.0);
          factory.addShape(ret, null, shapeDesc, false, 0xFFFFFFFF, 0xFFFFFFFF);
 
-         ret.enableCollisions(this.getRobotsYoVariableRegistry());
+         ret.enableCollisions(4, collisionHandler, this.getRobotsYoVariableRegistry());
          return ret;
       }
 
       private FloatingJoint groundPlane()
       {
-         FloatingJoint groundJoint = new FloatingJoint("ground", "ground", new Vector3d(), this);
+         FloatingJoint groundJoint = new FloatingJoint("ground", "ground", new Vector3D(), this);
 
          Link ground = new Link("ground");
 
@@ -190,7 +191,7 @@ public class CollisionExampleFixedArm
          linkGraphics.translate(0.0, 0.0, 0.0);
          linkGraphics.addCube(width, width, height, YoAppearance.Beige());
          ground.setLinkGraphics(linkGraphics);
-         ground.enableCollisions(this.getRobotsYoVariableRegistry());
+         ground.enableCollisions(4, collisionHandler, this.getRobotsYoVariableRegistry());
 
          groundJoint.setLink(ground);
          groundJoint.setPositionAndVelocity(0.0, 0.0, -height, 0.0, 0.0, 0.0);
@@ -224,12 +225,14 @@ public class CollisionExampleFixedArm
       sim.setGroundVisible(false);
       sim.setCameraPosition(0, -40.0, 0);
 
-      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, sim, 100);
+      DefaultCollisionVisualizer visualize = new DefaultCollisionVisualizer(0.1, 0.1, 0.01, sim, 100);
 
       CollisionHandler collisionHandler = doublePendulum.getCollisionHandler();
       collisionHandler.addListener(visualize);
 
-      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), collisionHandler, visualize));
+      CollisionArbiter collisionArbiter = new DoNothingCollisionArbiter();
+
+      sim.initPhysics(new ScsPhysics(null, doublePendulum.getCollisionDetector(), collisionArbiter, collisionHandler, visualize));
 
       Thread myThread = new Thread(sim);
       myThread.start();

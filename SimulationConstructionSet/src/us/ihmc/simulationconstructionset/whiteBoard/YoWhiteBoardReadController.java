@@ -6,13 +6,13 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotController.SensorProcessor;
-import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.simulationconstructionset.util.IndexOrderChecker;
 
 public class YoWhiteBoardReadController implements RobotController, SensorProcessor
 {
    private final YoVariableRegistry registry;
-   private final GlobalTimer yoWhiteBoardReadControllerWaitingGlobalTimer;
+   private final ExecutionTimer yoWhiteBoardReadControllerWaitingGlobalTimer;
    
    private final IntegerYoVariable numberOfNewDataSinceLastRead;
    private final IntegerYoVariable ticksTillNextRead;
@@ -29,7 +29,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
                                      boolean doNotReadFirstTime, boolean readOnInitialize)
    {
       registry = new YoVariableRegistry(name + "YoWhiteBoardReadController");
-      yoWhiteBoardReadControllerWaitingGlobalTimer = new GlobalTimer("whiteBoardReadWait", registry);
+      yoWhiteBoardReadControllerWaitingGlobalTimer = new ExecutionTimer("whiteBoardReadWait", registry);
       numberOfNewDataSinceLastRead = new IntegerYoVariable("numberOfNewDataSinceLastRead", registry);
 
       this.yoWhiteBoard = yoWhiteBoard;
@@ -119,7 +119,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
          {
             while (!yoWhiteBoard.isNewDataAvailable())
             {
-               yoWhiteBoardReadControllerWaitingGlobalTimer.startTimer();
+               yoWhiteBoardReadControllerWaitingGlobalTimer.startMeasurement();
                try
                {
                   yoWhiteBoard.wait();
@@ -127,7 +127,7 @@ public class YoWhiteBoardReadController implements RobotController, SensorProces
                catch (InterruptedException e)
                {
                }
-               yoWhiteBoardReadControllerWaitingGlobalTimer.stopTimer();
+               yoWhiteBoardReadControllerWaitingGlobalTimer.stopMeasurement();
             }
          }
       }

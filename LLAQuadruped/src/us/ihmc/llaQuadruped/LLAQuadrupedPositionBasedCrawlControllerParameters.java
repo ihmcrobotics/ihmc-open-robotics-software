@@ -1,12 +1,12 @@
 package us.ihmc.llaQuadruped;
 
-import javax.vecmath.Vector2d;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 import us.ihmc.quadrupedRobotics.controller.position.states.QuadrupedPositionBasedCrawlControllerParameters;
 
 public class LLAQuadrupedPositionBasedCrawlControllerParameters implements QuadrupedPositionBasedCrawlControllerParameters
 {
-   private final Vector2d desiredCoMOffset = new Vector2d(0.02, 0.0);
+   private final Vector2D desiredCoMOffset = new Vector2D(0.02, 0.0);
    
    @Override
    public double getMinimumVelocityForFullSkew()
@@ -80,7 +80,7 @@ public class LLAQuadrupedPositionBasedCrawlControllerParameters implements Quadr
    }
 
    @Override
-   public Vector2d getDefaultDesiredCoMOffset()
+   public Vector2D getDefaultDesiredCoMOffset()
    {
       return desiredCoMOffset;
    }

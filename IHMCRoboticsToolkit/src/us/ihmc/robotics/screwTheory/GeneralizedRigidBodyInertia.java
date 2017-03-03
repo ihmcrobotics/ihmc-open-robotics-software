@@ -1,23 +1,23 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class GeneralizedRigidBodyInertia
 {
    protected ReferenceFrame expressedInframe;
-   protected final Matrix3d massMomentOfInertiaPart;
-   protected final Vector3d crossPart;
+   protected final Matrix3D massMomentOfInertiaPart;
+   protected final Vector3D crossPart;
    protected double mass;
    protected boolean crossPartZero;
-   protected Vector3d tempVector = new Vector3d();
-   private final Matrix3d tempForCrossPartTilde = new Matrix3d();
+   protected final Vector3D tempVector = new Vector3D();
+   private final Matrix3D tempForCrossPartTilde = new Matrix3D();
+   private final RigidBodyTransform tempForChangeFrame = new RigidBodyTransform();
 
    /**
     * Default constructor; null reference frame, everything set to zero
@@ -25,25 +25,27 @@ public abstract class GeneralizedRigidBodyInertia
    public GeneralizedRigidBodyInertia()
    {
       this.expressedInframe = null;
-      this.massMomentOfInertiaPart = new Matrix3d();
-      this.crossPart = new Vector3d();
+      this.massMomentOfInertiaPart = new Matrix3D();
+      this.crossPart = new Vector3D();
       this.mass = 0.0;
       this.crossPartZero = true;
    }
 
    /**
-    * Construct using the reference frame in which the GeneralizedRigidBodyInertia is expressed, the mass moment of inertia matrix in that frame and the mass
-    * For the case that the origin of the frame in which the GeneralizedRigidBodyInertia is expressed coincides with the center of mass.
+    * Construct using the reference frame in which the GeneralizedRigidBodyInertia is expressed, the
+    * mass moment of inertia matrix in that frame and the mass For the case that the origin of the
+    * frame in which the GeneralizedRigidBodyInertia is expressed coincides with the center of mass.
     *
-    * @param frame the reference frame in which the GeneralizedRigidBodyInertia is expressed, and also the frame of which this
+    * @param frame the reference frame in which the GeneralizedRigidBodyInertia is expressed, and
+    *           also the frame of which this
     * @param massMomentOfInertia the mass moment of inertia matrix in ReferenceFrame frame
     * @param mass the mass of the rigid body to which this GeneralizedRigidBodyInertia corresponds
     */
-   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3d massMomentOfInertia, double mass)
+   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass)
    {
       this.expressedInframe = frame;
-      this.massMomentOfInertiaPart = new Matrix3d(massMomentOfInertia);
-      this.crossPart = new Vector3d();
+      this.massMomentOfInertiaPart = new Matrix3D(massMomentOfInertia);
+      this.crossPart = new Vector3D();
       this.mass = mass;
       this.crossPartZero = true;
    }
@@ -51,18 +53,18 @@ public abstract class GeneralizedRigidBodyInertia
    public GeneralizedRigidBodyInertia(ReferenceFrame frame, double Ixx, double Iyy, double Izz, double mass)
    {
       this.expressedInframe = frame;
-      this.massMomentOfInertiaPart = new Matrix3d();
+      this.massMomentOfInertiaPart = new Matrix3D();
       setMomentOfInertia(Ixx, Iyy, Izz);
-      this.crossPart = new Vector3d();
+      this.crossPart = new Vector3D();
       this.mass = mass;
       this.crossPartZero = true;
    }
 
-   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3d massMomentOfInertia, double mass, Vector3d crossPart)
+   public GeneralizedRigidBodyInertia(ReferenceFrame frame, Matrix3D massMomentOfInertia, double mass, Vector3D crossPart)
    {
       this.expressedInframe = frame;
-      this.massMomentOfInertiaPart = new Matrix3d(massMomentOfInertia);
-      this.crossPart = new Vector3d(crossPart);
+      this.massMomentOfInertiaPart = new Matrix3D(massMomentOfInertia);
+      this.crossPart = new Vector3D(crossPart);
       this.mass = mass;
       determineIfCrossPartIsZero();
    }
@@ -75,8 +77,8 @@ public abstract class GeneralizedRigidBodyInertia
    public GeneralizedRigidBodyInertia(GeneralizedRigidBodyInertia other)
    {
       this.expressedInframe = other.expressedInframe;
-      this.massMomentOfInertiaPart = new Matrix3d(other.massMomentOfInertiaPart);
-      this.crossPart = new Vector3d(other.crossPart);
+      this.massMomentOfInertiaPart = new Matrix3D(other.massMomentOfInertiaPart);
+      this.crossPart = new Vector3D(other.crossPart);
       this.mass = other.mass;
       this.crossPartZero = other.crossPartZero;
    }
@@ -94,9 +96,9 @@ public abstract class GeneralizedRigidBodyInertia
       return crossPartZero;
    }
 
-   public Matrix3d getMassMomentOfInertiaPartCopy()
+   public Matrix3D getMassMomentOfInertiaPartCopy()
    {
-      return new Matrix3d(massMomentOfInertiaPart);
+      return new Matrix3D(massMomentOfInertiaPart);
    }
 
    public double getMass()
@@ -147,21 +149,22 @@ public abstract class GeneralizedRigidBodyInertia
    }
 
    /**
-    * @return a 6 x 6 matrix representing this generalized inertia in matrix form [massMomentOfInertia, crossTranspose; cross, mI]
+    * @return a 6 x 6 matrix representing this generalized inertia in matrix form
+    *         [massMomentOfInertia, crossTranspose; cross, mI]
     */
    public void getMatrix(DenseMatrix64F matrixToPack)
    {
 
       // upper left block
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, massMomentOfInertiaPart, matrixToPack);
+      massMomentOfInertiaPart.get(0, 0, matrixToPack);
 
       // lower left
-      MatrixTools.toTildeForm(tempForCrossPartTilde, crossPart);
-      MatrixTools.setDenseMatrixFromMatrix3d(3, 0, tempForCrossPartTilde, matrixToPack);
+      tempForCrossPartTilde.setToTildeForm(crossPart);
+      tempForCrossPartTilde.get(3, 0, matrixToPack);
 
       // upper right block
       tempForCrossPartTilde.transpose();
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 3, tempForCrossPartTilde, matrixToPack);
+      tempForCrossPartTilde.get(0, 3, matrixToPack);
 
       // lower right block
       for (int i = 3; i < 6; i++)
@@ -171,7 +174,8 @@ public abstract class GeneralizedRigidBodyInertia
    }
 
    /**
-    * @return a 6 x 6 matrix representing this generalized inertia in matrix form [massMomentOfInertia, crossTranspose; cross, mI] 
+    * @return a 6 x 6 matrix representing this generalized inertia in matrix form
+    *         [massMomentOfInertia, crossTranspose; cross, mI]
     */
    public DenseMatrix64F toMatrix()
    {
@@ -183,33 +187,31 @@ public abstract class GeneralizedRigidBodyInertia
    /**
     * Changes the frame in which this GeneralizedRigidBodyInertia is expressed.
     *
-    * See Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 40, eq. (2.57)
-    * http://sites.google.com/site/vincentduindam/publications
+    * See Duindam, Port-Based Modeling and Control for Efficient Bipedal Walking Robots, page 40,
+    * eq. (2.57) http://sites.google.com/site/vincentduindam/publications
     *
     * @param newFrame the frame in which this inertia should be expressed
     */
    public void changeFrame(ReferenceFrame newFrame)
    {
-      RigidBodyTransform transform = newFrame.getTransformToDesiredFrame(expressedInframe);
+      if (newFrame == expressedInframe)
+         return;
 
-      Matrix3d rotation = new Matrix3d();
-      transform.getRotation(rotation);
+      newFrame.getTransformToDesiredFrame(tempForChangeFrame, expressedInframe);
 
-      transform.getTranslation(tempVector); // p
+      tempForChangeFrame.getTranslation(tempVector); // p
 
       // mass moment of inertia part:
 
       subTildeTimesTildePlusTildeTimesTildeTransposeFromSymmetricMatrix(massMomentOfInertiaPart, crossPart, tempVector); // J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p)
       subScalarTimesTildeTimesTildeFromSymmetricMatrix(massMomentOfInertiaPart, tempVector, mass); // J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p)
 
-      massMomentOfInertiaPart.mulTransposeLeft(rotation, massMomentOfInertiaPart); // RTranspose * (J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p))
-      massMomentOfInertiaPart.mul(rotation); // RTranspose * (J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p)) * R: done.
+      tempForChangeFrame.inverseTransform(massMomentOfInertiaPart); // RTranspose * (J - (tilde(c) * tilde(p))^T - tilde(c) * tilde(p) - m * tilde(p) * tilde(p)) * R: done.
 
       // cross part:
       tempVector.scale(mass); // m * p
       crossPart.add(tempVector); // c + m * p
-      rotation.transpose(); // RTranspose
-      rotation.transform(crossPart); // RTranspose * (c + m * p)
+      tempForChangeFrame.inverseTransform(crossPart);
 
       // mass part doesn't change
 
@@ -225,7 +227,7 @@ public abstract class GeneralizedRigidBodyInertia
     * @param a a vector
     * @param b another vector
     */
-   private static void subTildeTimesTildePlusTildeTimesTildeTransposeFromSymmetricMatrix(Matrix3d M, Vector3d a, Vector3d b)
+   private static void subTildeTimesTildePlusTildeTimesTildeTransposeFromSymmetricMatrix(Matrix3D M, Vector3D a, Vector3D b)
    {
       double axbx = a.getX() * b.getX();
       double ayby = a.getY() * b.getY();
@@ -251,7 +253,7 @@ public abstract class GeneralizedRigidBodyInertia
     * @param a a vector
     * @param scalar a scalar
     */
-   private static void subScalarTimesTildeTimesTildeFromSymmetricMatrix(Matrix3d M, Vector3d a, double scalar)
+   private static void subScalarTimesTildeTimesTildeFromSymmetricMatrix(Matrix3D M, Vector3D a, double scalar)
    {
       double xSquared = scalar * a.getX() * a.getX();
       double ySquared = scalar * a.getY() * a.getY();

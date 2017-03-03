@@ -2,14 +2,14 @@ package us.ihmc.sensorProcessing;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -17,7 +17,6 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.simulatedSensors.PerfectSimulatedIMURawSensorReader;
 import us.ihmc.simulationconstructionset.simulatedSensors.SimulatedIMURawSensorReader;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.testing.JUnitTools;
 
 
 
@@ -36,11 +35,11 @@ public class SimulatedIMURawSensorReader2Test
    public void test() throws SimulationExceededMaximumTimeException, UnreasonableAccelerationException
    {
       SingleRigidBodyRobot robot = new SingleRigidBodyRobot();
-      robot.setPosition(RandomTools.generateRandomVector(random));
+      robot.setPosition(RandomGeometry.nextVector3D(random));
       robot.setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
-      robot.setAngularVelocity(RandomTools.generateRandomVector(random));
-      robot.setLinearVelocity(RandomTools.generateRandomVector(random));
-      robot.setExternalForce(RandomTools.generateRandomVector(random));
+      robot.setAngularVelocity(RandomGeometry.nextVector3D(random));
+      robot.setLinearVelocity(RandomGeometry.nextVector3D(random));
+      robot.setExternalForce(RandomGeometry.nextVector3D(random));
       
       SimulatedSensorsTestFullRobotModel fullRobotModel = new SimulatedSensorsTestFullRobotModel();
       YoVariableRegistry registry = new YoVariableRegistry("test");
@@ -61,12 +60,12 @@ public class SimulatedIMURawSensorReader2Test
       simulatedIMURawSensorReader.read();
       imuSensorProcessor.update();
 
-      Vector3d linearAccelerationFromRobot = robot.getBodyAcceleration().getVectorCopy();
-      Vector3d linearAccelerationFromIMU = processedSensors.getAcceleration(imuIndex).getVectorCopy();
+      Vector3D linearAccelerationFromRobot = robot.getBodyAcceleration().getVectorCopy();
+      Vector3D linearAccelerationFromIMU = processedSensors.getAcceleration(imuIndex).getVectorCopy();
 
 //      System.out.println("linear from robot: " + linearAccelerationFromRobot);
 //      System.out.println("linear from imu: " + linearAccelerationFromIMU);
       
-      JUnitTools.assertTuple3dEquals(linearAccelerationFromRobot, linearAccelerationFromIMU, 1e-9);
+      EuclidCoreTestTools.assertTuple3DEquals(linearAccelerationFromRobot, linearAccelerationFromIMU, 1e-9);
    }
 }

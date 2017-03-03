@@ -2,9 +2,6 @@ package us.ihmc.javaFXToolkit.cameraControllers;
 
 import java.util.function.Predicate;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -19,6 +16,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 
 /**
@@ -69,15 +68,15 @@ public class CameraTranslationCalculator
    /** Key binding for moving the camera downward. Its default value is: {@code KeyCode.Z}. */
    private final ObjectProperty<KeyCode> downKey = new SimpleObjectProperty<>(this, "downKey", KeyCode.Z);
 
-   private final Vector3d down = new Vector3d();
+   private final Vector3D down = new Vector3D();
 
    /**
     * Creates a calculator for the camera translation.
     * @param up indicates which way is up.
     */
-   public CameraTranslationCalculator(Vector3d up)
+   public CameraTranslationCalculator(Vector3D up)
    {
-      down.negate(up);
+      down.setAndNegate(up);
    }
 
    /**
@@ -86,7 +85,7 @@ public class CameraTranslationCalculator
     */
    public EventHandler<KeyEvent> createKeyEventHandler()
    {
-      final Vector3d activeTranslationOffset = new Vector3d();
+      final Vector3D activeTranslationOffset = new Vector3D();
 
       AnimationTimer translateAnimation = new AnimationTimer()
       {
@@ -142,7 +141,7 @@ public class CameraTranslationCalculator
     * Update the camera translation after applying a translation offset in the camera local frame.
     * @param translationOffset the translation offset in local frame to apply. Not modified.
     */
-   public void updateObserverTranslation(Vector3d translationOffset)
+   public void updateObserverTranslation(Vector3D translationOffset)
    {
       updateObserverTranslation(translationOffset.getX(), translationOffset.getY(), translationOffset.getZ());
    }
@@ -161,25 +160,23 @@ public class CameraTranslationCalculator
          return;
       }
 
-      Vector3d shift = new Vector3d(dx, dy, dz);
+      Vector3D shift = new Vector3D(dx, dy, dz);
 
       if (keepTranslationLeveled.get())
       {
          double mxz = cameraOrientation.get().getMxz();
          double myz = cameraOrientation.get().getMyz();
          double mzz = cameraOrientation.get().getMzz();
-         Vector3d cameraZAxis = new Vector3d(mxz, myz, mzz);
-         Vector3d xAxisLeveled = new Vector3d();
+         Vector3D cameraZAxis = new Vector3D(mxz, myz, mzz);
+         Vector3D xAxisLeveled = new Vector3D();
          xAxisLeveled.cross(down, cameraZAxis);
          xAxisLeveled.normalize();
-         Vector3d yAxisLeveled = new Vector3d(down);
-         Vector3d zAxisLeveled = new Vector3d();
+         Vector3D yAxisLeveled = new Vector3D(down);
+         Vector3D zAxisLeveled = new Vector3D();
          zAxisLeveled.cross(xAxisLeveled, yAxisLeveled);
 
-         Matrix3d rotation = new Matrix3d();
-         rotation.setColumn(0, xAxisLeveled);
-         rotation.setColumn(1, yAxisLeveled);
-         rotation.setColumn(2, zAxisLeveled);
+         RotationMatrix rotation = new RotationMatrix();
+         rotation.setColumns(xAxisLeveled, yAxisLeveled, zAxisLeveled);
          rotation.transform(shift);
       }
       else
@@ -198,7 +195,7 @@ public class CameraTranslationCalculator
     */
    public void updateWorldTranslation(double dx, double dy, double dz)
    {
-      Vector3d shift = new Vector3d(dx, dy, dz);
+      Vector3D shift = new Vector3D(dx, dy, dz);
       JavaFXTools.addEquals(translation, shift);
    }
 

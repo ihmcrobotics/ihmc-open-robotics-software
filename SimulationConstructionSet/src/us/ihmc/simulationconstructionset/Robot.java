@@ -7,10 +7,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
@@ -235,7 +234,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       return gravityZ.getDoubleValue();
    }
 
-   public void getGravity(Vector3d gravityVectorToPack)
+   public void getGravity(Vector3D gravityVectorToPack)
    {
       gravityVectorToPack.set(gravityX.getDoubleValue(), gravityY.getDoubleValue(), gravityZ.getDoubleValue());
    }
@@ -334,7 +333,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       this.gravityZ.set(gravityZ);
    }
    
-   public void setGravity(Vector3d gravity)
+   public void setGravity(Vector3D gravity)
    {
       this.gravityX.set(gravity.getX());
       this.gravityY.set(gravity.getY());
@@ -546,11 +545,11 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       }
    }
 
-   private Vector3d w_null = new Vector3d();
-   private Vector3d v_null = new Vector3d();
+   private Vector3D w_null = new Vector3D();
+   private Vector3D v_null = new Vector3D();
 
    private SpatialVector a_hat_h_null = new SpatialVector();
-   private Matrix3d R_0_i = new Matrix3d();
+   private RotationMatrix R_0_i = new RotationMatrix();
 
    /**
     * Steps through every joint adding each camera mount to the provided list.  This function is called
@@ -733,6 +732,21 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       }
 
       return ret;
+   }
+
+   public ExternalForcePoint getExternalForcePoint(String name)
+   {
+      ArrayList<Joint> children = this.getRootJoints();
+
+      for (int i = 0; i < children.size(); i++)
+      {
+         Joint rootJoint = children.get(i);
+         ExternalForcePoint externalForcePoint = rootJoint.recursiveGetExternalForcePoint(name);
+         if (externalForcePoint != null) 
+            return externalForcePoint;
+      }
+
+      return null;
    }
 
    /**
@@ -1218,17 +1232,17 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
    }
 
 
-   private Point3d tempCOMPoint = new Point3d();    // Temporary point storing the robot's center of mass
+   private Point3D tempCOMPoint = new Point3D();    // Temporary point storing the robot's center of mass
 
    /**
     * Computes the center of mass of this Robot.  This center of mass position is returned
-    * by altering the provided Point3d.  If the robot has no mass, it also has no
+    * by altering the provided Point3D.  If the robot has no mass, it also has no
     * center of mass point.  This value is used in the calculation of center of momentum.
     *
     * @param comPoint Center of Mass point, in World Coordinates, that is computed.
     * @return The total mass of the robot.
     */
-   public double computeCenterOfMass(Point3d comPoint)
+   public double computeCenterOfMass(Point3D comPoint)
    {
       double totalMass = 0.0;
       comPoint.set(0.0, 0.0, 0.0);
@@ -1255,13 +1269,13 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
 
    /**
     * Computes the Center of Mass of the subtree rooted at the specified root Joint.
-    * This center of mass position is returned by altering the provided Point3d.
+    * This center of mass position is returned by altering the provided Point3D.
     * If the robot has no mass, it also has no center of mass point.
     *
     * @param comPoint Center of Mass point, in World Coordinates, that is computed.
     * @return The total mass of the robot.
     */
-   public double computeCenterOfMass(Joint rootJoint, Point3d comPoint)
+   public double computeCenterOfMass(Joint rootJoint, Point3D comPoint)
    {
       double totalMass = 0.0;
       comPoint.set(0.0, 0.0, 0.0);
@@ -1281,7 +1295,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       return totalMass;
    }
 
-   private Vector3d tempLinearMomentum = new Vector3d();
+   private Vector3D tempLinearMomentum = new Vector3D();
 
    /**
     * Computes the total linear momentum of the center of mass for
@@ -1290,7 +1304,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * @param linearMomentum Total linear momentum vector that is computed.
     * @return The total mass of the robot.
     */
-   public double computeLinearMomentum(Vector3d linearMomentum)
+   public double computeLinearMomentum(Vector3D linearMomentum)
    {
       double totalMass = 0.0;
       linearMomentum.set(0.0, 0.0, 0.0);
@@ -1316,7 +1330,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * @param linearMomentum Total linear momentum vector that is computed.
     * @return The total mass of the robot.
     */
-   public double computeLinearMomentum(Joint rootJoint, Vector3d linearMomentum)
+   public double computeLinearMomentum(Joint rootJoint, Vector3D linearMomentum)
    {
       double totalMass = 0.0;
       linearMomentum.set(0.0, 0.0, 0.0);
@@ -1329,7 +1343,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
    }
 
 
-   private Vector3d tempAngularMomentum = new Vector3d();
+   private Vector3D tempAngularMomentum = new Vector3D();
 
    /**
     * Computes the total angular momentum about the center of mass for
@@ -1337,7 +1351,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     *
     * @param angularMomentum Total angular momentum vector that is computed.
     */
-   public void computeAngularMomentum(Vector3d angularMomentum)
+   public void computeAngularMomentum(Vector3D angularMomentum)
    {
       angularMomentum.set(0.0, 0.0, 0.0);
 
@@ -1357,7 +1371,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * @param rootJoint Root Joint for which linear momentum is computed.
     * @param angularMomentum Total angular momentum vector that is computed.
     */
-   public void computeAngularMomentum(Joint rootJoint, Vector3d angularMomentum)
+   public void computeAngularMomentum(Joint rootJoint, Vector3D angularMomentum)
    {
       angularMomentum.set(0.0, 0.0, 0.0);
 
@@ -1366,7 +1380,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
    }
 
 
-   private Vector3d tempCOMVector = new Vector3d();
+   private Vector3D tempCOMVector = new Vector3D();
 
    /**
     * Computes the Center of Mass location and total linear and angular momentum
@@ -1377,7 +1391,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * @param angularMomentum Total angular momentum vector that is computed.
     * @return Total mass of the robot.
     */
-   public double computeCOMMomentum(Point3d comPoint, Vector3d linearMomentum, Vector3d angularMomentum)
+   public double computeCOMMomentum(Point3D comPoint, Vector3D linearMomentum, Vector3D angularMomentum)
    {
       double mass = computeCenterOfMass(comPoint);
       computeLinearMomentum(linearMomentum);
@@ -1407,7 +1421,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * @param angularMomentum Total angular momentum vector that is computed.
     * @return Total mass of the robot.
     */
-   public double computeCOMMomentum(Joint rootJoint, Point3d comPoint, Vector3d linearMomentum, Vector3d angularMomentum)
+   public double computeCOMMomentum(Joint rootJoint, Point3D comPoint, Vector3D linearMomentum, Vector3D angularMomentum)
    {
       double mass = computeCenterOfMass(rootJoint, comPoint);
       computeLinearMomentum(rootJoint, linearMomentum);
@@ -1427,8 +1441,8 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
    }
 
 
-   private final Vector3d tempRVector = new Vector3d();
-   private final Vector3d tempRCrossF = new Vector3d(), tempForce = new Vector3d();
+   private final Vector3D tempRVector = new Vector3D();
+   private final Vector3D tempRCrossF = new Vector3D(), tempForce = new Vector3D();
 
    /**
     * Computes the Center of Pressure of the GroundContactPoints attached to this
@@ -1438,7 +1452,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
     * @param copForce Center of Pressure total force vector that is computed.
     * @param copMoment Total moment generated about the Center of Pressure from all the GroundContactPoints.
     */
-   public void computeCenterOfPressure(Point3d copPoint, Vector3d copForce, Vector3d copMoment)
+   public void computeCenterOfPressure(Point3D copPoint, Vector3D copForce, Vector3D copMoment)
    {
       copPoint.set(0.0, 0.0, 0.0);
       copForce.set(0.0, 0.0, 0.0);
@@ -1943,7 +1957,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
    
    public void freezeJointAtZero(Joint jointToFreeze)
    {
-      Vector3d jointToFreezeOffset = new Vector3d();
+      Vector3D jointToFreezeOffset = new Vector3D();
       jointToFreeze.getOffset(jointToFreezeOffset);
       System.out.println("jointToFreezeOffset = " + jointToFreezeOffset);
       Joint parentJoint = jointToFreeze.getParentJoint();
@@ -1960,7 +1974,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       {
          jointsToMove.add(childJoint);
 
-         Vector3d childOffset = new Vector3d();
+         Vector3D childOffset = new Vector3D();
          childJoint.getOffset(childOffset);
          childOffset.add(jointToFreezeOffset);
          childJoint.changeOffsetVector(childOffset);
@@ -1982,6 +1996,18 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       }
       
       return true;
+   }
+
+   public Joint getJoint(String name)
+   {
+      for (int i=0; i<rootJoints.size(); i++)
+      {
+         Joint rootJoint = rootJoints.get(i);
+         Joint joint = rootJoint.recursivelyGetJoint(name);
+         if (joint != null)
+            return joint;
+      }
+      return null;
    }
    
 //   public void resetup()

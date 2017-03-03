@@ -81,7 +81,7 @@ public class CirclePositionTrajectoryGenerator implements PositionTrajectoryGene
    public void compute(double time)
    {
       this.currentTime.set(time);
-      anglePolynomial.compute(MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue()));
+      anglePolynomial.compute(MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue()));
 
       double angle = anglePolynomial.getPosition();
       double angleDot = anglePolynomial.getVelocity();

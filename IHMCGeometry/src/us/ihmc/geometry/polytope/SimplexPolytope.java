@@ -1,7 +1,7 @@
 package us.ihmc.geometry.polytope;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -11,11 +11,11 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 
 public class SimplexPolytope
 {
-   private Point3d pointOne, pointTwo, pointThree, pointFour;
+   private Point3D pointOne, pointTwo, pointThree, pointFour;
 
-   private THashMap<Point3d, Point3d> simplexPointToPolytopePointA = new THashMap<>();
-   private THashMap<Point3d, Point3d> simplexPointToPolytopePointB = new THashMap<>();
-   private TObjectDoubleHashMap<Point3d> lambdas = new TObjectDoubleHashMap<>();
+   private THashMap<Point3D, Point3D> simplexPointToPolytopePointA = new THashMap<>();
+   private THashMap<Point3D, Point3D> simplexPointToPolytopePointB = new THashMap<>();
+   private TObjectDoubleHashMap<Point3D> lambdas = new TObjectDoubleHashMap<>();
 
    public int getNumberOfPoints()
    {
@@ -30,7 +30,7 @@ public class SimplexPolytope
       return 4;
    }
 
-   public void getClosestPointsOnAAndB(Point3d pointOnAToPack, Point3d pointOnBToPack)
+   public void getClosestPointsOnAAndB(Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       pointOnAToPack.set(0.0, 0.0, 0.0);
       pointOnBToPack.set(0.0, 0.0, 0.0);
@@ -53,7 +53,7 @@ public class SimplexPolytope
       }
    }
 
-   private void addPointsContribution(Point3d pointToContribute, Point3d pointOnAToPack, Point3d pointOnBToPack)
+   private void addPointsContribution(Point3D pointToContribute, Point3D pointOnAToPack, Point3D pointOnBToPack)
    {
       double lambda = lambdas.get(pointToContribute);
 
@@ -71,7 +71,7 @@ public class SimplexPolytope
       pointOne = pointTwo = pointThree = pointFour = null;
    }
 
-   public void setPoints(Point3d... points)
+   public void setPoints(Point3D... points)
    {
       pointOne = pointTwo = pointThree = pointFour = null;
 
@@ -85,7 +85,7 @@ public class SimplexPolytope
          pointFour = points[3];
    }
 
-   public Point3d getPoint(int i)
+   public Point3D getPoint(int i)
    {
       if (i == 0)
          return pointOne;
@@ -99,12 +99,12 @@ public class SimplexPolytope
       return null;
    }
 
-   public double getLambda(Point3d point)
+   public double getLambda(Point3D point)
    {
       return lambdas.get(point);
    }
 
-   public boolean addVertex(Point3d simplexPointToAdd, Point3d correspondingPointOnA, Point3d correspondingPointOnB)
+   public boolean addVertex(Point3D simplexPointToAdd, Point3D correspondingPointOnA, Point3D correspondingPointOnB)
    {
       boolean alreadyHaveThatOne = doWeAlreadyHaveThatVertex(correspondingPointOnA, correspondingPointOnB);
 
@@ -153,7 +153,7 @@ public class SimplexPolytope
       return true;
    }
 
-   private boolean doWeAlreadyHaveThatVertex(Point3d correspondingPointOnA, Point3d correspondingPointOnB)
+   private boolean doWeAlreadyHaveThatVertex(Point3D correspondingPointOnA, Point3D correspondingPointOnB)
    {
       if (pointOne != null)
       {
@@ -179,7 +179,7 @@ public class SimplexPolytope
       return false;
    }
 
-   public boolean containsPoint(Point3d pointToCheck)
+   public boolean containsPoint(Point3D pointToCheck)
    {
       if (pointToCheck == pointOne)
          return true;
@@ -193,7 +193,7 @@ public class SimplexPolytope
       return false;
    }
 
-   public void removePoint(Point3d pointToRemove)
+   public void removePoint(Point3D pointToRemove)
    {
       if (pointToRemove == pointOne)
       {
@@ -223,7 +223,7 @@ public class SimplexPolytope
 
    }
 
-   public void getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(Point3d closestPointToOrigin)
+   public void getClosestPointToOriginOnConvexHullAndRemoveUnusedVertices(Point3D closestPointToOrigin)
    {
       // Use the distance subalgorithm of GJK and go through all the possibilities:
 
@@ -450,7 +450,7 @@ public class SimplexPolytope
       return true;
    }
 
-   private void projectInsideTetragon(Point3d closestPointToOrigin)
+   private void projectInsideTetragon(Point3D closestPointToOrigin)
    {
       // Compute barycentric coordinates for point inside the tetragon.
 
@@ -494,10 +494,10 @@ public class SimplexPolytope
       closestPointToOrigin.set(0.0, 0.0, 0.0);
    }
 
-   private void retainPoints(Point3d pointToKeep)
+   private void retainPoints(Point3D pointToKeep)
    {
-      Point3d point3dOnA = simplexPointToPolytopePointA.get(pointToKeep);
-      Point3d point3dOnB = simplexPointToPolytopePointB.get(pointToKeep);
+      Point3D point3dOnA = simplexPointToPolytopePointA.get(pointToKeep);
+      Point3D point3dOnB = simplexPointToPolytopePointB.get(pointToKeep);
 
       pointOne = null;
       pointTwo = null;
@@ -513,13 +513,13 @@ public class SimplexPolytope
       simplexPointToPolytopePointB.put(pointToKeep, point3dOnB);
    }
 
-   private void retainPoints(Point3d pointToKeep1, Point3d pointToKeep2)
+   private void retainPoints(Point3D pointToKeep1, Point3D pointToKeep2)
    {
-      Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
-      Point3d point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
+      Point3D point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
+      Point3D point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
 
-      Point3d point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
-      Point3d point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
+      Point3D point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
+      Point3D point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
 
       pointOne = null;
       pointTwo = null;
@@ -538,15 +538,15 @@ public class SimplexPolytope
       simplexPointToPolytopePointB.put(pointToKeep2, point3dOnB2);
    }
 
-   private void retainPoints(Point3d pointToKeep1, Point3d pointToKeep2, Point3d pointToKeep3)
+   private void retainPoints(Point3D pointToKeep1, Point3D pointToKeep2, Point3D pointToKeep3)
    {
-      Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
-      Point3d point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
-      Point3d point3dOnA3 = simplexPointToPolytopePointA.get(pointToKeep3);
+      Point3D point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
+      Point3D point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
+      Point3D point3dOnA3 = simplexPointToPolytopePointA.get(pointToKeep3);
 
-      Point3d point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
-      Point3d point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
-      Point3d point3dOnB3 = simplexPointToPolytopePointB.get(pointToKeep3);
+      Point3D point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
+      Point3D point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
+      Point3D point3dOnB3 = simplexPointToPolytopePointB.get(pointToKeep3);
 
       pointOne = null;
       pointTwo = null;
@@ -568,17 +568,17 @@ public class SimplexPolytope
       simplexPointToPolytopePointB.put(pointToKeep3, point3dOnB3);
    }
 
-   private void retainPoints(Point3d pointToKeep1, Point3d pointToKeep2, Point3d pointToKeep3, Point3d pointToKeep4)
+   private void retainPoints(Point3D pointToKeep1, Point3D pointToKeep2, Point3D pointToKeep3, Point3D pointToKeep4)
    {
-      Point3d point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
-      Point3d point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
-      Point3d point3dOnA3 = simplexPointToPolytopePointA.get(pointToKeep3);
-      Point3d point3dOnA4 = simplexPointToPolytopePointA.get(pointToKeep4);
+      Point3D point3dOnA1 = simplexPointToPolytopePointA.get(pointToKeep1);
+      Point3D point3dOnA2 = simplexPointToPolytopePointA.get(pointToKeep2);
+      Point3D point3dOnA3 = simplexPointToPolytopePointA.get(pointToKeep3);
+      Point3D point3dOnA4 = simplexPointToPolytopePointA.get(pointToKeep4);
 
-      Point3d point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
-      Point3d point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
-      Point3d point3dOnB3 = simplexPointToPolytopePointB.get(pointToKeep3);
-      Point3d point3dOnB4 = simplexPointToPolytopePointB.get(pointToKeep4);
+      Point3D point3dOnB1 = simplexPointToPolytopePointB.get(pointToKeep1);
+      Point3D point3dOnB2 = simplexPointToPolytopePointB.get(pointToKeep2);
+      Point3D point3dOnB3 = simplexPointToPolytopePointB.get(pointToKeep3);
+      Point3D point3dOnB4 = simplexPointToPolytopePointB.get(pointToKeep4);
 
       pointOne = null;
       pointTwo = null;
@@ -604,9 +604,9 @@ public class SimplexPolytope
       simplexPointToPolytopePointB.put(pointToKeep4, point3dOnB4);
    }
 
-   private Point3d discardedOnA, discardedOnB;
+   private Point3D discardedOnA, discardedOnB;
 
-   private void rememberDiscardedVertices(Point3d pointToDiscard)
+   private void rememberDiscardedVertices(Point3D pointToDiscard)
    {
       discardedOnA = simplexPointToPolytopePointA.get(pointToDiscard);
       discardedOnB = simplexPointToPolytopePointB.get(pointToDiscard);
@@ -617,7 +617,7 @@ public class SimplexPolytope
       discardedOnA = discardedOnB = null;
    }
 
-   public boolean wereMostRecentlyDiscared(Point3d checkOnA, Point3d checkOnB)
+   public boolean wereMostRecentlyDiscared(Point3D checkOnA, Point3D checkOnB)
    {
       if ((discardedOnA == null) || (discardedOnB == null)) return false;
 
@@ -629,7 +629,7 @@ public class SimplexPolytope
 //      return ((discardedOnA == checkOnA) && (discardedOnB == checkOnB));
    }
 
-   public boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint)
+   public boolean isInVoronoiRegionOfVertex(Point3D pointToCheck, Point3D otherPoint)
    {
       tempVector1.set(pointToCheck);
       tempVector1.scale(-1.0);
@@ -638,7 +638,7 @@ public class SimplexPolytope
       return (tempVector1.dot(tempVector2) <= 0.0);
    }
 
-   public boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint1, Point3d otherPoint2)
+   public boolean isInVoronoiRegionOfVertex(Point3D pointToCheck, Point3D otherPoint1, Point3D otherPoint2)
    {
       tempVector1.set(pointToCheck);
       tempVector1.scale(-1.0);
@@ -654,7 +654,7 @@ public class SimplexPolytope
       return true;
    }
 
-   public boolean isInVoronoiRegionOfVertex(Point3d pointToCheck, Point3d otherPoint1, Point3d otherPoint2, Point3d otherPoint3)
+   public boolean isInVoronoiRegionOfVertex(Point3D pointToCheck, Point3D otherPoint1, Point3D otherPoint2, Point3D otherPoint3)
    {
       tempVector1.set(pointToCheck);
       tempVector1.scale(-1.0);
@@ -677,14 +677,14 @@ public class SimplexPolytope
       return true;
    }
 
-   private final Vector3d tempVector1 = new Vector3d();
-   private final Vector3d tempVector2 = new Vector3d();
-   private final Vector3d tempVector3 = new Vector3d();
-   private final Vector3d tempVector4 = new Vector3d();
-   private final Vector3d tempNormalVector1 = new Vector3d();
-   private final Vector3d tempNormalVector2 = new Vector3d();
+   private final Vector3D tempVector1 = new Vector3D();
+   private final Vector3D tempVector2 = new Vector3D();
+   private final Vector3D tempVector3 = new Vector3D();
+   private final Vector3D tempVector4 = new Vector3D();
+   private final Vector3D tempNormalVector1 = new Vector3D();
+   private final Vector3D tempNormalVector2 = new Vector3D();
 
-   public boolean isInVoronoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPoint)
+   public boolean isInVoronoiRegionOfEdge(Point3D edgePointOne, Point3D edgePointTwo, Point3D otherPoint)
    {
       // TODO: Redundancies from other checks that be reused. Or is this just bad, due to epsilon problems.
       // If we are here, then we know we failed one or more of the Vertex Voronoi region checks (but we do not know which ones...).
@@ -716,7 +716,7 @@ public class SimplexPolytope
       return (tempVector3.dot(tempVector2) >= 0.0);
    }
 
-   public boolean isInVoronoiRegionOfEdge(Point3d edgePointOne, Point3d edgePointTwo, Point3d otherPointOne, Point3d otherPointTwo)
+   public boolean isInVoronoiRegionOfEdge(Point3D edgePointOne, Point3D edgePointTwo, Point3D otherPointOne, Point3D otherPointTwo)
    {
       // TODO: Redundancies from other checks that be reused...
       tempVector1.set(edgePointOne);
@@ -764,7 +764,7 @@ public class SimplexPolytope
       return true;
    }
 
-   public boolean isInVoronoiRegionOfFace(Point3d facePointOne, Point3d facePointTwo, Point3d facePointThree, Point3d otherPoint)
+   public boolean isInVoronoiRegionOfFace(Point3D facePointOne, Point3D facePointTwo, Point3D facePointThree, Point3D otherPoint)
    {
       tempVector1.sub(facePointTwo, facePointOne);
       tempVector2.sub(facePointThree, facePointOne);
@@ -786,7 +786,7 @@ public class SimplexPolytope
       //      return (dot1 * dot2 < 0.0 + 1e-8);
    }
 
-   private void setLambda(Point3d vertex, double lambda)
+   private void setLambda(Point3D vertex, double lambda)
    {
       if (lambda < 0.0)
       {
@@ -804,7 +804,7 @@ public class SimplexPolytope
       lambdas.put(vertex, lambda);
    }
 
-   private void projectOriginOntoPoint(Point3d vertex, Point3d projectionToPack)
+   private void projectOriginOntoPoint(Point3D vertex, Point3D projectionToPack)
    {
       projectionToPack.set(vertex);
 
@@ -812,7 +812,7 @@ public class SimplexPolytope
       setLambda(vertex, 1.0);
    }
 
-   private void projectOriginOntoEdge(Point3d vertexOne, Point3d vertexTwo, Point3d projectionToPack)
+   private void projectOriginOntoEdge(Point3D vertexOne, Point3D vertexTwo, Point3D projectionToPack)
    {
       tempVector1.set(vertexOne);
       tempVector1.scale(-1.0);
@@ -832,7 +832,7 @@ public class SimplexPolytope
 
    }
 
-   //   private void projectOriginOntoFace(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree, Point3d closestPointToOrigin)
+   //   private void projectOriginOntoFace(Point3D vertexOne, Point3D vertexTwo, Point3D vertexThree, Point3D closestPointToOrigin)
    //   {
    //      tempVector1.sub(vertexTwo, vertexOne);
    //      tempVector2.sub(vertexThree, vertexOne);
@@ -850,7 +850,7 @@ public class SimplexPolytope
    //
    //   }
    
-   private void projectOriginOntoFace(Point3d vertexOne, Point3d vertexTwo, Point3d vertexThree, Point3d closestPointToOrigin)
+   private void projectOriginOntoFace(Point3D vertexOne, Point3D vertexTwo, Point3D vertexThree, Point3D closestPointToOrigin)
    {
       // Using barycentric coordinates as described in https://www.cs.ubc.ca/~heidrich/Papers/JGT.05.pdf
       tempVector1.sub(vertexTwo, vertexOne);
@@ -910,12 +910,12 @@ public class SimplexPolytope
       return lambda;
    }
 
-   public Point3d getCorrespondingPointOnPolytopeA(Point3d simplexPoint)
+   public Point3D getCorrespondingPointOnPolytopeA(Point3D simplexPoint)
    {
       return simplexPointToPolytopePointA.get(simplexPoint);
    }
 
-   public Point3d getCorrespondingPointOnPolytopeB(Point3d simplexPoint)
+   public Point3D getCorrespondingPointOnPolytopeB(Point3D simplexPoint)
    {
       return simplexPointToPolytopePointB.get(simplexPoint);
    }
@@ -949,10 +949,10 @@ public class SimplexPolytope
       if (pointFour == null)
          return Double.NaN;
 
-      Vector3d vectorAB = new Vector3d();
-      Vector3d vectorAC = new Vector3d();
-      Vector3d vectorAD = new Vector3d();
-      Vector3d normalVector = new Vector3d();
+      Vector3D vectorAB = new Vector3D();
+      Vector3D vectorAC = new Vector3D();
+      Vector3D vectorAD = new Vector3D();
+      Vector3D normalVector = new Vector3D();
 
       vectorAB.sub(pointTwo, pointOne);
       vectorAC.sub(pointThree, pointOne);

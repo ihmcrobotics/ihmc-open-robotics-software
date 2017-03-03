@@ -6,18 +6,17 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -57,32 +56,32 @@ public class TransformInterpolationCalculatorTest
 	@Test(timeout = 30000)
    public void testComputeInterpolationForTranslation() throws Exception
    {
-      Matrix3d maxtrixIdentity = new Matrix3d();
+      RotationMatrix maxtrixIdentity = new RotationMatrix();
       maxtrixIdentity.setIdentity();
 
-      Vector3d vector1 = new Vector3d(0.0, 0.0, 0.0);
-      Vector3d vector2 = new Vector3d(5.0, 8.0, 10.0);
+      Vector3D vector1 = new Vector3D(0.0, 0.0, 0.0);
+      Vector3D vector2 = new Vector3D(5.0, 8.0, 10.0);
 
       RigidBodyTransform t1 =  new RigidBodyTransform(maxtrixIdentity, vector1);
       RigidBodyTransform t2 =  new RigidBodyTransform(maxtrixIdentity, vector2);
 
       RigidBodyTransform t3 =  new RigidBodyTransform();
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 0.0);
-      Vector3d interpolatedVector = new Vector3d();
+      Vector3D interpolatedVector = new Vector3D();
       t3.getTranslation(interpolatedVector);
       assertTrue(vector1.epsilonEquals(interpolatedVector, 1e-8));
 
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 1.0);
-      interpolatedVector = new Vector3d();
+      interpolatedVector = new Vector3D();
       t3.getTranslation(interpolatedVector);
       assertTrue(vector2.epsilonEquals(interpolatedVector, 1e-8));
 
       double alpha = 0.25;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
-      interpolatedVector = new Vector3d();
+      interpolatedVector = new Vector3D();
       t3.getTranslation(interpolatedVector);
 
-      Vector3d expectedVector = new Vector3d();
+      Vector3D expectedVector = new Vector3D();
       expectedVector.scaleAdd((1- alpha), vector1, expectedVector);
       expectedVector.scaleAdd(alpha, vector2, expectedVector);
 
@@ -109,8 +108,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
-      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3D(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3D(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -134,8 +133,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
-      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3D(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3D(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -172,8 +171,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 1.0;
 
-      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
-      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3D(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3D(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -210,8 +209,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 1.0;
       roll2 = 0.0;
 
-      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
-      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3D(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3D(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -252,8 +251,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
-      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3D(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3D(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -282,8 +281,8 @@ public class TransformInterpolationCalculatorTest
       pitch2 = 0.0;
       roll2 = 0.0;
 
-      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
-      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3D(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3D(roll2, pitch2, yaw2));
 
       alpha = 0.0;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
@@ -325,20 +324,20 @@ public class TransformInterpolationCalculatorTest
       pitch2 = -1.0;
       roll2 = 1.6;
 
-      t1.setRotationEulerAndZeroTranslation(new Vector3d(roll1, pitch1, yaw1));
-      t2.setRotationEulerAndZeroTranslation(new Vector3d(roll2, pitch2, yaw2));
+      t1.setRotationEulerAndZeroTranslation(new Vector3D(roll1, pitch1, yaw1));
+      t2.setRotationEulerAndZeroTranslation(new Vector3D(roll2, pitch2, yaw2));
 
-      AxisAngle4d axist1 = new AxisAngle4d();
-      Matrix3d maxtrixt1 = new Matrix3d();
+      AxisAngle axist1 = new AxisAngle();
+      RotationMatrix maxtrixt1 = new RotationMatrix();
       t1.getRotation(maxtrixt1);
 //      axist1.set(maxtrixt1);
-      RotationTools.convertMatrixToAxisAngle(maxtrixt1, axist1);
+      axist1.set(maxtrixt1);
 
-      AxisAngle4d axist2 = new AxisAngle4d();
-      Matrix3d maxtrixt2 = new Matrix3d();
+      AxisAngle axist2 = new AxisAngle();
+      RotationMatrix maxtrixt2 = new RotationMatrix();
       t2.getRotation(maxtrixt2);
 //      axist2.set(maxtrixt2);
-      RotationTools.convertMatrixToAxisAngle(maxtrixt2, axist2);
+      axist2.set(maxtrixt2);
       
 
 
@@ -347,8 +346,8 @@ public class TransformInterpolationCalculatorTest
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
       getYawPitchRoll(yawPitchRoll, t3);
 
-      AxisAngle4d axist3 = new AxisAngle4d();
-      Matrix3d maxtrixt3 = new Matrix3d();
+      AxisAngle axist3 = new AxisAngle();
+      RotationMatrix maxtrixt3 = new RotationMatrix();
       t3.getRotation(maxtrixt3);
       axist3.set(maxtrixt3);
 
@@ -360,8 +359,8 @@ public class TransformInterpolationCalculatorTest
       axist3.get(t3xyztheta);
 
       //compare vectors
-      Vector3d t2vector = new Vector3d(t2xyztheta[0], t2xyztheta[1], t2xyztheta[2]);
-      Vector3d t3vector = new Vector3d(t3xyztheta[0], t3xyztheta[1], t3xyztheta[2]);
+      Vector3D t2vector = new Vector3D(t2xyztheta[0], t2xyztheta[1], t2xyztheta[2]);
+      Vector3D t3vector = new Vector3D(t3xyztheta[0], t3xyztheta[1], t3xyztheta[2]);
 
       double anlgeBetweenVectors = t2vector.angle(t3vector);
       assertEquals(0.0, anlgeBetweenVectors, 1e-6);
@@ -374,7 +373,7 @@ public class TransformInterpolationCalculatorTest
    private void getYawPitchRoll(double[] yawPitchRoll, RigidBodyTransform transform3D)
    {
       // This seems to work much better than going to quaternions first, especially when yaw is large...
-      Matrix3d rotationMatrix = new Matrix3d();
+      RotationMatrix rotationMatrix = new RotationMatrix();
       transform3D.getRotation(rotationMatrix);
       yawPitchRoll[0] = Math.atan2(rotationMatrix.getM10(), rotationMatrix.getM00());
       yawPitchRoll[1] = Math.asin(-rotationMatrix.getM20());
@@ -409,13 +408,13 @@ public class TransformInterpolationCalculatorTest
       
       for (int i = 0; i < 1000; i++)
       {
-         transform1.set(RigidBodyTransform.generateRandomTransform(random));
-         transform2.set(RigidBodyTransform.generateRandomTransform(random));
+         transform1.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         transform2.set(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
          framePose1.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform1);
          framePose2.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), transform2);
 
-         double alpha = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         double alpha = RandomNumbers.nextDouble(random, 0.0, 1.0);
          transformInterpolationCalculator.computeInterpolation(transform1, transform2, toTestTransform, alpha);
 
          frame1.setPoseAndUpdate(framePose1);
@@ -448,7 +447,7 @@ public class TransformInterpolationCalculatorTest
       
       TransformInterpolationCalculator transformInterpolationCalculator = new TransformInterpolationCalculator();
       
-      firstTimeStampedTransform.setTimeStamp(RandomTools.generateRandomInt(random, 123, 45196516));
+      firstTimeStampedTransform.setTimeStamp(RandomNumbers.nextInt(random, 123, 45196516));
       secondTimeStampedTransform.setTimeStamp(firstTimeStampedTransform.getTimeStamp() - 1);
       
       try
@@ -461,8 +460,8 @@ public class TransformInterpolationCalculatorTest
          // Good
       }
 
-      firstTimeStampedTransform.setTimeStamp(RandomTools.generateRandomInt(random, 123, 45196516));
-      secondTimeStampedTransform.setTimeStamp(firstTimeStampedTransform.getTimeStamp() + RandomTools.generateRandomInt(random, 1, 20));
+      firstTimeStampedTransform.setTimeStamp(RandomNumbers.nextInt(random, 123, 45196516));
+      secondTimeStampedTransform.setTimeStamp(firstTimeStampedTransform.getTimeStamp() + RandomNumbers.nextInt(random, 1, 20));
 
       try
       {
@@ -487,15 +486,15 @@ public class TransformInterpolationCalculatorTest
 
       for (int i = 0; i < 100; i++)
       {
-         firstTimeStampedTransform.setTransform3D(RigidBodyTransform.generateRandomTransform(random));
-         secondTimeStampedTransform.setTransform3D(RigidBodyTransform.generateRandomTransform(random));
+         firstTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         secondTimeStampedTransform.setTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
 
-         long timestamp1 = RandomTools.generateRandomInt(random, 123, Integer.MAX_VALUE / 4);
-         long timestamp2 = timestamp1 + RandomTools.generateRandomInt(random, 1, 200);
+         long timestamp1 = RandomNumbers.nextInt(random, 123, Integer.MAX_VALUE / 4);
+         long timestamp2 = timestamp1 + RandomNumbers.nextInt(random, 1, 200);
          firstTimeStampedTransform.setTimeStamp(timestamp1);
          secondTimeStampedTransform.setTimeStamp(timestamp2);
 
-         long timeStampForInterpolation = RandomTools.generateRandomInt(random, (int) firstTimeStampedTransform.getTimeStamp(), (int) secondTimeStampedTransform.getTimeStamp());
+         long timeStampForInterpolation = RandomNumbers.nextInt(random, (int) firstTimeStampedTransform.getTimeStamp(), (int) secondTimeStampedTransform.getTimeStamp());
 
          transformInterpolationCalculator.interpolate(firstTimeStampedTransform, secondTimeStampedTransform, toTestTimeStampedTransform, timeStampForInterpolation);
 

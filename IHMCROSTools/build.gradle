@@ -62,14 +62,14 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile group: 'io.netty', name: 'netty', version: '3.5.8.Final'
-    compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
     compile group: 'org.apache.commons', name: 'com.springsource.org.apache.commons.io', version: '1.4.0'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
     compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
     
-    testCompile group: 'us.ihmc', name: 'IHMCContinuousIntegrationFramework', version: '0.9.1'
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
 	compile group: 'org.ros.rosjava_core', name: 'rosjava', version: '0.2.1'
 	compile group: 'org.ros.rosjava_bootstrap', name: 'message_generation', version: '0.2.1'
@@ -86,9 +86,11 @@ dependencies {
 
  	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 
-	testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 jar {
     manifest {

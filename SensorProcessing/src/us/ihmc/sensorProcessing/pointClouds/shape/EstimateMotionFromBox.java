@@ -1,5 +1,8 @@
 package us.ihmc.sensorProcessing.pointClouds.shape;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
+
 import georegression.geometry.GeometryMath_F64;
 import georegression.geometry.UtilPlane3D_F64;
 import georegression.metric.Intersection3D_F64;
@@ -9,9 +12,6 @@ import georegression.struct.plane.PlaneNormal3D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
 
 /**
  *

@@ -5,22 +5,22 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -34,16 +34,16 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    @RosExportedField(documentation = "Specifies which foot is expected to be executing the footstep to be adjusted.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "Specifies the adjusted position of the footstep. It is expressed in world frame.")
-   public Point3d location;
+   public Point3D location;
    @RosExportedField(documentation = "Specifies the adjusted orientation of the footstep. It is expressed in world frame.")
-   public Quat4d orientation;
+   public Quaternion orientation;
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
          + "the world. A value of null or an empty list will default to keep the contact points used for the original footstep. Contact points  are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
-   public List<Point2d> predictedContactPoints;
+   public List<Point2D> predictedContactPoints;
 
    /**
     * Empty constructor for serialization.
@@ -54,22 +54,22 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
-   public AdjustFootstepMessage(RobotSide robotSide, Point3d location, Quat4d orientation)
+   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
    {
       this(robotSide, location, orientation, null);
    }
 
-   public AdjustFootstepMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints)
+   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints)
    {
       this(robotSide, location, orientation, predictedContactPoints, TrajectoryType.DEFAULT, 0.0);
    }
 
-   public AdjustFootstepMessage(RobotSide robotSide, Point3d location, Quat4d orientation, TrajectoryType trajectoryType, double swingHeight)
+   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, TrajectoryType trajectoryType, double swingHeight)
    {
       this(robotSide, location, orientation, null, trajectoryType, swingHeight);
    }
 
-   public AdjustFootstepMessage(RobotSide robotSide, Point3d location, Quat4d orientation, ArrayList<Point2d> predictedContactPoints,
+   public AdjustFootstepMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
          TrajectoryType trajectoryType, double swingHeight)
    {
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
@@ -88,9 +88,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
       this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
-      this.location = new Point3d(footstepData.location);
-      this.orientation = new Quat4d(footstepData.orientation);
-      RotationTools.checkQuaternionNormalized(this.orientation);
+      this.location = new Point3D(footstepData.location);
+      this.orientation = new Quaternion(footstepData.orientation);
+      orientation.checkIfUnitary();
       if (footstepData.predictedContactPoints == null || footstepData.predictedContactPoints.isEmpty())
       {
          this.predictedContactPoints = null;
@@ -98,9 +98,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       else
       {
          this.predictedContactPoints = new ArrayList<>();
-         for (Point2d contactPoint : footstepData.predictedContactPoints)
+         for (Point2D contactPoint : footstepData.predictedContactPoints)
          {
-            this.predictedContactPoints.add(new Point2d(contactPoint));
+            this.predictedContactPoints.add(new Point2D(contactPoint));
          }
       }
    }
@@ -115,12 +115,12 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
-      location = new Point3d();
-      orientation = new Quat4d();
+      location = new Point3D();
+      orientation = new Quaternion();
       footstep.getPositionInWorldFrame(location);
       footstep.getOrientationInWorldFrame(orientation);
 
-      List<Point2d> footstepContactPoints = footstep.getPredictedContactPoints();
+      List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
       {
          if (predictedContactPoints == null)
@@ -131,9 +131,9 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          {
             predictedContactPoints.clear();
          }
-         for (Point2d contactPoint : footstepContactPoints)
+         for (Point2D contactPoint : footstepContactPoints)
          {
-            predictedContactPoints.add((Point2d) contactPoint.clone());
+            predictedContactPoints.add(new Point2D(contactPoint));
          }
       }
       else
@@ -147,27 +147,27 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       return origin;
    }
 
-   public List<Point2d> getPredictedContactPoints()
+   public List<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
 
-   public Point3d getLocation()
+   public Point3D getLocation()
    {
       return location;
    }
 
-   public void getLocation(Point3d locationToPack)
+   public void getLocation(Point3D locationToPack)
    {
       locationToPack.set(location);
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
 
-   public void getOrientation(Quat4d orientationToPack)
+   public void getOrientation(Quaternion orientationToPack)
    {
       orientationToPack.set(this.orientation);
    }
@@ -187,19 +187,19 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       this.origin = origin;
    }
 
-   public void setLocation(Point3d location)
+   public void setLocation(Point3D location)
    {
-      if (this.location == null) this.location = new Point3d();
+      if (this.location == null) this.location = new Point3D();
       this.location.set(location);
    }
 
-   public void setOrientation(Quat4d orientation)
+   public void setOrientation(Quaternion orientation)
    {
-      if (this.orientation == null) this.orientation = new Quat4d();
+      if (this.orientation == null) this.orientation = new Quaternion();
       this.orientation.set(orientation);
    }
 
-   public void setPredictedContactPoints(List<Point2d> predictedContactPoints)
+   public void setPredictedContactPoints(List<Point2D> predictedContactPoints)
    {
       this.predictedContactPoints = predictedContactPoints;
    }
@@ -233,8 +233,8 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       boolean orientationEquals = orientation.epsilonEquals(footstepData.orientation, epsilon);
       if (!orientationEquals)
       {
-         Quat4d temp = new Quat4d();
-         temp.negate(orientation);
+         Quaternion temp = new Quaternion();
+         temp.setAndNegate(orientation);
          orientationEquals = temp.epsilonEquals(footstepData.orientation, epsilon);
       }
 
@@ -253,8 +253,8 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
          {
             for (int i = 0; i < size; i++)
             {
-               Point2d pointOne = predictedContactPoints.get(i);
-               Point2d pointTwo = footstepData.predictedContactPoints.get(i);
+               Point2D pointOne = predictedContactPoints.get(i);
+               Point2D pointTwo = footstepData.predictedContactPoints.get(i);
 
                if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
                   contactPointsEqual = false;
@@ -269,7 +269,7 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    {
       AdjustFootstepMessage ret = this.clone();
 
-      // Point3d location;
+      // Point3D location;
       ret.location = TransformTools.getTransformedPoint(this.getLocation(), transform);
 
       // Quat4d orientation;
@@ -282,14 +282,14 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
-      this.orientation = RandomTools.generateRandomQuaternion(random);
+      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
+      this.orientation = RandomGeometry.nextQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
       this.predictedContactPoints = new ArrayList<>();
 
       for (int i = 0; i < numberOfPredictedContactPoints; i++)
       {
-         predictedContactPoints.add(new Point2d(random.nextDouble(), random.nextDouble()));
+         predictedContactPoints.add(new Point2D(random.nextDouble(), random.nextDouble()));
       }
    }
 

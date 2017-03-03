@@ -7,9 +7,10 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class TimeStampedTransform3DTest
 {
@@ -34,8 +35,8 @@ public class TimeStampedTransform3DTest
    public void testConstructor()
    {
       Random random = new Random(3213620L);
-      RigidBodyTransform expectedTransform = RigidBodyTransform.generateRandomTransform(random);
-      long expectedTimestamp = RandomTools.generateRandomInt(random, 132, 51568418);
+      RigidBodyTransform expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+      long expectedTimestamp = RandomNumbers.nextInt(random, 132, 51568418);
       
 
       TimeStampedTransform3D toBeTested = new TimeStampedTransform3D(expectedTransform, expectedTimestamp);
@@ -59,20 +60,20 @@ public class TimeStampedTransform3DTest
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
 
       Random random = new Random(3213620L);
-      expectedTimestamp = RandomTools.generateRandomInt(random, 132, 51568418);
+      expectedTimestamp = RandomNumbers.nextInt(random, 132, 51568418);
       toBeTested.setTimeStamp(expectedTimestamp);
 
       assertEquals("Timestamp is different from what was expected", expectedTimestamp, toBeTested.getTimeStamp());
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
 
-      expectedTransform = RigidBodyTransform.generateRandomTransform(random);
+      expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       toBeTested.setTransform3D(expectedTransform);
 
       assertEquals("Timestamp is different from what was expected", expectedTimestamp, toBeTested.getTimeStamp());
       assertTrue("Transform is different from what was expected", expectedTransform.epsilonEquals(toBeTested.getTransform3D(), EPSILON));
 
-      expectedTimestamp = RandomTools.generateRandomInt(random, 132, 51568418);
-      expectedTransform = RigidBodyTransform.generateRandomTransform(random);
+      expectedTimestamp = RandomNumbers.nextInt(random, 132, 51568418);
+      expectedTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       TimeStampedTransform3D expectedTimeStampedTransform = new TimeStampedTransform3D(expectedTransform, expectedTimestamp);
 
       toBeTested.set(expectedTimeStampedTransform);

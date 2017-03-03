@@ -3,14 +3,15 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.interfaces.EuclideanWaypointInterface;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
 
 public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<EuclideanWaypoint, SimpleEuclideanTrajectoryPoint>
@@ -21,7 +22,7 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
       super(new EuclideanWaypoint());
    }
 
-   public SimpleEuclideanTrajectoryPoint(double time, Point3d position, Vector3d linearVelocity)
+   public SimpleEuclideanTrajectoryPoint(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       this();
       set(time, position, linearVelocity);
@@ -39,18 +40,18 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
    }
 
    @Override
-   public void setPosition(Point3d position)
+   public void setPosition(Point3DReadOnly position)
    {
       waypointData.setPosition(position);
    }
 
    @Override
-   public void setLinearVelocity(Vector3d linearVelocity)
+   public void setLinearVelocity(Vector3DReadOnly linearVelocity)
    {
       waypointData.setLinearVelocity(linearVelocity);
    }
 
-   public void set(double time, Point3d position, Vector3d linearVelocity)
+   public void set(double time, Point3DReadOnly position, Vector3DReadOnly linearVelocity)
    {
       setTime(time);
       waypointData.set(position, linearVelocity);
@@ -103,32 +104,32 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
    }
    
    @Override
-   public void getPosition(Point3d positionToPack)
+   public void getPosition(Point3DBasics positionToPack)
    {
       waypointData.getPosition(positionToPack);
    }
 
-   public TransformablePoint3d getPositionCopy()
+   public Point3D getPositionCopy()
    {
-      TransformablePoint3d positionCopy = new TransformablePoint3d();
+      Point3D positionCopy = new Point3D();
       getPosition(positionCopy);
       return positionCopy;
    }
 
    @Override
-   public void getLinearVelocity(Vector3d linearVelocityToPack)
+   public void getLinearVelocity(Vector3DBasics linearVelocityToPack)
    {
       waypointData.getLinearVelocity(linearVelocityToPack);
    }
 
-   public TransformableVector3d getLinearVelocityCopy()
+   public Vector3D getLinearVelocityCopy()
    {
-      TransformableVector3d linearVelocityCopy = new TransformableVector3d();
+      Vector3D linearVelocityCopy = new Vector3D();
       getLinearVelocity(linearVelocityCopy);
       return linearVelocityCopy;
    }
 
-   public double get(Point3d positionToPack, Vector3d linearVelocityToPack)
+   public double get(Point3DBasics positionToPack, Vector3DBasics linearVelocityToPack)
    {
       waypointData.get(positionToPack, linearVelocityToPack);
       return getTime();
@@ -172,17 +173,17 @@ public class SimpleEuclideanTrajectoryPoint extends SimpleTrajectoryPoint<Euclid
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       waypointData.applyTransform(transform);
    }
 
-   Point3d getPosition()
+   Point3DReadOnly getPosition()
    {
       return waypointData.getPosition();
    }
 
-   Vector3d getLinearVelocity()
+   Vector3DReadOnly getLinearVelocity()
    {
       return waypointData.getLinearVelocity();
    }

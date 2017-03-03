@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.vision;
 
 import java.util.Arrays;
 
-import us.ihmc.tools.FormattingTools;
+import us.ihmc.robotics.MathTools;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -64,8 +64,8 @@ public class HSVValue
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": H: " + FormattingTools.roundToSignificantFigures(values[0], 4) + " S: "
-            + FormattingTools.roundToSignificantFigures(values[1], 4) + " V: " + FormattingTools.roundToSignificantFigures(values[2], 4);
+      return getClass().getSimpleName() + ": H: " + MathTools.roundToSignificantFigures(values[0], 4) + " S: "
+            + MathTools.roundToSignificantFigures(values[1], 4) + " V: " + MathTools.roundToSignificantFigures(values[2], 4);
    }
 
    @Override

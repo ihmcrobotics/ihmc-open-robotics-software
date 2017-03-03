@@ -18,8 +18,9 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.io.files.FileTools;
 import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -31,7 +32,7 @@ public class ProcessSpawnerTest
    private void validateFileContents(String expectedContent) throws Exception
    {
       byte[] binaryData = new byte[128];
-      DataInputStream dis = FileTools.getFileDataInputStream(testFilePath);
+      DataInputStream dis = FileTools.newFileDataInputStream(testFilePath);
       dis.readFully(binaryData, 0, dis.available());
       dis.close();
       String content = new String(binaryData).trim();
@@ -129,7 +130,7 @@ public class ProcessSpawnerTest
          return;
       }
 
-      final List<Integer> exitValues = new ArrayList(2);
+      final List<Integer> exitValues = new ArrayList<>(2);
       exitValues.clear();
       String[] arguments = {"2"};
 
@@ -185,7 +186,7 @@ public class ProcessSpawnerTest
    // this one is used for testing JavaProcessSpawner
    public static void main(String[] args) throws Exception
    {
-      DataOutputStream dos = FileTools.getFileDataOutputStream(testFilePath);
+      DataOutputStream dos = FileTools.newFileDataOutputStream(testFilePath, DefaultExceptionHandler.PRINT_STACKTRACE);
       dos.writeBytes(args[0]);
       dos.flush();
       dos.close();

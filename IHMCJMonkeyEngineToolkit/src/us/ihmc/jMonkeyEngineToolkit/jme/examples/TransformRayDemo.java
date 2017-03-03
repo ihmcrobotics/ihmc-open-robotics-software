@@ -9,16 +9,17 @@ import java.util.concurrent.Callable;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEViewportAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer.RenderType;
+import us.ihmc.jMonkeyEngineToolkit.jme.JMEViewportAdapter;
 import us.ihmc.jMonkeyEngineToolkit.utils.GraphicsDemoTools.PanBackAndForthTrackingAndDollyPositionHolder;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class TransformRayDemo
 {
@@ -38,7 +39,7 @@ public class TransformRayDemo
 
       final Graphics3DNode rayNode = new Graphics3DNode("laserRay", Graphics3DNodeType.VISUALIZATION);
       tInit.setRotationPitchAndZeroTranslation(Math.PI / 4.0);
-      // tInit.rotX(Math.PI / 4.0);
+      // tInit.setToRollMatrix(Math.PI / 4.0);
       rayNode.setTransform(tInit);
       rayNode.setGraphicsObject(graphic);
 
@@ -88,7 +89,7 @@ public class TransformRayDemo
 //                   rotatorZ.rotZ(Math.PI / 16);
 //
 ////                 Transform3D rotatorX = new Transform3D(rayNode.getTransform());
-////                 rotatorX.rotX(Math.PI / 16);
+////                 rotatorX.setToRollMatrix(Math.PI / 16);
 //
 //                   // rotatorZ.mul(rotatorX);
 //                   tAct.mul(rotatorZ);
@@ -116,10 +117,10 @@ public class TransformRayDemo
 
    RigidBodyTransform incrementalRotation = new RigidBodyTransform();
 
-   public RigidBodyTransform generateTransform(RigidBodyTransform init)
+   public AffineTransform generateTransform(AffineTransform init)
    {
-      RigidBodyTransform rotated = new RigidBodyTransform();
-      rotated.multiply(init, incrementalRotation);
+      AffineTransform rotated = new AffineTransform(init);
+      rotated.multiply(incrementalRotation);
 
       return rotated;
    }

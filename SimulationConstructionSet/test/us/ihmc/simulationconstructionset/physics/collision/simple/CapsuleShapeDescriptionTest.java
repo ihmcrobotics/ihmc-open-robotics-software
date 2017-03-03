@@ -1,13 +1,12 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class CapsuleShapeDescriptionTest
 {
@@ -22,13 +21,13 @@ public class CapsuleShapeDescriptionTest
 
       BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       capsule.getBoundingBox(boundingBox);
-      Point3d minimumPoint = new Point3d();
+      Point3D minimumPoint = new Point3D();
       boundingBox.getMinPoint(minimumPoint);
-      Point3d maximumPoint = new Point3d();
+      Point3D maximumPoint = new Point3D();
       boundingBox.getMaxPoint(maximumPoint);
 
-      JUnitTools.assertTuple3dEquals(new Point3d(-0.2, -0.2, -0.3), minimumPoint, 1e-10);
-      JUnitTools.assertTuple3dEquals(new Point3d(0.2, 0.2, 0.3), maximumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-0.2, -0.2, -0.3), minimumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.2, 0.2, 0.3), maximumPoint, 1e-10);
 
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(7.0, 8.0, 9.0);
@@ -38,8 +37,8 @@ public class CapsuleShapeDescriptionTest
       boundingBox.getMinPoint(minimumPoint);
       boundingBox.getMaxPoint(maximumPoint);
 
-      JUnitTools.assertTuple3dEquals(new Point3d(6.8, 7.8, 8.7), minimumPoint, 1e-10);
-      JUnitTools.assertTuple3dEquals(new Point3d(7.2, 8.2, 9.3), maximumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(6.8, 7.8, 8.7), minimumPoint, 1e-10);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(7.2, 8.2, 9.3), maximumPoint, 1e-10);
    }
 
 }

@@ -7,13 +7,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFJoint;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFLink;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
 import us.ihmc.robotics.sensors.ContactSensorType;

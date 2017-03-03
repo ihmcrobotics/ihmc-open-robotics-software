@@ -1,8 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -65,8 +64,8 @@ public class UserDesiredFootPoseControllerCommandGenerator
                trajectoryPoint.setTime(userDesiredFootPoseTrajectoryTime.getDoubleValue());
                trajectoryPoint.setPosition(framePose.getFramePointCopy());
                trajectoryPoint.setOrientation(framePose.getFrameOrientationCopy());
-               trajectoryPoint.setLinearVelocity(new Vector3d());
-               trajectoryPoint.setAngularVelocity(new Vector3d());
+               trajectoryPoint.setLinearVelocity(new Vector3D());
+               trajectoryPoint.setAngularVelocity(new Vector3D());
     
                footTrajectoryControllerCommand.addTrajectoryPoint(trajectoryPoint);
                

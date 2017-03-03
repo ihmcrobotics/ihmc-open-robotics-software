@@ -2,15 +2,14 @@ package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
 import java.awt.Color;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.QuadrupedReferenceFrames;
@@ -100,7 +99,7 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
       swingHeight.set(0.2);
 
       robot = new Robot("viz");
-      rootJoint = new FloatingJoint("floating", new Vector3d(), robot);
+      rootJoint = new FloatingJoint("floating", new Vector3D(), robot);
       robot.getRobotsYoVariableRegistry();
       robot.setController(this);
       scs = new SimulationConstructionSet();
@@ -138,11 +137,11 @@ public class MidFootZUpSwingTargetGeneratorVisualizer implements RobotController
          yoGraphicsListRegistry.registerArtifact(prefix + "feetArtifact", footPositionGraphic.createArtifact());
       }
 
-      yoFootPositions.get(RobotQuadrant.FRONT_LEFT).set(new Vector3d(0.12, 0.14, 0.0));
-      yoFootPositions.get(RobotQuadrant.HIND_LEFT).set(new Vector3d(-0.12, 0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.FRONT_LEFT).set(new Vector3D(0.12, 0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.HIND_LEFT).set(new Vector3D(-0.12, 0.14, 0.0));
 
-      yoFootPositions.get(RobotQuadrant.FRONT_RIGHT).set(new Vector3d(0.12, -0.14, 0.0));
-      yoFootPositions.get(RobotQuadrant.HIND_RIGHT).set(new Vector3d(-0.12, -0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.FRONT_RIGHT).set(new Vector3D(0.12, -0.14, 0.0));
+      yoFootPositions.get(RobotQuadrant.HIND_RIGHT).set(new Vector3D(-0.12, -0.14, 0.0));
 
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {

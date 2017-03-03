@@ -1,16 +1,15 @@
 package us.ihmc.modelFileLoaders.SdfLoader;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class SDFRoadVisual extends Graphics3DObject
 {
@@ -20,19 +19,19 @@ public class SDFRoadVisual extends Graphics3DObject
       
       AppearanceDefinition appearance = YoAppearance.Texture("models/road1.jpg");
       
-      Point3d startLeft = new Point3d();
-      Point3d startRight = new Point3d();
-      Point3d endLeft = new Point3d();
-      Point3d endRight = new Point3d();
+      Point3D startLeft = new Point3D();
+      Point3D startRight = new Point3D();
+      Point3D endLeft = new Point3D();
+      Point3D endRight = new Point3D();
       for(int i = 0 ; i < road.getPoints().size() - 1; i++)
       {
-         Point3d start = new Point3d(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i)));
-         Point3d end = new Point3d(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i+1)));
+         Point3D start = new Point3D(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i)));
+         Point3D end = new Point3D(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i+1)));
          
-         Vector3d direction = getDirection(start, end);
+         Vector3D direction = getDirection(start, end);
          
          
-         Vector3d toSide = getPerpendicularVectorOfLength(width, direction);
+         Vector3D toSide = getPerpendicularVectorOfLength(width, direction);
          
          if(i == 0)
          {
@@ -47,13 +46,13 @@ public class SDFRoadVisual extends Graphics3DObject
          
          if(i < road.getPoints().size() - 2)
          {
-            Point3d startNext = end;
-            Point3d endNext = new Point3d(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i+2)));
-            Vector3d directionNext = getDirection(startNext, endNext);
-            Vector3d nextSide = getPerpendicularVectorOfLength(width, directionNext);
+            Point3D startNext = end;
+            Point3D endNext = new Point3D(ModelFileLoaderConversionsHelper.stringToVector3d(road.getPoints().get(i+2)));
+            Vector3D directionNext = getDirection(startNext, endNext);
+            Vector3D nextSide = getPerpendicularVectorOfLength(width, directionNext);
 
-            Vector2d toSide2d = new Vector2d(toSide.getX(), toSide.getY());
-            Vector2d nextSide2d = new Vector2d(nextSide.getX(), nextSide.getY());
+            Vector2D toSide2d = new Vector2D(toSide.getX(), toSide.getY());
+            Vector2D nextSide2d = new Vector2D(nextSide.getX(), nextSide.getY());
             double angle = GeometryTools.getAngleFromFirstToSecondVector(toSide2d, nextSide2d);
             
             RigidBodyTransform rotZ = new RigidBodyTransform();
@@ -75,18 +74,18 @@ public class SDFRoadVisual extends Graphics3DObject
    }
 
 
-   private Vector3d getPerpendicularVectorOfLength(double width, Vector3d direction)
+   private Vector3D getPerpendicularVectorOfLength(double width, Vector3D direction)
    {
-      Vector3d toSide = new Vector3d(-direction.getY(), direction.getX(), 0);
+      Vector3D toSide = new Vector3D(-direction.getY(), direction.getX(), 0);
       toSide.normalize();
       toSide.scale(width/2.0);
       return toSide;
    }
    
    
-   private Vector3d getDirection(Point3d a, Point3d b)
+   private Vector3D getDirection(Point3D a, Point3D b)
    {
-      Vector3d direction = new Vector3d(b);
+      Vector3D direction = new Vector3D(b);
       direction.sub(a);
       direction.scale(0.5);
       return direction;

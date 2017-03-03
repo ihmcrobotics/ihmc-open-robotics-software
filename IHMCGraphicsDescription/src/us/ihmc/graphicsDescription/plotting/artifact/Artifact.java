@@ -2,8 +2,7 @@ package us.ihmc.graphicsDescription.plotting.artifact;
 
 import java.awt.Color;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 
@@ -28,7 +27,7 @@ public abstract class Artifact
    
    public abstract void drawHistory(Graphics2DAdapter graphics);
    
-   public abstract void drawLegend(Plotter2DAdapter graphics, Point2d origin);
+   public abstract void drawLegend(Plotter2DAdapter graphics, Point2D origin);
    
    public abstract void takeHistorySnapshot();
 

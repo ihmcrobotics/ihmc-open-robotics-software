@@ -277,7 +277,7 @@ public class CenterOfMassHeightManager
          zddDesired = Math.min(0.0, zddDesired);
 
       double epsilon = 1e-12;
-      zddDesired = MathTools.clipToMinMax(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
+      zddDesired = MathTools.clamp(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
 
       return zddDesired;
    }

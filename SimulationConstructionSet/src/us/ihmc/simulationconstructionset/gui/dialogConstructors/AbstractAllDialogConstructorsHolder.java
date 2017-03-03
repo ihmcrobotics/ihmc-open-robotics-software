@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset.gui.dialogConstructors;
 
+import java.io.File;
+
 import us.ihmc.simulationconstructionset.gui.DollyCheckBox;
 import us.ihmc.simulationconstructionset.gui.TrackCheckBox;
-
-import java.io.File;
 
 public class AbstractAllDialogConstructorsHolder implements AllDialogConstructorsHolder
 {

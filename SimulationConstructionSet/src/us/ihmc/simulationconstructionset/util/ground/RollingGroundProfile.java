@@ -1,17 +1,16 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class RollingGroundProfile extends GroundProfileFromHeightMap
 {
@@ -42,7 +41,7 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
       double zMin = Double.NEGATIVE_INFINITY; //-100.0;
       double zMax = Math.abs(amplitude) + 1e-4;
             
-      boundingBox = new BoundingBox3d(new Point3d(xMin, yMin, zMin), new Point3d(xMax, yMax, zMax));
+      boundingBox = new BoundingBox3d(new Point3D(xMin, yMin, zMin), new Point3D(xMax, yMax, zMax));
    }
 
    @Override
@@ -59,7 +58,7 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
    }
 
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       double dzdx = 0.0;
 
@@ -73,7 +72,7 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
    }
    
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -90,7 +89,7 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
       
       ThreadTools.sleep(1000);
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.translate(new Vector3d(0.0, 0.0, 1.0));
+      linkGraphics.translate(new Vector3D(0.0, 0.0, 1.0));
       linkGraphics.addSphere(0.5);
       scs.addStaticLinkGraphics(linkGraphics);
       

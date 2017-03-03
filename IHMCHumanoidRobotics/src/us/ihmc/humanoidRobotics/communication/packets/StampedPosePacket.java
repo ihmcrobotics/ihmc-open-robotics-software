@@ -3,7 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 
 public class StampedPosePacket extends Packet<StampedPosePacket>
@@ -49,6 +49,6 @@ public class StampedPosePacket extends Packet<StampedPosePacket>
 
    public StampedPosePacket(Random random)
    {
-      this("/pelvis", new TimeStampedTransform3D(RigidBodyTransform.generateRandomTransform(random), random.nextLong()), 1.0);
+      this("/pelvis", new TimeStampedTransform3D(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random), random.nextLong()), 1.0);
    }
 }

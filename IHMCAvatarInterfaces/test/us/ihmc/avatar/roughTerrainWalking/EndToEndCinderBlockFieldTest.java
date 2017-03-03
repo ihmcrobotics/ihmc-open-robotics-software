@@ -5,9 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +14,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -115,8 +114,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
          for (RobotSide robotSide : RobotSide.values)
          {
             FramePose cinderBlockPose = columns.get(robotSide).get(row);
-            Point3d location = new Point3d();
-            Quat4d orientation = new Quat4d();
+            Point3D location = new Point3D();
+            Quaternion orientation = new Quaternion();
             cinderBlockPose.getPose(location, orientation);
             location.setZ(location.getZ() + 0.02);
             FootstepDataMessage footstep = new FootstepDataMessage(robotSide, location, orientation);

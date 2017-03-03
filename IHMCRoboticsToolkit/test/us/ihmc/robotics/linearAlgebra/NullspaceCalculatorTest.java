@@ -10,8 +10,8 @@ import org.ejml.ops.MatrixFeatures;
 import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.random.RandomTools;
 
 /**
  * @author twan
@@ -29,7 +29,7 @@ public class NullspaceCalculatorTest
       NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(matrixSize, makeLargestComponentPositive);
 
       Random random = new Random();
-      double[] singularValues = RandomTools.generateRandomDoubleArray(random, matrixSize, 1.0, 2.0);
+      double[] singularValues = RandomNumbers.nextDoubleArray(random, matrixSize, 1.0, 2.0);
 
 //    singularValues[0] = 0.0;
       DenseMatrix64F matrix = RandomMatrices.createSingularValues(matrixSize, matrixSize, random, singularValues);
@@ -51,7 +51,7 @@ public class NullspaceCalculatorTest
       NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(matrixSize, makeLargestComponentPositive);
 
       Random random = new Random();
-      double[] singularValues = RandomTools.generateRandomDoubleArray(random, matrixSize, 1.0, 2.0);
+      double[] singularValues = RandomNumbers.nextDoubleArray(random, matrixSize, 1.0, 2.0);
       singularValues[matrixSize / 2] = 0.0;
       DenseMatrix64F matrix1 = RandomMatrices.createSingularValues(matrixSize, matrixSize, random, singularValues);
       nullspaceCalculator.setMatrix(matrix1, 1);
@@ -100,7 +100,7 @@ public class NullspaceCalculatorTest
       NullspaceCalculator nullspaceCalculator = new NullspaceCalculator(matrixSize, makeLargestComponentPositive);
 
       Random random = new Random();
-      double[] singularValues = RandomTools.generateRandomDoubleArray(random, matrixSize, 1.0, 2.0);
+      double[] singularValues = RandomNumbers.nextDoubleArray(random, matrixSize, 1.0, 2.0);
       singularValues[0] = 0.0;
       DenseMatrix64F matrix = RandomMatrices.createSingularValues(matrixSize, matrixSize, random, singularValues);
       nullspaceCalculator.setMatrix(matrix, 1);

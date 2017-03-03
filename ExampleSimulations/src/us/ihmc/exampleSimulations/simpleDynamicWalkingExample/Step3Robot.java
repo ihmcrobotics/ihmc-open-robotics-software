@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.simpleDynamicWalkingExample;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -48,14 +47,14 @@ public class Step3Robot extends Robot
       this.setGravity(g); //TODO change 
 
       // (1) Body (2DOF = Z + Pitch)
-      bodyJoint1 = new SliderJoint("bodyZ", new Vector3d(0.0, 0.0, 0.0), this, Axis.Z);
+      bodyJoint1 = new SliderJoint("bodyZ", new Vector3D(0.0, 0.0, 0.0), this, Axis.Z);
       bodyJoint1.setDynamic(true);
       Link bodyLinkSlider = setNullLink();
       bodyJoint1.setLink(bodyLinkSlider);
       this.addRootJoint(bodyJoint1);
       bodyJoint1.setInitialState(legHeight - 0.4, 0.0); //TODO change height if necessary
 
-      bodyJoint2 = new PinJoint("bodyPitch", new Vector3d(0.0, 0.0, 0.0), this, Axis.Y);
+      bodyJoint2 = new PinJoint("bodyPitch", new Vector3D(0.0, 0.0, 0.0), this, Axis.Y);
       bodyJoint2.setDynamic(true);
       bodyJoint2.setLimitStops(0.0, 1.0, 1e6, 1e3);
       Link bodyLinkPitch = body();
@@ -66,7 +65,7 @@ public class Step3Robot extends Robot
       for (RobotSide robotSide : RobotSide.values())
       {
 
-         PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3d(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
+         PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3D(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
                Axis.Y);
          hipJoints.put(robotSide, hipJoint);
          hipJoint.setDynamic(true);
@@ -77,7 +76,7 @@ public class Step3Robot extends Robot
 
          /************************************************************/
 
-         SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3d(0.0, 0.0, -upperLinkLength + 0.4), this, Axis.Z); //TODO change offset depending on height
+         SliderJoint kneeJoint = new SliderJoint(robotSide.getSideNameFirstLetter() + "Knee", new Vector3D(0.0, 0.0, -upperLinkLength + 0.4), this, Axis.Z); //TODO change offset depending on height
          kneeJoints.put(robotSide, kneeJoint);
          kneeJoint.setDynamic(true);
          kneeJoint.setLimitStops(-0.3, 0.3, 1e5, 1e4); //TODO change limits depending on initial position. Eg: (0.0, 0.6)
@@ -87,7 +86,7 @@ public class Step3Robot extends Robot
 
          /*************************************************************/
 
-         GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3d(0.0, 0.0, gcOffset), this);
+         GroundContactPoint contactPoint = new GroundContactPoint(robotSide.getSideNameFirstLetter() + "Foot", new Vector3D(0.0, 0.0, gcOffset), this);
          GCpoints.set(robotSide, contactPoint);
          kneeJoints.get(robotSide).addGroundContactPoint(contactPoint);
          Graphics3DObject graphics = kneeJoints.get(robotSide).getLink().getLinkGraphics();

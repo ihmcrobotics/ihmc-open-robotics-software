@@ -6,26 +6,23 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.geometry.transformables.SE3Waypoint;
 import us.ihmc.robotics.geometry.transformables.SO3Waypoint;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableQuat4d;
-import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.SE3TrajectoryPointInterface;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -39,22 +36,22 @@ public class SimpleSE3TrajectoryPointTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       SimpleSE3TrajectoryPoint simpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
       SimpleSE3TrajectoryPoint simpleTrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
       orientation.normalize();
 
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
-      Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
+      Vector3D angularVelocity = new Vector3D(1.7, 8.4, 2.2);
 
       simpleTrajectoryPoint.set(time, position, orientation, linearVelocity, angularVelocity);
       simpleSE3TrajectoryPoint.set(simpleTrajectoryPoint);
@@ -89,10 +86,10 @@ public class SimpleSE3TrajectoryPointTest
       Random random = new Random(21651016L);
 
       double expectedTime = 0.0;
-      Point3d expectedPosition = new Point3d();
-      Quat4d expectedOrientation = new TransformableQuat4d();
-      Vector3d expectedLinearVelocity = new Vector3d();
-      Vector3d expectedAngularVelocity = new Vector3d();
+      Point3D expectedPosition = new Point3D();
+      Quaternion expectedOrientation = new Quaternion();
+      Vector3D expectedLinearVelocity = new Vector3D();
+      Vector3D expectedAngularVelocity = new Vector3D();
 
       SimpleSE3TrajectoryPoint testedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
@@ -100,20 +97,20 @@ public class SimpleSE3TrajectoryPointTest
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
       expectedTime = 0.0;
-      expectedPosition = new Point3d();
-      expectedOrientation = new TransformableQuat4d();
-      expectedLinearVelocity = new Vector3d();
-      expectedAngularVelocity = new Vector3d();
+      expectedPosition = new Point3D();
+      expectedOrientation = new Quaternion();
+      expectedLinearVelocity = new Vector3D();
+      expectedAngularVelocity = new Vector3D();
       testedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity);
@@ -121,11 +118,11 @@ public class SimpleSE3TrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleSE3TrajectoryPoint expectedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint(expectedTime, expectedPosition, expectedOrientation,
             expectedLinearVelocity, expectedAngularVelocity);
@@ -136,11 +133,11 @@ public class SimpleSE3TrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedSimpleSE3TrajectoryPoint.getTime(),
             expectedPosition, expectedOrientation, expectedLinearVelocity, expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      final double expectedFinalTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      final Point3d expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      final Quat4d expectedFinalOrientation = RandomTools.generateRandomQuaternion(random);
-      final Vector3d expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
-      final Vector3d expectedFinalAngularVelocity = RandomTools.generateRandomVector(random);
+      final double expectedFinalTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      final Point3D expectedFinalPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      final Quaternion expectedFinalOrientation = RandomGeometry.nextQuaternion(random);
+      final Vector3D expectedFinalLinearVelocity = RandomGeometry.nextVector3D(random);
+      final Vector3D expectedFinalAngularVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleSE3TrajectoryPoint expectedSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
       expectedSE3TrajectoryPoint.setTime(expectedFinalTime);
@@ -164,32 +161,32 @@ public class SimpleSE3TrajectoryPointTest
       Random random = new Random(21651016L);
 
       double expectedTime = 0.0;
-      Point3d expectedPosition = new Point3d();
-      Quat4d expectedOrientation = new TransformableQuat4d();
-      Vector3d expectedLinearVelocity = new Vector3d();
-      Vector3d expectedAngularVelocity = new Vector3d();
+      Point3D expectedPosition = new Point3D();
+      Quaternion expectedOrientation = new Quaternion();
+      Vector3D expectedLinearVelocity = new Vector3D();
+      Vector3D expectedAngularVelocity = new Vector3D();
 
       final SimpleSE3TrajectoryPoint testedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleSE3TrajectoryPoint.set(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity, expectedAngularVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleSE3TrajectoryPoint.set(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity);
@@ -197,33 +194,33 @@ public class SimpleSE3TrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleSE3TrajectoryPoint.set(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity, expectedAngularVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleSE3TrajectoryPoint expectedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint(expectedTime, expectedPosition, expectedOrientation,
             expectedLinearVelocity, expectedAngularVelocity);
 
       testedSimpleSE3TrajectoryPoint.set(expectedSimpleSE3TrajectoryPoint);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
 
       expectedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity);
@@ -234,11 +231,11 @@ public class SimpleSE3TrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedSimpleSE3TrajectoryPoint.getTime(),
             expectedPosition, expectedOrientation, expectedLinearVelocity, expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      final double expectedFinalTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      final Point3d expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      final Quat4d expectedFinalOrientation = RandomTools.generateRandomQuaternion(random);
-      final Vector3d expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
-      final Vector3d expectedFinalAngularVelocity = RandomTools.generateRandomVector(random);
+      final double expectedFinalTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      final Point3D expectedFinalPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      final Quaternion expectedFinalOrientation = RandomGeometry.nextQuaternion(random);
+      final Vector3D expectedFinalLinearVelocity = RandomGeometry.nextVector3D(random);
+      final Vector3D expectedFinalAngularVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleSE3TrajectoryPoint expectedSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
       expectedSE3TrajectoryPoint.setTime(expectedFinalTime);
@@ -263,11 +260,11 @@ public class SimpleSE3TrajectoryPointTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       ReferenceFrame expectedFrame = worldFrame;
-      double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      TransformablePoint3d expectedPosition = new TransformablePoint3d(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
-      TransformableQuat4d expectedOrientation = new TransformableQuat4d(RandomTools.generateRandomQuaternion(random));
-      TransformableVector3d expectedLinearVelocity = new TransformableVector3d(RandomTools.generateRandomVector(random));
-      TransformableVector3d expectedAngularVelocity = new TransformableVector3d(RandomTools.generateRandomVector(random));
+      double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      Point3D expectedPosition = new Point3D(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
+      Quaternion expectedOrientation = new Quaternion(RandomGeometry.nextQuaternion(random));
+      Vector3D expectedLinearVelocity = new Vector3D(RandomGeometry.nextVector3D(random));
+      Vector3D expectedAngularVelocity = new Vector3D(RandomGeometry.nextVector3D(random));
       SimpleSE3TrajectoryPoint testedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint(expectedTime, expectedPosition, expectedOrientation,
             expectedLinearVelocity, expectedAngularVelocity);
 
@@ -293,11 +290,11 @@ public class SimpleSE3TrajectoryPointTest
       double epsilon = 1.0e-10;
       Random random = new Random(21651016L);
 
-      double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      Point3d expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Quat4d expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      Vector3d expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      Vector3d expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      Point3D expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      Quaternion expectedOrientation = RandomGeometry.nextQuaternion(random);
+      Vector3D expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      Vector3D expectedAngularVelocity = RandomGeometry.nextVector3D(random);
       SimpleSE3TrajectoryPoint testedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint(expectedTime, expectedPosition, expectedOrientation,
             expectedLinearVelocity, expectedAngularVelocity);
 
@@ -311,11 +308,11 @@ public class SimpleSE3TrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity,
             expectedAngularVelocity, testedSimpleSE3TrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
       testedSimpleSE3TrajectoryPoint.set(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity, expectedAngularVelocity);
 
       expectedTime = 0.0;
@@ -335,11 +332,11 @@ public class SimpleSE3TrajectoryPointTest
    {
       Random random = new Random(21651016L);
 
-      double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      Point3d expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Quat4d expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      Vector3d expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      Vector3d expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      Point3D expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      Quaternion expectedOrientation = RandomGeometry.nextQuaternion(random);
+      Vector3D expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      Vector3D expectedAngularVelocity = RandomGeometry.nextVector3D(random);
       SimpleSE3TrajectoryPoint testedSimpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint(expectedTime, expectedPosition, expectedOrientation,
             expectedLinearVelocity, expectedAngularVelocity);
 
@@ -347,11 +344,11 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(Double.isNaN(testedSimpleSE3TrajectoryPoint.getTime()));
       assertTrue(testedSimpleSE3TrajectoryPoint.containsNaN());
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedOrientation = RandomTools.generateRandomQuaternion(random);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
-      expectedAngularVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedOrientation = RandomGeometry.nextQuaternion(random);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
+      expectedAngularVelocity = RandomGeometry.nextVector3D(random);
       testedSimpleSE3TrajectoryPoint.set(expectedTime, expectedPosition, expectedOrientation, expectedLinearVelocity, expectedAngularVelocity);
 
       testedSimpleSE3TrajectoryPoint.setToNaN();
@@ -360,8 +357,8 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(testedSimpleSE3TrajectoryPoint.containsNaN());
    }
 
-   static void assertTrajectoryPointContainsExpectedData(double expectedTime, Point3d expectedPosition,
-         Quat4d expectedOrientation, Vector3d expectedLinearVelocity, Vector3d expectedAngularVelocity,
+   static void assertTrajectoryPointContainsExpectedData(double expectedTime, Point3D expectedPosition,
+         Quaternion expectedOrientation, Vector3D expectedLinearVelocity, Vector3D expectedAngularVelocity,
          SimpleSE3TrajectoryPoint testedSimpleSE3TrajectoryPoint, double epsilon)
    {
       assertEquals(expectedTime, testedSimpleSE3TrajectoryPoint.getTime(), epsilon);
@@ -370,10 +367,10 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(testedSimpleSE3TrajectoryPoint.getEuclideanWaypoint().getLinearVelocity(), epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(testedSimpleSE3TrajectoryPoint.getSO3Waypoint().getAngularVelocity(), epsilon));
 
-      Point3d actualPosition = new Point3d();
-      Quat4d actualOrientation = new TransformableQuat4d();
-      Vector3d actualLinearVelocity = new Vector3d();
-      Vector3d actualAngularVelocity = new Vector3d();
+      Point3D actualPosition = new Point3D();
+      Quaternion actualOrientation = new Quaternion();
+      Vector3D actualLinearVelocity = new Vector3D();
+      Vector3D actualAngularVelocity = new Vector3D();
 
       testedSimpleSE3TrajectoryPoint.getPosition(actualPosition);
       testedSimpleSE3TrajectoryPoint.getOrientation(actualOrientation);
@@ -385,10 +382,10 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(actualLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, epsilon));
 
-      Point3d actualFramePosition = new Point3d();
-      Quat4d actualFrameOrientation = new TransformableQuat4d();
-      Vector3d actualFrameLinearVelocity = new Vector3d();
-      Vector3d actualFrameAngularVelocity = new Vector3d();
+      Point3D actualFramePosition = new Point3D();
+      Quaternion actualFrameOrientation = new Quaternion();
+      Vector3D actualFrameLinearVelocity = new Vector3D();
+      Vector3D actualFrameAngularVelocity = new Vector3D();
 
       testedSimpleSE3TrajectoryPoint.getPosition(actualFramePosition);
       testedSimpleSE3TrajectoryPoint.getOrientation(actualFrameOrientation);
@@ -400,10 +397,10 @@ public class SimpleSE3TrajectoryPointTest
       assertTrue(expectedLinearVelocity.epsilonEquals(actualFrameLinearVelocity, epsilon));
       assertTrue(expectedAngularVelocity.epsilonEquals(actualFrameAngularVelocity, epsilon));
 
-      actualFramePosition = new Point3d();
-      actualFrameOrientation = new TransformableQuat4d();
-      actualFrameLinearVelocity = new Vector3d();
-      actualFrameAngularVelocity = new Vector3d();
+      actualFramePosition = new Point3D();
+      actualFrameOrientation = new Quaternion();
+      actualFrameLinearVelocity = new Vector3D();
+      actualFrameAngularVelocity = new Vector3D();
 
       testedSimpleSE3TrajectoryPoint.getPosition(actualFramePosition);
       testedSimpleSE3TrajectoryPoint.getOrientation(actualFrameOrientation);
@@ -425,21 +422,21 @@ public class SimpleSE3TrajectoryPointTest
       SimpleSE3TrajectoryPoint simpleTrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
       double time = 3.4;
-      Point3d position = new Point3d(1.0, 2.1, 3.7);
-      TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
       orientation.normalize();
 
-      Vector3d linearVelocity = new Vector3d(-0.4, 1.2, 3.3);
-      Vector3d angularVelocity = new Vector3d(1.7, 8.4, 2.2);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
+      Vector3D angularVelocity = new Vector3D(1.7, 8.4, 2.2);
 
       simpleTrajectoryPoint.set(time, position, orientation, linearVelocity, angularVelocity);
       simpleSE3TrajectoryPoint.set(simpleTrajectoryPoint);
 
       // Check some get calls: 
-      Point3d pointForVerification = new Point3d();
-      Quat4d quaternionForVerification = new TransformableQuat4d();
-      Vector3d linearVelocityForVerification = new Vector3d();
-      Vector3d angularVelocityForVerification = new Vector3d();
+      Point3D pointForVerification = new Point3D();
+      Quaternion quaternionForVerification = new Quaternion();
+      Vector3D linearVelocityForVerification = new Vector3D();
+      Vector3D angularVelocityForVerification = new Vector3D();
 
       simpleSE3TrajectoryPoint.getPosition(pointForVerification);
       simpleSE3TrajectoryPoint.getOrientation(quaternionForVerification);
@@ -480,10 +477,10 @@ public class SimpleSE3TrajectoryPointTest
       simpleSE3TrajectoryPoint.getAngularVelocity(angularVelocity);
 
       // Make sure they are all equal to zero:
-      assertTrue(position.epsilonEquals(new Point3d(), 1e-10));
-      assertTrue(orientation.epsilonEquals(new TransformableQuat4d(), 1e-10));
-      assertTrue(linearVelocity.epsilonEquals(new Vector3d(), 1e-10));
-      assertTrue(angularVelocity.epsilonEquals(new Vector3d(), 1e-10));
+      assertTrue(position.epsilonEquals(new Point3D(), 1e-10));
+      assertTrue(orientation.epsilonEquals(new Quaternion(), 1e-10));
+      assertTrue(linearVelocity.epsilonEquals(new Vector3D(), 1e-10));
+      assertTrue(angularVelocity.epsilonEquals(new Vector3D(), 1e-10));
 
       time = 9.9;
       pointForVerification.set(3.9, 2.2, 1.1);
@@ -553,11 +550,11 @@ public class SimpleSE3TrajectoryPointTest
       SimpleSE3TrajectoryPoint simpleSE3TrajectoryPoint = new SimpleSE3TrajectoryPoint();
 
       double time = 3.4;
-      TransformablePoint3d position = new TransformablePoint3d(1.0, 2.1, 3.7);
-      TransformableQuat4d orientation = new TransformableQuat4d(new Quat4d(0.1, 0.22, 0.34, 0.56));
+      Point3D position = new Point3D(1.0, 2.1, 3.7);
+      Quaternion orientation = new Quaternion(new Quaternion(0.1, 0.22, 0.34, 0.56));
 
-      TransformableVector3d linearVelocity = new TransformableVector3d(-0.4, 1.2, 3.3);
-      TransformableVector3d angularVelocity = new TransformableVector3d(1.7, 8.4, 2.2);
+      Vector3D linearVelocity = new Vector3D(-0.4, 1.2, 3.3);
+      Vector3D angularVelocity = new Vector3D(1.7, 8.4, 2.2);
 
       simpleSE3TrajectoryPoint.setTime(time);
       simpleSE3TrajectoryPoint.setPosition(position);
@@ -567,10 +564,10 @@ public class SimpleSE3TrajectoryPointTest
 
       PoseReferenceFrame poseFrame = new PoseReferenceFrame("poseFrame", new FramePose(worldFrame));
 
-      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3d(0.5, 7.7, 9.2));
+      FramePoint poseFramePosition = new FramePoint(worldFrame, new Point3D(0.5, 7.7, 9.2));
       poseFrame.setPositionAndUpdate(poseFramePosition);
 
-      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle4d(1.2, 3.9, 4.7, 2.2));
+      FrameOrientation poseOrientation = new FrameOrientation(worldFrame, new AxisAngle(1.2, 3.9, 4.7, 2.2));
       poseFrame.setOrientationAndUpdate(poseOrientation);
 
       simpleSE3TrajectoryPoint.applyTransform(worldFrame.getTransformToDesiredFrame(poseFrame));
@@ -628,10 +625,10 @@ public class SimpleSE3TrajectoryPointTest
       simpleSE3TrajectoryPointTwo.set(time, euclideanWaypoint, so3Waypoint);
       assertTrue(simpleSE3TrajectoryPointTwo.epsilonEquals(simpleSE3TrajectoryPoint, 1e-10));
 
-      Point3d positionToPack = new Point3d();
-      Quat4d orientationToPack = new Quat4d();
-      Vector3d linearVelocityToPack = new Vector3d();
-      Vector3d angularVelocityToPack = new Vector3d();
+      Point3D positionToPack = new Point3D();
+      Quaternion orientationToPack = new Quaternion();
+      Vector3D linearVelocityToPack = new Vector3D();
+      Vector3D angularVelocityToPack = new Vector3D();
       simpleSE3TrajectoryPoint.get(positionToPack, orientationToPack, linearVelocityToPack, angularVelocityToPack);
 
       simpleSE3TrajectoryPointTwo = new SimpleSE3TrajectoryPoint();

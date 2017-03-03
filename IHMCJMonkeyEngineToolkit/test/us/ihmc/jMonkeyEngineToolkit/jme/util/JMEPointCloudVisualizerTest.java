@@ -3,14 +3,13 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 import java.util.Arrays;
 import java.util.Random;
 
-import javax.vecmath.Point3f;
-
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.robotics.random.RandomGeometry;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEPointCloudVisualizerTest
@@ -28,7 +27,7 @@ public class JMEPointCloudVisualizerTest
       
       Random random = new Random();
       
-      Point3f[] randomPoint3fCloudArray = RandomTools.generateRandomPoint3fCloud(random, 10000, new Point3f(), new Point3f(5.0f, 5.0f, 5.0f));
+      Point3D32[] randomPoint3fCloudArray = RandomGeometry.nextPoint3D32Array(random, 10000, new Point3D32(), new Point3D32(5.0f, 5.0f, 5.0f));
       
       jmePointCloudVisualizer.addPointCloud(Arrays.asList(randomPoint3fCloudArray));
    }

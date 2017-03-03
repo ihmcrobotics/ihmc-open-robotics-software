@@ -7,17 +7,16 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -34,14 +33,14 @@ public class PlanarRegionTerrainObjectTest
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
          BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
-         double randomXCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
-         double randomYCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
-         double randomZCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
+         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
+         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
+         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
@@ -64,20 +63,20 @@ public class PlanarRegionTerrainObjectTest
    {
       Random random = new Random(1776L);
 
-      Vector3d terrainObjectNormalToPack = new Vector3d();
-      Vector3d planarRegionNormalToPack = new Vector3d();
-      Vector3d standardGroundNormal = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D terrainObjectNormalToPack = new Vector3D();
+      Vector3D planarRegionNormalToPack = new Vector3D();
+      Vector3D standardGroundNormal = new Vector3D(0.0, 0.0, 1.0);
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
          BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
-         double randomXCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
-         double randomYCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
-         double randomZCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
+         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
+         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
+         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
@@ -88,32 +87,34 @@ public class PlanarRegionTerrainObjectTest
          if (planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
             assertEquals(planarRegionZAtXY, heightAt, 1e-10);
-            JUnitTools.assertVector3dEquals("Normals are not equal!", terrainObjectNormalToPack, planarRegionNormalToPack, 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("Normals are not equal!", terrainObjectNormalToPack, planarRegionNormalToPack, 1e-10);
          }
          else
          {
             assertNotEquals(planarRegionZAtXY, heightAt, 1e-10);
-            JUnitTools.assertVector3dEquals("Normals are not equal!", standardGroundNormal, terrainObjectNormalToPack, 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("Normals are not equal!", standardGroundNormal, terrainObjectNormalToPack, 1e-10);
          }
       }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 4.0)
-   @Test(timeout = 30000)
+   @Test //(timeout = 30000)
    public void testGetBoundingBox() throws Exception
    {
       Random random = new Random(1776L);
 
-      Point3d planarRegionBoundingBoxMinPoint = new Point3d();
-      Point3d planarRegionBoundingBoxMaxPoint = new Point3d();
-      Point3d terrainObjectBoundingBoxMinPoint = new Point3d();
-      Point3d terrainObjectBoundingBoxMaxPoint = new Point3d();
+      Point3D planarRegionBoundingBoxMinPoint = new Point3D();
+      Point3D planarRegionBoundingBoxMaxPoint = new Point3D();
+      Point3D terrainObjectBoundingBoxMinPoint = new Point3D();
+      Point3D terrainObjectBoundingBoxMaxPoint = new Point3D();
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         int numberOfRandomlyGeneratedPolygons = random.nextInt(10);
+         double maxAbsoluteXYForPolygons = RandomNumbers.nextDouble(random, 30.0);
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, numberOfRandomlyGeneratedPolygons,
+                                                                                                            maxAbsoluteXYForPolygons,
+                                                                                                            numberOfRandomlyGeneratedPolygons);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
@@ -122,8 +123,20 @@ public class PlanarRegionTerrainObjectTest
          terrainObject.getBoundingBox().getMinPoint(terrainObjectBoundingBoxMinPoint);
          terrainObject.getBoundingBox().getMaxPoint(terrainObjectBoundingBoxMaxPoint);
 
-         JUnitTools.assertPoint3dEquals("Bounding box min points are not equal!", planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint, 1e-10);
-         JUnitTools.assertPoint3dEquals("Bounding box max points are not equal!", planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint, 1e-10);
+         if (numberOfRandomlyGeneratedPolygons == 0)
+         {
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(planarRegionBoundingBoxMinPoint);
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(planarRegionBoundingBoxMaxPoint);
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(terrainObjectBoundingBoxMinPoint);
+            EuclidCoreTestTools.assertTuple3DContainsOnlyNaN(terrainObjectBoundingBoxMaxPoint);
+         }
+         else
+         {
+            EuclidCoreTestTools.assertTuple3DEquals("Bounding box min points are not equal!", planarRegionBoundingBoxMinPoint, terrainObjectBoundingBoxMinPoint,
+                                                    1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("Bounding box max points are not equal!", planarRegionBoundingBoxMaxPoint, terrainObjectBoundingBoxMaxPoint,
+                                                    1e-10);
+         }
       }
    }
 
@@ -135,14 +148,14 @@ public class PlanarRegionTerrainObjectTest
 
       for (int i = 0; i < 100000; i++)
       {
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
          BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
-         double randomXCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
-         double randomYCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
-         double randomZCoord = RandomTools.generateRandomDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
+         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
+         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
+         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
@@ -163,33 +176,33 @@ public class PlanarRegionTerrainObjectTest
    {
       Random random = new Random(1776L);
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      Vector3d translation = new Vector3d();
-      Point3d randomPoint = new Point3d();
-      Vector3d planarRegionSurfaceNormal = new Vector3d();
+      Vector3D translation = new Vector3D();
+      Point3D randomPoint = new Point3D();
+      Vector3D planarRegionSurfaceNormal = new Vector3D();
 
-      Vector3d terrainObjectNormalToPack = new Vector3d();
-      Point3d terrainObjectIntersectionToPack = new Point3d();
+      Vector3D terrainObjectNormalToPack = new Vector3D();
+      Point3D terrainObjectIntersectionToPack = new Point3D();
 
       for (int i = 0; i < 100000; i++)
       {
 
-         PlanarRegion planarRegion = PlanarRegion
-               .generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10), RandomTools.generateRandomDouble(random, 30.0),
-                     random.nextInt(10));
+         PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
+                                                                                                            RandomNumbers.nextDouble(random, 30.0),
+                                                                                                            random.nextInt(10));
 
-         double randomXCoord = RandomTools.generateRandomDouble(random, 15.0);
-         double randomYCoord = RandomTools.generateRandomDouble(random, 15.0);
+         double randomXCoord = RandomNumbers.nextDouble(random, 15.0);
+         double randomYCoord = RandomNumbers.nextDouble(random, 15.0);
          double randomZCoord;
 
          boolean shouldGeneratePointGuaranteedOnPlane = random.nextBoolean();
 
          if (shouldGeneratePointGuaranteedOnPlane && planarRegion.isPointInsideByProjectionOntoXYPlane(randomXCoord, randomYCoord))
          {
-            randomZCoord = planarRegion.getPlaneZGivenXY(randomXCoord, randomYCoord) + RandomTools.generateRandomDouble(random, 1e-8);
+            randomZCoord = planarRegion.getPlaneZGivenXY(randomXCoord, randomYCoord) + RandomNumbers.nextDouble(random, 1e-8);
          }
          else
          {
-            randomZCoord = RandomTools.generateRandomDouble(random, 15.0);
+            randomZCoord = RandomNumbers.nextDouble(random, 15.0);
          }
 
          randomPoint.set(randomXCoord, randomYCoord, randomZCoord);
@@ -203,8 +216,8 @@ public class PlanarRegionTerrainObjectTest
          if (planarRegion.isPointOnOrSlightlyBelow(randomPoint, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS))
          {
             assertTrue(terrainObject.checkIfInside(randomXCoord, randomYCoord, randomZCoord, terrainObjectIntersectionToPack, terrainObjectNormalToPack));
-            JUnitTools.assertPoint3dEquals("Intersection to pack is not correct!", randomPoint, terrainObjectIntersectionToPack, 1e-10);
-            JUnitTools.assertVector3dEquals("Surface normal to pack is not correct!", planarRegionSurfaceNormal, terrainObjectNormalToPack, 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("Intersection to pack is not correct!", randomPoint, terrainObjectIntersectionToPack, 1e-10);
+            EuclidCoreTestTools.assertTuple3DEquals("Surface normal to pack is not correct!", planarRegionSurfaceNormal, terrainObjectNormalToPack, 1e-10);
          }
          else
          {
