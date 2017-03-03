@@ -289,9 +289,9 @@ public class WalkOnTheEdgesManager
    {
       double proximityState;
       if (isInSingleSupport.getBooleanValue())
-         proximityState = icpProximityToLeadingFootForSSToeOff.getDoubleValue();
+         proximityState = icpPercentOfStanceForDSToeOff.getDoubleValue();
       else
-         proximityState = icpProximityToLeadingFootForDSToeOff.getDoubleValue();
+         proximityState = icpPercentOfStanceForSSToeOff.getDoubleValue();
 
       boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
       if (proximityState > 0.0)
