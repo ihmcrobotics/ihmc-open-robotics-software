@@ -1,19 +1,4 @@
-package us.ihmc.simulationconstructionset;
-
-class ODEException extends Exception implements java.io.Serializable
-{
-   private static final long serialVersionUID = -9101473542052720197L;
-
-   public ODEException()
-   {
-   }
-
-   public ODEException(String message)
-   {
-      super(message);
-   }
-}
-
+package us.ihmc.simulationconstructionset.physics.engine.featherstone;
 
 public class CollisionRungeKutta implements java.io.Serializable
 {
@@ -467,6 +452,20 @@ public class CollisionRungeKutta implements java.io.Serializable
    {
       // System.err.println("comphys.numerics.RungeKutta: " + msg);
       System.out.println("comphys.numerics.RungeKutta: " + msg);
+   }
+
+   class ODEException extends Exception implements java.io.Serializable
+   {
+      private static final long serialVersionUID = -9101473542052720197L;
+
+      public ODEException()
+      {
+      }
+
+      public ODEException(String message)
+      {
+         super(message);
+      }
    }
 
 }
