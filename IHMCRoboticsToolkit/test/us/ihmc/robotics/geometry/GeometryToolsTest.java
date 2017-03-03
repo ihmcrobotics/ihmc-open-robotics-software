@@ -3,7 +3,6 @@ package us.ihmc.robotics.geometry;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
@@ -145,67 +144,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testGetPerpendicularBisector1()
-   {
-      Point2D lineStart = new Point2D(1, 1);
-      Point2D lineEnd = new Point2D(5, 5);
-      Point2D bisectorStart = new Point2D(2, 1);
-      Vector2D bisectorDirection = new Vector2D();
-      GeometryTools.getPerpendicularBisector(lineStart, lineEnd, bisectorStart, bisectorDirection);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetPerpendicularBisector2()
-   {
-      Random random = new Random(1176L);
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-
-         Point2D expectedBisectorStart = new Point2D();
-         expectedBisectorStart.interpolate(lineSegmentStart, lineSegmentEnd, 0.5);
-         Vector2D expectedBisectorDirection = new Vector2D();
-         expectedBisectorDirection.sub(lineSegmentEnd, lineSegmentStart);
-         GeometryTools.getPerpendicularVector(expectedBisectorDirection, expectedBisectorDirection);
-         expectedBisectorDirection.normalize();
-
-         Point2D actualBisectorStart = new Point2D();
-         Vector2D actualBisectorDirection = new Vector2D();
-         GeometryTools.getPerpendicularBisector(lineSegmentStart, lineSegmentEnd, actualBisectorStart, actualBisectorDirection);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedBisectorStart, actualBisectorStart, Epsilons.ONE_TRILLIONTH);
-         EuclidCoreTestTools.assertTuple2DEquals(expectedBisectorDirection, actualBisectorDirection, Epsilons.ONE_TRILLIONTH);
-
-         Point2D pointOnBisector = new Point2D();
-         pointOnBisector.scaleAdd(1.0, actualBisectorDirection, actualBisectorStart);
-         assertTrue(EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(pointOnBisector, lineSegmentStart, lineSegmentEnd));
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetPerpendicularVector()
-   {
-      Vector2D vector = new Vector2D(15.0, 10.0);
-      Vector2D expectedReturn = new Vector2D(-10.0, 15.0);
-      Vector2D actualReturn = GeometryTools.getPerpendicularVector(vector);
-      assertEquals("return value", expectedReturn, actualReturn);
-      Random random = new Random(1176L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         vector = RandomGeometry.nextVector2D(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
-         Vector2D perpendicularVector = GeometryTools.getPerpendicularVector(vector);
-         assertEquals(vector.length(), perpendicularVector.length(), Epsilons.ONE_TRILLIONTH);
-         assertEquals(vector.length() * vector.length(), vector.cross(perpendicularVector), Epsilons.ONE_TRILLIONTH);
-         assertEquals(0.0, vector.dot(perpendicularVector), Epsilons.ONE_TRILLIONTH);
-         assertEquals(Math.PI / 2.0, vector.angle(perpendicularVector), Epsilons.ONE_TRILLIONTH);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testGetPerpendicularVectorFromLineToPoint1()
    {
       FramePoint point0 = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -241,41 +179,6 @@ public class GeometryToolsTest
       FrameVector actualReturn1 = GeometryTools.getPerpendicularVectorFromLineToPoint(point1, lineStart1, lineEnd1, intersectionPoint1);
 
       assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetPerpendicularVectorFromLineToPoint2()
-   {
-      Random random = new Random(1176L);
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Vector3D expectedPerpendicularVector = RandomGeometry.nextVector3D(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
-         Point3D expectedIntersection = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-
-         Vector3D lineDirection = RandomGeometry.nextOrthogonalVector3D(random, expectedPerpendicularVector, true);
-         Point3D firstPointOnLine = new Point3D();
-         firstPointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection, expectedIntersection);
-         Point3D secondPointOnLine = new Point3D();
-         secondPointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection, expectedIntersection);
-
-         Point3D point = new Point3D();
-         point.add(expectedIntersection, expectedPerpendicularVector);
-
-         Point3D actualIntersection = new Point3D();
-         double epsilon = Epsilons.ONE_TRILLIONTH;
-
-         if (firstPointOnLine.distance(secondPointOnLine) < 5.0e-4)
-            epsilon = Epsilons.ONE_TEN_BILLIONTH; // Loss of precision when the given points defining the line are getting close.
-
-         Vector3D actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine,
-                                                                                                  actualIntersection);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedIntersection, actualIntersection, epsilon);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedPerpendicularVector, actualPerpendicularVector, epsilon);
-
-         actualPerpendicularVector = GeometryTools.getPerpendicularVectorFromLineToPoint(point, firstPointOnLine, secondPointOnLine, null);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedPerpendicularVector, actualPerpendicularVector, epsilon);
-      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -389,40 +292,6 @@ public class GeometryToolsTest
          assertEquals(errorMsg, 0.0, topVertexB.distance(topVertexBComputed), 1e-9);
 
          topVertexAngle += Math.toRadians(1.0);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testGetTopVertexOfIsoscelesTriangle2()
-   {
-      Random random = new Random(1176L);
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point3D expectedB = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         Point3D a = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         Vector3D ba = new Vector3D();
-         ba.sub(a, expectedB);
-
-         double abcAngle = RandomNumbers.nextDouble(random, 0.0, Math.PI / 2.0);
-
-         Vector3D triangleNormal = RandomGeometry.nextOrthogonalVector3D(random, ba, true);
-         triangleNormal.scale(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         AxisAngle abcAxisAngle = new AxisAngle(triangleNormal, abcAngle);
-         RotationMatrix abcRotationMatrix = new RotationMatrix();
-         abcRotationMatrix.set(abcAxisAngle);
-         Vector3D bc = new Vector3D();
-         abcRotationMatrix.transform(ba, bc);
-
-         Point3D c = new Point3D();
-         c.add(bc, expectedB);
-
-         double epsilon = Epsilons.ONE_TEN_BILLIONTH;
-
-         Point3D actualB = new Point3D();
-         GeometryTools.getTopVertexOfIsoscelesTriangle(a, c, triangleNormal, abcAngle, actualB);
-         EuclidCoreTestTools.assertTuple3DEquals(expectedB, actualB, epsilon);
-         assertEquals(abcAngle, ba.angle(bc), epsilon);
       }
    }
 
@@ -717,25 +586,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetRadiusOfArc() throws Exception
-   {
-      Random random = new Random(1176L);
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         double expectedArcRadius = RandomNumbers.nextDouble(random, 0.1, 100.0);
-         double chordAngle = RandomNumbers.nextDouble(random, -3.0 * Math.PI, 3.0 * Math.PI);
-         double chordLength = 2.0 * expectedArcRadius * Math.sin(0.5 * chordAngle);
-         double actualArcRadius = GeometryTools.getRadiusOfArc(chordLength, chordAngle);
-         assertEquals(expectedArcRadius, actualArcRadius, Epsilons.ONE_TRILLIONTH);
-      }
-
-      assertTrue(Double.isNaN(GeometryTools.getRadiusOfArc(1.0, 0.0)));
-      assertTrue(Double.isNaN(GeometryTools.getRadiusOfArc(1.0, Math.PI)));
-      assertTrue(Double.isNaN(GeometryTools.getRadiusOfArc(1.0, -Math.PI)));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testGetAxisAngleFromFirstToSecondVector1() throws Exception
    {
       Random random = new Random(1176L);
@@ -1006,46 +856,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetPerpendicularBisectorSegment1() throws Exception
-   {
-      Point2D firstLinePoint = new Point2D(1.0, 1.0);
-      Point2D secondLinePoint = new Point2D(0.0, 1.0);
-      double lengthOffset = 2.0;
-      List<Point2D> normalPointsFromLine = GeometryTools.getPerpendicularBisectorSegment(firstLinePoint, secondLinePoint, lengthOffset);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.5, -1.0), normalPointsFromLine.get(0), Epsilons.ONE_TRILLIONTH);
-      EuclidCoreTestTools.assertTuple2DEquals(new Point2D(0.5, 3.0), normalPointsFromLine.get(1), Epsilons.ONE_TRILLIONTH);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetPerpendicularBisectorSegment2() throws Exception
-   {
-      Random random = new Random(1176L);
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D firstPointOnLine = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D secondPointOnLine = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Vector2D lineDirection = new Vector2D();
-         lineDirection.sub(secondPointOnLine, firstPointOnLine);
-         double lengthOffset = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         List<Point2D> normalPointsFromLine = GeometryTools.getPerpendicularBisectorSegment(firstPointOnLine, secondPointOnLine, lengthOffset);
-
-         Point2D normalPoint0 = normalPointsFromLine.get(0);
-         Point2D normalPoint1 = normalPointsFromLine.get(1);
-         Vector2D normalDirection = new Vector2D();
-         normalDirection.sub(normalPoint1, normalPoint0);
-
-         assertEquals(2.0 * lengthOffset, normalDirection.length(), Epsilons.ONE_TRILLIONTH);
-         assertEquals(0.0, lineDirection.dot(normalDirection), Epsilons.ONE_TRILLIONTH);
-         assertEquals(lengthOffset, EuclidGeometryTools.distanceFromPoint2DToLine2D(normalPoint0, firstPointOnLine, secondPointOnLine), Epsilons.ONE_TRILLIONTH);
-         assertEquals(lengthOffset, EuclidGeometryTools.distanceFromPoint2DToLine2D(normalPoint1, firstPointOnLine, secondPointOnLine), Epsilons.ONE_TRILLIONTH);
-         assertTrue(EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(normalPoint0, firstPointOnLine, secondPointOnLine));
-         assertTrue(EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(normalPoint1, firstPointOnLine, secondPointOnLine));
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testGetTriangleBisector() throws Exception
    {
       Random random = new Random(1176L);
@@ -1227,7 +1037,7 @@ public class GeometryToolsTest
          Point2D secondPointOnLine1 = new Point2D();
          secondPointOnLine1.scaleAdd(RandomNumbers.nextDouble(random, 10.0), lineDirection1, firstPointOnLine1);
 
-         Vector2D orthogonal = GeometryTools.getPerpendicularVector(lineDirection1);
+         Vector2D orthogonal = EuclidGeometryTools.perpendicularVector2D(lineDirection1);
          orthogonal.normalize();
          double distance = RandomNumbers.nextDouble(random, 0.0, 10.0);
          double distanceEspilon = RandomNumbers.nextDouble(random, 0.0, 10.0);
@@ -1246,7 +1056,7 @@ public class GeometryToolsTest
       for (int i = 0; i < ITERATIONS; i++)
       {
          Vector2D lineDirection = RandomGeometry.nextVector2D(random, RandomNumbers.nextDouble(random, 0.0, 10.0));
-         Vector2D orthogonal = GeometryTools.getPerpendicularVector(lineDirection);
+         Vector2D orthogonal = EuclidGeometryTools.perpendicularVector2D(lineDirection);
          orthogonal.normalize();
 
          double angleEpsilon = Epsilons.ONE_MILLIONTH;

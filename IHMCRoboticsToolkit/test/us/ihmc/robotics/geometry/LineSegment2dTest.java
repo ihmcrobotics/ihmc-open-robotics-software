@@ -1,10 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -15,6 +11,7 @@ import org.junit.Test;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -520,7 +517,7 @@ public class LineSegment2dTest
          Point2D pointOffLineSegment = new Point2D();
          Vector2D lineSegmentDirection = new Vector2D();
          lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
-         Vector2D orthogonal = GeometryTools.getPerpendicularVector(lineSegmentDirection);
+         Vector2D orthogonal = EuclidGeometryTools.perpendicularVector2D(lineSegmentDirection);
          orthogonal.normalize();
 
          // Test between end points
@@ -1184,7 +1181,7 @@ public class LineSegment2dTest
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          Vector2D orthogonal = new Vector2D();
          orthogonal.sub(lineSegmentEnd, lineSegmentStart);
-         GeometryTools.getPerpendicularVector(orthogonal, orthogonal);
+         EuclidGeometryTools.perpendicularVector2D(orthogonal, orthogonal);
          orthogonal.normalize();
          Point2D expectedProjection = new Point2D();
          Point2D testPoint = new Point2D();
