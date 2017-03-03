@@ -56,50 +56,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAveragePoints()
-   {
-      Point3D a = new Point3D(5.8, 9.9, 4.5);
-      Point3D b = new Point3D(5.6, 8.1, 5.5);
-      double expectedReturn1 = 5.7;
-      double expectedReturn2 = 9.0;
-      double expectedReturn3 = 5;
-      Point3D actualReturn = GeometryTools.averagePoints(a, b);
-      double actualReturn1 = actualReturn.getX();
-      double actualReturn2 = actualReturn.getY();
-      double actualReturn3 = actualReturn.getZ();
-      assertEquals("return value", expectedReturn1, actualReturn1, EPSILON);
-      assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
-      assertEquals("return value", expectedReturn3, actualReturn3, EPSILON);
-
-      Point3D a1 = new Point3D(-5, -5, -5);
-      Point3D b1 = new Point3D(-5, -5, -5);
-      double expectedReturn11 = -5;
-      double expectedReturn12 = -5;
-      double expectedReturn13 = -5;
-      Point3D actualReturn01 = GeometryTools.averagePoints(a1, b1);
-      double actualReturn11 = actualReturn01.getX();
-      double actualReturn12 = actualReturn01.getY();
-      double actualReturn13 = actualReturn01.getZ();
-      assertEquals("return value", expectedReturn11, actualReturn11, EPSILON);
-      assertEquals("return value", expectedReturn12, actualReturn12, EPSILON);
-      assertEquals("return value", expectedReturn13, actualReturn13, EPSILON);
-
-      Point3D a2 = new Point3D(0, 0, 0);
-      Point3D b2 = new Point3D(0, 0, 0);
-      double expectedReturn21 = 0;
-      double expectedReturn22 = 0;
-      double expectedReturn23 = 0;
-      Point3D actualReturn02 = GeometryTools.averagePoints(a2, b2);
-      double actualReturn21 = actualReturn02.getX();
-      double actualReturn22 = actualReturn02.getY();
-      double actualReturn23 = actualReturn02.getZ();
-      assertEquals("return value", expectedReturn21, actualReturn21, EPSILON);
-      assertEquals("return value", expectedReturn22, actualReturn22, EPSILON);
-      assertEquals("return value", expectedReturn23, actualReturn23, EPSILON);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testGetDistanceBetweenPointAndPlane1()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);

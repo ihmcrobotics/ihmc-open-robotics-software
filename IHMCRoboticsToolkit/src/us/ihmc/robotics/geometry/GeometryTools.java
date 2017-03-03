@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
@@ -27,7 +26,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GeometryTools
 {
@@ -117,39 +115,6 @@ public class GeometryTools
       Point2DReadOnly checkPointPoint2d = new Point2D(point.getX(), point.getY());
 
       return EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(checkPointPoint2d, lineStartPoint2d, lineEndPoint2d);
-   }
-
-   /**
-    * Returns the average of two 3D points.
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    *
-    * @param a the first 3D point. Not modified.
-    * @param b the second 3D point. Not modified.
-    * @return the computed average.
-    */
-   public static Point3D averagePoints(Point3DReadOnly a, Point3DReadOnly b)
-   {
-      Point3D average = new Point3D(a);
-      average.add(b);
-      average.scale(0.5);
-
-      return average;
-   }
-
-   /**
-    * Returns the average of two 3D points.
-    *
-    * @param a the first 3D point. Not modified.
-    * @param b the second 3D point. Not modified.
-    * @param avgToPack the point in which the computed average is stored. Modified.
-    */
-   public static void averagePoints(FramePoint a, FramePoint b, FramePoint avgToPack)
-   {
-      avgToPack.setIncludingFrame(a);
-      avgToPack.add(b);
-      avgToPack.scale(0.5);
    }
 
    /**
