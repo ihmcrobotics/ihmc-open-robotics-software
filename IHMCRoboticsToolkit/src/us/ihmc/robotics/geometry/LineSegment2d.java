@@ -330,7 +330,7 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
     */
    public double percentageAlongLineSegment(double x, double y)
    {
-      return GeometryTools.getPercentageAlongLineSegment(x, y, endpoints[0].getX(), endpoints[0].getY(), endpoints[1].getX(), endpoints[1].getY());
+      return EuclidGeometryTools.percentageAlongLineSegment2D(x, y, endpoints[0].getX(), endpoints[0].getY(), endpoints[1].getX(), endpoints[1].getY());
    }
 
    public boolean isPointOnLineSegment(Point2DReadOnly point2d)
