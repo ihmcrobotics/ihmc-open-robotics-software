@@ -307,25 +307,7 @@ public class GeometryTools
       point.checkReferenceFrameMatch(pointOnPlane);
       point.checkReferenceFrameMatch(planeNormal);
 
-      return distanceFromPointToPlane(point.getPoint(), pointOnPlane.getPoint(), planeNormal.getVector());
-   }
-
-   /**
-    * Computes the minimum distance between a given point and a plane.
-    * 
-    * @param point the 3D query. Not modified.
-    * @param pointOnPlane a point located on the plane. Not modified.
-    * @param planeNormal the normal of the plane. Not modified.
-    * @return the distance between the point and the plane.
-    */
-   public static double distanceFromPointToPlane(Point3DReadOnly point, Point3DReadOnly pointOnPlane, Vector3DReadOnly planeNormal)
-   {
-      double d = -planeNormal.getX() * pointOnPlane.getX() - planeNormal.getY() * pointOnPlane.getY() - planeNormal.getZ() * pointOnPlane.getZ();
-
-      double numerator = planeNormal.getX() * point.getX() + planeNormal.getY() * point.getY() + planeNormal.getZ() * point.getZ() + d;
-      double denominator = planeNormal.length();
-
-      return Math.abs(numerator) / denominator;
+      return EuclidGeometryTools.distanceFromPoint3DToPlane3D(point.getPoint(), pointOnPlane.getPoint(), planeNormal.getVector());
    }
 
    /**
@@ -353,124 +335,7 @@ public class GeometryTools
       lineSegmentStart1.checkReferenceFrameMatch(lineSegmentEnd1);
       lineSegmentStart2.checkReferenceFrameMatch(lineSegmentEnd2);
       lineSegmentStart1.checkReferenceFrameMatch(lineSegmentStart2);
-      return doLineSegmentsIntersect(lineSegmentStart1.getPoint(), lineSegmentEnd1.getPoint(), lineSegmentStart2.getPoint(), lineSegmentEnd2.getPoint());
-   }
-
-   /**
-    * Test if two line segments intersect each other.
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> When the two line segments are parallel but not collinear, this method returns false.
-    *    <li> When the two line segments are collinear,
-    *     this methods returns true only if the two line segments overlap or have at least one common endpoint.
-    *    <li> When the two line segments have a common endpoint, this method returns true.
-    * </ul>
-    * </p>
-    * 
-    * @param lineSegmentStart1 first endpoint of the first line segment. Not modified.
-    * @param lineSegmentEnd1 second endpoint of the first line segment. Not modified.
-    * @param lineSegmentStart1 first endpoint of the second line segment. Not modified.
-    * @param lineSegmentEnd1 second endpoint of the second line segment. Not modified.
-    * @return {@code true} if the two line segments intersect, {@code false} otherwise.
-    */
-   public static boolean doLineSegmentsIntersect(Point2DReadOnly lineSegmentStart1, Point2DReadOnly lineSegmentEnd1, Point2DReadOnly lineSegmentStart2, Point2DReadOnly lineSegmentEnd2)
-   {
-      return doLineSegmentsIntersect(lineSegmentStart1.getX(), lineSegmentStart1.getY(), lineSegmentEnd1.getX(), lineSegmentEnd1.getY(),
-                                     lineSegmentStart2.getX(), lineSegmentStart2.getY(), lineSegmentEnd2.getX(), lineSegmentEnd2.getY());
-   }
-
-   /**
-    * Test if two line segments intersect each other.
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> When the two line segments are parallel but not collinear, this method returns false.
-    *    <li> When the two line segments are collinear,
-    *     this methods returns true only if the two line segments overlap or have at least one common endpoint.
-    *    <li> When the two line segments have a common endpoint, this method returns true.
-    * </ul>
-    * </p>
-    * 
-    * @param lineSegmentStart1x x-coordinate of the first endpoint of the first line segment.
-    * @param lineSegmentStart1y y-coordinate of the first endpoint of the first line segment.
-    * @param lineSegmentEnd1x x-coordinate of the second endpoint of the first line segment.
-    * @param lineSegmentEnd1y y-coordinate of the second endpoint of the first line segment.
-    * @param lineSegmentStart2x x-coordinate of the first endpoint of the second line segment.
-    * @param lineSegmentStart2y y-coordinate of the first endpoint of the second line segment.
-    * @param lineSegmentEnd2x x-coordinate of the second endpoint of the second line segment.
-    * @param lineSegmentEnd2y y-coordinate of the second endpoint of the second line segment.
-    * @return {@code true} if the two line segments intersect, {@code false} otherwise.
-    */
-   public static boolean doLineSegmentsIntersect(double lineSegmentStart1x, double lineSegmentStart1y, double lineSegmentEnd1x, double lineSegmentEnd1y,
-                                                 double lineSegmentStart2x, double lineSegmentStart2y, double lineSegmentEnd2x, double lineSegmentEnd2y)
-   {
-      double eps = Epsilons.ONE_TRILLIONTH;
-      double r1numerator, r1denominator, r2numerator, r2denominator;
-
-      double deltax1 = lineSegmentEnd1x - lineSegmentStart1x;
-      double deltay1 = lineSegmentEnd1y - lineSegmentStart1y;
-
-      double deltax2 = lineSegmentEnd2x - lineSegmentStart2x;
-      double deltay2 = lineSegmentEnd2y - lineSegmentStart2y;
-
-      double startDx = lineSegmentStart1x - lineSegmentStart2x;
-      double startDy = lineSegmentStart1y - lineSegmentStart2y;
-
-      r1numerator = deltax2 * startDy - deltay2 * startDx;
-      r1denominator = deltay2 * deltax1 - deltax2 * deltay1;
-
-      r2numerator = deltax1 * startDy - deltay1 * startDx;
-      r2denominator = r1denominator;
-
-      // denominator == 0 => the line segments are parallel.
-      if (Math.abs(r1denominator) < eps)
-      {
-         // If both numerators and the denominator are zero, the lines are collinear.
-         // We must project the lines onto the X- or Y-axis check if the segments overlap.
-         if (Math.abs(r1numerator) < eps && Math.abs(r2numerator) < eps)
-         {
-            double ls1, le1, ls2, le2;
-            if (Math.abs(lineSegmentStart1x - lineSegmentEnd1x) > eps)
-            {
-               ls1 = lineSegmentStart1x;
-               le1 = lineSegmentEnd1x;
-               ls2 = lineSegmentStart2x;
-               le2 = lineSegmentEnd2x;
-            }
-            else
-            {
-               ls1 = lineSegmentStart1y;
-               le1 = lineSegmentEnd1y;
-               ls2 = lineSegmentStart2y;
-               le2 = lineSegmentEnd2y;
-            }
-
-            // If both first points are less than both second points, the line
-            // segments do not intersect.
-            if (((ls1 < ls2) && (le1 < ls2)) && ((ls1 < le2) && (le1 < le2)))
-               return false;
-
-            // If both first points are greater than both second points, the line
-            // segments do not intersect.
-            if (((ls1 > ls2) && (le1 > ls2)) && ((ls1 > le2) && (le1 > le2)))
-               return false;
-
-            // Otherwise, the line segments must overlap. So we return true.
-            return true;
-         }
-         // The line segments are parallel but are not collinear, they do not intersect
-         else
-         {
-            return false;
-         }
-      }
-
-      double r1 = r1numerator / r1denominator;
-      double r2 = r2numerator / r2denominator;
-
-      // If both r1 and r2 are between zero and one, the line segments intersect.
-      return (0.0 - eps < r1) && (r1 < 1.0 + eps) && (0.0 - eps < r2) && (r2 < 1.0 + eps);
+      return EuclidGeometryTools.doLineSegment2DsIntersect(lineSegmentStart1.getPoint(), lineSegmentEnd1.getPoint(), lineSegmentStart2.getPoint(), lineSegmentEnd2.getPoint());
    }
 
    private static final ThreadLocal<Point2D> tempIntersection = new ThreadLocal<Point2D>()
@@ -1976,7 +1841,7 @@ public class GeometryTools
       if (!areVectorsCollinear(planeNormal1, planeNormal2, angleEpsilon))
          return false;
       else
-         return distanceFromPointToPlane(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
+         return EuclidGeometryTools.distanceFromPoint3DToPlane3D(pointOnPlane2, pointOnPlane1, planeNormal1) < distanceEpsilon;
    }
    
    /**
