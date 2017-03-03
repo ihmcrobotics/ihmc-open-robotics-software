@@ -8,7 +8,6 @@ import us.ihmc.avatar.rrtwalkingpath.AvatarWalkingPathGeneratorTest;
 
 public class AtlasWalkingPathGeneratorTest extends AvatarWalkingPathGeneratorTest
 {
-
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -22,5 +21,4 @@ public class AtlasWalkingPathGeneratorTest extends AvatarWalkingPathGeneratorTes
       // TODO Auto-generated method stub
       return "RobotName";
    }
-
 }

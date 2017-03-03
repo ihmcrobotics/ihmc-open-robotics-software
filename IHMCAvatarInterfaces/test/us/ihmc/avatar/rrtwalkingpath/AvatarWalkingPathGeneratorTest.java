@@ -21,6 +21,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -108,20 +109,20 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       {
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
 
-         for(int i=0;i<RRT2DNodeWalkingPath.boxes.length;i++)
+         addBoxEnvironment(RRT2DNodeWalkingPath.boxes[0], YoAppearance.Grey());
+         
+         for(int i=1;i<RRT2DNodeWalkingPath.boxes.length;i++)
          {
-            addBoxEnvironment(RRT2DNodeWalkingPath.boxes[i]);
+            addBoxEnvironment(RRT2DNodeWalkingPath.boxes[i], YoAppearance.Red());
          }
-         
-         EnvSet.addBox(goalState.x + 0.5, goalState.y -0.6, goalState.x + 0.6, goalState.y +0.6, 2, YoAppearance.Gray());
-         
+                  
          EnvSet.addSphere(goalState.x, goalState.y, goalState.z, 0.1, YoAppearance.Blue());
       }
       
-      public void addBoxEnvironment(RRT2DNodeWalkingPath.BoxInfo box)
+      public void addBoxEnvironment(RRT2DNodeWalkingPath.BoxInfo box, AppearanceDefinition app)
       {
          EnvSet.addBox(box.centerX - box.sizeX/2, box.centerY - box.sizeY/2,
-                       box.centerX + box.sizeX/2, box.centerY + box.sizeY/2, box.sizeZ, YoAppearance.Red());
+                       box.centerX + box.sizeX/2, box.centerY + box.sizeY/2, box.sizeZ, app);
       }
 
       @Override
@@ -180,17 +181,17 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
       initialState = new Vector3d(0.0, 0.0, 0.0);
       goalState = new Vector3d(8.0, -4.0, 0.0);
-            
-      RRTNode startNode = new RRT2DNodeWalkingPath(0.0, 0.0);
-      RRTNode goalNode = new RRT2DNodeWalkingPath(3.0, 2.0);
       
-      RRT2DPlannerWalkingPath rrtPlanner = new RRT2DPlannerWalkingPath(startNode, goalNode, 0.3);
+      RRTNode startNode = new RRT2DNodeWalkingPath(initialState.getX(), initialState.getY());
+      RRTNode goalNode = new RRT2DNodeWalkingPath(goalState.getX(), goalState.getY());
+      
+      RRT2DPlannerWalkingPath rrtPlanner = new RRT2DPlannerWalkingPath(startNode, goalNode, 0.4);
       
       RRTNode upperBoundNode = new RRT2DNodeWalkingPath(12.0, 3.0);
       RRTNode lowerBoundNode = new RRT2DNodeWalkingPath(-2.0, -7.0);
       
-      rrtPlanner.rrtTree.setUpperBound(upperBoundNode);
-      rrtPlanner.rrtTree.setLowerBound(lowerBoundNode);
+      rrtPlanner.getRRTTree().setUpperBound(upperBoundNode);
+      rrtPlanner.getRRTTree().setLowerBound(lowerBoundNode);
 
       // ******************************** //
 
@@ -216,19 +217,35 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       RRTNode nodeRobot = new RRT2DNodeWalkingPath(1.0, 0);
       nodeRobot.isValidNode();      
       
-      for (int i = 0; i < 500; i++)
-      {
-         boolean isConnected = rrtPlanner.expandTreeGoal(nodeOne, nodeTwo);
-         simulationConstructionSet.addStaticLinkGraphics(getNodeConnection(nodeOne, nodeTwo));
-         
-         if (isConnected == true)
-         {            
-            PrintTools.info("is Reached! "+i);
-            break;
-         }
-      }
+//      for (int i = 0; i < 1000; i++)
+//      {
+//         boolean isConnected = rrtPlanner.expandTreeGoal(nodeOne, nodeTwo);
+//         simulationConstructionSet.addStaticLinkGraphics(getNodeConnection(nodeOne, nodeTwo));
+//         
+//         if (isConnected == true)
+//         {            
+//            PrintTools.info("is Reached! "+i);
+//            break;
+//         }
+//      }
       
-
+      rrtPlanner.expandTreeGoal(2000);      
+      PrintTools.info("path size is "+rrtPlanner.getOptimalPath().size());
+      
+      simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Red()));
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      rrtPlanner.updateOptimalPath(100, 100);
+      simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Aqua()));
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+      
+      
+      //rrtPlanner.updateOptimalPath(100, 500);
+      //simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Blue()));      
+      //simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getPiecewisePath().getPiecewisePath(), YoAppearance.Green()));
+      
       
       
       // ******************************** //
@@ -294,12 +311,22 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    }
    // ******************************** //
 
-
-      
    
+      
+   private ArrayList<Graphics3DObject> getNodePath(ArrayList<RRTNode> nodePath, AppearanceDefinition app)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+      
+      for(int i =0;i<nodePath.size()-1;i++)
+      {
+         ret.addAll(getNodeConnection(nodePath.get(i), nodePath.get(i+1), app));         
+      }
+      
+      return ret;
+   }
 
 
-   public ArrayList<Graphics3DObject> getNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
+   private ArrayList<Graphics3DObject> getNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
@@ -320,10 +347,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1)-nodeTwo.getNodeData(1)), (nodeOne.getNodeData(0)-nodeTwo.getNodeData(0)), 0, Math.PI/2);
       lineCapsule.translate(translationLine);
       lineCapsule.rotate(rotationLine);
-      lineCapsule.addCapsule(0.03, nodeOne.getDistance(nodeTwo), YoAppearance.Gray());
-      
-      
-      
+      lineCapsule.addCapsule(0.02, nodeOne.getDistance(nodeTwo), YoAppearance.Gray());
       
       ret.add(nodeOneSphere);
       ret.add(nodeTwoSphere);
@@ -332,4 +356,33 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       return ret;
    }
    
+   public ArrayList<Graphics3DObject> getNodeConnection(RRTNode nodeOne, RRTNode nodeTwo, AppearanceDefinition app)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+
+      Graphics3DObject nodeOneSphere = new Graphics3DObject();
+      Graphics3DObject nodeTwoSphere = new Graphics3DObject();
+      
+      Graphics3DObject lineCapsule = new Graphics3DObject();
+      
+      Point3D translationNodeOne = new Point3D(nodeOne.getNodeData(0), nodeOne.getNodeData(1), 0);
+      nodeOneSphere.translate(translationNodeOne);
+      nodeOneSphere.addSphere(0.05, app);
+      
+      Point3D translationNodeTwo = new Point3D(nodeTwo.getNodeData(0), nodeTwo.getNodeData(1), 0);
+      nodeTwoSphere.translate(translationNodeTwo);
+      nodeTwoSphere.addSphere(0.05, app);
+      
+      Point3D translationLine = new Point3D((nodeOne.getNodeData(0)+nodeTwo.getNodeData(0))/2, (nodeOne.getNodeData(1)+nodeTwo.getNodeData(1))/2, 0);
+      AxisAngle rotationLine = new AxisAngle(-(nodeOne.getNodeData(1)-nodeTwo.getNodeData(1)), (nodeOne.getNodeData(0)-nodeTwo.getNodeData(0)), 0, Math.PI/2);
+      lineCapsule.translate(translationLine);
+      lineCapsule.rotate(rotationLine);
+      lineCapsule.addCapsule(0.02, nodeOne.getDistance(nodeTwo), app);
+      
+      ret.add(nodeOneSphere);
+      ret.add(nodeTwoSphere);
+      ret.add(lineCapsule);
+
+      return ret;
+   }
 }

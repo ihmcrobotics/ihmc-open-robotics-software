@@ -16,19 +16,19 @@ public class RRT2DPlanner extends RRTPlanner
 
    public boolean expandTreeGoal(double[] branchInfo)
    {
-      if (rrtTree.expandTree() == true)
+      if (getRRTTree().expandTree() == true)
       {
-         for (int i = 0; i < rrtTree.newNode.getDimensionOfNodeData(); i++)
+         for (int i = 0; i < getRRTTree().newNode.getDimensionOfNodeData(); i++)
          {
-            branchInfo[i] = rrtTree.newNode.getNodeData(i);
-            branchInfo[i + rrtTree.newNode.getDimensionOfNodeData()] = rrtTree.nearNode.getNodeData(i);
+            branchInfo[i] = getRRTTree().newNode.getNodeData(i);
+            branchInfo[i + getRRTTree().newNode.getDimensionOfNodeData()] = getRRTTree().nearNode.getNodeData(i);
          }
 
-         if (rrtTree.newNode.getDistance(goalNode) < rrtTree.getStepLength())
+         if (getRRTTree().newNode.getDistance(getGoalNode()) < getRRTTree().getStepLength())
          {
-            rrtTree.newNode.addChildNode(goalNode);
-            rrtTree.updatePath(goalNode);
-            optimalPath = rrtTree.pathNode;
+            getRRTTree().newNode.addChildNode(getGoalNode());
+            getRRTTree().updatePath(getGoalNode());
+            setOptimalPath(getRRTTree().pathNode);
 
             return true;
          }

@@ -14,25 +14,21 @@ public class RRT2DPlannerWalkingPath extends RRTPlanner
 
    public boolean expandTreeGoal(RRTNode nodeOne, RRTNode nodeTwo)
    {
-      double branchRootData[] = new double[2];
-      double branchNewData[] = new double[2];
-
-      if (rrtTree.expandTree() == true)
+      if (getRRTTree().expandTree() == true)
       {
-         for (int i = 0; i < rrtTree.getNewNode().getDimensionOfNodeData(); i++)
+         for (int i = 0; i < getRRTTree().getNewNode().getDimensionOfNodeData(); i++)
          {
-            branchRootData[i] = rrtTree.getNewNode().getNodeData(i);
-            branchNewData[i] = rrtTree.getNearNode().getNodeData(i);
-            nodeOne.setNodeData(i, rrtTree.getNewNode().getNodeData(i));
-            nodeTwo.setNodeData(i, rrtTree.getNearNode().getNodeData(i));
+            nodeOne.setNodeData(i, getRRTTree().getNewNode().getNodeData(i));
+            nodeTwo.setNodeData(i, getRRTTree().getNearNode().getNodeData(i));
          }
 
-         if (rrtTree.getNewNode().getDistance(goalNode) < rrtTree.getStepLength())
+         if (getRRTTree().getNewNode().getDistance(getGoalNode()) < getRRTTree().getStepLength())
          {
-            rrtTree.getNewNode().addChildNode(goalNode);
-            rrtTree.updatePath(goalNode);
-            optimalPath = rrtTree.getPathNode();
-
+            getRRTTree().getNewNode().addChildNode(getGoalNode());
+            getRRTTree().updatePath(getGoalNode());
+            setOptimalPath(getRRTTree().getPathNode());
+            
+            PrintTools.info("111 path size is "+getOptimalPath().size());
             return true;
          }
          return false;

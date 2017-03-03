@@ -1,6 +1,8 @@
 package us.ihmc.manipulation.planning.rrt;
 
 import java.util.ArrayList;
+
+import us.ihmc.tools.io.printing.PrintTools;
 /**
  * This class provides only expanding tree, expanding tree until reaching goal node and updating an optimal path.
  * The optimal path is just displacement minimizing straight-line shortcut.
@@ -10,12 +12,12 @@ import java.util.ArrayList;
  */
 public class RRTPlanner
 {
-   public RRTNode rootNode;
-   public RRTNode goalNode;
+   private RRTNode rootNode;
+   private RRTNode goalNode;
 
-   public RRTTree rrtTree;
-   RRTPiecewisePath rrtPiecewisePath;
-   public ArrayList<RRTNode> optimalPath = new ArrayList<RRTNode>();   
+   private RRTTree rrtTree;
+   private RRTPiecewisePath rrtPiecewisePath;
+   private ArrayList<RRTNode> optimalPath = new ArrayList<RRTNode>();   
    
 
    public RRTPlanner(RRTNode root, RRTNode goal, double stepLength)
@@ -47,6 +49,8 @@ public class RRTPlanner
                rrtTree.updatePath(goalNode);
                optimalPath = rrtTree.pathNode;
                
+               PrintTools.info("Connected "+i);
+               
                return true;
             }  
          }                 
@@ -71,5 +75,29 @@ public class RRTPlanner
          updateOptimalPath(sizeOfPiecewisePath);
       }
    }
+   
+   public RRTTree getRRTTree()
+   {
+      return rrtTree;
+   }
 
+   public RRTPiecewisePath getPiecewisePath()
+   {
+      return rrtPiecewisePath;
+   }
+   
+   public ArrayList<RRTNode> getOptimalPath()
+   {
+      return optimalPath;
+   }
+   
+   public void setOptimalPath(ArrayList<RRTNode> path)
+   {
+      optimalPath = path;
+   }
+   
+   public RRTNode getGoalNode()
+   {
+      return goalNode;
+   }
 }

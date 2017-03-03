@@ -3,6 +3,8 @@ package us.ihmc.manipulation.planning.rrt;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.tools.io.printing.PrintTools;
+
 /**
  * <RRTPiecewisePath> class a node path divides into @param sizeOfPiecewise.
  * ArrayList<RRTNode> piecewisePath is initialized when this class is initiated.
