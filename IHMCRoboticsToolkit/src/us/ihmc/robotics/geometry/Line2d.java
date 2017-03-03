@@ -474,7 +474,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    private boolean isPointOnSideOfLine(double x, double y, RobotSide side)
    {
-      return GeometryTools.isPointOnSideOfLine(x, y, point, normalizedVector, side);
+      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(x, y, point, normalizedVector, side == RobotSide.LEFT);
    }
 
    /**

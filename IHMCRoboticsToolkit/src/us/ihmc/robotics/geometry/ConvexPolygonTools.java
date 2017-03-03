@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -272,7 +273,7 @@ public class ConvexPolygonTools
       Point2D lineStart = new Point2D(currentPolygonPPoint);
       Point2D lineEnd = new Point2D(currentPolygonPPoint);
       lineEnd.add(caliperForPolygonP);
-      boolean isOnLeft = GeometryTools.isPointOnLeftSideOfLine(currentPolygonQPoint, lineStart, lineEnd);
+      boolean isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
       boolean wasOnLeft = isOnLeft;
 
       //    System.out.println("wasOnLeft = " + wasOnLeft);
@@ -352,7 +353,7 @@ public class ConvexPolygonTools
          lineStart = new Point2D(currentPolygonPPoint);
          lineEnd = new Point2D(currentPolygonPPoint);
          lineEnd.add(caliperForPolygonP);
-         isOnLeft = GeometryTools.isPointOnLeftSideOfLine(currentPolygonQPoint, lineStart, lineEnd);
+         isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
 
          //       System.out.println("new isOnLeft = " + isOnLeft);
 
@@ -512,7 +513,7 @@ public class ConvexPolygonTools
       {
          finished = true;
 
-         while (decrementP ^ GeometryTools.isPointOnLeftSideOfLine(lineQEnd, linePStart, linePEnd))
+         while (decrementP ^ EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(lineQEnd, linePStart, linePEnd))
          {
             lineQStart = lineQEnd;
 
@@ -528,7 +529,7 @@ public class ConvexPolygonTools
                return null; // No intersection. Prevent infinite loop.
          }
 
-         while ((!decrementP) ^ GeometryTools.isPointOnLeftSideOfLine(linePEnd, lineQStart, lineQEnd))
+         while ((!decrementP) ^ EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(linePEnd, lineQStart, lineQEnd))
          {
             linePStart = linePEnd;
 
