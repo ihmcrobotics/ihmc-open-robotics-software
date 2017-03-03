@@ -66,16 +66,6 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
       }
    }
 
-   public void addForceSensor(WrenchContactPoint sensor)
-   {
-      mySimulator.addForceSensor(sensor);
-   }
-
-   public ArrayList<WrenchContactPoint> getForceSensors()
-   {
-      return mySimulator.getForceSensors();
-   }
-
    public double getDT()
    {
       if (mySimulator != null)

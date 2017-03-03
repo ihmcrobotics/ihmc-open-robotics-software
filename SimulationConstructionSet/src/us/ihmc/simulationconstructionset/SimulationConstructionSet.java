@@ -4515,16 +4515,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       mySimulation.initPhysics(physics);
    }
 
-   public void addForceSensor(WrenchContactPoint sensor)
-   {
-      mySimulation.addForceSensor(sensor);
-   }
-
-   public ArrayList<WrenchContactPoint> getForceSensors()
-   {
-      return mySimulation.getForceSensors();
-   }
-
    public void repaintWindows()
    {
       if (myGUI != null)
