@@ -187,7 +187,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private DynamicGraphicMenuManager dynamicGraphicMenuManager;
    private ScsPhysics simpleScsPhysics;
-   private WrenchContactPoint simpleWrenchContactPoint;
    private SimulationConstructionSet scs;
 
    @BeforeClass
@@ -222,7 +221,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
       yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
       dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
-      simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
 
       scs = new SimulationConstructionSet(simpleRobot);
       simpleScsPhysics = createScsPhysics();
@@ -259,7 +257,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       yoGraphicsListRegistry = null;
       dynamicGraphicMenuManager = null;
       simpleScsPhysics = null;
-      simpleWrenchContactPoint = null;
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 2.8)
@@ -331,10 +328,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.initPhysics(simpleScsPhysics);
       ScsPhysics scsPhysicsFromSCS = scs.getPhysics();
       assertEquals(simpleScsPhysics, scsPhysicsFromSCS);
-
-      scs.addForceSensor(simpleWrenchContactPoint);
-      ArrayList<WrenchContactPoint> forceSensorsFromSCS = scs.getForceSensors();
-      assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 2.6)
