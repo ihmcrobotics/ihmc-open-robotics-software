@@ -206,7 +206,7 @@ public class Line3d implements GeometryObject<Line3d>
     */
    public double getClosestPointsWith(Line3d otherLine, Point3DBasics closestPointOnThisLineToPack, Point3DBasics closestPointOnOtherLineToPack)
    {
-      return GeometryTools.getClosestPointsForTwoLines(point, normalizedVector, otherLine.point, otherLine.normalizedVector, closestPointOnThisLineToPack, closestPointOnOtherLineToPack);
+      return EuclidGeometryTools.closestPoint3DsBetweenTwoLine3Ds(point, normalizedVector, otherLine.point, otherLine.normalizedVector, closestPointOnThisLineToPack, closestPointOnOtherLineToPack);
    }
 
    /**
