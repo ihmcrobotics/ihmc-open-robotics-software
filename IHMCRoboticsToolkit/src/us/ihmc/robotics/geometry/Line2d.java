@@ -354,12 +354,12 @@ public class Line2d implements GeometryObject<Line2d>
 
    public Point2D intersectionWith(Line2d secondLine)
    {
-      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector);
+      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, normalizedVector, secondLine.point, secondLine.normalizedVector);
    }
 
    public boolean intersectionWith(Line2d secondLine, Point3DBasics intersectionToPack)
    {
-      boolean success = GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, tempPoint2d);
+      boolean success = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, normalizedVector, secondLine.point, secondLine.normalizedVector, tempPoint2d);
       if (success)
          intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
       return success;
@@ -367,7 +367,7 @@ public class Line2d implements GeometryObject<Line2d>
 
    public boolean intersectionWith(Line2d secondLine, Point2DBasics intersectionToPack)
    {
-      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, intersectionToPack);
+      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, normalizedVector, secondLine.point, secondLine.normalizedVector, intersectionToPack);
    }
 
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
