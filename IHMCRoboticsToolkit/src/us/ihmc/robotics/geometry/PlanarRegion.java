@@ -420,7 +420,7 @@ public class PlanarRegion
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
-      if (!MathTools.isInsideBoundsInclusive(localPoint.getZ(), maximumOrthogonalDistance))
+      if (!MathTools.intervalContains(localPoint.getZ(), maximumOrthogonalDistance))
          return false;
       else
          return isPointInside(localPoint.getX(), localPoint.getY());
