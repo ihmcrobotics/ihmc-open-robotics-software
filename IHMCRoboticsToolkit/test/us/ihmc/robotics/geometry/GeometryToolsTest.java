@@ -100,98 +100,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
-   public void testAveragePoints1()
-   {
-      ArrayList<Point2D> points = new ArrayList<Point2D>();
-      Point2D a = new Point2D(1.0, 4.6);
-      Point2D b = new Point2D(5.2, 6.0);
-      Point2D c = new Point2D(3.7, 2.0);
-      points.add(a);
-      points.add(b);
-      points.add(c);
-      double expectedReturn1 = 3.3;
-      double expectedReturn2 = 4.2;
-      Point2D actualReturn = GeometryTools.averagePoint2ds(points);
-      double actualReturn1 = actualReturn.getX();
-      double actualReturn2 = actualReturn.getY();
-      assertEquals("return value", expectedReturn1, actualReturn1, EPSILON);
-      assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
-
-      ArrayList<Point2D> points1 = new ArrayList<Point2D>();
-      Point2D a1 = new Point2D(0.0, 0.0);
-      Point2D b1 = new Point2D(0.0, 0.0);
-      Point2D c1 = new Point2D(0.0, 0.0);
-      points1.add(a1);
-      points1.add(b1);
-      points1.add(c1);
-      double expectedReturn11 = 0.0;
-      double expectedReturn12 = 0.0;
-      Point2D actualReturn01 = GeometryTools.averagePoint2ds(points1);
-      double actualReturn11 = actualReturn01.getX();
-      double actualReturn12 = actualReturn01.getY();
-      assertEquals("return value", expectedReturn11, actualReturn11, EPSILON);
-      assertEquals("return value", expectedReturn12, actualReturn12, EPSILON);
-
-      ArrayList<Point2D> points2 = new ArrayList<Point2D>();
-      Point2D a2 = new Point2D(-1.0, -4.6);
-      Point2D b2 = new Point2D(-5.2, -6.0);
-      Point2D c2 = new Point2D(-3.7, -2.0);
-      points2.add(a2);
-      points2.add(b2);
-      points2.add(c2);
-      double expectedReturn21 = -3.3;
-      double expectedReturn22 = -4.2;
-      Point2D actualReturn02 = GeometryTools.averagePoint2ds(points2);
-      double actualReturn21 = actualReturn02.getX();
-      double actualReturn22 = actualReturn02.getY();
-      assertEquals("return value", expectedReturn21, actualReturn21, EPSILON);
-      assertEquals("return value", expectedReturn22, actualReturn22, EPSILON);
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testAveragePoints2()
-   {
-      ArrayList<Point3D> points = new ArrayList<Point3D>();
-      Point3D a = new Point3D(4.3, 5.6, 3.6);
-      Point3D b = new Point3D(8.1, 8.4, 0.0);
-      Point3D c = new Point3D(5.6, 1.0, 4.5);
-      points.add(a);
-      points.add(b);
-      points.add(c);
-      double expectedReturn1 = 6.0;
-      double expectedReturn2 = 5.0;
-      double expectedReturn3 = 2.7;
-      Point3D actualReturn = GeometryTools.averagePoint3ds(points);
-      double actualReturn1 = actualReturn.getX();
-      double actualReturn2 = actualReturn.getY();
-      double actualReturn3 = actualReturn.getZ();
-      assertEquals("return value", expectedReturn1, actualReturn1, EPSILON);
-      assertEquals("return value", expectedReturn2, actualReturn2, EPSILON);
-      assertEquals("return value", expectedReturn3, actualReturn3, EPSILON);
-
-      ArrayList<Point3D> points1 = new ArrayList<Point3D>();
-      Point3D a1 = new Point3D(0.0, 0.0, 0.0);
-      Point3D b1 = new Point3D(0.0, 0.0, 0.0);
-      Point3D c1 = new Point3D(0.0, 0.0, 0.0);
-      points1.add(a1);
-      points1.add(b1);
-      points1.add(c1);
-      double expectedReturn11 = 0.0;
-      double expectedReturn12 = 0.0;
-      double expectedReturn13 = 0.0;
-      Point3D actualReturn01 = GeometryTools.averagePoint3ds(points1);
-      double actualReturn11 = actualReturn01.getX();
-      double actualReturn12 = actualReturn01.getY();
-      double actualReturn13 = actualReturn01.getZ();
-      assertEquals("return value", expectedReturn11, actualReturn11, EPSILON);
-      assertEquals("return value", expectedReturn12, actualReturn12, EPSILON);
-      assertEquals("return value", expectedReturn13, actualReturn13, EPSILON);
-
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
    public void testGetDistanceBetweenPointAndPlane1()
    {
       FramePoint pointOnPlane = new FramePoint(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -963,7 +871,7 @@ public class GeometryToolsTest
 
          Point2D pointOnBisector = new Point2D();
          pointOnBisector.scaleAdd(1.0, actualBisectorDirection, actualBisectorStart);
-         assertTrue(GeometryTools.isPointOnLeftSideOfLine(pointOnBisector, lineSegmentStart, lineSegmentEnd));
+         assertTrue(EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(pointOnBisector, lineSegmentStart, lineSegmentEnd));
       }
    }
 
@@ -1313,40 +1221,6 @@ public class GeometryToolsTest
       assertEquals("return value", expectedReturn, actualReturn);
 
       /** @todo fill in the test code */
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testIsPointOnLeftSideOfLine1()
-   {
-      Point2D point = new Point2D(3, 9);
-      Point2D lineStart = new Point2D(-5, 8);
-      Point2D lineEnd = new Point2D(10, 7);
-      boolean expectedReturn = true;
-      boolean actualReturn = GeometryTools.isPointOnLeftSideOfLine(point, lineStart, lineEnd);
-      assertEquals("return value", expectedReturn, actualReturn);
-
-      Point2D point2 = new Point2D(1, 5);
-      Point2D lineStart2 = new Point2D(-5, 8);
-      Point2D lineEnd2 = new Point2D(10, 7);
-      boolean expectedReturn2 = false;
-      boolean actualReturn2 = GeometryTools.isPointOnLeftSideOfLine(point2, lineStart2, lineEnd2);
-      assertEquals("return value", expectedReturn2, actualReturn2);
-
-      Point2D point3 = new Point2D(1, 1);
-      Point2D lineStart3 = new Point2D(0, 0);
-      Point2D lineEnd3 = new Point2D(10, 10);
-      boolean expectedReturn3 = false;
-      boolean actualReturn3 = GeometryTools.isPointOnLeftSideOfLine(point3, lineStart3, lineEnd3);
-      assertEquals("return value", expectedReturn3, actualReturn3);
-
-      Point2D point4 = new Point2D(3, 9);
-      Point2D lineStart4 = new Point2D(10, 7);
-      Point2D lineEnd4 = new Point2D(-5, 8);
-      boolean expectedReturn4 = false;
-      boolean actualReturn4 = GeometryTools.isPointOnLeftSideOfLine(point4, lineStart4, lineEnd4);
-      assertEquals("return value", expectedReturn4, actualReturn4);
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -1891,108 +1765,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testIsPointInsideTriangleABC() throws Exception
-   {
-      Point2D inside = new Point2D();
-      Point2D outside = new Point2D();
-      Random random = new Random(1176L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D a = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D b = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D c = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-
-         assertTrue(GeometryTools.isPointInsideTriangleABC(a, a, b, c));
-         assertTrue(GeometryTools.isPointInsideTriangleABC(a, c, b, a));
-         assertTrue(GeometryTools.isPointInsideTriangleABC(b, a, b, c));
-         assertTrue(GeometryTools.isPointInsideTriangleABC(b, c, b, a));
-         assertTrue(GeometryTools.isPointInsideTriangleABC(c, a, b, c));
-         assertTrue(GeometryTools.isPointInsideTriangleABC(c, c, b, a));
-
-         inside.interpolate(a, b, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         inside.interpolate(inside, c, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
-         assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
-
-         outside.interpolate(a, b, RandomNumbers.nextDouble(random, 1.0, 10.0));
-         outside.interpolate(outside, c, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
-
-         outside.interpolate(a, b, RandomNumbers.nextDouble(random, -10.0, 0.0));
-         outside.interpolate(outside, c, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
-
-         outside.interpolate(a, b, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         outside.interpolate(outside, c, RandomNumbers.nextDouble(random, 1.0, 10.0));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
-
-         outside.interpolate(a, b, RandomNumbers.nextDouble(random, 0.0, 1.0));
-         outside.interpolate(outside, c, RandomNumbers.nextDouble(random, -10.0, 0.0));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, a, b, c));
-         assertFalse(GeometryTools.isPointInsideTriangleABC(outside, c, b, a));
-      }
-
-      Point2D a = new Point2D(1.0, 0.0);
-      Point2D b = new Point2D(1.0, 1.0);
-      Point2D c = new Point2D(0.0, 1.0);
-
-      // These tests tend to be flaky inside the loop
-      inside.interpolate(a, b, 0.5);
-      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
-      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
-      inside.interpolate(a, c, 0.5);
-      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
-      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
-      inside.interpolate(b, c, 0.5);
-      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, a, b, c));
-      assertTrue(GeometryTools.isPointInsideTriangleABC(inside, c, b, a));
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testComputeTriangleArea() throws Exception
-   {
-      Random random = new Random(1176L);
-      // Test for right rectangle, should be half the area of the corresponding rectangle
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D a = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D b = new Point2D();
-         Point2D c = new Point2D();
-         Point2D d = new Point2D();
-
-         Vector2D rectangleLength = RandomGeometry.nextVector2D(random, 1.0);
-         Vector2D rectangleWidth = new Vector2D(-rectangleLength.getY(), rectangleLength.getX());
-         double length = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         double width = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         rectangleLength.scale(length);
-         rectangleWidth.scale(width);
-
-         b.add(a, rectangleLength);
-         c.add(b, rectangleWidth);
-         d.add(a, rectangleWidth);
-
-         double expectedArea = 0.5 * length * width;
-         double actualArea = GeometryTools.computeTriangleArea(a, b, c);
-         assertEquals(expectedArea, actualArea, EPSILON);
-         actualArea = GeometryTools.computeTriangleArea(a, c, d);
-         assertEquals(expectedArea, actualArea, EPSILON);
-         actualArea = GeometryTools.computeTriangleArea(b, c, d);
-         assertEquals(expectedArea, actualArea, EPSILON);
-         actualArea = GeometryTools.computeTriangleArea(a, b, d);
-         assertEquals(expectedArea, actualArea, EPSILON);
-
-         // Just an annoying case
-         assertEquals(0.0, GeometryTools.computeTriangleArea(a, a, c), EPSILON);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testNormalizeSafeZUp() throws Exception
    {
       Vector3D actualVector;
@@ -2446,8 +2218,8 @@ public class GeometryToolsTest
          assertEquals(0.0, lineDirection.dot(normalDirection), Epsilons.ONE_TRILLIONTH);
          assertEquals(lengthOffset, EuclidGeometryTools.distanceFromPoint2DToLine2D(normalPoint0, firstPointOnLine, secondPointOnLine), Epsilons.ONE_TRILLIONTH);
          assertEquals(lengthOffset, EuclidGeometryTools.distanceFromPoint2DToLine2D(normalPoint1, firstPointOnLine, secondPointOnLine), Epsilons.ONE_TRILLIONTH);
-         assertTrue(GeometryTools.isPointOnLeftSideOfLine(normalPoint0, firstPointOnLine, secondPointOnLine));
-         assertTrue(GeometryTools.isPointOnRightSideOfLine(normalPoint1, firstPointOnLine, secondPointOnLine));
+         assertTrue(EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(normalPoint0, firstPointOnLine, secondPointOnLine));
+         assertTrue(EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(normalPoint1, firstPointOnLine, secondPointOnLine));
       }
    }
 

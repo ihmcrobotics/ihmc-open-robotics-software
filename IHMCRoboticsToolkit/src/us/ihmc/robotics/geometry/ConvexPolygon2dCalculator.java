@@ -395,7 +395,7 @@ public class ConvexPolygon2dCalculator
       Point2DReadOnly vertexTwo = polygon.getNextVertex(edgeIndex);
       double edgeVectorX = vertexTwo.getX() - vertexOne.getX();
       double edgeVectorY = vertexTwo.getY() - vertexOne.getY();
-      return GeometryTools.isPointOnSideOfLine(observerX, observerY, vertexOne.getX(), vertexOne.getY(), edgeVectorX, edgeVectorY, RobotSide.LEFT);
+      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(observerX, observerY, vertexOne.getX(), vertexOne.getY(), edgeVectorX, edgeVectorY, true);
    }
 
    /**

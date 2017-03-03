@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * A line segment must have two distinct endpoints by definition.
@@ -202,12 +201,12 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    public boolean isPointOnLeftSideOfLineSegment(Point2DReadOnly point)
    {
-      return GeometryTools.isPointOnSideOfLine(point, endpoints[0], endpoints[1], RobotSide.LEFT);
+      return EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(point, endpoints[0], endpoints[1]);
    }
    
    public boolean isPointOnRightSideOfLineSegment(Point2DReadOnly point)
    {
-      return GeometryTools.isPointOnSideOfLine(point, endpoints[0], endpoints[1], RobotSide.RIGHT);
+      return EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(point, endpoints[0], endpoints[1]);
    }
 
    public LineSegment2d shiftToLeftCopy(double distanceToShift)
