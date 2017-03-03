@@ -156,7 +156,7 @@ public class MathToolsTest
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIfInRange_2()
    {
-      MathTools.checkIfInRange(-5, -1, 1);
+      MathTools.checkIntervalContains(-5, -1, 1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -489,15 +489,15 @@ public class MathToolsTest
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIfInRangeFalse()
    {
-      MathTools.checkIfInRange(5.0, -3.0, 2.0);
+      MathTools.checkIntervalContains(5.0, -3.0, 2.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCheckIfInRangeTrue()
    {
-      MathTools.checkIfInRange(1.0, -3.0, 2.0);
-      MathTools.checkIfInRange(5.0, 5.0, 5.0);
+      MathTools.checkIntervalContains(1.0, -3.0, 2.0);
+      MathTools.checkIntervalContains(5.0, 5.0, 5.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

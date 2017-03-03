@@ -4294,8 +4294,8 @@ public class GeometryTools
     */
    public static double getUnknownTriangleSideLengthByLawOfCosine(double lengthSideA, double lengthSideB, double angleBetweenAAndB)
    {
-      MathTools.checkIfInRange(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
 
       if (Math.abs(angleBetweenAAndB) > Math.PI)
       {
@@ -4345,7 +4345,7 @@ public class GeometryTools
     */
    public static double pythagorasGetCathetus(double hypotenuseC, double cathetusA)
    {
-      MathTools.checkIfInRange(cathetusA, 0.0, hypotenuseC);
+      MathTools.checkIntervalContains(cathetusA, 0.0, hypotenuseC);
 
       return Math.sqrt(MathTools.square(hypotenuseC) - MathTools.square(cathetusA));
    }
@@ -4366,8 +4366,8 @@ public class GeometryTools
     */
    public static double pythagorasGetHypotenuse(double cathetusA, double cathetusB)
    {
-      MathTools.checkIfInRange(cathetusA, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(cathetusB, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(cathetusA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(cathetusB, 0.0, Double.POSITIVE_INFINITY);
       return Math.hypot(cathetusA, cathetusB);
    }
 
@@ -4391,9 +4391,9 @@ public class GeometryTools
     */
    public static boolean isFormingTriangle(double lengthSideA, double lengthSideB, double lengthSideC)
    {
-      MathTools.checkIfInRange(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthSideC, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideC, 0.0, Double.POSITIVE_INFINITY);
 
       if (lengthSideA + lengthSideB <= lengthSideC)
          return false;
