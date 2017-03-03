@@ -21,7 +21,7 @@ public class ConstantPositionTrajectoryGenerator implements PositionTrajectoryGe
    public ConstantPositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, PositionProvider positionProvider, double finalTime,
            YoVariableRegistry parentRegistry)
    {
-      MathTools.checkIfInRange(finalTime, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(finalTime, 0.0, Double.POSITIVE_INFINITY);
 
       this.positionProvider = positionProvider;
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());

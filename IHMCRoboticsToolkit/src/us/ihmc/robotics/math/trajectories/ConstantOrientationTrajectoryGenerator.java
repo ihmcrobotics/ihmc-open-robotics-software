@@ -21,7 +21,7 @@ public class ConstantOrientationTrajectoryGenerator implements OrientationTrajec
    public ConstantOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, OrientationProvider orientationProvider, double finalTime,
                                                  YoVariableRegistry parentRegistry)
    {
-      MathTools.checkIfInRange(finalTime, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(finalTime, 0.0, Double.POSITIVE_INFINITY);
 
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.orientationProvider = orientationProvider;

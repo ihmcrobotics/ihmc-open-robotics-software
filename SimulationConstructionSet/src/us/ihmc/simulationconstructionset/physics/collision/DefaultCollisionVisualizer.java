@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.physics.visualize;
+package us.ihmc.simulationconstructionset.physics.collision;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,6 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.ExternalTorque;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
-import us.ihmc.simulationconstructionset.physics.collision.CollisionHandlerListener;
 
 public class DefaultCollisionVisualizer implements CollisionHandlerListener
 {

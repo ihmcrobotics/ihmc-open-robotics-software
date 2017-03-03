@@ -32,8 +32,8 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
-      MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
-      MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
       matrix.set(0, 0, 0);
    }
 

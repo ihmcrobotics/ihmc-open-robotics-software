@@ -204,7 +204,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    public void setTrajectoryTime(double newTrajectoryTime, double approachTime)
    {
       trajectoryTime.set(newTrajectoryTime);
-      MathTools.checkIfInRange(approachTime, 0.0, newTrajectoryTime);
+      MathTools.checkIntervalContains(approachTime, 0.0, newTrajectoryTime);
       this.approachTime.set(approachTime);
    }
 
@@ -217,7 +217,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       changeFrame(tangentialPlane, false);
 
       currentTime.set(0.0);
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       double tIntermediate = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
       xyPolynomial.setCubic(0.0, tIntermediate, 0.0, 0.0, 1.0, 0.0);
       double z0 = initialPosition.getZ();
