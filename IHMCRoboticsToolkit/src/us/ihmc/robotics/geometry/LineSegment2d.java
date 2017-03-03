@@ -354,17 +354,17 @@ public class LineSegment2d implements GeometryObject<LineSegment2d>
 
    public Point2D intersectionWith(LineSegment2d secondLineSegment2d)
    {
-      return GeometryTools.getIntersectionBetweenTwoLineSegments(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1]);
+      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1]);
    }
    
    public boolean intersectionWith(LineSegment2d secondLineSegment2d, Point2D intersectionToPack)
    {
-      return GeometryTools.getIntersectionBetweenTwoLineSegments(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1], intersectionToPack);
+      return EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(endpoints[0], endpoints[1], secondLineSegment2d.endpoints[0], secondLineSegment2d.endpoints[1], intersectionToPack);
    }
    
    public Point2D intersectionWith(Line2d line2d)
    {
-      return GeometryTools.getIntersectionBetweenLineAndLineSegment(line2d.point, line2d.normalizedVector, endpoints[0], endpoints[1]);
+      return EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(line2d.point, line2d.normalizedVector, endpoints[0], endpoints[1]);
    }
    
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
