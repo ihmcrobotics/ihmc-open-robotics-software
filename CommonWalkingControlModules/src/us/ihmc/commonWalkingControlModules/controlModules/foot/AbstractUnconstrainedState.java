@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.FOOT_SWING_WEIGHT;
 
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -52,11 +50,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
 
-   // For privileged configuration commands
-   private final DoubleYoVariable privilegedWeight;
-   private final DoubleYoVariable privilegedConfigurationGain;
-   private final DoubleYoVariable privilegedVelocityGain;
-
    public AbstractUnconstrainedState(ConstraintType constraintType, FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains,
          YoVariableRegistry registry)
    {
@@ -95,15 +88,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       FramePose anklePoseInFoot = new FramePose(ankleFrame);
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(anklePoseInFoot);
-
-      // For privileged configuration commands
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = footControlHelper.getWalkingControllerParameters().getJointPrivilegedConfigurationParameters();
-      privilegedWeight = new DoubleYoVariable(namePrefix + "PrivilegedWeight", registry);
-      privilegedConfigurationGain = new DoubleYoVariable(namePrefix + "PrivilegedConfigurationGain", registry);
-      privilegedVelocityGain = new DoubleYoVariable(namePrefix + "PrivilegedVelocityGain", registry);
-      privilegedWeight.set(jointPrivilegedConfigurationParameters.getUnconstrainedKneeWeight());
-      privilegedConfigurationGain.set(jointPrivilegedConfigurationParameters.getUnconstrainedKneeConfigurationGain());
-      privilegedVelocityGain.set(jointPrivilegedConfigurationParameters.getUnconstrainedKneeVelocityGain());
    }
 
    protected void changeControlFrame(FramePose controlFramePoseInEndEffector)
@@ -224,14 +208,6 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      straightLegsPrivilegedConfigurationCommand.setWeight(privilegedWeight.getDoubleValue());
-      straightLegsPrivilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
-      straightLegsPrivilegedConfigurationCommand.setVelocityGain(privilegedVelocityGain.getDoubleValue());
-
-      bentLegsPrivilegedConfigurationCommand.setWeight(privilegedWeight.getDoubleValue());
-      bentLegsPrivilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
-      bentLegsPrivilegedConfigurationCommand.setVelocityGain(privilegedVelocityGain.getDoubleValue());
-
       if (hasSwitchedToStraightLegs.getBooleanValue())
          return straightLegsPrivilegedConfigurationCommand;
       else
