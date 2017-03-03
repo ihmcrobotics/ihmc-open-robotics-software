@@ -38,8 +38,8 @@ import us.ihmc.robotics.screwTheory.*;
 
 public class WholeBodyInverseDynamicsSolver
 {
-   private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = true;
-   private static final boolean MINIMIZE_JOINT_TORQUES = true;
+   private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = false;
+   private static final boolean MINIMIZE_JOINT_TORQUES = false;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
