@@ -99,13 +99,13 @@ public abstract class TransferState extends WalkingState
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICPLocal);
          balanceManager.getCapturePoint(capturePoint2d);
+         balanceManager.getNextExitCMP(nextExitCMP);
 
-         boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, desiredCMP, desiredICPLocal, capturePoint2d);
+         boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
 
          if (doToeOff)
          {
             momentumBasedController.getFilteredDesiredCenterOfPressure(momentumBasedController.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
-            balanceManager.getNextExitCMP(nextExitCMP);
 
             feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(trailingLeg);
