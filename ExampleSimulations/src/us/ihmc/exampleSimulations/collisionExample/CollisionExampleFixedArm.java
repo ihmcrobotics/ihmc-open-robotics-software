@@ -19,9 +19,9 @@ import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.gdx.GdxCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 
 public class CollisionExampleFixedArm
 {

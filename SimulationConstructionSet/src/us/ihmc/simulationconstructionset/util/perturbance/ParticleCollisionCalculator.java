@@ -23,7 +23,7 @@ public class ParticleCollisionCalculator
     */
    public static void handleCollision(Vector3D velocity1ToPack, Vector3D velocity2ToPack, double m1, double m2, double coefficientOfRestitution)
    {
-      MathTools.checkIfInRange(coefficientOfRestitution, 0.0, 1.0);
+      MathTools.checkIntervalContains(coefficientOfRestitution, 0.0, 1.0);
       double totalMass = m1 + m2;
 
       Vector3D v1 = velocity1ToPack;

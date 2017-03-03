@@ -4,7 +4,7 @@ import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
 import static java.lang.Math.sin;
-import static us.ihmc.robotics.MathTools.checkIfInRange;
+import static us.ihmc.robotics.MathTools.checkIntervalContains;
 import static us.ihmc.robotics.MathTools.clamp;
 import static us.ihmc.robotics.MathTools.square;
 import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
@@ -67,9 +67,9 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
 
    private static double getCosineAngleWithCosineLaw(double l_neighbour1, double l_neighbour2, double l_opposite)
    {
-      checkIfInRange(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
       double cosAngle = MathTools.clamp((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0,
                                                1.0);
@@ -92,7 +92,7 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       this.angleBCD = C;
       this.angleCDA = D;
 
-      return !MathTools.isInsideBoundsInclusive(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
+      return !MathTools.intervalContains(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
    }
 
    public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)

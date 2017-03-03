@@ -16,10 +16,10 @@ public class EuclidCoreMissingToolsTest
    {
       double longDouble = 0.12345678910111213;
 
-      double roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-7);
+      double roundedNumber = MathTools.floorToPrecision(longDouble, 1e-7);
       assertEquals(roundedNumber, 0.1234567, 1e-14);
 
-      roundedNumber = MathTools.floorToGivenPrecision(longDouble, 1e-3);
+      roundedNumber = MathTools.floorToPrecision(longDouble, 1e-3);
       assertEquals(roundedNumber, 0.123, 1e-14);
 
       Vector3D preciseVector = new Vector3D(0.12345678910111213, 100.12345678910111213, 1000.12345678910111213);
