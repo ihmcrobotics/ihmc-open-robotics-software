@@ -1,6 +1,5 @@
 package us.ihmc.robotics;
 
-import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
@@ -432,86 +431,70 @@ public class MathTools
    }
 
    /**
-    * Sums the integers in a collection
+    * Sums the integers in an array.
     *
-    * @param integers collection of integers
-    * @return int the sum
+    * @param array array of integers
+    * @return The sum of integers.
     */
-   public static int sumIntegers(Collection<Integer> integers)
+   public static int sum(int[] array)
    {
-      int ret = 0;
-      for (int i : integers)
+      int sum = 0;
+      for (int i = 0; i < array.length; i++)
       {
-         ret += i;
+         sum += array[i];
       }
-
-      return ret;
+      return sum;
    }
 
    /**
-    * Sums the integers in an array
+    * Sums the doubles in an array.
     *
-    * @param integers array of integers
-    * @return int the sum
+    * @param array array of doubles
+    * @return The sum of doubles.
     */
-   public static int sumIntegers(int[] integers)
+   public static double sum(double[] array)
    {
-      int ret = 0;
-      for (int i : integers)
-      {
-         ret += i;
-      }
-
-      return ret;
-   }
-
-   /**
-    * Sums the doubles in a collection
-    *
-    * @param doubles collection of doubles
-    * @return double the sum
-    */
-   public static double sumDoubles(Collection<Double> doubles)
-   {
-      double ret = 0.0;
-      for (double d : doubles)
-      {
-         ret += d;
-      }
-
-      return ret;
-   }
-
-   /**
-    * Finds the sum of doubles in an array
-    *
-    * @param doubles double[]
-    * return double
-    */
-   public static double sumDoubles(double[] doubles)
-   {
-      double ret = 0.0;
-      for (double d : doubles)
-      {
-         ret += d;
-      }
-
-      return ret;
-   }
-
-   /**
-    * Computes the cumulative sum array for a given array of doubles.
-    * For example, the cumulative sum sequence of the input sequence {a, b, c, ...} is {a, a + b, a + b + c, ...}
-    * @param doubles input sequence
-    * @return cumulative sum sequence
-    */
-   public static double[] cumulativeSumDoubles(double[] doubles)
-   {
-      double[] ret = new double[doubles.length];
       double sum = 0.0;
-      for (int i = 0; i < doubles.length; i++)
+      for (int i = 0; i < array.length; i++)
       {
-         sum += doubles[i];
+         sum += array[i];
+      }
+      return sum;
+   }
+
+   /**
+    * Sums the doubles in a list.
+    *
+    * @param list list of doubles
+    * @return The sum of doubles.
+    */
+   public static double sum(List<Double> list)
+   {
+      double sum = 0.0;
+      for (int i = 0; i < list.size(); i++)
+      {
+         sum += list.get(i);
+      }
+      return sum;
+   }
+
+
+   /**
+    * <p>Computes the cumulative sum array for a given array of doubles.</p>
+    * 
+    * <p>Example: The cumulative sum sequence of the input sequence {a, b, c, ...}
+    * is {a, a + b, a + b + c, ...}</p>
+    * 
+    * @param array input sequence
+    * @return Cumulative sum sequence.
+    */
+   public static double[] cumulativeSum(double[] array)
+   {
+      double[] ret = new double[array.length];
+      double sum = 0.0;
+      for (int i = 0; i < array.length; i++)
+      {
+         sum += array[i];
          ret[i] = sum;
       }
 
@@ -519,79 +502,57 @@ public class MathTools
    }
 
    /**
-    * Finds and returns the min value in an array of doubles
+    * The minimum value in an array of doubles.
     *
     * @param array double[]
-    * @return double
+    * @return Minimum value.
     */
    public static double min(double[] array)
    {
-      double ret = Double.MAX_VALUE;
-      for (double d : array)
+      double min = Double.MAX_VALUE;
+      for (int i = 0; i < array.length; i++)
       {
-         ret = Math.min(ret, d);
+         min = Math.min(min, array[i]);
       }
-
-      return ret;
+      return min;
    }
 
    /**
-    * Finds and returns the max value in an array of Doubles
+    * The maximum value in an array of doubles.
     *
     * @param array double[]
-    * @return double
+    * @return Maximum value.
     */
    public static double max(double[] array)
    {
-      double ret = -Double.MAX_VALUE;
-      for (double d : array)
+      double max = -Double.MAX_VALUE;
+      for (int i = 0; i < array.length; i++)
       {
-         ret = Math.max(ret, d);
+         max = Math.max(max, array[i]);
       }
-
-      return ret;
+      return max;
    }
 
    /**
-    *
+    * Average value in an array of doubles.
     *
     * @param array double[]
-    * @return double
+    * @return Average value.
     */
-   public static double mean(double[] array)
+   public static double average(double[] array)
    {
-      double tot = 0.0;
-      for (double d : array)
-      {
-         tot += d;
-      }
-
-      double ret = tot / (array.length);
-
-      // System.err.println("MathTools::mean: tot : " + tot);
-      // System.err.println("MathTools::mean: array.length : " +
-      // array.length);
-      // System.err.println("MathTools::mean: ret : " + ret);
-      return ret;
+      return sum(array) / array.length;
    }
 
    /**
+    * Average value in a list of doubles.
     *
-    *
-    * @param array ArrayList<Double>
-    * @return double
+    * @param list list of doubles
+    * @return Average value.
     */
-   public static double mean(List<Double> array)
+   public static double average(List<Double> list)
    {
-      double tot = 0.0;
-      for (double d : array)
-      {
-         tot += d;
-      }
-
-      double ret = tot / (array.size());
-
-      return ret;
+      return sum(list) / list.size();
    }
 
    public static void checkIfPositive(double argument)
