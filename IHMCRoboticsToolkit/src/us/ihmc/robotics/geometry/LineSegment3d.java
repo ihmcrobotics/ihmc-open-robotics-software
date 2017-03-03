@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -238,7 +239,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     */
    public double distanceSquared(Point3DReadOnly point)
    {
-      return GeometryTools.distanceFromPointToLineSegmentSquared(point, firstEndpoint, secondEndpoint);
+      return EuclidGeometryTools.distanceSquaredFromPoint3DToLineSegment3D(point, firstEndpoint, secondEndpoint);
    }
 
    /**
@@ -255,7 +256,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     */
    public double distance(Point3DReadOnly point)
    {
-      return GeometryTools.distanceFromPointToLineSegment(point, firstEndpoint, secondEndpoint);
+      return EuclidGeometryTools.distanceFromPoint3DToLineSegment3D(point, firstEndpoint, secondEndpoint);
    }
 
    /**
@@ -267,7 +268,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     */
    public double distance(LineSegment3d otherLineSegment)
    {
-      return GeometryTools.distanceBetweenTwoLineSegments(firstEndpoint, secondEndpoint, otherLineSegment.firstEndpoint, otherLineSegment.secondEndpoint);
+      return EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds(firstEndpoint, secondEndpoint, otherLineSegment.firstEndpoint, otherLineSegment.secondEndpoint);
    }
 
    /**

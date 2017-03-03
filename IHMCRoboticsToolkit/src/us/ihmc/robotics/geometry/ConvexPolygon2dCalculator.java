@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -29,7 +30,7 @@ public class ConvexPolygon2dCalculator
          Point2DReadOnly pointOne = polygon.getVertex(index);
          Point2DReadOnly pointTwo = polygon.getNextVertex(index);
 
-         double distance = GeometryTools.distanceFromPointToLineSegment(point, pointOne, pointTwo);
+         double distance = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point, pointOne, pointTwo);
          if (distance < closestDistance)
             closestDistance = distance;
       }
@@ -173,7 +174,7 @@ public class ConvexPolygon2dCalculator
       {
          Point2DReadOnly start = polygon.getVertex(i);
          Point2DReadOnly end = polygon.getNextVertex(i);
-         double distance = GeometryTools.distanceFromPointToLineSegment(point, start, end);
+         double distance = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(point, start, end);
          if (distance < minDistance)
          {
             index = i;
@@ -293,7 +294,7 @@ public class ConvexPolygon2dCalculator
       {
          Point2DReadOnly lineStart = polygon.getVertex(0);
          Point2DReadOnly lineEnd = polygon.getVertex(1);
-         double distance = GeometryTools.distanceFromPointToLineSegment(pointX, pointY, lineStart, lineEnd);
+         double distance = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(pointX, pointY, lineStart, lineEnd);
          if (distance > epsilon)
             return false;
          return true;
@@ -306,7 +307,7 @@ public class ConvexPolygon2dCalculator
          {
             Point2DReadOnly edgeStart = polygon.getVertex(i);
             Point2DReadOnly edgeEnd = polygon.getNextVertex(i);
-            double distanceToEdgeLine = GeometryTools.distanceFromPointToLine(pointX, pointY, edgeStart.getX(), edgeStart.getY(), edgeEnd.getX() - edgeStart.getX(), edgeEnd.getY() - edgeStart.getY());
+            double distanceToEdgeLine = EuclidGeometryTools.distanceFromPoint2DToLine2D(pointX, pointY, edgeStart.getX(), edgeStart.getY(), edgeEnd.getX() - edgeStart.getX(), edgeEnd.getY() - edgeStart.getY());
 
             boolean pointOutside = canObserverSeeEdge(i, pointX, pointY, polygon);
             if (!pointOutside)
@@ -555,12 +556,12 @@ public class ConvexPolygon2dCalculator
       {
          Point2DReadOnly vertex0 = polygon.getVertex(0);
          Point2DReadOnly vertex1 = polygon.getVertex(1);
-         if (GeometryTools.distanceFromPointToLineSegment(vertex0, segmentStart, segmentEnd) < epsilon)
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(vertex0, segmentStart, segmentEnd) < epsilon)
          {
             pointToPack1.set(vertex0);
             foundIntersections++;
          }
-         if (GeometryTools.distanceFromPointToLineSegment(vertex1, segmentStart, segmentEnd) < epsilon)
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(vertex1, segmentStart, segmentEnd) < epsilon)
          {
             if (foundIntersections == 0)
                pointToPack1.set(vertex1);
@@ -579,7 +580,7 @@ public class ConvexPolygon2dCalculator
          Point2DReadOnly edgeEnd = polygon.getNextVertex(i);
 
          // check if the end points of the line segments are on this edge
-         if (GeometryTools.distanceFromPointToLineSegment(segmentStart, edgeStart, edgeEnd) < epsilon)
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(segmentStart, edgeStart, edgeEnd) < epsilon)
          {
             if (foundIntersections == 0)
                pointToPack1.set(segmentStart);
@@ -591,7 +592,7 @@ public class ConvexPolygon2dCalculator
                foundIntersections--;
             if (foundIntersections == 2) break;
          }
-         if (GeometryTools.distanceFromPointToLineSegment(segmentEnd, edgeStart, edgeEnd) < epsilon)
+         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(segmentEnd, edgeStart, edgeEnd) < epsilon)
          {
             if (foundIntersections == 0)
                pointToPack1.set(segmentEnd);

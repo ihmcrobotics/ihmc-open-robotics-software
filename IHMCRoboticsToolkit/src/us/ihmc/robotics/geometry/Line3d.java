@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -179,7 +180,7 @@ public class Line3d implements GeometryObject<Line3d>
     */
    public double distance(Point3DReadOnly point)
    {
-      return GeometryTools.distanceFromPointToLine(point, this.point, this.normalizedVector);
+      return EuclidGeometryTools.distanceFromPoint3DToLine3D(point, this.point, this.normalizedVector);
    }
 
    /**
@@ -191,7 +192,7 @@ public class Line3d implements GeometryObject<Line3d>
     */
    public double distance(Line3d otherLine)
    {
-      return GeometryTools.distanceBetweenTwoLines(point, normalizedVector, otherLine.point, otherLine.normalizedVector);
+      return EuclidGeometryTools.distanceBetweenTwoLine3Ds(point, normalizedVector, otherLine.point, otherLine.normalizedVector);
    }
 
    /**
