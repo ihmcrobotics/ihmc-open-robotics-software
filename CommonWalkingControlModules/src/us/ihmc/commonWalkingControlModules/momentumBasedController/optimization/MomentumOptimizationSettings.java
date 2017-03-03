@@ -15,7 +15,10 @@ public abstract class MomentumOptimizationSettings
 
    public abstract double getJointJerkWeight();
 
-   public abstract double getJointTorqueWeight();
+   public double getJointTorqueWeight()
+   {
+      return 0.005;
+   }
 
    public abstract double getRhoWeight();
 
