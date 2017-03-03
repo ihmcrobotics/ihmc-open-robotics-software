@@ -82,7 +82,7 @@ public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
 
    public double computeStepStartX(int index)
    {
-      MathTools.checkIfInRange(index, 0, stepStartXValues.length);
+      MathTools.checkIntervalContains(index, 0, stepStartXValues.length);
 
       if (index == stepStartXValues.length)
          return Double.POSITIVE_INFINITY;
