@@ -162,7 +162,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    public void setTrajectoryTime(double duration)
    {
-      MathTools.checkIfInRange(duration, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(duration, 0.0, Double.POSITIVE_INFINITY);
       trajectoryTime.set(duration);
    }
 

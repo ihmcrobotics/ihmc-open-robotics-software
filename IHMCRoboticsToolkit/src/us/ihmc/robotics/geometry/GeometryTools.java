@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -4261,14 +4262,7 @@ public class GeometryTools
     */
    public static void rotateTuple2d(double yaw, Tuple2DBasics tupleToRotate)
    {
-      double cos = Math.cos(yaw);
-      double sin = Math.sin(yaw);
-      
-      double x = tupleToRotate.getX();
-      double y = tupleToRotate.getY();
-      
-      tupleToRotate.setX(cos * x - sin * y);
-      tupleToRotate.setY(sin * x + cos * y);
+      RotationMatrixTools.applyYawRotation(yaw, tupleToRotate, tupleToRotate);
    }
 
    /**
@@ -4280,11 +4274,7 @@ public class GeometryTools
     */
    public static void rotateTuple2d(double yaw, Tuple2DReadOnly tupleOriginal, Tuple2DBasics tupleTransformed)
    {
-      double cos = Math.cos(yaw);
-      double sin = Math.sin(yaw);
-
-      tupleTransformed.setX(cos * tupleOriginal.getX() - sin * tupleOriginal.getY());
-      tupleTransformed.setY(sin * tupleOriginal.getX() + cos * tupleOriginal.getY());
+      RotationMatrixTools.applyYawRotation(yaw, tupleOriginal, tupleTransformed);
    }
 
    /**
@@ -4304,8 +4294,8 @@ public class GeometryTools
     */
    public static double getUnknownTriangleSideLengthByLawOfCosine(double lengthSideA, double lengthSideB, double angleBetweenAAndB)
    {
-      MathTools.checkIfInRange(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
 
       if (Math.abs(angleBetweenAAndB) > Math.PI)
       {
@@ -4355,7 +4345,7 @@ public class GeometryTools
     */
    public static double pythagorasGetCathetus(double hypotenuseC, double cathetusA)
    {
-      MathTools.checkIfInRange(cathetusA, 0.0, hypotenuseC);
+      MathTools.checkIntervalContains(cathetusA, 0.0, hypotenuseC);
 
       return Math.sqrt(MathTools.square(hypotenuseC) - MathTools.square(cathetusA));
    }
@@ -4376,8 +4366,8 @@ public class GeometryTools
     */
    public static double pythagorasGetHypotenuse(double cathetusA, double cathetusB)
    {
-      MathTools.checkIfInRange(cathetusA, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(cathetusB, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(cathetusA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(cathetusB, 0.0, Double.POSITIVE_INFINITY);
       return Math.hypot(cathetusA, cathetusB);
    }
 
@@ -4401,9 +4391,9 @@ public class GeometryTools
     */
    public static boolean isFormingTriangle(double lengthSideA, double lengthSideB, double lengthSideC)
    {
-      MathTools.checkIfInRange(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(lengthSideC, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideA, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideB, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(lengthSideC, 0.0, Double.POSITIVE_INFINITY);
 
       if (lengthSideA + lengthSideB <= lengthSideC)
          return false;

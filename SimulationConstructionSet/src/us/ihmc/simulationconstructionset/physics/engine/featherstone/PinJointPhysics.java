@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.physics.engine.jerry;
+package us.ihmc.simulationconstructionset.physics.engine.featherstone;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;

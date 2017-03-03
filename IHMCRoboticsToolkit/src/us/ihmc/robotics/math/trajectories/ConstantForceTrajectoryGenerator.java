@@ -14,7 +14,7 @@ public class ConstantForceTrajectoryGenerator implements DoubleTrajectoryGenerat
 
    public ConstantForceTrajectoryGenerator(String namePrefix, double force, double finalTime, YoVariableRegistry parentRegistry)
    {
-      MathTools.checkIfInRange(finalTime, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(finalTime, 0.0, Double.POSITIVE_INFINITY);
 
       this.registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       this.force = new DoubleYoVariable("force", registry);

@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset;
+package us.ihmc.simulationconstructionset.physics.engine.featherstone;
 
 class CollisionDerivativeException extends Exception implements java.io.Serializable
 {
@@ -12,11 +12,4 @@ class CollisionDerivativeException extends Exception implements java.io.Serializ
    {
       super(msg);
    }
-}
-
-
-public interface CollisionDerivativeVector extends java.io.Serializable
-{
-   public abstract void derivs(double x, double[] y, double[] dydx) throws CollisionDerivativeException;
-   public abstract boolean isStuck(double[] y);
 }

@@ -226,7 +226,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    public void setTrajectoryTime(double newTrajectoryTime, double leaveTime, double approachTime)
    {
       trajectoryTime.set(newTrajectoryTime);
-      MathTools.checkIfInRange(approachTime, 0.0, newTrajectoryTime - leaveTime);
+      MathTools.checkIntervalContains(approachTime, 0.0, newTrajectoryTime - leaveTime);
       this.approachTime.set(approachTime);
       this.leaveTime.set(leaveTime);
    }
@@ -241,7 +241,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    {
       currentTrajectoryFrame = initialPosition.getReferenceFrame();
 
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       double t1 = leaveTime.getDoubleValue();
       double t2 = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
       double tf = trajectoryTime.getDoubleValue();
