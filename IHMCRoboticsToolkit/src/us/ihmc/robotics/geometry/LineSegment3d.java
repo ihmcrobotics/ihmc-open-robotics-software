@@ -533,7 +533,7 @@ public class LineSegment3d implements GeometryObject<LineSegment3d>
     */
    public double percentageAlongLineSegment(double x, double y, double z)
    {
-      return GeometryTools.getPercentageAlongLineSegment(x, y, z, firstEndpoint.getX(), firstEndpoint.getY(), firstEndpoint.getZ(), secondEndpoint.getX(),
+      return EuclidGeometryTools.percentageAlongLineSegment3D(x, y, z, firstEndpoint.getX(), firstEndpoint.getY(), firstEndpoint.getZ(), secondEndpoint.getX(),
                                                          secondEndpoint.getY(), secondEndpoint.getZ());
    }
 
