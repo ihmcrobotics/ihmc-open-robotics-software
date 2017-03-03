@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.PinJointPhysics;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.PinJointPhysics;
 import us.ihmc.simulationconstructionset.torqueSpeedCurve.TorqueSpeedCurve;
 
 /**

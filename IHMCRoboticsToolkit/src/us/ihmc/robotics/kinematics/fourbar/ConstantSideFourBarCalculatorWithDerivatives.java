@@ -91,7 +91,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
       this.angleBCD = C;
       this.angleCDA = D;
 
-      return !MathTools.isInsideBoundsInclusive(angleDABInRadians, minA, maxA);
+      return !MathTools.intervalContains(angleDABInRadians, minA, maxA);
    }
    
    /**

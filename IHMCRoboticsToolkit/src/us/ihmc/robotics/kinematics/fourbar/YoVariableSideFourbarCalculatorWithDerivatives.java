@@ -92,7 +92,7 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       this.angleBCD = C;
       this.angleCDA = D;
 
-      return !MathTools.isInsideBoundsInclusive(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
+      return !MathTools.intervalContains(angleDABInRadians, minA.getDoubleValue(), maxA.getDoubleValue());
    }
 
    public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
