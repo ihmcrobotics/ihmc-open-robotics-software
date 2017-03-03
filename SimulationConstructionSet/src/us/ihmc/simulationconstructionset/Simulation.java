@@ -19,9 +19,9 @@ import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -64,16 +64,6 @@ public class Simulation implements YoVariableHolder, Serializable // Runnable,
          if (physics.collisionConfigure != null)
             physics.collisionConfigure.setup(robot, physics.collisionDetector, physics.collisionHandler);
       }
-   }
-
-   public void addForceSensor(WrenchContactPoint sensor)
-   {
-      mySimulator.addForceSensor(sensor);
-   }
-
-   public ArrayList<WrenchContactPoint> getForceSensors()
-   {
-      return mySimulator.getForceSensors();
    }
 
    public double getDT()

@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 
 public class CollidingArmsSimulation
 {
