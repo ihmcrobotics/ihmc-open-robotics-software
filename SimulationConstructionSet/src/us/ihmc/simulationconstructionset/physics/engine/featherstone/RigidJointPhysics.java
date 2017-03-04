@@ -21,9 +21,7 @@ public class RigidJointPhysics extends JointPhysics<RigidJoint>
    @Override
    protected void jointDependentSetAndGetRotation(RotationMatrix Rh_i)
    {
-      System.out.println("RigidJoint jointDependentSetAndGetRotation");
       Rh_i.set(owner.getRigidRotation());
-      Rh_i.invert();
    }
 
    @Override
@@ -41,9 +39,10 @@ public class RigidJointPhysics extends JointPhysics<RigidJoint>
    @Override
    protected void jointDependentSet_d_i()
    {
-      d_i.set(owner.getRigidTranslation());
+      //TODO: Something wrong here. Figure it out...
+      d_i.set(owner.getLink().getComOffset());
       owner.getRigidRotation().inverseTransform(d_i);
-      d_i.add(owner.getLink().getComOffset());
+      d_i.add(owner.getRigidTranslation());
    }
 
    @Override
