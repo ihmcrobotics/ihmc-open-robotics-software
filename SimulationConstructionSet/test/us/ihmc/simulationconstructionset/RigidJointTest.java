@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -161,21 +161,20 @@ public class RigidJointTest
 
       Vector3D rigidJointOffset = new Vector3D();//1.1, 2.2, 3.3);
       RotationMatrix rigidJointRotation = new RotationMatrix();
-      rigidJointRotation.setEuler(0.0, 0.1, Math.PI/2.0);
-      
+      rigidJointRotation.setEuler(0.0, 0.1, Math.PI / 2.0);
+
       Vector3D rotationAxis = new Vector3D(0.1, 1.0, 0.0);
       rotationAxis.normalize();
       Vector3D rotatedRotationAxis = new Vector3D(rotationAxis);
       rigidJointRotation.transform(rotatedRotationAxis);
-      
+
       PinJoint pinJointA = new PinJoint("pinA", rigidJointOffset, robotA, rotatedRotationAxis);
-      
+
       RigidJoint rigidJointB = new RigidJoint("rigidJointB", new Vector3D(), robotB);
       rigidJointB.setRigidRotation(rigidJointRotation);
       Link rigidLinkB = new Link("rigidLinkB");
       rigidJointB.setLink(rigidLinkB);
-      
-      
+
       PinJoint pinJointB = new PinJoint("pinB", rigidJointOffset, robotB, rotationAxis);
 
       Link linkOneA = new Link("linkOneA");
@@ -185,14 +184,21 @@ public class RigidJointTest
       Vector3D radiiOfGyrationOne = new Vector3D(0.1, 0.2, 0.3);
       Vector3D rotatedRadiiOfGyrationOne = new Vector3D(radiiOfGyrationOne);
       rigidJointRotation.transform(rotatedRadiiOfGyrationOne);
-      
-      linkOneA.setMassAndRadiiOfGyration(massOne, rotatedRadiiOfGyrationOne);
+
+      linkOneA.setMass(massOne);
       linkOneB.setMassAndRadiiOfGyration(massOne, radiiOfGyrationOne);
+
+      Matrix3D momentOfInertiaOne = new Matrix3D();
+      linkOneB.getMomentOfInertia(momentOfInertiaOne);
+      Matrix3D rotatedMomentOfInertiaOne = new Matrix3D(momentOfInertiaOne);
+      rigidJointRotation.transform(rotatedMomentOfInertiaOne);
+
+      linkOneA.setMomentOfInertia(rotatedMomentOfInertiaOne);
 
       Vector3D centerOfMassOffsetOne = new Vector3D(0.1, 0.2, 1.0);
       Vector3D rotatedCenterOfMassOffsetOne = new Vector3D(centerOfMassOffsetOne);
       rigidJointRotation.transform(rotatedCenterOfMassOffsetOne);
- 
+
       linkOneA.setComOffset(rotatedCenterOfMassOffsetOne);
       linkOneB.setComOffset(centerOfMassOffsetOne);
 
@@ -211,7 +217,7 @@ public class RigidJointTest
 
       robotA.update();
       robotB.update();
-      
+
       robotA.doDynamicsButDoNotIntegrate();
       robotB.doDynamicsButDoNotIntegrate();
 
@@ -237,8 +243,7 @@ public class RigidJointTest
       EuclidCoreTestTools.assertTuple3DEquals(linearMomentumA, linearMomentumB, 1e-10);
       EuclidCoreTestTools.assertTuple3DEquals(angularMomentumA, angularMomentumB, 1e-10);
    }
-   
-//   @Ignore
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testPinJointThenRigidJointThenSlider() throws UnreasonableAccelerationException
@@ -263,7 +268,7 @@ public class RigidJointTest
       pinJointA.setLink(linkOneA);
       pinJointB.setLink(linkOneB);
 
-      Vector3D rigidJointOffset = new Vector3D();//1.1, 2.2, 3.3);
+      Vector3D rigidJointOffset = new Vector3D(1.1, 2.2, 3.3);
       RotationMatrix rigidJointRotation = new RotationMatrix();
       rigidJointRotation.setEuler(0.3, -0.55, 0.72);
 
@@ -286,14 +291,19 @@ public class RigidJointTest
       Link linkTwoA = new Link("linkTwoA");
       Link linkTwoB = new Link("linkTwoB");
 
-      double massTwo = 1.0;
-
+      double massTwo = 1.15;
       Vector3D radiiOfGyrationTwo = new Vector3D(0.13, 0.14, 0.17);
-      Vector3D rotatedRadiiOfGyrationTwo = new Vector3D(radiiOfGyrationTwo);
-      rigidJointRotation.transform(rotatedRadiiOfGyrationTwo);
 
-      linkTwoA.setMassAndRadiiOfGyration(massTwo, rotatedRadiiOfGyrationTwo);
+      linkTwoA.setMass(massTwo);
+//      linkTwoB.setMass(massTwo);
       linkTwoB.setMassAndRadiiOfGyration(massTwo, radiiOfGyrationTwo);
+
+      Matrix3D momentOfInertiaTwo = new Matrix3D();
+      linkTwoB.getMomentOfInertia(momentOfInertiaTwo);
+      Matrix3D rotatedMomentOfInertiaTwo = new Matrix3D(momentOfInertiaTwo);
+      rigidJointRotation.transform(rotatedMomentOfInertiaTwo);
+
+      linkTwoA.setMomentOfInertia(rotatedMomentOfInertiaTwo);
 
       Vector3D centerOfMassOffsetTwo = new Vector3D(0.3, 0.7, 1.11);
       Vector3D rotatedCenterOfMassOffsetTwo = new Vector3D(centerOfMassOffsetTwo);
@@ -324,12 +334,12 @@ public class RigidJointTest
 
       robotA.update();
       robotB.update();
-      
+
       robotA.doDynamicsButDoNotIntegrate();
       robotB.doDynamicsButDoNotIntegrate();
 
-//      robotA.doDynamicsAndIntegrate(0.0001);
-//      robotB.doDynamicsAndIntegrate(0.0001);
+      //      robotA.doDynamicsAndIntegrate(0.0001);
+      //      robotB.doDynamicsAndIntegrate(0.0001);
 
       Point3D centerOfMassA = new Point3D();
       Point3D centerOfMassB = new Point3D();
@@ -354,7 +364,7 @@ public class RigidJointTest
 
    public static void main(String[] args)
    {
-//      MutationTestFacilitator.facilitateMutationTestForClass(RigidJoint.class, RigidJointTest.class);
+      //      MutationTestFacilitator.facilitateMutationTestForClass(RigidJoint.class, RigidJointTest.class);
       MutationTestFacilitator.facilitateMutationTestForClass(RigidJointPhysics.class, RigidJointTest.class);
    }
 }
