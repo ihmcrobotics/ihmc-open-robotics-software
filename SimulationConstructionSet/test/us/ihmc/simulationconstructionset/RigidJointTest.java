@@ -18,6 +18,8 @@ import us.ihmc.simulationconstructionset.physics.engine.featherstone.RigidJointP
 public class RigidJointTest
 {
 
+   private static final boolean doDynamics = true;
+
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testOneRigidJoint()
@@ -221,6 +223,14 @@ public class RigidJointTest
       robotB.doDynamicsButDoNotIntegrate();
 
       checkRobotsHaveSameState(robotA, robotB);
+      
+      if (doDynamics)
+      {
+         robotA.doDynamicsAndIntegrate(0.0001);
+         robotB.doDynamicsAndIntegrate(0.0001);
+
+         checkRobotsHaveSameState(robotA, robotB);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -294,6 +304,14 @@ public class RigidJointTest
       robotB.doDynamicsButDoNotIntegrate();
 
       checkRobotsHaveSameState(robotA, robotB);
+      
+      if (doDynamics)
+      {
+         robotA.doDynamicsAndIntegrate(0.0001);
+         robotB.doDynamicsAndIntegrate(0.0001);
+
+         checkRobotsHaveSameState(robotA, robotB);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -392,10 +410,13 @@ public class RigidJointTest
 
       checkRobotsHaveSameState(robotA, robotB);
 
-      robotA.doDynamicsAndIntegrate(0.0001);
-      robotB.doDynamicsAndIntegrate(0.0001);
+      if (doDynamics)
+      {
+         robotA.doDynamicsAndIntegrate(0.0001);
+         robotB.doDynamicsAndIntegrate(0.0001);
 
-      checkRobotsHaveSameState(robotA, robotB);
+         checkRobotsHaveSameState(robotA, robotB);
+      }
    }
 
    private void checkRobotsHaveSameState(Robot robotA, Robot robotB)

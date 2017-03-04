@@ -28,7 +28,7 @@ public class RigidJointPhysics extends JointPhysics<RigidJoint>
    protected void jointDependentFeatherstonePassOne()
    {
       // No torques:
-      Q_i = 0.0;
+//      Q_i = 0.0;
    }
 
    @Override
