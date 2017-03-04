@@ -627,14 +627,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
    {
-      double kp = runningOnRealRobot ? 40.0 : 80.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.6;
+      double kp = 250.0;
+      double zeta = 0.6;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      YoPIDGains spineGains = new YoPIDGains("DefaultJointspace", registry);
+      YoPIDGains spineGains = new YoPIDGains("SpineJointspace", registry);
       spineGains.setKp(kp);
       spineGains.setZeta(zeta);
       spineGains.setKi(ki);
