@@ -1,17 +1,14 @@
 package us.ihmc.robotics.hyperCubeTree;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.List;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class OctreeTest
 {
@@ -183,7 +180,7 @@ public class OctreeTest
 
    private static <T,D> List<RecursableHyperTreeNode<T,D>>  getNodesIntersectingLine(HyperCubeTree<T,D> tree, Point3D startPoint, Point3D endPoint)
    {
-      LineSegment3d lineSegment = new LineSegment3d(startPoint, endPoint);
+      LineSegment3D lineSegment = new LineSegment3D(startPoint, endPoint);
       LineSegmentSearchVolume hyperVolume = new LineSegmentSearchVolume(lineSegment);
       List<RecursableHyperTreeNode<T,D>> nodes = tree.getHyperVolumeIntersection(hyperVolume);
       return nodes;

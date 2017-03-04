@@ -1,8 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -11,6 +9,7 @@ import org.junit.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -402,7 +401,7 @@ public class LineSegment1dTest
       
       Point3D point3d = new Point3D(1,1,1);
       Vector3D direction3d = new Vector3D(1,2,3);
-      LineSegment3d line3d = firstLine.toLineSegment3d(point3d, direction3d);
+      LineSegment3D line3d = firstLine.toLineSegment3d(point3d, direction3d);
       
       assertEquals(line3d.getFirstEndpoint(), new Point3D(1,1,1));
       assertEquals(line3d.getSecondEndpoint(), new Point3D(11,21,31));
