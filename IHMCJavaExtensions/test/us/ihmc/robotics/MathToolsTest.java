@@ -579,25 +579,25 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testCheckIsEqual()
    {
-      MathTools.checkIfEqual(1, 1);
-      MathTools.checkIfEqual(-2, -2);
+      MathTools.checkEquals(1, 1);
+      MathTools.checkEquals(-2, -2);
 
-      MathTools.checkIfEqual(2.0, 2.001, 0.1);
-      MathTools.checkIfEqual(-2.0, -2.001, 0.1);
+      MathTools.checkEpsilonEquals(2.0, 2.001, 0.1);
+      MathTools.checkEpsilonEquals(-2.0, -2.001, 0.1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(timeout = 30000)
    public void testCheckIsEqualNaN()
    {
-      MathTools.checkIfEqual(Double.NaN, Double.NaN, 1e-12);
+      MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualInt()
    {
-      MathTools.checkIfEqual(2, 4);
+      MathTools.checkEquals(2, 4);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -724,7 +724,7 @@ public class MathToolsTest
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualDouble()
    {
-      MathTools.checkIfEqual(2.0, 2.001, 0.0001);
+      MathTools.checkEpsilonEquals(2.0, 2.001, 0.0001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

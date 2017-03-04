@@ -435,7 +435,7 @@ public class PlanarRegion
     */
    public boolean isPointOnOrSlightlyAbove(Point3DReadOnly point3dInWorld, double distanceFromPlane)
    {
-      MathTools.checkIfPositive(distanceFromPlane);
+      MathTools.checkPositive(distanceFromPlane);
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
@@ -455,7 +455,7 @@ public class PlanarRegion
     */
    public boolean isPointOnOrSlightlyBelow(Point3DReadOnly point3dInWorld, double distanceFromPlane)
    {
-      MathTools.checkIfPositive(distanceFromPlane);
+      MathTools.checkPositive(distanceFromPlane);
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 

@@ -96,18 +96,16 @@ public class MathTools
     */
    public static boolean epsilonEquals(double v1, double v2, double epsilon)
    {
-      if(Double.isNaN(v1) && Double.isNaN(v2))
+      if (Double.compare(v1, v2) == 0)
       {
          return true;
       }
-      
-      //catches infinites
-      if(v1 == v2)
+      if (Math.abs(v1 - v2) <= epsilon)
       {
          return true;
       }
-      
-      return Math.abs(v1 - v2) <= Math.abs(epsilon);
+
+      return false;
    }
 
    /**
@@ -478,7 +476,6 @@ public class MathTools
       return sum;
    }
 
-
    /**
     * <p>Computes the cumulative sum array for a given array of doubles.</p>
     * 
@@ -555,60 +552,119 @@ public class MathTools
       return sum(list) / list.size();
    }
 
-   public static void checkIfPositive(double argument)
+   /**
+    * Throw exception if value is less than zero.
+    * No exception thrown if <code>value == 0.0</code>.
+    * 
+    * @param value value to check
+    * @throws RuntimeException if value is negative.
+    */
+   public static void checkPositive(double value)
    {
-      if (argument < 0.0)
-         throw new RuntimeException("Argument " + argument + " not positive.");
-   }
-
-   public static void checkIfGreaterOrEqual(double argument, double desired)
-   {
-      if (argument < desired)
-         throw new RuntimeException("Argument " + argument + " less than: " + desired);
-   }
-
-   public static void checkIfNegative(double argument)
-   {
-      if (argument > 0.0)
-         throw new RuntimeException("Argument " + argument + " not negative.");
-   }
-
-   public static void checkIfLessOrEqual(double argument, double desired)
-   {
-      if (argument > desired)
-         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
-   }
-
-   public static void checkIfLessOrEqual(int argument, int desired)
-   {
-      if (argument > desired)
-         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
-   }
-
-   public static void checkIfEqual(double val, double desired, double epsilon)
-   {
-      if (!(Math.abs(val - desired) < epsilon))
+      if (value < 0.0)
       {
-         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+         throw new RuntimeException("Value " + value + " is negative.");
       }
    }
 
-   public static void checkIfEqual(int val, int desired)
+   /**
+    * Throw exception if value is greater than zero.
+    * No exception thrown if <code>value == 0.0</code>.
+    * 
+    * @param value value to check
+    * @throws RuntimeException if value is positive.
+    */
+   public static void checkNegative(double value)
    {
-      if (val != desired)
+      if (value > 0.0)
       {
-         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+         throw new RuntimeException("Value " + value + " is positive.");
       }
    }
 
-   public static double square(double x)
+   /**
+    * Throw exception if <code>greater</code> not greater than or equal to <code>lesser</code>.
+    * No exception thrown if <code>greater == lesser</code>.
+    * 
+    * @param greater greater value
+    * @param lesser lesser value
+    * @throws RuntimeException if <code>greater</code> not greater than or equal to <code>lesser</code>.
+    */
+   public static void checkGreaterThanOrEquals(double greater, double lesser)
    {
-      return x * x;
+      if (greater < lesser)
+      {
+         throw new RuntimeException("Not greater than or equal. " + greater + " < " + lesser);
+      }
    }
 
-   public static double cube(double x)
+   /**
+    * Throw exception if <code>lesser</code> not less than or equal to <code>greater</code>.
+    * No exception thrown if <code>lesser == greater</code>.
+    * 
+    * @param lesser lesser value
+    * @param greater greater value
+    * @throws RuntimeException if <code>lesser</code> not less than or equal to <code>greater</code>.
+    */
+   public static void checkLessThanOrEquals(double lesser, double greater)
    {
-      return x * x * x;
+      if (lesser > greater)
+      {
+         throw new RuntimeException("Not less than or equal. " + lesser + " > " + greater);
+      }
+   }
+
+   /**
+    * Throw exception if <code>value1</code> not epsilon equal to <code>value2</code>.
+    * 
+    * @param value1 value to check
+    * @param value2 value to check
+    * @param epsilon epsilon
+    * @throws RuntimeException if <code>value1</code> not epsilon equal to <code>value2</code>.
+    */
+   public static void checkEpsilonEquals(double value1, double value2, double epsilon)
+   {
+      if (!epsilonEquals(value1, value2, epsilon))
+      {
+         throw new RuntimeException("Not epsilon equal.  " + value1 + " != " + value2 + " +/- " + epsilon);
+      }
+   }
+
+   /**
+    * Throw exception if <code>value1</code> not equal to <code>value2</code>.
+    * 
+    * @param value1 value to check
+    * @param value2 value to check
+    * @throws RuntimeException if <code>value1</code> not equal to <code>value2</code>.
+    */
+   public static void checkEquals(int value1, int value2)
+   {
+      if (value1 != value2)
+      {
+         throw new RuntimeException("Not equal. " + value1 + " !=" + value2);
+      }
+   }
+
+   /**
+    * Squares value.
+    * 
+    * @param value value to be squared
+    * @return <code>value * value</code>
+    */
+   public static double square(double value)
+   {
+      return value * value;
+   }
+
+   /**
+    * Cubes value.
+    * 
+    * @param value value to be cubed
+    * @return <code>value * value * value</code>
+    */
+   public static double cube(double value)
+   {
+      return value * value * value;
    }
 
    public static double powWithInteger(double x, int exponent)
