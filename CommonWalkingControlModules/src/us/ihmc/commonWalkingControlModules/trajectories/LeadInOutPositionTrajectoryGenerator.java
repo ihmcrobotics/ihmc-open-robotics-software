@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -191,7 +191,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, tempAxisAngle);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 
       initialDistortionPose.setToZero(this.initialPosition.getReferenceFrame());
       initialDistortionPose.setPosition(initialPosition);
@@ -207,7 +207,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.finalDirection.normalize();
       this.finalDirection.get(tempVector);
       tempVector.negate();
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, tempAxisAngle);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 
       finalDistortionPose.setToZero(this.finalPosition.getReferenceFrame());
       finalDistortionPose.setPosition(finalPosition);

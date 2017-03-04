@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -287,7 +287,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            GeometryTools.getAxisAngleFromZUpToVector(footToHipAxis.getVector(), hipPitchRotationToParentFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
             hipPitchPosition.get(hipPitchToParentFrame);
@@ -313,7 +313,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            GeometryTools.getAxisAngleFromZUpToVector(footToHipAxis.getVector(), anklePitchRotationToParentFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
             anklePitchPosition.get(anklePitchToParentFrame);
