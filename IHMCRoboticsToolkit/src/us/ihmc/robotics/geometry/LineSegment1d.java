@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -223,9 +224,9 @@ public class LineSegment1d
     * @param line3d the 3D line used as reference to compute the 3D line segment.
     * @return the 3D equivalent of this line segment.
     */
-   public LineSegment3D toLineSegment3d(Line3d line3d)
+   public LineSegment3D toLineSegment3d(Line3D line3d)
    {
-      return toLineSegment3d(line3d.getPoint(), line3d.getNormalizedVector());
+      return toLineSegment3d(line3d.getPoint(), line3d.getDirection());
    }
 
    /**
