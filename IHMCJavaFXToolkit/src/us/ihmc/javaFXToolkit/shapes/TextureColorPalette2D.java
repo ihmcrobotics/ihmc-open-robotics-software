@@ -64,8 +64,8 @@ public class TextureColorPalette2D implements TextureColorPalette
     */
    public void setHueSaturationBased(int hueResolution, int saturationResolution, double brightnessConstant)
    {
-      MathTools.checkIfGreaterOrEqual(hueResolution, 1);
-      MathTools.checkIfGreaterOrEqual(saturationResolution, 1);
+      MathTools.checkGreaterThanOrEquals(hueResolution, 1);
+      MathTools.checkGreaterThanOrEquals(saturationResolution, 1);
       MathTools.checkIntervalContains(brightnessConstant, 0.0, 1.0);
 
       this.hueResolution = hueResolution;
@@ -96,8 +96,8 @@ public class TextureColorPalette2D implements TextureColorPalette
     */
    public void setHueBrightnessBased(int hueResolution, int brightnessResolution, double saturationConstant)
    {
-      MathTools.checkIfGreaterOrEqual(hueResolution, 1);
-      MathTools.checkIfGreaterOrEqual(brightnessResolution, 1);
+      MathTools.checkGreaterThanOrEquals(hueResolution, 1);
+      MathTools.checkGreaterThanOrEquals(brightnessResolution, 1);
       MathTools.checkIntervalContains(saturationConstant, 0.0, 1.0);
 
       this.hueResolution = hueResolution;
@@ -128,8 +128,8 @@ public class TextureColorPalette2D implements TextureColorPalette
     */
    public void setSaturationBrightnessBased(int saturationResolution, int brightnessResolution, double hueConstant)
    {
-      MathTools.checkIfGreaterOrEqual(saturationResolution, 1);
-      MathTools.checkIfGreaterOrEqual(brightnessResolution, 1);
+      MathTools.checkGreaterThanOrEquals(saturationResolution, 1);
+      MathTools.checkGreaterThanOrEquals(brightnessResolution, 1);
       MathTools.checkIntervalContains(hueConstant, 0.0, 1.0);
 
       this.hueResolution = -1;
