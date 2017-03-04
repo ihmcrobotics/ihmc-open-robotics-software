@@ -7,7 +7,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
+import us.ihmc.simulationconstructionset.RigidJoint;
 import us.ihmc.simulationconstructionset.Robot;
 
 public class GroundAsABoxRobot
@@ -86,7 +86,7 @@ public class GroundAsABoxRobot
    public Robot createRobot()
    {
       Robot robot = new Robot("GroundAsABoxRobot");
-      NullJoint baseJoint = new NullJoint("base", new Vector3D(), robot);
+      RigidJoint baseJoint = new RigidJoint("base", new Vector3D(), robot);
 
       //    FloatingJoint baseJoint = new FloatingJoint("base", new Vector3d(), this);
       Link baseLink = new Link("base");
