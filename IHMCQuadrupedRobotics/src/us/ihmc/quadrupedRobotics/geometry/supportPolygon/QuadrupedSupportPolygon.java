@@ -1737,7 +1737,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
             double radiusOffsetAlongBisector = cornerCircleRadius * (Math.sin(Math.PI / 2.0) / Math.sin(bisectTheta));
             Point2D adjacentBisector = tempPointsForCornerCircle[3];
-            GeometryTools.getTriangleBisector(tempA, tempCorner, tempB, adjacentBisector);
+            EuclidGeometryTools.triangleBisector2D(tempA, tempCorner, tempB, adjacentBisector);
    
             Vector2D bisectorVector = tempVectorForCornerCircle;
             bisectorVector.set(adjacentBisector.getX() - cornerPoint.getX(), adjacentBisector.getY() - cornerPoint.getY());
