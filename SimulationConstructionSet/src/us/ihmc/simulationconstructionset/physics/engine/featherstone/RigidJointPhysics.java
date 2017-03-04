@@ -29,30 +29,19 @@ public class RigidJointPhysics extends JointPhysics<RigidJoint>
    {
       // No torques:
       Q_i = 0.0;
-
-      // Ri_0.transform(w_i);  // w and wd not in world coords.  Only x,y,z are
-      System.out.println(Ri_h);
-      System.out.println(v_i);
-      Ri_h.transform(v_i);
    }
 
    @Override
    protected void jointDependentSet_d_i()
    {
-      //TODO: Something wrong here. Figure it out...
-      d_i.set(owner.getLink().getComOffset());
+      d_i.set(owner.getRigidTranslation());
       owner.getRigidRotation().inverseTransform(d_i);
-      d_i.add(owner.getRigidTranslation());
+      d_i.add(owner.getLink().getComOffset());
    }
 
    @Override
    protected void jointDependentFeatherstonePassTwo(Vector3D w_h)
    {
-      //TODO: Do we need this at all for RigidJoints?
-      s_hat_i.top.set(u_i);
-      s_hat_i.bottom.cross(u_i, d_i);
-
-      // System.out.print(this.name + ":   " );System.out.println(s_hat_i);
    }
 
 
