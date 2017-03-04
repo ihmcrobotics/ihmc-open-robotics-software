@@ -7,7 +7,6 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -24,6 +23,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class GeometryTools
 {
+   public static double angleFromXForwardToVector2D(Vector2DReadOnly vector)
+   {
+      return EuclidGeometryTools.angleFromFirstToSecondVector2D(1.0, 0.0, vector.getX(), vector.getY());
+   }
+
    /**
     * Returns the minimum distance between a 2D point and an infinitely long 2D line defined by two points.
     * <p>
@@ -675,207 +679,6 @@ public class GeometryTools
       tupleToClip.setX(x1 < x2 ? MathTools.clamp(tupleToClip.getX(), x1, x2) : MathTools.clamp(tupleToClip.getX(), x2, x1));
       tupleToClip.setY(y1 < y2 ? MathTools.clamp(tupleToClip.getY(), y1, y2) : MathTools.clamp(tupleToClip.getY(), y2, y1));
       tupleToClip.setZ(z1 < z2 ? MathTools.clamp(tupleToClip.getZ(), z1, z2) : MathTools.clamp(tupleToClip.getZ(), z2, z1));
-   }
-
-   /**
-    *  Given a triangle defined by three points (A,B,C), this methods the point
-    *  X &in; AC such that the line (B, X) is the angle bisector of B.
-    *  As a result, the two angles CBX and XBA are equal.
-    *  <a href="https://en.wikipedia.org/wiki/Angle_bisector_theorem"> Useful link</a>.
-    *<p>
-    *Edge cases:
-    *<ul>
-    *   <li> if any the triangle's edge is shorter than {@link Epsilons#ONE_TRILLIONTH},
-    *    this method fails and returns {@code null}.
-    *</ul>
-    *</p>
-    * <p>
-    * WARNING: This method generates garbage.
-    * </p>
-    *
-    * @param A the first vertex of the triangle. Not modified.
-    * @param B the second vertex of the triangle, this is the first endpoint of the bisector. Not modified.
-    * @param C the third vertex of the triangle. Not modified.
-    * @return the second endpoint of the bisector, or {@code null} if the method failed.
-    */
-   public static Point2D getTriangleBisector(Point2DReadOnly A, Point2DReadOnly B, Point2DReadOnly C)
-   {
-      Point2D X = new Point2D();
-      getTriangleBisector(A, B, C, X);
-      return X;
-   }
-
-   /**
-    *  Given a triangle defined by three points (A,B,C), this methods the point
-    *  X &in; AC such that the line (B, X) is the angle bisector of B.
-    *  As a result, the two angles CBX and XBA are equal.
-    *  <a href="https://en.wikipedia.org/wiki/Angle_bisector_theorem"> Useful link</a>.
-    *<p>
-    *Edge cases:
-    *<ul>
-    *   <li> if any the triangle's edge is shorter than {@link Epsilons#ONE_TRILLIONTH},
-    *    this method fails and returns {@code false}.
-    *</ul>
-    *</p>
-    *
-    * @param A the first vertex of the triangle. Not modified.
-    * @param B the second vertex of the triangle, this is the first endpoint of the bisector. Not modified.
-    * @param C the third vertex of the triangle. Not modified.
-    * @param XToPack point in which the second endpoint of the bisector is stored. Modified.
-    * @return whether the bisector could be calculated or not.
-    */
-   public static boolean getTriangleBisector(Point2DReadOnly A, Point2DReadOnly B, Point2DReadOnly C, Point2DBasics XToPack)
-   {
-      // find all proportional values
-      double BA = B.distance(A);
-      if (BA < Epsilons.ONE_TRILLIONTH)
-         return false;
-
-      double BC = B.distance(C);
-      if (BC < Epsilons.ONE_TRILLIONTH)
-         return false;
-
-      double AC = A.distance(C);
-
-      if (AC < Epsilons.ONE_TRILLIONTH)
-         return false;
-
-      double AX = AC / ((BC / BA) + 1.0);
-
-      // use AX distance to find X along AC
-      double vectorAXx = C.getX() - A.getX();
-      double vectorAXy = C.getY() - A.getY();
-      double inverseMagnitude = 1.0 / Math.sqrt(vectorAXx * vectorAXx + vectorAXy * vectorAXy);
-      vectorAXx *= AX * inverseMagnitude;
-      vectorAXy *= AX * inverseMagnitude;
-
-      XToPack.set(vectorAXx, vectorAXy);
-      XToPack.add(A);
-      return false;
-   }
-
-   /**
-    * Computes the angle in radians from the first 2D vector to the second 2D vector.
-    * The computed angle is in the range [-<i>pi</i>; <i>pi</i>].
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
-    * </ul>
-    * </p>
-    * 
-    * @param vector1x x-component of first the vector.
-    * @param vector1y y-component of first the vector.
-    * @param vector2x x-component of second the vector.
-    * @param vector2y y-component of second the vector.
-    * @return the angle in radians from the first vector to the second vector.
-    */
-   public static double getAngleFromFirstToSecondVector(Vector2DReadOnly firstVector, Vector2DReadOnly secondVector)
-   {
-      return getAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), secondVector.getX(), secondVector.getY());
-   }
-
-   /**
-    * Computes the angle in radians from the first 2D vector to the second 2D vector.
-    * The computed angle is in the range [-<i>pi</i>; <i>pi</i>].
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
-    * </ul>
-    * </p>
-    * 
-    * @param firstVector the first vector. Not modified.
-    * @param secondVector the second vector. Not modified.
-    * @return the angle in radians from the first vector to the second vector.
-    */
-   public static double getAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double secondVectorX, double secondVectorY)
-   {
-      double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY);
-
-      if (firstVectorLength < 1e-7)
-         return 0.0;
-
-      firstVectorX /= firstVectorLength;
-      firstVectorY /= firstVectorLength;
-
-      double secondVectorLength = Math.sqrt(secondVectorX * secondVectorX + secondVectorY * secondVectorY);
-
-      if (secondVectorLength < 1e-7)
-         return 0.0;
-
-      secondVectorX /= secondVectorLength;
-      secondVectorY /= secondVectorLength;
-
-      // The sign of the angle comes from the cross product
-      double crossProduct = firstVectorX * secondVectorY - firstVectorY * secondVectorX;
-      // the magnitude of the angle comes from the dot product
-      double dotProduct = firstVectorX * secondVectorX + firstVectorY * secondVectorY;
-
-      double angle = Math.atan2(crossProduct, dotProduct);
-      // This is a hack to get the polygon tests to pass.
-      // Probably some edge case not well handled somewhere (Sylvain)
-      if (crossProduct == 0.0)
-         angle = -angle;
-
-      return angle;
-   }
-
-   /**
-    * Computes the angle in radians from the first 3D vector to the second 3D vector.
-    * The computed angle is in the range [0; <i>pi</i>].
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
-    * </ul>
-    * </p>
-    * 
-    * @param firstVector the first vector. Not modified.
-    * @param secondVector the second vector. Not modified.
-    * @return the angle in radians from the first vector to the second vector.
-    */
-   public static double getAngleFromFirstToSecondVector(Vector3DReadOnly firstVector, Vector3DReadOnly secondVector)
-   {
-      return getAngleFromFirstToSecondVector(firstVector.getX(), firstVector.getY(), firstVector.getZ(), secondVector.getX(), secondVector.getY(),
-                                             secondVector.getZ());
-   }
-
-   /**
-    * Computes the angle in radians from the first 3D vector to the second 3D vector.
-    * The computed angle is in the range [0; <i>pi</i>].
-    * <p>
-    * Edge cases:
-    * <ul>
-    *    <li> if the length of either vector is below {@code 1.0E-7}, this method fails and returns an angle of {@code 0.0} radian.
-    * </ul>
-    * </p>
-    * 
-    * @param firstVectorX x-component of first the vector.
-    * @param firstVectorY y-component of first the vector.
-    * @param firstVectorZ z-component of first the vector.
-    * @param secondVectorX x-component of second the vector.
-    * @param secondVectorY y-component of second the vector.
-    * @param secondVectorZ z-component of second the vector.
-    * @return the angle in radians from the first vector to the second vector.
-    */
-   public static double getAngleFromFirstToSecondVector(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX,
-                                                        double secondVectorY, double secondVectorZ)
-   {
-      double firstVectorLength = Math.sqrt(firstVectorX * firstVectorX + firstVectorY * firstVectorY + firstVectorZ * firstVectorZ);
-
-      if (firstVectorLength < 1e-7)
-         return 0.0;
-
-      double secondVectorLength = Math.sqrt(secondVectorX * secondVectorX + secondVectorY * secondVectorY + secondVectorZ * secondVectorZ);
-
-      if (secondVectorLength < 1e-7)
-         return 0.0;
-
-      double dotProduct = firstVectorX * secondVectorX + firstVectorY * secondVectorY + firstVectorZ * secondVectorZ;
-      dotProduct /= firstVectorLength * secondVectorLength;
-
-      return Math.acos(MathTools.clamp(dotProduct, -1.0, 1.0));
    }
 
    /**

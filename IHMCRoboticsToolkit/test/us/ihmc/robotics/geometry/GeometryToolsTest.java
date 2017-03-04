@@ -531,33 +531,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetAngleFromFirstToSecondVector() throws Exception
-   {
-      Random random = new Random(51651L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         double firstVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         double secondVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
-         Vector2D firstVector = RandomGeometry.nextVector2D(random, firstVectorLength);
-         Vector2D secondVector = new Vector2D();
-
-         for (double yaw = -Math.PI; yaw <= Math.PI; yaw += Math.PI / 100.0)
-         {
-            double c = Math.cos(yaw);
-            double s = Math.sin(yaw);
-            secondVector.setX(firstVector.getX() * c - firstVector.getY() * s);
-            secondVector.setY(firstVector.getX() * s + firstVector.getY() * c);
-            secondVector.scale(secondVectorLength / firstVectorLength);
-            double computedYaw = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
-            double yawDifference = AngleTools.computeAngleDifferenceMinusPiToPi(yaw, computedYaw);
-            assertEquals(0.0, yawDifference, Epsilons.ONE_TRILLIONTH);
-         }
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testNormalizeSafeZUp() throws Exception
    {
       Vector3D actualVector;
@@ -586,38 +559,6 @@ public class GeometryToolsTest
 
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
-   public void testGetTriangleBisector() throws Exception
-   {
-      Random random = new Random(1176L);
-
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Point2D a = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D b = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-         Point2D c = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
-
-         Vector2D ba = new Vector2D();
-         ba.sub(a, b);
-         Vector2D bc = new Vector2D();
-         bc.sub(c, b);
-
-         double abcAngle = ba.angle(bc);
-
-         Point2D x = new Point2D();
-         GeometryTools.getTriangleBisector(a, b, c, x);
-
-         Vector2D bx = new Vector2D();
-         bx.sub(x, b);
-
-         double abxAngle = ba.angle(bx);
-
-         assertEquals(0.5 * abcAngle, abxAngle, Epsilons.ONE_TRILLIONTH);
-         assertEquals(0.0, EuclidGeometryTools.distanceFromPoint2DToLine2D(x, a, c), Epsilons.ONE_TRILLIONTH);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
    public void testGetXYDistance() throws Exception
    {
       Random random = new Random(232L);
@@ -631,31 +572,6 @@ public class GeometryToolsTest
          double expectedDistance = firstPoint2d.distance(secondPoint2d);
          double actualDistance = GeometryTools.getXYDistance(firstPoint3d, secondPoint3d);
          assertEquals(expectedDistance, actualDistance, Epsilons.ONE_TRILLIONTH);
-      }
-   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
-   public void testGetAngleFromFirstToSecondVector3D() throws Exception
-   {
-      Random random = new Random(1176L);
-      // Test getRotationBasedOnNormal(AxisAngle4d rotationToPack, Vector3d normalVector3d)
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         Vector3D firstVector = new Vector3D(0.0, 0.0, 1.0);
-         double expectedAngle = RandomNumbers.nextDouble(random, 0.0, Math.PI);
-         Vector3D expectedAxis = RandomGeometry.nextOrthogonalVector3D(random, firstVector, true);
-         AxisAngle expectedAxisAngle = new AxisAngle(expectedAxis, expectedAngle);
-         RotationMatrix rotationMatrix = new RotationMatrix();
-         rotationMatrix.set(expectedAxisAngle);
-
-         Vector3D secondVector = new Vector3D();
-         rotationMatrix.transform(firstVector, secondVector);
-         secondVector.scale(RandomNumbers.nextDouble(random, 0.0, 10.0));
-
-         double actualAngle = GeometryTools.getAngleFromFirstToSecondVector(firstVector, secondVector);
-
-         assertEquals(expectedAngle, actualAngle, Epsilons.ONE_TRILLIONTH);
       }
    }
 

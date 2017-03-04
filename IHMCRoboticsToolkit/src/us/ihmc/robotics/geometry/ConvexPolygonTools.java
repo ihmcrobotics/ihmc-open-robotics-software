@@ -1209,7 +1209,7 @@ public class ConvexPolygonTools
       tangentIndex2 = vIndex;
       Vector2D tangent2 = new Vector2D(polygon.getVertex(tangentIndex2).getX() - point.getX(), polygon.getVertex(tangentIndex2).getY() - point.getY());
    
-      if (GeometryTools.getAngleFromFirstToSecondVector(tangent1, tangent2) > 0)
+      if (tangent1.angle(tangent2) > 0)
       {
          return new int[] {tangentIndex1, tangentIndex2};
       }
@@ -1230,8 +1230,8 @@ public class ConvexPolygonTools
       Vector2D base = new Vector2D(point.getX() - vertex.getX(), point.getY() - vertex.getY());
       Vector2D first = new Vector2D(previous.getX() - vertex.getX(), previous.getY() - vertex.getY());
       Vector2D second = new Vector2D(next.getX() - vertex.getX(), next.getY() - vertex.getY());
-      double firstAngle = GeometryTools.getAngleFromFirstToSecondVector(base, first);
-      double secondAngle = GeometryTools.getAngleFromFirstToSecondVector(base, second);
+      double firstAngle = base.angle(first);
+      double secondAngle = base.angle(second);
    
       if (firstAngle * secondAngle >= 0)
       {    // if both angles have the same sign, the line does not pass through the polygon
@@ -1297,10 +1297,10 @@ public class ConvexPolygonTools
          Vector2D edge2B = new Vector2D(polygon2.getVertex(edge2BStart).getX() - v2Median.getX(), polygon2.getVertex(edge2BStart).getY() - v2Median.getY());
    
          // see diagram 3.2 in [Edelsbrunner]
-         double angle1A = GeometryTools.getAngleFromFirstToSecondVector(m, edge1A); // A' in diagram
-         double angle1B = GeometryTools.getAngleFromFirstToSecondVector(edge1B, m); // A'' in diagram
-         double angle2A = GeometryTools.getAngleFromFirstToSecondVector(edge2A, mReversed); // B' in diagram
-         double angle2B = GeometryTools.getAngleFromFirstToSecondVector(mReversed, edge2B); // B'' in diagram
+         double angle1A = m.angle(edge1A); // A' in diagram
+         double angle1B = edge1B.angle(m); // A'' in diagram
+         double angle2A = edge2A.angle(mReversed); // B' in diagram
+         double angle2B = mReversed.angle(edge2B); // B'' in diagram
    
          int[] range1 = findStartAndEndTangents(v2Median, polygon1, epsilon);
          int[] range2 = findStartAndEndTangents(v1Median, polygon2, epsilon);

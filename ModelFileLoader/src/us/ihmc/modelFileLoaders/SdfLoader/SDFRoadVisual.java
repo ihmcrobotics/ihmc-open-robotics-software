@@ -53,7 +53,7 @@ public class SDFRoadVisual extends Graphics3DObject
 
             Vector2D toSide2d = new Vector2D(toSide.getX(), toSide.getY());
             Vector2D nextSide2d = new Vector2D(nextSide.getX(), nextSide.getY());
-            double angle = GeometryTools.getAngleFromFirstToSecondVector(toSide2d, nextSide2d);
+            double angle = toSide2d.angle(nextSide2d);
             
             RigidBodyTransform rotZ = new RigidBodyTransform();
             rotZ.setRotationYawAndZeroTranslation(angle/2.0);
