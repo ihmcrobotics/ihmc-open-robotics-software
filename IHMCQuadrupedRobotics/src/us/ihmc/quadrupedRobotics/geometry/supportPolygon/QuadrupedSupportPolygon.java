@@ -836,7 +836,7 @@ public class QuadrupedSupportPolygon implements Serializable
       if (size() == 1)
       {
          FramePoint footstep = getFootstep(getFirstSupportingQuadrant());
-         return -GeometryTools.distanceBetweenPoints(x, y, footstep.getX(), footstep.getY());
+         return -EuclidGeometryTools.distanceBetweenPoint2Ds(x, y, footstep.getX(), footstep.getY());
       }
       else if (size() == 2)
       {
@@ -894,7 +894,7 @@ public class QuadrupedSupportPolygon implements Serializable
       if (size() == 1)
       {
          FramePoint footstep = getFootstep(getFirstSupportingQuadrant());
-         return GeometryTools.distanceBetweenPoints(x, y, footstep.getX(), footstep.getY());
+         return EuclidGeometryTools.distanceBetweenPoint2Ds(x, y, footstep.getX(), footstep.getY());
       }
       else if (size() == 2)
       {
@@ -1723,7 +1723,7 @@ public class QuadrupedSupportPolygon implements Serializable
             double cornerToB = cornerPoint.distance(pointB);
             double aToB = pointA.distance(pointB);
    
-            double theta = GeometryTools.getUnknownTriangleAngleByLawOfCosine(cornerToA, cornerToB, aToB);
+            double theta = EuclidGeometryTools.unknownTriangleAngleByLawOfCosine(cornerToA, cornerToB, aToB);
             
             Point2D tempCorner = tempPointsForCornerCircle[0];
             Point2D tempA = tempPointsForCornerCircle[1];
