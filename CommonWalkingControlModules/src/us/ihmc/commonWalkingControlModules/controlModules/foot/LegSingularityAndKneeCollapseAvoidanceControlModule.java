@@ -154,7 +154,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final OneDoFJoint hipPitchJoint;
 
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
-         WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -169,11 +169,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       minimumLegLength = new DoubleYoVariable(namePrefix + "MinLegLength", registry);
       minimumLegLength.set(walkingControllerParameters.getMinMechanicalLegLength());
 
-      twistCalculator = momentumBasedController.getTwistCalculator();
-      controlDT = momentumBasedController.getControlDT();
-      yoTime = momentumBasedController.getYoTime();
+      twistCalculator = controllerToolbox.getTwistCalculator();
+      controlDT = controllerToolbox.getControlDT();
+      yoTime = controllerToolbox.getYoTime();
 
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       hipPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH);
       frameBeforeHipPitchJoint = hipPitchJoint.getFrameBeforeJoint();
@@ -323,7 +323,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          }
       };
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
       visualize = visualize && yoGraphicsListRegistry != null;
       moreVisualizers = visualize && moreVisualizers;
 

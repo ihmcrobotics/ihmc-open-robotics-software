@@ -95,11 +95,11 @@ public class PelvisOrientationManager
    private final DoubleYoVariable pelvisYawSineFrequence = new DoubleYoVariable("pelvisYawSineFrequence", registry);
    private final DoubleYoVariable pelvisYawSineMagnitude = new DoubleYoVariable("pelvisYawSineMagnitude", registry);
 
-   public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public PelvisOrientationManager(WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry parentRegistry)
    {
-      yoTime = momentumBasedController.getYoTime();
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      yoTime = controllerToolbox.getYoTime();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       pelvisFrame = referenceFrames.getPelvisFrame();
@@ -113,7 +113,7 @@ public class PelvisOrientationManager
          pelvisOrientationTrajectoryGenerator.registerNewTrajectoryFrame(ankleZUpFrames.get(robotSide));
 
       gains = walkingControllerParameters.createPelvisOrientationControlGains(registry);
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       RigidBody elevator = fullRobotModel.getElevator();
       RigidBody pelvis = fullRobotModel.getPelvis();
       yoPelvisAngularWeight.set(SolverWeightLevels.PELVIS_WEIGHT, SolverWeightLevels.PELVIS_WEIGHT, SolverWeightLevels.PELVIS_WEIGHT);

@@ -96,7 +96,7 @@ public class HandControlModule
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame handControlFrame;
 
-   public HandControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController, ArmControllerParameters armControlParameters,
+   public HandControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, ArmControllerParameters armControlParameters,
          YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, YoVariableRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -106,7 +106,7 @@ public class HandControlModule
 
       if (REGISTER_YOVARIABLES)
       {
-         yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+         yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
          parentRegistry.addChild(registry);
       }
       else
@@ -129,7 +129,7 @@ public class HandControlModule
          }
       };
 
-      fullRobotModel = momentumBasedController.getFullRobotModel();
+      fullRobotModel = controllerToolbox.getFullRobotModel();
       hand = fullRobotModel.getHand(robotSide);
       chest = fullRobotModel.getChest();
 
@@ -147,7 +147,7 @@ public class HandControlModule
          areJointsEnabled.put(oneDoFJoint, new BooleanYoVariable(namePrefix + oneDoFJoint.getName() + "IsEnabled", registry));
       }
 
-      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
+      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(name, name + "SwitchTime", HandControlMode.class, yoTime, registry);
 
       RigidBody elevator = fullRobotModel.getElevator();
@@ -162,7 +162,7 @@ public class HandControlModule
 
       String stateNamePrefix = namePrefix + "Hand";
 
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap = new EnumMap<>(BaseForControl.class);
       baseForControlToReferenceFrameMap.put(BaseForControl.CHEST, chestFrame);
       baseForControlToReferenceFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
@@ -173,7 +173,7 @@ public class HandControlModule
       jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, homeConfiguration, controlledJoints, jointspaceGains, registry);
       taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, elevator, hand, chest, taskspaceGains, baseForControlToReferenceFrameMap,
             yoGraphicsListRegistry, registry);
-      userControlModeState = new HandUserControlModeState(stateNamePrefix, controlledJoints, momentumBasedController, registry);
+      userControlModeState = new HandUserControlModeState(stateNamePrefix, controlledJoints, controllerToolbox, registry);
 
       if (isAtLeastOneJointPositionControlled)
       {
@@ -216,7 +216,7 @@ public class HandControlModule
       }
       else
       {
-         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, momentumBasedController, elevator,
+         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, controllerToolbox, elevator,
                hand, registry);
          jointAccelerationIntegrationCommand = null;
          lowLevelOneDoFJointDesiredDataHolder = null;

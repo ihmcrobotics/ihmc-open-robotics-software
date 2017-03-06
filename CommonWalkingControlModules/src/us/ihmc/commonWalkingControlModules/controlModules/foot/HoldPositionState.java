@@ -144,7 +144,7 @@ public class HoldPositionState extends AbstractFootControlState
 
       if (VISUALIZE)
       {
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getDynamicGraphicObjectsListRegistry();
          YoGraphicPosition desiredPositionViz = new YoGraphicPosition(namePrefix + "DesiredHoldPosition", desiredHoldPosition, 0.005, YoAppearance.DarkGray(), GraphicType.CROSS);
          dynamicGraphicObjectsListRegistry.registerYoGraphic("HoldPosition", desiredPositionViz);
          dynamicGraphicObjectsListRegistry.registerArtifact("HoldPosition", desiredPositionViz.createArtifact());

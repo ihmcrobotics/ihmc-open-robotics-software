@@ -28,18 +28,18 @@ public class DoNothingBehavior extends HighLevelBehavior
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
-   public DoNothingBehavior(HighLevelHumanoidControllerToolbox momentumBasedController)
+   public DoNothingBehavior(HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       super(controllerState);
 
-      this.bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
-      this.controllerToolbox = momentumBasedController;
-      allRobotJoints = momentumBasedController.getFullRobotModel().getOneDoFJoints();
+      this.bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
+      this.controllerToolbox = controllerToolbox;
+      allRobotJoints = controllerToolbox.getFullRobotModel().getOneDoFJoints();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-         footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
+         ContactablePlaneBody contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
+         footContactStates.put(robotSide, controllerToolbox.getContactState(contactableFoot));
       }
 
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);

@@ -110,7 +110,7 @@ public class SupportState extends AbstractFootControlState
       registry = new YoVariableRegistry(prefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      footSwitch = footControlHelper.getMomentumBasedController().getFootSwitches().get(robotSide);
+      footSwitch = footControlHelper.getHighLevelHumanoidControllerToolbox().getFootSwitches().get(robotSide);
       controlFrame = new PoseReferenceFrame(prefix + "HoldPositionFrame", contactableFoot.getSoleFrame());
       desiredSoleFrame = new PoseReferenceFrame(prefix + "DesiredSoleFrame", worldFrame);
 
@@ -119,7 +119,7 @@ public class SupportState extends AbstractFootControlState
       footLoadThreshold = new DoubleYoVariable(prefix + "LoadThreshold", registry);
       footLoadThreshold.set(defaultFootLoadThreshold);
 
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
 
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
@@ -163,7 +163,7 @@ public class SupportState extends AbstractFootControlState
       durationForStanceLegStraightening.set(footControlHelper.getWalkingControllerParameters().getDurationForStanceLegStraightening());
       straightKneeAngle.set(footControlHelper.getWalkingControllerParameters().getStraightKneeAngle());
 
-      YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getDynamicGraphicObjectsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
       if (graphicsListRegistry != null)
          graphicsListRegistry.registerYoGraphic(prefix + getClass().getSimpleName(), frameViz);

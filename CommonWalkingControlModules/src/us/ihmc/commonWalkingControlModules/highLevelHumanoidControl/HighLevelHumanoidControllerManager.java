@@ -62,12 +62,12 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
          WholeBodyControllerCore controllerCore, HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
-         HighLevelHumanoidControllerToolbox momentumBasedController, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+         HighLevelHumanoidControllerToolbox controllerToolbox, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
          ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
-      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
+      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       this.controllerCoreOutput = controllerCoreOutput;
       this.controllerCore = controllerCore;
 
@@ -81,11 +81,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
          this.registry.addChild(highLevelBehaviors.get(i).getYoVariableRegistry());
       }
       this.initialBehavior = initialBehavior;
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
-      this.registry.addChild(momentumBasedController.getYoVariableRegistry());
+      this.registry.addChild(controllerToolbox.getYoVariableRegistry());
 
-      momentumBasedController.attachControllerFailureListener(new ControllerFailureListener()
+      controllerToolbox.attachControllerFailureListener(new ControllerFailureListener()
       {
          @Override
          public void controllerFailed(FrameVector2d fallingDirection)

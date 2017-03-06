@@ -284,7 +284,7 @@ public class LogDataProcessorHelper
       return scs;
    }
 
-   public HighLevelHumanoidControllerToolbox getMomentumBasedController()
+   public HighLevelHumanoidControllerToolbox getHighLevelHumanoidControllerToolbox()
    {
       return controllerToolbox;
    }

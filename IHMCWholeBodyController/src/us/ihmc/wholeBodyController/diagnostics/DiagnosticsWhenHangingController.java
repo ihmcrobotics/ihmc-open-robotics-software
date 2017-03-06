@@ -113,18 +113,18 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
-         HighLevelHumanoidControllerToolbox momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
+         HighLevelHumanoidControllerToolbox controllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.DIAGNOSTICS);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
-      this.bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
+      this.bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-         footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
+         ContactablePlaneBody contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
+         footContactStates.put(robotSide, controllerToolbox.getContactState(contactableFoot));
       }
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       humanoidJointPoseList.setParentRegistry(registry);
 
       splineDuration.set(3.0);
@@ -143,8 +143,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       adaptTorqueOffset.set(false);
       transferTorqueOffsets.set(false);
 
-      this.yoTime = momentumBasedController.getYoTime();
-      this.fullRobotModel = momentumBasedController.getFullRobotModel();
+      this.yoTime = controllerToolbox.getYoTime();
+      this.fullRobotModel = controllerToolbox.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
@@ -215,8 +215,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       stateMachine.addState(finishedState);
 
       // Foot force sensors tarring stuff
-      footSwitches = momentumBasedController.getFootSwitches();
-      alphaFootForce.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, momentumBasedController.getControlDT()));
+      footSwitches = controllerToolbox.getFootSwitches();
+      alphaFootForce.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT()));
       updateFootForceSensorOffsets.set(true);
 
       for (RobotSide robotSide : RobotSide.values)

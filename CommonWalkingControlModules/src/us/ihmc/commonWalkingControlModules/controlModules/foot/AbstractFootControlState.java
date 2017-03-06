@@ -52,13 +52,13 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
       this.footControlHelper = footControlHelper;
       this.contactableFoot = footControlHelper.getContactableFoot();
 
-      this.controllerToolbox = footControlHelper.getMomentumBasedController();
+      this.controllerToolbox = footControlHelper.getHighLevelHumanoidControllerToolbox();
 
       this.robotSide = footControlHelper.getRobotSide();
 
       rootBody = controllerToolbox.getTwistCalculator().getRootBody();
 
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
       OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);

@@ -27,7 +27,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
-      controllerToolbox = logDataProcessorHelper.getMomentumBasedController();
+      controllerToolbox = logDataProcessorHelper.getHighLevelHumanoidControllerToolbox();
 
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)

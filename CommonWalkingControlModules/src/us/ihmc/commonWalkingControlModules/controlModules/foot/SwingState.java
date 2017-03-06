@@ -118,7 +118,7 @@ public class SwingState extends AbstractUnconstrainedState
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
 
-      controlDT = footControlHelper.getMomentumBasedController().getControlDT();
+      controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
@@ -142,7 +142,7 @@ public class SwingState extends AbstractUnconstrainedState
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
 
-      soleFrame = footControlHelper.getMomentumBasedController().getReferenceFrames().getSoleFrame(robotSide);
+      soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
       ReferenceFrame toeFrame = createToeFrame(robotSide);
       controlFrame = walkingControllerParameters.controlToeDuringSwing() ? toeFrame : footFrame;

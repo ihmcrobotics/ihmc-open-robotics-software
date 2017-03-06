@@ -85,9 +85,9 @@ public class LegJointLimitAvoidanceControlModule
 
    private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
 
-   public LegJointLimitAvoidanceControlModule(String prefix, YoVariableRegistry registry, HighLevelHumanoidControllerToolbox momentumBasedController, RobotSide robotSide)
+   public LegJointLimitAvoidanceControlModule(String prefix, YoVariableRegistry registry, HighLevelHumanoidControllerToolbox controllerToolbox, RobotSide robotSide)
    {
-      robotModel = momentumBasedController.getFullRobotModel();
+      robotModel = controllerToolbox.getFullRobotModel();
       base = robotModel.getPelvis();
       RigidBody foot = robotModel.getFoot(robotSide);
       robotJoints = ScrewTools.filterJoints(ScrewTools.createJointPath(base, foot), OneDoFJoint.class);
@@ -153,7 +153,7 @@ public class LegJointLimitAvoidanceControlModule
       originalDesiredLinearVelocity = new YoFrameVector(prefix + "originalDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
       adjustedDesiredLinearVelocity = new YoFrameVector(prefix + "adjustedDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
       if (visualize)
       {
          yoDesiredFootPositionGraphic = new YoGraphicPosition(prefix + "DesiredFootPosition", originalDesiredYoPose.getPosition(), 0.025, YoAppearance.Yellow(),

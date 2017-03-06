@@ -49,9 +49,9 @@ public class HighLevelControlManagerFactory
       parentRegistry.addChild(registry);
    }
 
-   public void setMomentumBasedController(HighLevelHumanoidControllerToolbox momentumBasedController)
+   public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
    }
 
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
@@ -80,7 +80,7 @@ public class HighLevelControlManagerFactory
       if (balanceManager != null)
          return balanceManager;
 
-      if (!hasMomentumBasedController(BalanceManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
          return null;
@@ -102,7 +102,7 @@ public class HighLevelControlManagerFactory
       if (centerOfMassHeightManager != null)
          return centerOfMassHeightManager;
 
-      if (!hasMomentumBasedController(CenterOfMassHeightManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(CenterOfMassHeightManager.class))
          return null;
       if (!hasWalkingControllerParameters(CenterOfMassHeightManager.class))
          return null;
@@ -187,7 +187,7 @@ public class HighLevelControlManagerFactory
 
       if (!hasArmControllerParameters(ManipulationControlModule.class))
          return null;
-      if (!hasMomentumBasedController(ManipulationControlModule.class))
+      if (!hasHighLevelHumanoidControllerToolbox(ManipulationControlModule.class))
          return null;
       if (!hasMomentumOptimizationSettings(ManipulationControlModule.class))
          return null;
@@ -206,7 +206,7 @@ public class HighLevelControlManagerFactory
       if (feetManager != null)
          return feetManager;
 
-      if (!hasMomentumBasedController(FeetManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(FeetManager.class))
          return null;
       if (!hasWalkingControllerParameters(FeetManager.class))
          return null;
@@ -227,7 +227,7 @@ public class HighLevelControlManagerFactory
       if (pelvisOrientationManager != null)
          return pelvisOrientationManager;
 
-      if (!hasMomentumBasedController(PelvisOrientationManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(PelvisOrientationManager.class))
          return null;
       if (!hasWalkingControllerParameters(PelvisOrientationManager.class))
          return null;
@@ -239,7 +239,7 @@ public class HighLevelControlManagerFactory
       return pelvisOrientationManager;
    }
 
-   private boolean hasMomentumBasedController(Class<?> managerClass)
+   private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
    {
       if (controllerToolbox != null)
          return true;

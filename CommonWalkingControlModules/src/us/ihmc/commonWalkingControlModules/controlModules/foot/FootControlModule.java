@@ -80,24 +80,24 @@ public class FootControlModule
 
    public FootControlModule(RobotSide robotSide, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
-         YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
+         YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       this.toeOffHelper = toeOffHelper;
 
-      contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-      momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
-      momentumBasedController.setPlaneContactStateFullyConstrained(contactableFoot);
+      contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
+      controllerToolbox.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
+      controllerToolbox.setPlaneContactStateFullyConstrained(contactableFoot);
 
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Foot";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
+      footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, controllerToolbox, registry);
 
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;
 
-      footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
       footLoadThresholdToHoldPosition = new DoubleYoVariable("footLoadThresholdToHoldPosition", registry);
       footLoadThresholdToHoldPosition.set(0.2);
 
@@ -109,7 +109,7 @@ public class FootControlModule
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
 
       // set up states and state machine
-      DoubleYoVariable time = momentumBasedController.getYoTime();
+      DoubleYoVariable time = controllerToolbox.getYoTime();
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", ConstraintType.class, time, registry);
       requestedState = EnumYoVariable.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       requestedState.set(null);

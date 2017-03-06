@@ -67,15 +67,15 @@ public class HandCompliantControlHelper
    private final RobotSide robotSide;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   public HandCompliantControlHelper(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
+   public HandCompliantControlHelper(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + "CompliantControl");
       parentRegistry.addChild(registry);
 
       this.robotSide = robotSide;
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
 
-      ReferenceFrame forceSensorMeasurementFrame = momentumBasedController.getWristForceSensor(robotSide).getMeasurementFrame();
+      ReferenceFrame forceSensorMeasurementFrame = controllerToolbox.getWristForceSensor(robotSide).getMeasurementFrame();
 
       forceDeadzoneSize = new DoubleYoVariable(namePrefix + "ForceDeadzoneSize", registry);
       deadzoneMeasuredForce = DeadzoneYoFrameVector.createDeadzoneYoFrameVector(namePrefix + "DeadzoneMeasuredForce", registry, forceDeadzoneSize,

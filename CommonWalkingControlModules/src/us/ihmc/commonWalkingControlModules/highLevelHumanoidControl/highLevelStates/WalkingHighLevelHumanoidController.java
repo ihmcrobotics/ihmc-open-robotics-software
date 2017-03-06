@@ -123,20 +123,20 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-         CapturePointPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox momentumBasedController)
+         CapturePointPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       super(controllerState);
 
       this.managerFactory = managerFactory;
 
-      this.yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      this.yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
 
-      // Getting parameters from the momentumBasedController
-      this.controllerToolbox = momentumBasedController;
-      fullRobotModel = momentumBasedController.getFullRobotModel();
-      yoTime = momentumBasedController.getYoTime();
+      // Getting parameters from the HighLevelHumanoidControllerToolbox
+      this.controllerToolbox = controllerToolbox;
+      fullRobotModel = controllerToolbox.getFullRobotModel();
+      yoTime = controllerToolbox.getYoTime();
 
-      feet = momentumBasedController.getContactableFeet();
+      feet = controllerToolbox.getContactableFeet();
 
       allOneDoFjoints = fullRobotModel.getOneDoFJoints();
 
@@ -158,14 +158,14 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       hasWalkingControllerBeenInitialized.set(false);
 
-      failureDetectionControlModule = new WalkingFailureDetectionControlModule(momentumBasedController.getContactableFeet(), registry);
+      failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime, feet, statusOutputManager, yoTime, yoGraphicsListRegistry, registry);
 
-      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, momentumBasedController, walkingMessageHandler, managerFactory, walkingControllerParameters, registry);
+      commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, walkingMessageHandler, managerFactory, walkingControllerParameters, registry);
 
       String namePrefix = "walking";
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", WalkingStateEnum.class, yoTime, registry); // this is used by name, and it is ugly.
@@ -175,7 +175,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       double highCoPDampingDuration = walkingControllerParameters.getHighCoPDampingDurationToPreventFootShakies();
       double coPErrorThreshold = walkingControllerParameters.getCoPErrorThresholdForHighCoPDamping();
       boolean enableHighCoPDamping = highCoPDampingDuration > 0.0 && !Double.isInfinite(coPErrorThreshold);
-      momentumBasedController.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
+      controllerToolbox.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
 
       JointLimitParameters limitParameters = new JointLimitParameters();
       String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits(limitParameters);
