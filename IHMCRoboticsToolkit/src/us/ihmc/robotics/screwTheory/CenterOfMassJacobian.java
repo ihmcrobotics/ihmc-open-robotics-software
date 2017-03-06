@@ -32,7 +32,7 @@ public class CenterOfMassJacobian
    private final Map<RigidBody, MutableDouble> subTreeMassMap = new LinkedHashMap<RigidBody, MutableDouble>();
    private final Map<RigidBody, FramePoint> comScaledByMassMap = new LinkedHashMap<RigidBody, FramePoint>();
    private final Map<RigidBody, MutableBoolean> comScaledByMassMapIsUpdated = new LinkedHashMap<RigidBody, MutableBoolean>();
-      
+
    private double inverseTotalMass;
 
    public CenterOfMassJacobian(RigidBody rootBody)
@@ -64,7 +64,7 @@ public class CenterOfMassJacobian
          comScaledByMassMapIsUpdated.put(rigidBody, new MutableBoolean(false));
          subTreeMassMap.put(rigidBody, new MutableDouble(-1.0));
       }
-      
+
       recomputeSubtreeMassesAndTotalMass();
    }
 
@@ -72,10 +72,10 @@ public class CenterOfMassJacobian
    {
       for (int i = 0; i < rigidBodyList.size(); i++)
          subTreeMassMap.get(rigidBodyList.get(i)).setValue(-1.0);
-      
+
       inverseTotalMass = 1.0 / TotalMassCalculator.computeMass(rigidBodyList);
    }
-   
+
    public void compute()
    {
       int column = 0;
@@ -83,17 +83,17 @@ public class CenterOfMassJacobian
       {
          comScaledByMassMapIsUpdated.get(rigidBodyList.get(i)).setValue(false);
       }
-      
+
       for (InverseDynamicsJoint joint : joints)
       {
          RigidBody childBody = joint.getSuccessor();
-         
+
          FramePoint comPositionScaledByMass = getCoMScaledByMass(childBody);
          double subTreeMass = getSubTreeMass(childBody);
 
          GeometricJacobian motionSubspace = joint.getMotionSubspace();
          final List<Twist> allTwists = motionSubspace.getAllUnitTwists();
-         for(int i = 0; i <  allTwists.size(); i++)
+         for (int i = 0; i < allTwists.size(); i++)
          {
             tempUnitTwist.set(allTwists.get(i));
             tempUnitTwist.changeFrame(rootFrame);
@@ -103,13 +103,12 @@ public class CenterOfMassJacobian
          }
       }
 
-      
       CommonOps.scale(inverseTotalMass, jacobianMatrix);
    }
 
    private double getSubTreeMass(RigidBody rigidBody)
    {
-      
+
       if (!subTreeMassMap.containsKey(rigidBody))
          subTreeMassMap.put(rigidBody, new MutableDouble(-1.0));
 
@@ -138,16 +137,15 @@ public class CenterOfMassJacobian
    private FramePoint getCoMScaledByMass(RigidBody rigidBody)
    {
       MutableBoolean comIsUpdated = comScaledByMassMapIsUpdated.get(rigidBody);
-      
+
       if (comIsUpdated == null)
       {
          comIsUpdated = new MutableBoolean(false);
-         
+
          comScaledByMassMapIsUpdated.put(rigidBody, comIsUpdated);
          comScaledByMassMap.put(rigidBody, new FramePoint());
       }
-      
-      
+
       if (comIsUpdated.booleanValue())
       {
          return comScaledByMassMap.get(rigidBody);
@@ -155,7 +153,7 @@ public class CenterOfMassJacobian
       else
       {
          FramePoint curChildCoMScaledByMass = comScaledByMassMap.get(rigidBody);
-         
+
          curChildCoMScaledByMass.setToZero(rootFrame);
          rigidBody.getCoMOffset(curChildCoMScaledByMass);
          curChildCoMScaledByMass.changeFrame(rootFrame);
