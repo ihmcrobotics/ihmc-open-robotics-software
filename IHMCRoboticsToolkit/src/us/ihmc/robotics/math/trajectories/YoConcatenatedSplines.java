@@ -62,8 +62,8 @@ public class YoConcatenatedSplines
 
    public void setQuadraticQuinticQuadratic(double[] times, FramePoint[] positions, FrameVector initialVelocity, FrameVector finalVelocity)
    {
-      MathTools.checkIfEqual(times.length, 4);
-      MathTools.checkIfEqual(positions.length, 4);
+      MathTools.checkEquals(times.length, 4);
+      MathTools.checkEquals(positions.length, 4);
 
       int[] reorderedSplineIndices = new int[] {0, 2, 1};
 
@@ -108,10 +108,10 @@ public class YoConcatenatedSplines
    public void setCubicLinearQuinticLinearCubic(double[] fixedPointTimes, FramePoint[] fixedPointPositions, FrameVector[] fixedPointVelocities,
            double[] intermediateTimes)
    {
-      MathTools.checkIfEqual(rangeList.size(), 5);
-      MathTools.checkIfEqual(fixedPointTimes.length, 4);
-      MathTools.checkIfEqual(fixedPointPositions.length, 4);
-      MathTools.checkIfEqual(fixedPointVelocities.length, 4);
+      MathTools.checkEquals(rangeList.size(), 5);
+      MathTools.checkEquals(fixedPointTimes.length, 4);
+      MathTools.checkEquals(fixedPointPositions.length, 4);
+      MathTools.checkEquals(fixedPointVelocities.length, 4);
 
       double[] allTimes = new double[]
       {
@@ -182,10 +182,10 @@ public class YoConcatenatedSplines
    public void setQuarticLinearQuinticLinearQuartic(double[] fixedPointTimes, FramePoint[] fixedPointPositions, FrameVector[] fixedPointVelocities,
            double[] intermediateTimes)
    {
-      MathTools.checkIfEqual(rangeList.size(), 5);
-      MathTools.checkIfEqual(fixedPointTimes.length, 4);
-      MathTools.checkIfEqual(fixedPointPositions.length, 4);
-      MathTools.checkIfEqual(fixedPointVelocities.length, 4);
+      MathTools.checkEquals(rangeList.size(), 5);
+      MathTools.checkEquals(fixedPointTimes.length, 4);
+      MathTools.checkEquals(fixedPointPositions.length, 4);
+      MathTools.checkEquals(fixedPointVelocities.length, 4);
 
       double[] allTimes = new double[]
       {
@@ -258,10 +258,10 @@ public class YoConcatenatedSplines
 
    public void setCubicQuarticQuinticCubic(double[] times, FramePoint[] positions, FrameVector[] velocities)
    {
-      MathTools.checkIfEqual(rangeList.size(), 4);
-      MathTools.checkIfEqual(times.length, 5);
-      MathTools.checkIfEqual(positions.length, 5);
-      MathTools.checkIfEqual(velocities.length, 5);
+      MathTools.checkEquals(rangeList.size(), 4);
+      MathTools.checkEquals(times.length, 5);
+      MathTools.checkEquals(positions.length, 5);
+      MathTools.checkEquals(velocities.length, 5);
 
       int[] reorderedSplineIndices = new int[] {0, 3, 1, 2};
 
@@ -306,10 +306,10 @@ public class YoConcatenatedSplines
 
    public void setCubicQuarticQuinticQuarticCubic(double[] times, FramePoint[] positions, FrameVector[] velocities)
    {
-      MathTools.checkIfEqual(rangeList.size(), 5);
-      MathTools.checkIfEqual(times.length, 6);
-      MathTools.checkIfEqual(positions.length, 6);
-      MathTools.checkIfEqual(velocities.length, 6);
+      MathTools.checkEquals(rangeList.size(), 5);
+      MathTools.checkEquals(times.length, 6);
+      MathTools.checkEquals(positions.length, 6);
+      MathTools.checkEquals(velocities.length, 6);
 
       int[] reorderedSplineIndices = new int[] {0, 4, 1, 3, 2};
 
@@ -361,10 +361,10 @@ public class YoConcatenatedSplines
 
    public void setCubicQuinticCubic(double[] times, FramePoint[] positions, FrameVector[] velocities)
    {
-      MathTools.checkIfEqual(rangeList.size(), 3);
-      MathTools.checkIfEqual(times.length, 4);
-      MathTools.checkIfEqual(positions.length, 4);
-      MathTools.checkIfEqual(velocities.length, 4);
+      MathTools.checkEquals(rangeList.size(), 3);
+      MathTools.checkEquals(times.length, 4);
+      MathTools.checkEquals(positions.length, 4);
+      MathTools.checkEquals(velocities.length, 4);
 
       int[] reorderedSplineIndices = new int[] {0, 2, 1};
 
@@ -402,12 +402,12 @@ public class YoConcatenatedSplines
    public void setQuarticQuinticQuartic(double[] times, FramePoint[] positions, FrameVector[] velocities, double[] intermediateTimes,
            FrameVector[] intermediateVelocities)
    {
-      MathTools.checkIfEqual(rangeList.size(), 3);
-      MathTools.checkIfEqual(times.length, 4);
-      MathTools.checkIfEqual(positions.length, 4);
-      MathTools.checkIfEqual(velocities.length, 4);
-      MathTools.checkIfEqual(intermediateTimes.length, 2);
-      MathTools.checkIfEqual(intermediateVelocities.length, 2);
+      MathTools.checkEquals(rangeList.size(), 3);
+      MathTools.checkEquals(times.length, 4);
+      MathTools.checkEquals(positions.length, 4);
+      MathTools.checkEquals(velocities.length, 4);
+      MathTools.checkEquals(intermediateTimes.length, 2);
+      MathTools.checkEquals(intermediateVelocities.length, 2);
 
       int[] reorderedSplineIndices = new int[] {0, 2, 1};
 
@@ -447,13 +447,13 @@ public class YoConcatenatedSplines
    public void setQuinticsUsingIntermediateVeloctiesAndAccelerations(double[] times, FramePoint[] positions, FrameVector[] velocities,
            double[] intermediateTimes, FrameVector[] intermediateVelocities, FrameVector[] intermediateAccelerations)
    {
-      MathTools.checkIfEqual(rangeList.size(), 3);
-      MathTools.checkIfEqual(times.length, 4);
-      MathTools.checkIfEqual(positions.length, 4);
-      MathTools.checkIfEqual(velocities.length, 4);
-      MathTools.checkIfEqual(intermediateTimes.length, 2);
-      MathTools.checkIfEqual(intermediateVelocities.length, 2);
-      MathTools.checkIfEqual(intermediateAccelerations.length, 2);
+      MathTools.checkEquals(rangeList.size(), 3);
+      MathTools.checkEquals(times.length, 4);
+      MathTools.checkEquals(positions.length, 4);
+      MathTools.checkEquals(velocities.length, 4);
+      MathTools.checkEquals(intermediateTimes.length, 2);
+      MathTools.checkEquals(intermediateVelocities.length, 2);
+      MathTools.checkEquals(intermediateAccelerations.length, 2);
 
       int[] reorderedSplineIndices = new int[] {0, 2, 1};
 
@@ -495,13 +495,13 @@ public class YoConcatenatedSplines
            double ghostTime, FramePoint ghostWaypoint, double[] intermediateTimes, FrameVector[] intermediateVelocities,
            FrameVector[] intermediateAccelerations)
    {
-      MathTools.checkIfEqual(rangeList.size(), 3);
-      MathTools.checkIfEqual(times.length, 4);
-      MathTools.checkIfEqual(positions.length, 4);
-      MathTools.checkIfEqual(velocities.length, 4);
-      MathTools.checkIfEqual(intermediateTimes.length, 2);
-      MathTools.checkIfEqual(intermediateVelocities.length, 2);
-      MathTools.checkIfEqual(intermediateAccelerations.length, 2);
+      MathTools.checkEquals(rangeList.size(), 3);
+      MathTools.checkEquals(times.length, 4);
+      MathTools.checkEquals(positions.length, 4);
+      MathTools.checkEquals(velocities.length, 4);
+      MathTools.checkEquals(intermediateTimes.length, 2);
+      MathTools.checkEquals(intermediateVelocities.length, 2);
+      MathTools.checkEquals(intermediateAccelerations.length, 2);
 
       int[] reorderedSplineIndices = new int[] {0, 2, 1};
 
@@ -542,14 +542,14 @@ public class YoConcatenatedSplines
    public void setSexticQuinticSexticUsingIntermediateVelocitiesAndAccelerations(double[] times, FramePoint[] positions, FrameVector[] velocities,
            FrameVector[] waypointAccelerations, double[] intermediateTimes, FrameVector[] intermediateVelocities, FrameVector[] intermediateAccelerations)
    {
-      MathTools.checkIfEqual(rangeList.size(), 3);
-      MathTools.checkIfEqual(times.length, 4);
-      MathTools.checkIfEqual(positions.length, 4);
-      MathTools.checkIfEqual(velocities.length, 4);
-      MathTools.checkIfEqual(waypointAccelerations.length, 2);
-      MathTools.checkIfEqual(intermediateTimes.length, 2);
-      MathTools.checkIfEqual(intermediateVelocities.length, 2);
-      MathTools.checkIfEqual(intermediateAccelerations.length, 2);
+      MathTools.checkEquals(rangeList.size(), 3);
+      MathTools.checkEquals(times.length, 4);
+      MathTools.checkEquals(positions.length, 4);
+      MathTools.checkEquals(velocities.length, 4);
+      MathTools.checkEquals(waypointAccelerations.length, 2);
+      MathTools.checkEquals(intermediateTimes.length, 2);
+      MathTools.checkEquals(intermediateVelocities.length, 2);
+      MathTools.checkEquals(intermediateAccelerations.length, 2);
 
       int[] reorderedSplineIndices = new int[] {0, 2, 1};
 
@@ -603,10 +603,10 @@ public class YoConcatenatedSplines
 
    public void setQuintics(double[] times, FramePoint[] positions, FrameVector[] velocities, FrameVector[] accelerations)
    {
-      MathTools.checkIfEqual(times.length, rangeList.size() + 1);
-      MathTools.checkIfEqual(positions.length, times.length);
-      MathTools.checkIfEqual(velocities.length, times.length);
-      MathTools.checkIfEqual(accelerations.length, times.length);
+      MathTools.checkEquals(times.length, rangeList.size() + 1);
+      MathTools.checkEquals(positions.length, times.length);
+      MathTools.checkEquals(velocities.length, times.length);
+      MathTools.checkEquals(accelerations.length, times.length);
 
       for (int i = 0; i < times.length - 1; i++)
       {
@@ -632,8 +632,8 @@ public class YoConcatenatedSplines
 
    public void setQuintics(YoConcatenatedSplines oldSplines, double[] oldTimes, double[] newTimes)
    {
-      MathTools.checkIfEqual(oldTimes.length, newTimes.length);
-      MathTools.checkIfEqual(oldTimes.length, rangeList.size() + 1);
+      MathTools.checkEquals(oldTimes.length, newTimes.length);
+      MathTools.checkEquals(oldTimes.length, rangeList.size() + 1);
 
       for (int i = 0; i < oldTimes.length - 1; i++)
       {

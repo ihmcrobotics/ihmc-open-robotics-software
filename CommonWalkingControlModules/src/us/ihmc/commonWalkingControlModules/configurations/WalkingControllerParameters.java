@@ -507,11 +507,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * In transfer, this is the maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * In transfer, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * This distance is determined by finding the stance length, and multiplying it by the returned variable.
     * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
-    * @return ICP proximity in meters
+    * @return percent of stance length for proximity
     */
-   public double getICPProximityToLeadingFootForToeOff()
+   public double getICPPercentOfStanceForDSToeOff()
    {
       return 0.0;
    }
@@ -553,5 +554,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getMinHeightDifferenceForStepUpOrDown()
    {
       return 0.04;
+   }
+
+   /**
+    * Sets an interpolation ratio for determining the toe off contact point. A ray is cast forward from the center
+    * of the foot through this point, and where the ray intersects with the foot polygon is where the toe off contact is set.
+    * This interpolation allows biasing between the ideal ICP plan by choosing only the exit CMP and the feedback CMP location.
+    * @return interpolation ratio (0.0 = all exit cmp, 1.0 = all desired CoP)
+    */
+   public double getToeOffContactInterpolation()
+   {
+      return 0.0;
    }
 }

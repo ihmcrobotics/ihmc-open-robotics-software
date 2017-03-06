@@ -242,16 +242,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       this.referenceFrame = referenceFrame;
    }
 
-   /**
-    * Sets this tuple to the location of the origin of passed in referenceFrame.
-    */
-   protected void setFromReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      ReferenceFrame thisReferenceFrame = getReferenceFrame();
-      setToZero(referenceFrame);
-      changeFrame(thisReferenceFrame);
-   }
-
    @Override
    public final void setToNaN()
    {

@@ -97,7 +97,7 @@ import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTre
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotConnectionGUIUpdater;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
@@ -4513,16 +4513,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       this.physics = physics;
       mySimulation.initPhysics(physics);
-   }
-
-   public void addForceSensor(WrenchContactPoint sensor)
-   {
-      mySimulation.addForceSensor(sensor);
-   }
-
-   public ArrayList<WrenchContactPoint> getForceSensors()
-   {
-      return mySimulation.getForceSensors();
    }
 
    public void repaintWindows()

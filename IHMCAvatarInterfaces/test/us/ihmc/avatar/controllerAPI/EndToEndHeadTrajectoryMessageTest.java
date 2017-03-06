@@ -8,7 +8,6 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -31,6 +30,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -41,35 +41,20 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 17.9)
-   @Test(timeout = 89000)
-   public void testSingleWaypoint() throws Exception
+   private RigidBody head;
+   private RigidBody chest;
+   private OneDoFJoint[] neckJoints;
+   private int numberOfJoints;
+
+   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      setupTest();
 
       Random random = new Random(564574L);
-
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      assertTrue(success);
-
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      humanoidReferenceFrames.updateFrames();
-
       double trajectoryTime = 1.0;
-      RigidBody head = fullRobotModel.getHead();
-      RigidBody chest = fullRobotModel.getChest();
 
-      OneDoFJoint[] neckClone = ScrewTools.cloneOneDoFJointPath(chest, head);
-
-      ScrewTestTools.setRandomPositionsWithinJointLimits(neckClone, random);
-
-      RigidBody headClone = neckClone[neckClone.length - 1].getSuccessor();
+      ScrewTestTools.setRandomPositionsWithinJointLimits(neckJoints, random);
+      RigidBody headClone = neckJoints[numberOfJoints - 1].getSuccessor();
       FrameOrientation desiredRandomChestOrientation = new FrameOrientation(headClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -78,7 +63,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
       drcSimulationTestHelper.send(headTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
 
       humanoidReferenceFrames.updateFrames();
@@ -91,6 +76,36 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       humanoidReferenceFrames.updateFrames();
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), head.getName(), scs);
+
+      assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), scs);
+   }
+
+   public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+   }
+
+   private void setupTest() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      ThreadTools.sleep(1000);
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      RigidBody head = fullRobotModel.getHead();
+      RigidBody chest = fullRobotModel.getChest();
+      neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      numberOfJoints = neckJoints.length;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+   }
+
+   @SuppressWarnings("unchecked")
+   public static HeadControlMode findControllerState(SimulationConstructionSet scs)
+   {
+      String headOrientatManagerName = HeadOrientationManager.class.getSimpleName();
+      String headControlStateName = "headControlState";
+      return ((EnumYoVariable<HeadControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
+>>>>>>> develop
    }
 
    public static double findControllerSwitchTime(SimulationConstructionSet scs)
