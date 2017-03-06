@@ -269,7 +269,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    }
 
    @Override
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return null;
    }

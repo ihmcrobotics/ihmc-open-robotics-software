@@ -131,16 +131,16 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
    @Override
    public void updateDynamicGraphicObjectListRegistry()
    {
-      if(robotControlElement.getDynamicGraphicObjectsListRegistry() != null)
+      if(robotControlElement.getYoGraphicsListRegistry() != null)
       {
     	  if(registry!=null)
                  registry.updateChangedValues();
          if (simulatedRobot != null)
          {
             simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
-            robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+            robotControlElement.getYoGraphicsListRegistry().setSimulationTransformToWorld(transformToWorld);
          }
-         robotControlElement.getDynamicGraphicObjectsListRegistry().update();
+         robotControlElement.getYoGraphicsListRegistry().update();
       }
    }
 

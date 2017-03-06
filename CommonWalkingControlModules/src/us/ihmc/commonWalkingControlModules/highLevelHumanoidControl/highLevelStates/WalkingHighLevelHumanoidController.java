@@ -129,7 +129,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       this.managerFactory = managerFactory;
 
-      this.yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
+      this.yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       // Getting parameters from the HighLevelHumanoidControllerToolbox
       this.controllerToolbox = controllerToolbox;

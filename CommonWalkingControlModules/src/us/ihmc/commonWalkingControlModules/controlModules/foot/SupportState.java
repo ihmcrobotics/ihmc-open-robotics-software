@@ -163,7 +163,7 @@ public class SupportState extends AbstractFootControlState
       durationForStanceLegStraightening.set(footControlHelper.getWalkingControllerParameters().getDurationForStanceLegStraightening());
       straightKneeAngle.set(footControlHelper.getWalkingControllerParameters().getStraightKneeAngle());
 
-      YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry graphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       frameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.2);
       if (graphicsListRegistry != null)
          graphicsListRegistry.registerYoGraphic(prefix + getClass().getSimpleName(), frameViz);

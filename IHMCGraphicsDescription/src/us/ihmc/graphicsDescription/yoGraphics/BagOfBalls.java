@@ -90,7 +90,7 @@ public class BagOfBalls
     * @param name String Name of the BagOfBalls
     * @param appearance Appearance for each of the balls.
     * @param parentRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     */
    public BagOfBalls(int numberOfBalls, double sizeInMeters, String name, AppearanceDefinition appearance, YoVariableRegistry parentRegistry,
@@ -108,7 +108,7 @@ public class BagOfBalls
     * @param name String Name of the BagOfBalls
     * @param appearance Appearance for each of the balls.
     * @param parentRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     */
    public BagOfBalls(int numberOfBalls, double sizeInMeters, String name, AppearanceDefinition appearance, GraphicType graphicType,
@@ -124,7 +124,7 @@ public class BagOfBalls
     * @param name String Name of the BagOfBalls
     * @param appearances ArrayList of the Appearance for each of the balls.
     * @param parentRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     */
    public BagOfBalls(double sizeInMeters, String name, List<AppearanceDefinition> appearances, YoVariableRegistry parentRegistry,
@@ -174,7 +174,7 @@ public class BagOfBalls
     * @param sizeInMeters double Size of each ball in meters.
     * @param name String Name of the BagOfBalls to create.
     * @param parentYoVariableRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     * @return BagOfBalls
     */
@@ -201,7 +201,7 @@ public class BagOfBalls
     * @param sizeInMeters double Size of each ball in meters.
     * @param name String Name of the BagOfBalls to create.
     * @param parentYoVariableRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     * @return BagOfBalls
     */

@@ -54,7 +54,7 @@ public abstract class SingleJointArticulatedContactable implements Contactable
 
       if (addDynamicGraphicForceVectorsForceVectors)
       {
-         robot.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+         robot.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       }
    }
 
