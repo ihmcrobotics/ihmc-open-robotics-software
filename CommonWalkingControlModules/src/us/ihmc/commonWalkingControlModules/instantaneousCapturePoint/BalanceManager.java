@@ -120,35 +120,35 @@ public class BalanceManager
 
    private final boolean useICPOptimizationControl;
 
-   public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry parentRegistry)
    {
-      this(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, parentRegistry, true);
+      this(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, parentRegistry, true);
    }
 
-   public BalanceManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry parentRegistry,
          boolean use2DCMPProjection)
    {
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
-      SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
+      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
 
       ICPControlGains icpControlGains = walkingControllerParameters.createICPControlGains(registry);
 
-      double controlDT = momentumBasedController.getControlDT();
-      double gravityZ = momentumBasedController.getGravityZ();
+      double controlDT = controllerToolbox.getControlDT();
+      double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
-      this.controllerToolbox = momentumBasedController;
-      yoTime = momentumBasedController.getYoTime();
+      this.controllerToolbox = controllerToolbox;
+      yoTime = controllerToolbox.getYoTime();
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
-      bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
+      bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       useICPOptimizationControl = walkingControllerParameters.useOptimizationBasedICPController() && (icpOptimizationParameters != null);
 
@@ -167,7 +167,7 @@ public class BalanceManager
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
-      icpPlanner.setOmega0(momentumBasedController.getOmega0());
+      icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferTime(walkingControllerParameters.getDefaultTransferTime());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
@@ -177,12 +177,12 @@ public class BalanceManager
       maxICPErrorBeforeSingleSupportY.set(walkingControllerParameters.getMaxICPErrorBeforeSingleSupportY());
 
       YoPDGains pelvisXYControlGains = walkingControllerParameters.createPelvisICPBasedXYControlGains(registry);
-      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(momentumBasedController, bipedSupportPolygons, pelvisXYControlGains, registry);
+      pelvisICPBasedTranslationManager = new PelvisICPBasedTranslationManager(controllerToolbox, bipedSupportPolygons, pelvisXYControlGains, registry);
 
-      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, momentumBasedController, walkingControllerParameters, registry);
+      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
       double maxAllowedDistanceCMPSupport = walkingControllerParameters.getMaxAllowedDistanceCMPSupport();
-      SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = momentumBasedController.getDefaultFootPolygons();
+      SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = controllerToolbox.getDefaultFootPolygons();
       momentumRecoveryControlModule = new MomentumRecoveryControlModule(defaultFootPolygons, maxAllowedDistanceCMPSupport, registry, yoGraphicsListRegistry);
 
       controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());

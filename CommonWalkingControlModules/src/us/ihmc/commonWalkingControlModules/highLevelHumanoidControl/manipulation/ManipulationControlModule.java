@@ -50,12 +50,12 @@ public class ManipulationControlModule
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public ManipulationControlModule(ArmControllerParameters armControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public ManipulationControlModule(ArmControllerParameters armControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry parentRegistry)
    {
-      fullRobotModel = momentumBasedController.getFullRobotModel();
+      fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handControlModules = new SideDependentList<HandControlModule>();
@@ -65,7 +65,7 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters,
+         HandControlModule individualHandControlModule = new HandControlModule(robotSide, controllerToolbox, armControllerParameters,
                jointspaceControlGains, taskspaceGains, registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }

@@ -69,11 +69,11 @@ public class HeadOrientationManager
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final double[] initialJointPositions;
 
-   public HeadOrientationManager(HighLevelHumanoidControllerToolbox momentumBasedController, HeadOrientationControllerParameters headOrientationControllerParameters,
+   public HeadOrientationManager(HighLevelHumanoidControllerToolbox controllerToolbox, HeadOrientationControllerParameters headOrientationControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      yoTime = momentumBasedController.getYoTime();
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      yoTime = controllerToolbox.getYoTime();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
       stateMachine = new GenericStateMachine<>("headControlState", "headControlState" + "SwitchTime", HeadControlMode.class, yoTime, registry);
 

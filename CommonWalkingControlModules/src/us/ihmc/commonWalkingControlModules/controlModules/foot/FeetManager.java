@@ -54,21 +54,21 @@ public class FeetManager
    private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
 
    // TODO Needs to be cleaned up someday... (Sylvain)
-   public FeetManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      this.controllerToolbox = momentumBasedController;
-      feet = momentumBasedController.getContactableFeet();
+      this.controllerToolbox = controllerToolbox;
+      feet = controllerToolbox.getContactableFeet();
 
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
-         contactStates.put(robotSide, momentumBasedController.getContactState(feet.get(robotSide)));
+         contactStates.put(robotSide, controllerToolbox.getContactState(feet.get(robotSide)));
 
       toeOffHelper = new ToeOffHelper(contactStates, feet, walkingControllerParameters, registry);
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, toeOffHelper, walkingControllerParameters, feet, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(controllerToolbox, toeOffHelper, walkingControllerParameters, feet, registry);
 
-      this.footSwitches = momentumBasedController.getFootSwitches();
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      this.footSwitches = controllerToolbox.getFootSwitches();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
@@ -81,7 +81,7 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffHelper, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, momentumBasedController, registry);
+               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, controllerToolbox, registry);
          footControlModule.setAttemptToStraightenLegs(walkingControllerParameters.attemptToStraightenLegs());
 
          footControlModules.put(robotSide, footControlModule);

@@ -67,11 +67,11 @@ public class WalkingCommandConsumer
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
-   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox momentumBasedController, WalkingMessageHandler walkingMessageHandler, HighLevelControlManagerFactory managerFactory,
+   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingMessageHandler walkingMessageHandler, HighLevelControlManagerFactory managerFactory,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.walkingMessageHandler = walkingMessageHandler;
-      yoTime = momentumBasedController.getYoTime();
+      yoTime = controllerToolbox.getYoTime();
 
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;

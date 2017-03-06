@@ -14,10 +14,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final DoubleYoVariable minimumTransferTime = new DoubleYoVariable("minimumTransferTime", registry);
 
    public TransferToWalkingSingleSupportState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory,
+         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
          WalkingFailureDetectionControlModule failureDetectionControlModule, double minimumTransferTime, YoVariableRegistry parentRegistry)
    {
-      super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingMessageHandler, momentumBasedController, managerFactory,
+      super(transferToSide, WalkingStateEnum.getWalkingTransferState(transferToSide), walkingMessageHandler, controllerToolbox, managerFactory,
             failureDetectionControlModule, parentRegistry);
 
       this.minimumTransferTime.set(minimumTransferTime);

@@ -30,7 +30,7 @@ public class StandingState extends WalkingState
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
    private final BooleanYoVariable doPreparePelvisForLocomotion = new BooleanYoVariable("doPreparePelvisForLocomotion", registry);
 
-   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
@@ -38,7 +38,7 @@ public class StandingState extends WalkingState
 
       this.commandInputManager = commandInputManager;
       this.walkingMessageHandler = walkingMessageHandler;
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();

@@ -769,8 +769,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
-      HighLevelHumanoidControllerToolbox momentumBasedController = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
-                                                                                          .getMomentumBasedController();
+      HighLevelHumanoidControllerToolbox controllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
+                                                                                          .getHighLevelHumanoidControllerToolbox();
 
       int numberOfChanges = 4;
 
@@ -782,7 +782,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          if (!success) break;
 
          // check if the found support polygon is close to the actual one
-         FrameConvexPolygon2d foundSupport = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
+         FrameConvexPolygon2d foundSupport = controllerToolbox.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
          FrameConvexPolygon2d actualSupport = new FrameConvexPolygon2d(foundSupport.getReferenceFrame(), newContactPoints);
          double epsilon = 5.0; // cm^2
          boolean close = Math.abs(foundSupport.getArea() - actualSupport.getArea()) * 10000 < epsilon;

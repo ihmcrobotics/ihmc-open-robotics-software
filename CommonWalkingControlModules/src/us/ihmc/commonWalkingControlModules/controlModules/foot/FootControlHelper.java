@@ -31,21 +31,21 @@ public class FootControlHelper
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
 
-   public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
+      contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {
-         partialFootholdControlModule = new PartialFootholdControlModule(robotSide, momentumBasedController,
+         partialFootholdControlModule = new PartialFootholdControlModule(robotSide, controllerToolbox,
                walkingControllerParameters, registry, yoGraphicsListRegistry);
       }
       else
@@ -57,10 +57,10 @@ public class FootControlHelper
 
       fullyConstrainedNormalContactVector = new FrameVector(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
 
-      bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
+      bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
-            walkingControllerParameters, momentumBasedController, registry);
+            walkingControllerParameters, controllerToolbox, registry);
    }
 
    private final FramePoint2d desiredCoP = new FramePoint2d();
@@ -94,7 +94,7 @@ public class FootControlHelper
       return contactableFoot;
    }
 
-   public HighLevelHumanoidControllerToolbox getMomentumBasedController()
+   public HighLevelHumanoidControllerToolbox getHighLevelHumanoidControllerToolbox()
    {
       return controllerToolbox;
    }

@@ -266,7 +266,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the MomentumBasedController ////////////////////////////////////////////////////////
+      // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
@@ -284,7 +284,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
 
-      managerFactory.setMomentumBasedController(controllerToolbox);
+      managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
@@ -495,10 +495,10 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       return statusOutputManager;
    }
 
-   public HighLevelHumanoidControllerToolbox getMomentumBasedController()
+   public HighLevelHumanoidControllerToolbox getHighLevelHumanoidControllerToolbox()
    {
       if (controllerToolbox == null)
-         throw new RuntimeException("momentumBasedController was not created yet.");
+         throw new RuntimeException(HighLevelHumanoidControllerToolbox.class.getSimpleName() + " has not been created yet.");
 
       return controllerToolbox;
    }

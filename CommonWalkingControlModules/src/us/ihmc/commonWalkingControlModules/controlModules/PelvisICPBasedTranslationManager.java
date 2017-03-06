@@ -90,16 +90,16 @@ public class PelvisICPBasedTranslationManager
    private final LongYoVariable numberOfQueuedCommands;
    private final CommandArrayDeque<PelvisTrajectoryCommand> commandQueue = new CommandArrayDeque<>(PelvisTrajectoryCommand.class);
 
-   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox momentumBasedController, BipedSupportPolygons bipedSupportPolygons, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, BipedSupportPolygons bipedSupportPolygons, YoPDGains pelvisXYControlGains, YoVariableRegistry parentRegistry)
    {
       supportPolygonSafeMargin.set(0.04);
       frozenOffsetDecayAlpha.set(0.998);
 
-      yoTime = momentumBasedController.getYoTime();
-      controlDT = momentumBasedController.getControlDT();
-      pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
-      midFeetZUpFrame = momentumBasedController.getReferenceFrames().getMidFeetZUpFrame();
-      ankleZUpFrames = momentumBasedController.getReferenceFrames().getAnkleZUpReferenceFrames();
+      yoTime = controllerToolbox.getYoTime();
+      controlDT = controllerToolbox.getControlDT();
+      pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
+      midFeetZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
+      ankleZUpFrames = controllerToolbox.getReferenceFrames().getAnkleZUpReferenceFrames();
 
       this.bipedSupportPolygons = bipedSupportPolygons;
 

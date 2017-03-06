@@ -29,14 +29,14 @@ public class TransferToStandingState extends WalkingState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
-   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(WalkingStateEnum.TO_STANDING, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
 
       this.walkingMessageHandler = walkingMessageHandler;
-      this.controllerToolbox = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
