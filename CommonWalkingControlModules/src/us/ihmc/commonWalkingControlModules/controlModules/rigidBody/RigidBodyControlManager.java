@@ -56,33 +56,33 @@ public class RigidBodyControlManager
    private final OneDoFJoint[] jointsAtDesiredPosition;
 
    private final ReferenceFrame bodyFrame;
-   private final ReferenceFrame rootFrame;
+   private final ReferenceFrame baseFrame;
 
    private final BooleanYoVariable allJointsEnabled;
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   public RigidBodyControlManager(RigidBody bodyToControl, RigidBody rootBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
-         List<String> positionControlledJointNames, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame rootFrame, DoubleYoVariable yoTime,
+   public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
+         List<String> positionControlledJointNames, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame baseFrame, DoubleYoVariable yoTime,
          YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoVariableRegistry(namePrefix);
       bodyFrame = bodyToControl.getBodyFixedFrame();
-      this.rootFrame = rootFrame;
+      this.baseFrame = baseFrame;
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
 
-      OneDoFJoint[] jointsToControl = ScrewTools.createOneDoFJointPath(rootBody, bodyToControl);
+      OneDoFJoint[] jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
       jointsOriginal = jointsToControl;
-      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(rootBody, bodyToControl);
+      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(baseBody, bodyToControl);
       initialJointPositions = new double[jointsOriginal.length];
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, rootBody, elevator, controlFrameMap, rootFrame, yoTime, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, baseBody, elevator, controlFrameMap, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
       ArrayList<OneDoFJoint> positionControlledJoints = new ArrayList<>();
@@ -160,7 +160,7 @@ public class RigidBodyControlManager
    public void holdOrientationInTaskspace()
    {
       computeDesiredOrientation(initialOrientation);
-      initialOrientation.changeFrame(rootFrame);
+      initialOrientation.changeFrame(baseFrame);
       taskspaceControlState.holdOrientation(initialOrientation);
       requestState(taskspaceControlState.getStateEnum());
    }
@@ -168,7 +168,7 @@ public class RigidBodyControlManager
    public void holdPoseInTaskspace()
    {
       computeDesiredPose(initialPose);
-      initialPose.changeFrame(rootFrame);
+      initialPose.changeFrame(baseFrame);
       taskspaceControlState.holdPose(initialPose);
       requestState(taskspaceControlState.getStateEnum());
    }
