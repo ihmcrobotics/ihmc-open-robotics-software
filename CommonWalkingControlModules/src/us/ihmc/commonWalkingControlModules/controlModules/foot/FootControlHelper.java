@@ -42,7 +42,7 @@ public class FootControlHelper
       RigidBody foot = contactableFoot.getRigidBody();
       String namePrefix = foot.getName();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       if (walkingControllerParameters.getOrCreateExplorationParameters(registry) != null)
       {
          partialFootholdControlModule = new PartialFootholdControlModule(robotSide, controllerToolbox,

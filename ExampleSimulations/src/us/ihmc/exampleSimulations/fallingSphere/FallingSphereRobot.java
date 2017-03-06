@@ -121,7 +121,7 @@ public class FallingSphereRobot extends Robot
       initRobot();
       
       this.getRobotsYoVariableRegistry().addChild(registry);
-      this.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+      this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
    }
 
    private Link ball()

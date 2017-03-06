@@ -354,7 +354,7 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
    }
 
    @Override
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return null;
    }

@@ -79,7 +79,7 @@ public class PushRecoveryControlModule
       enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
       enablePushRecovery.set(ENABLE); // todo add some smartness on whether ot not to enable this if using the icp optimization
 
-      yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
+      yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
       footstepAdjustor = new FootstepAdjustor(feet, registry, yoGraphicsListRegistry);
 

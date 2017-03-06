@@ -106,7 +106,7 @@ public class HandControlModule
 
       if (REGISTER_YOVARIABLES)
       {
-         yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
+         yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
          parentRegistry.addChild(registry);
       }
       else

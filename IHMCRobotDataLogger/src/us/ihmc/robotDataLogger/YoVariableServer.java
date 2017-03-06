@@ -45,7 +45,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    // Data to send
    private List<RigidBody> mainBodies = new ArrayList<>();
    private YoVariableRegistry mainRegistry;
-   private YoGraphicsListRegistry mainDynamicGraphicObjectsListRegistry;
+   private YoGraphicsListRegistry mainYoGraphicsListRegistry;
    private final ArrayList<ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry>> variableData = new ArrayList<>();
    
    // Variable data
@@ -133,9 +133,9 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
       int mainOffset = controlServer.getHandshakeBuilder().addRegistry(mainRegistry, variables);
-      if(mainDynamicGraphicObjectsListRegistry != null)
+      if(mainYoGraphicsListRegistry != null)
       {
-         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(mainDynamicGraphicObjectsListRegistry);
+         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(mainYoGraphicsListRegistry);
       }
       FullStateBuffer.Builder builder = new FullStateBuffer.Builder(mainOffset, variables, jointHolders);
       mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
@@ -279,7 +279,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
          mainBodies.add(fullRobotModel.getElevator());
       }
       mainRegistry = registry;
-      mainDynamicGraphicObjectsListRegistry = yoGraphicsListRegistry;
+      mainYoGraphicsListRegistry = yoGraphicsListRegistry;
       
    }
    
