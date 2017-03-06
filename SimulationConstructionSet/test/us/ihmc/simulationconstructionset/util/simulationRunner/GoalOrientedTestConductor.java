@@ -219,6 +219,11 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       sustainGoals.add(YoVariableTestGoal.doubleLessThan(timeYoVariable, timeYoVariable.getDoubleValue() + timeLimit));
    }
    
+   public void addDurationGoal(DoubleYoVariable timeYoVariable, double durationFromNow)
+   {
+      terminalGoals.add(YoVariableTestGoal.timeInFuture(timeYoVariable, durationFromNow));
+   }
+   
    public void addSustainGoal(YoVariableTestGoal yoVariableTestGoal)
    {
       sustainGoals.add(yoVariableTestGoal);
