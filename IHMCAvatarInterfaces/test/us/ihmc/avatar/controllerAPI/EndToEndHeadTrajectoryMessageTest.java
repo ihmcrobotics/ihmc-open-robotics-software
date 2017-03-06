@@ -7,14 +7,12 @@ import java.util.Random;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -30,6 +28,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -40,33 +39,20 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 17.9)
-   @Test(timeout = 89000)
-   public void testSingleWaypoint() throws Exception
+   private RigidBody head;
+   private RigidBody chest;
+   private OneDoFJoint[] neckJoints;
+   private int numberOfJoints;
+
+   public void testSingleWaypoint() throws SimulationExceededMaximumTimeException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      setupTest();
 
       Random random = new Random(564574L);
-
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
-
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      assertTrue(success);
-
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-
       double trajectoryTime = 1.0;
-      RigidBody head = fullRobotModel.getHead();
-      RigidBody chest = fullRobotModel.getChest();
 
-      OneDoFJoint[] neckClone = ScrewTools.cloneOneDoFJointPath(chest, head);
-
-      ScrewTestTools.setRandomPositionsWithinJointLimits(neckClone, random);
-
-      RigidBody headClone = neckClone[neckClone.length - 1].getSuccessor();
+      ScrewTestTools.setRandomPositionsWithinJointLimits(neckJoints, random);
+      RigidBody headClone = neckJoints[numberOfJoints - 1].getSuccessor();
       FrameOrientation desiredRandomChestOrientation = new FrameOrientation(headClone.getBodyFixedFrame());
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -75,7 +61,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
       drcSimulationTestHelper.send(headTrajectoryMessage);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
       desiredRandomChestOrientation.changeFrame(chest.getBodyFixedFrame());
 
@@ -83,8 +69,27 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      
+
       assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), scs);
+   }
+
+   public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+   }
+
+   private void setupTest() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      ThreadTools.sleep(1000);
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      RigidBody head = fullRobotModel.getHead();
+      RigidBody chest = fullRobotModel.getChest();
+      neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
+      numberOfJoints = neckJoints.length;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
    @SuppressWarnings("unchecked")
