@@ -149,14 +149,14 @@ public class SwingState extends AbstractUnconstrainedState
       controlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
-      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
-      stanceConfigurationProvider = new CurrentConfigurationProvider(momentumBasedController.getReferenceFrames().getFootFrame(robotSide.getOppositeSide()));
+      stanceConfigurationProvider = new CurrentConfigurationProvider(controllerToolbox.getReferenceFrames().getFootFrame(robotSide.getOppositeSide()));
       initialConfigurationProvider = new CurrentConfigurationProvider(soleFrame);
       initialVelocityProvider = new CurrentLinearVelocityProvider(soleFrame, rigidBody, twistCalculator);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getDynamicGraphicObjectsListRegistry();
 
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             finalConfigurationProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingTimeProvider, registry);
@@ -219,8 +219,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
    {
-      ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-      ReferenceFrame footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
+      ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
+      ReferenceFrame footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
       FramePoint2d toeContactPoint2d = new FramePoint2d();
       contactableFoot.getToeOffContactPoint(toeContactPoint2d);
       FramePoint toeContactPoint = new FramePoint();

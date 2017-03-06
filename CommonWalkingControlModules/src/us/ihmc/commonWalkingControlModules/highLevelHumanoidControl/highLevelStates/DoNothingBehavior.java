@@ -19,7 +19,7 @@ public class DoNothingBehavior extends HighLevelBehavior
 {
    private static final HighLevelState controllerState = HighLevelState.DO_NOTHING_BEHAVIOR;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
@@ -33,7 +33,7 @@ public class DoNothingBehavior extends HighLevelBehavior
       super(controllerState);
 
       this.bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       allRobotJoints = momentumBasedController.getFullRobotModel().getOneDoFJoints();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -56,7 +56,7 @@ public class DoNothingBehavior extends HighLevelBehavior
    public void doAction()
    {
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      momentumBasedController.update();
+      controllerToolbox.update();
       for (int i = 0; i < allRobotJoints.length; i++)
       {
          allRobotJoints[i].setTau(0.0);

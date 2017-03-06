@@ -40,7 +40,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final GenericStateMachine<HighLevelState, HighLevelBehavior> stateMachine;
    private final HighLevelState initialBehavior;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
@@ -81,7 +81,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
          this.registry.addChild(highLevelBehaviors.get(i).getYoVariableRegistry());
       }
       this.initialBehavior = initialBehavior;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
       this.registry.addChild(momentumBasedController.getYoVariableRegistry());
 
@@ -159,7 +159,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    public void initialize()
    {
       controllerCore.initialize();
-      momentumBasedController.initialize();
+      controllerToolbox.initialize();
       stateMachine.setCurrentState(initialBehavior);
    }
 
@@ -189,11 +189,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private void reportDesiredCenterOfPressureForEstimator()
    {
-      SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
-      FullHumanoidRobotModel fullHumanoidRobotModel = momentumBasedController.getFullRobotModel();
+      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
+      FullHumanoidRobotModel fullHumanoidRobotModel = controllerToolbox.getFullRobotModel();
       for (RobotSide robotSide : RobotSide.values)
       {
-         momentumBasedController.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
+         controllerToolbox.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
          centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
       }
    }

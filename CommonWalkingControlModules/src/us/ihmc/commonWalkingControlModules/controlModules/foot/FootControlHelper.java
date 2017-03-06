@@ -20,7 +20,7 @@ public class FootControlHelper
 
    private final RobotSide robotSide;
    private final ContactableFoot contactableFoot;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingControllerParameters walkingControllerParameters;
    private final PartialFootholdControlModule partialFootholdControlModule;
 
@@ -35,7 +35,7 @@ public class FootControlHelper
          YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       this.walkingControllerParameters = walkingControllerParameters;
 
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
@@ -67,7 +67,7 @@ public class FootControlHelper
 
    public void update()
    {
-      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
       if (desiredCoP.containsNaN())
          isDesiredCoPOnEdge.set(false);
@@ -96,7 +96,7 @@ public class FootControlHelper
 
    public HighLevelHumanoidControllerToolbox getMomentumBasedController()
    {
-      return momentumBasedController;
+      return controllerToolbox;
    }
 
    public WalkingControllerParameters getWalkingControllerParameters()

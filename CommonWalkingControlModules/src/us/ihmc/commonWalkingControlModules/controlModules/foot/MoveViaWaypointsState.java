@@ -55,7 +55,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
       String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression() + "FootMoveViaWaypoints";
 
-      footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
+      footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
 
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, worldFrame, registry);

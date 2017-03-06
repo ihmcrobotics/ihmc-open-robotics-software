@@ -51,7 +51,7 @@ public class FootControlModule
    private final EnumYoVariable<ConstraintType> requestedState;
    private final EnumMap<ConstraintType, boolean[]> contactStatesMap = new EnumMap<ConstraintType, boolean[]>(ConstraintType.class);
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final RobotSide robotSide;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
@@ -94,7 +94,7 @@ public class FootControlModule
       parentRegistry.addChild(registry);
       footControlHelper = new FootControlHelper(robotSide, walkingControllerParameters, momentumBasedController, registry);
 
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       this.robotSide = robotSide;
 
       footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
@@ -318,7 +318,7 @@ public class FootControlModule
          footControlHelper.setFullyConstrainedNormalContactVector(normalContactVector);
       }
 
-      momentumBasedController.setPlaneContactState(contactableFoot, contactStatesMap.get(constraintType), normalContactVector);
+      controllerToolbox.setPlaneContactState(contactableFoot, contactStatesMap.get(constraintType), normalContactVector);
 
       if (getCurrentConstraintType() == constraintType) // Use resetCurrentState() for such case
          return;
@@ -545,6 +545,6 @@ public class FootControlModule
       {
          footControlHelper.getPartialFootholdControlModule().reset();
       }
-      momentumBasedController.resetFootSupportPolygon(robotSide);
+      controllerToolbox.resetFootSupportPolygon(robotSide);
    }
 }

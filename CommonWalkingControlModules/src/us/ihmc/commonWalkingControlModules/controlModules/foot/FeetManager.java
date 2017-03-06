@@ -49,7 +49,7 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
 
@@ -57,7 +57,7 @@ public class FeetManager
    public FeetManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       feet = momentumBasedController.getContactableFeet();
 
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -276,7 +276,7 @@ public class FeetManager
       footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
 
       if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
-         momentumBasedController.restorePreviousFootContactPoints(robotSide);
+         controllerToolbox.restorePreviousFootContactPoints(robotSide);
 
       FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
       supportFootControlModule.setAllowFootholdAdjustments(true);

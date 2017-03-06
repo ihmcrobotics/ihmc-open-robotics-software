@@ -66,7 +66,7 @@ public class LogDataProcessorHelper
 
    private final SimulationConstructionSet scs;
 
-   private final UpdatableHighLevelHumanoidControllerToolbox momentumBasedController;
+   private final UpdatableHighLevelHumanoidControllerToolbox controllerToolbox;
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final DoubleYoVariable yoTime;
 
@@ -128,7 +128,7 @@ public class LogDataProcessorHelper
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
       yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
-      momentumBasedController = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames,
+      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames,
             stateEstimatorFootSwitches, null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, null, controllerDT,
             updatables, null);
 
@@ -216,7 +216,7 @@ public class LogDataProcessorHelper
    {
       sensorReader.read();
       twistCalculator.compute();
-      momentumBasedController.update();
+      controllerToolbox.update();
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
@@ -286,7 +286,7 @@ public class LogDataProcessorHelper
 
    public HighLevelHumanoidControllerToolbox getMomentumBasedController()
    {
-      return momentumBasedController;
+      return controllerToolbox;
    }
 
    public YoFramePoint findYoFramePoint(String pointPrefix, ReferenceFrame pointFrame)
