@@ -14,6 +14,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassJacobian
@@ -26,6 +27,7 @@ public class CenterOfMassJacobian
    private final Twist tempUnitTwist = new Twist();
    private final Vector3D tempJacobianColumn = new Vector3D();
    private final Vector3D tempVector = new Vector3D();
+   private final FrameVector tempFrameVector = new FrameVector();
    private final DenseMatrix64F tempJointVelocitiesMatrix;
    private final DenseMatrix64F centerOfMassVelocityMatrix;
 
@@ -180,14 +182,20 @@ public class CenterOfMassJacobian
    public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
    {
       ScrewTools.getJointVelocitiesMatrix(joints, tempJointVelocitiesMatrix);
-      getCenterOfMassVelocity(centerOfMassVelocityToPack, tempJointVelocitiesMatrix);
+      CommonOps.mult(jacobianMatrix, tempJointVelocitiesMatrix, centerOfMassVelocityMatrix);
+      centerOfMassVelocityToPack.setIncludingFrame(rootFrame, centerOfMassVelocityMatrix);
    }
 
-   private void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack, DenseMatrix64F jointVelocities)
+   public void getCenterOfMassVelocity(FrameVector2d centerOfMassVelocityToPack)
    {
-      CommonOps.mult(jacobianMatrix, jointVelocities, centerOfMassVelocityMatrix);
-      centerOfMassVelocityToPack.setIncludingFrame(rootFrame, centerOfMassVelocityMatrix.get(0, 0), centerOfMassVelocityMatrix.get(1, 0),
-                                     centerOfMassVelocityMatrix.get(2, 0));
+      getCenterOfMassVelocity(rootFrame, centerOfMassVelocityToPack);
+   }
+
+   public void getCenterOfMassVelocity(ReferenceFrame desiredOutputFrame, FrameVector2d centerOfMassVelocityToPack)
+   {
+      getCenterOfMassVelocity(tempFrameVector);
+      tempFrameVector.changeFrame(desiredOutputFrame);
+      centerOfMassVelocityToPack.setByProjectionOntoXYPlaneIncludingFrame(tempFrameVector);
    }
 
    private void setColumn(Twist twist, FramePoint comPositionScaledByMass, double subTreeMass, int column)
