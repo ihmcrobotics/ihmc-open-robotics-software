@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -14,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 /**
  * @author Twan Koolen
  */
-public class Line2d implements Geometry2d<Line2d>
+public class Line2d implements GeometryObject<Line2d>
 {
    // TODO: think about usage of epsilons in the methods.
 
@@ -339,7 +341,6 @@ public class Line2d implements Geometry2d<Line2d>
       return new Line2d(point, perpendicularVector());
    }
 
-   @Override
    public Point2D intersectionWith(LineSegment2d lineSegment)
    {
       return lineSegment.intersectionWith(this);
@@ -351,15 +352,14 @@ public class Line2d implements Geometry2d<Line2d>
       return normalizedVector.dot(line.getNormalizedVector()) < 1e-7;
    }
 
-   @Override
    public Point2D intersectionWith(Line2d secondLine)
    {
-      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector);
+      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, normalizedVector, secondLine.point, secondLine.normalizedVector);
    }
 
    public boolean intersectionWith(Line2d secondLine, Point3DBasics intersectionToPack)
    {
-      boolean success = GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, tempPoint2d);
+      boolean success = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, normalizedVector, secondLine.point, secondLine.normalizedVector, tempPoint2d);
       if (success)
          intersectionToPack.set(tempPoint2d.getX(), tempPoint2d.getY(), intersectionToPack.getZ());
       return success;
@@ -367,22 +367,20 @@ public class Line2d implements Geometry2d<Line2d>
 
    public boolean intersectionWith(Line2d secondLine, Point2DBasics intersectionToPack)
    {
-      return GeometryTools.getIntersectionBetweenTwoLines(point, normalizedVector, secondLine.point, secondLine.normalizedVector, intersectionToPack);
+      return EuclidGeometryTools.intersectionBetweenTwoLine2Ds(point, normalizedVector, secondLine.point, secondLine.normalizedVector, intersectionToPack);
    }
 
-   @Override
    public Point2D[] intersectionWith(ConvexPolygon2d convexPolygon)
    {
       return convexPolygon.intersectionWith(this);
    }
 
-   @Override
    public double distance(Point2DReadOnly point)
    {
       tempPoint2d.set(this.point);
       tempPoint2d.add(normalizedVector);
 
-      return GeometryTools.distanceFromPointToLine(point, this.point, tempPoint2d);
+      return EuclidGeometryTools.distanceFromPoint2DToLine2D(point, this.point, tempPoint2d);
    }
 
    public double distanceSquared(Point2DReadOnly point)
@@ -392,19 +390,16 @@ public class Line2d implements Geometry2d<Line2d>
       return distance * distance;
    }
 
-   @Override
    public double distance(Line2d line)
    {
       throw new RuntimeException("Not yet implemented");
    }
 
-   @Override
    public double distance(LineSegment2d lineSegment)
    {
       throw new RuntimeException("Not yet implemented");
    }
 
-   @Override
    public double distance(ConvexPolygon2d convexPolygon)
    {
       throw new RuntimeException("Not yet implemented");
@@ -427,14 +422,12 @@ public class Line2d implements Geometry2d<Line2d>
       normalizedVector.applyTransform(transform);
    }
 
-   @Override
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       point.applyTransform(transform, false);
       normalizedVector.applyTransform(transform, false);
    }
 
-   @Override
    public Line2d applyTransformCopy(Transform transform)
    {
       Line2d copy = new Line2d(this);
@@ -442,7 +435,6 @@ public class Line2d implements Geometry2d<Line2d>
       return copy;
    }
 
-   @Override
    public Line2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       Line2d copy = new Line2d(this);
@@ -482,7 +474,7 @@ public class Line2d implements Geometry2d<Line2d>
 
    private boolean isPointOnSideOfLine(double x, double y, RobotSide side)
    {
-      return GeometryTools.isPointOnSideOfLine(x, y, point, normalizedVector, side);
+      return EuclidGeometryTools.isPoint2DOnSideOfLine2D(x, y, point, normalizedVector, side == RobotSide.LEFT);
    }
 
    /**
@@ -565,10 +557,9 @@ public class Line2d implements Geometry2d<Line2d>
     * 
     * @param point2d the point to project on this line. Modified.
     */
-   @Override
    public void orthogonalProjection(Point2DBasics point2d)
    {
-      GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, point2d);
+      EuclidGeometryTools.orthogonalProjectionOnLine2D(point2d, point, normalizedVector, point2d);
    }
 
    /**
@@ -580,12 +571,11 @@ public class Line2d implements Geometry2d<Line2d>
     * @param point2d the point to compute the projection of. Not modified.
     * @return the projection of the point onto the line or {@code null} if the method failed.
     */
-   @Override
    public Point2D orthogonalProjectionCopy(Point2DReadOnly point2d)
    {
       Point2D projection = new Point2D();
 
-      boolean success = GeometryTools.getOrthogonalProjectionOnLine(point2d, point, normalizedVector, projection);
+      boolean success = EuclidGeometryTools.orthogonalProjectionOnLine2D(point2d, point, normalizedVector, projection);
       if (!success)
          return null;
       else

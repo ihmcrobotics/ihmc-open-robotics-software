@@ -72,6 +72,7 @@ public class BalanceManager
 
    private final YoFramePoint2d yoPerfectCMP = new YoFramePoint2d("perfectCMP", worldFrame, registry);
    private final YoFramePoint2d yoDesiredCMP = new YoFramePoint2d("desiredCMP", worldFrame, registry);
+
    // TODO It seems that the achieved CMP can be off sometimes.
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
@@ -333,17 +334,17 @@ public class BalanceManager
          linearMomentumRateOfChangeControlModule.setDefaultMomentumWeight();
       }
 
-         linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
-         linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
-         linearMomentumRateOfChangeControlModule.setOmega0(omega0);
-         linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
-         linearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
-         linearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
-         linearMomentumRateOfChangeControlModule.setPerfectCMP(perfectCMP);
-         linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
-         yoDesiredCMP.getFrameTuple2d(desiredCMP);
-         linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
-         yoDesiredCMP.set(desiredCMP);
+      linearMomentumRateOfChangeControlModule.setDesiredCenterOfMassHeightAcceleration(desiredCoMHeightAcceleration);
+      linearMomentumRateOfChangeControlModule.setCapturePoint(capturePoint2d);
+      linearMomentumRateOfChangeControlModule.setOmega0(omega0);
+      linearMomentumRateOfChangeControlModule.setDesiredCapturePoint(adjustedDesiredCapturePoint2d);
+      linearMomentumRateOfChangeControlModule.setFinalDesiredCapturePoint(finalDesiredCapturePoint2d);
+      linearMomentumRateOfChangeControlModule.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateOfChangeControlModule.setPerfectCMP(perfectCMP);
+      linearMomentumRateOfChangeControlModule.setSupportLeg(supportLeg);
+      yoDesiredCMP.getFrameTuple2d(desiredCMP);
+      linearMomentumRateOfChangeControlModule.compute(desiredCMP, desiredCMP);
+      yoDesiredCMP.set(desiredCMP);
    }
 
    public Footstep createFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
@@ -385,6 +386,11 @@ public class BalanceManager
    public void getDesiredCMP(FramePoint2d desiredCMPToPack)
    {
       yoDesiredCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
+   }
+
+   public void getPerfectCMP(FramePoint2d desiredCMPToPack)
+   {
+      yoPerfectCMP.getFrameTuple2dIncludingFrame(desiredCMPToPack);
    }
 
    public void getDesiredICP(FramePoint2d desiredICPToPack)

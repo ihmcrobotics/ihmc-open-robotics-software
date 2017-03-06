@@ -72,7 +72,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
    public void initialize()
    {
       double trajectoryTime = trajectoryTimeProvider.getValue();
-      MathTools.checkIfInRange(trajectoryTime, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime, 0.0, Double.POSITIVE_INFINITY);
       this.trajectoryTime.set(trajectoryTime);
       currentTime.set(0.0);
       parameterPolynomial.setQuintic(0.0, trajectoryTime, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);

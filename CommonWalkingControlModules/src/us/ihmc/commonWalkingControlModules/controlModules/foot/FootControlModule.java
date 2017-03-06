@@ -22,10 +22,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -76,14 +73,17 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
+   private final ToeOffHelper toeOffHelper;
 
    private final BooleanYoVariable requestExploration;
    private final BooleanYoVariable resetFootPolygon;
 
-   public FootControlModule(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
+   public FootControlModule(RobotSide robotSide, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
    {
+      this.toeOffHelper = toeOffHelper;
+
       contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       momentumBasedController.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
       momentumBasedController.setPlaneContactStateFullyConstrained(contactableFoot);
@@ -124,7 +124,7 @@ public class FootControlModule
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
 
-      onToesState = new OnToesState(footControlHelper, toeOffFootControlGains, registry);
+      onToesState = new OnToesState(footControlHelper, toeOffHelper, toeOffFootControlGains, registry);
       states.add(onToesState);
 
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
@@ -492,11 +492,6 @@ public class FootControlModule
          holdPositionState.setAttemptToStraightenLegs(attemptToStraightenLegs);
       if (exploreFootPolygonState != null)
          exploreFootPolygonState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-   }
-
-   public void setExitCMPForToeOff(FramePoint exitCMP)
-   {
-      onToesState.setExitCMP(exitCMP);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()

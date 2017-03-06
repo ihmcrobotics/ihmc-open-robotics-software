@@ -5,6 +5,7 @@ import java.util.Random;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
@@ -366,6 +368,12 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    {
       pose.translate(x, y, z);
    }
+   
+   public void translateLocally(Vector3DBasics translation)
+   {
+      pose.transformToWorld(translation);
+      pose.translate(translation);
+   }
 
    public double getX()
    {
@@ -505,7 +513,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       }
       else
       {
-         GeometryTools.getTopVertexOfIsoscelesTriangle(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle,
+         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle,
                                                        originToPack.getPoint());
       }
    }

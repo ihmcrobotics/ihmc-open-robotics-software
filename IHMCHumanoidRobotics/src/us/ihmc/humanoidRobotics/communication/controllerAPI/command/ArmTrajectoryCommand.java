@@ -46,7 +46,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
 
    public void addArmTrajectoryPoint(double trajectoryPointTime, double[] desiredJointPositions, double[] desiredJointVelocities)
    {
-      MathTools.checkIfEqual(desiredJointPositions.length, desiredJointVelocities.length);
+      MathTools.checkEquals(desiredJointPositions.length, desiredJointVelocities.length);
       for (int jointIndex = 0; jointIndex < desiredJointPositions.length; jointIndex++)
       {
          SimpleTrajectoryPoint1DList jointTrajectoryInput = jointTrajectoryInputs.getAndGrowIfNeeded(jointIndex);

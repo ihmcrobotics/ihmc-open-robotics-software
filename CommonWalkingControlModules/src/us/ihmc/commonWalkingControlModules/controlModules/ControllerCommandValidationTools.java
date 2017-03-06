@@ -62,7 +62,7 @@ public class ControllerCommandValidationTools
          double waypointPosition = trajectoryPointList.getTrajectoryPoint(i).getPosition();
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();
-         if (!MathTools.isInsideBoundsInclusive(waypointPosition, jointLimitLower, jointLimitUpper))
+         if (!MathTools.intervalContains(waypointPosition, jointLimitLower, jointLimitUpper))
          {
             PrintTools.warn("Joint out of bounds: "+joint.getName()+" (" +jointLimitLower+", "+jointLimitUpper+ ") = "+waypointPosition+" (t="+i+")");
             return false;

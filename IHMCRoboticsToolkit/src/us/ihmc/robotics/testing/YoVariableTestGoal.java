@@ -241,6 +241,11 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          }
       };
    }
+   
+   public static YoVariableTestGoal timeInFuture(DoubleYoVariable timeYoVariable, double durationFromNow)
+   {
+      return doubleGreaterThan(timeYoVariable, timeYoVariable.getDoubleValue() + durationFromNow);
+   }
 
    private static String getFormattedBooleanYoVariable(final BooleanYoVariable booleanYoVariable)
    {

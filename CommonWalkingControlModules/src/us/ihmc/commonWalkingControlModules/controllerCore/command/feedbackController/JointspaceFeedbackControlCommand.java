@@ -135,7 +135,7 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
     */
    public void setOneDoFJoint(int jointIndex, double desiredPosition, double desiredVelocity, double feedForwardAcceleration)
    {
-      MathTools.checkIfEqual(joints.get(jointIndex).getDegreesOfFreedom(), 1);
+      MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       desiredPositions.get(jointIndex).setValue(desiredPosition);
       desiredVelocities.get(jointIndex).setValue(desiredVelocity);
       feedForwardAccelerations.get(jointIndex).setValue(feedForwardAcceleration);

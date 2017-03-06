@@ -7,9 +7,9 @@ public class EuclidCoreMissingTools
 
    public static void floorToGivenPrecision(Tuple3DBasics tuple3d, double precision)
    {
-      tuple3d.setX(MathTools.floorToGivenPrecision(tuple3d.getX(), precision));
-      tuple3d.setY(MathTools.floorToGivenPrecision(tuple3d.getY(), precision));
-      tuple3d.setZ(MathTools.floorToGivenPrecision(tuple3d.getZ(), precision));
+      tuple3d.setX(MathTools.floorToPrecision(tuple3d.getX(), precision));
+      tuple3d.setY(MathTools.floorToPrecision(tuple3d.getY(), precision));
+      tuple3d.setZ(MathTools.floorToPrecision(tuple3d.getZ(), precision));
       
    }
 

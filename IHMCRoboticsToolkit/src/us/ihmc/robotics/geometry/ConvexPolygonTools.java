@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -272,7 +273,7 @@ public class ConvexPolygonTools
       Point2D lineStart = new Point2D(currentPolygonPPoint);
       Point2D lineEnd = new Point2D(currentPolygonPPoint);
       lineEnd.add(caliperForPolygonP);
-      boolean isOnLeft = GeometryTools.isPointOnLeftSideOfLine(currentPolygonQPoint, lineStart, lineEnd);
+      boolean isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
       boolean wasOnLeft = isOnLeft;
 
       //    System.out.println("wasOnLeft = " + wasOnLeft);
@@ -352,7 +353,7 @@ public class ConvexPolygonTools
          lineStart = new Point2D(currentPolygonPPoint);
          lineEnd = new Point2D(currentPolygonPPoint);
          lineEnd.add(caliperForPolygonP);
-         isOnLeft = GeometryTools.isPointOnLeftSideOfLine(currentPolygonQPoint, lineStart, lineEnd);
+         isOnLeft = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(currentPolygonQPoint, lineStart, lineEnd);
 
          //       System.out.println("new isOnLeft = " + isOnLeft);
 
@@ -512,7 +513,7 @@ public class ConvexPolygonTools
       {
          finished = true;
 
-         while (decrementP ^ GeometryTools.isPointOnLeftSideOfLine(lineQEnd, linePStart, linePEnd))
+         while (decrementP ^ EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(lineQEnd, linePStart, linePEnd))
          {
             lineQStart = lineQEnd;
 
@@ -528,7 +529,7 @@ public class ConvexPolygonTools
                return null; // No intersection. Prevent infinite loop.
          }
 
-         while ((!decrementP) ^ GeometryTools.isPointOnLeftSideOfLine(linePEnd, lineQStart, lineQEnd))
+         while ((!decrementP) ^ EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(linePEnd, lineQStart, lineQEnd))
          {
             linePStart = linePEnd;
 
@@ -593,7 +594,7 @@ public class ConvexPolygonTools
          Point2DReadOnly startQ = polygonQ.getVertex(startIndexQ);
          Point2DReadOnly endQ = polygonQ.getVertex(endIndexQ);
 
-         Point2D intersection = GeometryTools.getIntersectionBetweenTwoLines(startP, endP, startQ, endQ);
+         Point2D intersection = EuclidGeometryTools.intersectionBetweenTwoLine2Ds(startP, endP, startQ, endQ);
          if (intersection == null)
          {
             System.err.println("intersection is null in constructPolygonForIntersection!. startP = " + startP + ", endP = " + endP + ", startQ = " + startQ + ", endQ = " + endQ);
@@ -1208,7 +1209,7 @@ public class ConvexPolygonTools
       tangentIndex2 = vIndex;
       Vector2D tangent2 = new Vector2D(polygon.getVertex(tangentIndex2).getX() - point.getX(), polygon.getVertex(tangentIndex2).getY() - point.getY());
    
-      if (GeometryTools.getAngleFromFirstToSecondVector(tangent1, tangent2) > 0)
+      if (tangent1.angle(tangent2) > 0)
       {
          return new int[] {tangentIndex1, tangentIndex2};
       }
@@ -1229,8 +1230,8 @@ public class ConvexPolygonTools
       Vector2D base = new Vector2D(point.getX() - vertex.getX(), point.getY() - vertex.getY());
       Vector2D first = new Vector2D(previous.getX() - vertex.getX(), previous.getY() - vertex.getY());
       Vector2D second = new Vector2D(next.getX() - vertex.getX(), next.getY() - vertex.getY());
-      double firstAngle = GeometryTools.getAngleFromFirstToSecondVector(base, first);
-      double secondAngle = GeometryTools.getAngleFromFirstToSecondVector(base, second);
+      double firstAngle = base.angle(first);
+      double secondAngle = base.angle(second);
    
       if (firstAngle * secondAngle >= 0)
       {    // if both angles have the same sign, the line does not pass through the polygon
@@ -1296,10 +1297,10 @@ public class ConvexPolygonTools
          Vector2D edge2B = new Vector2D(polygon2.getVertex(edge2BStart).getX() - v2Median.getX(), polygon2.getVertex(edge2BStart).getY() - v2Median.getY());
    
          // see diagram 3.2 in [Edelsbrunner]
-         double angle1A = GeometryTools.getAngleFromFirstToSecondVector(m, edge1A); // A' in diagram
-         double angle1B = GeometryTools.getAngleFromFirstToSecondVector(edge1B, m); // A'' in diagram
-         double angle2A = GeometryTools.getAngleFromFirstToSecondVector(edge2A, mReversed); // B' in diagram
-         double angle2B = GeometryTools.getAngleFromFirstToSecondVector(mReversed, edge2B); // B'' in diagram
+         double angle1A = m.angle(edge1A); // A' in diagram
+         double angle1B = edge1B.angle(m); // A'' in diagram
+         double angle2A = edge2A.angle(mReversed); // B' in diagram
+         double angle2B = mReversed.angle(edge2B); // B'' in diagram
    
          int[] range1 = findStartAndEndTangents(v2Median, polygon1, epsilon);
          int[] range2 = findStartAndEndTangents(v1Median, polygon2, epsilon);
@@ -1422,7 +1423,7 @@ public class ConvexPolygonTools
    
          if ((angle1A < angle2B) && (angle2B < Math.PI / 2))
          {
-            Point2D proj = GeometryTools.getOrthogonalProjectionOnLine(polygon2.getVertex(v2MedianIndex), polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
+            Point2D proj = EuclidGeometryTools.orthogonalProjectionOnLine2D(polygon2.getVertex(v2MedianIndex), polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
             LineSegment2d p = new LineSegment2d(polygon1.getVertex(v1Start), polygon1.getVertex(v1End));
             if (p.isBetweenEndpoints(proj, 0))
             {
@@ -1544,10 +1545,10 @@ public class ConvexPolygonTools
    {
       LineSegment2d edge1 = new LineSegment2d(edgePoint1A, edgePoint1B);
       LineSegment2d edge2 = new LineSegment2d(edgePoint2A, edgePoint2B);
-      Point2D proj1AOnto2 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint1A, edgePoint2A, edgePoint2B);
-      Point2D proj1BOnto2 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint1B, edgePoint2A, edgePoint2B);
-      Point2D proj2AOnto1 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint2A, edgePoint1A, edgePoint1B);
-      Point2D proj2BOnto1 = GeometryTools.getOrthogonalProjectionOnLine(edgePoint2B, edgePoint1A, edgePoint1B);
+      Point2D proj1AOnto2 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1A, edgePoint2A, edgePoint2B);
+      Point2D proj1BOnto2 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint1B, edgePoint2A, edgePoint2B);
+      Point2D proj2AOnto1 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2A, edgePoint1A, edgePoint1B);
+      Point2D proj2BOnto1 = EuclidGeometryTools.orthogonalProjectionOnLine2D(edgePoint2B, edgePoint1A, edgePoint1B);
    
       Point2DReadOnly[][] possiblePointPairsWithProj = new Point2DReadOnly[4][2];
       Point2DReadOnly[][] possiblePointPairsWithoutProj = new Point2DReadOnly[4][2];
@@ -1612,7 +1613,7 @@ public class ConvexPolygonTools
     */
    private static Point2DReadOnly[] finalPhasePointAndEdge(Point2DReadOnly edgePoint1, Point2DReadOnly edgePoint2, Point2DReadOnly lonePoint)
    {
-      Point2D proj = GeometryTools.getOrthogonalProjectionOnLine(lonePoint, edgePoint1, edgePoint2);
+      Point2D proj = EuclidGeometryTools.orthogonalProjectionOnLine2D(lonePoint, edgePoint1, edgePoint2);
       LineSegment2d p = new LineSegment2d(edgePoint1, edgePoint2);
       if (p.isBetweenEndpoints(proj, 0))
       {
