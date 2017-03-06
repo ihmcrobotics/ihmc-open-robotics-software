@@ -25,7 +25,7 @@ public class LoadBearingHandControlState extends HandControlState
    private final YoVariableRegistry registry;
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final DoubleYoVariable coefficientOfFriction;
    private final SpatialAccelerationVector handAcceleration;
@@ -48,7 +48,7 @@ public class LoadBearingHandControlState extends HandControlState
       spatialAccelerationCommand.set(elevator, endEffector);
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
 
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
 
       parentRegistry.addChild(registry);
 
@@ -117,7 +117,7 @@ public class LoadBearingHandControlState extends HandControlState
          contactNormal.setIncludingFrame(handPalm.getSoleFrame(), 0.0, 0.0, 1.0);
 
       contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-      momentumBasedController.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), contactNormal);
+      controllerToolbox.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), contactNormal);
    }
 
    @Override
@@ -126,7 +126,7 @@ public class LoadBearingHandControlState extends HandControlState
       if (handPalm == null)
          return;
 
-      momentumBasedController.setPlaneContactStateFree(handPalm);
+      controllerToolbox.setPlaneContactStateFree(handPalm);
       contactNormal.setToNaN();
    }
 

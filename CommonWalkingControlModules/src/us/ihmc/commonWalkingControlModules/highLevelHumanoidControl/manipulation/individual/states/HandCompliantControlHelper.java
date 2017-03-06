@@ -65,7 +65,7 @@ public class HandCompliantControlHelper
    private final FrameVector errorTorque = new FrameVector();
 
    private final RobotSide robotSide;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    public HandCompliantControlHelper(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
    {
@@ -73,7 +73,7 @@ public class HandCompliantControlHelper
       parentRegistry.addChild(registry);
 
       this.robotSide = robotSide;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
 
       ReferenceFrame forceSensorMeasurementFrame = momentumBasedController.getWristForceSensor(robotSide).getMeasurementFrame();
 
@@ -215,7 +215,7 @@ public class HandCompliantControlHelper
 
    private void updateWristMeasuredWrench(FrameVector measuredForceToPack, FrameVector measuredTorqueToPack)
    {
-      momentumBasedController.getWristMeasuredWrenchHandWeightCancelled(measuredWrench, robotSide);
+      controllerToolbox.getWristMeasuredWrenchHandWeightCancelled(measuredWrench, robotSide);
 
       measuredWrench.getLinearPartIncludingFrame(tempForceVector);
       measuredWrench.getAngularPartIncludingFrame(tempTorqueVector);

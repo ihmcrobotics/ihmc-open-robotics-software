@@ -86,7 +86,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final OneDoFJoint[] allOneDoFjoints;
 
    private final FullHumanoidRobotModel fullRobotModel;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
@@ -132,7 +132,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       this.yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
 
       // Getting parameters from the momentumBasedController
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       fullRobotModel = momentumBasedController.getFullRobotModel();
       yoTime = momentumBasedController.getYoTime();
 
@@ -186,8 +186,8 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private void setupStateMachine()
    {
-      StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, momentumBasedController, managerFactory, failureDetectionControlModule, walkingControllerParameters, registry);
-      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler, momentumBasedController, managerFactory, failureDetectionControlModule, registry);
+      StandingState standingState = new StandingState(commandInputManager, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, walkingControllerParameters, registry);
+      TransferToStandingState toStandingState = new TransferToStandingState(walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
       WalkingStateEnum toStandingStateEnum = toStandingState.getStateEnum();
 
       stateMachine.addState(toStandingState);
@@ -199,7 +199,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          double minimumTransferTime = walkingControllerParameters.getMinimumTransferTime();
          TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(transferToSide, walkingMessageHandler,
-               momentumBasedController, managerFactory, failureDetectionControlModule, minimumTransferTime, registry);
+               controllerToolbox, managerFactory, failureDetectionControlModule, minimumTransferTime, registry);
          walkingTransferStates.put(transferToSide, transferState);
          stateMachine.addState(transferState);
       }
@@ -208,7 +208,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       for (RobotSide supportSide : RobotSide.values)
       {
-         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(supportSide, walkingMessageHandler, momentumBasedController,
+         WalkingSingleSupportState singleSupportState = new WalkingSingleSupportState(supportSide, walkingMessageHandler, controllerToolbox,
                managerFactory, walkingControllerParameters, failureDetectionControlModule, registry);
          walkingSingleSupportStates.put(supportSide, singleSupportState);
          stateMachine.addState(singleSupportState);
@@ -218,7 +218,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       for (RobotSide transferToSide : RobotSide.values)
       {
-         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(transferToSide, walkingMessageHandler, momentumBasedController, managerFactory, failureDetectionControlModule, registry);
+         TransferToFlamingoStanceState transferState = new TransferToFlamingoStanceState(transferToSide, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
          flamingoTransferStates.put(transferToSide, transferState);
          stateMachine.addState(transferState);
       }
@@ -227,7 +227,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       for (RobotSide supportSide : RobotSide.values)
       {
-         FlamingoStanceState singleSupportState = new FlamingoStanceState(supportSide, walkingMessageHandler, momentumBasedController, managerFactory, failureDetectionControlModule, registry);
+         FlamingoStanceState singleSupportState = new FlamingoStanceState(supportSide, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, registry);
          flamingoSingleSupportStates.put(supportSide, singleSupportState);
          stateMachine.addState(singleSupportState);
       }
@@ -371,7 +371,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          @Override
          public void stateChanged(State<WalkingStateEnum> oldState, State<WalkingStateEnum> newState, double time)
          {
-            momentumBasedController.reportControllerStateChangeToListeners(oldState.getStateEnum(), newState.getStateEnum());
+            controllerToolbox.reportControllerStateChangeToListeners(oldState.getStateEnum(), newState.getStateEnum());
          }
       });
    }
@@ -384,7 +384,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    public void initialize()
    {
-      momentumBasedController.initialize();
+      controllerToolbox.initialize();
       managerFactory.initializeManagers();
 
       commandInputManager.flushAllCommands();
@@ -404,7 +404,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
-         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+         controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
       balanceManager.disablePelvisXYControl();
@@ -450,7 +450,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private void initializeContacts()
    {
-      momentumBasedController.clearContacts();
+      controllerToolbox.clearContacts();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -484,7 +484,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    @Override
    public void doAction()
    {
-      momentumBasedController.update();
+      controllerToolbox.update();
 
       if (headOrientationManager != null)
          headOrientationManager.submitNewNeckJointDesiredConfiguration(controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder());
@@ -526,7 +526,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreOutput.getDesiredCenterOfPressure(footDesiredCoPs.get(robotSide), feet.get(robotSide).getRigidBody());
-         momentumBasedController.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
+         controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
@@ -537,7 +537,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean haveContactStatesChanged = false;
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
+         YoPlaneContactState contactState = controllerToolbox.getContactState(feet.get(robotSide));
          if (contactState.pollContactHasChangedNotification())
             haveContactStatesChanged = true;
       }
@@ -545,7 +545,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       if (!haveContactStatesChanged)
          return;
 
-      momentumBasedController.updateBipedSupportPolygons();
+      controllerToolbox.updateBipedSupportPolygons();
       balanceManager.updateCurrentICPPlan();
    }
 
@@ -568,7 +568,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          {
             FrameVector2d fallingDirection = failureDetectionControlModule.getFallingDirection();
             walkingMessageHandler.reportControllerFailure(fallingDirection);
-            momentumBasedController.reportControllerFailureToListeners(fallingDirection);
+            controllerToolbox.reportControllerFailureToListeners(fallingDirection);
          }
       }
 
@@ -583,7 +583,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    {
       balanceManager.getDesiredICPVelocity(desiredICPVelocityAsFrameVector);
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
-      double omega0 = momentumBasedController.getOmega0();
+      double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
       controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
             isRecoveringFromPush, feetManager));
@@ -616,14 +616,14 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          limitCommandSent.set(true);
       }
 
-      boolean isHighCoPDampingNeeded = momentumBasedController.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
+      boolean isHighCoPDampingNeeded = controllerToolbox.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
 
-         YoPlaneContactState contactState = momentumBasedController.getContactState(feet.get(robotSide));
+         YoPlaneContactState contactState = controllerToolbox.getContactState(feet.get(robotSide));
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          planeContactStateCommand.setUseHighCoPDamping(isHighCoPDampingNeeded);

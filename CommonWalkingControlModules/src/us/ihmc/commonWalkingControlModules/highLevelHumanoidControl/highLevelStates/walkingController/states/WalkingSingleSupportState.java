@@ -36,7 +36,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FramePose desiredFootPoseInWorld = new FramePose(worldFrame);
    private final FramePoint nextExitCMP = new FramePoint();
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
@@ -57,7 +57,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       super(supportSide, WalkingStateEnum.getWalkingSingleSupportState(supportSide), walkingMessageHandler, momentumBasedController, managerFactory,
             parentRegistry);
 
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
@@ -233,7 +233,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          if (feetManager.checkIfToeOffSafeSingleSupport(nextFootstep, nextExitCMP, desiredCMP, currentICP, desiredICP))
          {
-            momentumBasedController.getFilteredDesiredCenterOfPressure(momentumBasedController.getContactableFeet().get(supportSide), filteredDesiredCoP);
+            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
 
             feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(supportSide);
@@ -276,8 +276,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
-      momentumBasedController.updateContactPointsForUpcomingFootstep(nextFootstep);
-      momentumBasedController.updateBipedSupportPolygons();
+      controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
+      controllerToolbox.updateBipedSupportPolygons();
    }
 
    @Override

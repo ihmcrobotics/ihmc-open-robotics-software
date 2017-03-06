@@ -64,7 +64,7 @@ public class BalanceManager
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
    private final MomentumRecoveryControlModule momentumRecoveryControlModule;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint yoCenterOfMass = new YoFramePoint("centerOfMass", worldFrame, registry);
    private final YoFramePoint2d yoDesiredCapturePoint = new YoFramePoint2d("desiredICP", worldFrame, registry);
@@ -143,7 +143,7 @@ public class BalanceManager
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       yoTime = momentumBasedController.getYoTime();
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -289,7 +289,7 @@ public class BalanceManager
 
    public void compute(RobotSide supportLeg, double desiredCoMHeightAcceleration, boolean keepCMPInsideSupportPolygon)
    {
-      momentumBasedController.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePoint(capturePoint2d);
 
       icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, yoTime.getDoubleValue());
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
@@ -297,7 +297,7 @@ public class BalanceManager
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
       pelvisICPBasedTranslationManager.addICPOffset(desiredCapturePoint2d, desiredCapturePointVelocity2d);
 
-      double omega0 = momentumBasedController.getOmega0();
+      double omega0 = controllerToolbox.getOmega0();
       if (supportLeg == null)
          pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
       else
@@ -309,7 +309,7 @@ public class BalanceManager
       yoFinalDesiredICP.getFrameTuple2dIncludingFrame(finalDesiredCapturePoint2d);
 
       // --- compute adjusted desired capture point
-      momentumBasedController.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
+      controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
       desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
@@ -375,7 +375,7 @@ public class BalanceManager
 
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
-      momentumBasedController.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePoint(capturePoint2d);
       return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), capturePoint2d);
    }
 
@@ -438,7 +438,7 @@ public class BalanceManager
    {
       update();
       yoFinalDesiredICP.set(Double.NaN, Double.NaN);
-      momentumBasedController.getCapturePoint(tempCapturePoint);
+      controllerToolbox.getCapturePoint(tempCapturePoint);
       yoDesiredCapturePoint.setByProjectionOntoXYPlane(tempCapturePoint);
 
       icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
@@ -503,7 +503,7 @@ public class BalanceManager
    public boolean isTransitionToStandingSafe()
    {
       FrameConvexPolygon2d supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
-      momentumBasedController.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePoint(capturePoint2d);
 
       // signed distance returns a negative number if the point is inside the polygon.
       return supportPolygonInWorld.getSignedDistance(capturePoint2d) < -safeDistanceFromSupportEdgesToStopCancelICPPlan.getDoubleValue();
@@ -511,13 +511,13 @@ public class BalanceManager
 
    public double getICPErrorMagnitude()
    {
-      momentumBasedController.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePoint(capturePoint2d);
       return capturePoint2d.distance(yoDesiredCapturePoint.getFrameTuple2d());
    }
 
    public void getICPError(FrameVector2d icpErrorToPack)
    {
-      momentumBasedController.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePoint(capturePoint2d);
       yoDesiredCapturePoint.getFrameTuple2dIncludingFrame(desiredCapturePoint2d);
       icpErrorToPack.setIncludingFrame(desiredCapturePoint2d);
       icpErrorToPack.sub(capturePoint2d);
@@ -616,7 +616,7 @@ public class BalanceManager
    {
       centerOfMassPosition.setToZero(centerOfMassFrame);
       yoCenterOfMass.setAndMatchFrame(centerOfMassPosition);
-      double omega0 = momentumBasedController.getOmega0();
+      double omega0 = controllerToolbox.getOmega0();
       CapturePointTools.computeDesiredCentroidalMomentumPivot(yoDesiredCapturePoint, yoDesiredICPVelocity, omega0, yoPerfectCMP);
       icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
    }
@@ -633,7 +633,7 @@ public class BalanceManager
       centerOfMassPosition.setToZero(centerOfMassFrame);
       centerOfMassPosition.changeFrame(worldFrame);
 
-      momentumBasedController.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePoint(capturePoint2d);
       capturePoint2d.checkReferenceFrameMatch(worldFrame);
       desiredCapturePoint2d.checkReferenceFrameMatch(worldFrame);
 
@@ -657,7 +657,7 @@ public class BalanceManager
 
    public void updateICPPlanForSingleSupportDisturbances()
    {
-      momentumBasedController.getCapturePoint(capturePoint2d);
+      controllerToolbox.getCapturePoint(capturePoint2d);
       icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), capturePoint2d);
    }
 
@@ -668,7 +668,7 @@ public class BalanceManager
 
    public void getCapturePoint(FramePoint2d capturePointToPack)
    {
-      momentumBasedController.getCapturePoint(capturePointToPack);
+      controllerToolbox.getCapturePoint(capturePointToPack);
    }
 
    public void minimizeAngularMomentumRateZ(boolean enable)

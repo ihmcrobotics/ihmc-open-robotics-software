@@ -87,7 +87,7 @@ public class PartialFootholdControlModule
 
    private final int footCornerPoints;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final FramePoint2d capturePoint = new FramePoint2d();
    private RobotSide robotSide;
 
@@ -106,7 +106,7 @@ public class PartialFootholdControlModule
    {
       ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       this.robotSide = robotSide;
 
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
@@ -342,12 +342,12 @@ public class PartialFootholdControlModule
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       // if the icp is in the area that would be cut off exit
-      FrameConvexPolygon2d oppositeFootPolygon = momentumBasedController.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
+      FrameConvexPolygon2d oppositeFootPolygon = controllerToolbox.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
       fullSupportAfterShrinking.setIncludingFrameAndUpdate(oppositeFootPolygon);
       fullSupportAfterShrinking.changeFrameAndProjectToXYPlane(worldFrame);
       fullSupportAfterShrinking.addVertices(controllerFootPolygonInWorld);
       fullSupportAfterShrinking.update();
-      momentumBasedController.getCapturePoint(capturePoint);
+      controllerToolbox.getCapturePoint(capturePoint);
       yoFullSupportAfterShrinking.setFrameConvexPolygon2d(fullSupportAfterShrinking);
 //      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
 //      if (!icpInPolygon)

@@ -59,7 +59,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
    private final TorqueOffsetPrinter torqueOffsetPrinter;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
@@ -78,7 +78,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          ContactablePlaneBody contactableFoot = highLevelControllerToolbox.getContactableFeet().get(robotSide);
          footContactStates.put(robotSide, highLevelControllerToolbox.getContactState(contactableFoot));
       }
-      this.momentumBasedController = highLevelControllerToolbox;
+      this.controllerToolbox = highLevelControllerToolbox;
       this.torqueOffsetPrinter = torqueOffsetPrinter;
       this.fullRobotModel = highLevelControllerToolbox.getFullRobotModel();
 
@@ -192,7 +192,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
          estimateTorqueOffset.set(false);
 
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      momentumBasedController.update();
+      controllerToolbox.update();
 
       updateDiagnosticsWhenHangingHelpers();
       updatePDControllers();

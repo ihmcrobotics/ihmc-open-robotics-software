@@ -105,7 +105,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private final HumanoidJointPoseList humanoidJointPoseList;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
@@ -124,7 +124,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
          ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
          footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
       }
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = momentumBasedController;
       humanoidJointPoseList.setParentRegistry(registry);
 
       splineDuration.set(3.0);
@@ -330,7 +330,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
 
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      momentumBasedController.update();
+      controllerToolbox.update();
    }
 
    public void updateDiagnosticsWhenHangingHelpers()

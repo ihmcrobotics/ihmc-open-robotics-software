@@ -62,7 +62,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       if (!stepTiming.hasAbsoluteTime())
          return;
 
-      double currentTime = momentumBasedController.getYoTime().getDoubleValue();
+      double currentTime = controllerToolbox.getYoTime().getDoubleValue();
       double timeInFootstepPlan = currentTime - stepTiming.getExecutionStartTime();
       double adjustedTransferTime = stepTiming.getSwingStartTime() - timeInFootstepPlan;
 

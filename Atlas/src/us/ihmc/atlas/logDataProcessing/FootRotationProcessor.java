@@ -19,7 +19,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final SideDependentList<PartialFootholdControlModule> partialFootholdControlModules = new SideDependentList<>();
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final LogDataProcessorHelper logDataProcessorHelper;
 
@@ -27,12 +27,12 @@ public class FootRotationProcessor implements LogDataProcessorFunction
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
       WalkingControllerParameters walkingControllerParameters = logDataProcessorHelper.getWalkingControllerParameters();
-      momentumBasedController = logDataProcessorHelper.getMomentumBasedController();
+      controllerToolbox = logDataProcessorHelper.getMomentumBasedController();
 
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
-         PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(robotSide, momentumBasedController,
+         PartialFootholdControlModule partialFootholdControlModule = new PartialFootholdControlModule(robotSide, controllerToolbox,
                walkingControllerParameters, registry, yoGraphicsListRegistry);
          partialFootholdControlModules.put(robotSide, partialFootholdControlModule);
       }
@@ -58,7 +58,7 @@ public class FootRotationProcessor implements LogDataProcessorFunction
             logDataProcessorHelper.getDesiredCoP(robotSide, desiredCoP2d);
             partialFootholdControlModule.compute(desiredCoP2d, measuredCoP2d);
 
-            YoPlaneContactState contactState = momentumBasedController.getFootContactStates().get(robotSide);
+            YoPlaneContactState contactState = controllerToolbox.getFootContactStates().get(robotSide);
             boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
             if (contactStateHasChanged)
             {
