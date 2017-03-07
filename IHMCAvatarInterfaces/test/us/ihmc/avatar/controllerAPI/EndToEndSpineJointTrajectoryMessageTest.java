@@ -95,7 +95,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       SpineTrajectoryMessage message3 = createRandomSpineMessage(trajectoryTime, random);
 
       executeMessage(message1);
-      executeMessage(message2);
+      executeMessage(message2, chest);
       executeMessage(message3);
 
       assertControlWasConsistent(controllerSpy);
@@ -425,7 +425,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       }
    }
 
-   private void executeMessage(ChestTrajectoryMessage message) throws SimulationExceededMaximumTimeException
+   private void executeMessage(ChestTrajectoryMessage message, RigidBody chest) throws SimulationExceededMaximumTimeException
    {
       double controllerDT = getRobotModel().getControllerDT();
       drcSimulationTestHelper.send(message);
@@ -435,12 +435,12 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       Quaternion desired = new Quaternion();
       message.getLastTrajectoryPoint().getOrientation(desired);
-      assertChestDesired(drcSimulationTestHelper.getSimulationConstructionSet(), desired);
+      assertChestDesired(drcSimulationTestHelper.getSimulationConstructionSet(), desired, chest);
    }
 
-   private static void assertChestDesired(SimulationConstructionSet scs, Quaternion desired)
+   private static void assertChestDesired(SimulationConstructionSet scs, Quaternion desired, RigidBody chest)
    {
-      Quaternion controllerDesired = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs);
+      Quaternion controllerDesired = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
       EuclidCoreTestTools.assertQuaternionEquals(desired, controllerDesired, DESIRED_QUAT_EPSILON);
    }
 
