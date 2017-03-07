@@ -30,7 +30,7 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
    @Override
    public void wasRewound()
    {
-      updateDynamicGraphicObjectListRegistries();
+      updateYoGraphicsListRegistries();
 //      long lcm;
 //      if (controllers.size() == 0)
 //      {
@@ -59,18 +59,18 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
    }
 
 
-   private void updateDynamicGraphicObjectListRegistries()
+   private void updateYoGraphicsListRegistries()
    {
       for (int i = 0; i < controllers.size(); i++)
       {
-         controllers.get(i).updateDynamicGraphicObjectListRegistry();
+         controllers.get(i).updateYoGraphicsListRegistry();
       }
    }
 
    @Override
    public void update(int tick)
    {
-      updateDynamicGraphicObjectListRegistries();
+      updateYoGraphicsListRegistries();
    }
 
 
