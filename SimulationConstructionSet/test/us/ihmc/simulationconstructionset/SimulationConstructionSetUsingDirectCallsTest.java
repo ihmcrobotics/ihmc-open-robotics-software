@@ -219,7 +219,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
       processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
       toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
-      yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
+      yoGraphicsListRegistry = createYoGraphicsListRegistryWithObject();
       dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
 
       scs = new SimulationConstructionSet(simpleRobot);
@@ -1292,7 +1292,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return scsCollisionConfigure;
    }
 
-   private YoGraphicsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
+   private YoGraphicsListRegistry createYoGraphicsListRegistryWithObject()
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicsList yoGraphicsList = new YoGraphicsList(yoGraphicsListName);

@@ -64,7 +64,7 @@ public class ExplorationHelper
       soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
 
-      YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       if (graphicObjectsListRegistry != null)
       {
          yoDesiredCop = new YoFramePoint2d(prefix + "DesiredExplorationCop", ReferenceFrame.getWorldFrame(), registry);

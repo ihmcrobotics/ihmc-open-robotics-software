@@ -369,10 +369,32 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       pose.translate(x, y, z);
    }
    
-   public void translateLocally(Vector3DBasics translation)
+   /**
+    * <p>Translate the pose with a translation in local frame.</p>
+    * 
+    * <p>Not thread safe. Will transform transform to world frame and back.</p>
+    * 
+    * @param localTranslation translation in local pose frame
+    */
+   public void translateLocally(Vector3DBasics localTranslation)
    {
-      pose.transformToWorld(translation);
-      pose.translate(translation);
+      pose.transformToWorld(localTranslation);
+      pose.translate(localTranslation);
+      pose.transformToLocal(localTranslation);
+   }
+   
+   /**
+    * <p>Rotate the pose with a translation in local frame.</p>
+    * 
+    * <p>Not thread safe. Will transform transform to world frame and back.</p>
+    * 
+    * @param localRotation translation in local pose frame
+    */
+   public void rotateLocally(QuaternionBasics localRotation)
+   {
+      pose.transformToWorld(localRotation);
+      pose.rotate(localRotation);
+      pose.transformToLocal(localRotation);
    }
 
    public double getX()

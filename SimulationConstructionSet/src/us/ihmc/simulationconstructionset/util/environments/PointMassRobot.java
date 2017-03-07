@@ -68,7 +68,7 @@ public class PointMassRobot extends Robot
       yoGraphicsListRegistry.registerYoGraphic(name, contactPoint);
       yoGraphicsListRegistry.registerYoGraphic(name, pointMassForce);
 
-      this.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+      this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       addRootJoint(xJoint);
       xJoint.addJoint(yJoint);

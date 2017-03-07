@@ -381,7 +381,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
    }

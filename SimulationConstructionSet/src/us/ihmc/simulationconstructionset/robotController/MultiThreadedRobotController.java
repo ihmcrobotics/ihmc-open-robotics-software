@@ -21,9 +21,9 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
    public void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle)
    {
       controllers.add(new MultiThreadedRobotControllerExecutor(simulatedRobot, controller, executionsPerControlTick, skipFirstControlCycle, registry));
-      if(controller.getDynamicGraphicObjectsListRegistry() != null)
+      if(controller.getYoGraphicsListRegistry() != null)
       {
-         scs.addYoGraphicsListRegistry(controller.getDynamicGraphicObjectsListRegistry(), false);
+         scs.addYoGraphicsListRegistry(controller.getYoGraphicsListRegistry(), false);
       }
    }
 

@@ -151,7 +151,7 @@ public class CenterOfMassCalibrationTool implements Updatable
 
 //         ForceSensorData footForceSensor = forceSensorDataHolder.getByName(footSensorNames.get(robotSide));
 //         WrenchBasedFootSwitch wrenchBasedFootSwitch = new WrenchBasedFootSwitch(bipedFeet.get(robotSide).getName(), footForceSensor, 0.02, totalRobotWeight,
-//               bipedFeet.get(robotSide), dynamicGraphicObjectsListRegistry, contactThresholdForce, registry);
+//               bipedFeet.get(robotSide), YoGraphicsListRegistry, contactThresholdForce, registry);
       }
       
    

@@ -72,20 +72,20 @@ public class WalkingCommandConsumer
    private final RigidBodyControlManager chestManager;
    private final RigidBodyControlManager headManager;
 
-   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox momentumBasedController, WalkingMessageHandler walkingMessageHandler, HighLevelControlManagerFactory managerFactory,
+   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingMessageHandler walkingMessageHandler, HighLevelControlManagerFactory managerFactory,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.walkingMessageHandler = walkingMessageHandler;
-      yoTime = momentumBasedController.getYoTime();
+      yoTime = controllerToolbox.getYoTime();
 
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
 
-      RigidBody head = momentumBasedController.getFullRobotModel().getHead();
-      RigidBody chest = momentumBasedController.getFullRobotModel().getChest();
-      RigidBody pelvis = momentumBasedController.getFullRobotModel().getPelvis();
+      RigidBody head = controllerToolbox.getFullRobotModel().getHead();
+      RigidBody chest = controllerToolbox.getFullRobotModel().getChest();
+      RigidBody pelvis = controllerToolbox.getFullRobotModel().getPelvis();
 
-      ReferenceFrame pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
