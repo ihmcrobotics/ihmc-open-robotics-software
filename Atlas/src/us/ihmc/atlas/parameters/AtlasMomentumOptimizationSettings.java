@@ -48,7 +48,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final double rhoRateHighWeight;
 
    private final double neckJointspaceWeight = 1.0;
-   private final double spineJointspaceWeight = 1.0;
+   private final double spineJointspaceWeight = 15.0;
    private final double armJointspaceWeight = 1.0;
    private final TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
 
