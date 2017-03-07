@@ -916,7 +916,7 @@ public class HighLevelHumanoidControllerToolbox
       return bipedSupportPolygons;
    }
 
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
    }

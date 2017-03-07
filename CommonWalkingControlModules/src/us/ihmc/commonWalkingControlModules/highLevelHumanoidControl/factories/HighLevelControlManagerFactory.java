@@ -51,7 +51,7 @@ public class HighLevelControlManagerFactory
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
-   private HighLevelHumanoidControllerToolbox momentumBasedController;
+   private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private CapturePointPlannerParameters capturePointPlannerParameters;
    private ICPOptimizationParameters icpOptimizationParameters;
@@ -64,9 +64,9 @@ public class HighLevelControlManagerFactory
       parentRegistry.addChild(registry);
    }
 
-   public void setMomentumBasedController(HighLevelHumanoidControllerToolbox momentumBasedController)
+   public void setHighLevelHumanoidControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
    }
 
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
@@ -95,7 +95,7 @@ public class HighLevelControlManagerFactory
       if (balanceManager != null)
          return balanceManager;
 
-      if (!hasMomentumBasedController(BalanceManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
          return null;
@@ -104,7 +104,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(momentumBasedController, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, registry);
+      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, icpOptimizationParameters, registry);
       Vector3D linearMomentumWeight = momentumOptimizationSettings.getLinearMomentumWeight();
       Vector3D angularMomentumWeight = momentumOptimizationSettings.getAngularMomentumWeight();
       balanceManager.setMomentumWeight(angularMomentumWeight, linearMomentumWeight);
@@ -117,12 +117,12 @@ public class HighLevelControlManagerFactory
       if (centerOfMassHeightManager != null)
          return centerOfMassHeightManager;
 
-      if (!hasMomentumBasedController(CenterOfMassHeightManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(CenterOfMassHeightManager.class))
          return null;
       if (!hasWalkingControllerParameters(CenterOfMassHeightManager.class))
          return null;
 
-      centerOfMassHeightManager = new CenterOfMassHeightManager(momentumBasedController, walkingControllerParameters, registry);
+      centerOfMassHeightManager = new CenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
       return centerOfMassHeightManager;
    }
 
@@ -145,8 +145,8 @@ public class HighLevelControlManagerFactory
          return null;
 
       // TODO: replace this when we support reference frames
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       Map<BaseForControl, ReferenceFrame> controlFrameMap = new EnumMap<>(BaseForControl.class);
       controlFrameMap.put(BaseForControl.CHEST, fullRobotModel.getChest().getBodyFixedFrame());
       controlFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
@@ -165,8 +165,8 @@ public class HighLevelControlManagerFactory
 
       TObjectDoubleHashMap<String> homeConfiguration = walkingControllerParameters.getOrCreateJointHomeConfiguration();
       List<String> positionControlledJoints = walkingControllerParameters.getOrCreatePositionControlledJoints();
-      RigidBody elevator = momentumBasedController.getFullRobotModel().getElevator();
-      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
+      RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
+      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, elevator, homeConfiguration, positionControlledJoints,
             controlFrameMap, rootFrame, yoTime, registry);
@@ -182,7 +182,7 @@ public class HighLevelControlManagerFactory
       if (manipulationControlModule != null)
          return manipulationControlModule;
 
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
       if (fullRobotModel.getChest() == null)
       {
@@ -204,12 +204,12 @@ public class HighLevelControlManagerFactory
 
       if (!hasArmControllerParameters(ManipulationControlModule.class))
          return null;
-      if (!hasMomentumBasedController(ManipulationControlModule.class))
+      if (!hasHighLevelHumanoidControllerToolbox(ManipulationControlModule.class))
          return null;
       if (!hasMomentumOptimizationSettings(ManipulationControlModule.class))
          return null;
 
-      manipulationControlModule = new ManipulationControlModule(armControllerParameters, momentumBasedController, registry);
+      manipulationControlModule = new ManipulationControlModule(armControllerParameters, controllerToolbox, registry);
       double handJointspaceWeight = momentumOptimizationSettings.getHandJointspaceWeight();
       Vector3D handAngularTaskspaceWeight = momentumOptimizationSettings.getHandAngularTaskspaceWeight();
       Vector3D handLinearTaskspaceWeight = momentumOptimizationSettings.getHandLinearTaskspaceWeight();
@@ -223,14 +223,14 @@ public class HighLevelControlManagerFactory
       if (feetManager != null)
          return feetManager;
 
-      if (!hasMomentumBasedController(FeetManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(FeetManager.class))
          return null;
       if (!hasWalkingControllerParameters(FeetManager.class))
          return null;
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
 
-      feetManager = new FeetManager(momentumBasedController, walkingControllerParameters, registry);
+      feetManager = new FeetManager(controllerToolbox, walkingControllerParameters, registry);
       Vector3D highLinearFootWeight = momentumOptimizationSettings.getHighLinearFootWeight();
       Vector3D highAngularFootWeight = momentumOptimizationSettings.getHighAngularFootWeight();
       Vector3D defaultLinearFootWeight = momentumOptimizationSettings.getDefaultLinearFootWeight();
@@ -244,21 +244,21 @@ public class HighLevelControlManagerFactory
       if (pelvisOrientationManager != null)
          return pelvisOrientationManager;
 
-      if (!hasMomentumBasedController(PelvisOrientationManager.class))
+      if (!hasHighLevelHumanoidControllerToolbox(PelvisOrientationManager.class))
          return null;
       if (!hasWalkingControllerParameters(PelvisOrientationManager.class))
          return null;
       if (!hasMomentumOptimizationSettings(PelvisOrientationManager.class))
          return null;
 
-      pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, momentumBasedController, registry);
+      pelvisOrientationManager = new PelvisOrientationManager(walkingControllerParameters, controllerToolbox, registry);
       pelvisOrientationManager.setWeights(momentumOptimizationSettings.getPelvisAngularWeight());
       return pelvisOrientationManager;
    }
 
-   private boolean hasMomentumBasedController(Class<?> managerClass)
+   private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
    {
-      if (momentumBasedController != null)
+      if (controllerToolbox != null)
          return true;
       missingObjectWarning(HighLevelHumanoidControllerToolbox.class, managerClass);
       return false;

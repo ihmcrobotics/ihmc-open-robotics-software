@@ -33,7 +33,7 @@ public class FullyConstrainedState extends AbstractFootControlState
 
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
-      footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
       spatialAccelerationCommand.setWeight(SolverWeightLevels.FOOT_SUPPORT_WEIGHT);
       spatialAccelerationCommand.set(rootBody, contactableFoot.getRigidBody());
       spatialAccelerationCommand.setPrimaryBase(pelvis);
@@ -54,7 +54,7 @@ public class FullyConstrainedState extends AbstractFootControlState
    public void doTransitionIntoAction()
    {
       super.doTransitionIntoAction();
-      momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
+      controllerToolbox.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
    }
 
    @Override
@@ -69,9 +69,9 @@ public class FullyConstrainedState extends AbstractFootControlState
       if (partialFootholdControlModule != null)
       {
          footSwitch.computeAndPackCoP(cop);
-         momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+         controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
          partialFootholdControlModule.compute(desiredCoP, cop);
-         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+         YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
          boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
             contactState.notifyContactStateHasChanged();

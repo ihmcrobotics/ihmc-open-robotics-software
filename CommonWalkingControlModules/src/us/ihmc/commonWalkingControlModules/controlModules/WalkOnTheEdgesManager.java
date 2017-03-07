@@ -86,10 +86,10 @@ public class WalkOnTheEdgesManager
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(HighLevelHumanoidControllerToolbox momentumBasedController, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters,
+   public WalkOnTheEdgesManager(HighLevelHumanoidControllerToolbox controllerToolbox, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters,
          SideDependentList<? extends ContactablePlaneBody> feet, YoVariableRegistry parentRegistry)
    {
-      this(momentumBasedController.getFullRobotModel(), toeOffHelper, walkingControllerParameters, feet, createFootContactStates(momentumBasedController), parentRegistry);
+      this(controllerToolbox.getFullRobotModel(), toeOffHelper, walkingControllerParameters, feet, createFootContactStates(controllerToolbox), parentRegistry);
    }
 
    public WalkOnTheEdgesManager(FullHumanoidRobotModel fullRobotModel, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters,
@@ -133,12 +133,12 @@ public class WalkOnTheEdgesManager
       parentRegistry.addChild(registry);
    }
 
-   private static SideDependentList<YoPlaneContactState> createFootContactStates(HighLevelHumanoidControllerToolbox momentumBasedController)
+   private static SideDependentList<YoPlaneContactState> createFootContactStates(HighLevelHumanoidControllerToolbox controllerToolbox)
    {
       SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
-         footContactStates.put(robotSide, momentumBasedController.getContactState(momentumBasedController.getContactableFeet().get(robotSide)));
+         footContactStates.put(robotSide, controllerToolbox.getContactState(controllerToolbox.getContactableFeet().get(robotSide)));
       }
       return footContactStates;
    }

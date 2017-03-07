@@ -41,7 +41,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
 
-   protected final HighLevelHumanoidControllerToolbox momentumBasedController;
+   protected final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    protected boolean attemptToStraightenLegs;
 
@@ -52,13 +52,13 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
       this.footControlHelper = footControlHelper;
       this.contactableFoot = footControlHelper.getContactableFoot();
 
-      this.momentumBasedController = footControlHelper.getMomentumBasedController();
+      this.controllerToolbox = footControlHelper.getHighLevelHumanoidControllerToolbox();
 
       this.robotSide = footControlHelper.getRobotSide();
 
-      rootBody = momentumBasedController.getTwistCalculator().getRootBody();
+      rootBody = controllerToolbox.getTwistCalculator().getRootBody();
 
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
       OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);

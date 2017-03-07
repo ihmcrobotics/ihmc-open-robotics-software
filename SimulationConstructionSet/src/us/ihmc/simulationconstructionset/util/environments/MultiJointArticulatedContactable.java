@@ -65,7 +65,7 @@ public abstract class MultiJointArticulatedContactable implements Contactable
             
       if (addDynamicGraphicForceVectorsForceVectors)
       {
-         robot.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+         robot.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       }
    }
    

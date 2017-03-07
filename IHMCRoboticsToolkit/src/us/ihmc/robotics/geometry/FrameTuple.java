@@ -68,6 +68,36 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       set(x, y, z);
    }
 
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startIndex, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startIndex, tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleDenseMatrix);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, tupleDenseMatrix);
+   }
+   
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, int column, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, column, tupleDenseMatrix);
+   }
+
    public final void set(FrameTuple<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);

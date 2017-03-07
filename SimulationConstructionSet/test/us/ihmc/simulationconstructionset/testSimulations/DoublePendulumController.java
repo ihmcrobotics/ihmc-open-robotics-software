@@ -89,7 +89,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
    }
 
    @Override
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return null;
    }
