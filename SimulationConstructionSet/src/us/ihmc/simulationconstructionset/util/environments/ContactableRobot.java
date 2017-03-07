@@ -62,10 +62,10 @@ public abstract class ContactableRobot extends Robot implements Contactable
    }
 
    public void createAvailableContactPoints(int groupIdentifier, int totalContactPointsAvailable, double forceVectorScale,
-         boolean addDynamicGraphicForceVectorsForceVectors)
+         boolean addYoGraphicForceVectorsForceVectors)
    {
       articulatedContactable.createAvailableContactPoints(groupIdentifier, totalContactPointsAvailable, forceVectorScale,
-            addDynamicGraphicForceVectorsForceVectors);
+            addYoGraphicForceVectorsForceVectors);
    }
 
    @Override

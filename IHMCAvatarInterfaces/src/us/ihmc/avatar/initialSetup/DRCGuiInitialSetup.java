@@ -102,8 +102,8 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
       if (SHOW_ONLY_WRENCH_VISUALIZER)
       {
-         scs.hideAllDynamicGraphicObjects();
-         scs.setDynamicGraphicObjectsListVisible("wrenchVisualizer", true);
+         scs.hideAllYoGraphics();
+         scs.setYoGraphicsListVisible("wrenchVisualizer", true);
       }
 
       if (SHOW_EXPORT_TORQUE_AND_SPEED)

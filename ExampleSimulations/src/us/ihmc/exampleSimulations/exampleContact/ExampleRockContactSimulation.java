@@ -87,7 +87,7 @@ public class ExampleRockContactSimulation
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       double forceVectorScale = 0.001;
       AppearanceDefinition appearance = YoAppearance.Green();
-      contactableBoxRobot.addDynamicGraphicForceVectorsToGroundContactPoints(forceVectorScale, appearance , yoGraphicsListRegistry);
+      contactableBoxRobot.addYoGraphicForceVectorsToGroundContactPoints(forceVectorScale, appearance , yoGraphicsListRegistry);
       
       YoGraphicPosition checkGroundPosition = new YoGraphicPosition("checkGround", groundCheckPoint, 0.01, YoAppearance.Orange());
       yoGraphicsListRegistry.registerYoGraphic("CheckGroundPosition", checkGroundPosition);

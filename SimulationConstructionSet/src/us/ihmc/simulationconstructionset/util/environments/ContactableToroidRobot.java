@@ -118,12 +118,12 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       return wheelLink;
    }
    
-   public void addDynamicGraphicForceVectorsToGroundContactPoints(double forceVectorScale, AppearanceDefinition appearance, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void addYoGraphicForceVectorsToGroundContactPoints(double forceVectorScale, AppearanceDefinition appearance, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      addDynamicGraphicForceVectorsToGroundContactPoints(1, forceVectorScale, appearance, yoGraphicsListRegistry);
+      addYoGraphicForceVectorsToGroundContactPoints(1, forceVectorScale, appearance, yoGraphicsListRegistry);
    }
    
-   public void addDynamicGraphicForceVectorsToGroundContactPoints(int groupIdentifier, double forceVectorScale, AppearanceDefinition appearance, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void addYoGraphicForceVectorsToGroundContactPoints(int groupIdentifier, double forceVectorScale, AppearanceDefinition appearance, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (yoGraphicsListRegistry == null) return;
       
@@ -133,8 +133,8 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {
-         YoGraphicVector dynamicGraphicVector = new YoGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), forceVectorScale, appearance);
-         yoGraphicsListRegistry.registerYoGraphic("ContactableToroidRobot", dynamicGraphicVector);
+         YoGraphicVector yoGraphicVector = new YoGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), forceVectorScale, appearance);
+         yoGraphicsListRegistry.registerYoGraphic("ContactableToroidRobot", yoGraphicVector);
       }
    }
    
