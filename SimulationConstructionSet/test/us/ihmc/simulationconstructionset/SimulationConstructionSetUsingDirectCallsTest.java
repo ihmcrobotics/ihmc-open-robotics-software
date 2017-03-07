@@ -700,17 +700,17 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean isGroundVisibleFromSCS2 = stateIfTerrainIsVisible(scs);
       assertTrue(isGroundVisibleFromSCS2);
 
-      ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
+      ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getYoGraphicsListRegistries();
       assertArrayOfObjectsContainsTheObject(yoGraphicListRegistriesFromSCS, yoGraphicsListRegistry);
 
-      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
-      scs.hideAllDynamicGraphicObjects();
-      boolean yoGraphicsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      scs.setYoGraphicsListVisible(yoGraphicsListName, true);
+      scs.hideAllYoGraphics();
+      boolean yoGraphicsAreShowing = scs.checkAllYoGraphicsListRegistriesAreShowing();
       assertFalse(yoGraphicsAreShowing);
 
-      scs.hideAllDynamicGraphicObjects();
-      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
-      boolean yoGraphicsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      scs.hideAllYoGraphics();
+      scs.setYoGraphicsListVisible(yoGraphicsListName, true);
+      boolean yoGraphicsAreShowing2 = scs.checkAllYoGraphicsListRegistriesAreShowing();
       assertTrue(yoGraphicsAreShowing2);
 
 //      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);

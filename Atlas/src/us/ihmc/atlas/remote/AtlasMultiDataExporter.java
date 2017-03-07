@@ -396,8 +396,8 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          e.printStackTrace();
       }
 
-      scs.hideAllDynamicGraphicObjects();
-      scs.setDynamicGraphicObjectsListVisible("DesiredExternalWrench", true);
+      scs.hideAllYoGraphics();
+      scs.setYoGraphicsListVisible("DesiredExternalWrench", true);
    }
 
    public void setSimulateExport(SimulateAndExport simulateExport)
