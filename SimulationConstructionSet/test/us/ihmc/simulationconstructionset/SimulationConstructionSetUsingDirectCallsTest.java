@@ -155,7 +155,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private final String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
    private final String simpleComponentName =  "simpleComponent";
    private final String runningName = "simpleRunningName";
-   private final String yoGraphicsListName = "simpleDynamicGraphicObjectsList";
+   private final String yoGraphicsListName = "simpleYoGraphicsList";
    private final String[][] graphGroupVars = { cameraTrackingXYZVarNames, cameraDollyXYZVarNames };
    private final String[][][] graphGroupVarsWithConfig = { { cameraTrackingXYZVarNames, { "config_1" } }, { cameraDollyXYZVarNames, { "config_2" } } };
    private final String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);

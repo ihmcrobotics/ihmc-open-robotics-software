@@ -28,10 +28,10 @@ public abstract class SingleJointArticulatedContactable implements Contactable
 
    public abstract Joint getJoint();
 
-   public void createAvailableContactPoints(int groupIdentifier, int totalContactPointsAvailable, double forceVectorScale, boolean addDynamicGraphicForceVectorsForceVectors)
+   public void createAvailableContactPoints(int groupIdentifier, int totalContactPointsAvailable, double forceVectorScale, boolean addYoGraphicForceVectorsForceVectors)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = null;
-      if (addDynamicGraphicForceVectorsForceVectors) yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      if (addYoGraphicForceVectorsForceVectors) yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       for (int i = 0; i < totalContactPointsAvailable; i++)
       {
@@ -43,16 +43,16 @@ public abstract class SingleJointArticulatedContactable implements Contactable
          contactAvailable.set(true);
          contactsAvailable.add(contactAvailable);
 
-         if (addDynamicGraphicForceVectorsForceVectors)
+         if (addYoGraphicForceVectorsForceVectors)
          {
-            YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(name + "Point" + i, contactPoint.getYoPosition(), 0.02, YoAppearance.Green());
-            YoGraphicVector dynamicGraphicVector = new YoGraphicVector(name + "Force" + i, contactPoint.getYoPosition(), contactPoint.getYoForce(), forceVectorScale, YoAppearance.Green());
-            yoGraphicsListRegistry.registerYoGraphic(name, dynamicGraphicPosition);
-            yoGraphicsListRegistry.registerYoGraphic(name, dynamicGraphicVector);
+            YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(name + "Point" + i, contactPoint.getYoPosition(), 0.02, YoAppearance.Green());
+            YoGraphicVector yoGraphicVector = new YoGraphicVector(name + "Force" + i, contactPoint.getYoPosition(), contactPoint.getYoForce(), forceVectorScale, YoAppearance.Green());
+            yoGraphicsListRegistry.registerYoGraphic(name, yoGraphicPosition);
+            yoGraphicsListRegistry.registerYoGraphic(name, yoGraphicVector);
          }
       }
 
-      if (addDynamicGraphicForceVectorsForceVectors)
+      if (addYoGraphicForceVectorsForceVectors)
       {
          robot.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       }
