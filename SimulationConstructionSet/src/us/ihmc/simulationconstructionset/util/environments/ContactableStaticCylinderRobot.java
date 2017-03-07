@@ -115,8 +115,8 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       
       for (GroundContactPoint groundContactPoint : groundContactPoints)
       {
-         YoGraphicVector dynamicGraphicVector = new YoGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), forceVectorScale, appearance);
-         yoGraphicsListRegistry.registerYoGraphic("ContactableToroidRobot", dynamicGraphicVector);
+         YoGraphicVector yoGraphicVector = new YoGraphicVector(groundContactPoint.getName(), groundContactPoint.getYoPosition(), groundContactPoint.getYoForce(), forceVectorScale, appearance);
+         yoGraphicsListRegistry.registerYoGraphic("ContactableToroidRobot", yoGraphicVector);
       }
    }
    

@@ -107,8 +107,8 @@ public class HybridImpulseSpringDamperCollisionHandler implements CollisionHandl
       {
          externalForcePointBalls = BagOfBalls.createPatrioticBag(500, 0.0008, "contactBalls", parentRegistry, yoGraphicsListRegistry);
          newCollisionBalls = new BagOfBalls(500, 0.001, "newCollisionBalls", YoAppearance.Black(), parentRegistry, yoGraphicsListRegistry);
-         int maxNumberOfDynamicGraphicPositions = 500;
-         contactingExternalForcePointsVisualizer = new ContactingExternalForcePointsVisualizer(maxNumberOfDynamicGraphicPositions, yoGraphicsListRegistry,
+         int maxNumberOfYoGraphicPositions = 500;
+         contactingExternalForcePointsVisualizer = new ContactingExternalForcePointsVisualizer(maxNumberOfYoGraphicPositions, yoGraphicsListRegistry,
                                                                                                parentRegistry);
          contactingExternalForcePointsVisualizer.setForceVectorScale(0.25);
       }
