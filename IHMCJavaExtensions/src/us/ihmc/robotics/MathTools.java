@@ -83,7 +83,7 @@ public class MathTools
    }
 
    /**
-    * True if value |(v1-v2)| <= |epsilon|
+    * True if value |(v1-v2)| <= epsilon
     * True if v1 and v2 are Double.NaN
     * True if v1 and v2 are Positive Infinity
     * True if v1 and v2 are Negative Infinity
@@ -93,9 +93,15 @@ public class MathTools
     * @param v2 double
     * @param epsilon double
     * @return boolean
+    * @throws RuntimeException is epsilon is less than zero.
     */
    public static boolean epsilonEquals(double v1, double v2, double epsilon)
    {
+      if (epsilon < 0.0)
+      {
+         throw new RuntimeException("epilson is less than 0.0");
+      }
+      
       if (Double.compare(v1, v2) == 0)
       {
          return true;
@@ -109,7 +115,7 @@ public class MathTools
    }
 
    /**
-    * True if value |(v1-v2)| <= |epsilon|
+    * True if value |(v1-v2)| <= epsilon
     * True if v1 and v2 are Float.NaN
     * True if v1 and v2 are Positive Infinity
     * True if v1 and v2 are Negative Infinity
@@ -119,9 +125,15 @@ public class MathTools
     * @param v2 float
     * @param epsilon float
     * @return boolean
+    * @throws RuntimeException is epsilon is less than zero.
     */
    public static boolean epsilonEquals(float v1, float v2, float epsilon)
    {
+      if (epsilon < 0.0)
+      {
+         throw new RuntimeException("epilson is less than 0.0");
+      }
+      
       if(Float.isNaN(v1) && Float.isNaN(v2))
       {
          return true;
