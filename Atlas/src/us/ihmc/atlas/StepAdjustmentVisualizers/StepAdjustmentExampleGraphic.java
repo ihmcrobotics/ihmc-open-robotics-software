@@ -323,7 +323,9 @@ public class StepAdjustmentExampleGraphic
 
       icpPlanner.setSupportLeg(supportSide);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue());
+      icpPlanner.compute(yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
 
       icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
       icpOptimizationController.compute(yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue(), desiredICP, desiredICPVelocity, desiredICP, omega0.getDoubleValue());
@@ -360,10 +362,14 @@ public class StepAdjustmentExampleGraphic
 
       icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
 
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue());
+      icpPlanner.compute(yoTime.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpOptimizationController.setBeginningOfStateICP(desiredICP, desiredICPVelocity);
 
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue() + timeToConsiderAdjustment.getDoubleValue());
+      icpPlanner.compute(yoTime.getDoubleValue() + timeToConsiderAdjustment.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       yoCurrentICP.set(desiredICP);
 
       initialTime = yoTime.getDoubleValue();
@@ -456,7 +462,9 @@ public class StepAdjustmentExampleGraphic
       }
 
       double currentTime = timeToConsiderAdjustment.getDoubleValue() + initialTime;
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
+      icpPlanner.compute(currentTime);
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       yoDesiredICP.set(desiredICP);
 
       updateCurrentICPPosition();
@@ -592,7 +600,9 @@ public class StepAdjustmentExampleGraphic
       for (int i = 0; i < numberOfBalls; i++)
       {
          double currentTime = i * trajectoryDT + initialTime;
-         icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
+         icpPlanner.compute(currentTime);
+         icpPlanner.getDesiredCapturePointPosition(desiredICP);
+         icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
          desiredICP3d.setXY(desiredICP);
          bagOfBalls.setBall(desiredICP3d, i);
       }

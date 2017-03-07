@@ -290,7 +290,9 @@ public class BalanceManager
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
 
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, yoTime.getDoubleValue());
+      icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
+      icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
