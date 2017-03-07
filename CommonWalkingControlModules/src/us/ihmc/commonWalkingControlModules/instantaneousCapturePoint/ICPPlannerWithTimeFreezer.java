@@ -32,7 +32,8 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    private final FrameVector2d tmpCapturePointVelocity;
 
    public ICPPlannerWithTimeFreezer(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-         CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    CapturePointPlannerParameters capturePointPlannerParameters, YoVariableRegistry parentRegistry,
+                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, parentRegistry, yoGraphicsListRegistry);
 
@@ -59,15 +60,20 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
       this.freezeTimeFactor.set(capturePointPlannerParameters.getFreezeTimeFactor());
    }
 
-   public void getDesiredCapturePointPositionAndVelocity(FramePoint2d desiredCapturePointPositionToPack, FrameVector2d desiredCapturePointVelocityToPack,
-         FramePoint2d currentCapturePointPosition, double time)
+   @Override
+   public void compute(double time)
    {
-      super.getDesiredCapturePointPositionAndVelocity(desiredCapturePointPositionToPack, desiredCapturePointVelocityToPack, getTimeWithDelay(time));
+      throw new RuntimeException("Use the method ICPPlannerWithTimeFreezer.compute(FramePoint2d, double) instead. If the time freeze feature is not desired, use ICPPlanner instead.");
+   }
+
+   public void compute(FramePoint2d currentCapturePointPosition, double time)
+   {
+      super.compute(time);
 
       if (doTimeFreezing.getBooleanValue())
       {
-         tmpCapturePointPosition.setIncludingFrame(desiredCapturePointPositionToPack);
-         tmpCapturePointVelocity.setIncludingFrame(desiredCapturePointVelocityToPack);
+         super.getDesiredCapturePointPosition(tmpCapturePointPosition);
+         super.getDesiredCapturePointVelocity(tmpCapturePointVelocity);
          doTimeFreezeIfNeeded(currentCapturePointPosition, time);
       }
 
@@ -127,10 +133,10 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    private void computeCapturePointDistantToFreezeLine(FramePoint2d currentCapturePointPosition, FramePoint2d desiredCapturePointPosition,
-         FrameVector2d desiredCapturePointVelocity)
+                                                       FrameVector2d desiredCapturePointVelocity)
    {
       distanceToFreezeLine.set(CapturePointTools.computeDistanceToCapturePointFreezeLineIn2d(currentCapturePointPosition, desiredCapturePointPosition,
-            desiredCapturePointVelocity));
+                                                                                             desiredCapturePointVelocity));
    }
 
    @Override
