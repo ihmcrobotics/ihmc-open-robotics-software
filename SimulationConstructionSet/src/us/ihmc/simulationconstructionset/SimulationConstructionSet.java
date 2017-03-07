@@ -4349,14 +4349,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       if(yoGraphicMenuManager != null)
       {
-         addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
+         addCheckBoxesToYoGraphicCheckBoxMenuItem(yoGraphicsLists);
          displayYoGraphicMenu();
       }
 
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
    }
 
-   private void addCheckBoxesToDynamicGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
+   private void addCheckBoxesToYoGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
@@ -4388,7 +4388,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return simulationOverheadPlotterFactory;
    }
 
-   public void hideAllDynamicGraphicObjects()
+   public void hideAllYoGraphics()
    {
       int numberOfElements = yoGraphicListRegistries.size();
 
@@ -4399,7 +4399,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public boolean checkAllDynamicGraphicObjectsListRegistriesAreShowing()
+   public boolean checkAllYoGraphicsListRegistriesAreShowing()
    {
       boolean ret = true;
       int numberOfElements = yoGraphicListRegistries.size();
@@ -4413,7 +4413,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return ret;
    }
 
-   public void setDynamicGraphicObjectsListVisible(String name, boolean visible)
+   public void setYoGraphicsListVisible(String name, boolean visible)
    {
       ArrayList<YoGraphicsList> lists = new ArrayList<YoGraphicsList>();
       int numberOfElements = yoGraphicListRegistries.size();
@@ -4443,7 +4443,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    }
 
-   public ArrayList<YoGraphicsListRegistry> getDynamicGraphicObjectsListRegistries()
+   public ArrayList<YoGraphicsListRegistry> getYoGraphicsListRegistries()
    {
       return yoGraphicListRegistries;
    }
