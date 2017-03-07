@@ -187,6 +187,8 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       
       if (assertionFailedMessage != null)
       {
+         PrintTools.error(this, assertionFailedMessage);
+         
          concludeTesting();
          
          throw new AssertionFailedError(assertionFailedMessage);
