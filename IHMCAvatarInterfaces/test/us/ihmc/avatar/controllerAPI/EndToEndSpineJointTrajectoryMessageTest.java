@@ -15,17 +15,20 @@ import org.junit.Before;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.math.QuaternionCalculus;
@@ -41,7 +44,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
@@ -165,7 +167,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    {
       setupTest();
 
-      int waypoints = 200;
+      int waypoints = 100;
       SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, waypoints);
       for (int waypoint = 0; waypoint < waypoints; waypoint++)
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -176,18 +178,199 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       assertDesiredsContinous(controllerSpy);
    }
 
+   /**
+    * Tests that messages queue properly and the body manager has the correct number of waypoints after
+    * queuing.
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testMessageQueuing() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+
+      int numberOfMessages = 10;
+      int numberOfPoints = 5;
+
+      // same wave for all back joints
+      double amplitude = 0.1;
+      double frequency = 0.25;
+
+      double timePerWaypoint = 0.05;
+      double totalTime = timePerWaypoint;
+
+      // create messages
+      SpineTrajectoryMessage[] messages = new SpineTrajectoryMessage[numberOfMessages];
+      for (int msgIdx = 0; msgIdx < numberOfMessages; msgIdx++)
+      {
+         SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints, numberOfPoints);
+         double timeInMessage = timePerWaypoint;
+
+         for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
+         {
+            double desiredPosition = amplitude * Math.sin(2.0 * Math.PI * frequency * totalTime);
+            double desiredVelocity = 2.0 * Math.PI * frequency * amplitude * Math.cos(2.0 * Math.PI * frequency * totalTime);
+
+            if (msgIdx == 0 && pointIdx == 0)
+               desiredVelocity = 0.0;
+            if (msgIdx == numberOfMessages - 1 && pointIdx == numberOfPoints - 1)
+               desiredVelocity = 0.0;
+
+            for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+               message.setTrajectoryPoint(jointIdx, pointIdx, timeInMessage, desiredPosition, desiredVelocity);
+
+            totalTime += timePerWaypoint;
+            timeInMessage += timePerWaypoint;
+         }
+
+         message.setUniqueId(msgIdx + 1);
+         if (msgIdx != 0)
+            message.setExecutionMode(ExecutionMode.QUEUE, msgIdx);
+
+         messages[msgIdx] = message;
+      }
+
+      // send messages
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      double controllerDT = getRobotModel().getControllerDT();
+      for (int msgIdx = 0; msgIdx < numberOfMessages; msgIdx++)
+      {
+         drcSimulationTestHelper.send(messages[msgIdx]);
+         drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT);
+
+         for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+            assertNumberOfTrajectoryPoints((msgIdx + 1) * numberOfPoints + 1, spineJoints[jointIdx], scs);
+      }
+
+      int expectedPointsInGenerator = Math.min(numberOfPoints + 1, RigidBodyJointspaceControlState.maxPointsInGenerator);
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         assertNumberOfTrajectoryPointsInGenerator(expectedPointsInGenerator, spineJoints[jointIdx], scs);
+
+      int expectedPointsInQueue = numberOfMessages * numberOfPoints - expectedPointsInGenerator + 1;
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+         assertNumberOfTrajectoryPointsInQueue(expectedPointsInQueue, spineJoints[jointIdx], scs);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(totalTime + 1.0);
+      assertControlWasConsistent(controllerSpy);
+      assertDesiredsContinous(controllerSpy);
+   }
+
+   /**
+    * Tests that messages queue properly and the body manager has the correct number of waypoints after
+    * queuing.
+    * @throws SimulationExceededMaximumTimeException
+    */
+   public void testMessageWithDifferentTrajectoryLengthsPerJoint() throws SimulationExceededMaximumTimeException
+   {
+      setupTest();
+      Random random = new Random(845278L);
+      double maxTime = 5.0;
+
+      int[] numberOfPoints = new int[numberOfJoints];
+      double[] trajectoryTime = new double[numberOfJoints];
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         numberOfPoints[jointIdx] = random.nextInt(10);
+         trajectoryTime[jointIdx] = random.nextDouble() * maxTime;
+      }
+
+      SpineTrajectoryMessage message = new SpineTrajectoryMessage(numberOfJoints);
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         int numberOfPoinsForJoint = numberOfPoints[jointIdx];
+         double timePerPoint = trajectoryTime[jointIdx] / (double) numberOfPoinsForJoint;
+         double time = timePerPoint;
+
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = new OneDoFJointTrajectoryMessage(numberOfPoinsForJoint);
+         for (int pointIdx = 0; pointIdx < numberOfPoinsForJoint; pointIdx++)
+         {
+            double position = getRandomJointAngleInRange(random, spineJoints[jointIdx]);
+            jointTrajectoryMessage.setTrajectoryPoint(pointIdx, time, position, 0.0);
+            time += timePerPoint;
+         }
+         message.setTrajectory1DMessage(jointIdx, jointTrajectoryMessage);
+      }
+
+      // send message
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      double controllerDT = getRobotModel().getControllerDT();
+      drcSimulationTestHelper.send(message);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT);
+
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         OneDoFJoint joint = spineJoints[jointIdx];
+         assertNumberOfTrajectoryPoints(numberOfPoints[jointIdx] + 1, joint, scs);
+      }
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(maxTime);
+
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+      {
+         int maxPointsInGenerator = RigidBodyJointspaceControlState.maxPointsInGenerator;
+         int totalPointsForJoint = numberOfPoints[jointIdx] + 1;
+
+         if (totalPointsForJoint <= maxPointsInGenerator)
+         {
+            assertNumberOfTrajectoryPointsInGenerator(totalPointsForJoint, spineJoints[jointIdx], scs);
+         }
+         else
+         {
+            int pointsInLastTrajectory = totalPointsForJoint - maxPointsInGenerator; // fist set in generator
+            while (pointsInLastTrajectory > (maxPointsInGenerator - 1))
+               pointsInLastTrajectory -= (maxPointsInGenerator - 1); // keep filling the generator
+            pointsInLastTrajectory++;
+            assertNumberOfTrajectoryPointsInGenerator(pointsInLastTrajectory, spineJoints[jointIdx], scs);
+         }
+      }
+
+      assertDesiredsMatchAfterExecution(message, spineJoints, scs);
+      assertControlWasConsistent(controllerSpy);
+      assertDesiredsContinous(controllerSpy);
+   }
+
+   private static void assertNumberOfTrajectoryPoints(int points, OneDoFJoint joint, SimulationConstructionSet scs)
+   {
+      String bodyName = "utorso";
+      String prefix = bodyName + "Jointspace";
+      String jointName = joint.getName();
+      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPoints", prefix + "ControlModule");
+      assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
+   }
+
+   private static void assertNumberOfTrajectoryPointsInGenerator(int points, OneDoFJoint joint, SimulationConstructionSet scs)
+   {
+      String bodyName = "utorso";
+      String prefix = bodyName + "Jointspace";
+      String jointName = joint.getName();
+      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInGenerator", prefix + "ControlModule");
+      assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
+   }
+
+   private static void assertNumberOfTrajectoryPointsInQueue(int points, OneDoFJoint joint, SimulationConstructionSet scs)
+   {
+      String bodyName = "utorso";
+      String prefix = bodyName + "Jointspace";
+      String jointName = joint.getName();
+      IntegerYoVariable numberOfPoints = getIntegerYoVariable(scs, prefix + "_" + jointName + "_numberOfPointsInQueue", prefix + "ControlModule");
+      assertEquals("Unexpected number of trajectory points for " + jointName, points, numberOfPoints.getIntegerValue());
+   }
+
    private SpineTrajectoryMessage createRandomSpineMessage(double trajectoryTime, Random random)
    {
       double[] jointDesireds = new double[numberOfJoints];
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJoint joint = spineJoints[jointIdx];
-         double jointLimitUpper = joint.getJointLimitUpper();
-         double jointLimitLower = joint.getJointLimitLower();
-         double desired = RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
+         double desired = getRandomJointAngleInRange(random, joint);
          jointDesireds[jointIdx] = desired;
       }
       return new SpineTrajectoryMessage(trajectoryTime, jointDesireds);
+   }
+
+   private double getRandomJointAngleInRange(Random random, OneDoFJoint joint)
+   {
+      double jointLimitUpper = joint.getJointLimitUpper();
+      double jointLimitLower = joint.getJointLimitLower();
+      return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
    }
 
    private ChestTrajectoryMessage createRandomChestMessage(double trajectoryTime, Random random)
@@ -222,19 +405,23 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       double trajectoryTime = 0.0;
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointsLists()[jointIdx];
+         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointLists()[jointIdx];
          double jointTrajectoryTime = jointTrajectory.getLastTrajectoryPoint().getTime();
          if (jointTrajectoryTime > trajectoryTime)
             trajectoryTime = jointTrajectoryTime;
       }
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 5.0 * controllerDT));
+      assertDesiredsMatchAfterExecution(message, spineJoints, drcSimulationTestHelper.getSimulationConstructionSet());
+   }
 
-      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+   private static void assertDesiredsMatchAfterExecution(SpineTrajectoryMessage message, OneDoFJoint[] spineJoints, SimulationConstructionSet scs)
+   {
+      for (int jointIdx = 0; jointIdx < spineJoints.length; jointIdx++)
       {
-         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointsLists()[jointIdx];
+         OneDoFJointTrajectoryMessage jointTrajectory = message.getTrajectoryPointLists()[jointIdx];
          double desired = jointTrajectory.getLastTrajectoryPoint().getPosition();
          OneDoFJoint joint = spineJoints[jointIdx];
-         assertJointDesired(drcSimulationTestHelper.getSimulationConstructionSet(), joint, desired);
+         assertJointDesired(scs, joint, desired);
       }
    }
 
@@ -274,8 +461,8 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static BooleanYoVariable findOrientationControlEnabled(SimulationConstructionSet scs, RigidBody body)
    {
       String bodyName = body.getName();
-      String namespace = bodyName + "OrientationFBController";
-      String variable = bodyName + "IsOrientationFBControllerEnabled";
+      String namespace = bodyName + "SpatialFBController";
+      String variable = bodyName + "IsSpatialFBControllerEnabled";
       return getBooleanYoVariable(scs, variable, namespace);
    }
 
@@ -301,6 +488,11 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
    private static BooleanYoVariable getBooleanYoVariable(SimulationConstructionSet scs, String name, String namespace)
    {
       return getYoVariable(scs, name, namespace, BooleanYoVariable.class);
+   }
+
+   private static IntegerYoVariable getIntegerYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   {
+      return getYoVariable(scs, name, namespace, IntegerYoVariable.class);
    }
 
    private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
@@ -451,7 +643,6 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       public double getMaxSpeed()
       {
-         PrintTools.info("Max Speed: " + maxSpeed.getDoubleValue());
          return maxSpeed.getDoubleValue();
       }
 

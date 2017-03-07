@@ -2,6 +2,7 @@ package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
 
 import java.util.Random;
 
@@ -13,8 +14,10 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationManager;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -28,6 +31,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -35,7 +39,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-5;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -63,32 +67,80 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT()); // Trick to get frames synchronized with the controller.
       assertTrue(success);
-      desiredRandomChestOrientation.changeFrame(chest.getBodyFixedFrame());
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames.updateFrames();
+      desiredRandomChestOrientation.changeFrame(humanoidReferenceFrames.getChestFrame());
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-
-      assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), scs);
+      humanoidReferenceFrames.updateFrames();
+      desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
+      assertSingleWaypointExecuted(desiredRandomChestOrientation.getQuaternion(), head.getName(), scs);
    }
 
    public void testLookingLeftAndRight() throws SimulationExceededMaximumTimeException
    {
       setupTest();
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames.updateFrames();
+
+      double trajectoryTime = 1.0;
+      FrameOrientation lookStraightAhead = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), new Quaternion());
+      lookStraightAhead.changeFrame(ReferenceFrame.getWorldFrame());
+
+      Quaternion lookLeftQuat = new Quaternion();
+      lookLeftQuat.appendYawRotation(Math.PI / 4.0);
+      lookLeftQuat.appendPitchRotation(Math.PI / 16.0);
+      lookLeftQuat.appendRollRotation(-Math.PI / 16.0);
+      FrameOrientation lookLeft = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), lookLeftQuat);
+      lookLeft.changeFrame(ReferenceFrame.getWorldFrame());
+
+      Quaternion lookRightQuat = new Quaternion();
+      lookRightQuat.appendYawRotation(-Math.PI / 4.0);
+      lookRightQuat.appendPitchRotation(-Math.PI / 16.0);
+      lookRightQuat.appendRollRotation(Math.PI / 16.0);
+      FrameOrientation lookRight = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
+      lookRight.changeFrame(ReferenceFrame.getWorldFrame());
+
+      HeadTrajectoryMessage lookStraightAheadMessage = new HeadTrajectoryMessage(trajectoryTime, lookStraightAhead.getQuaternion());
+      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
+
+      HeadTrajectoryMessage lookLeftMessage = new HeadTrajectoryMessage(trajectoryTime, lookLeft.getQuaternion());
+      drcSimulationTestHelper.send(lookLeftMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
+
+      HeadTrajectoryMessage lookRightMessage = new HeadTrajectoryMessage(trajectoryTime, lookRight.getQuaternion());
+      drcSimulationTestHelper.send(lookRightMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
+
+      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 0.1));
    }
 
    private void setupTest() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      FlatGroundEnvironment environment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
       ThreadTools.sleep(1000);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      RigidBody head = fullRobotModel.getHead();
-      RigidBody chest = fullRobotModel.getChest();
+      head = fullRobotModel.getHead();
+      chest = fullRobotModel.getChest();
       neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
       numberOfJoints = neckJoints.length;
+
+      drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(5.0, 0.0, 2.0);
+      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(0.0, 0.0, 0.4);
+
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
@@ -107,36 +159,23 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       return scs.getVariable(headOrientatManagerName, headControlStateName + "SwitchTime").getValueAsDouble();
    }
 
-   public static Quaternion findControllerDesiredOrientation(SimulationConstructionSet scs)
+   public static Quaternion findControllerDesiredOrientation(String bodyName, SimulationConstructionSet scs)
    {
-      String headPrefix = "head";
-      String subTrajectoryName = headPrefix + "SubTrajectory";
-      String currentOrientationVarNamePrefix = subTrajectoryName + "CurrentOrientation";
-
-      double x = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qx").getValueAsDouble();
-      double y = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qy").getValueAsDouble();
-      double z = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qz").getValueAsDouble();
-      double s = scs.getVariable(subTrajectoryName, currentOrientationVarNamePrefix + "Qs").getValueAsDouble();
-      return new Quaternion(x, y, z, s);
+      return findQuat4d("FeedbackControllerToolbox", bodyName + "DesiredOrientation", scs);
    }
 
-   public static int findNumberOfWaypoints(SimulationConstructionSet scs)
+   public static int findNumberOfWaypoints(String bodyName, SimulationConstructionSet scs)
    {
-      String headPrefix = "head";
-      String numberOfWaypointsVarName = headPrefix + "NumberOfWaypoints";
-      String orientationTrajectoryName = headPrefix + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
+      String numberOfWaypointsVarName = bodyName + "NumberOfWaypoints";
+      String orientationTrajectoryName = bodyName + MultipleWaypointsOrientationTrajectoryGenerator.class.getSimpleName();
       return ((IntegerYoVariable) scs.getVariable(orientationTrajectoryName, numberOfWaypointsVarName)).getIntegerValue();
    }
 
-   public static void assertSingleWaypointExecuted(Quaternion desiredOrientation, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(Quaternion desiredOrientation, String bodyName, SimulationConstructionSet scs)
    {
-      assertEquals(2, findNumberOfWaypoints(scs));
-
-      Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(scs);
-      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.getX(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.getY(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.getZ(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getS(), controllerDesiredOrientation.getS(), EPSILON_FOR_DESIREDS);
+      assertEquals(2, findNumberOfWaypoints(bodyName, scs));
+      Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(bodyName, scs);
+      EuclidCoreTestTools.assertQuaternionEquals(desiredOrientation, controllerDesiredOrientation, EPSILON_FOR_DESIREDS);
    }
 
    @Before

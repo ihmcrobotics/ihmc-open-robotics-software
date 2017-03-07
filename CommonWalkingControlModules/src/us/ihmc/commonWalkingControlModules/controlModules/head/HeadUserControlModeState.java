@@ -63,7 +63,7 @@ public class HeadUserControlModeState extends HeadControlState
       }
 
       for (int i = 0; i < userControlledJoints.length; i++)
-         userDesiredJointAccelerations[i].set(command.getNeckDesiredJointAcceleration(i));
+         userDesiredJointAccelerations[i].set(command.getDesiredJointAcceleration(i));
       timeSinceLastUserMesage.set(0.0);
       timeOfLastUserMesage.set(yoTime.getDoubleValue());
    }

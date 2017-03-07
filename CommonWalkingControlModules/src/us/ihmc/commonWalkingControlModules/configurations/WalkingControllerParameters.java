@@ -1,9 +1,14 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -12,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -135,10 +141,67 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
-   /** The gains used when the spine joints are controlled directly instead of the chest orientation */
-   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   /**
+    * The map returned contains all controller gains for tracking jointspace trajectories. The key of
+    * the map is the joint name as defined in the robot joint map. If a joint is not contained in the
+    * map, jointspace control is not supported for that joint.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing jointspace PID gains by joint name
+    */
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
    {
-      return null;
+      return new HashMap<String, YoPIDGains>();
+   }
+
+   /**
+    * The map returned contains all controller gains for tracking taskspace orientation trajectories
+    * (or the orientation part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * orientation or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace orientation PID gains by rigid body name
+    */
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoOrientationPIDGainsInterface>();
+   }
+
+   /**
+    * The map returned contains all controller gains for tracking taskspace position trajectories
+    * (or the position part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * position or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace position PID gains by rigid body name
+    */
+   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoPositionPIDGainsInterface>();
+   }
+
+   /**
+    * The map returned contains the default home joint angles. The key of the map is the joint name
+    * as defined in the robot joint map.
+    *
+    * @return map containing home joint angles by joint name
+    */
+   public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
+   {
+      return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * The list of strings returned contains all joint names that are position controlled. The names
+    * of the joints are defined in the robots joint map.
+    *
+    * @return list of position controlled joint names
+    */
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      return new ArrayList<String>();
    }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
