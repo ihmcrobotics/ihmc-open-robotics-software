@@ -128,6 +128,9 @@ public class HighLevelControlManagerFactory
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, ReferenceFrame rootFrame)
    {
+      if (bodyToControl == null)
+         return null;
+
       String bodyName = bodyToControl.getName();
       if (rigidBodyManagerMapByBodyName.containsKey(bodyName))
       {
