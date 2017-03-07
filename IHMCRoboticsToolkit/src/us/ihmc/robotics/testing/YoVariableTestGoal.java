@@ -14,7 +14,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
    private boolean hasMetGoal = false;
 
-   private YoVariableTestGoal(YoVariable<?>... yoVariables)
+   protected YoVariableTestGoal(YoVariable<?>... yoVariables)
    {
       for (YoVariable<?> yoVariable : yoVariables)
       {
