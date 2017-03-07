@@ -145,8 +145,9 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       assertTrue(success);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-
-      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs);
+      RigidBody chest = fullRobotModel.getChest();
+      
+      EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
 //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndFootTrajectoryMessageTest.assertSingleWaypointExecuted(footSide, desiredFootPose.getFramePointCopy().getPoint(), desiredFootPose.getFrameOrientationCopy().getQuaternion(), scs);
       for (RobotSide robotSide : RobotSide.values)
