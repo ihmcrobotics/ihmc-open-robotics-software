@@ -4422,7 +4422,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicListRegistries.get(i);
          lists.clear();
-         yoGraphicsListRegistry.getRegisteredDynamicGraphicObjectsLists(lists);
+         yoGraphicsListRegistry.getRegisteredYoGraphicsLists(lists);
          int n = lists.size();
 
          for (int j = 0; j < n; j++)
