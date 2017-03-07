@@ -128,13 +128,13 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       this(name, DEFAULT_LENGTH, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_MASS);
    }
 
-   public void addDynamicGraphicForceVectorsToGroundContactPoints(double forceVectorScale, AppearanceDefinition appearance,
+   public void addYoGraphicForceVectorsToGroundContactPoints(double forceVectorScale, AppearanceDefinition appearance,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      addDynamicGraphicForceVectorsToGroundContactPoints(0, forceVectorScale, appearance, yoGraphicsListRegistry);
+      addYoGraphicForceVectorsToGroundContactPoints(0, forceVectorScale, appearance, yoGraphicsListRegistry);
    }
 
-   public void addDynamicGraphicForceVectorsToGroundContactPoints(int groupIdentifier, double forceVectorScale, AppearanceDefinition appearance,
+   public void addYoGraphicForceVectorsToGroundContactPoints(int groupIdentifier, double forceVectorScale, AppearanceDefinition appearance,
          YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (yoGraphicsListRegistry == null)
