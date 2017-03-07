@@ -4,14 +4,14 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import us.ihmc.simulationconstructionset.gui.tools.MultiButtonSelectionDeselectionAction;
-import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
+import us.ihmc.simulationconstructionset.util.graphics.YoGraphicCheckBoxMenuItem;
 
-public class DynamicGraphicMenuManager
+public class YoGraphicMenuManager
 {
    private JMenu jMenu;
    private MultiButtonSelectionDeselectionAction hideAllGraphicObjects;
 
-   public DynamicGraphicMenuManager()
+   public YoGraphicMenuManager()
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
@@ -42,7 +42,7 @@ public class DynamicGraphicMenuManager
       hideAllGraphicObjects.hideAllGraphics();
    }
 
-   public void addCheckBox(DynamicGraphicCheckBoxMenuItem checkBox)
+   public void addCheckBox(YoGraphicCheckBoxMenuItem checkBox)
    {
       jMenu.add(checkBox);
       hideAllGraphicObjects.addButton(checkBox);

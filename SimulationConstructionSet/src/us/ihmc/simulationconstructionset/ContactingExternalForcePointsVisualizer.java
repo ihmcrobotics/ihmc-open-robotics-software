@@ -33,16 +33,16 @@ public class ContactingExternalForcePointsVisualizer
 
    private final ArrayList<ContactingExternalForcePoint> contactPoints = new ArrayList<>();
 
-   public ContactingExternalForcePointsVisualizer(int maxNumberOfDynamicGraphicPositions, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public ContactingExternalForcePointsVisualizer(int maxNumberOfYoGraphicPositions, YoGraphicsListRegistry yoGraphicsListRegistry,
                                                   YoVariableRegistry parentRegistry)
    {
-      for (int i = 0; i < maxNumberOfDynamicGraphicPositions; i++)
+      for (int i = 0; i < maxNumberOfYoGraphicPositions; i++)
       {
          YoFramePoint contactPointWorld = new YoFramePoint("contactPoint" + i, worldFrame, this.registry);
          contactPointsWorld.add(contactPointWorld);
-         YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
-         contactPointsViz.add(dynamicGraphicPosition);
-         yoGraphicsListRegistry.registerYoGraphic("contactPoints", dynamicGraphicPosition);
+         YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
+         contactPointsViz.add(yoGraphicPosition);
+         yoGraphicsListRegistry.registerYoGraphic("contactPoints", yoGraphicPosition);
 
          YoFrameVector normalVector = new YoFrameVector("contactNormal" + i, worldFrame, registry);
          contactNormals.add(normalVector);

@@ -41,7 +41,7 @@ public class ManipulationControlModule
    public static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 2.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final List<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
+   private final List<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
    private final SideDependentList<HandControlModule> handControlModules;
@@ -103,9 +103,9 @@ public class ManipulationControlModule
             ReferenceFrame handPositionControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             if (handPositionControlFrame != null)
             {
-               YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(handPositionControlFrame, registry, 0.1);
-               dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-               list.add(dynamicGraphicReferenceFrame);
+               YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(handPositionControlFrame, registry, 0.1);
+               yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
+               list.add(yoGraphicReferenceFrame);
             }
          }
          yoGraphicsListRegistry.registerYoGraphicsList(list);
@@ -258,9 +258,9 @@ public class ManipulationControlModule
 
    private void updateGraphics()
    {
-      for (int i = 0; i < dynamicGraphicReferenceFrames.size(); i++)
+      for (int i = 0; i < yoGraphicReferenceFrames.size(); i++)
       {
-         dynamicGraphicReferenceFrames.get(i).update();
+         yoGraphicReferenceFrames.get(i).update();
       }
    }
 

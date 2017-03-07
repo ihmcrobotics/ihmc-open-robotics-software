@@ -40,7 +40,7 @@ public interface MultiThreadedRobotControlElement extends Runnable
    public String getName();
    
    /**
-    * Get the DynamicGraphicsObjectListRegistry for this controller and adds it to SCS
+    * Get the {@link YoGraphicsListRegistry} for this controller and adds it to SCS
     */
    public YoGraphicsListRegistry getYoGraphicsListRegistry();
    

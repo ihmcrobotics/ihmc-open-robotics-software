@@ -77,7 +77,7 @@ class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
    }
 
    @Override
-   public void updateDynamicGraphicObjectListRegistry()
+   public void updateYoGraphicsListRegistry()
    {
    }
    
