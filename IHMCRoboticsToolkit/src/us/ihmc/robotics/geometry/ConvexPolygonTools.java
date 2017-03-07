@@ -1209,7 +1209,7 @@ public class ConvexPolygonTools
       tangentIndex2 = vIndex;
       Vector2D tangent2 = new Vector2D(polygon.getVertex(tangentIndex2).getX() - point.getX(), polygon.getVertex(tangentIndex2).getY() - point.getY());
    
-      if (tangent1.angle(tangent2) > 0)
+      if (tangent1.angle(tangent2) >= 0)
       {
          return new int[] {tangentIndex1, tangentIndex2};
       }
@@ -1305,20 +1305,20 @@ public class ConvexPolygonTools
          int[] range1 = findStartAndEndTangents(v2Median, polygon1, epsilon);
          int[] range2 = findStartAndEndTangents(v1Median, polygon2, epsilon);
    
-         angle1A = MathTools.epsilonEquals(angle1A, 0, .01) ? 0 : angle1A;
-         angle1B = MathTools.epsilonEquals(angle1B, 0, .01) ? 0 : angle1B;
-         angle2A = MathTools.epsilonEquals(angle2A, 0, .01) ? 0 : angle2A;
-         angle2B = MathTools.epsilonEquals(angle2B, 0, .01) ? 0 : angle2B;
+         angle1A = MathTools.epsilonEquals(angle1A, 0, 0.01) ? 0 : angle1A;
+         angle1B = MathTools.epsilonEquals(angle1B, 0, 0.01) ? 0 : angle1B;
+         angle2A = MathTools.epsilonEquals(angle2A, 0, 0.01) ? 0 : angle2A;
+         angle2B = MathTools.epsilonEquals(angle2B, 0, 0.01) ? 0 : angle2B;
    
-         angle1A += ((angle1A < 0) && isInRange(v1MedianIndex, range1[0], range1[1])) ? 2 * Math.PI : 0;
-         angle1B += ((angle1B < 0) && isInRange(v1MedianIndex, range1[0], range1[1])) ? 2 * Math.PI : 0;
-         angle2A += ((angle2A < 0) && isInRange(v2MedianIndex, range2[0], range2[1])) ? 2 * Math.PI : 0;
-         angle2B += ((angle2B < 0) && isInRange(v2MedianIndex, range2[0], range2[1])) ? 2 * Math.PI : 0;
+         angle1A += ((angle1A <= 0) && isInRange(v1MedianIndex, range1[0], range1[1])) ? 2 * Math.PI : 0;
+         angle1B += ((angle1B <= 0) && isInRange(v1MedianIndex, range1[0], range1[1])) ? 2 * Math.PI : 0;
+         angle2A += ((angle2A <= 0) && isInRange(v2MedianIndex, range2[0], range2[1])) ? 2 * Math.PI : 0;
+         angle2B += ((angle2B <= 0) && isInRange(v2MedianIndex, range2[0], range2[1])) ? 2 * Math.PI : 0;
    
-         angle1A += ((angle1A < 0) && (angle1B < 0) && (angle1A < angle1B)) ? 2 * Math.PI : 0;
-         angle1B += ((angle1A < 0) && (angle1B < 0) && (angle1B < angle1A)) ? 2 * Math.PI : 0;
-         angle2A += ((angle2A < 0) && (angle2B < 0) && (angle2A < angle2B)) ? 2 * Math.PI : 0;
-         angle2B += ((angle2A < 0) && (angle2B < 0) && (angle2B < angle2A)) ? 2 * Math.PI : 0;
+         angle1A += ((angle1A <= 0) && (angle1B <= 0) && (angle1A < angle1B)) ? 2 * Math.PI : 0;
+         angle1B += ((angle1A <= 0) && (angle1B <= 0) && (angle1B < angle1A)) ? 2 * Math.PI : 0;
+         angle2A += ((angle2A <= 0) && (angle2B <= 0) && (angle2A < angle2B)) ? 2 * Math.PI : 0;
+         angle2B += ((angle2A <= 0) && (angle2B <= 0) && (angle2B < angle2A)) ? 2 * Math.PI : 0;
    
          int[] updatedIndices;
    
