@@ -150,7 +150,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       RigidBody chest = fullRobotModel.getChest();
       RigidBody pelvis = fullRobotModel.getPelvis();
 
-      ReferenceFrame pelvisZUpFrame = momentumBasedController.getPelvisZUpFrame();
+      ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
       this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
