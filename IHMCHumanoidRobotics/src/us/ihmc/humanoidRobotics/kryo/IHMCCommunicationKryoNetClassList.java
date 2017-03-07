@@ -164,13 +164,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.Body
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage.NeckControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SnapFootstepPacket;
+import us.ihmc.humanoidRobotics.communication.packets.walking.SpineDesiredAccelerationsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
@@ -260,6 +260,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(NeckTrajectoryMessage.class);
       registerPacketClass(ChestTrajectoryMessage.class);
       registerPacketClass(SpineTrajectoryMessage.class);
+      registerPacketClass(SpineDesiredAccelerationsMessage.class);
       registerPacketClass(PelvisTrajectoryMessage.class);
       registerPacketClass(PelvisOrientationTrajectoryMessage.class);
       registerPacketClass(FootTrajectoryMessage.class);
@@ -280,7 +281,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BodyPart.class);
 
       registerPacketField(ArmControlMode.class);
-      registerPacketField(NeckControlMode.class);
       registerPacketField(BaseForControl.class);
       registerPacketField(OneDoFJointTrajectoryMessage.class);
       registerPacketField(OneDoFJointTrajectoryMessage[].class);

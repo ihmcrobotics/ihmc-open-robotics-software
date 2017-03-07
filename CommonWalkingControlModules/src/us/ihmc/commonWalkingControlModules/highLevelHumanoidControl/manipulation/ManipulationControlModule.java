@@ -17,13 +17,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -159,15 +157,6 @@ public class ManipulationControlModule
          return;
       for (RobotSide robotSide : RobotSide.values)
          handControlModules.get(robotSide).holdPositionInJointspace();
-   }
-
-   public void handleGoHomeCommand(GoHomeCommand command)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (command.getRequest(robotSide, BodyPart.ARM))
-            goToDefaultState(robotSide, command.getTrajectoryTime());
-      }
    }
 
    public void handleHandTrajectoryCommands(List<HandTrajectoryCommand> commands)

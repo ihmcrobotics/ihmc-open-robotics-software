@@ -13,14 +13,14 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.controlModules.head.HeadControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.head.HeadUserControlModeState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.NeckDesiredAccelerationsMessage.NeckControlMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -56,47 +56,36 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
 
       RigidBody chest = fullRobotModel.getChest();
       RigidBody head = fullRobotModel.getHead();
+      String headName = head.getName();
       OneDoFJoint[] neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
       double[] neckDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, neckJoints.length, 0.1);
-      NeckDesiredAccelerationsMessage neckDesiredAccelerationsMessage = new NeckDesiredAccelerationsMessage(NeckControlMode.USER_CONTROL_MODE,
-            neckDesiredJointAccelerations);
+      NeckDesiredAccelerationsMessage neckDesiredAccelerationsMessage = new NeckDesiredAccelerationsMessage(neckDesiredJointAccelerations);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      assertEquals(HeadControlMode.TASKSPACE, EndToEndHeadTrajectoryMessageTest.findControllerState(scs));
+      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(headName, scs));
 
       drcSimulationTestHelper.send(neckDesiredAccelerationsMessage);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HeadUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
       assertTrue(success);
 
-      assertEquals(HeadControlMode.USER_CONTROL_MODE, EndToEndHeadTrajectoryMessageTest.findControllerState(scs));
-      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(neckJoints, scs);
+      assertEquals(RigidBodyControlMode.USER, findControllerState(headName, scs));
+      double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(neckJoints, headName, scs);
       assertArrayEquals(neckDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
       double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(neckJoints, scs);
       assertArrayEquals(neckDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
-      neckDesiredAccelerationsMessage = new NeckDesiredAccelerationsMessage(NeckControlMode.IHMC_CONTROL_MODE, null);
-
-      drcSimulationTestHelper.send(neckDesiredAccelerationsMessage);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
-      assertTrue(success);
-
-      assertEquals(HeadControlMode.TASKSPACE, EndToEndHeadTrajectoryMessageTest.findControllerState(scs));
-
-      neckDesiredAccelerationsMessage = new NeckDesiredAccelerationsMessage(NeckControlMode.USER_CONTROL_MODE, neckDesiredJointAccelerations);
-
-      drcSimulationTestHelper.send(neckDesiredAccelerationsMessage);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HeadUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
-      assertTrue(success);
-
-      assertEquals(HeadControlMode.USER_CONTROL_MODE, EndToEndHeadTrajectoryMessageTest.findControllerState(scs));
-
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
       assertTrue(success);
 
-      assertEquals(HeadControlMode.TASKSPACE, EndToEndHeadTrajectoryMessageTest.findControllerState(scs));
+      assertEquals(RigidBodyControlMode.JOINTSPACE, findControllerState(headName, scs));
+   }
+
+   @SuppressWarnings("unchecked")
+   public static RigidBodyControlMode findControllerState(String bodyName, SimulationConstructionSet scs)
+   {
+      String headOrientatManagerName = bodyName + "Manager";
+      String headControlStateName = headOrientatManagerName + "State";
+      return ((EnumYoVariable<RigidBodyControlMode>) scs.getVariable(headOrientatManagerName, headControlStateName)).getEnumValue();
    }
 
    public static double[] findQPOutputJointAccelerations(OneDoFJoint[] neckJoints, SimulationConstructionSet scs)
@@ -109,14 +98,15 @@ public abstract class EndToEndNeckDesiredAccelerationsMessageTest implements Mul
       return qdd_ds;
    }
 
-   public static double[] findControllerDesiredJointAccelerations(OneDoFJoint[] neckJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredJointAccelerations(OneDoFJoint[] neckJoints, String bodyName, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[neckJoints.length];
-      String nameSpace = HeadUserControlModeState.class.getSimpleName();
+      String nameSpace = bodyName + "UserControlModule";
 
       for (int i = 0; i < neckJoints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(nameSpace, "qdd_d_user_" + neckJoints[i].getName()).getValueAsDouble();
+         String variable = bodyName + "UserMode_" + neckJoints[i].getName() + "_qdd_d";
+         qdd_ds[i] = scs.getVariable(nameSpace, variable).getValueAsDouble();
       }
       return qdd_ds;
    }

@@ -10,6 +10,11 @@ public class SimpleTrajectoryPoint1DList extends SimpleTrajectoryPointList<Simpl
       super(SimpleTrajectoryPoint1D.class);
    }
 
+   public SimpleTrajectoryPoint1DList(int initialCapacity)
+   {
+      super(SimpleTrajectoryPoint1D.class, initialCapacity);
+   }
+
    public void set(SimpleTrajectoryPoint1DList trajectory)
    {
       clear();
