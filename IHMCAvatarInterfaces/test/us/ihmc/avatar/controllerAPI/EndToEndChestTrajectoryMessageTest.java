@@ -48,7 +48,7 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-5;
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-4;
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
