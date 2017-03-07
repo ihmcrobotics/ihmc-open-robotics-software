@@ -137,7 +137,7 @@ public abstract class EndToEndHeadTrajectoryMessageTest implements MultiRobotTes
       neckJoints = ScrewTools.createOneDoFJointPath(chest, head);
       numberOfJoints = neckJoints.length;
 
-      drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
+      drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(5.0, 0.0, 2.0);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(0.0, 0.0, 0.4);
 
