@@ -22,7 +22,7 @@ import us.ihmc.tools.io.printing.PrintTools;
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
-@ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
+@ContinuousIntegrationPlan(categories = IntegrationCategory.EXCLUDE)
 public class IHMCROSTranslationRuntimeToolsTest
 {
    @ContinuousIntegrationTest(estimatedDuration = 24.4)
