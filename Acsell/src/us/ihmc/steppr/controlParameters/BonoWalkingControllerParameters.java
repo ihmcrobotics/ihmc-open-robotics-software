@@ -1,9 +1,12 @@
 package us.ihmc.steppr.controlParameters;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
@@ -499,6 +502,86 @@ public class BonoWalkingControllerParameters extends WalkingControllerParameters
       gains.createDerivativeGainUpdater(true);
 
       return gains;
+   }
+
+   private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   {
+      double kp = 250.0;
+      double zeta = 0.6;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      YoPIDGains spineGains = new YoPIDGains("SpineJointspace", registry);
+      spineGains.setKp(kp);
+      spineGains.setZeta(zeta);
+      spineGains.setKi(ki);
+      spineGains.setMaximumIntegralError(maxIntegralError);
+      spineGains.setMaximumFeedback(maxAccel);
+      spineGains.setMaximumFeedbackRate(maxJerk);
+      spineGains.createDerivativeGainUpdater(true);
+
+      return spineGains;
+   }
+
+   private Map<String, YoPIDGains> jointspaceGains = null;
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
+   {
+      if (jointspaceGains != null)
+         return jointspaceGains;
+
+      jointspaceGains = new HashMap<>();
+
+      YoPIDGains spineGains = createSpineControlGains(registry);
+      for (SpineJointName name : jointMap.getSpineJointNames())
+         jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
+
+      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
+
+      return jointspaceGains;
+   }
+
+   private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   {
+      if (taskspaceAngularGains != null)
+         return taskspaceAngularGains;
+
+      taskspaceAngularGains = new HashMap<>();
+
+      YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
+
+      YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
+
+      return taskspaceAngularGains;
+   }
+
+   private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   /** {@inheritDoc} */
+   @Override
+   public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
+   {
+      if (jointHomeConfiguration != null)
+         return jointHomeConfiguration;
+
+      jointHomeConfiguration = new TObjectDoubleHashMap<String>();
+
+      for (SpineJointName name : jointMap.getSpineJointNames())
+         jointHomeConfiguration.put(jointMap.getSpineJointName(name), 0.0);
+
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         jointHomeConfiguration.put(jointMap.getNeckJointName(name), 0.0);
+
+      return jointHomeConfiguration;
    }
 
    @Override
