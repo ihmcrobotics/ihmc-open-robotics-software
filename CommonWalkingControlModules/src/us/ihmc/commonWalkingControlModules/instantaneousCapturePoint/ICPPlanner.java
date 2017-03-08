@@ -33,53 +33,91 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
- * Implementation of the ICP (Instantaneous Capture Point) planners introduced by Johannes Englsberger:
+ * Implementation of the ICP (Instantaneous Capture Point) planners introduced by Johannes
+ * Englsberger:
  * <ol>
- * <li> Three-Dimensional Bipedal Walking Control Based on Divergent Component of Motion, IEEE Transactions on Robotics, 2015.
- * <li> Three-Dimensional Bipedal Walking Control Using Divergent Component of Motion, IEEE/RSJ International Conference on Intelligent Robots and Systems, 2013. 
- * <li> Trajectory generation for continuous leg forces during double support and heel-to-toe shift based on divergent component of motion, IEEE/RSJ International Conference on Intelligent Robots and Systems, 2014.
+ * <li>Three-Dimensional Bipedal Walking Control Based on Divergent Component of Motion, IEEE
+ * Transactions on Robotics, 2015.
+ * <li>Three-Dimensional Bipedal Walking Control Using Divergent Component of Motion, IEEE/RSJ
+ * International Conference on Intelligent Robots and Systems, 2013.
+ * <li>Trajectory generation for continuous leg forces during double support and heel-to-toe shift
+ * based on divergent component of motion, IEEE/RSJ International Conference on Intelligent Robots
+ * and Systems, 2014.
  * </ol>
  * 
- * To summarize, the idea is to compute a smooth ICP trajectory for a given set of upcoming footsteps and a set of desired constant CMP (Centroidal Moment Pivot) locations for each support.
+ * To summarize, the idea is to compute a smooth ICP trajectory for a given set of upcoming
+ * footsteps and a set of desired constant CMP (Centroidal Moment Pivot) locations for each support.
  * <p>
- * Note that this ICP planner does not guarantee that the resulting CMP will always be inside the support polygon. Indeed the ICP trajectory is generated using splines without additional constraints on CMP.
- * Usually the CMP will remain inside the support polygon, however, for certain combinations of transfer and swing durations, the generated ICP trajectory might result in CMP overshooting outside the support polygon.
- * This is mostly happens when transfer and swing durations are on very different scales, i.e. one is very small while the other is very large.
+ * Note that this ICP planner does not guarantee that the resulting CMP will always be inside the
+ * support polygon. Indeed the ICP trajectory is generated using splines without additional
+ * constraints on CMP. Usually the CMP will remain inside the support polygon, however, for certain
+ * combinations of transfer and swing durations, the generated ICP trajectory might result in CMP
+ * overshooting outside the support polygon. This is mostly happens when transfer and swing
+ * durations are on very different scales, i.e. one is very small while the other is very large.
  * </p>
  * <p>
- * Note on the reference frames used in the planner.
- * The overall ICP trajectory is a piecewise set of splines representing portions of the trajectory for each phase of the gait cycle (single support, double support).
- * Each of these trajectories starts from initial conditions expressed in a reference frame relevant to the initial support context and ends at final conditions expressed in a reference frame relevant to the final support situation.
- * By doing so, foot slippage is inherently handle by this ICP planner as when a foot is slipping, the active trajectory is immediately stretched such that the initial and final conditions are following the foot they are attached to.
+ * Note on the reference frames used in the planner. The overall ICP trajectory is a piecewise set
+ * of splines representing portions of the trajectory for each phase of the gait cycle (single
+ * support, double support). Each of these trajectories starts from initial conditions expressed in
+ * a reference frame relevant to the initial support context and ends at final conditions expressed
+ * in a reference frame relevant to the final support situation. By doing so, foot slippage is
+ * inherently handle by this ICP planner as when a foot is slipping, the active trajectory is
+ * immediately stretched such that the initial and final conditions are following the foot they are
+ * attached to.
  * </p>
  * <p>
  * How to use the ICP planner.
  * <ul>
- * <li> First clear the current plan with {@link #clearPlan()}.
- * <li> Register the footsteps to be used in the plan with {@link #addFootstepToPlan(Footstep, FootstepTiming)}.
- * <li> Set the duration to be used for the last transfer phase, i.e. once the last footstep has been reached, using {@link #setFinalTransferTime(double)}.
- * <li> Then several options depending on the current phase of the walking gait:
+ * <li>First clear the current plan with {@link #clearPlan()}.
+ * <li>Register the footsteps to be used in the plan with
+ * {@link #addFootstepToPlan(Footstep, FootstepTiming)}.
+ * <li>Set the duration to be used for the last transfer phase, i.e. once the last footstep has been
+ * reached, using {@link #setFinalTransferTime(double)}.
+ * <li>Then several options depending on the current phase of the walking gait:
  * <ul>
- * <li> The robot is simply standing: simply call {@link #initializeForStanding(double)} providing the current controller time.
- * <li> The robot is about to perform a transfer of its weight from one foot to the other. You first need to provide the information about which foot the robot is transferring to via {@link #setTransferToSide(RobotSide)}
- *     or transferring from via {@link #setTransferFromSide(RobotSide)}. Then call {@link #initializeForTransfer(double)} providing the current controller time.
- * <li> The robot is about to perform a single support phase. You first need to provide the information about the foot that will be used a the support foot via {@link #setSupportLeg(RobotSide)}.
- *     Then call {@link #initializeForSingleSupport(double)} providing the current controller time.
+ * <li>The robot is simply standing: simply call {@link #initializeForStanding(double)} providing
+ * the current controller time.
+ * <li>The robot is about to perform a transfer of its weight from one foot to the other. You first
+ * need to provide the information about which foot the robot is transferring to via
+ * {@link #setTransferToSide(RobotSide)} or transferring from via
+ * {@link #setTransferFromSide(RobotSide)}. Then call {@link #initializeForTransfer(double)}
+ * providing the current controller time.
+ * <li>The robot is about to perform a single support phase. You first need to provide the
+ * information about the foot that will be used a the support foot via
+ * {@link #setSupportLeg(RobotSide)}. Then call {@link #initializeForSingleSupport(double)}
+ * providing the current controller time.
  * </ul>
- * <li> TODO finish up documentation.
+ * <li>The state of the ICP plan can then computed via {@link #compute(double)} given the current
+ * controller time.
+ * <li>The output of the planner can be accessed using the various following getters:
+ * <ul>
+ * <li>To get the ICP position, use either {@link #getDesiredCapturePointPosition(FramePoint)},
+ * {@link #getDesiredCapturePointPosition(FramePoint2d)}, or
+ * {@link #getDesiredCapturePointPosition(YoFramePoint)}.
+ * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector)},
+ * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
+ * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
+ * <li>To get the CMP position, use either
+ * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint)}, or
+ * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
+ * <li>To get the CMP velocity, use either
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector)}, or
+ * {@link #getDesiredCentroidalMomentumPivotVelocity(FrameVector2d)}.
+ * </ul>
  * </ul>
  * </p>
  *
  */
 public class ICPPlanner
 {
+   /** Whether to display by default the various artifacts for debug or not. */
    private static final boolean VISUALIZE = false;
+   /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -91,7 +129,6 @@ public class ICPPlanner
    private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(namePrefix + "IsInitialTransfer", registry);
    private final BooleanYoVariable isDoubleSupport = new BooleanYoVariable(namePrefix + "IsDoubleSupport", registry);
    private final DoubleYoVariable timeInCurrentState = new DoubleYoVariable(namePrefix + "TimeInCurrentState", registry);
-   private final DoubleYoVariable minSwingTime = new DoubleYoVariable(namePrefix + "MinSwingTime", registry);
    private final DoubleYoVariable finalTransferTime = new DoubleYoVariable(namePrefix + "FinalTransferTime", registry);
    private final DoubleYoVariable transferTimeSplitFraction = new DoubleYoVariable(namePrefix + "TransferTimeSplitFraction", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
@@ -117,7 +154,7 @@ public class ICPPlanner
 
    private final BooleanYoVariable requestedHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
    private final BooleanYoVariable isHoldingPosition = new BooleanYoVariable(namePrefix + "IsHoldingPosition", registry);
-   private final YoFramePoint actualICPToHold = new YoFramePoint(namePrefix + "ActualCapturePointToHold", worldFrame, registry);
+   private final YoFramePoint icpPositionToHold = new YoFramePoint(namePrefix + "CapturePointPositionToHold", worldFrame, registry);
 
    private final BooleanYoVariable useTwoConstantCMPsPerSupport = new BooleanYoVariable(namePrefix + "UseTwoConstantCMPsPerSupport", registry);
    private final DoubleYoVariable swingTimeSplitFraction = new DoubleYoVariable(namePrefix + "SwingTimeSplitFraction", registry);
@@ -141,6 +178,21 @@ public class ICPPlanner
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
 
+   /**
+    * Creates an ICP planner. Refer to the class documentation: {@link ICPPlanner}.
+    * 
+    * @param bipedSupportPolygons it is used to get reference frames relevant for walking such as
+    *           the sole frames. It is also used in
+    *           {@link ReferenceCentroidalMomentumPivotLocationsCalculator} to adapt the ICP plan to
+    *           available support polygon. The reference to this parameter is saved internally and
+    *           it will be accessed to access up-to-date information.
+    * @param contactableFeet it is used to get the set of default contact points for each foot.
+    * @param icpPlannerParameters configuration class used to initialized the constant parameters of
+    *           the ICP plan.
+    * @param parentRegistry registry to which the ICP planner's registry is attached to.
+    * @param yoGraphicsListRegistry registry to which the visualization for the planner should be
+    *           added to.
+    */
    public ICPPlanner(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                      CapturePointPlannerParameters icpPlannerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -148,7 +200,7 @@ public class ICPPlanner
 
       finalTransferTime.setToNaN();
 
-      actualICPToHold.setToNaN();
+      icpPositionToHold.setToNaN();
       isHoldingPosition.set(false);
 
       icpDoubleSupportTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix + "DoubleSupport", worldFrame, registry);
@@ -167,8 +219,6 @@ public class ICPPlanner
 
       // Initialize omega0 to NaN to force the user to explicitly set it.
       omega0.set(Double.NaN);
-
-      minSwingTime.set(0.3); // TODO Need to be extracted
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
                                                                                         numberFootstepsToConsider.getIntegerValue(), registry);
@@ -254,6 +304,13 @@ public class ICPPlanner
       yoGraphicsListRegistry.registerArtifactList(artifactList);
    }
 
+   /**
+    * Clear footstep and timing information making the ICP planner ready to be reinitialized with
+    * new footsteps.
+    * <p>
+    * Don't forget to call this method before registering a new set of footsteps.
+    * </p>
+    */
    public void clearPlan()
    {
       referenceCMPsCalculator.clear();
@@ -265,22 +322,62 @@ public class ICPPlanner
       }
    }
 
+   /**
+    * Registers the side of the support leg.
+    * <p>
+    * This is required before initializing the planner for a single support phase.
+    * </p>
+    * 
+    * @param robotSide the side of the support leg.
+    */
    public void setSupportLeg(RobotSide robotSide)
    {
       supportSide.set(robotSide);
    }
 
+   /**
+    * Registers the side to which the robot is about to transfer its weight.
+    * <p>
+    * This is required before initializing the planner for a transfer phase.
+    * </p>
+    * 
+    * @param robotSide the side towards which the robot is about to transfer.
+    */
    public void setTransferToSide(RobotSide robotSide)
    {
       transferToSide.set(robotSide);
    }
 
+   /**
+    * Registers the side from which the robot is about to transfer its weight.
+    * <p>
+    * This is equivalent to: {@code setTransferToSide(robotSide.getOppositeSide())}.
+    * </p>
+    * <p>
+    * This is required before initializing the planner for a transfer phase.
+    * </p>
+    * 
+    * @param robotSide the side from which the robot is about to transfer.
+    */
    public void setTransferFromSide(RobotSide robotSide)
    {
       if (robotSide != null)
          transferToSide.set(robotSide.getOppositeSide());
    }
 
+   /**
+    * Registers an additional footstep to consider in the next plan.
+    * <p>
+    * Footsteps have to be registered before initializing the planner.
+    * </p>
+    * <p>
+    * The reference to {@code footstep} is saved internally. The active ICP plan can be modified by
+    * updating a footstep and then calling the method {@link #updateCurrentPlan()}.
+    * </p>
+    * 
+    * @param footstep the new footstep to be queued to the current list of footsteps. Not modified.
+    * @param timing the timings to use when performing the footstep. Not modified.
+    */
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       if (footstep == null)
@@ -292,48 +389,38 @@ public class ICPPlanner
       transferTimes.get(footstepIndex).set(timing.getTransferTime());
    }
 
-   public void setDesiredCapturePointState(FramePoint currentDesiredCapturePointPosition, FrameVector currentDesiredCapturePointVelocity)
+   /**
+    * Prepares the planner to hold the given ICP position {@code icpPositionToHold} during the
+    * double support phase.
+    * <p>
+    * This is usually useful for dealing with unexpected switch to double support where centering
+    * the ICP in the support polygon would be undesirable.
+    * </p>
+    * 
+    * @param icpPositionToHold the position at which the ICP will be held during the next double
+    *           support phase. Not modified.
+    */
+   public void holdCurrentICP(FramePoint icpPositionToHold)
    {
-      desiredCapturePointPosition.set(currentDesiredCapturePointPosition);
-      desiredCapturePointVelocity.set(currentDesiredCapturePointVelocity);
-   }
-
-   public void setDesiredCapturePointState(YoFramePoint currentDesiredCapturePointPosition, YoFrameVector currentDesiredCapturePointVelocity)
-   {
-      desiredCapturePointPosition.set(currentDesiredCapturePointPosition);
-      desiredCapturePointVelocity.set(currentDesiredCapturePointVelocity);
-   }
-
-   public void setDesiredCapturePointState(FramePoint2d currentDesiredCapturePointPosition, FrameVector2d currentDesiredCapturePointVelocity)
-   {
-      // Do not set the Z to zero!
-      desiredCapturePointPosition.checkReferenceFrameMatch(currentDesiredCapturePointPosition);
-      desiredCapturePointPosition.setX(currentDesiredCapturePointPosition.getX());
-      desiredCapturePointPosition.setY(currentDesiredCapturePointPosition.getY());
-
-      desiredCapturePointVelocity.checkReferenceFrameMatch(currentDesiredCapturePointVelocity);
-      desiredCapturePointVelocity.setX(currentDesiredCapturePointVelocity.getX());
-      desiredCapturePointVelocity.setY(currentDesiredCapturePointVelocity.getY());
-   }
-
-   public void setDesiredCapturePointState(YoFramePoint2d currentDesiredCapturePointPosition, YoFrameVector2d currentDesiredCapturePointVelocity)
-   {
-      // Do not set the Z to zero!
-      desiredCapturePointPosition.checkReferenceFrameMatch(currentDesiredCapturePointPosition);
-      desiredCapturePointPosition.setX(currentDesiredCapturePointPosition.getX());
-      desiredCapturePointPosition.setY(currentDesiredCapturePointPosition.getY());
-
-      desiredCapturePointVelocity.checkReferenceFrameMatch(currentDesiredCapturePointVelocity);
-      desiredCapturePointVelocity.setX(currentDesiredCapturePointVelocity.getX());
-      desiredCapturePointVelocity.setY(currentDesiredCapturePointVelocity.getY());
-   }
-
-   public void holdCurrentICP(double initialTime, FramePoint actualICPToHold)
-   {
-      this.actualICPToHold.set(actualICPToHold);
+      this.icpPositionToHold.set(icpPositionToHold);
       requestedHoldPosition.set(true);
    }
 
+   /**
+    * Initializes the planner to smoothly re-center the ICP in the support polygon preparing the
+    * robot for standing.
+    * <p>
+    * This method is typically useful when done with a walking sequence so the robot smoothly
+    * terminates its last transfer.
+    * </p>
+    * <p>
+    * Call {@link #setFinalTransferTime(double)} beforehand to change the time taken to re-center
+    * the ICP.
+    * </p>
+    * 
+    * @param initialTime typically refers to the current controller time. Marks the initial phase
+    *           time for the planner.
+    */
    public void initializeForStanding(double initialTime)
    {
       clearPlan();
@@ -344,6 +431,17 @@ public class ICPPlanner
       updateTransferPlan();
    }
 
+   /**
+    * Prepares the ICP planner for a transfer phase.
+    * <p>
+    * Make sure that footsteps have been registered using
+    * {@link #addFootstepToPlan(Footstep, FootstepTiming)} and that the transfer side has been
+    * registered using {@link #setTransferToSide(RobotSide)} before calling this method.
+    * </p>
+    * 
+    * @param initialTime typically refers to the current controller time. Marks the initial phase
+    *           time for the planner.
+    */
    public void initializeForTransfer(double initialTime)
    {
       isDoubleSupport.set(true);
@@ -402,13 +500,13 @@ public class ICPPlanner
 
       if (requestedHoldPosition.getBooleanValue())
       {
-         desiredCapturePointPosition.set(actualICPToHold);
+         desiredCapturePointPosition.set(icpPositionToHold);
          desiredCapturePointVelocity.setToZero();
-         singleSupportInitialICP.setIncludingFrame(actualICPToHold);
-         singleSupportFinalICP.setIncludingFrame(actualICPToHold);
+         singleSupportInitialICP.setIncludingFrame(icpPositionToHold);
+         singleSupportFinalICP.setIncludingFrame(icpPositionToHold);
          singleSupportInitialICPVelocity.set(0.0, 0.0, 0.0);
          setCornerPointsToNaN();
-         actualICPToHold.setToNaN();
+         icpPositionToHold.setToNaN();
          isDoneWalking = true;
          requestedHoldPosition.set(false);
          isHoldingPosition.set(true);
@@ -470,6 +568,17 @@ public class ICPPlanner
       icpDoubleSupportTrajectoryGenerator.initialize();
    }
 
+   /**
+    * Prepares the ICP planner for a single support phase.
+    * <p>
+    * Make sure that footsteps have been registered using
+    * {@link #addFootstepToPlan(Footstep, FootstepTiming)} and that the support side has been
+    * registered using {@link #setSupportLeg(RobotSide)} before calling this method.
+    * </p>
+    * 
+    * @param initialTime typically refers to the current controller time. Marks the initial phase
+    *           time for the planner.
+    */
    public void initializeForSingleSupport(double initialTime)
    {
       isHoldingPosition.set(false);
@@ -566,6 +675,17 @@ public class ICPPlanner
          exitCornerPoints.get(i).changeFrame(desiredFrame);
    }
 
+   /**
+    * Reinitializes the current plan without changing its initial time.
+    * <p>
+    * This is typically useful for updating the ICP plan with any change in contact state, i.e. on
+    * foot switched to toe-off or the support polygon has been resized.
+    * </p>
+    * <p>
+    * It can also be used to update the ICP plan when one of the registered footstep has been
+    * modified from the outside. i.e. when dealing with push recovery via step adjustment.
+    * </p>
+    */
    public void updateCurrentPlan()
    {
       if (isDoubleSupport.getBooleanValue())
@@ -580,27 +700,18 @@ public class ICPPlanner
       }
    }
 
-   public void updatePlanForSingleSupportDisturbances(FramePoint2d actualCapturePointPosition)
-   {
-      initializeForSingleSupport(initialTime.getDoubleValue());
-
-      if (isDone())
-         return;
-
-      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(actualCapturePointPosition);
-
-      if (Double.isNaN(deltaTimeToBeAccounted))
-         return;
-
-      // Ensure that we don't shift the time by more than what's remaining
-      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, timeInCurrentStateRemaining.getDoubleValue());
-      // Ensure the time shift won't imply a single support that's crazy short
-      double currentSwingTime = swingTimes.get(0).getDoubleValue();
-      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, currentSwingTime - minSwingTime.getDoubleValue());
-
-      initialTime.sub(deltaTimeToBeAccounted);
-   }
-
+   /**
+    * Given the location of the actual ICP {@code actualCapturePointPosition}, this method estimates
+    * the duration before the capture point reaches its desired location at foot touchdown.
+    * <p>
+    * Note this method is to be used when in single support and assumes that the internal state of
+    * the planner is up-to-date, i.e. {@link #compute(double)} has been called in the current
+    * control tick.
+    * 
+    * @param actualCapturePointPosition the current position of the measured ICP. Not modified.
+    * @return the estimated time remaining before the capture point reaches its desired position at
+    *         the end of this state.
+    */
    public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2d actualCapturePointPosition)
    {
       if (isDone())
@@ -655,6 +766,17 @@ public class ICPPlanner
          return Math.log(distanceRatio) / omega0.getDoubleValue();
    }
 
+   /**
+    * Updates the current state of the ICP plan.
+    * <p>
+    * The ICP planner has to be initialized before calling this method.
+    * </p>
+    * <p>
+    * The ICP planner has to be updated before accessing its outputs.
+    * </p>
+    * 
+    * @param time the current controller time.
+    */
    public void compute(double time)
    {
       timeInCurrentState.set(time - initialTime.getDoubleValue());
@@ -737,66 +859,171 @@ public class ICPPlanner
       }
    }
 
+   /**
+    * Gets the current ICP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCapturePointPositionToPack the current ICP position. Modified.
+    */
    public void getDesiredCapturePointPosition(FramePoint desiredCapturePointPositionToPack)
    {
       desiredCapturePointPosition.getFrameTupleIncludingFrame(desiredCapturePointPositionToPack);
    }
 
+   /**
+    * Gets the current ICP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCapturePointPositionToPack the current ICP position. Modified.
+    */
    public void getDesiredCapturePointPosition(FramePoint2d desiredCapturePointPositionToPack)
    {
       desiredCapturePointPosition.getFrameTuple2dIncludingFrame(desiredCapturePointPositionToPack);
    }
 
+   /**
+    * Gets the current ICP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCapturePointPositionToPack the current ICP position. Modified.
+    */
    public void getDesiredCapturePointPosition(YoFramePoint desiredCapturePointPositionToPack)
    {
       desiredCapturePointPositionToPack.set(desiredCapturePointPosition);
    }
 
+   /**
+    * Gets the current ICP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
+    */
    public void getDesiredCapturePointVelocity(FrameVector desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocity.getFrameTupleIncludingFrame(desiredCapturePointVelocityToPack);
    }
 
+   /**
+    * Gets the current ICP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
+    */
    public void getDesiredCapturePointVelocity(FrameVector2d desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocity.getFrameTuple2dIncludingFrame(desiredCapturePointVelocityToPack);
    }
 
+   /**
+    * Gets the current ICP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCapturePointVelocityToPack the current ICP velocity. Modified.
+    */
    public void getDesiredCapturePointVelocity(YoFrameVector desiredCapturePointVelocityToPack)
    {
       desiredCapturePointVelocityToPack.set(desiredCapturePointVelocity);
    }
 
+   /**
+    * Gets the current CMP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
+    */
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCentroidalMomentumPivotPosition.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
 
+   /**
+    * Gets the current CMP position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCentroidalMomentumPivotPositionToPack the current CMP position. Modified.
+    */
    public void getDesiredCentroidalMomentumPivotPosition(FramePoint2d desiredCentroidalMomentumPivotPositionToPack)
    {
       desiredCentroidalMomentumPivotPosition.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotPositionToPack);
    }
 
+   /**
+    * Gets the current CMP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
+    */
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCentroidalMomentumPivotVelocity.getFrameTupleIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
 
+   /**
+    * Gets the current CMP velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    * 
+    * @param desiredCentroidalMomentumPivotVelocityToPack the current CMP velocity. Modified.
+    */
    public void getDesiredCentroidalMomentumPivotVelocity(FrameVector2d desiredCentroidalMomentumPivotVelocityToPack)
    {
       desiredCentroidalMomentumPivotVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
 
+   /**
+    * Gets the time relative to the beginning of the current state.
+    * 
+    * @return the time spent in the current state.
+    */
    public double getTimeInCurrentState()
    {
       return timeInCurrentState.getDoubleValue();
    }
 
+   /**
+    * Gets the time remaining before the end of the current state.
+    * 
+    * @return the time remaining.
+    */
    public double getTimeInCurrentStateRemaining()
    {
       return timeInCurrentStateRemaining.getDoubleValue();
    }
 
+   /**
+    * Gets the current state overall duration.
+    * 
+    * @return the current state duration.
+    */
    public double getCurrentStateDuration()
    {
       if (isDoubleSupport.getBooleanValue())
@@ -805,46 +1032,70 @@ public class ICPPlanner
          return swingTimes.get(0).getDoubleValue();
    }
 
+   /**
+    * Changes the duration for the last transfer when going to standing state.
+    * <p>
+    * This method mostly affects {@link #initializeForStanding(double)}.
+    * </p>
+    * 
+    * @param time
+    */
    public void setFinalTransferTime(double time)
    {
       finalTransferTime.set(time);
    }
 
-   public void setMinimumSingleSupportTimeForDisturbanceRecovery(double minTime)
-   {
-      minSwingTime.set(minTime);
-   }
-
-   public void setTransferTimeSplitFraction(double transferTimeSplitFraction)
-   {
-      this.transferTimeSplitFraction.set(transferTimeSplitFraction);
-   }
-
+   /**
+    * Intrinsic robot parameter.
+    * <p>
+    * Correspond the natural frequency response of the robot when modeled as an inverted pendulum:
+    * {@code omega0 = Math.sqrt(g / z0)}, where {@code g} is equal to the magnitude of the gravity,
+    * and {@code z0} is the constant center of mass height of the robot with respect to is feet.
+    * </p>
+    * 
+    * @param omega0 the robot's natural balance frequency response.
+    */
    public void setOmega0(double omega0)
    {
       this.omega0.set(omega0);
    }
 
+   /**
+    * Returns whether the ICP planner currently assumes to that the robot is in double support.
+    * 
+    * @return whether the ICP plan is in double support state or not.
+    */
    public boolean isInDoubleSupport()
    {
       return isDoubleSupport.getBooleanValue();
    }
 
+   /**
+    * Returns whether the ICP planner currently assumes to that the robot is standing.
+    * 
+    * @return whether the ICP plan is in standing state or not.
+    */
    public boolean isInStanding()
    {
       return isStanding.getBooleanValue();
    }
 
+   /**
+    * Returns whether the ICP planner currently assumes to that the robot is performing the first
+    * transfer of a walking sequence, i.e. just left standing state.
+    * 
+    * @return whether the ICP plan is in initial transfer state or not.
+    */
    public boolean isInInitialTranfer()
    {
       return isInitialTransfer.getBooleanValue();
    }
 
-   public void getSingleSupportInitialCapturePointPosition(FramePoint capturePointPositionToPack)
-   {
-      singleSupportInitialICP.getFrameTupleIncludingFrame(capturePointPositionToPack);
-   }
-
+   /**
+    * Retrieves the desired ICP position at the end of the current state.
+    * 
+    * @param finalDesiredCapturePointPositionToPack the final desired ICP position. Modified.
+    */
    public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
@@ -857,6 +1108,11 @@ public class ICPPlanner
 
    private final FramePoint tempFinalICP = new FramePoint();
 
+   /**
+    * Retrieves the desired ICP position at the end of the current state.
+    * 
+    * @param finalDesiredCapturePointPositionToPack the final desired ICP position. Modified.
+    */
    public void getFinalDesiredCapturePointPosition(YoFramePoint2d finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
@@ -867,16 +1123,38 @@ public class ICPPlanner
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
 
+   /**
+    * Retrieves the position of the next exit CMP.
+    * <p>
+    * This is typically useful to estimate where the robot will put its center of pressure at the
+    * end of single support.
+    * </p>
+    * 
+    * @param entryCMPToPack the next exit CMP position. Modified.
+    */
    public void getNextExitCMP(FramePoint entryCMPToPack)
    {
       referenceCMPsCalculator.getNextExitCMP(entryCMPToPack);
    }
 
+   /**
+    * Tests if the ICP planner is done with the current state.
+    * 
+    * @return {@code true} if the plan for the current state is done, returns {@code false}
+    *         otherwise.
+    */
    public boolean isDone()
    {
       return timeInCurrentStateRemaining.getDoubleValue() <= 0.0;
    }
 
+   /**
+    * Tests the current state in the ICP plan results in having the desired CMP located at the exit
+    * CMP.
+    * 
+    * @return {@code true} if the current CMP is located on the exit CMP, returns {@code false}
+    *         otherwise.
+    */
    public boolean isOnExitCMP()
    {
       if (isDoubleSupport.getBooleanValue())
