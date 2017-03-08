@@ -2,7 +2,6 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationconstructionset.util.environments.planarRegionEnvironments.PlanarRegionEnvironmentInterface;
 
 public class AlternatingSlopesEnvironment extends PlanarRegionEnvironmentInterface
@@ -13,20 +12,11 @@ public class AlternatingSlopesEnvironment extends PlanarRegionEnvironmentInterfa
    {
       this.rampWidth = rampWidth;
    }
-   
-   @Override
-   public void generateEnvironment()
-   {
-      super.generateEnvironment();
-   }
-
-   @Override
-   protected void buildGenerator(PlanarRegionsListGenerator generator)
-   {
-   }
 
    public void addRamp(double length, double deltaZ)
    {
+      checkHasNotBeenGenerated();
+      
       generator.translate(length / 2.0, 0.0, deltaZ / 2.0);
       generator.rotate(-Math.atan2(deltaZ, length), Axis.Y);
       
