@@ -192,7 +192,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    {
       Graphics3DObject linkGraphics = new Graphics3DObject();
 
-      linkGraphics.addCoordinateSystem(scale, arrowColor);
+      linkGraphics.addCoordinateSystem(1.0, arrowColor);
 
       return linkGraphics;
    }

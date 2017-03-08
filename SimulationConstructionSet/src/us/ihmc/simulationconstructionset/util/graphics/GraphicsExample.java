@@ -39,7 +39,7 @@ public class GraphicsExample
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
 
       YoGraphicCoordinateSystem worldCoordinateSystem = new YoGraphicCoordinateSystem("Example", worldOrigin.getYoX(), worldOrigin.getYoY(),
-                                                                worldOrigin.getYoZ(), yaw, pitch, roll, 1.0);
+                                                                worldOrigin.getYoZ(), yaw, pitch, roll, 2.0);
 
       // setup slider board
       setupEvolution(scs, testPoint);
