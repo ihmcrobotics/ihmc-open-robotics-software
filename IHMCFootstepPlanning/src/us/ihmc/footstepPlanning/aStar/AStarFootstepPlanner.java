@@ -23,7 +23,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
-   private static final double DEFAULT_COST_PER_STEP = 0.01;
+   private static final double DEFAULT_COST_PER_STEP = 0.0;
    private static final double DEFAULT_YAW_WEIGHT = 0.1;
 
    private FootstepGraph graph;

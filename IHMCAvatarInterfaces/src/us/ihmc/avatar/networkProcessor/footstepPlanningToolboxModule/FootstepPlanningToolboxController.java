@@ -111,7 +111,7 @@ public class FootstepPlanningToolboxController extends ToolboxController
       plannerMap.put(Planners.PLANAR_REGION_BIPEDAL, createPlanarRegionBipedalPlanner(planningPolygonsInSoleFrame, controllerPolygonsInSoleFrame));
       plannerMap.put(Planners.PLAN_THEN_SNAP, new PlanThenSnapPlanner(new TurnWalkTurnPlanner(), planningPolygonsInSoleFrame));
       plannerMap.put(Planners.A_STAR, AStarFootstepPlanner.createDefaultPlanner(null));
-      activePlanner.set(Planners.A_STAR);
+      activePlanner.set(Planners.PLANAR_REGION_BIPEDAL);
 
       usePlanarRegions.set(true);
       isDone.set(true);
