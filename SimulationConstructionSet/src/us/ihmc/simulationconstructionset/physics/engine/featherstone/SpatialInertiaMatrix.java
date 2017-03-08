@@ -219,7 +219,15 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
        */
    }
 
-   RotationMatrix ONE3d = new RotationMatrix(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+   public void set(SpatialInertiaMatrix spatialInertiaMatrix)
+   {
+      this.A.set(spatialInertiaMatrix.A);
+      this.B.set(spatialInertiaMatrix.B);
+      this.C.set(spatialInertiaMatrix.C);
+      this.D.set(spatialInertiaMatrix.D);
+   }
+
+   private final RotationMatrix ONE3d = new RotationMatrix(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
 
    public void oneMinus()
    {
@@ -323,8 +331,5 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       M.setM21(v1.getZ() * v2.getY());
       M.setM22(v1.getZ() * v2.getZ());
    }
-
-
-
 
 }
