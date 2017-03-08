@@ -80,8 +80,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       }
 
       hasTimings = message.hasTimings;
-      swingTime = message.swingTime;
-      transferTime = message.transferTime;
+      swingTime = message.swingDuration;
+      transferTime = message.transferDuration;
 
       hasAbsoluteTime = message.hasAbsoluteTime;
       swingStartTime = message.swingStartTime;

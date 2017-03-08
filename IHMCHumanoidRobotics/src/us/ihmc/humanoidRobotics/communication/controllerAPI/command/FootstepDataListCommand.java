@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -14,6 +15,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    private double defaultTransferTime;
    private double finalTransferTime;
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
+   private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
 
    public FootstepDataListCommand()
@@ -35,10 +37,11 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       clear();
 
-      defaultSwingTime = message.defaultSwingTime;
-      defaultTransferTime = message.defaultTransferTime;
-      finalTransferTime = message.finalTransferTime;
+      defaultSwingTime = message.defaultSwingDuration;
+      defaultTransferTime = message.defaultTransferDuration;
+      finalTransferTime = message.finalTransferDuration;
       executionMode = message.executionMode;
+      executionTiming = message.executionTiming;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       if (dataList != null)
       {
@@ -56,6 +59,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       defaultTransferTime = other.defaultTransferTime;
       finalTransferTime = other.finalTransferTime;
       executionMode = other.executionMode;
+      executionTiming = other.executionTiming;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
