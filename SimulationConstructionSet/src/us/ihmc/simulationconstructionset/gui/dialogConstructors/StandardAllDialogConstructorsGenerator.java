@@ -29,7 +29,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    private ExportSnapshotDialogGenerator exportSnapshotDialogConstructor;
    
    private PlaybackPropertiesDialogGenerator playbackPropertiesDialogConstructor;
-   
+
    private SaveConfigurationDialogGenerator saveConfigurationDialogConstructor;
    private LoadConfigurationDialogGenerator loadConfigurationDialogConstructor;
    private SaveGraphConfigurationDialogGenerator saveGraphConfigurationDialogConstructor;
@@ -43,6 +43,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    private DataBufferPropertiesDialogGenerator dataBufferPropertiesDialogConstructor;
    
    private CameraPropertiesDialogGenerator cameraPropertiesDialogConstructor;
+   private YoGraphicsPropertiesDialogGenerator yoGraphicsPropertiesDialogConstructor;
    private ResizeViewportDialogGenerator resizeViewportDialogConstructor;
    
    private AboutDialogGenerator aboutDialogConstructor;
@@ -89,6 +90,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
       this.dataBufferPropertiesDialogConstructor = new DataBufferPropertiesDialogGenerator(myDataBuffer, parentContainer, frame, myGraphArrayPanel);
       
       this.cameraPropertiesDialogConstructor = new CameraPropertiesDialogGenerator(myGUI, parentContainer, frame);
+      this.yoGraphicsPropertiesDialogConstructor = new YoGraphicsPropertiesDialogGenerator(sim, parentContainer, frame);
       this.resizeViewportDialogConstructor = new ResizeViewportDialogGenerator(frame, viewportSelector);
 
       this.aboutDialogConstructor = new AboutDialogGenerator(frame);
@@ -104,6 +106,12 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
    public CameraPropertiesDialogConstructor getCameraPropertiesDialogConstructor()
    {
       return cameraPropertiesDialogConstructor;
+   }
+
+   @Override
+   public YoGraphicsPropertiesDialogConstructor getYoGraphicsPropertiesDialogConstructor()
+   {
+      return yoGraphicsPropertiesDialogConstructor;
    }
 
    @Override
@@ -233,7 +241,7 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
          playbackPropertiesDialogConstructor.closeAndDispose();
          playbackPropertiesDialogConstructor = null;
       }
-      
+
       if (saveConfigurationDialogConstructor != null)
       {
          saveConfigurationDialogConstructor.closeAndDispose();
@@ -287,7 +295,13 @@ public class StandardAllDialogConstructorsGenerator implements AllDialogConstruc
          cameraPropertiesDialogConstructor.closeAndDispose();
          cameraPropertiesDialogConstructor = null;
       }
-      
+
+      if (yoGraphicsPropertiesDialogConstructor != null)
+      {
+         yoGraphicsPropertiesDialogConstructor.closeAndDispose();
+         yoGraphicsPropertiesDialogConstructor = null;
+      }
+
       if (resizeViewportDialogConstructor != null)
       {
          resizeViewportDialogConstructor.closeAndDispose();
