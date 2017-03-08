@@ -2,10 +2,10 @@ package us.ihmc.avatar.rrtwalkingpath;
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
@@ -18,6 +18,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -29,9 +30,10 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.walkingpath.RRT2DNodeWalkingPath;
-import us.ihmc.manipulation.planning.walkingpath.RRT2DNodeWalkingPath.BoxInfo;
-import us.ihmc.manipulation.planning.walkingpath.RRT2DPlannerWalkingPath;
+import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStep;
+import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
+import us.ihmc.manipulation.planning.walkingpath.rrt.RRT2DNodeWalkingPath;
+import us.ihmc.manipulation.planning.walkingpath.rrt.RRT2DPlannerWalkingPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -69,8 +71,8 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    
 
    
-   Vector3d goalState;
-   Vector3d initialState;
+   Point3D goalState;
+   Point3D initialState;
    
    @Before
    public void showMemoryUsageBeforeTest()
@@ -116,7 +118,12 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
             addBoxEnvironment(RRT2DNodeWalkingPath.boxes[i], YoAppearance.Red());
          }
                   
-         EnvSet.addSphere(goalState.x, goalState.y, goalState.z, 0.1, YoAppearance.Blue());
+         EnvSet.addSphere(goalState.getX(), goalState.getY(), goalState.getZ(), 0.1, YoAppearance.Blue());
+         
+         RigidBodyTransform location = new RigidBodyTransform();
+         location.setTranslation(initialState);
+         
+         // EnvSet.addCylinder(location, 1.0, 0.4, YoAppearance.Wheat());
       }
       
       public void addBoxEnvironment(RRT2DNodeWalkingPath.BoxInfo box, AppearanceDefinition app)
@@ -179,8 +186,8 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
       // Input ************************** //
       // ******************************** //
-      initialState = new Vector3d(0.0, 0.0, 0.0);
-      goalState = new Vector3d(8.0, -4.0, 0.0);
+      initialState = new Point3D(0.0, 0.0, 0.0);
+      goalState = new Point3D(8.0, -4.0, 0.0);
       
       RRTNode startNode = new RRT2DNodeWalkingPath(initialState.getX(), initialState.getY());
       RRTNode goalNode = new RRT2DNodeWalkingPath(goalState.getX(), goalState.getY());
@@ -211,92 +218,108 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
       // RRT Planning ******************* //
       // ******************************** //
-      RRTNode nodeOne = new RRT2DNodeWalkingPath(0, 0);
-      RRTNode nodeTwo = new RRT2DNodeWalkingPath(0, 0);
-
-      RRTNode nodeRobot = new RRT2DNodeWalkingPath(1.0, 0);
-      nodeRobot.isValidNode();      
-      
-//      for (int i = 0; i < 1000; i++)
-//      {
-//         boolean isConnected = rrtPlanner.expandTreeGoal(nodeOne, nodeTwo);
-//         simulationConstructionSet.addStaticLinkGraphics(getNodeConnection(nodeOne, nodeTwo));
-//         
-//         if (isConnected == true)
-//         {            
-//            PrintTools.info("is Reached! "+i);
-//            break;
-//         }
-//      }
       
       rrtPlanner.expandTreeGoal(2000);      
-      PrintTools.info("path size is "+rrtPlanner.getOptimalPath().size());
-      
-      simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Red()));
+      PrintTools.info("path has "+rrtPlanner.getOptimalPath().size()+" nodes");
+            
+      simulationConstructionSet.addStaticLinkGraphics(getPrintNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Red()));
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
       
-      rrtPlanner.updateOptimalPath(100, 100);
-      simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Aqua()));
+      rrtPlanner.updateOptimalPath(50, 200);
+      simulationConstructionSet.addStaticLinkGraphics(getPrintNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Aqua()));
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
       
+      PrintTools.info("shortcut optimized path has "+rrtPlanner.getOptimalPath().size()+" nodes");
       
-      //rrtPlanner.updateOptimalPath(100, 500);
-      //simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getOptimalPath(), YoAppearance.Blue()));      
-      //simulationConstructionSet.addStaticLinkGraphics(getNodePath(rrtPlanner.getPiecewisePath().getPiecewisePath(), YoAppearance.Green()));
+            
+      // footstep
+      rrtPlanner.createFootStepPlanner(0.5, 0.35);
+      
+      SkeletonPathFootStepPlanner footStepPlanner = rrtPlanner.getFootStepPlanner();
+      
+      simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsLeftSide.get()));
+      simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsRightSide.get()));
+      
+      footStepPlanner.setFirstStep(RobotSide.LEFT);
+      footStepPlanner.createFootSteps();
+            
+      simulationConstructionSet.addStaticLinkGraphics(getPrintFootSteps(footStepPlanner.footSteps));
+      simulationConstructionSet.addStaticLinkGraphics(getPrintSphere(footStepPlanner.tempPoint, YoAppearance.Black()));
+      
+      
+//      Point2D testPoint = new Point2D.Double(1, -1);
+//      simulationConstructionSet.addStaticLinkGraphics(getPrintSphere(testPoint, YoAppearance.Black()));
+//      simulationConstructionSet.addStaticLinkGraphics(getPrintFootStep(footStepPlanner.getProjectedFootStep(RobotSide.RIGHT, testPoint)));
+//      simulationConstructionSet.addStaticLinkGraphics(getPrintFootStep(footStepPlanner.getProjectedFootStep(RobotSide.LEFT, testPoint)));
+//      simulationConstructionSet.addStaticLinkGraphics(getPrintFootStep(footStepPlanner.footSteps.get(0)));
+      
+      
+      
+      
+//      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+//      rrtPlanner.getFootStepPlanner().createFootStepList();
+//      footsteps = rrtPlanner.getFootStepPlanner().footsteps; 
+//      simulationConstructionSet.addStaticLinkGraphics(getFootPrint(footsteps));
+      
+      
+      
       
       
       
       // ******************************** //
       // Foot Step Planning ************* //
       // ******************************** //
-      
-      double swingTime = 2.0;
-      double transferTime = 0.8;
-      int steps = 3;
+//      
+//      double swingTime = 2.0;
+//      double transferTime = 0.8;
+//      int steps = 3;
+//
+//      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
+//      FootstepDataMessage footstepData;
+//      RobotSide robotSide;
+//      double footstepY;
+//      double footstepX;
+//      Point3D location;
+//      Quaternion orientation;
+//
+//      robotSide = RobotSide.LEFT;
+//      footstepX = 0.2;
+//      footstepY = 0.14;
+//      location = new Point3D(footstepX, footstepY, 0.0);
+//      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+//      footstepData = new FootstepDataMessage(robotSide, location, orientation);
+//      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+//      footsteps.add(footstepData);
+//
+//      robotSide = RobotSide.RIGHT;
+//      footstepX = 0.4;
+//      footstepY = -0.14;
+//      location = new Point3D(footstepX, footstepY, 0.0);
+//      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+//      footstepData = new FootstepDataMessage(robotSide, location, orientation);
+//      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+//      footsteps.add(footstepData);
+//
+//      robotSide = RobotSide.LEFT;
+//      footstepX = 0.4;
+//      footstepY = 0.14;
+//      location = new Point3D(footstepX, footstepY, 0.0);
+//      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+//      footstepData = new FootstepDataMessage(robotSide, location, orientation);
+//      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+//      footsteps.add(footstepData);
+//
+//      drcSimulationTestHelper.send(footsteps);
+//      double simulationTime = (swingTime + transferTime) * steps + 1.0;
 
-      FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime);
-      FootstepDataMessage footstepData;
-      RobotSide robotSide;
-      double footstepY;
-      double footstepX;
-      Point3D location;
-      Quaternion orientation;
-
-      robotSide = RobotSide.LEFT;
-      footstepX = 0.2;
-      footstepY = 0.14;
-      location = new Point3D(footstepX, footstepY, 0.0);
-      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      footstepData = new FootstepDataMessage(robotSide, location, orientation);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-      footsteps.add(footstepData);
-
-      robotSide = RobotSide.RIGHT;
-      footstepX = 0.4;
-      footstepY = -0.14;
-      location = new Point3D(footstepX, footstepY, 0.0);
-      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      footstepData = new FootstepDataMessage(robotSide, location, orientation);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-      footsteps.add(footstepData);
-
-      robotSide = RobotSide.LEFT;
-      footstepX = 0.4;
-      footstepY = 0.14;
-      location = new Point3D(footstepX, footstepY, 0.0);
-      orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
-      footstepData = new FootstepDataMessage(robotSide, location, orientation);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-      footsteps.add(footstepData);
-
-      drcSimulationTestHelper.send(footsteps);
-      double simulationTime = (swingTime + transferTime) * steps + 1.0;
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+//      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       // ******************************** //
 
+      
+      PrintTools.info("END!!");
+      
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -313,20 +336,20 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
    
       
-   private ArrayList<Graphics3DObject> getNodePath(ArrayList<RRTNode> nodePath, AppearanceDefinition app)
+   private ArrayList<Graphics3DObject> getPrintNodePath(ArrayList<RRTNode> nodePath, AppearanceDefinition app)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
       
       for(int i =0;i<nodePath.size()-1;i++)
       {
-         ret.addAll(getNodeConnection(nodePath.get(i), nodePath.get(i+1), app));         
+         ret.addAll(getPrintNodeConnection(nodePath.get(i), nodePath.get(i+1), app));         
       }
       
       return ret;
    }
 
 
-   private ArrayList<Graphics3DObject> getNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
+   private ArrayList<Graphics3DObject> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
@@ -356,7 +379,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       return ret;
    }
    
-   public ArrayList<Graphics3DObject> getNodeConnection(RRTNode nodeOne, RRTNode nodeTwo, AppearanceDefinition app)
+   private ArrayList<Graphics3DObject> getPrintNodeConnection(RRTNode nodeOne, RRTNode nodeTwo, AppearanceDefinition app)
    {
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
@@ -385,4 +408,120 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       return ret;
    }
+//   
+//   private ArrayList<Graphics3DObject> getPrintFootStep(FootstepDataListMessage footsteps)
+//   {
+//      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+//
+//      for(int i =0;i<footsteps.size();i++)
+//      {
+//         Graphics3DObject singleStep = new Graphics3DObject();
+//         
+//         singleStep.translate(footsteps.get(i).location);
+//         if(footsteps.get(i).robotSide == RobotSide.RIGHT)
+//         {
+//            singleStep.addSphere(0.05, YoAppearance.Blue());
+//         }
+//         else
+//         {
+//            singleStep.addSphere(0.05, YoAppearance.Green());
+//         }
+//         
+//         ret.add(singleStep);
+//      }
+//      return ret;
+//   }
+   
+   private Graphics3DObject getPrintFootStep(SkeletonPathFootStep footstep)
+   {
+      Graphics3DObject ret = new Graphics3DObject();
+      
+      double sizeX = 0.3;
+      double sizeY = 0.15;
+      double sizeZ = 0.01;      
+      
+      Point3D location = new Point3D(footstep.getLocation().getX(), footstep.getLocation().getY(), 0);
+      AxisAngle rotation = new AxisAngle();
+      rotation.appendYawRotation(footstep.getYawAngle());
+      
+      ret.translate(location);
+      ret.rotate(rotation);
+      if(footstep.getRobotSide() == RobotSide.RIGHT)
+      {
+         ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Green());
+         PrintTools.info("R "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
+      }
+      
+      else
+      {
+         ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Blue());
+         PrintTools.info("L "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
+      }
+         
+      return ret;
+   }
+   
+   private ArrayList<Graphics3DObject> getPrintFootSteps(ArrayList<SkeletonPathFootStep> footSteps)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+      
+      for(int i=0;i<footSteps.size();i++)
+      {
+         ret.add(getPrintFootStep(footSteps.get(i)));
+         PrintTools.info(" "+footSteps.get(i).getLocation().getX()+" "+footSteps.get(i).getLocation().getY());
+      }
+         
+      return ret;
+   }
+   
+   private Graphics3DObject getPrintSphere(Point2D aPoint, AppearanceDefinition app)
+   {
+      Graphics3DObject aSphere = new Graphics3DObject();
+      aSphere.translate(aPoint.getX(), aPoint.getY(), 0);
+      aSphere.addSphere(0.05, app);
+      return aSphere;
+   }
+   
+   private ArrayList<Graphics3DObject> getPrintSegment(Line2D pathSegment)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+
+      Graphics3DObject nodeOneSphere = new Graphics3DObject();
+      Graphics3DObject nodeTwoSphere = new Graphics3DObject();
+      
+      Graphics3DObject lineCapsule = new Graphics3DObject();
+      
+      Point3D translationNodeOne = new Point3D(pathSegment.getX1(), pathSegment.getY1(), 0);
+      nodeOneSphere.translate(translationNodeOne);
+      nodeOneSphere.addSphere(0.05, YoAppearance.DarkGray());
+      
+      Point3D translationNodeTwo = new Point3D(pathSegment.getX2(), pathSegment.getY2(), 0);
+      nodeTwoSphere.translate(translationNodeTwo);
+      nodeTwoSphere.addSphere(0.05, YoAppearance.DarkGray());
+      
+      Point3D translationLine = new Point3D((pathSegment.getX1()+pathSegment.getX2())/2, (pathSegment.getY1()+pathSegment.getY2())/2, 0);
+      AxisAngle rotationLine = new AxisAngle(-(pathSegment.getY1()-pathSegment.getY2()), (pathSegment.getX1()-pathSegment.getX2()), 0, Math.PI/2);
+      lineCapsule.translate(translationLine);
+      lineCapsule.rotate(rotationLine);
+      lineCapsule.addCapsule(0.02, pathSegment.getP1().distance(pathSegment.getP2()), YoAppearance.Gray());
+      
+      ret.add(nodeOneSphere);
+      ret.add(nodeTwoSphere);
+      ret.add(lineCapsule);
+
+      return ret;
+   }
+   
+   private ArrayList<Graphics3DObject> getPrintSegments(ArrayList<Line2D> pathSegments)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+
+      for(int i =0;i<pathSegments.size();i++)
+      {
+         ret.addAll(getPrintSegment(pathSegments.get(i)));
+      }
+
+      return ret;
+   }
+
 }

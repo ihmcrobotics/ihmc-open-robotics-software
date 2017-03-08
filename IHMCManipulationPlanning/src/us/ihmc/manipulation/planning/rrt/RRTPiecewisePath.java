@@ -223,7 +223,7 @@ public class RRTPiecewisePath
       {
          shortcutPath.add(linearPath.get(i));
       }
-
+     
       return isValidPath(shortcutPath);
    }
    

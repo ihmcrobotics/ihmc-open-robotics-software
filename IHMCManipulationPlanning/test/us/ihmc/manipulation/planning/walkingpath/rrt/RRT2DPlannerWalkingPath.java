@@ -1,11 +1,13 @@
-package us.ihmc.manipulation.planning.walkingpath;
+package us.ihmc.manipulation.planning.walkingpath.rrt;
 
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTPlanner;
+import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class RRT2DPlannerWalkingPath extends RRTPlanner
 {
+   SkeletonPathFootStepPlanner footStepPlanner;
 
    public RRT2DPlannerWalkingPath(RRTNode root, RRTNode goal, double stepLength)
    {
@@ -28,11 +30,29 @@ public class RRT2DPlannerWalkingPath extends RRTPlanner
             getRRTTree().updatePath(getGoalNode());
             setOptimalPath(getRRTTree().getPathNode());
             
-            PrintTools.info("111 path size is "+getOptimalPath().size());
+            PrintTools.info("path size is "+getOptimalPath().size());
             return true;
          }
          return false;
       }
       return false;
+   }
+   
+   public void createFootStepPlanner(double stepLength, double stepWidth)
+   {
+      double[] pathX = new double[getOptimalPath().size()];
+      double[] pathY = new double[getOptimalPath().size()];
+      
+      for(int i=0;i<getOptimalPath().size();i++)
+      {
+         pathX[i] = getOptimalPath().get(i).getNodeData(0);
+         pathY[i] = getOptimalPath().get(i).getNodeData(1);
+      }
+      footStepPlanner = new SkeletonPathFootStepPlanner(pathX, pathY, stepLength, stepWidth);
+   }
+   
+   public SkeletonPathFootStepPlanner getFootStepPlanner()
+   {
+      return footStepPlanner;
    }
 }
