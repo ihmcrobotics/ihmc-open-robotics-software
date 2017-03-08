@@ -8,6 +8,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEnvironmentInterface
@@ -27,6 +28,11 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
       buildGenerator(generator);
       
       environment = new PlanarRegionsListDefinedEnvironment(generator.getPlanarRegionsList(), 1e-2, false);
+   }
+
+   public CombinedTerrainObject3D getCombinedTerrainObject3D()
+   {
+      return environment.getCombinedTerrainObject3D();
    }
    
    @Override
