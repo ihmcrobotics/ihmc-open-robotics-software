@@ -285,7 +285,7 @@ public class KinematicsToolboxController extends ToolboxController
             ReferenceFrame handControlFrame = desiredFullRobotModel.getHandControlFrame(robotSide);
             DenseMatrix64F selectionMatrix = handSelectionMatrices.get(robotSide);
             Twist desiredHandTwist = computeDesiredTwist(desiredHandPose, hand, handControlFrame, selectionMatrix, tempErrorMagnitude);
-            newSolutionQuality += tempErrorMagnitude.doubleValue();
+            newSolutionQuality += handWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, hand);
             spatialVelocityCommand.set(desiredHandTwist, selectionMatrix);
@@ -306,7 +306,7 @@ public class KinematicsToolboxController extends ToolboxController
             RigidBody foot = desiredFullRobotModel.getFoot(robotSide);
             DenseMatrix64F selectionMatrix = footSelectionMatrices.get(robotSide);
             Twist desiredFootTwist = computeDesiredTwist(desiredFootPose, foot, selectionMatrix, tempErrorMagnitude);
-            newSolutionQuality += tempErrorMagnitude.doubleValue();
+            newSolutionQuality += footWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, foot);
             spatialVelocityCommand.set(desiredFootTwist, selectionMatrix);
@@ -323,7 +323,7 @@ public class KinematicsToolboxController extends ToolboxController
       if (desiredCoMXY != null)
       {
          FrameVector2d desiredMomentumXY = computeDesiredMomentumXY(desiredCoMXY, tempErrorMagnitude);
-         newSolutionQuality += tempErrorMagnitude.doubleValue();
+         newSolutionQuality += momentumWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          MomentumCommand momentumCommand = new MomentumCommand();
          momentumCommand.setLinearMomentumXY(desiredMomentumXY);
          momentumCommand.setWeight(momentumWeight.getDoubleValue());
@@ -335,7 +335,7 @@ public class KinematicsToolboxController extends ToolboxController
       {
          RigidBody chest = desiredFullRobotModel.getChest();
          Twist desiredChestTwist = computeDesiredTwist(desiredChestOrientation, chest, chestSelectionMatrix, tempErrorMagnitude);
-         newSolutionQuality += tempErrorMagnitude.doubleValue();
+         newSolutionQuality += chestWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          FrameVector desiredChestAngularVelocity = new FrameVector();
          desiredChestTwist.getAngularVelocityInBaseFrame(desiredChestAngularVelocity);
@@ -352,7 +352,7 @@ public class KinematicsToolboxController extends ToolboxController
       {
          RigidBody pelvis = desiredFullRobotModel.getPelvis();
          Twist desiredPelvisTwist = computeDesiredTwist(desiredPelvisOrientation, pelvis, pelvisSelectionMatrix, tempErrorMagnitude);
-         newSolutionQuality += tempErrorMagnitude.doubleValue();
+         newSolutionQuality += pelvisOrientationWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
          FrameVector desiredPelvisAngularVelocity = new FrameVector();
          desiredPelvisTwist.getAngularVelocityInBaseFrame(desiredPelvisAngularVelocity);
