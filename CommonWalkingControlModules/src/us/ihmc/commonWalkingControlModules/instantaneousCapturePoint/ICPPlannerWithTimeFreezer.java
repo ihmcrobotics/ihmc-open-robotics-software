@@ -68,7 +68,7 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
 
    public void compute(FramePoint2d currentCapturePointPosition, double time)
    {
-      super.compute(time);
+      super.compute(time - timeDelay.getDoubleValue());
 
       if (doTimeFreezing.getBooleanValue())
       {
@@ -100,12 +100,12 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    {
       computeCapturePointDistantToFreezeLine(currentCapturePointPosition, tmpCapturePointPosition, tmpCapturePointVelocity);
 
-      if (isDone(time))
+      if (isDone())
       {
          completelyFreezeTime(time);
          isTimeBeingFrozen.set(true);
       }
-      else if (computeAndReturnTimeRemaining(getTimeWithDelay(time)) < 0.1 && isInDoubleSupport()
+      else if (getTimeInCurrentStateRemaining() < 0.1 && isInDoubleSupport()
             && distanceToFreezeLine.getDoubleValue() > maxCapturePointErrorAllowedToBeginSwingPhase.getDoubleValue())
       {
          completelyFreezeTime(time);
@@ -140,27 +140,16 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
+   public void updatePlanForSingleSupportDisturbances(FramePoint2d actualCapturePointPosition)
    {
       timeDelay.set(0.0);
-      previousTime.set(time);
-      super.updatePlanForSingleSupportDisturbances(time, actualCapturePointPosition);
+      previousTime.set(getTimeInCurrentState());
+      super.updatePlanForSingleSupportDisturbances(actualCapturePointPosition);
    }
 
    public boolean getIsTimeBeingFrozen()
    {
       return isTimeBeingFrozen.getBooleanValue();
-   }
-
-   @Override
-   public boolean isDone(double time)
-   {
-      return super.isDone(getTimeWithDelay(time));
-   }
-
-   private double getTimeWithDelay(double time)
-   {
-      return time - timeDelay.getDoubleValue();
    }
 
    @Override
