@@ -4,6 +4,8 @@ import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -70,6 +72,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setGains(SE3PIDGainsInterface gains)
    {
       this.gains.set(gains);
+   }
+
+   public void setGains(OrientationPIDGainsInterface orientationGains)
+   {
+      this.gains.set(orientationGains);
+   }
+
+   public void setGains(PositionPIDGainsInterface positionGains)
+   {
+      this.gains.set(positionGains);
    }
 
    public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)

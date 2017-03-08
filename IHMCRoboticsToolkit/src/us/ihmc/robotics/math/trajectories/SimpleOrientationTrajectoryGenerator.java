@@ -95,7 +95,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    public void initialize()
    {
       currentTime.set(0.0);
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       parameterPolynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
       
       currentOrientation.set(initialOrientation);

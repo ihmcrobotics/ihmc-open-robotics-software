@@ -62,7 +62,7 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
                   robotControlElement.write(System.nanoTime());
                   if(registry!=null)
                           registry.updateMirror();
-                  updateDynamicGraphicObjectListRegistry();
+                  updateYoGraphicsListRegistry();
                }
                else
                {
@@ -129,18 +129,18 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    @Override
-   public void updateDynamicGraphicObjectListRegistry()
+   public void updateYoGraphicsListRegistry()
    {
-      if(robotControlElement.getDynamicGraphicObjectsListRegistry() != null)
+      if(robotControlElement.getYoGraphicsListRegistry() != null)
       {
     	  if(registry!=null)
                  registry.updateChangedValues();
          if (simulatedRobot != null)
          {
             simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
-            robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+            robotControlElement.getYoGraphicsListRegistry().setSimulationTransformToWorld(transformToWorld);
          }
-         robotControlElement.getDynamicGraphicObjectsListRegistry().update();
+         robotControlElement.getYoGraphicsListRegistry().update();
       }
    }
 

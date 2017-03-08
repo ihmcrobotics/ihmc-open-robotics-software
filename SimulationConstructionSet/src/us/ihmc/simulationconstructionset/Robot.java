@@ -252,7 +252,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       getRobotsYoVariableRegistry().addChild(registry);
    }
 
-   public void addDynamicGraphicObjectsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (yoGraphicsListRegistry == null)
       {

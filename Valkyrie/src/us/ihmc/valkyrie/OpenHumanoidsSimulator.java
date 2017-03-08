@@ -124,7 +124,7 @@ public class OpenHumanoidsSimulator
 		  simulationStarter.setStartingLocation(startingLocation);
 		  simulationStarter.setInitializeEstimatorToActual(true);
 		  simulationStarter.startSimulation(networkProcessorParameters, false);
-		  simulationStarter.getAvatarSimulation().getSimulationConstructionSet().hideAllDynamicGraphicObjects();
+		  simulationStarter.getAvatarSimulation().getSimulationConstructionSet().hideAllYoGraphics();
 
 
 		  if (REDIRECT_UI_PACKETS_TO_ROS)

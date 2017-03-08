@@ -93,7 +93,7 @@ public class TaskspaceHeadControlState extends HeadControlState
          trajectoryGenerator.clear();
       }
 
-      trajectoryGenerator.appendWaypoints(command);
+      trajectoryGenerator.appendWaypoints(command.getTrajectoryPointList());
       trajectoryGenerator.changeFrame(chestFrame);
    }
 

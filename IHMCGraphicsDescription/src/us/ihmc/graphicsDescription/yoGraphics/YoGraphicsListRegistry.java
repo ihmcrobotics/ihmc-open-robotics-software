@@ -147,7 +147,7 @@ public class YoGraphicsListRegistry
       artifactLists.add(artifactList);
    }
 
-   public void getRegisteredDynamicGraphicObjectsLists(ArrayList<YoGraphicsList> yoGraphicsLists)
+   public void getRegisteredYoGraphicsLists(ArrayList<YoGraphicsList> yoGraphicsLists)
    {
       yoGraphicsLists.addAll(this.yoGraphicsLists);
    }
@@ -220,8 +220,8 @@ public class YoGraphicsListRegistry
          {
             if (artifactList != null)
             {
-               //               DynamicGraphicCheckBoxMenuItem checkBox = new DynamicGraphicCheckBoxMenuItem(graphicsList.getLabel(), graphicsList.getDynamicGraphicObjects());
-               //               dynamicGraphicMenu.add(checkBox);
+               //               YoGraphicCheckBoxMenuItem checkBox = new YoGraphicCheckBoxMenuItem(graphicsList.getLabel(), graphicsList.getYoGraphics());
+               //               yoGraphicMenu.add(checkBox);
 
                // add graphics to simulation individually
                artifactList.addArtifactsToPlotter(plotter);

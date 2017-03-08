@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
@@ -22,6 +21,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
@@ -49,7 +49,7 @@ public class TaskspaceChestControlState extends ChestControlState
    private final FrameSO3TrajectoryPoint tempTrajectoryPoint = new FrameSO3TrajectoryPoint();
    private final ReferenceFrame pelvisZUpFrame;
 
-   private final CommandArrayDeque<ChestTrajectoryCommand> commandQueue = new CommandArrayDeque<>(ChestTrajectoryCommand.class);
+   private final RecyclingArrayDeque<ChestTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(ChestTrajectoryCommand.class);
    private final BooleanYoVariable isReadyToHandleQueuedCommands = new BooleanYoVariable("chestIsReadyToHandleQueuedChestTrajectoryCommands", registry);
    private final LongYoVariable numberOfQueuedCommands = new LongYoVariable("chestNumberOfQueuedCommands", registry);
 

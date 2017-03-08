@@ -31,8 +31,8 @@ public class VehicleModelObjectVisualizer
          ReferenceFrame objectFrame = new PoseReferenceFrame(objectName, framePose);
          objectFrame.update();
 
-         YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(objectFrame, registry, objectFrameScale);
-         yoGraphicsList.add(dynamicGraphicReferenceFrame);
+         YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(objectFrame, registry, objectFrameScale);
+         yoGraphicsList.add(yoGraphicReferenceFrame);
       }
 
       YoGraphicReferenceFrame vehicleFrameViz = new YoGraphicReferenceFrame(vehicleFrame, registry, vehicleFrameScale);

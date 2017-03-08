@@ -370,8 +370,8 @@ public class AvatarSimulationFactory
          SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = simulationConstructionSet.createSimulationOverheadPlotterFactory();
          simulationOverheadPlotterFactory.setShowOnStart(guiInitialSetup.get().isShowOverheadView());
          simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
-         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getDynamicGraphicObjectsListRegistry());
-         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(stateEstimationThread.getDynamicGraphicObjectsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getYoGraphicsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(stateEstimationThread.getYoGraphicsListRegistry());
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(actualCMPComputer.getYoGraphicsListRegistry());
          simulationOverheadPlotterFactory.createOverheadPlotter();
          guiInitialSetup.get().initializeGUI(simulationConstructionSet, humanoidFloatingRootJointRobot, robotModel.get());

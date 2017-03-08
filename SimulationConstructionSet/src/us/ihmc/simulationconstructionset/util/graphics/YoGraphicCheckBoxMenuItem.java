@@ -8,24 +8,24 @@ import javax.swing.JCheckBoxMenuItem;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 
-public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements ItemListener
+public class YoGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements ItemListener
 {
    private static final long serialVersionUID = -1641762511153430886L;
    private ArrayList<YoGraphic> yoGraphics = new ArrayList<YoGraphic>();
 
-   public DynamicGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics)
+   public YoGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics)
    {
       this(label, yoGraphics, true);
    }
 
-   public DynamicGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics, boolean selectedState)
+   public YoGraphicCheckBoxMenuItem(String label, ArrayList<YoGraphic> yoGraphics, boolean selectedState)
    {
       super(label, selectedState);
       this.yoGraphics = yoGraphics;
       this.addItemListener(this);
    }
 
-   public void addDynamicGraphicObjects(ArrayList<YoGraphic> yoGraphics)
+   public void addYoGraphics(ArrayList<YoGraphic> yoGraphics)
    {
       this.yoGraphics.addAll(yoGraphics);
    }
@@ -35,15 +35,15 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
    {
       if (ie.getStateChange() == ItemEvent.SELECTED)
       {
-         showDynamicGraphicObjects();
+         showYoGraphics();
       }
       else
       {
-         hideDynamicGraphicObjects();
+         hideYoGraphics();
       }
    }
 
-   public void showDynamicGraphicObjects()
+   public void showYoGraphics()
    {
       this.setSelected(true);
 
@@ -54,7 +54,7 @@ public class DynamicGraphicCheckBoxMenuItem extends JCheckBoxMenuItem implements
       }
    }
 
-   public void hideDynamicGraphicObjects()
+   public void hideYoGraphics()
    {
       this.setSelected(false);
 

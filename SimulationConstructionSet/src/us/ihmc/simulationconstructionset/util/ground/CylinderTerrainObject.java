@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Direction;
-import us.ihmc.robotics.geometry.Line3d;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
@@ -107,9 +107,9 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    @Override
    public double heightAt(double x, double y, double z)
    {
-      Line3d axis = getAxis();
+      Line3D axis = getAxis();
       Point3D testPoint = new Point3D(x, y, z);
-      Line3d zLine = new Line3d(testPoint, zVector);
+      Line3D zLine = new Line3D(testPoint, zVector);
 
       double distance = axis.distance(zLine);
 
@@ -218,14 +218,14 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       inverseTransform.transform(localDirectionVectorToPack);
    }
 
-   public Line3d getAxis()
+   public Line3D getAxis()
    {
       Point3D axisOrigin = new Point3D();
       location.getTranslation(axisOrigin);
 
       Vector3D axisDirection = getAxisDirectionCopy();
 
-      return new Line3d(axisOrigin, axisDirection);
+      return new Line3D(axisOrigin, axisDirection);
    }
 
    public Vector3D getAxisDirectionCopy()

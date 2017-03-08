@@ -406,7 +406,7 @@ public class YoPolynomial
    public void setQuadraticUsingIntermediatePoint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zFinal)
    {
       reshape(3);
-      MathTools.checkIfInRange(tIntermediate, t0, tFinal);
+      MathTools.checkIntervalContains(tIntermediate, t0, tFinal);
       setPositionRow(0, t0, z0);
       setPositionRow(1, tIntermediate, zIntermediate);
       setPositionRow(2, tFinal, zFinal);
@@ -418,8 +418,8 @@ public class YoPolynomial
          double z0, double zIntermediate1, double zIntermediate2, double zFinal)
    {
       reshape(4);
-      MathTools.checkIfInRange(tIntermediate1, t0, tIntermediate1);
-      MathTools.checkIfInRange(tIntermediate2, tIntermediate1, tFinal);
+      MathTools.checkIntervalContains(tIntermediate1, t0, tIntermediate1);
+      MathTools.checkIntervalContains(tIntermediate2, tIntermediate1, tFinal);
       setPositionRow(0, t0, z0);
       setPositionRow(1, tIntermediate1, zIntermediate1);
       setPositionRow(2, tIntermediate2, zIntermediate2);

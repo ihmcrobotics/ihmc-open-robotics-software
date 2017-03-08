@@ -278,7 +278,7 @@ public class YoVariableHandshakeParser
       return Collections.unmodifiableList(variables);
    }
 
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
    }

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -17,7 +18,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -927,7 +927,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                RotationMatrix pitchRollMatrix = new RotationMatrix();
                RotationMatrix cinderBlockOrientation = new RotationMatrix();
 
-               pitchRollMatrix.set(GeometryTools.getAxisAngleFromZUpToVector(cinderBlockNormal));
+               pitchRollMatrix.set(EuclidGeometryTools.axisAngleFromZUpToVector3D(cinderBlockNormal));
                cinderBlockOrientation.setToYawMatrix(Math.toRadians(courseAngle));
                cinderBlockOrientation.multiply(pitchRollMatrix);
 

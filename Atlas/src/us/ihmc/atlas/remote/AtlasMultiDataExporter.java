@@ -375,7 +375,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = parser.getYoGraphicsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.getRootRegistry().addChild(parser.getRootRegistry());
       scs.setGroundVisible(false);
@@ -396,8 +396,8 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          e.printStackTrace();
       }
 
-      scs.hideAllDynamicGraphicObjects();
-      scs.setDynamicGraphicObjectsListVisible("DesiredExternalWrench", true);
+      scs.hideAllYoGraphics();
+      scs.setYoGraphicsListVisible("DesiredExternalWrench", true);
    }
 
    public void setSimulateExport(SimulateAndExport simulateExport)

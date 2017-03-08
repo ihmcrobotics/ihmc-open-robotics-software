@@ -132,24 +132,24 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
-      MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
-      MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
       matrix.set(0, 0, tau);
    }
 
    @Override
    public void getVelocityMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
-      MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
       matrix.set(rowStart, 0, qd);
    }
 
    @Override
    public void getDesiredAccelerationMatrix(DenseMatrix64F matrix, int rowStart)
    {
-      MathTools.checkIfInRange(matrix.getNumRows(), 1, Integer.MAX_VALUE);
-      MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
       matrix.set(rowStart, 0, qddDesired);
    }
 

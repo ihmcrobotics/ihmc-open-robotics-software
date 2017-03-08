@@ -146,7 +146,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
          AppearanceDefinition appearance = YoAppearance.Color(getColor(currentRigidBody.getInertia().getMass()));
          appearance.setTransparency(0.6);
 
-         //            new DynamicGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
+         //            new YoGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
          YoGraphicShape comViz = new YoGraphicShape(rigidBodyName + "CoMEllipsoid", createEllipsoid(inertiaMatrix, mass, appearance), comPosition,
                comOrientation, 1.0);
          yoGraphics.add(comViz);

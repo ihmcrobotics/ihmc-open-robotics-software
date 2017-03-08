@@ -1,9 +1,14 @@
 package us.ihmc.atlas.parameters;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -23,7 +28,7 @@ import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -60,6 +65,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final double massScale;
 
    private ExplorationParameters explorationParameters = null;
+   private Map<String, YoPIDGains> jointspaceGains = null;
+   private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
+   private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
+   private ArrayList<String> positionControlledJoints = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
@@ -616,16 +625,116 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return gains;
    }
 
+   private YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   {
+      double kp = 50.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.8;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      YoPIDGains spineGains = new YoPIDGains("SpineJointspace", registry);
+      spineGains.setKp(kp);
+      spineGains.setZeta(zeta);
+      spineGains.setKi(ki);
+      spineGains.setMaximumIntegralError(maxIntegralError);
+      spineGains.setMaximumFeedback(maxAccel);
+      spineGains.setMaximumFeedbackRate(maxJerk);
+      spineGains.createDerivativeGainUpdater(true);
+
+      return spineGains;
+   }
+
    /** {@inheritDoc} */
    @Override
-   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
    {
-      YoPIDGains ret = new YoPIDGains("Spine", registry);
+      if (jointspaceGains != null)
+         return jointspaceGains;
 
-      ret.setKp(10.0);
-      ret.setZeta(0.5);
+      jointspaceGains = new HashMap<>();
 
-      return ret;
+      YoPIDGains spineGains = createSpineControlGains(registry);
+      for (SpineJointName name : jointMap.getSpineJointNames())
+         jointspaceGains.put(jointMap.getSpineJointName(name), spineGains);
+
+      YoPIDGains headGains = createHeadJointspaceControlGains(registry);
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
+
+      return jointspaceGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   {
+      if (taskspaceAngularGains != null)
+         return taskspaceAngularGains;
+
+      taskspaceAngularGains = new HashMap<>();
+
+      YoOrientationPIDGainsInterface chestAngularGains = createChestControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getChestName(), chestAngularGains);
+
+      YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
+      taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
+
+      return taskspaceAngularGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
+   {
+      if (jointHomeConfiguration != null)
+         return jointHomeConfiguration;
+
+      jointHomeConfiguration = new TObjectDoubleHashMap<String>();
+
+      jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 0.0);
+      jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 0.0);
+      jointHomeConfiguration.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 0.0);
+
+      jointHomeConfiguration.put(jointMap.getNeckJointName(NeckJointName.PROXIMAL_NECK_PITCH), 0.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), robotSide.negateIfRightSide(0.785398));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(-0.1));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), 3.00);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), robotSide.negateIfRightSide(1.8));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), -0.30);
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), robotSide.negateIfRightSide(0.70));
+         jointHomeConfiguration.put(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH), 0.15);
+      }
+
+      return jointHomeConfiguration;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      if (positionControlledJoints != null)
+         return positionControlledJoints;
+
+      positionControlledJoints = new ArrayList<String>();
+
+      if (runningOnRealRobot)
+      {
+         for (NeckJointName name : jointMap.getNeckJointNames())
+            positionControlledJoints.add(jointMap.getNeckJointName(name));
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (ArmJointName name : jointMap.getArmJointNames())
+               positionControlledJoints.add(jointMap.getArmJointName(robotSide, name));
+         }
+      }
+
+      return positionControlledJoints;
    }
 
    @Override
@@ -932,8 +1041,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
-      return new AtlasMomentumOptimizationSettings(scale);
+      return new AtlasMomentumOptimizationSettings(jointMap);
    }
 
    @Override
@@ -1110,8 +1218,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public double getICPProximityToLeadingFootForToeOff()
+   public double getICPPercentOfStanceForDSToeOff()
    {
-      return 0.1;
+      return 0.18;
    }
 }
