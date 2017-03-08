@@ -35,11 +35,11 @@ public abstract class JointPhysics< J extends Joint>
    public Vector3D v_i = new Vector3D();    // v_i is the linear velocity of this link in these coordinates.
 
    public Vector3D r_i = new Vector3D();    // r_i is radius vector from previous center of mass to this center of mass in these coordinates.
-   private Vector3D r_h = new Vector3D();    // r_h is radius vector from this center of mass to the previous center of mass in the previous coordinates.
+   protected Vector3D r_h = new Vector3D();    // r_h is radius vector from this center of mass to the previous center of mass in the previous coordinates.
    protected Vector3D v_i_temp = new Vector3D();
 
-   private SpatialTransformationMatrix i_X_hat_h = new SpatialTransformationMatrix();
-   private SpatialTransformationMatrix h_X_hat_i = new SpatialTransformationMatrix();
+   protected SpatialTransformationMatrix i_X_hat_h = new SpatialTransformationMatrix();
+   protected SpatialTransformationMatrix h_X_hat_i = new SpatialTransformationMatrix();
 
    public SpatialVector Z_hat_i = new SpatialVector();
    public SpatialInertiaMatrix I_hat_i = new SpatialInertiaMatrix();
@@ -56,7 +56,7 @@ public abstract class JointPhysics< J extends Joint>
    public LinkedHashMap<Integer, GroundContactPointGroup> groundContactPointGroups;
    public ArrayList<GroundContactPointGroup> groundContactPointGroupList;
 
-   private JointWrenchSensor jointWrenchSensor;
+   protected JointWrenchSensor jointWrenchSensor;
    private SpatialVector tempJointWrenchVector;
    private Vector3D tempVectorForWrenchTranslation, tempOffsetForWrenchTranslation;
 
@@ -326,9 +326,9 @@ public abstract class JointPhysics< J extends Joint>
    private double Qi_etc;    // Qi - s_hat_i_prime (Z_hat_i + I_hat_i * c_hat_i)
 
    // Temporary variables used in intermediary calculations
-   private SpatialInertiaMatrix
+   protected SpatialInertiaMatrix
          SIM1 = new SpatialInertiaMatrix(), SIM2 = new SpatialInertiaMatrix();
-   private SpatialVector
+   protected SpatialVector
          sV1 = new SpatialVector(), sV2 = new SpatialVector();
 
    /**
@@ -444,7 +444,7 @@ public abstract class JointPhysics< J extends Joint>
       // System.out.println("s_hat_i: " + s_hat_i);
    }
 
-   private SpatialVector X_hat_h_a_hat_h = new SpatialVector();
+   protected SpatialVector X_hat_h_a_hat_h = new SpatialVector();
    private SpatialVector qdd_s_hat_i = new SpatialVector();
 
    // private SpatialInertiaMatrix
@@ -1952,7 +1952,7 @@ public abstract class JointPhysics< J extends Joint>
       return retBuffer.toString();
    }
 
-   private void computeAndSetWrenchAtJoint()
+   protected void computeAndSetWrenchAtJoint()
    {
       //Using Mirtich Equation 4.24:
       tempJointWrenchVector.set(a_hat_i);

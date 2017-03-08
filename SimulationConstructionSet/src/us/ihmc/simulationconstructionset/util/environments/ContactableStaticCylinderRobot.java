@@ -25,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
+import us.ihmc.simulationconstructionset.RigidJoint;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
@@ -37,7 +37,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    
    private final RigidBodyTransform cylinderCenterTransformToWorld = new RigidBodyTransform();
    
-   private final NullJoint nullJoint;
+   private final RigidJoint nullJoint;
    private final Link cylinderLink;
    private final Graphics3DObject linkGraphics;
    
@@ -70,7 +70,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       rotationTransform.setRotation(rotation);
       rotationTransform.transform(axis);
       
-      nullJoint = new NullJoint(name + "NullJoint", offset, this);
+      nullJoint = new RigidJoint(name + "NullJoint", offset, this);
 
       cylinderLink = new Link(name + "Link");
       cylinderLink.setMassAndRadiiOfGyration(DEFAULT_MASS, 1.0, 1.0, 1.0);
@@ -121,7 +121,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    }
    
    @Override
-   public NullJoint getNullJoint()
+   public RigidJoint getNullJoint()
    {
       return nullJoint;
    }
