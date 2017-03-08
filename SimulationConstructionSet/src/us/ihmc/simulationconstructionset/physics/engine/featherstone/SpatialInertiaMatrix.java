@@ -15,8 +15,6 @@ import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
  * @version Beta 1.0
  */
 
-
-
 public final class SpatialInertiaMatrix implements java.io.Serializable
 {
    /**
@@ -44,14 +42,12 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
       return s.bottom.dot(IA_s_top) + s.bottom.dot(IB_s_bottom) + s.top.dot(IC_s_top) + s.top.dot(ID_s_bottom);
 
-
    }
 
    @Override
    public String toString()
    {
       return (A.toString() + B.toString() + C.toString() + D.toString() + "\n");
-
 
    }
 
@@ -71,7 +67,6 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
    }
 
-
    public void sub(SpatialInertiaMatrix M2)
    {
       A.sub(M2.A);
@@ -79,7 +74,6 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       C.sub(M2.C);
       D.sub(M2.D);
    }
-
 
    public void add(SpatialInertiaMatrix M2)
    {
@@ -104,7 +98,6 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       C.sub(M1.C, M2.C);
       D.sub(M1.D, M2.D);
    }
-
 
    public void getMatrix(Matrix M)
    {
@@ -160,19 +153,21 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       M.set(2, 2, D.getElement(0, 2));
    }
 
-
    /*
-    * public void setInitArticulatedInertia(double mass, double Ixx, double Iyy, double Izz)
-    * {
-    * A.setElement(0,0, 0.0); A.setElement(0,1, 0.0); A.setElement(0,2, 0.0);     B.setElement(0,0, mass); B.setElement(0,1, 0.0 ); B.setElement(0,2, 0.0);
-    * A.setElement(1,0, 0.0); A.setElement(1,1, 0.0); A.setElement(1,2, 0.0);     B.setElement(1,0, 0.0 ); B.setElement(1,1, mass); B.setElement(1,2, 0.0);
-    * A.setElement(2,0, 0.0); A.setElement(2,1, 0.0); A.setElement(2,2, 0.0);     B.setElement(2,0, 0.0 ); B.setElement(2,1, 0.0 ); B.setElement(2,2, mass);
-    *
-    * C.setElement(0,0, Ixx); C.setElement(0,1, 0.0); C.setElement(0,2, 0.0);     D.setElement(0,0, 0.0); D.setElement(0,1, 0.0); D.setElement(0,2, 0.0);
-    * C.setElement(1,0, 0.0); C.setElement(1,1, Iyy); C.setElement(1,2, 0.0);     D.setElement(1,0, 0.0); D.setElement(1,1, 0.0); D.setElement(1,2, 0.0);
-    * C.setElement(2,0, 0.0); C.setElement(2,1, 0.0); C.setElement(2,2, Izz);     D.setElement(2,0, 0.0); D.setElement(2,1, 0.0); D.setElement(2,2, 0.0);
-    *
-    * }
+    * public void setInitArticulatedInertia(double mass, double Ixx, double Iyy,
+    * double Izz) { A.setElement(0,0, 0.0); A.setElement(0,1, 0.0);
+    * A.setElement(0,2, 0.0); B.setElement(0,0, mass); B.setElement(0,1, 0.0 );
+    * B.setElement(0,2, 0.0); A.setElement(1,0, 0.0); A.setElement(1,1, 0.0);
+    * A.setElement(1,2, 0.0); B.setElement(1,0, 0.0 ); B.setElement(1,1, mass);
+    * B.setElement(1,2, 0.0); A.setElement(2,0, 0.0); A.setElement(2,1, 0.0);
+    * A.setElement(2,2, 0.0); B.setElement(2,0, 0.0 ); B.setElement(2,1, 0.0 );
+    * B.setElement(2,2, mass); C.setElement(0,0, Ixx); C.setElement(0,1, 0.0);
+    * C.setElement(0,2, 0.0); D.setElement(0,0, 0.0); D.setElement(0,1, 0.0);
+    * D.setElement(0,2, 0.0); C.setElement(1,0, 0.0); C.setElement(1,1, Iyy);
+    * C.setElement(1,2, 0.0); D.setElement(1,0, 0.0); D.setElement(1,1, 0.0);
+    * D.setElement(1,2, 0.0); C.setElement(2,0, 0.0); C.setElement(2,1, 0.0);
+    * C.setElement(2,2, Izz); D.setElement(2,0, 0.0); D.setElement(2,1, 0.0);
+    * D.setElement(2,2, 0.0); }
     */
 
    public void setInitArticulatedInertia(double mass, Matrix3D Inertia)
@@ -207,15 +202,17 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       D.setM21(0.0);
       D.setM22(0.0);
 
-
       /*
-       * A.setElement(0,0, 0.0); A.setElement(0,1, 0.0); A.setElement(0,2, 0.0);     B.setElement(0,0, mass); B.setElement(0,1, 0.0 ); B.setElement(0,2, 0.0);
-       * A.setElement(1,0, 0.0); A.setElement(1,1, 0.0); A.setElement(1,2, 0.0);     B.setElement(1,0, 0.0 ); B.setElement(1,1, mass); B.setElement(1,2, 0.0);
-       * A.setElement(2,0, 0.0); A.setElement(2,1, 0.0); A.setElement(2,2, 0.0);     B.setElement(2,0, 0.0 ); B.setElement(2,1, 0.0 ); B.setElement(2,2, mass);
-       *
-       * C.set(Inertia);                                                             D.setElement(0,0, 0.0); D.setElement(0,1, 0.0); D.setElement(0,2, 0.0);
-       *                                                                           D.setElement(1,0, 0.0); D.setElement(1,1, 0.0); D.setElement(1,2, 0.0);
-       *                                                                           D.setElement(2,0, 0.0); D.setElement(2,1, 0.0); D.setElement(2,2, 0.0);
+       * A.setElement(0,0, 0.0); A.setElement(0,1, 0.0); A.setElement(0,2, 0.0);
+       * B.setElement(0,0, mass); B.setElement(0,1, 0.0 ); B.setElement(0,2,
+       * 0.0); A.setElement(1,0, 0.0); A.setElement(1,1, 0.0); A.setElement(1,2,
+       * 0.0); B.setElement(1,0, 0.0 ); B.setElement(1,1, mass);
+       * B.setElement(1,2, 0.0); A.setElement(2,0, 0.0); A.setElement(2,1, 0.0);
+       * A.setElement(2,2, 0.0); B.setElement(2,0, 0.0 ); B.setElement(2,1, 0.0
+       * ); B.setElement(2,2, mass); C.set(Inertia); D.setElement(0,0, 0.0);
+       * D.setElement(0,1, 0.0); D.setElement(0,2, 0.0); D.setElement(1,0, 0.0);
+       * D.setElement(1,1, 0.0); D.setElement(1,2, 0.0); D.setElement(2,0, 0.0);
+       * D.setElement(2,1, 0.0); D.setElement(2,2, 0.0);
        */
    }
 
@@ -243,7 +240,6 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
    }
 
-
    public void Iss_sIs(SpatialInertiaMatrix I_hat_i, SpatialVector s_hat_i, double sIs)
    {
       Atop.set(s_hat_i.top);
@@ -261,13 +257,11 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       v2.add(Ctop, Dbot);
       v2.scale(1.0 / sIs);
 
-
       setInnerMul(this.A, v1, s_hat_i.bottom);
       setInnerMul(this.B, v1, s_hat_i.top);
       setInnerMul(this.C, v2, s_hat_i.bottom);
       setInnerMul(this.D, v2, s_hat_i.top);
    }
-
 
    private Vector3D Atop = new Vector3D(), Bbot = new Vector3D(), Ctop = new Vector3D(), Dbot = new Vector3D();
    private Vector3D botA = new Vector3D(), botB = new Vector3D(), topC = new Vector3D(), topD = new Vector3D();
