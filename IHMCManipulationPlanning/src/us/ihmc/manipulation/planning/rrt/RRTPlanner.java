@@ -70,10 +70,27 @@ public class RRTPlanner
    
    public void updateOptimalPath(int sizeOfPiecewisePath, int numberOfIteration)
    {
+      PrintTools.info("Buliding Started");
       for (int i =0;i<numberOfIteration;i++)
       {
          updateOptimalPath(sizeOfPiecewisePath);
       }
+      
+      if(optimalPath.size() > 2)
+      {
+         ArrayList<RRTNode> tempPath = new ArrayList<RRTNode>();
+         tempPath.add(optimalPath.get(0));
+         for(int i = 1;i<optimalPath.size();i++)
+         {
+            if(optimalPath.get(0).getDistance(optimalPath.get(i)) > 0)
+            {
+               tempPath.add(optimalPath.get(i));
+            }
+         }
+         optimalPath = tempPath;
+      }
+      
+      PrintTools.info("OptimalPath is Built");
    }
    
    public RRTTree getRRTTree()
