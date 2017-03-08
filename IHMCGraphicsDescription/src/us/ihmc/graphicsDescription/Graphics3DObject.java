@@ -1141,7 +1141,7 @@ public class Graphics3DObject
       for (int i = 0; i < numberOfConvexPolygons; i++)
       {
          ConvexPolygon2d convexPolygon = planarRegion.getConvexPolygon(i);
-         MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, -0.00001);
+         MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, -0.0001);
          addInstruction(new Graphics3DAddMeshDataInstruction(meshDataHolder, appearances[i % appearances.length]));
       }
 
