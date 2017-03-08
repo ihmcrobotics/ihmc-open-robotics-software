@@ -377,7 +377,7 @@ public class BalanceManager
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
-      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), capturePoint2d);
+      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
    }
 
    public void freezePelvisXYControl()
@@ -417,7 +417,7 @@ public class BalanceManager
 
    public double getTimeRemainingInCurrentState()
    {
-      return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
+      return icpPlanner.getTimeInCurrentState();
    }
 
    public void goHome()
@@ -527,7 +527,7 @@ public class BalanceManager
 
    public boolean isICPPlanDone()
    {
-      return icpPlanner.isDone(yoTime.getDoubleValue());
+      return icpPlanner.isDone();
    }
 
    public boolean isOnExitCMP()
@@ -660,7 +660,8 @@ public class BalanceManager
    public void updateICPPlanForSingleSupportDisturbances()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
-      icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), capturePoint2d);
+      icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+      icpPlanner.updatePlanForSingleSupportDisturbances(capturePoint2d);
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)

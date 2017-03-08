@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointPosition;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCapturePointVelocity;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCornerPointsDoubleSupport;
-import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.computeDesiredCornerPointsSingleSupport;
+import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +95,7 @@ public class ICPPlanner
    private final DoubleYoVariable finalTransferTime = new DoubleYoVariable(namePrefix + "FinalTransferTime", registry);
    private final DoubleYoVariable transferTimeSplitFraction = new DoubleYoVariable(namePrefix + "TransferTimeSplitFraction", registry);
    private final DoubleYoVariable initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
-   private final DoubleYoVariable remainingTime = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
+   private final DoubleYoVariable timeInCurrentStateRemaining = new DoubleYoVariable(namePrefix + "RemainingTime", registry);
    private final IntegerYoVariable numberFootstepsToConsider = new IntegerYoVariable(namePrefix + "NumberFootstepsToConsider", registry);
 
    private final DoubleYoVariable velocityDecayDurationWhenDone = new DoubleYoVariable(namePrefix + "VelocityDecayDurationWhenDone", registry);
@@ -583,20 +580,20 @@ public class ICPPlanner
       }
    }
 
-   public void updatePlanForSingleSupportDisturbances(double time, FramePoint2d actualCapturePointPosition)
+   public void updatePlanForSingleSupportDisturbances(FramePoint2d actualCapturePointPosition)
    {
       initializeForSingleSupport(initialTime.getDoubleValue());
 
-      if (isDone(time))
+      if (isDone())
          return;
 
-      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
+      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(actualCapturePointPosition);
 
       if (Double.isNaN(deltaTimeToBeAccounted))
          return;
 
       // Ensure that we don't shift the time by more than what's remaining
-      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, computeAndReturnTimeRemaining(time));
+      deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, timeInCurrentStateRemaining.getDoubleValue());
       // Ensure the time shift won't imply a single support that's crazy short
       double currentSwingTime = swingTimes.get(0).getDoubleValue();
       deltaTimeToBeAccounted = Math.min(deltaTimeToBeAccounted, currentSwingTime - minSwingTime.getDoubleValue());
@@ -604,17 +601,17 @@ public class ICPPlanner
       initialTime.sub(deltaTimeToBeAccounted);
    }
 
-   public double estimateTimeRemainingForStateUnderDisturbance(double time, FramePoint2d actualCapturePointPosition)
+   public double estimateTimeRemainingForStateUnderDisturbance(FramePoint2d actualCapturePointPosition)
    {
-      if (isDone(time))
+      if (isDone())
          return 0.0;
 
-      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(time, actualCapturePointPosition);
+      double deltaTimeToBeAccounted = estimateDeltaTimeBetweenDesiredICPAndActualICP(actualCapturePointPosition);
 
       if (Double.isNaN(deltaTimeToBeAccounted))
          return 0.0;
 
-      double estimatedTimeRemaining = computeAndReturnTimeRemaining(time) - deltaTimeToBeAccounted;
+      double estimatedTimeRemaining = getTimeInCurrentStateRemaining() - deltaTimeToBeAccounted;
       estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       return estimatedTimeRemaining;
@@ -626,9 +623,8 @@ public class ICPPlanner
    private final FrameLineSegment2d desiredICPToFinalICPLineSegment = new FrameLineSegment2d();
    private final FramePoint2d actualICP2d = new FramePoint2d();
 
-   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(double time, FramePoint2d actualCapturePointPosition)
+   private double estimateDeltaTimeBetweenDesiredICPAndActualICP(FramePoint2d actualCapturePointPosition)
    {
-      compute(time);
       desiredCapturePointPosition.getFrameTuple2dIncludingFrame(desiredICP2d);
       singleSupportFinalICP.getFrameTuple2dIncludingFrame(finalICP2d);
 
@@ -651,7 +647,6 @@ public class ICPPlanner
       double actualDistanceDueToDisturbance = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(actualICP2d);
       double expectedDistanceAccordingToPlan = desiredCentroidalMomentumPivotPosition.getXYPlaneDistance(desiredCapturePointPosition);
 
-      computeTimeInCurrentState(time);
       double distanceRatio = actualDistanceDueToDisturbance / expectedDistanceAccordingToPlan;
 
       if (distanceRatio < 1.0e-3)
@@ -662,12 +657,14 @@ public class ICPPlanner
 
    public void compute(double time)
    {
-      computeTimeInCurrentState(time);
+      timeInCurrentState.set(time - initialTime.getDoubleValue());
+      timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
+
+      time = timeInCurrentState.getDoubleValue();
 
       update();
       referenceCMPsCalculator.update();
 
-      time = timeInCurrentState.getDoubleValue();
       double omega0 = this.omega0.getDoubleValue();
 
       if (isDoubleSupport.getBooleanValue())
@@ -790,24 +787,22 @@ public class ICPPlanner
       desiredCentroidalMomentumPivotVelocity.getFrameTuple2dIncludingFrame(desiredCentroidalMomentumPivotVelocityToPack);
    }
 
-   protected void computeTimeInCurrentState(double time)
+   public double getTimeInCurrentState()
    {
-      timeInCurrentState.set(time - initialTime.getDoubleValue());
+      return timeInCurrentState.getDoubleValue();
    }
 
-   public double computeAndReturnTimeRemaining(double time)
+   public double getTimeInCurrentStateRemaining()
    {
-      computeTimeInCurrentState(time);
+      return timeInCurrentStateRemaining.getDoubleValue();
+   }
 
-      DoubleYoVariable stateDuration;
-
+   public double getCurrentStateDuration()
+   {
       if (isDoubleSupport.getBooleanValue())
-         stateDuration = transferTimes.get(0);
+         return transferTimes.get(0).getDoubleValue();
       else
-         stateDuration = swingTimes.get(0);
-
-      remainingTime.set(stateDuration.getDoubleValue() - timeInCurrentState.getDoubleValue());
-      return remainingTime.getDoubleValue();
+         return swingTimes.get(0).getDoubleValue();
    }
 
    public void setFinalTransferTime(double time)
@@ -850,12 +845,6 @@ public class ICPPlanner
       singleSupportInitialICP.getFrameTupleIncludingFrame(capturePointPositionToPack);
    }
 
-   public double computeAndReturnTimeInCurrentState(double time)
-   {
-      computeTimeInCurrentState(time);
-      return timeInCurrentState.getDoubleValue();
-   }
-
    public void getFinalDesiredCapturePointPosition(FramePoint finalDesiredCapturePointPositionToPack)
    {
       if (isStanding.getBooleanValue())
@@ -883,9 +872,9 @@ public class ICPPlanner
       referenceCMPsCalculator.getNextExitCMP(entryCMPToPack);
    }
 
-   public boolean isDone(double time)
+   public boolean isDone()
    {
-      return computeAndReturnTimeRemaining(time) <= 0.0;
+      return timeInCurrentStateRemaining.getDoubleValue() <= 0.0;
    }
 
    public boolean isOnExitCMP()

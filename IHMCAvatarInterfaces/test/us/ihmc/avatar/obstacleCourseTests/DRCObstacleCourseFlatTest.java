@@ -758,7 +758,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       slipRandomOnEachStepPerturber.setRotationRangeToSlipNextStep(new double[]{0.0, 0.0, 0.0}, new double[]{0.2, 0.05, 0.02});
       slipRandomOnEachStepPerturber.setSlipAfterStepTimeDeltaRange(0.01, 1.0);
       slipRandomOnEachStepPerturber.setSlipPercentSlipPerTickRange(0.02, 1.0);
-      slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.0);
+      slipRandomOnEachStepPerturber.setProbabilityOfSlip(0.70);
 
       robot.setController(slipRandomOnEachStepPerturber, 10);
 
