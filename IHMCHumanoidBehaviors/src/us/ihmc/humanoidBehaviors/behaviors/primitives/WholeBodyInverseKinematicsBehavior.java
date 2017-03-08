@@ -194,15 +194,21 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       MatrixTools.removeZeroRows(selectionMatrix, 1.0e-5);
    }
 
+   public void holdCurrentChestOrientation()
+   {
+      FrameOrientation currentChestOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
+      yoDesiredChestOrientation.setAndMatchFrame(currentChestOrientation);
+   }
+
    public void setDesiredChestOrientation(FrameOrientation desiredChestOrientation)
    {
       yoDesiredChestOrientation.setAndMatchFrame(desiredChestOrientation);
    }
 
-   public void setChestAngularControl(boolean roll, boolean pitch, boolean yaw )
+   public void setChestAngularControl(boolean roll, boolean pitch, boolean yaw)
    {
       double[] controlledPositionAxes = new double[] {0.0, 0.0, 0.0};
-      double[] controlledOrientationAxes = new double[] {(roll)? 1.0 : 0.0, (pitch)? 1.0 : 0.0, (yaw)? 1.0 : 0.0 };
+      double[] controlledOrientationAxes = new double[] {(roll) ? 1.0 : 0.0, (pitch) ? 1.0 : 0.0, (yaw) ? 1.0 : 0.0};
       setChestControlledAxes(controlledPositionAxes, controlledOrientationAxes);
    }
 
@@ -212,16 +218,22 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
       organizeDataInSelectionMatrix(selectionMatrix, data);
    }
-   
+
+   public void holdCurrentPelvisOrientation()
+   {
+      FrameOrientation currentPelvisOrientation = new FrameOrientation(fullRobotModel.getPelvis().getBodyFixedFrame());
+      yoDesiredPelvisOrientation.setAndMatchFrame(currentPelvisOrientation);
+   }
+
    public void setDesiredPelvisOrientation(FrameOrientation desiredPelvisOrientation)
    {
       yoDesiredPelvisOrientation.setAndMatchFrame(desiredPelvisOrientation);
    }
 
-   public void setPelvisAngularControl(boolean roll, boolean pitch, boolean yaw )
+   public void setPelvisAngularControl(boolean roll, boolean pitch, boolean yaw)
    {
       double[] controlledPositionAxes = new double[] {0.0, 0.0, 0.0};
-      double[] controlledOrientationAxes = new double[] {(roll)? 1.0 : 0.0, (pitch)? 1.0 : 0.0, (yaw)? 1.0 : 0.0 };
+      double[] controlledOrientationAxes = new double[] {(roll) ? 1.0 : 0.0, (pitch) ? 1.0 : 0.0, (yaw) ? 1.0 : 0.0};
       setPelvisControlledAxes(controlledPositionAxes, controlledOrientationAxes);
    }
 
@@ -231,16 +243,16 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
       organizeDataInSelectionMatrix(selectionMatrix, data);
    }
-   
+
    public void setBodyWeights(BodyWeights bodyWeights)
    {
-      if(trackingWeightsMessage == null)
+      if (trackingWeightsMessage == null)
       {
          trackingWeightsMessage = new TrackingWeightsMessage(bodyWeights);
       }
       else
       {
-      trackingWeightsMessage.setTrackingWeightsMessage(bodyWeights);
+         trackingWeightsMessage.setTrackingWeightsMessage(bodyWeights);
       }
    }
 
@@ -295,7 +307,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          yoDesiredChestQuaternion.get(desiredChestOrientation);
          chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
       }
-      
+
       if (yoDesiredPelvisOrientation.containsNaN())
       {
          pelvisOrientationTrajectoryMessage = null;
@@ -307,12 +319,11 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          yoDesiredPelvisQuaternion.get(desiredPelvisOrientation);
          pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredPelvisOrientation);
       }
-      
-      
-      if (trackingWeightsMessage == null)
-      {
-         trackingWeightsMessage = new TrackingWeightsMessage(BodyWeights.STANDARD);
-      }
+//
+//      if (trackingWeightsMessage == null)
+//      {
+//         trackingWeightsMessage = new TrackingWeightsMessage(BodyWeights.STANDARD);
+//      }
    }
 
    @Override
@@ -343,13 +354,13 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(pelvisOrientationTrajectoryMessage);
          }
-         
+
          if (trackingWeightsMessage != null)
          {
             trackingWeightsMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(trackingWeightsMessage);
          }
-         
+
       }
       if (kinematicsToolboxOutputQueue.isNewPacketAvailable() && !hasSentMessageToController.getBooleanValue())
       {
