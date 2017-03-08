@@ -14,8 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
@@ -100,7 +98,6 @@ import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.processManagement.UnsignedByteTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
@@ -125,7 +122,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
       JME_MOUNTAINS, BLUE_SKY;
    }
    
-   public static final SkyboxToUse skyboxToUse = SkyboxToUse.JME_MOUNTAINS;
+   public static final SkyboxToUse skyboxToUse = SkyboxToUse.BLUE_SKY;
 
    public final static boolean USE_PBO = true;
    public final static boolean USE_GPU_LIDAR_PARALLEL_SCENE = false; // Disable: this is super slow
