@@ -109,7 +109,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
       currentSegment = new IntegerYoVariable(namePrefix + "CurrentSegment", registry);
 
-      spline = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, 4, trajectoryFrame, registry);
+      spline = new VelocityConstrainedPositionTrajectoryGenerator(namePrefix, trajectoryFrame, registry);
 
       yoStartOfSplineICP = new YoFramePoint(namePrefix + "InitialICPSpline", trajectoryFrame, registry);
       yoEndOfSplineICP = new YoFramePoint(namePrefix + "FinalICPSpline", trajectoryFrame, registry);
