@@ -195,6 +195,17 @@ public class AbstractAllDialogConstructorsHolder implements AllDialogConstructor
       };
    }
 
+   @Override
+   public YoGraphicsPropertiesDialogConstructor getYoGraphicsPropertiesDialogConstructor()
+   {
+      return new YoGraphicsPropertiesDialogConstructor()
+      {
+         @Override
+         public void constructDialog()
+         {
+         }
+      };
+   }
 
    @Override
    public PrintGraphsDialogConstructor getPrintGraphsDialogConstructor()

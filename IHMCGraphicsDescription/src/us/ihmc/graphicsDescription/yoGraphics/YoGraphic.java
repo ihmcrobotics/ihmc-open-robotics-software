@@ -4,6 +4,7 @@ import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public abstract class YoGraphic
 {
@@ -15,6 +16,8 @@ public abstract class YoGraphic
    private final RigidBodyTransform rootTransform = new RigidBodyTransform();
    private final AffineTransform objectTransform;
    private final AffineTransform transform = new AffineTransform();
+
+   protected DoubleProvider globalScaleProvider;
 
    protected abstract void computeRotationTranslation(AffineTransform transform3D);
 
@@ -28,6 +31,11 @@ public abstract class YoGraphic
    {
       this.name = name;
       objectTransform = new AffineTransform();
+   }
+
+   public void setGlobalScaleProvider(DoubleProvider globalScaleProvider)
+   {
+      this.globalScaleProvider = globalScaleProvider;
    }
 
    public void showGraphicObject()

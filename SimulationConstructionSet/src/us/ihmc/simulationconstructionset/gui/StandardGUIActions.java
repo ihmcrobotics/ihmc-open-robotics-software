@@ -75,6 +75,7 @@ import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveGraphConf
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SaveRobotConfigurationAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SelectEntryBoxGroupAction;
 import us.ihmc.simulationconstructionset.gui.actions.dialogActions.SelectExtraPanelAction;
+import us.ihmc.simulationconstructionset.gui.actions.dialogActions.YoGraphicsPropertiesAction;
 import us.ihmc.simulationconstructionset.gui.config.CameraSelector;
 import us.ihmc.simulationconstructionset.gui.config.ConfigurationList;
 import us.ihmc.simulationconstructionset.gui.config.EntryBoxGroupList;
@@ -105,6 +106,7 @@ import us.ihmc.simulationconstructionset.gui.dialogConstructors.ResizeViewportDi
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveGraphConfigurationDialogConstructor;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.SaveRobotConfigurationDialogConstructor;
+import us.ihmc.simulationconstructionset.gui.dialogConstructors.YoGraphicsPropertiesDialogConstructor;
 
 public class StandardGUIActions implements GUIEnablerAndDisabler
 {
@@ -114,6 +116,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
    
    protected JMenu cameraMenu, viewportMenu, viewMenu, extraPanelsMenu, cameraKeysMenu; //TODO: Make private.
    private CameraPropertiesAction cameraPropertiesAction;
+   private YoGraphicsPropertiesAction yoGraphicsPropertiesAction;
    private JMenu configurationMenu;
    private CreateNewGraphWindowAction createNewGraphWindowAction;
    private CreateNewViewportWindowAction createNewViewportWindowAction;
@@ -295,6 +298,10 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       cameraPropertiesAction = new CameraPropertiesAction(cameraPropertiesDialogConstructor, trackCheckBox, dollyCheckBox);
       guiActions.add(cameraPropertiesAction);
 
+      YoGraphicsPropertiesDialogConstructor yoGraphicsPropertiesDialogConstructor = allDialogConstructorsHolder.getYoGraphicsPropertiesDialogConstructor();
+      yoGraphicsPropertiesAction = new YoGraphicsPropertiesAction(yoGraphicsPropertiesDialogConstructor);
+      guiActions.add(yoGraphicsPropertiesAction);
+
       hideShowViewportAction = new HideShowViewportAction(allCommandsExecutor);
       guiActions.add(hideShowViewportAction);
 
@@ -369,6 +376,9 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
 
       cameraPropertiesAction = new CameraPropertiesAction(cameraPropertiesDialogConstructor, trackCheckBox, dollyCheckBox);
       guiActions.add(cameraPropertiesAction);
+
+      yoGraphicsPropertiesAction = actions.yoGraphicsPropertiesAction;
+      guiActions.add(yoGraphicsPropertiesAction);
 
       hideShowViewportAction = new HideShowViewportAction(viewportSelector);
       guiActions.add(hideShowViewportAction);
@@ -677,6 +687,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       viewportMenu.setName("Viewport");
       viewportMenu.setMnemonic('v');
       viewportMenu.add(cameraPropertiesAction);
+      viewportMenu.add(yoGraphicsPropertiesAction);
       viewportMenu.add(hideShowViewportAction);
       cameraMenu = new JMenu("Camera");
       cameraMenu.setName("Camera");
@@ -797,6 +808,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       viewportMenu = new JMenu("Viewport");
       viewportMenu.setMnemonic('v');
       viewportMenu.add(cameraPropertiesAction);
+      viewportMenu.add(yoGraphicsPropertiesAction);
       viewportMenu.add(hideShowViewportAction);
       viewportMenu.add(resizeViewportAction);
 
@@ -1131,6 +1143,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
          viewportMenu.add(extraPanelsMenu);
       viewportMenu.add(cameraMenu);
       viewportMenu.add(cameraPropertiesAction);
+      viewportMenu.add(yoGraphicsPropertiesAction);
       viewportMenu.add(hideShowViewportAction);
 
       viewportMenu.add(cameraKeysMenu);
@@ -1306,6 +1319,7 @@ public class StandardGUIActions implements GUIEnablerAndDisabler
       }
 
       cameraPropertiesAction = null;
+      yoGraphicsPropertiesAction = null;
 
       if (configurationMenu != null)
       {
