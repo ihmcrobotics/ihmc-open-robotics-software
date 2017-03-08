@@ -41,7 +41,7 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
 
    private final double neckJointspaceWeight = 5.0;
-   private final double spineJointspaceWeight = 1.0;
+   private final double spineJointspaceWeight = 10.0;
    private final double armJointspaceWeight = 1.0;
    private final TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
 
