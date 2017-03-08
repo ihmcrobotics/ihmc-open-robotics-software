@@ -48,11 +48,11 @@ public class GraphicsExample
       zero.set(0.0);
 
       // create graphics vector
-      YoGraphicVector dynamicGraphicVector = new YoGraphicVector("Example", zero, zero, zero, testPoint.getYoX(), testPoint.getYoY(), testPoint.getYoZ(), 1.0,
+      YoGraphicVector yoGraphicVector = new YoGraphicVector("Example", zero, zero, zero, testPoint.getYoX(), testPoint.getYoY(), testPoint.getYoZ(), 1.0,
                                                      YoAppearance.Black());
 
       // add graphic objects to list
-      yoGraphicsList.add(dynamicGraphicVector);
+      yoGraphicsList.add(yoGraphicVector);
 
       yoGraphicsList.add(new YoGraphicPosition("Example", testPoint, 0.01, YoAppearance.Red()));
       yoGraphicsList.add(new YoGraphicPosition("Example", testPoint2, 0.01, YoAppearance.Black()));

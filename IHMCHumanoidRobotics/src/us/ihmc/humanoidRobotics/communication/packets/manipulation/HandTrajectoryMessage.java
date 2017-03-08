@@ -123,7 +123,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       super.set(other);
       robotSide = other.robotSide;
       baseForControl = other.baseForControl;
-      executionMode = other.executionMode;
+      setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
    }
 
    public RobotSide getRobotSide()

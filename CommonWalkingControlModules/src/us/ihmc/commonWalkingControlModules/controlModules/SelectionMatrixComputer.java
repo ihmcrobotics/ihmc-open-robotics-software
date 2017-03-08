@@ -11,9 +11,9 @@ public class SelectionMatrixComputer
 {
    private final LinearSolver<DenseMatrix64F> selectionMatrixSolver = new SolvePseudoInverseSvdGCFree(12, 12);
 
-   public void computeSelectionMatrix(int jacobianId, HighLevelHumanoidControllerToolbox momentumBasedController, DenseMatrix64F selectionMatrix)
+   public void computeSelectionMatrix(int jacobianId, HighLevelHumanoidControllerToolbox controllerToolbox, DenseMatrix64F selectionMatrix)
    {
-      computeSelectionMatrix(momentumBasedController.getJacobian(jacobianId), selectionMatrix);
+      computeSelectionMatrix(controllerToolbox.getJacobian(jacobianId), selectionMatrix);
    }
 
    public void computeSelectionMatrix(GeometricJacobian jacobian, DenseMatrix64F selectionMatrix)

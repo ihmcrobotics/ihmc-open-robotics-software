@@ -70,7 +70,7 @@ public class SpatialForceVector
     */
    public SpatialForceVector(ReferenceFrame expressedInFrame, double[] matrix)
    {
-      MathTools.checkIfInRange(matrix.length, SIZE, SIZE);
+      MathTools.checkIntervalContains(matrix.length, SIZE, SIZE);
       this.expressedInFrame = expressedInFrame;
       angularPart = new Vector3D(matrix[0], matrix[1], matrix[2]);
       linearPart = new Vector3D(matrix[3], matrix[4], matrix[5]);
@@ -264,8 +264,8 @@ public class SpatialForceVector
 
    public void set(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
-      MathTools.checkIfEqual(matrix.getNumRows(), SIZE);
-      MathTools.checkIfEqual(matrix.getNumCols(), 1);
+      MathTools.checkEquals(matrix.getNumRows(), SIZE);
+      MathTools.checkEquals(matrix.getNumCols(), 1);
 
       this.expressedInFrame = expressedInFrame;
       angularPart.set(matrix.get(0, 0), matrix.get(1, 0), matrix.get(2, 0));
@@ -274,7 +274,7 @@ public class SpatialForceVector
 
    public void set(ReferenceFrame expressedInFrame, double[] doubleArray)
    {
-      MathTools.checkIfEqual(doubleArray.length, SIZE);
+      MathTools.checkEquals(doubleArray.length, SIZE);
 
       this.expressedInFrame = expressedInFrame;
       angularPart.set(doubleArray[0], doubleArray[1], doubleArray[2]);
@@ -380,8 +380,8 @@ public class SpatialForceVector
     */
    public void getMatrix(DenseMatrix64F matrix)
    {
-      MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
-      MathTools.checkIfInRange(matrix.getNumCols(), 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
       matrix.set(0, 0, angularPart.getX());
       matrix.set(1, 0, angularPart.getY());
       matrix.set(2, 0, angularPart.getZ());
@@ -392,8 +392,8 @@ public class SpatialForceVector
 
    public void getMatrixColumn(DenseMatrix64F matrix, int column)
    {
-      MathTools.checkIfInRange(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
-      MathTools.checkIfInRange(matrix.getNumCols(), column + 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumRows(), SIZE, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrix.getNumCols(), column + 1, Integer.MAX_VALUE);
       matrix.set(0, column, angularPart.getX());
       matrix.set(1, column, angularPart.getY());
       matrix.set(2, column, angularPart.getZ());

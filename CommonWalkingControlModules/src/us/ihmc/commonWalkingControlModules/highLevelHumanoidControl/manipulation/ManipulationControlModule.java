@@ -17,13 +17,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -43,19 +41,19 @@ public class ManipulationControlModule
    public static final double TO_DEFAULT_CONFIGURATION_TRAJECTORY_TIME = 2.0;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final List<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
+   private final List<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
    private final BooleanYoVariable hasBeenInitialized = new BooleanYoVariable("hasBeenInitialized", registry);
    private final SideDependentList<HandControlModule> handControlModules;
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   public ManipulationControlModule(ArmControllerParameters armControllerParameters, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public ManipulationControlModule(ArmControllerParameters armControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
          YoVariableRegistry parentRegistry)
    {
-      fullRobotModel = momentumBasedController.getFullRobotModel();
+      fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       createFrameVisualizers(yoGraphicsListRegistry, fullRobotModel, "HandControlFrames", true);
 
       handControlModules = new SideDependentList<HandControlModule>();
@@ -65,7 +63,7 @@ public class ManipulationControlModule
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         HandControlModule individualHandControlModule = new HandControlModule(robotSide, momentumBasedController, armControllerParameters,
+         HandControlModule individualHandControlModule = new HandControlModule(robotSide, controllerToolbox, armControllerParameters,
                jointspaceControlGains, taskspaceGains, registry);
          handControlModules.put(robotSide, individualHandControlModule);
       }
@@ -105,9 +103,9 @@ public class ManipulationControlModule
             ReferenceFrame handPositionControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             if (handPositionControlFrame != null)
             {
-               YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(handPositionControlFrame, registry, 0.1);
-               dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-               list.add(dynamicGraphicReferenceFrame);
+               YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(handPositionControlFrame, registry, 0.1);
+               yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
+               list.add(yoGraphicReferenceFrame);
             }
          }
          yoGraphicsListRegistry.registerYoGraphicsList(list);
@@ -159,15 +157,6 @@ public class ManipulationControlModule
          return;
       for (RobotSide robotSide : RobotSide.values)
          handControlModules.get(robotSide).holdPositionInJointspace();
-   }
-
-   public void handleGoHomeCommand(GoHomeCommand command)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (command.getRequest(robotSide, BodyPart.ARM))
-            goToDefaultState(robotSide, command.getTrajectoryTime());
-      }
    }
 
    public void handleHandTrajectoryCommands(List<HandTrajectoryCommand> commands)
@@ -269,9 +258,9 @@ public class ManipulationControlModule
 
    private void updateGraphics()
    {
-      for (int i = 0; i < dynamicGraphicReferenceFrames.size(); i++)
+      for (int i = 0; i < yoGraphicReferenceFrames.size(); i++)
       {
-         dynamicGraphicReferenceFrames.get(i).update();
+         yoGraphicReferenceFrames.get(i).update();
       }
    }
 

@@ -59,7 +59,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicVector. startPoint = " + startPoint + ", frameVector = "
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicVector. startPoint = " + startPoint + ", frameVector = "
                + frameVector);
       }
    }

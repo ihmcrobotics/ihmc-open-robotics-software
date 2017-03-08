@@ -21,7 +21,7 @@ public class TransferToStandingState extends WalkingState
    private final BooleanYoVariable doFootExplorationInTransferToStanding = new BooleanYoVariable("doFootExplorationInTransferToStanding", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
@@ -29,14 +29,14 @@ public class TransferToStandingState extends WalkingState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
-   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public TransferToStandingState(WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(WalkingStateEnum.TO_STANDING, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
 
       this.walkingMessageHandler = walkingMessageHandler;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
@@ -82,7 +82,7 @@ public class TransferToStandingState extends WalkingState
          }
       }
 
-      momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+      controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       failureDetectionControlModule.setNextFootstep(null);
 

@@ -5,11 +5,9 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the head to the desired orientation while going through the specified trajectory points."
@@ -27,24 +25,24 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
    public HeadTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
+   /**
+    * Random constructor for unit testing this packet
+    * @param random seed
+    */
    public HeadTrajectoryMessage(Random random)
    {
       super(random);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
     * Clone constructor.
-    * @param headTrajectoryMessage message to clone.
+    * @param message to clone.
     */
-   public HeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
+   public HeadTrajectoryMessage(AbstractSO3TrajectoryMessage<?> headTrajectoryMessage)
    {
       super(headTrajectoryMessage);
-      setUniqueId(headTrajectoryMessage.getUniqueId());
-      setDestination(headTrajectoryMessage.getDestination());
    }
 
    /**
@@ -56,7 +54,6 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
    public HeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
       super(trajectoryTime, desiredOrientation);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -69,35 +66,5 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
    {
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-   }
-
-   @Override
-   public boolean epsilonEquals(HeadTrajectoryMessage other, double epsilon)
-   {
-      return super.epsilonEquals(other, epsilon);
-   }
-
-   @Override
-   public HeadTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      HeadTrajectoryMessage transformedHeadTrajectoryMessage = new HeadTrajectoryMessage(this);
-      transformedHeadTrajectoryMessage.applyTransform(transform);
-      return transformedHeadTrajectoryMessage;
-   }
-
-   @Override
-   public String toString()
-   {
-      if (taskspaceTrajectoryPoints != null)
-         return "Head SO3 trajectory: number of SO3 trajectory points = " + getNumberOfTrajectoryPoints();
-      else
-         return "Head SO3 trajectory: no SO3 trajectory points";
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public String validateMessage()
-   {
-      return PacketValidityChecker.validateHeadTrajectoryMessage(this);
    }
 }

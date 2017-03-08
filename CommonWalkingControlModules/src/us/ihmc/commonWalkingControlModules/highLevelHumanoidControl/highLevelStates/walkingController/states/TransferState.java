@@ -21,7 +21,7 @@ public abstract class TransferState extends WalkingState
    protected final RobotSide transferToSide;
 
    protected final WalkingMessageHandler walkingMessageHandler;
-   protected final HighLevelHumanoidControllerToolbox momentumBasedController;
+   protected final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    protected final CenterOfMassHeightManager comHeightManager;
@@ -32,17 +32,19 @@ public abstract class TransferState extends WalkingState
    private final FramePoint2d desiredICPLocal = new FramePoint2d();
    private final FramePoint2d capturePoint2d = new FramePoint2d();
    private final FramePoint2d desiredCMP = new FramePoint2d();
+
+   private final FramePoint2d filteredDesiredCoP = new FramePoint2d();
    private final FramePoint nextExitCMP = new FramePoint();
 
    public TransferState(RobotSide transferToSide, WalkingStateEnum transferStateEnum, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory,
+         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
       super(transferStateEnum, parentRegistry);
       this.transferToSide = transferToSide;
       this.walkingMessageHandler = walkingMessageHandler;
       this.failureDetectionControlModule = failureDetectionControlModule;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
@@ -72,7 +74,7 @@ public abstract class TransferState extends WalkingState
       if (!balanceManager.isICPPlanDone())
          return false;
       balanceManager.getCapturePoint(capturePoint2d);
-      FrameConvexPolygon2d supportPolygonInWorld = momentumBasedController.getBipedSupportPolygons().getSupportPolygonInWorld();
+      FrameConvexPolygon2d supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
       boolean isICPInsideSupportPolygon = supportPolygonInWorld.isPointInside(capturePoint2d);
 
       if (!isICPInsideSupportPolygon)
@@ -95,15 +97,17 @@ public abstract class TransferState extends WalkingState
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICPLocal);
          balanceManager.getCapturePoint(capturePoint2d);
+         balanceManager.getNextExitCMP(nextExitCMP);
 
-         boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, desiredCMP, desiredICPLocal, capturePoint2d);
+         boolean doToeOff = feetManager.checkIfToeOffSafe(trailingLeg, nextExitCMP, desiredCMP, desiredICPLocal, capturePoint2d);
 
          if (doToeOff)
          {
-            balanceManager.getNextExitCMP(nextExitCMP);
-            feetManager.setExitCMPForToeOff(trailingLeg, nextExitCMP);
+            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
+
+            feetManager.computeToeOffContactPoint(trailingLeg, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(trailingLeg);
-            momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+            controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
          }
       }
    }
@@ -114,7 +118,7 @@ public abstract class TransferState extends WalkingState
       balanceManager.clearICPPlan();
 
       feetManager.initializeContactStatesForDoubleSupport(transferToSide);
-      momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+      controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       Footstep nextFootstep = walkingMessageHandler.peek(0);
       failureDetectionControlModule.setNextFootstep(nextFootstep);

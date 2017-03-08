@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -100,7 +101,7 @@ public class SpiralBasedAlgorithm
          rayThroughSphere.sub(sphereOrigin, pointsOnSphere[rayIndex]);
          rayThroughSphere.normalize();
 
-         GeometryTools.getAxisAngleFromFirstToSecondVector(xAxis, rayThroughSphere, rotationForXAxisAlignedWithRay);
+         EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(xAxis, rayThroughSphere, rotationForXAxisAlignedWithRay);
          rotationMatrixForXAxisAlignedWithRay.set(rotationForXAxisAlignedWithRay);
 
          for (int rotationAroundRayIndex = 0; rotationAroundRayIndex < numberOfRotationsAroundRay; rotationAroundRayIndex++)

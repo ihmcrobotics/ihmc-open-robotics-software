@@ -85,7 +85,7 @@ import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecu
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.DynamicGraphicMenuManager;
+import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
@@ -105,7 +105,7 @@ import us.ihmc.simulationconstructionset.robotcommprotocol.SCSRobotGUICommunicat
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
+import us.ihmc.simulationconstructionset.util.graphics.YoGraphicCheckBoxMenuItem;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.io.printing.PrintTools;
@@ -290,7 +290,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private final SimulationConstructionSetParameters parameters;
 
-   private final DynamicGraphicMenuManager dynamicGraphicMenuManager;
+   private final YoGraphicMenuManager yoGraphicMenuManager;
 
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
@@ -410,11 +410,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                createFrame(showGUI);
             }
          });
-         this.dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
+         this.yoGraphicMenuManager = new YoGraphicMenuManager();
       }
       else
       {
-         this.dynamicGraphicMenuManager = null;
+         this.yoGraphicMenuManager = null;
       }
 
       this.mySimulation = simulation;
@@ -2282,9 +2282,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          if (parameters.getShowWindows()) myGUI.show();
 
-         if (!parameters.getShowYoGraphicObjects() && dynamicGraphicMenuManager != null)
+         if (!parameters.getShowYoGraphicObjects() && yoGraphicMenuManager != null)
          {
-            dynamicGraphicMenuManager.hideAllGraphics();
+            yoGraphicMenuManager.hideAllGraphics();
          }
       }
 
@@ -4347,16 +4347,16 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       if (yoGraphicsLists == null) return;
 
-      if(dynamicGraphicMenuManager != null)
+      if(yoGraphicMenuManager != null)
       {
-         addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
+         addCheckBoxesToYoGraphicCheckBoxMenuItem(yoGraphicsLists);
          displayYoGraphicMenu();
       }
 
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
    }
 
-   private void addCheckBoxesToDynamicGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
+   private void addCheckBoxesToYoGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
@@ -4374,8 +4374,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                String label = yoGraphicsList.getLabel();
                ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
                boolean selectedState = yoGraphicsList.checkAllYoGraphicsAreShowing();
-               DynamicGraphicCheckBoxMenuItem checkBox = new DynamicGraphicCheckBoxMenuItem(label, yoGraphics, selectedState);
-               dynamicGraphicMenuManager.addCheckBox(checkBox);
+               YoGraphicCheckBoxMenuItem checkBox = new YoGraphicCheckBoxMenuItem(label, yoGraphics, selectedState);
+               yoGraphicMenuManager.addCheckBox(checkBox);
             }
          }
       });
@@ -4388,7 +4388,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return simulationOverheadPlotterFactory;
    }
 
-   public void hideAllDynamicGraphicObjects()
+   public void hideAllYoGraphics()
    {
       int numberOfElements = yoGraphicListRegistries.size();
 
@@ -4399,7 +4399,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public boolean checkAllDynamicGraphicObjectsListRegistriesAreShowing()
+   public boolean checkAllYoGraphicsListRegistriesAreShowing()
    {
       boolean ret = true;
       int numberOfElements = yoGraphicListRegistries.size();
@@ -4413,7 +4413,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return ret;
    }
 
-   public void setDynamicGraphicObjectsListVisible(String name, boolean visible)
+   public void setYoGraphicsListVisible(String name, boolean visible)
    {
       ArrayList<YoGraphicsList> lists = new ArrayList<YoGraphicsList>();
       int numberOfElements = yoGraphicListRegistries.size();
@@ -4422,7 +4422,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicListRegistries.get(i);
          lists.clear();
-         yoGraphicsListRegistry.getRegisteredDynamicGraphicObjectsLists(lists);
+         yoGraphicsListRegistry.getRegisteredYoGraphicsLists(lists);
          int n = lists.size();
 
          for (int j = 0; j < n; j++)
@@ -4443,7 +4443,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    }
 
-   public ArrayList<YoGraphicsListRegistry> getDynamicGraphicObjectsListRegistries()
+   public ArrayList<YoGraphicsListRegistry> getYoGraphicsListRegistries()
    {
       return yoGraphicListRegistries;
    }
@@ -4456,7 +4456,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          public void run()
          {
             JMenuBar menuBar = new JMenuBar();
-            menuBar.add(dynamicGraphicMenuManager.getjMenu());
+            menuBar.add(yoGraphicMenuManager.getjMenu());
             addMenuBar(menuBar);
          }
       });

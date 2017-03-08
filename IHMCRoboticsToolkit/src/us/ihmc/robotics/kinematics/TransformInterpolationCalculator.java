@@ -48,7 +48,7 @@ public class TransformInterpolationCalculator
       long timeStamp1 = timeStampedTransform1.getTimeStamp();
       long timeStamp2 = timeStampedTransform2.getTimeStamp();
 
-      MathTools.checkIfInRange(timeStamp, timeStamp1, timeStamp2);
+      MathTools.checkIntervalContains(timeStamp, timeStamp1, timeStamp2);
 
       RigidBodyTransform transform1 = timeStampedTransform1.getTransform3D();
       RigidBodyTransform transform2 = timeStampedTransform2.getTransform3D();

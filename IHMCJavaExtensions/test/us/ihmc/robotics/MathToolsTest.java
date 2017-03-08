@@ -156,7 +156,7 @@ public class MathToolsTest
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIfInRange_2()
    {
-      MathTools.checkIfInRange(-5, -1, 1);
+      MathTools.checkIntervalContains(-5, -1, 1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -257,11 +257,8 @@ public class MathToolsTest
          negValsList.add(-1.5);
       }
 
-      assertEquals(MathTools.sumDoubles(posVals), 37.5, 1e-12);
-      assertEquals(MathTools.sumDoubles(negVals), -37.5, 1e-12);
-
-      assertEquals(MathTools.sumDoubles(posValsList), 37.5, 1e-12);
-      assertEquals(MathTools.sumDoubles(negValsList), -37.5, 1e-12);
+      assertEquals(MathTools.sum(posVals), 37.5, 1e-12);
+      assertEquals(MathTools.sum(negVals), -37.5, 1e-12);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -280,11 +277,8 @@ public class MathToolsTest
          negValsList.add(-1);
       }
 
-      assertEquals(MathTools.sumIntegers(posVals), 25);
-      assertEquals(MathTools.sumIntegers(negVals), -25);
-
-      assertEquals(MathTools.sumIntegers(posValsList), 25);
-      assertEquals(MathTools.sumIntegers(negValsList), -25);
+      assertEquals(MathTools.sum(posVals), 25);
+      assertEquals(MathTools.sum(negVals), -25);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -293,14 +287,14 @@ public class MathToolsTest
    {
       double[] randomValues = RandomNumbers.nextDoubleArray(random, 25, 10.0);
       int[] randomInts = RandomNumbers.nextIntArray(random, 25, 10);
-      double sumOfRandomValues = MathTools.sumDoubles(randomValues);
-      long sumOfInts = MathTools.sumIntegers(randomInts);
+      double sumOfRandomValues = MathTools.sum(randomValues);
+      long sumOfInts = MathTools.sum(randomInts);
 
       randomValues = MathTools.dotPlus(randomValues, 7.3);
-      assertEquals(sumOfRandomValues + 25 * 7.3, MathTools.sumDoubles(randomValues), 1e-12);
+      assertEquals(sumOfRandomValues + 25 * 7.3, MathTools.sum(randomValues), 1e-12);
 
       randomInts = MathTools.dotPlus(randomInts, 7);
-      assertEquals(sumOfInts + 25 * 7, MathTools.sumIntegers(randomInts));
+      assertEquals(sumOfInts + 25 * 7, MathTools.sum(randomInts));
 
    }
 
@@ -446,18 +440,18 @@ public class MathToolsTest
       {
          -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0
       };
-      assertEquals(0.7143, MathTools.mean(numbers), 1e-4);
+      assertEquals(0.7143, MathTools.average(numbers), 1e-4);
 
-      assertEquals(5.0, MathTools.mean(new double[] {5.0}), 1e-34);
+      assertEquals(5.0, MathTools.average(new double[] {5.0}), 1e-34);
 
       numbers[4] = Double.POSITIVE_INFINITY;
-      assertTrue(Double.isInfinite(MathTools.mean(numbers)));
+      assertTrue(Double.isInfinite(MathTools.average(numbers)));
 
       numbers[4] = Double.NEGATIVE_INFINITY;
-      assertTrue(Double.isInfinite(MathTools.mean(numbers)));
+      assertTrue(Double.isInfinite(MathTools.average(numbers)));
 
       numbers[4] = Double.NaN;
-      assertTrue(Double.isNaN(MathTools.mean(numbers)));
+      assertTrue(Double.isNaN(MathTools.average(numbers)));
 
    }
 
@@ -470,18 +464,18 @@ public class MathToolsTest
          -1.0, -4.0, 4.0, 3.0, 0.0, 1.0, -2.0, -5.0, -3.0, 2.0, 2.0, 3.0, 5.0, 5.0
       };
       ArrayList<Double> numbers = new ArrayList<Double>(Arrays.asList(numbersArray));
-      assertEquals(0.7143, MathTools.mean(numbers), 1e-4);
+      assertEquals(0.7143, MathTools.average(numbers), 1e-4);
 
-      assertEquals(5.0, MathTools.mean(new double[] {5.0}), 1e-34);
+      assertEquals(5.0, MathTools.average(new double[] {5.0}), 1e-34);
 
       numbers.set(4, Double.POSITIVE_INFINITY);
-      assertTrue(Double.isInfinite(MathTools.mean(numbers)));
+      assertTrue(Double.isInfinite(MathTools.average(numbers)));
 
       numbers.set(4, Double.NEGATIVE_INFINITY);
-      assertTrue(Double.isInfinite(MathTools.mean(numbers)));
+      assertTrue(Double.isInfinite(MathTools.average(numbers)));
 
       numbers.set(4, Double.NaN);
-      assertTrue(Double.isNaN(MathTools.mean(numbers)));
+      assertTrue(Double.isNaN(MathTools.average(numbers)));
 
    }
 
@@ -489,15 +483,15 @@ public class MathToolsTest
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIfInRangeFalse()
    {
-      MathTools.checkIfInRange(5.0, -3.0, 2.0);
+      MathTools.checkIntervalContains(5.0, -3.0, 2.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testCheckIfInRangeTrue()
    {
-      MathTools.checkIfInRange(1.0, -3.0, 2.0);
-      MathTools.checkIfInRange(5.0, 5.0, 5.0);
+      MathTools.checkIntervalContains(1.0, -3.0, 2.0);
+      MathTools.checkIntervalContains(5.0, 5.0, 5.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -585,25 +579,25 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testCheckIsEqual()
    {
-      MathTools.checkIfEqual(1, 1);
-      MathTools.checkIfEqual(-2, -2);
+      MathTools.checkEquals(1, 1);
+      MathTools.checkEquals(-2, -2);
 
-      MathTools.checkIfEqual(2.0, 2.001, 0.1);
-      MathTools.checkIfEqual(-2.0, -2.001, 0.1);
+      MathTools.checkEpsilonEquals(2.0, 2.001, 0.1);
+      MathTools.checkEpsilonEquals(-2.0, -2.001, 0.1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000, expected = RuntimeException.class)
+   @Test(timeout = 30000)
    public void testCheckIsEqualNaN()
    {
-      MathTools.checkIfEqual(Double.NaN, Double.NaN, 1e-12);
+      MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualInt()
    {
-      MathTools.checkIfEqual(2, 4);
+      MathTools.checkEquals(2, 4);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -730,7 +724,7 @@ public class MathToolsTest
    @Test(timeout = 30000, expected = RuntimeException.class)
    public void testCheckIsEqualDouble()
    {
-      MathTools.checkIfEqual(2.0, 2.001, 0.0001);
+      MathTools.checkEpsilonEquals(2.0, 2.001, 0.0001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

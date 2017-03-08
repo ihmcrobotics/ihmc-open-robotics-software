@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -17,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class MeshDataGenerator
 {
@@ -1587,7 +1587,7 @@ public class MeshDataGenerator
       return new MeshDataHolder(points, textPoints, polygonIndices, normals);
    }
 
-   public static MeshDataHolder Line(LineSegment3d lineSegment3d, double width)
+   public static MeshDataHolder Line(LineSegment3D lineSegment3d, double width)
    {
       return Line(lineSegment3d.getFirstEndpoint(), lineSegment3d.getSecondEndpoint(), width);
    }

@@ -1,12 +1,12 @@
 package us.ihmc.robotics.controllers;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -44,7 +44,7 @@ public class EuclideanTangentialDampingCalculator
          {
             positionError.changeFrame(bodyFrame);
 
-            GeometryTools.getAxisAngleFromZUpToVector(positionError.getVector(), rotationToControlFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(positionError.getVector(), rotationToControlFrame);
 
             transformToParent.setRotationAndZeroTranslation(rotationToControlFrame);
          }

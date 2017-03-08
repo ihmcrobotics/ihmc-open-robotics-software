@@ -43,7 +43,7 @@ public class BagOfBalls
    private static final AppearanceDefinition DEFAULT_COLOR = YoAppearance.Black();
    private static final GraphicType DEFAULT_GRAPHIC_TYPE = null;
 
-   private final ArrayList<YoGraphicPosition> dynamicGraphicPositions = new ArrayList<>();
+   private final ArrayList<YoGraphicPosition> yoGraphicPositions = new ArrayList<>();
    private int index;
    private boolean outOfBallsWarning = false;
    private YoGraphicsList yoGraphicsList;
@@ -90,7 +90,7 @@ public class BagOfBalls
     * @param name String Name of the BagOfBalls
     * @param appearance Appearance for each of the balls.
     * @param parentRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     */
    public BagOfBalls(int numberOfBalls, double sizeInMeters, String name, AppearanceDefinition appearance, YoVariableRegistry parentRegistry,
@@ -108,7 +108,7 @@ public class BagOfBalls
     * @param name String Name of the BagOfBalls
     * @param appearance Appearance for each of the balls.
     * @param parentRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     */
    public BagOfBalls(int numberOfBalls, double sizeInMeters, String name, AppearanceDefinition appearance, GraphicType graphicType,
@@ -124,7 +124,7 @@ public class BagOfBalls
     * @param name String Name of the BagOfBalls
     * @param appearances ArrayList of the Appearance for each of the balls.
     * @param parentRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     */
    public BagOfBalls(double sizeInMeters, String name, List<AppearanceDefinition> appearances, YoVariableRegistry parentRegistry,
@@ -147,7 +147,7 @@ public class BagOfBalls
          else
             newPosition = new YoGraphicPosition(name + i, yoFramePoint, sizeInMeters, appearances.get(i));
 
-         dynamicGraphicPositions.add(newPosition);
+         yoGraphicPositions.add(newPosition);
       }
 
       index = 0;
@@ -174,7 +174,7 @@ public class BagOfBalls
     * @param sizeInMeters double Size of each ball in meters.
     * @param name String Name of the BagOfBalls to create.
     * @param parentYoVariableRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     * @return BagOfBalls
     */
@@ -201,7 +201,7 @@ public class BagOfBalls
     * @param sizeInMeters double Size of each ball in meters.
     * @param name String Name of the BagOfBalls to create.
     * @param parentYoVariableRegistry YoVariableRegistry to register the BagOfBalls with.
-    * @param yoGraphicsListRegistry DynamicGraphicObjectsListRegistry to register the BagOfBalls
+    * @param yoGraphicsListRegistry YoGraphicsListRegistry to register the BagOfBalls
     *           with.
     * @return BagOfBalls
     */
@@ -227,9 +227,9 @@ public class BagOfBalls
       {
          yoGraphicsList = new YoGraphicsList(name + "Balls");
 
-         for (YoGraphicPosition dynamicGraphicPosition : dynamicGraphicPositions)
+         for (YoGraphicPosition yoGraphicPosition : yoGraphicPositions)
          {
-            yoGraphicsList.add(dynamicGraphicPosition);
+            yoGraphicsList.add(yoGraphicPosition);
          }
 
          yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
@@ -242,9 +242,9 @@ public class BagOfBalls
       {
          artifactList = new ArtifactList(name + "Balls");
 
-         for (YoGraphicPosition dynamicGraphicPosition : dynamicGraphicPositions)
+         for (YoGraphicPosition yoGraphicPosition : yoGraphicPositions)
          {
-            artifactList.add(dynamicGraphicPosition.createArtifact());
+            artifactList.add(yoGraphicPosition.createArtifact());
          }
 
          yoGraphicsListRegistry.registerArtifactList(artifactList);
@@ -311,12 +311,12 @@ public class BagOfBalls
 
    public void setBall(double x, double y, double z, AppearanceDefinition appearance, int ballIndex)
    {
-      if (ballIndex < dynamicGraphicPositions.size())
+      if (ballIndex < yoGraphicPositions.size())
       {
-         YoGraphicPosition dynamicGraphicPosition = dynamicGraphicPositions.get(ballIndex);
-         dynamicGraphicPosition.setPosition(x, y, z);
+         YoGraphicPosition yoGraphicPosition = yoGraphicPositions.get(ballIndex);
+         yoGraphicPosition.setPosition(x, y, z);
          if (appearance != null)
-            dynamicGraphicPosition.setAppearance(appearance);
+            yoGraphicPosition.setAppearance(appearance);
       }
       else
       {
@@ -350,15 +350,15 @@ public class BagOfBalls
    {
       location.changeFrame(worldFrame);
 
-      if (index >= dynamicGraphicPositions.size())
+      if (index >= yoGraphicPositions.size())
       {
          index = 0;
       }
 
-      YoGraphicPosition dynamicGraphicPosition = dynamicGraphicPositions.get(index);
-      dynamicGraphicPosition.setPosition(location);
+      YoGraphicPosition yoGraphicPosition = yoGraphicPositions.get(index);
+      yoGraphicPosition.setPosition(location);
       if (appearance != null)
-         dynamicGraphicPosition.setAppearance(appearance);
+         yoGraphicPosition.setAppearance(appearance);
 
       index++;
    }
@@ -371,9 +371,9 @@ public class BagOfBalls
    {
       index = 0;
 
-      for (int i = 0; i < dynamicGraphicPositions.size(); i++)
+      for (int i = 0; i < yoGraphicPositions.size(); i++)
       {
-         YoGraphicPosition yoGraphicPosition = dynamicGraphicPositions.get(i);
+         YoGraphicPosition yoGraphicPosition = yoGraphicPositions.get(i);
          yoGraphicPosition.setPosition(Double.NaN, Double.NaN, Double.NaN);
       }
    }
@@ -384,9 +384,9 @@ public class BagOfBalls
    public void hideAll()
    {
       index = 0;
-      for (int i = 0; i < dynamicGraphicPositions.size(); i++)
+      for (int i = 0; i < yoGraphicPositions.size(); i++)
       {
-         dynamicGraphicPositions.get(i).setPositionToNaN();
+         yoGraphicPositions.get(i).setPositionToNaN();
       }
    }
 
@@ -398,6 +398,6 @@ public class BagOfBalls
 
    public int getNumberOfBalls()
    {
-      return dynamicGraphicPositions.size();
+      return yoGraphicPositions.size();
    }
 }
