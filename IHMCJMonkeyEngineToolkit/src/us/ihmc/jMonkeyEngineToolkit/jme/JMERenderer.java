@@ -14,6 +14,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.nio.file.Path;
@@ -34,6 +36,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetConfig;
 import com.jme3.asset.AssetManager;
+import com.jme3.asset.TextureKey;
 import com.jme3.audio.AudioContext;
 import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
@@ -52,6 +55,7 @@ import com.jme3.system.JmeSystem;
 import com.jme3.system.NativeLibraryLoader;
 import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.system.lwjgl.LwjglContext;
+import com.jme3.texture.Texture;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
 import com.jme3.util.SkyFactory.EnvMapType;
@@ -96,6 +100,7 @@ import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
 import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.processManagement.UnsignedByteTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 
@@ -114,6 +119,13 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       CANVAS, AWTPANELS
    }
+   
+   public enum SkyboxToUse
+   {
+      JME_MOUNTAINS, BLUE_SKY;
+   }
+   
+   public static final SkyboxToUse skyboxToUse = SkyboxToUse.JME_MOUNTAINS;
 
    public final static boolean USE_PBO = true;
    public final static boolean USE_GPU_LIDAR_PARALLEL_SCENE = false; // Disable: this is super slow
@@ -508,7 +520,22 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       try
       {
-         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
+         Spatial sky = null;
+         if (skyboxToUse == SkyboxToUse.BLUE_SKY)
+         {
+            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0005.bmp", true));
+            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0002.bmp", true));
+            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0001.bmp", true));
+            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp", true));
+            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp", true));
+            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp", true));
+            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+         }
+         else if (skyboxToUse == SkyboxToUse.JME_MOUNTAINS)
+         {
+            sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
+         }
+
          sky.setLocalScale(1000);
          rootNode.attachChild(sky);
          notifyRepaint();
