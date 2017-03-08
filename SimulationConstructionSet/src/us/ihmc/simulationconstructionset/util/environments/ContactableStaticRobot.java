@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.NullJoint;
+import us.ihmc.simulationconstructionset.RigidJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 
@@ -19,7 +19,7 @@ public abstract class ContactableStaticRobot extends Robot implements Contactabl
       articulatedContactable = new InternalSingleJointArticulatedContactable(name, this); 
    }
    
-   public abstract NullJoint getNullJoint();
+   public abstract RigidJoint getNullJoint();
 
    private static class InternalSingleJointArticulatedContactable extends SingleJointArticulatedContactable
    {
