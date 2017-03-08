@@ -7,6 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.PlotterInterface;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicsListRegistry
@@ -29,6 +30,24 @@ public class YoGraphicsListRegistry
 
    public YoGraphicsListRegistry()
    {
+   }
+
+   public void setGlobalScaleProvider(DoubleProvider globalScaleProvider)
+   {
+      for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
+      {
+         setGlobalScaleProvider(yoGraphicsList, globalScaleProvider);
+      }
+   }
+
+   private void setGlobalScaleProvider(YoGraphicsList yoGraphicsList, DoubleProvider globalScaleProvider)
+   {
+      ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
+
+      for (YoGraphic yoGraphic : yoGraphics)
+      {
+         yoGraphic.setGlobalScaleProvider(globalScaleProvider);
+      }
    }
 
    private void checkForRepeatNames(YoGraphicsList yoGraphicsList)
@@ -356,8 +375,7 @@ public class YoGraphicsListRegistry
    
    
    private void updateRootTransform()
-   {
-           
+   {  
       rootTransform.set(simulatedRootToWorldTransform);
       rootTransform.multiply(controllerWorldToRootTransform);
       
@@ -365,7 +383,6 @@ public class YoGraphicsListRegistry
       {
          yoGraphicsLists.get(i).setRootTransform(rootTransform);
       }
-      
    }
    
    /**
@@ -398,4 +415,5 @@ public class YoGraphicsListRegistry
          updateRootTransform();
       }
    }
+
 }
