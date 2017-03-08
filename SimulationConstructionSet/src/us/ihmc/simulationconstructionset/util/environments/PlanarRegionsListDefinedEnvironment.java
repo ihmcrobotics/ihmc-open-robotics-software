@@ -62,6 +62,11 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
       return combinedTerrainObject3D;
    }
 
+   public CombinedTerrainObject3D getCombinedTerrainObject3D()
+   {
+      return combinedTerrainObject;
+   }
+   
    @Override
    public TerrainObject3D getTerrainObject3D()
    {

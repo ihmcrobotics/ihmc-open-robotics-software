@@ -637,8 +637,8 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
-      double kp = runningOnRealRobot ? 40.0 : 80.0;
-      double zeta = runningOnRealRobot ? 0.3 : 0.6;
+      double kp = 50.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.8;
       double ki = 0.0;
       double maxIntegralError = 0.0;
       double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
