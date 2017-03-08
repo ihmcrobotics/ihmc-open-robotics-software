@@ -14,6 +14,9 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 
 public class RigidJointPhysics extends JointPhysics<RigidJoint>
 {
+   //TODO: Clean up. Overriding too much of JointPhysics and repeating it. 
+   //TODO: Need to make the abstract classes better and perhaps have
+   //TODO: JointPhysics, OneDegreeOfFreedomJointPhysics, RigidJointPhysics, FloatingJointPhysics, etc.
    public RigidJointPhysics(RigidJoint owner)
    {
       super(owner);
