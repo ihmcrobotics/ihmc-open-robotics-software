@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -16,7 +17,6 @@ import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
-import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 
@@ -260,7 +260,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       double temporaryEdgeDistance;
       double smallestEdgeDistance = Double.MAX_VALUE;
       Point3D projectionOnEdge = new Point3D();
-      LineSegment3d temporaryEdge = new LineSegment3d();
+      LineSegment3D temporaryEdge = new LineSegment3D();
       for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
       {
          Point2DReadOnly vertex = convexPolygon.getVertex(j);
@@ -323,7 +323,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
             }
          }
 
@@ -336,7 +336,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (temporaryEdgeDistance < smallestEdgeDistance)
             {
                smallestEdgeDistance = temporaryEdgeDistance;
-               projectionOnEdge.set(temporaryEdge.orthogonalProjectionCopy(pointToCheck));
+               projectionOnEdge.set(temporaryEdge.orthogonalProjection(pointToCheck));
             }
          }
       }

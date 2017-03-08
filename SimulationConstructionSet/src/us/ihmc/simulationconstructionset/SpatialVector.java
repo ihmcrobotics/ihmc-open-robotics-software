@@ -172,4 +172,11 @@ public final class SpatialVector implements java.io.Serializable
 
       bottom.cross(w_i, temp1);
    }
+
+   public boolean containsNaN()
+   {
+      if (top.containsNaN()) return true;
+      if (bottom.containsNaN()) return true;
+      return false;
+   }
 }

@@ -260,7 +260,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       List<JointState> jointStates = handshakeParser.getJointStates();
       JointUpdater.getJointUpdaterList(robot.getRootJoints(), jointStates, jointUpdaters);
 
-      yoGraphicsListRegistry = handshakeParser.getDynamicGraphicObjectsListRegistry();
+      yoGraphicsListRegistry = handshakeParser.getYoGraphicsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.setShowOnStart(showOverheadView);

@@ -82,18 +82,18 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
    private final DoubleYoVariable currentTimeInState;
 
    public static TaskspaceToJointspaceHandPositionControlState createControlStateForForceControlledJoints(String namePrefix, RobotSide robotSide,
-         HighLevelHumanoidControllerToolbox momentumBasedController, RigidBody base, RigidBody endEffector, YoPIDGains gains, YoVariableRegistry parentRegistry)
+         HighLevelHumanoidControllerToolbox controllerToolbox, RigidBody base, RigidBody endEffector, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
-      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, robotSide, momentumBasedController, base, endEffector, false, gains, parentRegistry);
+      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, robotSide, controllerToolbox, base, endEffector, false, gains, parentRegistry);
    }
 
    public static TaskspaceToJointspaceHandPositionControlState createControlStateForPositionControlledJoints(String namePrefix, RobotSide robotSide,
-         HighLevelHumanoidControllerToolbox momentumBasedController, RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
+         HighLevelHumanoidControllerToolbox controllerToolbox, RigidBody base, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
-      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, robotSide, momentumBasedController, base, endEffector, true, null, parentRegistry);
+      return new TaskspaceToJointspaceHandPositionControlState(namePrefix, robotSide, controllerToolbox, base, endEffector, true, null, parentRegistry);
    }
 
-   private TaskspaceToJointspaceHandPositionControlState(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
+   private TaskspaceToJointspaceHandPositionControlState(String namePrefix, RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
          RigidBody base, RigidBody endEffector, boolean doPositionControl, YoPIDGains gains, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.TASKSPACE);
@@ -103,7 +103,7 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
 
       parentRegistry.addChild(registry);
 
-      yoTime = momentumBasedController.getYoTime();
+      yoTime = controllerToolbox.getYoTime();
 
       initialTime = new DoubleYoVariable(namePrefix + "InitialTime", registry);
       currentTimeInState = new DoubleYoVariable(namePrefix + "CurrentTimeInState", registry);
@@ -162,9 +162,9 @@ public class TaskspaceToJointspaceHandPositionControlState extends FinishableSta
       }
 
       enableCompliantControl = new BooleanYoVariable(namePrefix + "EnableCompliantControl", registry);
-      if (momentumBasedController.getWristForceSensor(robotSide) != null)
+      if (controllerToolbox.getWristForceSensor(robotSide) != null)
       {
-         handCompliantControlHelper = new HandCompliantControlHelper(namePrefix, robotSide, momentumBasedController, registry);
+         handCompliantControlHelper = new HandCompliantControlHelper(namePrefix, robotSide, controllerToolbox, registry);
       }
       else
       {

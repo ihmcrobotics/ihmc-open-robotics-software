@@ -81,7 +81,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       explorationMethod = new EnumYoVariable<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);
       explorationMethod.set(ExplorationMethod.LINES);
 
-      dt = momentumBasedController.getControlDT();
+      dt = controllerToolbox.getControlDT();
       ExplorationParameters explorationParameters =
             footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
 
@@ -92,7 +92,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       internalHoldPositionState.doFootholdAdjustments(false);
 
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
-      footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
 
@@ -176,7 +176,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       double timeInState = getTimeInCurrentState();
 
       footSwitch.computeAndPackCoP(cop);
-      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
 
       if (timeInState < timeBeforeExploring.getDoubleValue())
@@ -187,7 +187,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       boolean contactStateHasChanged = false;
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+         YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
          {

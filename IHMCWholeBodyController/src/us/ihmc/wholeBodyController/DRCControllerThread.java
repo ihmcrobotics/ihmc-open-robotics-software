@@ -403,7 +403,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
    }

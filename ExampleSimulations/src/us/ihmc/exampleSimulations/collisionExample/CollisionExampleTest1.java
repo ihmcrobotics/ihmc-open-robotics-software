@@ -4,7 +4,7 @@ package us.ihmc.exampleSimulations.collisionExample;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.simulationconstructionset.CollisionIntegrator;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.CollisionIntegrator;
 
 
 public class CollisionExampleTest1

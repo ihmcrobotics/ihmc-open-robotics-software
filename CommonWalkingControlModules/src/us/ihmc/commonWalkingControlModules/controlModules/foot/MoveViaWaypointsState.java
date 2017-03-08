@@ -4,7 +4,6 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
-import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -15,6 +14,7 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
@@ -47,7 +47,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
    private final BooleanYoVariable isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
-   private final CommandArrayDeque<FootTrajectoryCommand> commandQueue = new CommandArrayDeque<>(FootTrajectoryCommand.class);
+   private final RecyclingArrayDeque<FootTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(FootTrajectoryCommand.class);
 
    public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
@@ -55,7 +55,7 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
 
       String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression() + "FootMoveViaWaypoints";
 
-      footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
+      footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
 
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, worldFrame, registry);

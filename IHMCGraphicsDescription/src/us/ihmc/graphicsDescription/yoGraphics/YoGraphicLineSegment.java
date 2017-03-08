@@ -47,7 +47,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!endPoint.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
       }
    }
 
