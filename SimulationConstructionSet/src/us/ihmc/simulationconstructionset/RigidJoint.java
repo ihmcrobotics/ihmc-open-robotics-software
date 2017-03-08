@@ -25,9 +25,7 @@ public class RigidJoint extends Joint
    {
       super(jname, offset, rob, 0);
       physics = new RigidJointPhysics(this);
-
-      //TODO: Need this at all?
-      physics.u_i = new Vector3D(1.0, 0.0, 0.0);
+      physics.u_i = null;
    }
 
    @Override
