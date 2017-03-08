@@ -13,6 +13,12 @@ public class SimpleTrajectoryPointList<P extends TrajectoryPointInterface<P>> im
       trajectoryPoints = new RecyclingArrayList<>(trajectoryPointClass);
    }
 
+   public SimpleTrajectoryPointList(Class<P> trajectoryPointClass, int initialCapacity)
+   {
+      trajectoryPoints = new RecyclingArrayList<>(initialCapacity, trajectoryPointClass);
+      trajectoryPoints.clear();
+   }
+
    @Override
    public void clear()
    {

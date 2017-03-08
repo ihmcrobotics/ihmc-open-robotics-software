@@ -400,13 +400,13 @@ public class BoundingBox3d
 
    public void setEpsilonToShrink(double epsilon)
    {
-      MathTools.checkIfNegative(epsilon);
+      MathTools.checkNegative(epsilon);
       this.epsilon = epsilon;
    }
 
    public void setEpsilonToGrow(double epsilon)
    {
-      MathTools.checkIfPositive(epsilon);
+      MathTools.checkPositive(epsilon);
       this.epsilon = epsilon;
    }
 

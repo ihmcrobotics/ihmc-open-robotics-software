@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -76,7 +77,7 @@ public class IncrementalCovariance3DTest
 
    private void assertCovarianceIsCorrect(IncrementalCovariance3D incrementalCovariance3D, List<Point3D> dataset)
    {
-      Point3D expectedMean = GeometryTools.averagePoint3ds(dataset);
+      Point3D expectedMean = EuclidGeometryTools.averagePoint3Ds(dataset);
       Point3D actualMean = new Point3D();
       incrementalCovariance3D.getMean(actualMean);
       EuclidCoreTestTools.assertTuple3DEquals(expectedMean, actualMean, EPSILON);
@@ -126,7 +127,7 @@ public class IncrementalCovariance3DTest
       int n = dataset.size();
       DenseMatrix64F datasetMatrix = new DenseMatrix64F(n, 3);
 
-      Point3D average = GeometryTools.averagePoint3ds(dataset);
+      Point3D average = EuclidGeometryTools.averagePoint3Ds(dataset);
 
       for (int i = 0; i < n; i++)
       {

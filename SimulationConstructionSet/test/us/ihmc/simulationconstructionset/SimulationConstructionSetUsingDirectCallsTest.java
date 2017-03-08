@@ -53,7 +53,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.DynamicGraphicMenuManager;
+import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
@@ -68,8 +68,8 @@ import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -155,7 +155,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private final String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
    private final String simpleComponentName =  "simpleComponent";
    private final String runningName = "simpleRunningName";
-   private final String yoGraphicsListName = "simpleDynamicGraphicObjectsList";
+   private final String yoGraphicsListName = "simpleYoGraphicsList";
    private final String[][] graphGroupVars = { cameraTrackingXYZVarNames, cameraDollyXYZVarNames };
    private final String[][][] graphGroupVarsWithConfig = { { cameraTrackingXYZVarNames, { "config_1" } }, { cameraDollyXYZVarNames, { "config_2" } } };
    private final String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
@@ -185,9 +185,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private BooleanYoVariable processDataHasBeenCalled;
    private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
-   private DynamicGraphicMenuManager dynamicGraphicMenuManager;
+   private YoGraphicMenuManager yoGraphicMenuManager;
    private ScsPhysics simpleScsPhysics;
-   private WrenchContactPoint simpleWrenchContactPoint;
    private SimulationConstructionSet scs;
 
    @BeforeClass
@@ -220,9 +219,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
       processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
       toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
-      yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
-      dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
-      simpleWrenchContactPoint = new WrenchContactPoint("simpleWrenchContactPoint", dummyRegistry, staticLink);
+      yoGraphicsListRegistry = createYoGraphicsListRegistryWithObject();
+      yoGraphicMenuManager = new YoGraphicMenuManager();
 
       scs = new SimulationConstructionSet(simpleRobot);
       simpleScsPhysics = createScsPhysics();
@@ -257,9 +255,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       processDataHasBeenCalled = null;
       toggleKeyPointModeCommandListenerHasBeenCalled = null;
       yoGraphicsListRegistry = null;
-      dynamicGraphicMenuManager = null;
+      yoGraphicMenuManager = null;
       simpleScsPhysics = null;
-      simpleWrenchContactPoint = null;
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 2.8)
@@ -331,10 +328,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.initPhysics(simpleScsPhysics);
       ScsPhysics scsPhysicsFromSCS = scs.getPhysics();
       assertEquals(simpleScsPhysics, scsPhysicsFromSCS);
-
-      scs.addForceSensor(simpleWrenchContactPoint);
-      ArrayList<WrenchContactPoint> forceSensorsFromSCS = scs.getForceSensors();
-      assertArrayOfObjectsContainsTheObject(forceSensorsFromSCS, simpleWrenchContactPoint);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 2.6)
@@ -707,17 +700,17 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean isGroundVisibleFromSCS2 = stateIfTerrainIsVisible(scs);
       assertTrue(isGroundVisibleFromSCS2);
 
-      ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
+      ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getYoGraphicsListRegistries();
       assertArrayOfObjectsContainsTheObject(yoGraphicListRegistriesFromSCS, yoGraphicsListRegistry);
 
-      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
-      scs.hideAllDynamicGraphicObjects();
-      boolean yoGraphicsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      scs.setYoGraphicsListVisible(yoGraphicsListName, true);
+      scs.hideAllYoGraphics();
+      boolean yoGraphicsAreShowing = scs.checkAllYoGraphicsListRegistriesAreShowing();
       assertFalse(yoGraphicsAreShowing);
 
-      scs.hideAllDynamicGraphicObjects();
-      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
-      boolean yoGraphicsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      scs.hideAllYoGraphics();
+      scs.setYoGraphicsListVisible(yoGraphicsListName, true);
+      boolean yoGraphicsAreShowing2 = scs.checkAllYoGraphicsListRegistriesAreShowing();
       assertTrue(yoGraphicsAreShowing2);
 
 //      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
@@ -1299,7 +1292,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return scsCollisionConfigure;
    }
 
-   private YoGraphicsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
+   private YoGraphicsListRegistry createYoGraphicsListRegistryWithObject()
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicsList yoGraphicsList = new YoGraphicsList(yoGraphicsListName);

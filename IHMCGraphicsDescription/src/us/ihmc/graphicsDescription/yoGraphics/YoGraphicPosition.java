@@ -284,7 +284,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
          break;
       }
       default:
-         throw new RuntimeException("Shouldn't get here. Seems you set an invalid DynamicGraphicPosition type! type = " + type);
+         throw new RuntimeException("Shouldn't get here. Seems you set an invalid YoGraphicPosition type! type = " + type);
       }
 
       return linkGraphics;

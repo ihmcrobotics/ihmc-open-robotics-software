@@ -52,8 +52,8 @@ public class ExampleLidarController implements RobotController
       this.scs = scs;
       this.lidarScanParameters = robot.getLidarScanParameters();
 
-      YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition("point", point, 0.01, YoAppearance.Purple());
-      yoGraphicsListRegistry.registerYoGraphic("test", dynamicGraphicPosition);
+      YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("point", point, 0.01, YoAppearance.Purple());
+      yoGraphicsListRegistry.registerYoGraphic("test", yoGraphicPosition);
 
       bagOfBalls = new BagOfBalls(lidarScanParameters.getPointsPerSweep(), 0.005, YoAppearance.AliceBlue(), registry, yoGraphicsListRegistry);
 

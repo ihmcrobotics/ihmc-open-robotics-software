@@ -29,7 +29,7 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
 
    public void addReductionFactor(OneDoFJoint joint, double reductionFactor)
    {
-      MathTools.checkIfInRange(reductionFactor, 0.0, 1.0);
+      MathTools.checkIntervalContains(reductionFactor, 0.0, 1.0);
       jointNames.add(joint.getName());
       joints.add(joint);
       jointReductionFactors.add(reductionFactor);

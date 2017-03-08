@@ -40,7 +40,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final GenericStateMachine<HighLevelState, HighLevelBehavior> stateMachine;
    private final HighLevelState initialBehavior;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
@@ -62,12 +62,12 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
          WholeBodyControllerCore controllerCore, HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
-         HighLevelHumanoidControllerToolbox momentumBasedController, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+         HighLevelHumanoidControllerToolbox controllerToolbox, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
          ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
-      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
+      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       this.controllerCoreOutput = controllerCoreOutput;
       this.controllerCore = controllerCore;
 
@@ -81,11 +81,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
          this.registry.addChild(highLevelBehaviors.get(i).getYoVariableRegistry());
       }
       this.initialBehavior = initialBehavior;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
-      this.registry.addChild(momentumBasedController.getYoVariableRegistry());
+      this.registry.addChild(controllerToolbox.getYoVariableRegistry());
 
-      momentumBasedController.attachControllerFailureListener(new ControllerFailureListener()
+      controllerToolbox.attachControllerFailureListener(new ControllerFailureListener()
       {
          @Override
          public void controllerFailed(FrameVector2d fallingDirection)
@@ -159,7 +159,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    public void initialize()
    {
       controllerCore.initialize();
-      momentumBasedController.initialize();
+      controllerToolbox.initialize();
       stateMachine.setCurrentState(initialBehavior);
    }
 
@@ -189,11 +189,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private void reportDesiredCenterOfPressureForEstimator()
    {
-      SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
-      FullHumanoidRobotModel fullHumanoidRobotModel = momentumBasedController.getFullRobotModel();
+      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
+      FullHumanoidRobotModel fullHumanoidRobotModel = controllerToolbox.getFullRobotModel();
       for (RobotSide robotSide : RobotSide.values)
       {
-         momentumBasedController.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
+         controllerToolbox.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
          centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
       }
    }

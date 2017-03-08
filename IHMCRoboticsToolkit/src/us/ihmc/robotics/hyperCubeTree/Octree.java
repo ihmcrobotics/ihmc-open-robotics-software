@@ -2,8 +2,8 @@ package us.ihmc.robotics.hyperCubeTree;
 
 import java.util.List;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class Octree extends HyperCubeTree<Boolean, Void>
 {
@@ -71,7 +71,7 @@ public class Octree extends HyperCubeTree<Boolean, Void>
 
    public void putLidarAtGraduallyMoreAccurateResolution(Point3D start, Point3D end)
    {
-      HyperVolume line = new LineSegmentSearchVolume(new LineSegment3d(start, end));
+      HyperVolume line = new LineSegmentSearchVolume(new LineSegment3D(start, end));
       double[] location = new double[] {end.getX(), end.getY(), end.getZ()};
       this.put(location, true);
       this.leafAdded(new HyperCubeLeaf<Boolean>(true, location));
@@ -89,7 +89,7 @@ public class Octree extends HyperCubeTree<Boolean, Void>
 
    public void putLidarAtMinimumResolution(Point3D start, Point3D end)
    {
-      HyperVolume line = new LineSegmentSearchVolume(new LineSegment3d(start, end));
+      HyperVolume line = new LineSegmentSearchVolume(new LineSegment3D(start, end));
       double[] location = new double[] {end.getX(), end.getY(), end.getZ()};
       this.upRezz(location);
       this.put(location, true);

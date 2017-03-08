@@ -375,7 +375,7 @@ public class Box3d extends Shape3d<Box3d>
    
    private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack)
    {
-      MathTools.checkIfEqual(NUM_VERTICES, verticesToPack.length);
+      MathTools.checkEquals(NUM_VERTICES, verticesToPack.length);
       
       double dx = dimensions.get(Direction.X) / 2.0;
       double dy = dimensions.get(Direction.Y) / 2.0;
@@ -399,7 +399,7 @@ public class Box3d extends Shape3d<Box3d>
    
    private void computeVerticesShapeFrame(Point3DBasics[] verticesToPack, FaceName faceName)
    {
-      MathTools.checkIfEqual(NUM_VERTICES_PER_FACE, verticesToPack.length);
+      MathTools.checkEquals(NUM_VERTICES_PER_FACE, verticesToPack.length);
       
       double dx = dimensions.get(Direction.X) / 2.0;
       double dy = dimensions.get(Direction.Y) / 2.0;

@@ -69,7 +69,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
    private final double estimatorDT;
 
    private boolean visualizeMeasurementFrames = false;
-   private final ArrayList<YoGraphicReferenceFrame> dynamicGraphicMeasurementFrames = new ArrayList<>();
+   private final ArrayList<YoGraphicReferenceFrame> yoGraphicMeasurementFrames = new ArrayList<>();
 
    private final CenterOfPressureVisualizer copVisualizer;
 
@@ -178,7 +178,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          imusToDisplay.add(fusedIMUSensor);
 
       if (visualizeMeasurementFrames)
-         setupDynamicGraphicObjects(yoGraphicsListRegistry, imusToDisplay);
+         setupYoGraphics(yoGraphicsListRegistry, imusToDisplay);
 
       if (stateEstimatorParameters.requestFrozenModeAtStart())
          operatingMode.set(StateEstimatorMode.FROZEN);
@@ -186,14 +186,14 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          operatingMode.set(StateEstimatorMode.NORMAL);
    }
 
-   private void setupDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
+   private void setupYoGraphics(YoGraphicsListRegistry yoGraphicsListRegistry, List<? extends IMUSensorReadOnly> imuProcessedOutputs)
    {
       for (int i = 0; i < imuProcessedOutputs.size(); i++)
       {
-         YoGraphicReferenceFrame dynamicGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
-         dynamicGraphicMeasurementFrames.add(dynamicGraphicMeasurementFrame);
+         YoGraphicReferenceFrame yoGraphicMeasurementFrame = new YoGraphicReferenceFrame(imuProcessedOutputs.get(i).getMeasurementFrame(), registry, 1.0);
+         yoGraphicMeasurementFrames.add(yoGraphicMeasurementFrame);
       }
-      yoGraphicsListRegistry.registerYoGraphics("imuFrame", dynamicGraphicMeasurementFrames);
+      yoGraphicsListRegistry.registerYoGraphics("imuFrame", yoGraphicMeasurementFrames);
    }
 
    @Override
@@ -295,8 +295,8 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
 
       if (visualizeMeasurementFrames)
       {
-         for (int i = 0; i < dynamicGraphicMeasurementFrames.size(); i++)
-            dynamicGraphicMeasurementFrames.get(i).update();
+         for (int i = 0; i < yoGraphicMeasurementFrames.size(); i++)
+            yoGraphicMeasurementFrames.get(i).update();
       }
 
       if (ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ)

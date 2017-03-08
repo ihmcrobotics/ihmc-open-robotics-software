@@ -169,12 +169,12 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
          if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
          {
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementX, maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementX, maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 + EPSILON);
             success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
          }
          else
          {
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementX, maxStepLengthsForward.get(swingLeg.getEnumValue()) - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsForward.get(swingLeg.getEnumValue()) + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementX, maxStepLengthsForward.get(swingLeg.getEnumValue()) - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsForward.get(swingLeg.getEnumValue()) + EPSILON);
             success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
          }
 
@@ -224,12 +224,12 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
 
          if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
          {
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementX,  - maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 - EPSILON, - maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 + minimumDistanceFromSameSideFoot + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementX,  - maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 - EPSILON, - maxStepLengthsForward.get(swingLeg.getEnumValue()) / 2.0 + minimumDistanceFromSameSideFoot + EPSILON);
             success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
          }
          else
          {
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementX,  - maxStepLengthsForward.get(swingLeg.getEnumValue()) - EPSILON, - maxStepLengthsForward.get(swingLeg.getEnumValue()) + minimumDistanceFromSameSideFoot + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementX,  - maxStepLengthsForward.get(swingLeg.getEnumValue()) - EPSILON, - maxStepLengthsForward.get(swingLeg.getEnumValue()) + minimumDistanceFromSameSideFoot + EPSILON);
             success &= MathTools.epsilonEquals(footDisplacementY, 0.0, EPSILON);
          }
 
@@ -280,12 +280,12 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
          {
             success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementY, maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementY, maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 + EPSILON);
          }
          else
          {
             success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementY, maxStepLengthsSideways.get(swingLeg.getEnumValue()) - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsSideways.get(swingLeg.getEnumValue()) + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementY, maxStepLengthsSideways.get(swingLeg.getEnumValue()) - minimumDistanceFromSameSideFoot - EPSILON, maxStepLengthsSideways.get(swingLeg.getEnumValue()) + EPSILON);
          }
 
          if(DEBUG)
@@ -335,12 +335,12 @@ public abstract class QuadrupedMidFootZUpSwingTargetGeneratorTest implements Rob
          if(stepIndex < 2) //the first 2 steps are only half steps because the feet are in a square configuration
          {
             success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementY,  - maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 - EPSILON, - maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 + minimumDistanceFromSameSideFoot + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementY,  - maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 - EPSILON, - maxStepLengthsSideways.get(swingLeg.getEnumValue()) / 2.0 + minimumDistanceFromSameSideFoot + EPSILON);
          }
          else
          {
             success &= MathTools.epsilonEquals(footDisplacementX, 0.0, EPSILON);
-            success &= MathTools.isInsideBoundsInclusive(footDisplacementY,  - maxStepLengthsSideways.get(swingLeg.getEnumValue()) - EPSILON, - maxStepLengthsSideways.get(swingLeg.getEnumValue()) + minimumDistanceFromSameSideFoot + EPSILON);
+            success &= MathTools.intervalContains(footDisplacementY,  - maxStepLengthsSideways.get(swingLeg.getEnumValue()) - EPSILON, - maxStepLengthsSideways.get(swingLeg.getEnumValue()) + minimumDistanceFromSameSideFoot + EPSILON);
          }
 
          if(DEBUG)

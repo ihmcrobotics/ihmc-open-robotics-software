@@ -117,12 +117,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       this(robotModel, null, scsInitialSetup);
    }
-   
+
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
       this(robotModel, environment, null);
    }
-   
+
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, DRCSCSInitialSetup scsInitialSetup)
    {
       this.robotModel = robotModel;
@@ -133,7 +133,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.createSCSSimulatedSensors = true;
 
-      if(scsInitialSetup == null)
+      if (scsInitialSetup == null)
       {
          this.scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
          this.scsInitialSetup.setInitializeEstimatorToActual(false);
@@ -268,6 +268,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    /**
     * Set a specific starting location. By default, the robot will start at (0, 0) in world with no yaw.
     */
+   @Override
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
       setStartingLocationOffset(startingLocation.getStartingLocationOffset());
@@ -313,11 +314,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       scsCameraFix.set(fixX, fixY, fixZ);
    }
 
-//   /** Make the controller use a specific PacketCommunicator instead of the default. If you don't know what you're doing, forget about that method. */
-//   public void setControllerPacketCommunicator(PacketCommunicator controllerInputPacketCommunicator)
-//   {
-//      this.controllerPacketCommunicator = controllerInputPacketCommunicator;
-//   }
+   //   /** Make the controller use a specific PacketCommunicator instead of the default. If you don't know what you're doing, forget about that method. */
+   //   public void setControllerPacketCommunicator(PacketCommunicator controllerInputPacketCommunicator)
+   //   {
+   //      this.controllerPacketCommunicator = controllerInputPacketCommunicator;
+   //   }
 
    /**
     * Creates a default output PacketCommunicator for the network processor.
@@ -332,8 +333,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       networkParameters.enableLocalControllerCommunicator(true);
 
-      IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
-      controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
+      controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+                                                                                             new IHMCCommunicationKryoNetClassList());
       try
       {
          controllerPacketCommunicator.connect();
@@ -342,10 +343,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       {
          throw new RuntimeException(e);
       }
-
    }
-
-
 
    /**
     * Starts the SCS visualizer for the behavior module.
@@ -395,7 +393,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    {
       return scriptBasedControllerCommandGenerator;
    }
-   
+
    public void setFlatGroundWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       this.walkingScriptParameters = walkingScriptParameters;
@@ -416,11 +414,13 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
-            walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
+                                                             walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
+                                                             HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       if (setupControllerNetworkSubscriber)
-         controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), controllerPacketCommunicator);
+         controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"),
+                                                             controllerPacketCommunicator);
 
       for (int i = 0; i < highLevelBehaviorFactories.size(); i++)
          controllerFactory.addHighLevelBehaviorFactory(highLevelBehaviorFactories.get(i));
@@ -493,7 +493,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
             int framesPerSecond = 25;
             DRCRenderedSceneVideoHandler drcRenderedSceneVideoHandler = new DRCRenderedSceneVideoHandler(scsSensorOutputPacketCommunicator);
-            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, drcRenderedSceneVideoHandler, timeStampProvider, framesPerSecond);
+            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, drcRenderedSceneVideoHandler, timeStampProvider,
+                                                              framesPerSecond);
          }
 
          for (DRCRobotLidarParameters lidarParams : sensorInformation.getLidarParameters())
@@ -507,7 +508,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private void printIfDebug(String string)
    {
-      if (DEBUG) System.out.println(string);
+      if (DEBUG)
+         System.out.println(string);
    }
 
    /**
@@ -518,7 +520,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    private void startNetworkProcessor(DRCNetworkModuleParameters networkModuleParams)
    {
-      if(networkModuleParams.isRosModuleEnabled() || networkModuleParams.isSensorModuleEnabled())
+      if (networkModuleParams.isRosModuleEnabled() || networkModuleParams.isSensorModuleEnabled())
       {
          LocalObjectCommunicator simulatedSensorCommunicator = createSimulatedSensorsPacketCommunicator();
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
@@ -549,7 +551,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    public LocalObjectCommunicator getSimulatedSensorsPacketCommunicator()
    {
-      if(scsSensorOutputPacketCommunicator == null)
+      if (scsSensorOutputPacketCommunicator == null)
       {
          createSimulatedSensorsPacketCommunicator();
       }
@@ -559,7 +561,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    @Override
    public void close()
    {
-      if(controllerPacketCommunicator != null)
+      if (controllerPacketCommunicator != null)
       {
          controllerPacketCommunicator.close();
       }

@@ -1,7 +1,7 @@
 package us.ihmc.robotics.hyperCubeTree;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class LineSegmentSearchVolume extends HyperVolume
 {
@@ -9,7 +9,7 @@ public class LineSegmentSearchVolume extends HyperVolume
    final private double[] pointA;
    final private double[] pointB;
    final private double[] scale;
-   public LineSegmentSearchVolume(LineSegment3d lineSegment)
+   public LineSegmentSearchVolume(LineSegment3D lineSegment)
    {
       super(3, computeOuterBounds(lineSegment), null, true);
       dim = 3;
@@ -23,7 +23,7 @@ public class LineSegmentSearchVolume extends HyperVolume
          scale[i]=1.0/(pointB[i]-pointA[i]);
       }  
    }
-   private static OneDimensionalBounds[] computeOuterBounds(LineSegment3d lineSegment)
+   private static OneDimensionalBounds[] computeOuterBounds(LineSegment3D lineSegment)
    {
       double[] aVals = new double[3];
       lineSegment.getFirstEndpoint().get(aVals);
