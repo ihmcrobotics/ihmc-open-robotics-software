@@ -119,7 +119,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    
    public enum SkyboxToUse
    {
-      JME_MOUNTAINS, BLUE_SKY;
+      JME_MOUNTAINS, BLUE_SKY, DUSK_SKY;
    }
    
    public static final SkyboxToUse skyboxToUse = SkyboxToUse.BLUE_SKY;
@@ -526,6 +526,16 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
             Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp", true));
             Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp", true));
             Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp", true));
+            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+         }
+         else if (skyboxToUse == SkyboxToUse.DUSK_SKY)
+         {
+            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0005.bmp", true));
+            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0002.bmp", true));
+            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0001.bmp", true));
+            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0004.bmp", true));
+            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0003.bmp", true));
+            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0006.bmp", true));
             sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
          }
          else if (skyboxToUse == SkyboxToUse.JME_MOUNTAINS)
@@ -1478,6 +1488,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       enqueue(new Callable<Object>()
       {
+         @Override
          public Object call() throws Exception
          {
             updatables.add(updatable);
@@ -1491,6 +1502,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       enqueue(new Callable<Object>()
       {
+         @Override
          public Object call() throws Exception
          {
             updatables.remove(updatable);
