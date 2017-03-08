@@ -48,7 +48,7 @@ public class SkeletonPathFootStepPlanner
 //      }
    }
         
-   public void setFirstStep(RobotSide robotSide)
+   public void setZeroStep(RobotSide robotSide)
    {
       Point2D footStepLocation = new Point2D.Double();
       if(robotSide == RobotSide.RIGHT)

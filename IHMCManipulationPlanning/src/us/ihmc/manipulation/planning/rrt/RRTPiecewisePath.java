@@ -33,9 +33,10 @@ public class RRTPiecewisePath
    }
    
    private void initializePiecewisePath()
-   {
+   {      
       double totalLength = 0;
       double pieceLength;
+      double remainderLength;
 
       for (int i = 0; i < linearPath.size() - 1; i++)
       {
@@ -59,28 +60,68 @@ public class RRTPiecewisePath
       {
          succedentNode = nodeCreator.createNode();
 
+         remainderLength = pieceLength;
+         
          double nomalizedDistance;
-         nomalizedDistance = precedentNode.getDistance(nextPathNode);
          double distanceToGo;
 
-         if (nomalizedDistance >= pieceLength)
-         {
-            distanceToGo = pieceLength;
-         }
-         else
-         {
-            distanceToGo = pieceLength - nomalizedDistance;
+         
 
-            curPiece++;
-            curPathNode = linearPath.get(curPiece);
-            nextPathNode = linearPath.get(curPiece + 1);
-            precedentNode = curPathNode;
+
+         while(true)
+         {  
+            nomalizedDistance = precedentNode.getDistance(nextPathNode);
+            
+            if(nomalizedDistance >= remainderLength)
+            {
+               distanceToGo = remainderLength;               
+               break;
+            }
+            else{
+               remainderLength = remainderLength - nomalizedDistance;
+                
+               curPiece++;
+                
+               curPathNode = linearPath.get(curPiece);
+               nextPathNode = linearPath.get(curPiece + 1);
+               precedentNode = linearPath.get(curPiece);
+            }
          }
+//         if (nomalizedDistance >= pieceLength)
+//         {
+//            distanceToGo = pieceLength;
+//            tempLength = tempLength+distanceToGo;
+//         }
+//         else
+//         {
+//            distanceToGo = pieceLength - nomalizedDistance;
+//            tempLength = tempLength+distanceToGo + nomalizedDistance;
+//            
+//            curPiece++;
+//            
+//            curPathNode = linearPath.get(curPiece);
+//            nextPathNode = linearPath.get(curPiece + 1);
+//            precedentNode = linearPath.get(curPiece);
+//         }
 
          setNodeDataInterpolation(precedentNode, nextPathNode, succedentNode, distanceToGo);
 
+
          addPathPiecewise(succedentNode, curPiece);
+         
+         if(Double.isNaN(succedentNode.getNodeData(0)) == true)
+         {
+            PrintTools.info("NANANANANANAN!!!!!!!!!!!!!!!!!!!! "+piecewisePath.get(piecewisePath.size() - 1).getNodeData(0)+" "+piecewisePath.get(piecewisePath.size() - 1).getNodeData(0));
+         }
+         
          precedentNode = succedentNode;
+         
+         if(Double.isNaN(precedentNode.getNodeData(0)) == true)
+         {
+            PrintTools.info("NANANANANANAN!!! "+ precedentNode.getNodeData(0)+" "+ precedentNode.getNodeData(1) + " "+ succedentNode.getNodeData(0) + " "+ succedentNode.getNodeData(1));
+         }
+         
+         
       }
 
       // final

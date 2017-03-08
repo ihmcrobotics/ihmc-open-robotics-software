@@ -94,7 +94,7 @@ class DrawPanel extends JPanel
 
       // piecewise
       g.setColor(Color.green);      
-      ArrayList<RRTNode> piecewisePath = info.getPiecewisePath().getPiecewisePath();
+      ArrayList<RRTNode> piecewisePath = info.getPiecewisePath().getPiecewisePath();      
       for (int i =0;i< piecewisePath.size()-1;i++)
       {
          double p1x = piecewisePath.get(i).getNodeData(0);
@@ -206,9 +206,9 @@ public class RRTTestProject
       DrawPanel drawPanel;
       Dimension dim;
       
-      String newAmount = new Scanner(System.in).nextLine();
+//      String newAmount = new Scanner(System.in).nextLine();
       
-      rrtPlanner.updateOptimalPath(100, 100);
+      rrtPlanner.updateOptimalPath(101, 100);
 
       frame = new JFrame("RRTTest");
       drawPanel = new DrawPanel(100, rrtPointInfo, rrtPlanner);

@@ -218,6 +218,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       // ******************************** //
       // RRT Planning ******************* //
       // ******************************** //
+           
       
       rrtPlanner.expandTreeGoal(2000);      
       PrintTools.info("path has "+rrtPlanner.getOptimalPath().size()+" nodes");
@@ -242,7 +243,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsLeftSide.get()));
       simulationConstructionSet.addStaticLinkGraphics(getPrintSegments(footStepPlanner.pathSegmentsRightSide.get()));
       
-      footStepPlanner.setFirstStep(RobotSide.LEFT);
+      footStepPlanner.setZeroStep(RobotSide.LEFT);
       footStepPlanner.createFootSteps();
             
       simulationConstructionSet.addStaticLinkGraphics(getPrintFootSteps(footStepPlanner.footSteps));
