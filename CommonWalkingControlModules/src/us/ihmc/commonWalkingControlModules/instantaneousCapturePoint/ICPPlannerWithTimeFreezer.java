@@ -140,11 +140,11 @@ public class ICPPlannerWithTimeFreezer extends ICPPlanner
    }
 
    @Override
-   public void updatePlanForSingleSupportDisturbances(FramePoint2d actualCapturePointPosition)
+   public void updateCurrentPlan()
    {
       timeDelay.set(0.0);
       previousTime.set(getTimeInCurrentState());
-      super.updatePlanForSingleSupportDisturbances(actualCapturePointPosition);
+      super.updateCurrentPlan();
    }
 
    public boolean getIsTimeBeingFrozen()
