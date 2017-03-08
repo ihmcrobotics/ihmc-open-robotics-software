@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.SpatialVector;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
-public class FloatJointPhysics extends JointPhysics<FloatingJoint>
+public class FloatingJointPhysics extends JointPhysics<FloatingJoint>
 {
    private double[] k_qdd_x = new double[4], k_qdd_y = new double[4], k_qdd_z = new double[4];
    private double[] k_qdd_wx = new double[4], k_qdd_wy = new double[4], k_qdd_wz = new double[4];
@@ -38,7 +38,7 @@ public class FloatJointPhysics extends JointPhysics<FloatingJoint>
 
    private double q_x_n, q_y_n, q_z_n, qd_x_n, qd_y_n, qd_z_n, q_qs_n, q_qx_n, q_qy_n, q_qz_n, qd_wx_n, qd_wy_n, qd_wz_n;
 
-   public FloatJointPhysics(FloatingJoint owner)
+   public FloatingJointPhysics(FloatingJoint owner)
    {
       super(owner);
    }
