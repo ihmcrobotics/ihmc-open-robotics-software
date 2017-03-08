@@ -16,52 +16,80 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
    protected PlanarRegionsListDefinedEnvironment environment;
    protected final PlanarRegionsListGenerator generator;
    
+   private boolean hasBeenGenerated;
+   
    public PlanarRegionEnvironmentInterface()
    {
+      hasBeenGenerated = false;
       generator = new PlanarRegionsListGenerator();
    }
    
-   protected abstract void buildGenerator(PlanarRegionsListGenerator generator);
-   
-   protected void generateEnvironment()
-   {
-      buildGenerator(generator);
-      
+   public void generateEnvironment()
+   {      
       environment = new PlanarRegionsListDefinedEnvironment(generator.getPlanarRegionsList(), 1e-2, false);
+      hasBeenGenerated = true;
    }
 
    public CombinedTerrainObject3D getCombinedTerrainObject3D()
    {
+      ensureHasBeenGenerated();
+      
       return environment.getCombinedTerrainObject3D();
    }
    
    @Override
    public TerrainObject3D getTerrainObject3D()
    {
+      ensureHasBeenGenerated();
+      
       return environment.getTerrainObject3D();
    }
 
    @Override
    public List<? extends Robot> getEnvironmentRobots()
    {
+      ensureHasBeenGenerated();
+      
       return environment.getEnvironmentRobots();
    }
 
    @Override
    public void createAndSetContactControllerToARobot()
    {
+      ensureHasBeenGenerated();
+      
       environment.createAndSetContactControllerToARobot();
    }
 
    @Override
    public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
+      ensureHasBeenGenerated();
+      
       environment.addContactPoints(externalForcePoints);
    }
 
    @Override
    public void addSelectableListenerToSelectables(SelectableObjectListener selectedListener)
    {
+      ensureHasBeenGenerated();
+      
       environment.addSelectableListenerToSelectables(selectedListener);
+   }
+   
+   protected void checkHasNotBeenGenerated()
+   {
+      if (hasBeenGenerated)
+      {
+         throw new RuntimeException("Environment has already been generated!");
+      }
+   }
+   
+   private void ensureHasBeenGenerated()
+   {
+      if (!hasBeenGenerated)
+      {
+         generateEnvironment();
+      }
    }
 }

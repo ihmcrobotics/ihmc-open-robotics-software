@@ -1,16 +1,8 @@
 package us.ihmc.simulationconstructionset.util.environments.planarRegionEnvironments;
 
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-
 public class LittleWallsWithIncreasingHeightPlanarRegionEnvironment extends PlanarRegionEnvironmentInterface
 {
    public LittleWallsWithIncreasingHeightPlanarRegionEnvironment()
-   {
-      generateEnvironment();
-   }
-   
-   @Override
-   protected void buildGenerator(PlanarRegionsListGenerator generator)
    {
       generator.translate(2.0, 0.0, -0.01);
       generator.addCubeReferencedAtCenter(6.0, 1.0, 0.00005);
