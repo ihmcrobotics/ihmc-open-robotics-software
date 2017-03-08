@@ -79,10 +79,11 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       angularMomentumWeight.scale(1.0 / scale);
 
       for (SpineJointName jointName : jointMap.getSpineJointNames())
-      {
-         jointspaceWeights.put(jointMap.getSpineJointName(jointName), spineJointspaceWeight);
          userModeWeights.put(jointMap.getSpineJointName(jointName), spineUserModeWeight);
-      }
+
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), chestAngularWeight.getZ() * spineJointspaceWeight / chestAngularWeight.getZ());
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), chestAngularWeight.getY() * spineJointspaceWeight / chestAngularWeight.getZ());
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), chestAngularWeight.getX() * spineJointspaceWeight / chestAngularWeight.getZ());
 
       for (ArmJointName jointName : jointMap.getArmJointNames())
       {
