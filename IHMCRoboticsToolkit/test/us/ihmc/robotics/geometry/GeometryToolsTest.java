@@ -371,10 +371,10 @@ public class GeometryToolsTest
          assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(-x, y), epsilon));
          assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(-x, -y), epsilon));
          assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(x, -y), epsilon));
-         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(x, y), -epsilon));
-         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(-x, y), -epsilon));
-         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(-x, -y), -epsilon));
-         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(x, -y), -epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(x, y), epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(-x, y), epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(-x, -y), epsilon));
+         assertEquals(isTuple2dZero, GeometryTools.isZero(new Point2D(x, -y), epsilon));
 
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, y, z), epsilon));
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, y, -z), epsilon));
@@ -384,14 +384,14 @@ public class GeometryToolsTest
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, y, -z), epsilon));
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, z), epsilon));
          assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, -z), epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, y, z), -epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, y, -z), -epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, -y, z), -epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, -y, -z), -epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, y, z), -epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, y, -z), -epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, z), -epsilon));
-         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, -z), -epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, y, -z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, -y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(x, -y, -z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, y, -z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, z), epsilon));
+         assertEquals(isTuple3dZero, GeometryTools.isZero(new Point3D(-x, -y, -z), epsilon));
       }
    }
 
