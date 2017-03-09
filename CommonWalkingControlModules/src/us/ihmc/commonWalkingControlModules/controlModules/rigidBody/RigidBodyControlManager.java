@@ -9,9 +9,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
@@ -44,6 +41,8 @@ public class RigidBodyControlManager
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
    private final EnumYoVariable<RigidBodyControlMode> requestedState;
 
+   private final RigidBodyPositionControlHelper positionControlHelper;
+
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
@@ -60,8 +59,6 @@ public class RigidBodyControlManager
 
    private final BooleanYoVariable allJointsEnabled;
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-   private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
-   private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          List<String> positionControlledJointNames, Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame baseFrame, DoubleYoVariable yoTime,
@@ -85,22 +82,7 @@ public class RigidBodyControlManager
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, baseBody, elevator, controlFrameMap, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
-      ArrayList<OneDoFJoint> positionControlledJoints = new ArrayList<>();
-      for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
-      {
-         OneDoFJoint joint = jointsToControl[jointIdx];
-         if (positionControlledJointNames.contains(joint.getName()))
-            positionControlledJoints.add(joint);
-      }
-
-      for (OneDoFJoint positionControlledJoint : positionControlledJoints)
-      {
-         lowLevelOneDoFJointDesiredDataHolder.registerJointWithEmptyData(positionControlledJoint);
-         lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(positionControlledJoint, LowLevelJointControlMode.POSITION_CONTROL);
-         jointAccelerationIntegrationCommand.addJointToComputeDesiredPositionFor(positionControlledJoint);
-
-         // TODO: add individual integration settings for joints
-      }
+      positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, registry);
 
       allJointsEnabled = new BooleanYoVariable(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
@@ -402,7 +384,7 @@ public class RigidBodyControlManager
    {
       inverseDynamicsCommandList.clear();
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
-      inverseDynamicsCommandList.addCommand(jointAccelerationIntegrationCommand);
+      inverseDynamicsCommandList.addCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
       return inverseDynamicsCommandList;
    }
 
@@ -413,7 +395,7 @@ public class RigidBodyControlManager
 
    public LowLevelOneDoFJointDesiredDataHolderReadOnly getLowLevelJointDesiredData()
    {
-      return lowLevelOneDoFJointDesiredDataHolder;
+      return positionControlHelper.getLowLevelOneDoFJointDesiredDataHolder();
    }
 
    public FeedbackControlCommandList createFeedbackControlTemplate()
