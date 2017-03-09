@@ -3,10 +3,10 @@ package us.ihmc.humanoidBehaviors.coactiveDesignFramework;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.whiteBoard.TCPYoWhiteBoard;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class CoactiveElementYoWhiteBoardSynchronizer implements Runnable

@@ -22,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -44,7 +45,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * TODO Deprecate archaic methods

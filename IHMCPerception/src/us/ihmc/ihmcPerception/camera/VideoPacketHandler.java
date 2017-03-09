@@ -3,6 +3,7 @@ package us.ihmc.ihmcPerception.camera;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.net.NetStateListener;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -10,7 +11,6 @@ import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {

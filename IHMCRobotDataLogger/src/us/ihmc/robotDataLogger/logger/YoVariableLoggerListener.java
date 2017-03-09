@@ -10,6 +10,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
@@ -17,7 +18,6 @@ import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
 import us.ihmc.tools.compression.SnappyUtils;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 {

@@ -1,13 +1,13 @@
 package us.ihmc.acsell;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * Hacked to be outside the main DRC code, move after code freeze

@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -42,7 +43,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimator;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.DRCStateEstimatorInterface;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterface, StateEstimator
 {

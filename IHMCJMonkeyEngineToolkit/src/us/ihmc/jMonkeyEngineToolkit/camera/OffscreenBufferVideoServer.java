@@ -3,6 +3,7 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 import java.awt.image.BufferedImage;
 
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -11,7 +12,6 @@ import us.ihmc.jMonkeyEngineToolkit.CameraAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class OffscreenBufferVideoServer
 {

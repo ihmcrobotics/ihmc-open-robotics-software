@@ -1,5 +1,6 @@
 package us.ihmc.simulationToolkit.controllers;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,7 +20,6 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SimulateCutforceController implements RobotController
 {

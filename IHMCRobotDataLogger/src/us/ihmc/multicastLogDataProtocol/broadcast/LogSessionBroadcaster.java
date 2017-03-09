@@ -19,12 +19,12 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class LogSessionBroadcaster extends Thread
 {

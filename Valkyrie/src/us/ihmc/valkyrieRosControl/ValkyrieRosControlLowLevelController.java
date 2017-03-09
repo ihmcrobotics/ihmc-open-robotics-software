@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.taskExecutor.Task;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;

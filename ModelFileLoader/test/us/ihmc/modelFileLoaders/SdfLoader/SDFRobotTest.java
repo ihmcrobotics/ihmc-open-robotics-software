@@ -13,6 +13,7 @@ import javax.xml.bind.JAXBException;
 
 import org.junit.Test;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -28,7 +29,6 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SDFRobotTest
 {

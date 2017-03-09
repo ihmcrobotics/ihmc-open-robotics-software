@@ -1,4 +1,4 @@
-package us.ihmc.tools.io.printing;
+package us.ihmc.commons;
 
 /**
  * Conveniently prints useful messages to the console. Uses logging style prefixes

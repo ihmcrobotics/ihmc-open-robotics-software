@@ -24,6 +24,7 @@ import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
@@ -33,7 +34,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
-import us.ihmc.tools.io.printing.PrintTools;
 
 @SuppressWarnings("unused") // it's a wrapper, unused is fine
 /**
