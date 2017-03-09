@@ -12,6 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -32,6 +33,7 @@ public class KinematicsToolboxOutputConverter
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FullHumanoidRobotModel fullRobotModelToUseForConversion;
+   private final HumanoidReferenceFrames referenceFrames;
    private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] oneDoFJoints;
    private final int jointsHashCode;
@@ -42,6 +44,7 @@ public class KinematicsToolboxOutputConverter
       rootJoint = fullRobotModelToUseForConversion.getRootJoint();
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModelToUseForConversion);
       jointsHashCode = (int) NameBasedHashCodeTools.computeArrayHashCode(oneDoFJoints);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModelToUseForConversion);
    }
 
    public void updateFullRobotModel(KinematicsToolboxOutputStatus solution)
@@ -128,7 +131,8 @@ public class KinematicsToolboxOutputConverter
       FrameOrientation desiredOrientation = new FrameOrientation(chestFrame);
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getQuaternion(desiredQuaternion);
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredQuaternion);
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredQuaternion, worldFrame, pelvisZUpFrame);
       output.setChestTrajectoryMessage(chestTrajectoryMessage);
    }
 

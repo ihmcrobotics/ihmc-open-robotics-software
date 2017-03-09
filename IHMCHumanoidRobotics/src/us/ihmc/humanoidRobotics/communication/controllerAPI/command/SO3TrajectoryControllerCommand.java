@@ -5,15 +5,17 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>> extends QueueableCommand<T, M>
+public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryControllerCommand<T, M>, M extends AbstractSO3TrajectoryMessage<M>> extends QueueableCommand<T, M> implements FrameBasedCommand<M>
 {
    private final FrameSO3TrajectoryPointList trajectoryPointList = new FrameSO3TrajectoryPointList();
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(3,6);
+   private ReferenceFrame trajectoryFrame;
 
    public SO3TrajectoryControllerCommand()
    {
@@ -50,6 +52,15 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    {
       trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
       setPropertiesOnly(other);
+      trajectoryFrame = other.getTrajectoryFrame();
+   }
+   
+   @Override
+   public void set(ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame, M message)
+   {
+      this.trajectoryFrame = trajectoryFrame;
+      clear(expressedInFrame);
+      set(message);
    }
 
    /**
@@ -164,10 +175,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       trajectoryPointList.changeFrame(referenceFrame);
    }
 
-   /**
-    * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
-    */
-   public ReferenceFrame getReferenceFrame()
+   public ReferenceFrame getExpressedInFrame()
    {
       return trajectoryPointList.getReferenceFrame();
    }
@@ -178,5 +186,15 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    public void checkReferenceFrameMatch(ReferenceFrame frame)
    {
       trajectoryPointList.checkReferenceFrameMatch(frame);
+   }
+
+   public ReferenceFrame getTrajectoryFrame()
+   {
+      return trajectoryFrame;
+   }
+
+   public void setTrajectoryFrame(ReferenceFrame trajectoryFrame)
+   {
+      this.trajectoryFrame = trajectoryFrame;
    }
 }
