@@ -1,8 +1,9 @@
 package us.ihmc.utilities.ros;
 
 import org.apache.commons.lang3.text.WordUtils;
+
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.ros.generators.*;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 
 import java.io.File;

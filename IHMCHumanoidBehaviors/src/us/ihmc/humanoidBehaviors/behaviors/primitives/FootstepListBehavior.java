@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -21,7 +22,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class FootstepListBehavior extends AbstractBehavior
 {

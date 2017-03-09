@@ -15,6 +15,7 @@ import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManag
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiConnectionModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -31,7 +32,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationKryoNetCl
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class DRCNetworkProcessor
 {

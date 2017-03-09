@@ -1,6 +1,6 @@
 package us.ihmc.commons.exception;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 public enum DefaultExceptionHandler
 {
