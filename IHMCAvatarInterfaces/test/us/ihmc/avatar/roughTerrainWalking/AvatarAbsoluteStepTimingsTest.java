@@ -180,15 +180,15 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       public TestingEnvironment()
       {
          WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-         double flatArea = walkingControllerParameters.getDefaultStepLength() * 1.0;
-         double maxElevation = walkingControllerParameters.getMinSwingHeightFromStanceFoot() * 0.5;
+         double flatArea = walkingControllerParameters.getDefaultStepLength() * 0.5;
+         double maxElevation = walkingControllerParameters.getMinSwingHeightFromStanceFoot() * 0.25;
 
          terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
-         terrain.addBox(-0.5, -1.0, flatArea, 1.0, -0.01, 0.0);
+         terrain.addBox(-0.5 - flatArea / 2.0, -1.0, flatArea / 2.0, 1.0, -0.01, 0.0);
 
          for (int i = 0; i < 50; i++)
          {
-            double xStart = flatArea + (double) i * flatArea;
+            double xStart = flatArea + (double) i * flatArea - flatArea / 2.0;
             double height = maxElevation * 2.0 * (random.nextDouble() - 0.5);
             double length = flatArea;
             terrain.addBox(xStart, -1.0, xStart + length, 1.0, height - 0.01, height);

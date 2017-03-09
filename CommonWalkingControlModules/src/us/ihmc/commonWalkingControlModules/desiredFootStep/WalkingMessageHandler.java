@@ -596,7 +596,7 @@ public class WalkingMessageHandler
       if (Double.isNaN(swingDuration) || swingDuration <= 0.0)
          swingDuration = defaultSwingTime.getDoubleValue();
 
-      double transferDuration = footstep.getSwingDuration();
+      double transferDuration = footstep.getTransferDuration();
       if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
          if (upcomingFootstepTimings.isEmpty())
