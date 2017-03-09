@@ -48,7 +48,9 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final double rhoRateHighWeight;
 
    private final double neckJointspaceWeight = 1.0;
-   private final double spineJointspaceWeight = 15.0;
+   private final double spineJointspaceWeightYaw = 15.0;
+   private final double spineJointspaceWeightPitch = 45.0;
+   private final double spineJointspaceWeightRoll = 45.0;
    private final double armJointspaceWeight = 1.0;
    private final TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
 
@@ -81,9 +83,9 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       for (SpineJointName jointName : jointMap.getSpineJointNames())
          userModeWeights.put(jointMap.getSpineJointName(jointName), spineUserModeWeight);
 
-      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), chestAngularWeight.getZ() * spineJointspaceWeight / chestAngularWeight.getZ());
-      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), chestAngularWeight.getY() * spineJointspaceWeight / chestAngularWeight.getZ());
-      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), chestAngularWeight.getX() * spineJointspaceWeight / chestAngularWeight.getZ());
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), spineJointspaceWeightYaw);
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), spineJointspaceWeightPitch);
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), spineJointspaceWeightRoll);
 
       for (ArmJointName jointName : jointMap.getArmJointNames())
       {
