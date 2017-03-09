@@ -23,12 +23,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private final Quaternion orientation = new Quaternion();
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
-   private boolean hasTimings = false;
-   private double swingTime = Double.NaN;
-   private double transferTime = Double.NaN;
-
-   private boolean hasAbsoluteTime = false;
-   private double swingStartTime = Double.NaN;
+   private double swingDuration = Double.NaN;
+   private double transferDuration = Double.NaN;
 
    public FootstepDataCommand()
    {
@@ -47,12 +43,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       predictedContactPoints.clear();
       trajectoryWaypoints.clear();
 
-      hasTimings = false;
-      swingTime = Double.NaN;
-      transferTime = Double.NaN;
-
-      hasAbsoluteTime = false;
-      swingStartTime = Double.NaN;
+      swingDuration = Double.NaN;
+      transferDuration = Double.NaN;
    }
 
    @Override
@@ -79,12 +71,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
             predictedContactPoints.add().set(originalPredictedContactPoints.get(i));
       }
 
-      hasTimings = message.hasTimings;
-      swingTime = message.swingTime;
-      transferTime = message.transferTime;
-
-      hasAbsoluteTime = message.hasAbsoluteTime;
-      swingStartTime = message.swingStartTime;
+      swingDuration = message.swingDuration;
+      transferDuration = message.transferDuration;
    }
 
    @Override
@@ -105,12 +93,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
 
-      hasTimings = other.hasTimings;
-      swingTime = other.swingTime;
-      transferTime = other.transferTime;
-
-      hasAbsoluteTime = other.hasAbsoluteTime;
-      swingStartTime = other.swingStartTime;
+      swingDuration = other.swingDuration;
+      transferDuration = other.transferDuration;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -186,29 +170,14 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return predictedContactPoints;
    }
 
-   public boolean hasTimings()
+   public double getSwingDuration()
    {
-      return hasTimings;
+      return swingDuration;
    }
 
-   public double getSwingTime()
+   public double getTransferDuration()
    {
-      return swingTime;
-   }
-
-   public double getTransferTime()
-   {
-      return transferTime;
-   }
-
-   public boolean hasAbsoluteTime()
-   {
-      return hasAbsoluteTime;
-   }
-
-   public double getSwingStartTime()
-   {
-      return swingStartTime;
+      return transferDuration;
    }
 
    @Override

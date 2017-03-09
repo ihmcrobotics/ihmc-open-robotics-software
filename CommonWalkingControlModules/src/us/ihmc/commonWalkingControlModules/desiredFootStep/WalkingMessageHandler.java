@@ -16,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -142,15 +143,15 @@ public class WalkingMessageHandler
       }
 
       isWalkingPaused.set(false);
-      double commandDefaultTransferTime = command.getDefaultTransferTime();
-      double commandDefaultSwingTime = command.getDefaultSwingTime();
+      double commandDefaultTransferTime = command.getDefaultTransferDuration();
+      double commandDefaultSwingTime = command.getDefaultSwingDuration();
       if (!Double.isNaN(commandDefaultSwingTime) && commandDefaultSwingTime > 1.0e-2 && !Double.isNaN(commandDefaultTransferTime) && commandDefaultTransferTime >= 0.0)
       {
          defaultTransferTime.set(commandDefaultTransferTime);
          defaultSwingTime.set(commandDefaultSwingTime);
       }
 
-      double commandFinalTransferTime = command.getFinalTransferTime();
+      double commandFinalTransferTime = command.getFinalTransferDuration();
       if (commandFinalTransferTime >= 0.0)
          finalTransferTime.set(commandFinalTransferTime);
       else
@@ -160,7 +161,7 @@ public class WalkingMessageHandler
       {
          Footstep newFootstep = createFootstep(command.getFootstep(i));
          upcomingFootsteps.add(newFootstep);
-         FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i));
+         FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i), command.getExecutionTiming());
          upcomingFootstepTimings.add(newFootstepTiming);
       }
 
@@ -587,20 +588,46 @@ public class WalkingMessageHandler
       return footstep;
    }
 
-   private FootstepTiming createFootstepTiming(FootstepDataCommand footstep)
+   private FootstepTiming createFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming)
    {
       FootstepTiming timing = new FootstepTiming();
-      if (footstep.hasTimings())
-         timing.setTimings(footstep.getSwingTime(), footstep.getTransferTime());
-      else
+
+      double swingDuration = footstep.getSwingDuration();
+      if (Double.isNaN(swingDuration) || swingDuration <= 0.0)
+         swingDuration = defaultSwingTime.getDoubleValue();
+
+      double transferDuration = footstep.getTransferDuration();
+      if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
          if (upcomingFootstepTimings.isEmpty())
-            timing.setTimings(defaultSwingTime.getDoubleValue(), defaultInitialTransferTime.getDoubleValue());
+            transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
-            timing.setTimings(defaultSwingTime.getDoubleValue(), defaultTransferTime.getDoubleValue());
+            transferDuration = defaultTransferTime.getDoubleValue();
       }
-      if (footstep.hasAbsoluteTime())
-         timing.setAbsoluteTime(footstep.getSwingStartTime(), footstepDataListRecievedTime.getDoubleValue());
+
+      timing.setTimings(swingDuration, transferDuration);
+
+      switch (executionTiming)
+      {
+      case CONTROL_DURATIONS:
+         break;
+      case CONTROL_ABSOLUTE_TIMINGS:
+         int stepsInQueue = upcomingFootstepTimings.size();
+         if (stepsInQueue == 0)
+         {
+            timing.setAbsoluteTime(transferDuration, footstepDataListRecievedTime.getDoubleValue());
+         }
+         else
+         {
+            FootstepTiming previousTiming = upcomingFootstepTimings.get(stepsInQueue - 1);
+            double swingStartTime = previousTiming.getSwingStartTime() + previousTiming.getSwingTime() + transferDuration;
+            timing.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
+         }
+         break;
+      default:
+         throw new RuntimeException("Timing mode not implemented.");
+      }
+
       return timing;
    }
 
