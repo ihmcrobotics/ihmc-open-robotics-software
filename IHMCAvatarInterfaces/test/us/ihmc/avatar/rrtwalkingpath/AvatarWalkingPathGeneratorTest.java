@@ -67,9 +67,6 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
    private HumanoidRobotDataReceiver robotDataReceiver;
    private HumanoidFloatingRootJointRobot robot;
    private static final boolean DEBUG = false;
-
-   
-
    
    Point3D goalState;
    Point3D initialState;
@@ -250,22 +247,6 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       simulationConstructionSet.addStaticLinkGraphics(getPrintSphere(footStepPlanner.tempPoint, YoAppearance.Black()));
       
       
-//      Point2D testPoint = new Point2D.Double(1, -1);
-//      simulationConstructionSet.addStaticLinkGraphics(getPrintSphere(testPoint, YoAppearance.Black()));
-//      simulationConstructionSet.addStaticLinkGraphics(getPrintFootStep(footStepPlanner.getProjectedFootStep(RobotSide.RIGHT, testPoint)));
-//      simulationConstructionSet.addStaticLinkGraphics(getPrintFootStep(footStepPlanner.getProjectedFootStep(RobotSide.LEFT, testPoint)));
-//      simulationConstructionSet.addStaticLinkGraphics(getPrintFootStep(footStepPlanner.footSteps.get(0)));
-      
-      
-      
-      
-//      FootstepDataListMessage footsteps = new FootstepDataListMessage();
-//      rrtPlanner.getFootStepPlanner().createFootStepList();
-//      footsteps = rrtPlanner.getFootStepPlanner().footsteps; 
-//      simulationConstructionSet.addStaticLinkGraphics(getFootPrint(footsteps));
-      
-      
-      
       
       
       
@@ -333,6 +314,8 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
+   // ******************************** //
+   // Print
    // ******************************** //
 
    
@@ -409,29 +392,29 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
 
       return ret;
    }
-//   
-//   private ArrayList<Graphics3DObject> getPrintFootStep(FootstepDataListMessage footsteps)
-//   {
-//      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
-//
-//      for(int i =0;i<footsteps.size();i++)
-//      {
-//         Graphics3DObject singleStep = new Graphics3DObject();
-//         
-//         singleStep.translate(footsteps.get(i).location);
-//         if(footsteps.get(i).robotSide == RobotSide.RIGHT)
-//         {
-//            singleStep.addSphere(0.05, YoAppearance.Blue());
-//         }
-//         else
-//         {
-//            singleStep.addSphere(0.05, YoAppearance.Green());
-//         }
-//         
-//         ret.add(singleStep);
-//      }
-//      return ret;
-//   }
+   
+   private ArrayList<Graphics3DObject> getPrintFootStep(FootstepDataListMessage footsteps)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+
+      for(int i =0;i<footsteps.size();i++)
+      {
+         Graphics3DObject singleStep = new Graphics3DObject();
+         
+         singleStep.translate(footsteps.get(i).location);
+         if(footsteps.get(i).robotSide == RobotSide.RIGHT)
+         {
+            singleStep.addSphere(0.05, YoAppearance.Blue());
+         }
+         else
+         {
+            singleStep.addSphere(0.05, YoAppearance.Green());
+         }
+         
+         ret.add(singleStep);
+      }
+      return ret;
+   }
    
    private Graphics3DObject getPrintFootStep(SkeletonPathFootStep footstep)
    {
