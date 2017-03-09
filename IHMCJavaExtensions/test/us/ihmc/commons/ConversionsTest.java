@@ -1,6 +1,7 @@
 package us.ihmc.commons;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -237,6 +238,90 @@ public class ConversionsTest
          assertEquals((nSecs * 1e-3), Conversions.nanoSecondsToMicroseconds(nSecs), 1e-6);
          assertEquals((-nSecs * 1e-3), Conversions.nanoSecondsToMicroseconds(-nSecs), 1e-6);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testMagnitudeToDecibels()
+   {
+      double epsilon = 1e-10;
+      assertEquals(20.0, Conversions.convertMagnitudeToDecibels(10.0), epsilon);
+      assertEquals(40.0, Conversions.convertMagnitudeToDecibels(100.0), epsilon);
+      assertEquals(28.691378080683975, Conversions.convertMagnitudeToDecibels(27.2), epsilon);
+
+      double[] magnitudes = new double[] {10.0, 100.0, 27.2};
+      double[] decibels = Conversions.convertMagnitudeToDecibels(magnitudes);
+
+      assertEquals(20.0, decibels[0], epsilon);
+      assertEquals(40.0, decibels[1], epsilon);
+      assertEquals(28.691378080683975, decibels[2], epsilon);
+
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testNaN()
+   {
+      double magnitude = -1.0;
+      double decibels = Conversions.convertMagnitudeToDecibels(magnitude);
+      assertTrue(Double.isNaN(decibels));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testNegativeInfinity()
+   {
+      double magnitude = 0.0;
+      double decibels = Conversions.convertMagnitudeToDecibels(magnitude);
+      assertTrue(Double.isInfinite(decibels));
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRadiansToDegrees()
+   {
+      double[] phaseInRadians = new double[] {0.0, Math.PI / 4.0, Math.PI, Math.PI * 2.0, Math.PI * 4.0};
+      double[] phaseInDegrees = Conversions.convertRadianToDegrees(phaseInRadians);
+
+      double epsilon = 1e-10;
+      assertEquals(0.0, phaseInDegrees[0], epsilon);
+      assertEquals(45.0, phaseInDegrees[1], epsilon);
+      assertEquals(180.0, phaseInDegrees[2], epsilon);
+      assertEquals(360.0, phaseInDegrees[3], epsilon);
+      assertEquals(720.0, phaseInDegrees[4], epsilon);
+
+      phaseInRadians = new double[] {-0.0, -Math.PI / 4.0, -Math.PI, -Math.PI * 2.0, -Math.PI * 4.0};
+      phaseInDegrees = Conversions.convertRadianToDegrees(phaseInRadians);
+
+      assertEquals(-0.0, phaseInDegrees[0], epsilon);
+      assertEquals(-45.0, phaseInDegrees[1], epsilon);
+      assertEquals(-180.0, phaseInDegrees[2], epsilon);
+      assertEquals(-360.0, phaseInDegrees[3], epsilon);
+      assertEquals(-720.0, phaseInDegrees[4], epsilon);
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testRadiansPerSecondToHz()
+   {
+      double[] freqInRadPerSecond = new double[] {0.0, Math.PI / 4.0, Math.PI, Math.PI * 2.0, Math.PI * 4.0};
+      double[] freqInHz = Conversions.convertRadPerSecondToHz(freqInRadPerSecond);
+
+      double epsilon = 1e-10;
+      assertEquals(0.0, freqInHz[0], epsilon);
+      assertEquals(0.125, freqInHz[1], epsilon);
+      assertEquals(0.5, freqInHz[2], epsilon);
+      assertEquals(1.0, freqInHz[3], epsilon);
+      assertEquals(2.0, freqInHz[4], epsilon);
+
+      freqInRadPerSecond = new double[] {-0.0, -Math.PI / 4.0, -Math.PI, -Math.PI * 2.0, -Math.PI * 4.0};
+      freqInHz = Conversions.convertRadPerSecondToHz(freqInRadPerSecond);
+
+      assertEquals(-0.0, freqInHz[0], epsilon);
+      assertEquals(-0.125, freqInHz[1], epsilon);
+      assertEquals(-0.5, freqInHz[2], epsilon);
+      assertEquals(-1.0, freqInHz[3], epsilon);
+      assertEquals(-2.0, freqInHz[4], epsilon);
    }
 
    public static void main(String[] args)
