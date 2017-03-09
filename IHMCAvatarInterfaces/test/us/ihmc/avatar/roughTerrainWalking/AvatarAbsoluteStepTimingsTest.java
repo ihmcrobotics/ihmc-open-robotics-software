@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlannerWithTimeFreezer;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -74,6 +75,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       double transferTime = walkingControllerParameters.getDefaultTransferTime();
       double finalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
       FootstepDataListMessage footsteps = new FootstepDataListMessage(swingTime, transferTime, finalTransferTime);
+      footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
       for (int stepIndex = 0; stepIndex < steps; stepIndex++)
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -82,7 +84,13 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-         footstepData.setAbsoluteTime(swingStartInterval * (double) (stepIndex + 1));
+
+         if (stepIndex == 0)
+            footstepData.setTransferDuration(swingStartInterval);
+         else
+            footstepData.setTransferDuration(transferTime);
+         footstepData.setSwingDuration(swingStartInterval - transferTime);
+
          footsteps.add(footstepData);
       }
 
@@ -129,7 +137,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
-         footstepData.setAbsoluteTime(minimumTransferTime / 2.0);
+         footstepData.setTransferDuration(minimumTransferTime / 2.0);
          footsteps.add(footstepData);
       }
 
@@ -172,15 +180,15 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       public TestingEnvironment()
       {
          WalkingControllerParameters walkingControllerParameters = getRobotModel().getWalkingControllerParameters();
-         double flatArea = walkingControllerParameters.getDefaultStepLength() * 1.0;
-         double maxElevation = walkingControllerParameters.getMinSwingHeightFromStanceFoot() * 0.5;
+         double flatArea = walkingControllerParameters.getDefaultStepLength() * 0.5;
+         double maxElevation = walkingControllerParameters.getMinSwingHeightFromStanceFoot() * 0.25;
 
          terrain = new CombinedTerrainObject3D(getClass().getSimpleName());
-         terrain.addBox(-0.5, -1.0, flatArea, 1.0, -0.01, 0.0);
+         terrain.addBox(-0.5 - flatArea / 2.0, -1.0, flatArea / 2.0, 1.0, -0.01, 0.0);
 
          for (int i = 0; i < 50; i++)
          {
-            double xStart = flatArea + (double) i * flatArea;
+            double xStart = flatArea + (double) i * flatArea - flatArea / 2.0;
             double height = maxElevation * 2.0 * (random.nextDouble() - 0.5);
             double length = flatArea;
             terrain.addBox(xStart, -1.0, xStart + length, 1.0, height - 0.01, height);
