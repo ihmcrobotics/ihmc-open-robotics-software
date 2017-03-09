@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -69,6 +70,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
+   private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
@@ -735,6 +737,56 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       }
 
       return positionControlledJoints;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   {
+      if (integrationSettings != null)
+         return integrationSettings;
+
+      integrationSettings = new HashMap<String, JointAccelerationIntegrationSettings>();
+
+      JointAccelerationIntegrationSettings neckJointSettings = new JointAccelerationIntegrationSettings();
+      neckJointSettings.setAlphaPosition(0.9996);
+      neckJointSettings.setAlphaVelocity(0.95);
+      neckJointSettings.setMaxPositionError(0.2);
+      neckJointSettings.setMaxVelocity(2.0);
+
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
+
+      JointAccelerationIntegrationSettings shoulderJointSettings = new JointAccelerationIntegrationSettings();
+      shoulderJointSettings.setAlphaPosition(0.9998);
+      shoulderJointSettings.setAlphaVelocity(0.95);
+      shoulderJointSettings.setMaxPositionError(0.2);
+      shoulderJointSettings.setMaxVelocity(2.0);
+
+      JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
+      elbowJointSettings.setAlphaPosition(0.9996);
+      elbowJointSettings.setAlphaVelocity(0.95);
+      elbowJointSettings.setMaxPositionError(0.2);
+      elbowJointSettings.setMaxVelocity(2.0);
+
+      JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
+      wristJointSettings.setAlphaPosition(0.9999);
+      wristJointSettings.setAlphaVelocity(0.95);
+      wristJointSettings.setMaxPositionError(0.2);
+      wristJointSettings.setMaxVelocity(2.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), shoulderJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), shoulderJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), elbowJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), elbowJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), wristJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), wristJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH), wristJointSettings);
+      }
+
+      return integrationSettings;
    }
 
    @Override

@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -23,7 +25,8 @@ public class RigidBodyPositionControlHelper
    private final JointAccelerationIntegrationCommand jointAccelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
-   public RigidBodyPositionControlHelper(String namePrefix, OneDoFJoint[] jointsToControl, List<String> positionControlledJointNames, YoVariableRegistry parentRegistry)
+   public RigidBodyPositionControlHelper(String namePrefix, OneDoFJoint[] jointsToControl, List<String> positionControlledJointNames,
+         Map<String, JointAccelerationIntegrationSettings> integrationSettings, YoVariableRegistry parentRegistry)
    {
       YoVariableRegistry registry = new YoVariableRegistry(namePrefix + "PositionControlHelper");
 
@@ -48,10 +51,20 @@ public class RigidBodyPositionControlHelper
          OneDoFJoint positionControlledJoint = positionControlledJoints.get(jointIdx);
          String jointName = positionControlledJoint.getName();
 
-         accelerationIntegrationAlphaPosition[jointIdx] = new DoubleYoVariable(namePrefix + "_" + jointName + "_accelerationIntegrationAlphaPosition", registry);
-         accelerationIntegrationAlphaVelocity[jointIdx] = new DoubleYoVariable(namePrefix + "_" + jointName + "_accelerationIntegrationAlphaVelocity", registry);
-         accelerationIntegrationMaxPositionError[jointIdx] = new DoubleYoVariable(namePrefix + "_" + jointName + "_accelerationIntegrationMaxPositionError", registry);
-         accelerationIntegrationMaxVelocity[jointIdx] = new DoubleYoVariable(namePrefix + "_" + jointName + "_accelerationIntegrationMaxVelocity", registry);
+         String prefix = namePrefix + "_" + jointName + "_accelerationIntegration";
+         accelerationIntegrationAlphaPosition[jointIdx] = new DoubleYoVariable(prefix + "AlphaPosition", registry);
+         accelerationIntegrationAlphaVelocity[jointIdx] = new DoubleYoVariable(prefix + "AlphaVelocity", registry);
+         accelerationIntegrationMaxPositionError[jointIdx] = new DoubleYoVariable(prefix + "MaxPositionError", registry);
+         accelerationIntegrationMaxVelocity[jointIdx] = new DoubleYoVariable(prefix + "MaxVelocity", registry);
+
+         if (!integrationSettings.containsKey(jointName))
+            throw new RuntimeException("Attempting to position control a joint that has no acceleration integration settings.");
+
+         JointAccelerationIntegrationSettings jointIntegrationSettings = integrationSettings.get(jointName);
+         accelerationIntegrationAlphaPosition[jointIdx].set(jointIntegrationSettings.getAlphaPosition());
+         accelerationIntegrationAlphaVelocity[jointIdx].set(jointIntegrationSettings.getAlphaVelocity());
+         accelerationIntegrationMaxPositionError[jointIdx].set(jointIntegrationSettings.getMaxPositionError());
+         accelerationIntegrationMaxVelocity[jointIdx].set(jointIntegrationSettings.getMaxVelocity());
 
          lowLevelOneDoFJointDesiredDataHolder.registerJointWithEmptyData(positionControlledJoint);
          lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(positionControlledJoint, LowLevelJointControlMode.POSITION_CONTROL);
