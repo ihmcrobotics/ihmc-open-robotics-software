@@ -50,7 +50,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final int TICK_EPSILON = 2;
+   private static final int TICK_EPSILON = 4;
 
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
    {
@@ -127,6 +127,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
 
       FootstepDataListMessage footsteps = new FootstepDataListMessage(0.6, 0.3, 0.1);
+      footsteps.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS);
       double minimumTransferTime = getRobotModel().getWalkingControllerParameters().getMinimumTransferTime();
 
       // add very fast footstep:
