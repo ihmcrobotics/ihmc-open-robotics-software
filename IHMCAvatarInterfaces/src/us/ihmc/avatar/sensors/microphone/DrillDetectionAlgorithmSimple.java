@@ -1,6 +1,6 @@
 package us.ihmc.avatar.sensors.microphone;
 
-import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
+import us.ihmc.commons.Conversions;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
 public class DrillDetectionAlgorithmSimple extends DrillDetectionAlgorithm
@@ -33,7 +33,7 @@ public class DrillDetectionAlgorithmSimple extends DrillDetectionAlgorithm
 
       double[][] fftData = BodePlotConstructor.computeFreqMagPhase(time, input);
       double[] frequency = fftData[0];
-      double[] magnitude = BodeUnitsConverter.convertMagnitudeToDecibels(fftData[1]);
+      double[] magnitude = Conversions.convertMagnitudeToDecibels(fftData[1]);
 
       //Peak detection math
       int frequencyBandLowerBoundIndex = 0;
