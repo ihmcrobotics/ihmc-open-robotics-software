@@ -67,8 +67,8 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.fullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
-      this.controlDTInNS = Conversions.secondsToNanoSeconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = Conversions.secondsToNanoSeconds(robotModel.getEstimatorDT());
+      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = Conversions.secondsToNanoseconds(robotModel.getEstimatorDT());
       sendFingerJointGains.set(true);
       fingerTrajectoryTime.set(0.5);
 
@@ -164,7 +164,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    public void read(long currentClockTime)
    {
       long timestamp = threadDataSynchronizer.getTimestamp();
-      fingerControllerTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+      fingerControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
 
       for (RobotSide robotSide : RobotSide.values)
       {

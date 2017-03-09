@@ -98,7 +98,7 @@ public class PlaybackPoseInterpolator
    private double transitionTime(PlaybackPose poseToTransitionInto)
    {
       return poseMorphDuration.getDoubleValue() + timeDelayAfterPose.getDoubleValue()
-            + Conversions.milliSecondsToSeconds((long) poseToTransitionInto.getPlayBackDelayBeforePose());
+            + Conversions.millisecondsToSeconds((long) poseToTransitionInto.getPlayBackDelayBeforePose());
    }
    
    public double getTransitionTimeDelay()

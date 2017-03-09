@@ -214,7 +214,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             break;
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanoSecondstoSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
+         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
             break;
       }
 

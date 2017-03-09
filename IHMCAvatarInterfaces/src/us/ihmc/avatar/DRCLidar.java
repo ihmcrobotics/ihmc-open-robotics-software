@@ -79,7 +79,7 @@ public class DRCLidar
       public void scan(float[] scan, RigidBodyTransform lidarTransform, double time)
       {
          final SimulatedLidarScanPacket lidarScan = new SimulatedLidarScanPacket(lidarSensorId, new LidarScanParameters(lidarScanParameters,
-               Conversions.secondsToNanoSeconds(time)), Arrays.copyOf(scan, scan.length));
+               Conversions.secondsToNanoseconds(time)), Arrays.copyOf(scan, scan.length));
 
          objectCommunicator.consumeObject(lidarScan);
       }

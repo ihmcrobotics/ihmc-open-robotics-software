@@ -145,14 +145,14 @@ public class QuadrupedForceControllerManager implements QuadrupedControllerManag
          stateImpl.onEntry();
          for (int i = 0; i < iterations; i++)
          {
-            robotTimestamp.add(Conversions.milliSecondsToSeconds(1));
+            robotTimestamp.add(Conversions.millisecondsToSeconds(1));
             stateImpl.process();
          }
          stateImpl.onExit();
          
          for (int i = 0; i < iterations; i++)
          {
-            robotTimestamp.add(Conversions.milliSecondsToSeconds(1));
+            robotTimestamp.add(Conversions.millisecondsToSeconds(1));
             stateImpl.onEntry();
             stateImpl.onExit();
          }
