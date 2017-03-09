@@ -139,7 +139,7 @@ public class RigidBody implements NameBasedHashCodeHolder
    }
 
    @Override
-   public long nameBasedHashCode()
+   public long getNameBasedHashCode()
    {
       return nameBasedHashCode;
    }

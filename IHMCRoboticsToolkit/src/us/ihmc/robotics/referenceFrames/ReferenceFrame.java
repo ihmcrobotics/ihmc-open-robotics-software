@@ -720,7 +720,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    @Override
-   public long nameBasedHashCode()
+   public long getNameBasedHashCode()
    {
       return nameBasedHashCode;
    }
