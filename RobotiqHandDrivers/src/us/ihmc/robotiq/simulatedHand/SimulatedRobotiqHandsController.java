@@ -66,8 +66,8 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
          HumanoidGlobalDataProducer globalDataProducer, CloseableAndDisposableRegistry closeableAndDisposableRegistry)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
-      this.controlDTInNS = Conversions.secondsToNanoSeconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = Conversions.secondsToNanoSeconds(robotModel.getEstimatorDT());
+      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = Conversions.secondsToNanoseconds(robotModel.getEstimatorDT());
       sendFingerJointGains.set(true);
 
       if(globalDataProducer != null)
@@ -196,11 +196,11 @@ public class SimulatedRobotiqHandsController implements MultiThreadedRobotContro
       if (threadDataSynchronizer != null)
       {
          timestamp = threadDataSynchronizer.getTimestamp();
-         handControllerTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+         handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
       }
       else
       {
-         handControllerTime.add(Conversions.nanoSecondstoSeconds(controlDTInNS));
+         handControllerTime.add(Conversions.nanosecondsToSeconds(controlDTInNS));
       }
 
       if(jointAngleProducer != null)

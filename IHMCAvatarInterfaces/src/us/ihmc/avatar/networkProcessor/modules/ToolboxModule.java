@@ -163,8 +163,8 @@ public abstract class ToolboxModule
             if (Thread.interrupted())
                return;
 
-            serverTime += Conversions.milliSecondsToSeconds(updatePeriodMilliseconds);
-            yoVariableServer.update(Conversions.secondsToNanoSeconds(serverTime));
+            serverTime += Conversions.millisecondsToSeconds(updatePeriodMilliseconds);
+            yoVariableServer.update(Conversions.secondsToNanoseconds(serverTime));
          }
       };
    }
@@ -352,7 +352,7 @@ public abstract class ToolboxModule
             {
                getToolboxController().update();
                controllerNetworkSubscriber.run();
-               yoTime.add(Conversions.milliSecondsToSeconds(updatePeriodMilliseconds));
+               yoTime.add(Conversions.millisecondsToSeconds(updatePeriodMilliseconds));
 
                if (receivedInput.getAndSet(false))
                   timeOfLastInput.set(yoTime.getDoubleValue());

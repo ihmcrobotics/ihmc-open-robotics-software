@@ -63,7 +63,7 @@ public class DoublePendulumController implements MultiThreadedRobotControlElemen
       tick.increment();
       
       long start = System.nanoTime();
-      while(System.nanoTime() - start < Conversions.milliSecondsToNanoSeconds(10))
+      while(System.nanoTime() - start < Conversions.millisecondsToNanoseconds(10))
       {
          // Busy wait
       }

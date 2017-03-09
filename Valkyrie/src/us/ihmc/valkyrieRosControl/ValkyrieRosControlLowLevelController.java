@@ -275,9 +275,9 @@ public class ValkyrieRosControlLowLevelController
       long timestamp = timestampProvider.getTimestamp();
 
       if (wakeUpTime.isNaN())
-         wakeUpTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+         wakeUpTime.set(Conversions.nanosecondsToSeconds(timestamp));
 
-      yoTime.set(Conversions.nanoSecondstoSeconds(timestamp) - wakeUpTime.getDoubleValue());
+      yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
       taskExecutor.doControl();
       ValkyrieLowLevelControlModeMessage.ControlMode newRequest = requestedLowLevelControlModeAtomic.getAndSet(null);

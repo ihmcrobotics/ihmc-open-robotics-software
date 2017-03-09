@@ -81,7 +81,7 @@ public class CostOfTransportCalculator implements RobotVisualizer
       int currentSample = sampleIndex(index);
       int historicSample = sampleIndex(index + 1);
       
-      this.robotTime[currentSample] = Conversions.nanoSecondstoSeconds(timestamp);
+      this.robotTime[currentSample] = Conversions.nanosecondsToSeconds(timestamp);
       this.totalWork[currentSample] = totalWorkVariable.getDoubleValue();
       
       fullRobotModel.getRootJoint().getTranslation(position);

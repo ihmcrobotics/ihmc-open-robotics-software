@@ -196,7 +196,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       if (simTimestamp < 0)
          return;
 
-      double currentTimeInSeconds = Conversions.nanoSecondstoSeconds(simTimestamp);
+      double currentTimeInSeconds = Conversions.nanosecondsToSeconds(simTimestamp);
       yoTime.set(currentTimeInSeconds);
    }
 
@@ -253,7 +253,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
 
          if (yoVaribleServer != null)
          {
-            yoVaribleServer.update(Conversions.secondsToNanoSeconds(yoTime.getDoubleValue()));
+            yoVaribleServer.update(Conversions.secondsToNanoseconds(yoTime.getDoubleValue()));
          }
       }
       catch (Exception e)

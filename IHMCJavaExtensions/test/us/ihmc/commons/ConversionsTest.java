@@ -65,9 +65,9 @@ public class ConversionsTest
    {
       long timestamp = 1500000000;
 
-      assertEquals(1.5, Conversions.nanoSecondstoSeconds(timestamp), 1e-22);
+      assertEquals(1.5, Conversions.nanosecondsToSeconds(timestamp), 1e-22);
 
-      assertEquals(-1.5, Conversions.nanoSecondstoSeconds(-timestamp), 1e-22);
+      assertEquals(-1.5, Conversions.nanosecondsToSeconds(-timestamp), 1e-22);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -76,8 +76,8 @@ public class ConversionsTest
    {
       double time = 1.5;
 
-      assertEquals(1500000000, Conversions.secondsToNanoSeconds(time));
-      assertEquals(-1500000000, Conversions.secondsToNanoSeconds(-time));
+      assertEquals(1500000000, Conversions.secondsToNanoseconds(time));
+      assertEquals(-1500000000, Conversions.secondsToNanoseconds(-time));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -91,8 +91,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          mSecs = (long) random.nextFloat() * 1000;
-         assertEquals(mSecs * 1e3, Conversions.microSecondsToNanoseconds(mSecs), 1e-6);
-         assertEquals(-mSecs * 1e3, Conversions.microSecondsToNanoseconds(-mSecs), 1e-6);
+         assertEquals(mSecs * 1e3, Conversions.microsecondsToNanoseconds(mSecs), 1e-6);
+         assertEquals(-mSecs * 1e3, Conversions.microsecondsToNanoseconds(-mSecs), 1e-6);
       }
    }
 
@@ -107,8 +107,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          secs = (long) random.nextFloat() * 1000;
-         assertEquals(secs * 1e3, Conversions.secondsToMilliSeconds(secs), 1e-6);
-         assertEquals(-secs * 1e3, Conversions.secondsToMilliSeconds(-secs), 1e-6);
+         assertEquals(secs * 1e3, Conversions.secondsToMilliseconds(secs), 1e-6);
+         assertEquals(-secs * 1e3, Conversions.secondsToMilliseconds(-secs), 1e-6);
       }
    }
 
@@ -123,8 +123,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          mSecs = (long) random.nextFloat() * 1000;
-         assertEquals(mSecs * 1e-3, Conversions.milliSecondsToSeconds(mSecs), 1e-6);
-         assertEquals(-mSecs * 1e-3, Conversions.milliSecondsToSeconds(-mSecs), 1e-6);
+         assertEquals(mSecs * 1e-3, Conversions.millisecondsToSeconds(mSecs), 1e-6);
+         assertEquals(-mSecs * 1e-3, Conversions.millisecondsToSeconds(-mSecs), 1e-6);
       }
    }
 
@@ -139,8 +139,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          mSecs = (long) random.nextFloat() * 1000;
-         assertEquals((mSecs * 1e-3) / 60.0, Conversions.milliSecondsToMinutes(mSecs), 1e-6);
-         assertEquals((-mSecs * 1e-3) / 60.0, Conversions.milliSecondsToMinutes(-mSecs), 1e-6);
+         assertEquals((mSecs * 1e-3) / 60.0, Conversions.millisecondsToMinutes(mSecs), 1e-6);
+         assertEquals((-mSecs * 1e-3) / 60.0, Conversions.millisecondsToMinutes(-mSecs), 1e-6);
       }
    }
 
@@ -155,8 +155,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          mSecs = (int) random.nextFloat() * 1000;
-         assertEquals((mSecs * 1e6), Conversions.milliSecondsToNanoSeconds(mSecs), 1e-6);
-         assertEquals((-mSecs * 1e6), Conversions.milliSecondsToNanoSeconds(-mSecs), 1e-6);
+         assertEquals((mSecs * 1e6), Conversions.millisecondsToNanoseconds(mSecs), 1e-6);
+         assertEquals((-mSecs * 1e6), Conversions.millisecondsToNanoseconds(-mSecs), 1e-6);
       }
    }
 
@@ -171,8 +171,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          mSecs = (int) random.nextFloat() * 1000;
-         assertEquals((mSecs * 1e-6), Conversions.microSecondsToSeconds(mSecs), 1e-6);
-         assertEquals((-mSecs * 1e-6), Conversions.microSecondsToSeconds(-mSecs), 1e-6);
+         assertEquals((mSecs * 1e-6), Conversions.microsecondsToSeconds(mSecs), 1e-6);
+         assertEquals((-mSecs * 1e-6), Conversions.microsecondsToSeconds(-mSecs), 1e-6);
       }
    }
 
@@ -219,8 +219,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          nSecs = (int) random.nextFloat() * 1000;
-         assertEquals((nSecs * 1e-6), Conversions.nanoSecondsToMillis(nSecs), 1e-6);
-         assertEquals((-nSecs * 1e-6), Conversions.nanoSecondsToMillis(-nSecs), 1e-6);
+         assertEquals((nSecs * 1e-6), Conversions.nanosecondsToMilliseconds(nSecs), 1e-6);
+         assertEquals((-nSecs * 1e-6), Conversions.nanosecondsToMilliseconds(-nSecs), 1e-6);
       }
    }
 
@@ -235,8 +235,8 @@ public class ConversionsTest
       for (int i = 0; i < 100; i++)
       {
          nSecs = (int) random.nextFloat() * 1000;
-         assertEquals((nSecs * 1e-3), Conversions.nanoSecondsToMicroseconds(nSecs), 1e-6);
-         assertEquals((-nSecs * 1e-3), Conversions.nanoSecondsToMicroseconds(-nSecs), 1e-6);
+         assertEquals((nSecs * 1e-3), Conversions.nanosecondsToMicroseconds(nSecs), 1e-6);
+         assertEquals((-nSecs * 1e-3), Conversions.nanosecondsToMicroseconds(-nSecs), 1e-6);
       }
    }
 

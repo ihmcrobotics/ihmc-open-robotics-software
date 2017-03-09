@@ -238,7 +238,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    {
       if (startTime == -1)
          startTime = time;
-      yoTime.set(Conversions.nanoSecondstoSeconds(time - startTime));
+      yoTime.set(Conversions.nanosecondsToSeconds(time - startTime));
 
       tauFunctionSelected.set(selectedFunctionGenerator.getValue());
 

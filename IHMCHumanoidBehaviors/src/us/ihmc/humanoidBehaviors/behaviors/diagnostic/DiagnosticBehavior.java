@@ -2678,13 +2678,13 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       RigidBodyTransform lastPelvisPoseInWorldFrame = new RigidBodyTransform();
       lastPelvisPoseInWorldFrame.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-      stateEstimatorPelvisPoseBuffer.put(lastPelvisPoseInWorldFrame, Conversions.secondsToNanoSeconds(yoTime.getDoubleValue()));
+      stateEstimatorPelvisPoseBuffer.put(lastPelvisPoseInWorldFrame, Conversions.secondsToNanoseconds(yoTime.getDoubleValue()));
 
       if (isIcpOffsetSenderEnabled.getBooleanValue())
       {
          if (yoTime.getDoubleValue() > previousIcpPacketSentTime.getDoubleValue() + 1.0)
          {
-            long timestamp = Conversions.secondsToNanoSeconds(yoTime.getDoubleValue() - icpTimeDelay.getDoubleValue());
+            long timestamp = Conversions.secondsToNanoseconds(yoTime.getDoubleValue() - icpTimeDelay.getDoubleValue());
 
             TimeStampedTransform3D pelvisTimeStampedTransformInThePast = new TimeStampedTransform3D();
             stateEstimatorPelvisPoseBuffer.findTransform(timestamp, pelvisTimeStampedTransformInThePast);

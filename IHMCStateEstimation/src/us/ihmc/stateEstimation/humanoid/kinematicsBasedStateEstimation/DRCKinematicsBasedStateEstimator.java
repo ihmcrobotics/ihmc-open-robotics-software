@@ -233,7 +233,7 @@ public class DRCKinematicsBasedStateEstimator implements DRCStateEstimatorInterf
          reinitializeStateEstimator.set(false);
          initialize();
       }
-      yoTime.set(Conversions.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp()));
+      yoTime.set(Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getTimestamp()));
 
       if (fusedIMUSensor != null)
          fusedIMUSensor.update();

@@ -169,7 +169,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    @Override
    public void tickAndUpdate(double timeToSetInSeconds)
    {
-      this.update(Conversions.secondsToNanoSeconds(timeToSetInSeconds));   
+      this.update(Conversions.secondsToNanoseconds(timeToSetInSeconds));   
    }
 
    /**
