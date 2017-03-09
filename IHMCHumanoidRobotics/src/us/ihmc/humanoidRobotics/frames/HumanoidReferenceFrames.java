@@ -45,7 +45,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final ReferenceFrame pelvisFrame;
    private final ZUpFrame pelvisZUpFrame;
    
-   private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
    private final EnumMap<SpineJointName, ReferenceFrame> spineReferenceFrames = ContainerTools.createEnumMap(SpineJointName.class);
    private final EnumMap<NeckJointName, ReferenceFrame> neckReferenceFrames = ContainerTools.createEnumMap(NeckJointName.class);
    private final SideDependentList<EnumMap<ArmJointName, ReferenceFrame>> armJointFrames = SideDependentList.createListOfEnumMaps(ArmJointName.class);
@@ -67,7 +66,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       if (fullRobotModel.getPelvis() != null)
       {
          pelvisFrame = fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint();
-         nameBasedHashCodeToReferenceFrameMap.put(pelvisFrame.nameBasedHashCode(), pelvisFrame);
       }
       else
       {
@@ -82,7 +80,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          chestFrame = null;
       }
       pelvisZUpFrame = new ZUpFrame(worldFrame, pelvisFrame, "pelvisZUpFrame");
-      nameBasedHashCodeToReferenceFrameMap.put(pelvisZUpFrame.nameBasedHashCode(), pelvisZUpFrame);
 
       RobotSpecificJointNames robotJointNames = fullRobotModel.getRobotSpecificJointNames();
 
@@ -125,19 +122,15 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
      {
          ZUpFrame ankleZUpFrame = new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
-         nameBasedHashCodeToReferenceFrameMap.put(ankleZUpFrame.nameBasedHashCode(), ankleZUpFrame);
 
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-         nameBasedHashCodeToReferenceFrameMap.put(soleFrame.nameBasedHashCode(), soleFrame);
          soleFrames.put(robotSide, soleFrame);
          
          ZUpFrame soleZUpFrame = new ZUpFrame(worldFrame, soleFrame, soleFrame.getName() + "ZUp");
-         nameBasedHashCodeToReferenceFrameMap.put(soleZUpFrame.nameBasedHashCode(), soleZUpFrame);
          soleZUpFrames.put(robotSide, soleZUpFrame);
       }
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
-      nameBasedHashCodeToReferenceFrameMap.put(midFeetZUpFrame.nameBasedHashCode(), midFeetZUpFrame);
 
       //this is a frame that is directly between the 2 feet but faces forward instead of perpendicular to the line between the feet
       midFeetZUpWalkDirectionFrame = new ReferenceFrame("midFeetZUpWalkDirectionFrame", ReferenceFrame.getWorldFrame())
@@ -171,7 +164,6 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
             midFootZUpPose.getPose(transformToParent);
          }
       };
-      nameBasedHashCodeToReferenceFrameMap.put(midFeetZUpWalkDirectionFrame.nameBasedHashCode(), midFeetZUpWalkDirectionFrame);
       
       // this is a
       midFeetUnderPelvisWalkDirectionFrame = new ReferenceFrame("midFeetUnderPelvisWalkDirectionFrame", ReferenceFrame.getWorldFrame())
@@ -192,37 +184,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
             midFeetPose.getPose(transformToParent);
          }
       };
-      nameBasedHashCodeToReferenceFrameMap.put(midFeetUnderPelvisWalkDirectionFrame.nameBasedHashCode(), midFeetUnderPelvisWalkDirectionFrame);
 
       RigidBody elevator = fullRobotModel.getElevator();
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
-      nameBasedHashCodeToReferenceFrameMap.put(centerOfMassFrame.nameBasedHashCode(), centerOfMassFrame);
-      
-      // a little repetitive, but better than recursion
-      for(OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
-      {
-         ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
-         ReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
-         ReferenceFrame comLinkBefore = joint.getPredecessor().getBodyFixedFrame();
-         ReferenceFrame comLinkAfter = joint.getSuccessor().getBodyFixedFrame();
-         
-         nameBasedHashCodeToReferenceFrameMap.put(frameBeforeJoint.nameBasedHashCode(), frameBeforeJoint);
-         nameBasedHashCodeToReferenceFrameMap.put(frameAfterJoint.nameBasedHashCode(), frameAfterJoint);
-         nameBasedHashCodeToReferenceFrameMap.put(comLinkBefore.nameBasedHashCode(), comLinkBefore);
-         nameBasedHashCodeToReferenceFrameMap.put(comLinkAfter.nameBasedHashCode(), comLinkAfter);
-      }
-      ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
-      nameBasedHashCodeToReferenceFrameMap.put(elevatorFrame.nameBasedHashCode(), elevatorFrame);
-      nameBasedHashCodeToReferenceFrameMap.put(ReferenceFrame.getWorldFrame().nameBasedHashCode(), ReferenceFrame.getWorldFrame());
-      
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         if(handControlFrame != null)
-         {
-            nameBasedHashCodeToReferenceFrameMap.put(handControlFrame.nameBasedHashCode(), handControlFrame);
-         }
-      }
    }
 
    @Override
@@ -425,10 +389,5 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public SideDependentList<ReferenceFrame> getSoleZUpFrames()
    {
       return soleZUpFrames;
-   }
-
-   public ReferenceFrame getReferenceFrameFromNameBaseHashCode(long nameBasedHashCode)
-   {
-      return nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
    }
 }

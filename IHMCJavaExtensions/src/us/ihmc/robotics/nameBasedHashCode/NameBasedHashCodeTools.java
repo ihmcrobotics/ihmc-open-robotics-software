@@ -47,16 +47,16 @@ public class NameBasedHashCodeTools
 
    public static long combineHashCodes(long hashCodeToUpdate, NameBasedHashCodeHolder holder)
    {
-      return PRIME * hashCodeToUpdate + (holder == null ? NULL_HASHCODE : holder.nameBasedHashCode());
+      return PRIME * hashCodeToUpdate + (holder == null ? NULL_HASHCODE : holder.getNameBasedHashCode());
    }
 
    public static long combineHashCodes(NameBasedHashCodeHolder holder1, NameBasedHashCodeHolder holder2)
    {
-      return PRIME * (holder1 == null ? NULL_HASHCODE : holder1.nameBasedHashCode()) + (holder2 == null ? NULL_HASHCODE : holder2.nameBasedHashCode());
+      return PRIME * (holder1 == null ? NULL_HASHCODE : holder1.getNameBasedHashCode()) + (holder2 == null ? NULL_HASHCODE : holder2.getNameBasedHashCode());
    }
 
    public static long combineHashCodes(String string, NameBasedHashCodeHolder holder)
    {
-      return PRIME * computeStringHashCode(string) + (holder == null ? NULL_HASHCODE : holder.nameBasedHashCode());
+      return PRIME * computeStringHashCode(string) + (holder == null ? NULL_HASHCODE : holder.getNameBasedHashCode());
    }
 }
