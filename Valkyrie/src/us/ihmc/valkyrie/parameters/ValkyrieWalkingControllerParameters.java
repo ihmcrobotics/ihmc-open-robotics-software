@@ -14,6 +14,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -53,6 +54,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
+   private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
    {
@@ -748,6 +750,46 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       return positionControlledJoints;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   {
+      if (integrationSettings != null)
+         return integrationSettings;
+
+      integrationSettings = new HashMap<String, JointAccelerationIntegrationSettings>();
+
+      JointAccelerationIntegrationSettings neckJointSettings = new JointAccelerationIntegrationSettings();
+      neckJointSettings.setAlphaPosition(0.9996);
+      neckJointSettings.setAlphaVelocity(0.95);
+      neckJointSettings.setMaxPositionError(0.2);
+      neckJointSettings.setMaxVelocity(2.0);
+
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
+
+      JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
+      elbowJointSettings.setAlphaPosition(0.999);
+      elbowJointSettings.setAlphaVelocity(0.83);
+      elbowJointSettings.setMaxPositionError(0.2);
+      elbowJointSettings.setMaxVelocity(2.0);
+
+      JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
+      wristJointSettings.setAlphaPosition(0.999);
+      wristJointSettings.setAlphaVelocity(0.83);
+      wristJointSettings.setMaxPositionError(0.2);
+      wristJointSettings.setMaxVelocity(2.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), elbowJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), wristJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), wristJointSettings);
+      }
+
+      return integrationSettings;
    }
 
    @Override
