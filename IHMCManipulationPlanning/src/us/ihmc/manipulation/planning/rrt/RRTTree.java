@@ -32,19 +32,19 @@ public class RRTTree
    protected RRTNode nearNode;
    protected RRTNode newNode;
    protected double stepLength;
-   
+
    protected RRTNode upperBoundNode;
    protected RRTNode lowerBoundNode;
    protected ArrayList<RRTNode> pathNode = new ArrayList<RRTNode>();
-   
+
    private RRTNode nodeCreator;
-   
+
    public RRTTree(RRTNode rootNode)
    {
       this.rootNode = rootNode;
       nodeCreator = rootNode.createNode();
    }
-   
+
    public void setStepLength(double length)
    {
       this.stepLength = length;
@@ -54,12 +54,12 @@ public class RRTTree
    {
       return this.stepLength;
    }
-   
+
    public void setUpperBound(RRTNode upperBoundNode)
    {
       this.upperBoundNode = upperBoundNode;
    }
-   
+
    public void setLowerBound(RRTNode lowerBoundNode)
    {
       this.lowerBoundNode = lowerBoundNode;
@@ -77,21 +77,22 @@ public class RRTTree
       Random randomManager = new Random();
       for (int i = 0; i < randomNode.getDimensionOfNodeData(); i++)
       {
-         double randonValue = randomManager.nextDouble() * (this.upperBoundNode.getNodeData(i) - this.lowerBoundNode.getNodeData(i)) + this.lowerBoundNode.getNodeData(i);
-         randomNode.setNodeData(i, randonValue);         
+         double randonValue = randomManager.nextDouble() * (this.upperBoundNode.getNodeData(i) - this.lowerBoundNode.getNodeData(i))
+               + this.lowerBoundNode.getNodeData(i);
+         randomNode.setNodeData(i, randonValue);
       }
       return randomNode;
    }
-   
+
    public boolean expandTree()
    {
       RRTNode node = getRandomNode();
       updateNearNodeForTargetNode(node);
-      this.newNode = getNewNode(node);      
-      
+      this.newNode = getNewNode(node);
+
       return addNewNode();
    }
-   
+
    public boolean expandTree(RRTNode node)
    {
       updateNearNodeForTargetNode(node);
@@ -100,7 +101,7 @@ public class RRTTree
    }
 
    public void updateNearNodeForTargetNode(RRTNode targetNode)
-   {      
+   {
       RRTNode[] nodeOnCurrentLevel;
       RRTNode[] nodeOnFutureLevel;
       int currentLevel = 0;
@@ -183,77 +184,81 @@ public class RRTTree
             double normalizedDistance = (targetNode.getNodeData(i) - nearNode.getNodeData(i)) / nearNode.getDistance(targetNode);
             newNode.setNodeData(i, nearNode.getNodeData(i) + getStepLength() * normalizedDistance);
          }
-      }      
+      }
       return newNode;
    }
-   
+
    public boolean addNewNode()
-   {      
-      if(this.newNode.isValidNode() == true)
+   {
+      if (this.newNode.isValidNode() == true)
       {
-         nearNode.addChildNode(this.newNode);
-         return true;
+         RRTPiecewiseNode nodeConnectionTest = new RRTPiecewiseNode(this.nearNode, this.newNode);
+         if (nodeConnectionTest.isValidConnection())
+         {
+            nearNode.addChildNode(this.newNode);
+            return true;
+         }
       }
       else
       {
          // PrintTools.info("The newly created node is unvalid");
-      }         
+      }
       return false;
    }
-   
+
    public void updatePath(RRTNode endNode)
    {
       this.pathNode.clear();
-      
+
       ArrayList<RRTNode> pathNodeOne = new ArrayList<RRTNode>();
       RRTNode singleNode = endNode;
-      while(true)
+      while (true)
       {
          pathNodeOne.add(singleNode);
-         if(singleNode == rootNode)
+         if (singleNode == rootNode)
          {
             PrintTools.info("node Path is completely built");
-            break;            
+            break;
          }
          singleNode = singleNode.getParentNode();
       }
-      
+
       int pathSize = pathNodeOne.size();
-      for(int i=0;i<pathSize;i++)
+      for (int i = 0; i < pathSize; i++)
       {
-         pathNode.add(pathNodeOne.get(pathSize-i-1));
-      }          
+         pathNode.add(pathNodeOne.get(pathSize - i - 1));
+      }
    }
-   
+
    private void warningMessage()
    {
-      if(upperBoundNode == null || lowerBoundNode == null)
+      if (upperBoundNode == null || lowerBoundNode == null)
       {
          PrintTools.info("Searching boundary should be defined (Use methods setUpperBound and setLowerBound)");
       }
-      if(stepLength == 0)
+      if (stepLength == 0)
       {
          PrintTools.info("Step length should be defined (Use methods setStepLength)");
       }
    }
-   
+
    public RRTNode getRootNode()
    {
       return rootNode;
    }
-   
+
    public RRTNode getNearNode()
    {
       return nearNode;
    }
-   
+
    public RRTNode getNewNode()
    {
       return newNode;
    }
-   
+
    public ArrayList<RRTNode> getPathNode()
    {
-      return pathNode;      
+      return pathNode;
    }
 }
