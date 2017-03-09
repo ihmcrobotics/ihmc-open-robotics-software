@@ -20,6 +20,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -64,6 +65,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    private final ConcurrentListeningQueue<KinematicsToolboxOutputStatus> kinematicsToolboxOutputQueue = new ConcurrentListeningQueue<>(40);
    private KinematicsToolboxOutputStatus solutionSentToController = null;
+   
+   private final ReferenceFrame pelvisZUpFrame;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable timeSolutionSentToController;
@@ -80,6 +83,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       super(namePrefix, outgoingCommunicationBridge);
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();;
 
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.005);
@@ -305,7 +310,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          YoFrameQuaternion yoDesiredChestQuaternion = yoDesiredChestOrientation;
          Quaternion desiredChestOrientation = new Quaternion();
          yoDesiredChestQuaternion.get(desiredChestOrientation);
-         chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation);
+         chestTrajectoryMessage = new ChestTrajectoryMessage(0.0, desiredChestOrientation, worldFrame, pelvisZUpFrame);
       }
 
       if (yoDesiredPelvisOrientation.containsNaN())

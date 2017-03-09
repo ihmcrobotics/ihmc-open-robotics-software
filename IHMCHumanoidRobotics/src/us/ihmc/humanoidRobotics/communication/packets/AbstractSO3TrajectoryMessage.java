@@ -12,17 +12,21 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable
+public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable, FrameBasedMessage
 {
    @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
 
    @RosIgnoredField
    public float[] selectionMatrixDiagonal;
+   
+   public long trajectoryReferenceFrameId;
+   public long expressedInReferenceFrameId;
 
    /**
     * Empty constructor for serialization.
@@ -44,6 +48,9 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       {
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(random);
       }
+      
+      trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
+      expressedInReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
    }
 
    public AbstractSO3TrajectoryMessage(AbstractSO3TrajectoryMessage<?> so3TrajectoryMessage)
@@ -55,15 +62,28 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
       setUniqueId(so3TrajectoryMessage.getUniqueId());
       setDestination(so3TrajectoryMessage.getDestination());
+      trajectoryReferenceFrameId = so3TrajectoryMessage.getTrajectoryReferenceFrameId();
+      expressedInReferenceFrameId = so3TrajectoryMessage.getExpressedInReferenceFrameId();
    }
 
-   public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
+   public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame)
    {
       Vector3D zeroAngularVelocity = new Vector3D();
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {new SO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      trajectoryReferenceFrameId = trajectoryFrame.getNameBasedHashCode();
+      expressedInReferenceFrameId = expressedInFrame.getNameBasedHashCode();
    }
-
+   
+   public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long expressedInFrameId, long trajectoryReferenceFrameId)
+   {
+      Vector3D zeroAngularVelocity = new Vector3D();
+      taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[] {new SO3TrajectoryPointMessage(trajectoryTime, desiredOrientation, zeroAngularVelocity)};
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
+      this.expressedInReferenceFrameId = expressedInFrameId;
+   }
+   
    public AbstractSO3TrajectoryMessage(int numberOfTrajectoryPoints)
    {
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
@@ -72,7 +92,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void getTrajectoryPoints(FrameSO3TrajectoryPointList trajectoryPointListToPack)
    {
-      trajectoryPointListToPack.clear(ReferenceFrame.getWorldFrame());
+//      trajectoryPointListToPack.clear(ReferenceFrame.getWorldFrame());
 
       SO3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.length;
@@ -92,17 +112,34 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
+      trajectoryReferenceFrameId = other.getTrajectoryReferenceFrameId();
+      expressedInReferenceFrameId = other.getExpressedInReferenceFrameId();
    }
 
    /**
     * Create a trajectory point.
     * @param trajectoryPointIndex index of the trajectory point to create.
     * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
-    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.
-    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.
+    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
     */
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity)
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
    {
+      checkIfTrajectoryFrameIdsMatch(this.expressedInReferenceFrameId, expressedInReferenceFrame);
+      rangeCheck(trajectoryPointIndex);
+      taskspaceTrajectoryPoints[trajectoryPointIndex] = new SO3TrajectoryPointMessage(time, orientation, angularVelocity);
+   }
+
+   /**
+    * Create a trajectory point.
+    * @param trajectoryPointIndex index of the trajectory point to create.
+    * @param time time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.
+    * @param orientation define the desired 3D orientation to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
+    * @param angularVelocity define the desired 3D angular velocity to be reached at this trajectory point. It is should be expressed in the frame defined by referenceFrameId
+    */
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Quaternion orientation, Vector3D angularVelocity, long expressedInReferenceFrameId)
+   {
+      checkIfFrameIdsMatch(this.expressedInReferenceFrameId, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
       taskspaceTrajectoryPoints[trajectoryPointIndex] = new SO3TrajectoryPointMessage(time, orientation, angularVelocity);
    }
@@ -197,7 +234,8 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    public String toString()
    {
       if (taskspaceTrajectoryPoints != null)
-         return getClass().getSimpleName() + ": number of SO3 trajectory points = " + getNumberOfTrajectoryPoints();
+         return getClass().getSimpleName() + ": number of SO3 trajectory points = " + getNumberOfTrajectoryPoints() + " expressed in frame id: "
+               + getExpressedInReferenceFrameId() + " trajectory frame id: " + getTrajectoryReferenceFrameId();
       else
          return getClass().getSimpleName() + ": no SO3 trajectory points";
    }
@@ -205,6 +243,16 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    @Override
    public boolean epsilonEquals(T other, double epsilon)
    {
+      if(expressedInReferenceFrameId != other.expressedInReferenceFrameId)
+      {
+         return false;
+      }
+      
+      if(trajectoryReferenceFrameId != other.getTrajectoryReferenceFrameId())
+      {
+         return false;
+      }
+      
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          return false;
 
@@ -215,5 +263,59 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       }
 
       return super.epsilonEquals(other, epsilon);
+   }
+   
+   @Override
+   public long getTrajectoryReferenceFrameId()
+   {
+      return trajectoryReferenceFrameId;
+   }
+
+   @Override
+   public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
+   {
+      this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
+   }
+   
+   @Override
+   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
+   {
+      trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
+   }
+   
+   @Override
+   public long getExpressedInReferenceFrameId()
+   {
+      return expressedInReferenceFrameId;
+   }
+   
+   @Override
+   public void setExpressedInReferenceFrameId(long expressedInReferenceFrameId)
+   {
+      this.expressedInReferenceFrameId = expressedInReferenceFrameId;
+   }
+   
+   @Override
+   public void setExpressedInReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
+   {
+      this.expressedInReferenceFrameId = expressedInReferenceFrame.getNameBasedHashCode();
+   }
+   
+   private void checkIfTrajectoryFrameIdsMatch(long frameId, ReferenceFrame referenceFrame)
+   {
+      if(frameId != referenceFrame.getNameBasedHashCode())
+      {
+         String msg = "Argument's hashcode " + referenceFrame + " " +  referenceFrame.getNameBasedHashCode() + " does not match " + frameId;
+         throw new ReferenceFrameMismatchException(msg);
+      }
+   }
+   
+   private void checkIfFrameIdsMatch(long frameId, long otherReferenceFrameId)
+   {
+      if(frameId != otherReferenceFrameId)
+      {
+         String msg = "Argument's hashcode " + otherReferenceFrameId + " does not match " + frameId;
+         throw new ReferenceFrameMismatchException(msg);
+      }
    }
 }

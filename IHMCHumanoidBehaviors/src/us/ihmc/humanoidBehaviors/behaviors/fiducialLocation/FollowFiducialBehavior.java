@@ -267,7 +267,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
 
    private void sendHeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
-      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation);
+      ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
 
       headTrajectoryMessage.setDestination(PacketDestination.UI);
       sendPacket(headTrajectoryMessage);

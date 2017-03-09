@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMess
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -67,12 +68,15 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
    private final DoubleYoVariable transferTime = new DoubleYoVariable(prefix + "TransferTime", registry);
    private final IntegerYoVariable maxNumberOfStepsToTake = new IntegerYoVariable(prefix + "NumberOfStepsToTake", registry);
 
+   private final FullRobotModel fullRobotModel;
+
    public WalkOverTerrainStateMachineBehavior(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions, LogModelProvider logModelProvider, FullHumanoidRobotModel fullRobotModel,
                                               HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
    {
       super(goalDetectorBehaviorService.getClass().getSimpleName(), "WalkOverTerrain_" + goalDetectorBehaviorService.getClass().getSimpleName(), WalkOverTerrainState.class, yoTime, communicationBridge);
 
       this.yoTime = yoTime;
+      this.fullRobotModel = fullRobotModel;
 
       nextSideToSwing = new EnumYoVariable<>("nextSideToSwing", registry, RobotSide.class);
       nextSideToSwing.set(RobotSide.LEFT);
@@ -293,6 +297,8 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
 
       public void setupPipeLine()
       {
+         ReferenceFrame chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         
          BehaviorAction lookUpAction = new BehaviorAction(atlasPrimitiveActions.headTrajectoryBehavior)
          {
             @Override
@@ -301,7 +307,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
                AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 4.0);
                Quaternion headOrientation = new Quaternion();
                headOrientation.set(orientationAxisAngle);
-               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(0.5, headOrientation);
+               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(0.5, headOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
                atlasPrimitiveActions.headTrajectoryBehavior.setInput(headTrajectoryMessage);
             }
          };
@@ -314,7 +320,7 @@ public class WalkOverTerrainStateMachineBehavior extends StateMachineBehavior<Wa
                AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0);
                Quaternion headOrientation = new Quaternion();
                headOrientation.set(orientationAxisAngle);
-               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(2.0, headOrientation);
+               HeadTrajectoryMessage headTrajectoryMessage = new HeadTrajectoryMessage(2.0, headOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
                atlasPrimitiveActions.headTrajectoryBehavior.setInput(headTrajectoryMessage);
             }
          };

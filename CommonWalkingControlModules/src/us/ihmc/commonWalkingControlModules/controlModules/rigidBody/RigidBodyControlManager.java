@@ -203,7 +203,7 @@ public class RigidBodyControlManager
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
       computeDesiredOrientation(initialOrientation);
-      initialOrientation.changeFrame(command.getReferenceFrame());
+      initialOrientation.changeFrame(command.getExpressedInFrame());
 
       if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialOrientation))
       {
