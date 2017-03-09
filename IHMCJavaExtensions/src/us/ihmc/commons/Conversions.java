@@ -223,7 +223,10 @@ public class Conversions
    {
       return nanoseconds / microToNano;
    }
-
+   
+   /**
+    * TODO: Clean and document me!
+    */
    public static double[] convertRadPerSecondToHz(double[] freqInRadPerSecond)
    {
       double[] frequencyInHz = new double[freqInRadPerSecond.length];
@@ -236,6 +239,9 @@ public class Conversions
       return frequencyInHz;
    }
 
+   /**
+    * TODO: Clean and document me!
+    */
    public static double convertRadPerSecondToHz(double freqInRadPerSecond)
    {
       double frequencyInHz = freqInRadPerSecond / (2.0 * Math.PI);
@@ -243,6 +249,9 @@ public class Conversions
       return frequencyInHz;
    }
 
+   /**
+    * TODO: Clean and document me!
+    */
    public static double[] convertRadianToDegrees(double[] phaseInRadian)
    {
       double[] phaseInDegrees = new double[phaseInRadian.length];
@@ -255,6 +264,9 @@ public class Conversions
       return phaseInDegrees;
    }
 
+   /**
+    * TODO: Clean and document me!
+    */
    public static double convertRadianToDegrees(double phaseInRadian)
    {
       double phaseInDegrees = phaseInRadian * 180.0 / Math.PI;
@@ -262,6 +274,9 @@ public class Conversions
       return phaseInDegrees;
    }
 
+   /**
+    * TODO: Clean and document me!
+    */
    public static double[] convertMagnitudeToDecibels(double[] magnitudesInUnits)
    {
       int n = magnitudesInUnits.length;
@@ -276,6 +291,9 @@ public class Conversions
       return magnitudeInDecibels;
    }
 
+   /**
+    * TODO: Clean and document me!
+    */
    public static double convertMagnitudeToDecibels(double magnitudesInUnits)
    {
       double magnitudeInDecibels = 20.0 * Math.log10(magnitudesInUnits);
