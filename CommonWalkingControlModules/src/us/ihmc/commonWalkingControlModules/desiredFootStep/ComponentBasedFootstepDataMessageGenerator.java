@@ -78,8 +78,8 @@ public class ComponentBasedFootstepDataMessageGenerator implements Updatable
       RobotSide supportLeg = nextSwingLeg.getEnumValue().getOppositeSide();
 
       FootstepDataListMessage footsteps = computeNextFootsteps(supportLeg);
-      footsteps.setDefaultSwingTime(swingTime.getDoubleValue());
-      footsteps.setDefaultTransferTime(transferTime.getDoubleValue());
+      footsteps.setDefaultSwingDuration(swingTime.getDoubleValue());
+      footsteps.setDefaultTransferDuration(transferTime.getDoubleValue());
       commandInputManager.submitMessage(footsteps);
 
       nextSwingLeg.set(supportLeg);

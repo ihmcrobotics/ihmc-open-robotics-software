@@ -5,10 +5,19 @@ package us.ihmc.humanoidRobotics.footstep;
  */
 public class FootstepTiming
 {
+   /** The nominal swing duration of a footstep as specified in the FootstepData */
    private double swingTime = Double.NaN;
+
+   /** The nominal transfer duration of a footstep as specified in the FootstepData */
    private double transferTime = Double.NaN;
+
+   /** Boolean that tells the controller whether it should attempt achieving absolute timings */
    private boolean hasAbsoluteTime = false;
+
+   /** The absolute start time of the swing is computed by the controller if absolute timings are requested */
    private double swingStartTime = Double.NaN;
+
+   /** The controller time at which the footstep data list starts executing if absolute timings are requested */
    private double executionStartTime = Double.NaN;
 
    public FootstepTiming()

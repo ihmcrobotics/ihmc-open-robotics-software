@@ -606,8 +606,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                                                      double transferTime)
       {
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingTime(swingTime);
-         footstepDataListMessage.setDefaultTransferTime(transferTime);
+         footstepDataListMessage.setDefaultSwingDuration(swingTime);
+         footstepDataListMessage.setDefaultTransferDuration(transferTime);
          int numSteps = plan.getNumberOfSteps();
          int lastStepIndex = Math.min(startIndex + maxNumberOfStepsToTake + 1, numSteps);
          for (int i = 1 + startIndex; i < lastStepIndex; i++)
@@ -635,8 +635,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                                                      double transferTime, PlanarRegionsList planarRegionsList)
       {
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingTime(swingTime);
-         footstepDataListMessage.setDefaultTransferTime(transferTime);
+         footstepDataListMessage.setDefaultSwingDuration(swingTime);
+         footstepDataListMessage.setDefaultTransferDuration(transferTime);
          int numSteps = plan.getNumberOfSteps();
          int lastStepIndex = Math.min(startIndex + maxNumberOfStepsToTake + 1, numSteps);
          
@@ -712,8 +712,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
          // make footstep data message
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingTime(swingTime.getDoubleValue());
-         footstepDataListMessage.setDefaultTransferTime(transferTime.getDoubleValue());
+         footstepDataListMessage.setDefaultSwingDuration(swingTime.getDoubleValue());
+         footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
          Point3D position = new Point3D();
          Quaternion orientation = new Quaternion();
          stepPose.getPosition(position);
