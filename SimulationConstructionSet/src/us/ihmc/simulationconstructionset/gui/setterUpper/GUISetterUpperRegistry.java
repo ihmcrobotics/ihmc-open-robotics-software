@@ -3,6 +3,7 @@ package us.ihmc.simulationconstructionset.gui;
 import java.util.ArrayList;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.setterUpper.GUISetterUpper;
 
 public class GUISetterUpperRegistry
 {
