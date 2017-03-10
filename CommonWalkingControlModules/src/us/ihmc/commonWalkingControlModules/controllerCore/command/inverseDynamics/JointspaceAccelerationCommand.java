@@ -138,7 +138,8 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       {
          boolean isJointHardConstraint = getWeight(jointIdx) == HARD_CONSTRAINT;
          if (isJointHardConstraint != isHardConstraint)
-            throw new RuntimeException("Inconsistent weights in " + getClass().getSimpleName());
+            throw new RuntimeException("Inconsistent weights in " + getClass().getSimpleName() + ": some joint acceleration "
+                  + "desireds have weights, others are hard constraints. This is not supported in a single message.");
       }
 
       return isHardConstraint;
