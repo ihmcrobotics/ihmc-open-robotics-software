@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionset.gui.setterUpper;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
