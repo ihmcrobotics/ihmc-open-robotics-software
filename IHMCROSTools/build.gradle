@@ -87,6 +87,7 @@ dependencies {
  	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
