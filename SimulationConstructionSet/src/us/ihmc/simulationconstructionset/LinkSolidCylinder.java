@@ -1,17 +1,16 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.graphics3DAdapter.graphics.Graphics3DObject;
-import us.ihmc.graphics3DAdapter.graphics.appearances.AppearanceDefinition;
-import us.ihmc.graphics3DAdapter.graphics.appearances.YoAppearance;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
@@ -35,7 +34,7 @@ public class LinkSolidCylinder extends Link
    private final Graphics3DObject boneGeometry;
    private final Graphics3DObject jointAxisGeometry;
 
-   public LinkSolidCylinder(String name, Vector3d cylinderZAxisInWorld, double length, double radius, AppearanceDefinition color)
+   public LinkSolidCylinder(String name, Vector3D cylinderZAxisInWorld, double length, double radius, AppearanceDefinition color)
    {
       this(name, cylinderZAxisInWorld, computeMassOfHollowCylinder(length, radius), length, radius, color);
    }
@@ -47,21 +46,21 @@ public class LinkSolidCylinder extends Link
       return materialVolume * aluminumDensityKgPerCubicM;
    }
    
-   public LinkSolidCylinder(String name, Vector3d cylinderZAxisInWorld, double mass, double length, double radius, AppearanceDefinition color)
+   public LinkSolidCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, AppearanceDefinition color)
    {
       this(name, cylinderZAxisInWorld, mass, length, radius, attachParentJointToDistalEndOfCylinder(cylinderZAxisInWorld, length), color);
    }
 
-   private static Vector3d attachParentJointToDistalEndOfCylinder(Vector3d cylinderZAxisInWorld, double length)
+   private static Vector3D attachParentJointToDistalEndOfCylinder(Vector3D cylinderZAxisInWorld, double length)
    {
-      Vector3d parentJointOffsetFromCoM = new Vector3d(cylinderZAxisInWorld);
+      Vector3D parentJointOffsetFromCoM = new Vector3D(cylinderZAxisInWorld);
       parentJointOffsetFromCoM.normalize();
       parentJointOffsetFromCoM.scale(-length / 2.0);
 
       return parentJointOffsetFromCoM;
    }
 
-   public LinkSolidCylinder(String name, Vector3d cylinderZAxisInWorld, double mass, double length, double radius, Vector3d parentJointOffsetFromCoM,
+   public LinkSolidCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, Vector3D parentJointOffsetFromCoM,
          AppearanceDefinition color)
    {
       super(name);
@@ -75,7 +74,7 @@ public class LinkSolidCylinder extends Link
 
       comOffset.set(parentJointOffsetFromCoM);
 
-      Matrix3d moiInCylinderFrame = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
+      Matrix3D moiInCylinderFrame = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
 
       Boolean computeMoiInWorldInternally = false;
 
@@ -92,12 +91,12 @@ public class LinkSolidCylinder extends Link
          double[] eigenvectors = new double[] { linkXAxis.getX(), linkYAxis.getX(), linkZAxis.getX(), linkXAxis.getY(), linkYAxis.getY(), linkZAxis.getY(),
                linkXAxis.getZ(), linkYAxis.getZ(), linkZAxis.getZ() };
 
-         Matrix3d Q = new Matrix3d(eigenvectors);
+         Matrix3D Q = new Matrix3D(eigenvectors);
 
-         Matrix3d moiInWorldFrame = new Matrix3d();
+         Matrix3D moiInWorldFrame = new Matrix3D();
 
-         moiInCylinderFrame.mulTransposeRight(moiInCylinderFrame, Q);
-         moiInWorldFrame.mul(Q, moiInCylinderFrame);
+         moiInCylinderFrame.multiplyTransposeOther(Q);
+         moiInWorldFrame.preMultiply(Q);
 
          this.setMass(mass);
          setMomentOfInertia(moiInWorldFrame);
@@ -117,8 +116,8 @@ public class LinkSolidCylinder extends Link
       this.addEllipsoidFromMassProperties2(color);
    }
 
-   private Graphics3DObject createCylinderGeometry(double length, double radius, AppearanceDefinition color, Vector3d cylinderZAxisInWorld,
-         Vector3d parentJointOffsetFromCoM)
+   private Graphics3DObject createCylinderGeometry(double length, double radius, AppearanceDefinition color, Vector3D cylinderZAxisInWorld,
+         Vector3D parentJointOffsetFromCoM)
    {
       Graphics3DObject ret = new Graphics3DObject();
       ret.addSphere(1.5*radius, YoAppearance.BlackMetalMaterial());
@@ -126,11 +125,11 @@ public class LinkSolidCylinder extends Link
       ret.identity();
       ret.translate(parentJointOffsetFromCoM);
 
-      AxisAngle4d cylinderRotationFromZup;
+      AxisAngle cylinderRotationFromZup;
       if (parentJointOffsetFromCoM.length() > 0.0)
-         cylinderRotationFromZup = GeometryTools.getRotationBasedOnNormal(parentJointOffsetFromCoM);
+         cylinderRotationFromZup = EuclidGeometryTools.axisAngleFromZUpToVector3D(parentJointOffsetFromCoM);
       else
-         cylinderRotationFromZup = GeometryTools.getRotationBasedOnNormal(cylinderZAxisInWorld);
+         cylinderRotationFromZup = EuclidGeometryTools.axisAngleFromZUpToVector3D(cylinderZAxisInWorld);
       ret.rotate(cylinderRotationFromZup);
       ret.translate(0.0, 0.0, -length / 2.0);
       ret.addCylinder(length, radius, color);
@@ -138,8 +137,8 @@ public class LinkSolidCylinder extends Link
       return ret;
    }
 
-   private Graphics3DObject createBoneGeometry(double length, double radius, AppearanceDefinition color, Vector3d cylinderZAxisInWorld,
-         Vector3d parentJointOffsetFromCoM)
+   private Graphics3DObject createBoneGeometry(double length, double radius, AppearanceDefinition color, Vector3D cylinderZAxisInWorld,
+         Vector3D parentJointOffsetFromCoM)
    {
       Graphics3DObject ret = new Graphics3DObject();
 
@@ -147,18 +146,18 @@ public class LinkSolidCylinder extends Link
       ret.addSphere(1.5*radius, YoAppearance.BlackMetalMaterial());
       ret.translate(parentJointOffsetFromCoM);
 
-      AxisAngle4d cylinderRotationFromZup;
+      AxisAngle cylinderRotationFromZup;
       if (parentJointOffsetFromCoM.length() > 0.0)
-         cylinderRotationFromZup = GeometryTools.getRotationBasedOnNormal(parentJointOffsetFromCoM);
+         cylinderRotationFromZup = EuclidGeometryTools.axisAngleFromZUpToVector3D(parentJointOffsetFromCoM);
       else
-         cylinderRotationFromZup = GeometryTools.getRotationBasedOnNormal(cylinderZAxisInWorld);
+         cylinderRotationFromZup = EuclidGeometryTools.axisAngleFromZUpToVector3D(cylinderZAxisInWorld);
       ret.rotate(cylinderRotationFromZup);
       ret.translate(0.0, 0.0, -0.5 * length);
       ret.addCone(1.0 * length, radius, color);
       ret.translate(0.0, 0.0, 0.5 * length);
 
-      Vector3d rotationAxis = new Vector3d(cylinderRotationFromZup.x, cylinderRotationFromZup.y, cylinderRotationFromZup.z);
-      AxisAngle4d another180DegreeRotation = new AxisAngle4d(rotationAxis, Math.PI);
+      Vector3D rotationAxis = new Vector3D(cylinderRotationFromZup.getX(), cylinderRotationFromZup.getY(), cylinderRotationFromZup.getZ());
+      AxisAngle another180DegreeRotation = new AxisAngle(rotationAxis, Math.PI);
       ret.rotate(another180DegreeRotation);
       ret.translate(0.0, 0.0, -0.5 * length);
       ret.addCone(1.0 * length, radius, color);
@@ -167,19 +166,19 @@ public class LinkSolidCylinder extends Link
       return ret;
    }
    
-   private Graphics3DObject createJointAxisGeometry(double length, double radius, AppearanceDefinition color, Vector3d cylinderZAxisInWorld,
-         Vector3d parentJointOffsetFromCoM)
+   private Graphics3DObject createJointAxisGeometry(double length, double radius, AppearanceDefinition color, Vector3D cylinderZAxisInWorld,
+         Vector3D parentJointOffsetFromCoM)
    {
       Graphics3DObject ret = new Graphics3DObject();
 
       ret.identity();
       ret.translate(parentJointOffsetFromCoM);
 
-      AxisAngle4d cylinderRotationFromZup;
+      AxisAngle cylinderRotationFromZup;
       if (parentJointOffsetFromCoM.length() > 0.0)
-         cylinderRotationFromZup = GeometryTools.getRotationBasedOnNormal(parentJointOffsetFromCoM);
+         cylinderRotationFromZup = EuclidGeometryTools.axisAngleFromZUpToVector3D(parentJointOffsetFromCoM);
       else
-         cylinderRotationFromZup = GeometryTools.getRotationBasedOnNormal(cylinderZAxisInWorld);
+         cylinderRotationFromZup = EuclidGeometryTools.axisAngleFromZUpToVector3D(cylinderZAxisInWorld);
       
       ret.rotate(cylinderRotationFromZup);
       ret.translate(0.0, 0.0, -length / 2.0);
@@ -190,51 +189,51 @@ public class LinkSolidCylinder extends Link
 
    public void addCylinderLinkGraphicsFromMassProperties()
    {
-      getLinkGraphics().combine(cylinderGeometry, new Vector3d());
+      getLinkGraphics().combine(cylinderGeometry, new Vector3D());
    }
 
    public void useCylinderLinkGraphicsFromMassProperties()
    {
       getLinkGraphics().getGraphics3DInstructions().clear();
-      getLinkGraphics().combine(cylinderGeometry, new Vector3d());
+      getLinkGraphics().combine(cylinderGeometry, new Vector3D());
    }
    
    public void addBoneLinkGraphicsFromMassProperties()
    {
-      getLinkGraphics().combine(boneGeometry, new Vector3d());
+      getLinkGraphics().combine(boneGeometry, new Vector3D());
    }
 
    public void useBoneLinkGraphicsFromMassProperties()
    {
       getLinkGraphics().getGraphics3DInstructions().clear();
-      getLinkGraphics().combine(boneGeometry, new Vector3d());
+      getLinkGraphics().combine(boneGeometry, new Vector3D());
    }
 
    public void addJointAxisGraphics()
    {
-      getLinkGraphics().combine(jointAxisGeometry, new Vector3d());
+      getLinkGraphics().combine(jointAxisGeometry, new Vector3D());
    }
 
    public void useJointAxisGraphicsFromMassProperties()
    {
       getLinkGraphics().getGraphics3DInstructions().clear();
-      getLinkGraphics().combine(jointAxisGeometry, new Vector3d());
+      getLinkGraphics().combine(jointAxisGeometry, new Vector3D());
    }
    
-   private final Vector3d linkVectorCopy = new Vector3d();
+   private final Vector3D linkVectorCopy = new Vector3D();
 
-   private void addCylinderLinkGraphics(Vector3d linkStartPointOffsetFromParentJoint, double linkThickness, Vector3d linkVectorInWorld,
+   private void addCylinderLinkGraphics(Vector3D linkStartPointOffsetFromParentJoint, double linkThickness, Vector3D linkVectorInWorld,
          AppearanceDefinition color)
    {
       addCylinderLinkGraphics(linkStartPointOffsetFromParentJoint, linkThickness, linkVectorInWorld, color, 0.5 * linkThickness);
    }
 
-   public void addCylinderLinkGraphics(Point3d cylinderStart, Point3d cylinderEnd, double linkThickness, AppearanceDefinition color)
+   public void addCylinderLinkGraphics(Point3D cylinderStart, Point3D cylinderEnd, double linkThickness, AppearanceDefinition color)
    {
       addCylinderLinkGraphics(cylinderStart, cylinderEnd, linkThickness, color, 0.5 * linkThickness);
    }
 
-   private void addCylinderLinkGraphics(Vector3d linkStartPointOffsetFromParentJoint, double linkThickness, Vector3d linkVectorInWorld,
+   private void addCylinderLinkGraphics(Vector3D linkStartPointOffsetFromParentJoint, double linkThickness, Vector3D linkVectorInWorld,
          AppearanceDefinition color, double trimBothEndsByThisMuch)
    {
       linkVectorCopy.set(linkVectorInWorld);
@@ -244,12 +243,12 @@ public class LinkSolidCylinder extends Link
       linkGraphics.identity();
       linkGraphics.translate(linkStartPointOffsetFromParentJoint);
       linkVectorCopy.sub(linkStartPointOffsetFromParentJoint);
-      linkGraphics.rotate(GeometryTools.getRotationBasedOnNormal(linkVectorCopy));
+      linkGraphics.rotate(EuclidGeometryTools.axisAngleFromZUpToVector3D(linkVectorCopy));
       linkGraphics.translate(0.0, 0.0, trimBothEndsByThisMuch);
       linkGraphics.addCylinder(linkVectorCopy.length() - trimBothEndsByThisMuch, linkThickness, color);
    }
 
-   private void addCylinderLinkGraphics(Vector3d linkStartPointOffsetFromParentJoint, double linkThickness, Joint jointWhereLinkEnds,
+   private void addCylinderLinkGraphics(Vector3D linkStartPointOffsetFromParentJoint, double linkThickness, Joint jointWhereLinkEnds,
          AppearanceDefinition color, double trimBothEndsByThisMuch)
    {
       jointWhereLinkEnds.getOffset(linkVectorCopy);
@@ -259,23 +258,23 @@ public class LinkSolidCylinder extends Link
       linkGraphics.identity();
       linkGraphics.translate(linkStartPointOffsetFromParentJoint);
       linkVectorCopy.sub(linkStartPointOffsetFromParentJoint);
-      linkGraphics.rotate(GeometryTools.getRotationBasedOnNormal(linkVectorCopy));
+      linkGraphics.rotate(EuclidGeometryTools.axisAngleFromZUpToVector3D(linkVectorCopy));
       linkGraphics.translate(0.0, 0.0, trimBothEndsByThisMuch);
       linkGraphics.addCylinder(linkVectorCopy.length() - trimBothEndsByThisMuch, linkThickness, color);
    }
 
-   public void addCylinderLinkGraphics(Point3d cylinderStart, Point3d cylinderEnd, double linkThickness, AppearanceDefinition color,
+   public void addCylinderLinkGraphics(Point3D cylinderStart, Point3D cylinderEnd, double linkThickness, AppearanceDefinition color,
          double trimBothEndsByThisMuch)
    {
       Graphics3DObject linkGraphics = getLinkGraphics();
 
       linkGraphics.identity();
 
-      Vector3d linkVector = new Vector3d();
+      Vector3D linkVector = new Vector3D();
       linkVector.sub(cylinderEnd, cylinderStart);
 
       linkGraphics.translate(cylinderStart);
-      linkGraphics.rotate(GeometryTools.getRotationBasedOnNormal(linkVector));
+      linkGraphics.rotate(EuclidGeometryTools.axisAngleFromZUpToVector3D(linkVector));
       linkGraphics.translate(0.0, 0.0, trimBothEndsByThisMuch);
       linkGraphics.addCylinder(linkVector.length() - trimBothEndsByThisMuch, linkThickness, color);
    }
