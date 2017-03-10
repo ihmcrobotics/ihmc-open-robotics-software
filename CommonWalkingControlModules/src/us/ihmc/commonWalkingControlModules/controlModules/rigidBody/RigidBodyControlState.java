@@ -28,6 +28,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    private final DoubleYoVariable trajectoryStartTime;
    private final DoubleYoVariable yoTime;
 
+   // TODO: move adding the registry to the parent registry here instead of doing it in each implementation of this class.
    public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime)
    {
       super(stateEnum);

@@ -47,6 +47,7 @@ public class RigidBodyControlManager
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
+   private final RigidBodyLoadBearingControlState loadBearingControlState;
 
    private final double[] initialJointPositions;
    private final FrameOrientation initialOrientation = new FrameOrientation();
@@ -82,6 +83,7 @@ public class RigidBodyControlManager
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, bodyToControl, baseBody, elevator, controlFrameMap, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
+      loadBearingControlState = new RigidBodyLoadBearingControlState(bodyName, yoTime, registry);
 
       positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
 
@@ -98,6 +100,7 @@ public class RigidBodyControlManager
       states.add(jointspaceControlState);
       states.add(taskspaceControlState);
       states.add(userControlState);
+      states.add(loadBearingControlState);
 
       for (RigidBodyControlState fromState : states)
       {
@@ -240,7 +243,7 @@ public class RigidBodyControlManager
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid desired accelerations command.");
          holdInJointspace();
       }
    }
@@ -260,19 +263,23 @@ public class RigidBodyControlManager
 
    public void requestLoadBearing()
    {
-      // TODO: check if load bearing is supported by rigid body
-      // if it is switch state to load bearing
+      if (positionControlHelper.hasPositionControlledJoints())
+      {
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing since some joints are position controlled.");
+         return;
+      }
+      requestState(loadBearingControlState.getStateEnum());
    }
 
    public boolean isLoadBearing()
    {
-      // TODO: return whether the rigid body is load bearing
-      return false;
+      return stateMachine.getCurrentStateEnum() == RigidBodyControlMode.LOAD_BEARING;
    }
 
    public void resetJointIntegrators()
    {
-      // TODO: reset joint integrators for all joints that are controlled by this module
+      for (int jointIdx = 0; jointIdx < jointsOriginal.length; jointIdx++)
+         jointsOriginal[jointIdx].resetIntegrator();
    }
 
    public boolean isControllingPoseInFrame(ReferenceFrame referenceFrame)
