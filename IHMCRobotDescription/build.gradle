@@ -45,12 +45,10 @@ dependencies {
     
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
-    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGeometry")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
-    testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 
 jar {
