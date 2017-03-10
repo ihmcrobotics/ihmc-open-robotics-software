@@ -16,7 +16,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
 
 
-public class LinkSolidCylinder extends Link
+public class LinkHollowCylinder extends Link
 {
 
    /**
@@ -34,7 +34,7 @@ public class LinkSolidCylinder extends Link
    private final Graphics3DObject boneGeometry;
    private final Graphics3DObject jointAxisGeometry;
 
-   public LinkSolidCylinder(String name, Vector3D cylinderZAxisInWorld, double length, double radius, AppearanceDefinition color)
+   public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double length, double radius, AppearanceDefinition color)
    {
       this(name, cylinderZAxisInWorld, computeMassOfHollowCylinder(length, radius), length, radius, color);
    }
@@ -46,7 +46,7 @@ public class LinkSolidCylinder extends Link
       return materialVolume * aluminumDensityKgPerCubicM;
    }
    
-   public LinkSolidCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, AppearanceDefinition color)
+   public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, AppearanceDefinition color)
    {
       this(name, cylinderZAxisInWorld, mass, length, radius, attachParentJointToDistalEndOfCylinder(cylinderZAxisInWorld, length), color);
    }
@@ -60,7 +60,7 @@ public class LinkSolidCylinder extends Link
       return parentJointOffsetFromCoM;
    }
 
-   public LinkSolidCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, Vector3D parentJointOffsetFromCoM,
+   public LinkHollowCylinder(String name, Vector3D cylinderZAxisInWorld, double mass, double length, double radius, Vector3D parentJointOffsetFromCoM,
          AppearanceDefinition color)
    {
       super(name);
