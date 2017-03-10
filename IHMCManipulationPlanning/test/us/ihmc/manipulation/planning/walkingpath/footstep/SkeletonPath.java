@@ -9,7 +9,8 @@ import us.ihmc.tools.io.printing.PrintTools;
 
 public class SkeletonPath
 {
-   public ArrayList<Line2D> pathSegments = new ArrayList<Line2D>();
+   private ArrayList<Line2D> pathSegments = new ArrayList<Line2D>();
+   private Point2D finalPoint;
    
    public SkeletonPath()
    {
@@ -20,7 +21,6 @@ public class SkeletonPath
    {
       for(int i=0;i<skeletonPathX.length-1;i++)
       {
-//         PrintTools.info(""+i+" "+skeletonPathX[i]+" "+skeletonPathY[i]+ " "+ skeletonPathX[i+1]+" "+skeletonPathY[i+1]);
          Line2D.Double aSegment = new Line2D.Double(skeletonPathX[i], skeletonPathY[i], skeletonPathX[i+1], skeletonPathY[i+1]);
          pathSegments.add(aSegment);         
       }
@@ -153,5 +153,12 @@ public class SkeletonPath
       }
       
       return alpha;
+   }
+   
+   public Point2D getFinalPoint()
+   {
+      finalPoint = new Point2D.Double();
+      finalPoint.setLocation(pathSegments.get(pathSegments.size()-1).getP2());
+      return finalPoint;
    }
 }

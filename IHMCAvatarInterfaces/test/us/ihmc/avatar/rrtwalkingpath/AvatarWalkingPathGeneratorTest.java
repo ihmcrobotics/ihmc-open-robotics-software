@@ -433,13 +433,13 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       if(footstep.getRobotSide() == RobotSide.RIGHT)
       {
          ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Green());
-         PrintTools.info("R "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
+         //PrintTools.info("R "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
       
       else
       {
          ret.addCube(sizeX, sizeY, sizeZ, YoAppearance.Blue());
-         PrintTools.info("L "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
+         //PrintTools.info("L "+footstep.getLocation().getX()+" "+footstep.getLocation().getY());
       }
          
       return ret;
@@ -452,7 +452,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
       for(int i=0;i<footSteps.size();i++)
       {
          ret.add(getPrintFootStep(footSteps.get(i)));
-         PrintTools.info(" "+footSteps.get(i).getLocation().getX()+" "+footSteps.get(i).getLocation().getY());
+//         PrintTools.info(" "+footSteps.get(i).getLocation().getX()+" "+footSteps.get(i).getLocation().getY());
       }
          
       return ret;

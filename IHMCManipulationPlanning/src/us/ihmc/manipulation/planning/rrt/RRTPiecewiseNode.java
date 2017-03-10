@@ -52,7 +52,6 @@ public class RRTPiecewiseNode
 
    public boolean isValidConnection()
    {
-      PrintTools.info("Size " + nodes.size());
       for (int i = 0; i < nodes.size(); i++)
       {
          if (nodes.get(i).isValidNode() == false)
