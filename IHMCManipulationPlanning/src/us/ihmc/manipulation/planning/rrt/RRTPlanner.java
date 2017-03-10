@@ -49,8 +49,6 @@ public class RRTPlanner
                rrtTree.updatePath(goalNode);
                optimalPath = rrtTree.pathNode;
 
-               PrintTools.info("Connected " + i);
-
                return true;
             }
          }

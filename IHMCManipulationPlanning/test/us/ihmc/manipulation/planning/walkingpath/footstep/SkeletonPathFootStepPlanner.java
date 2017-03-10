@@ -41,7 +41,9 @@ public class SkeletonPathFootStepPlanner
       this.skeletonPathSegments = new SkeletonPath(skeletonPathX, skeletonPathY);
       this.pathSegmentsRightSide = new SkeletonPath(-this.stepWidth/2, this.skeletonPathSegments);
       this.pathSegmentsLeftSide = new SkeletonPath(this.stepWidth/2, this.skeletonPathSegments);
+            
       
+      PrintTools.info("final "+skeletonPathSegments.getFinalPoint().getX()+" "+skeletonPathSegments.getFinalPoint().getY());
 //      for(int i =0;i<skeletonPathSegments.get().size();i++)
 //      {
 //         PrintTools.info(""+i+" seg "+skeletonPathSegments.get().get(i).getX1()+" "+skeletonPathSegments.get().get(i).getY1()+" "+ skeletonPathSegments.get().get(i).getX2()+" "+skeletonPathSegments.get().get(i).getY2());
@@ -69,31 +71,18 @@ public class SkeletonPathFootStepPlanner
       
    public void createFootSteps()
    {
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
-      addNextStep();
+      for(int i=0;i<100;i++)
+      {
+         addNextStep();
+         if(footSteps.get(footSteps.size()-1).getLocation().distance(skeletonPathSegments.getFinalPoint()) < stepWidth/2+0.0001)
+         {
+            PrintTools.info(""+i+" "+footSteps.get(footSteps.size()-1).getLocation().distance(skeletonPathSegments.getFinalPoint()));
+            addNextStep();
+            PrintTools.info("numberof steps "+footSteps.size());
+            break;
+         }
+         
+      }
    }
    
    private void addNextStep()
@@ -148,7 +137,7 @@ public class SkeletonPathFootStepPlanner
             if(aProjectedCandidate.getLocation().distance(curStep.getLocation()) < stepStride)
             {
                curMatric = getXMatric(aProjectedCandidate.getLocation(), curSegment);
-               PrintTools.info(""+i+" "+angleOfCandidate*180/Math.PI+" matric "+ curMatric);
+//               PrintTools.info(""+i+" "+angleOfCandidate*180/Math.PI+" matric "+ curMatric);
                if(curMatric > maxMatric)
                {
                   maxMatric = curMatric;
@@ -158,7 +147,7 @@ public class SkeletonPathFootStepPlanner
          }
       }
       
-      PrintTools.info("!!! "+ret.getLocation().getX()+" "+ret.getLocation().getY());
+//      PrintTools.info("!!! "+ret.getLocation().getX()+" "+ret.getLocation().getY());
       tempPoint = new Point2D.Double(ret.getLocation().getX(), ret.getLocation().getY());
       
       return ret;
@@ -190,7 +179,7 @@ public class SkeletonPathFootStepPlanner
             if(aProjectedCandidate.getLocation().distance(curStep.getLocation()) < stepStride)
             {
                curMatric = getXMatric(aProjectedCandidate.getLocation(), curSegment);
-               PrintTools.info(""+i+" "+angleOfCandidate*180/Math.PI+" matric "+ curMatric);
+               //PrintTools.info(""+i+" "+angleOfCandidate*180/Math.PI+" matric "+ curMatric);
                if(curMatric > maxMatric)
                {
                   maxMatric = curMatric;
@@ -200,7 +189,7 @@ public class SkeletonPathFootStepPlanner
          }
       }
       
-      PrintTools.info("!!! "+ret.getLocation().getX()+" "+ret.getLocation().getY());
+      //PrintTools.info("!!! "+ret.getLocation().getX()+" "+ret.getLocation().getY());
       tempPoint = new Point2D.Double(ret.getLocation().getX(), ret.getLocation().getY());
       
       return ret;
