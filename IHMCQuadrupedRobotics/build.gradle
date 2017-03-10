@@ -68,6 +68,7 @@ dependencies {
     testCompile group: 'com.google.caliper', name: 'caliper', version: '1.0-beta-2'
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
     
     testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
