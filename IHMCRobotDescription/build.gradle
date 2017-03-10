@@ -47,7 +47,6 @@ dependencies {
 
     compile ihmc.getProjectDependency(":IHMCGeometry")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
-	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
 }
 
