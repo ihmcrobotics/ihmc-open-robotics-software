@@ -63,6 +63,7 @@ dependencies {
 
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
    testCompile ihmc.getProjectTestDependency(":IHMCQuadrupedRobotics")
    testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
 }
