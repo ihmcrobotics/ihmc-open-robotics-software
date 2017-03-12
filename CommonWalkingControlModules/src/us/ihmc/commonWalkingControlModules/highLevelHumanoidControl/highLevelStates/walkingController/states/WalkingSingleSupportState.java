@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ContinuousTransferICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -18,7 +18,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -242,7 +241,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(double, FramePoint2d)}.
+    * Request the swing trajectory to speed up using {@link ContinuousTransferICPPlanner#estimateTimeRemainingForStateUnderDisturbance(double, FramePoint2d)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     * @return the current swing time remaining for the swing foot trajectory
     */
