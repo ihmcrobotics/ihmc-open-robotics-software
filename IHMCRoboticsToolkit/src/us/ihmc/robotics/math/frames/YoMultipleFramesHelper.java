@@ -1,23 +1,22 @@
 package us.ihmc.robotics.math.frames;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
 {
-   private static final int MAX_REGISTERED_FRAMES = 10;
-   private final IntegerYoVariable currentFrameIndex;
-   private final ArrayList<ReferenceFrame> referenceFrames = new ArrayList<ReferenceFrame>();
+   private final LongYoVariable currentFrameId;
+   private final TLongObjectHashMap<ReferenceFrame> referenceFrames = new TLongObjectHashMap<ReferenceFrame>();
 
    public YoMultipleFramesHelper(String namePrefix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
-      currentFrameIndex = new IntegerYoVariable(namePrefix + "FrameIndex", registry);
-      currentFrameIndex.set(0);
+      currentFrameId = new LongYoVariable(namePrefix + "FrameId", registry);
+      currentFrameId.set(referenceFrames[0].getNameBasedHashCode());
 
       if (referenceFrames == null || referenceFrames.length == 0)
          throw new RuntimeException("Need to provide at least one ReferenceFrame.");
@@ -34,7 +33,7 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
     */
    public ReferenceFrame getCurrentReferenceFrame()
    {
-      return referenceFrames.get(currentFrameIndex.getIntegerValue());
+      return referenceFrames.get(currentFrameId.getLongValue());
    }
 
    /**
@@ -54,7 +53,7 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
    public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame newCurrentReferenceFrame)
    {
       ReferenceFrame previousReferenceFrame = getCurrentReferenceFrame();
-      currentFrameIndex.set(findRegisteredReferenceFrame(newCurrentReferenceFrame));
+      currentFrameId.set(newCurrentReferenceFrame.getNameBasedHashCode());
       return previousReferenceFrame;
    }
 
@@ -72,9 +71,7 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
          return;
       }
 
-      referenceFrames.add(newReferenceFrame);
-      if (referenceFrames.size() > MAX_REGISTERED_FRAMES) throw new RuntimeException("Can only register 10 frames. If you really want more, we need to make findRegisteredReferenceFrame() more efficient by using a Hash Map of some sort.");
-
+      referenceFrames.put(newReferenceFrame.getNameBasedHashCode(), newReferenceFrame);
    }
 
    /**
@@ -84,7 +81,7 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
     */
    public boolean isReferenceFrameRegistered(ReferenceFrame referenceFrame)
    {
-      return referenceFrames.contains(referenceFrame);
+      return referenceFrames.contains(referenceFrame.getNameBasedHashCode());
    }
 
    /**
@@ -103,16 +100,6 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
     */
    public void getRegisteredReferenceFrames(List<ReferenceFrame> referenceFramesToPack)
    {
-      referenceFramesToPack.addAll(referenceFrames);
-   }
-
-   private int findRegisteredReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      int newFrameIndex = referenceFrames.indexOf(referenceFrame);
-
-      if (newFrameIndex == -1)
-         throw new RuntimeException("The frame: " + referenceFrame.getName() + " has not been registered.");
-
-      return newFrameIndex;
+      referenceFramesToPack.addAll(referenceFrames.valueCollection());
    }
 }
