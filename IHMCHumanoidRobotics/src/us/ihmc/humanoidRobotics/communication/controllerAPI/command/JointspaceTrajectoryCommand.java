@@ -82,7 +82,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
       return jointTrajectoryInputs.get(jointIndex).getTrajectoryPoint(trajectoryPointIndex);
    }
 
-   public SimpleTrajectoryPoint1DList getJointTrajectoryPointList(int jointIndex)
+   public OneDoFJointTrajectoryCommand getJointTrajectoryPointList(int jointIndex)
    {
       return jointTrajectoryInputs.get(jointIndex);
    }
