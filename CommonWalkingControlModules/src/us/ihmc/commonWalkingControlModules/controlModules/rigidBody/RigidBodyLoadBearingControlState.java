@@ -2,15 +2,26 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
+   private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommands;
 
    public RigidBodyLoadBearingControlState(String bodyName, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOAD_BEARING, bodyName, yoTime);
+
+      int numberOfContactPlanes = 1;
+      planeContactStateCommands = new RecyclingArrayList<>(numberOfContactPlanes, PlaneContactStateCommand.class);
+
       parentRegistry.addChild(registry);
    }
 
@@ -38,8 +49,11 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      // TODO Auto-generated method stub
-      return null;
+      inverseDynamicsCommandList.clear();
+      inverseDynamicsCommandList.addCommand(spatialAccelerationCommand);
+      for (int planneIdx = 0; planneIdx < planeContactStateCommands.size(); planneIdx++)
+         inverseDynamicsCommandList.addCommand(planeContactStateCommands.get(planneIdx));
+      return inverseDynamicsCommandList;
    }
 
    @Override
