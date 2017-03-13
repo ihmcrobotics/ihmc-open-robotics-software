@@ -36,6 +36,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -69,7 +70,12 @@ import us.ihmc.tools.thread.ThreadTools;
 public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTestInterface
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
+   static
+   {
+      simulationTestingParameters.setUsePefectSensors(true);
+   }
+
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-4;
 
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -90,6 +96,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -103,7 +111,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
-         desiredRandomHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+         humanoidReferenceFrames.updateFrames();
+         desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
@@ -112,11 +121,18 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                desiredOrientation);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         humanoidReferenceFrames.updateFrames();
+         desiredRandomHandPose.changeFrame(humanoidReferenceFrames.getChestFrame());
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
          assertTrue(success);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+         humanoidReferenceFrames.updateFrames();
+         desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
+         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
 
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertSingleWaypointExecuted(handName, desiredPosition, desiredOrientation, scs);
