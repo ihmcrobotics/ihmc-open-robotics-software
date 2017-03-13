@@ -62,7 +62,7 @@ dependencies {
 	compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
 	compile group: 'com.github.wendykierp', name: 'JTransforms', version: '3.1'
 	compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
-	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.4'
+	compile group: 'us.ihmc', name: 'RobotEnvironmentAwareness', version: '0.4.1'
     
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
