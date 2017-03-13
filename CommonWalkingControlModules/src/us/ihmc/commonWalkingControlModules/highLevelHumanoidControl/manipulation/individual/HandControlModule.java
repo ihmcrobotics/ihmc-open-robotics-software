@@ -3,14 +3,20 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 import static us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools.addRequestedStateTransition;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyLoadBearingControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -20,21 +26,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.JointSpaceHandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.LoadBearingHandControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.TaskspaceHandControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -42,6 +40,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -51,7 +50,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class HandControlModule
 {
@@ -63,14 +61,14 @@ public class HandControlModule
 
    private final YoVariableRegistry registry;
 
-   private final GenericStateMachine<HandControlMode, HandControlState> stateMachine;
+   private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
 
-   private final TaskspaceHandControlState taskspaceControlState;
-   private final JointSpaceHandControlState jointspaceControlState;
-   private final LoadBearingHandControlState loadBearingControlState;
-   private final HandUserControlModeState userControlModeState;
+   private final RigidBodyTaskspaceControlState taskspaceControlState;
+   private final RigidBodyJointspaceControlState jointspaceControlState;
+   private final RigidBodyLoadBearingControlState loadBearingControlState;
+   private final RigidBodyUserControlState userControlModeState;
 
-   private final EnumYoVariable<HandControlMode> requestedState;
+   private final EnumYoVariable<RigidBodyControlMode> requestedState;
    private final OneDoFJoint[] controlledJoints;
 
    private final Map<OneDoFJoint, BooleanYoVariable> areJointsEnabled;
@@ -79,7 +77,7 @@ public class HandControlModule
 
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final StateChangedListener<HandControlMode> stateChangedlistener;
+   private final StateChangedListener<RigidBodyControlMode> stateChangedlistener;
    private final BooleanYoVariable hasHandPoseStatusBeenSent;
 
    private final BooleanYoVariable areAllArmJointEnabled;
@@ -99,20 +97,9 @@ public class HandControlModule
    public HandControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, ArmControllerParameters armControlParameters,
          YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, YoVariableRegistry parentRegistry)
    {
-      YoGraphicsListRegistry yoGraphicsListRegistry;
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       name = namePrefix + getClass().getSimpleName();
       registry = new YoVariableRegistry(name);
-
-      if (REGISTER_YOVARIABLES)
-      {
-         yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-         parentRegistry.addChild(registry);
-      }
-      else
-      {
-         yoGraphicsListRegistry = null;
-      }
 
       hasHandPoseStatusBeenSent = new BooleanYoVariable(namePrefix + "HasHandPoseStatusBeenSent", registry);
       hasHandPoseStatusBeenSent.set(false);
@@ -120,10 +107,10 @@ public class HandControlModule
       areAllArmJointEnabled = new BooleanYoVariable(namePrefix + "AreAllArmJointEnabled", registry);
       areAllArmJointEnabled.set(true);
 
-      stateChangedlistener = new StateChangedListener<HandControlMode>()
+      stateChangedlistener = new StateChangedListener<RigidBodyControlMode>()
       {
          @Override
-         public void stateChanged(State<HandControlMode> oldState, State<HandControlMode> newState, double time)
+         public void stateChanged(State<RigidBodyControlMode> oldState, State<RigidBodyControlMode> newState, double time)
          {
             hasHandPoseStatusBeenSent.set(false);
          }
@@ -137,8 +124,10 @@ public class HandControlModule
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
       controlledJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(chest, hand);
+      initialJointPositions = new double[controlledJoints.length];
 
-      requestedState = new EnumYoVariable<HandControlMode>(name + "RequestedState", "", registry, HandControlMode.class, true);
+      requestedState = new EnumYoVariable<RigidBodyControlMode>(name + "RequestedState", "", registry, RigidBodyControlMode.class, true);
       requestedState.set(null);
 
       areJointsEnabled = new LinkedHashMap<>();
@@ -148,7 +137,7 @@ public class HandControlModule
       }
 
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
-      stateMachine = new GenericStateMachine<>(name, name + "SwitchTime", HandControlMode.class, yoTime, registry);
+      stateMachine = new GenericStateMachine<>(name, name + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
 
       RigidBody elevator = fullRobotModel.getElevator();
       String[] positionControlledJointNames = armControlParameters.getPositionControlledJointNames(robotSide);
@@ -160,20 +149,18 @@ public class HandControlModule
       else
          positionControlledJoints = new OneDoFJoint[0];
 
-      String stateNamePrefix = namePrefix + "Hand";
-
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap = new EnumMap<>(BaseForControl.class);
-      baseForControlToReferenceFrameMap.put(BaseForControl.CHEST, chestFrame);
-      baseForControlToReferenceFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
-      baseForControlToReferenceFrameMap.put(BaseForControl.WORLD, worldFrame);
-
       Map<OneDoFJoint, Double> homeConfiguration = armControlParameters.getDefaultArmJointPositions(fullRobotModel, robotSide);
+      TObjectDoubleHashMap<String> homeConfigurationNew = new TObjectDoubleHashMap<>();
+      for (OneDoFJoint joint : controlledJoints)
+         homeConfigurationNew.put(joint.getName(), homeConfiguration.get(joint));
+      String bodyName = hand.getName();
 
-      jointspaceControlState = new JointSpaceHandControlState(stateNamePrefix, homeConfiguration, controlledJoints, jointspaceGains, registry);
-      taskspaceControlState = new TaskspaceHandControlState(stateNamePrefix, elevator, hand, chest, taskspaceGains, baseForControlToReferenceFrameMap,
-            yoGraphicsListRegistry, registry);
-      userControlModeState = new HandUserControlModeState(stateNamePrefix, controlledJoints, controllerToolbox, registry);
+      jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, controlledJoints, homeConfigurationNew, yoTime, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, hand, chest, elevator, null, chestFrame, yoTime, registry);
+      userControlModeState = new RigidBodyUserControlState(bodyName, controlledJoints, yoTime, registry);
+
+      taskspaceControlState.setGains(taskspaceGains.getOrientationGains(), taskspaceGains.getPositionGains());
+      jointspaceControlState.setGains(jointspaceGains);
 
       if (isAtLeastOneJointPositionControlled)
       {
@@ -216,8 +203,7 @@ public class HandControlModule
       }
       else
       {
-         loadBearingControlState = new LoadBearingHandControlState(stateNamePrefix, HandControlMode.LOAD_BEARING, robotSide, controllerToolbox, elevator,
-               hand, registry);
+         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyName, yoTime, registry);
          jointAccelerationIntegrationCommand = null;
          lowLevelOneDoFJointDesiredDataHolder = null;
          accelerationIntegrationAlphaPosition = null;
@@ -226,21 +212,23 @@ public class HandControlModule
          accelerationIntegrationMaxVelocity = null;
       }
 
+      parentRegistry.addChild(registry);
+
       setupStateMachine();
    }
 
    private void setupStateMachine()
    {
-      List<HandControlState> allStates = new ArrayList<>();
+      List<RigidBodyControlState> allStates = new ArrayList<>();
       allStates.add(jointspaceControlState);
       allStates.add(taskspaceControlState);
       allStates.add(userControlModeState);
       if (loadBearingControlState != null)
          allStates.add(loadBearingControlState);
 
-      for (HandControlState fromState : allStates)
+      for (RigidBodyControlState fromState : allStates)
       {
-         for (HandControlState toState : allStates)
+         for (RigidBodyControlState toState : allStates)
          {
             addRequestedStateTransition(requestedState, false, fromState, toState);
          }
@@ -293,7 +281,7 @@ public class HandControlModule
          areAllArmJointEnabled.set(true);
       }
 
-      if (stateMachine.getCurrentState().isAbortRequested())
+      if (stateMachine.getCurrentState().abortState())
       {
          holdPositionInJointspace();
       }
@@ -352,78 +340,39 @@ public class HandControlModule
 
    public void holdPositionInChest()
    {
-      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.TASKSPACE;
-      taskspaceControlState.holdPositionInChest(handControlFrame, initializeToCurrent);
+      computeDesiredPose(initialPose);
+      taskspaceControlState.holdPose(initialPose);
       requestedState.set(taskspaceControlState.getStateEnum());
    }
 
    public void handleHandTrajectoryCommand(HandTrajectoryCommand command)
    {
-      boolean success;
-
-      switch (command.getExecutionMode())
-      {
-      case OVERRIDE:
-         boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.TASKSPACE;
-         success = taskspaceControlState.handleHandTrajectoryCommand(command, handControlFrame, initializeToCurrent);
-         if (success)
-            requestedState.set(taskspaceControlState.getStateEnum());
-         else
-            PrintTools.warn(this, "Can't execute HandTrajectoryCommand! " + command.getRobotSide());
-         return;
-      case QUEUE:
-         success = taskspaceControlState.queueHandTrajectoryCommand(command);
-         if (!success)
-         {
-            holdPositionInJointspace();
-            PrintTools.warn(this, "Can't execute HandTrajectoryCommand! " + command.getRobotSide());
-         }
-         return;
-      default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
-         return;
-      }
+      computeDesiredPose(initialPose);
+      if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
+         requestState(taskspaceControlState.getStateEnum());
+      else
+         holdPositionInJointspace();
    }
 
    public void holdPositionInJointspace()
    {
-      jointspaceControlState.holdCurrentConfiguration();
-      requestedState.set(jointspaceControlState.getStateEnum());
+      jointspaceControlState.holdCurrent();
+      requestState(jointspaceControlState.getStateEnum());
    }
 
    public void goHome(double trajectoryTime)
    {
-      boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
-      jointspaceControlState.goHome(trajectoryTime, initializeToCurrent);
-      requestedState.set(jointspaceControlState.getStateEnum());
+      jointspaceControlState.goHomeFromCurrent(trajectoryTime);
+      requestState(jointspaceControlState.getStateEnum());
    }
 
    public void handleArmTrajectoryCommand(ArmTrajectoryCommand command)
    {
-      boolean success;
-
-      switch (command.getExecutionMode())
-      {
-      case OVERRIDE:
-         boolean initializeToCurrent = stateMachine.getCurrentStateEnum() != HandControlMode.JOINTSPACE;
-         success = jointspaceControlState.handleArmTrajectoryCommand(command, initializeToCurrent);
-         if (success)
-            requestedState.set(jointspaceControlState.getStateEnum());
-         else
-            PrintTools.warn(this, "Can't execute ArmTrajectoryCommand! " + command.getRobotSide());
-         return;
-      case QUEUE:
-         success = jointspaceControlState.queueArmTrajectoryCommand(command);
-         if (!success)
-         {
-            holdPositionInJointspace();
-            PrintTools.warn(this, "Can't execute ArmTrajectoryCommand! " + command.getRobotSide());
-         }
-         return;
-      default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
-         return;
-      }
+      computeDesiredJointPositions(initialJointPositions);
+      if (jointspaceControlState.handleTrajectoryCommand(command, initialJointPositions))
+         requestState(jointspaceControlState.getStateEnum());
+      else
+         holdPositionInJointspace();
    }
 
    public void handleArmDesiredAccelerationsCommand(ArmDesiredAccelerationsCommand command)
@@ -431,9 +380,9 @@ public class HandControlModule
       if (!ControllerCommandValidationTools.checkArmDesiredAccelerationsCommand(controlledJoints, command))
          return;
 
-      boolean success = userControlModeState.handleArmDesiredAccelerationsMessage(command);
+      boolean success = userControlModeState.handleDesiredAccelerationsCommand(command);
       if (success)
-         requestedState.set(userControlModeState.getStateEnum());
+         requestState(userControlModeState.getStateEnum());
       else
          PrintTools.warn(this, "Can't execute ArmDesiredAccelerationsCommand! " + command.getRobotSide());
    }
@@ -457,7 +406,7 @@ public class HandControlModule
    {
       if (isAtLeastOneJointPositionControlled)
          return false;
-      return stateMachine.getCurrentStateEnum() == HandControlMode.LOAD_BEARING;
+      return stateMachine.getCurrentStateEnum() == RigidBodyControlMode.LOAD_BEARING;
    }
 
    public void resetJointIntegrators()
@@ -468,12 +417,13 @@ public class HandControlModule
 
    public boolean isControllingPoseInWorld()
    {
-      State<HandControlMode> currentState = stateMachine.getCurrentState();
+      return true;
+   }
 
-      if (currentState == taskspaceControlState)
-         return taskspaceControlState.getTrajectoryFrame() == worldFrame;
-
-      return false;
+   private void requestState(RigidBodyControlMode state)
+   {
+      if (stateMachine.getCurrentStateEnum() != state)
+         requestedState.set(state);
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
@@ -497,12 +447,60 @@ public class HandControlModule
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
-      for (HandControlMode mode : HandControlMode.values())
+      for (RigidBodyControlMode mode : RigidBodyControlMode.values())
       {
-         HandControlState state = stateMachine.getState(mode);
+         RigidBodyControlState state = stateMachine.getState(mode);
          if (state != null && state.getFeedbackControlCommand() != null)
             ret.addCommand(state.getFeedbackControlCommand());
       }
       return ret;
    }
+
+   private final double[] initialJointPositions;
+   private final FramePose initialPose = new FramePose();
+   private final OneDoFJoint[] jointsAtDesiredPosition;
+
+   private void computeDesiredPose(FramePose desiredPoseToPack)
+   {
+      desiredPoseToPack.setToZero(hand.getBodyFixedFrame());
+      desiredPoseToPack.changeFrame(worldFrame);
+   }
+
+   private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
+      {
+         for (int i = 0; i < controlledJoints.length; i++)
+            desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
+      }
+      else
+      {
+         updateJointsAtDesiredPosition();
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+            desiredJointPositionsToPack[i] = jointsAtDesiredPosition[i].getQ();
+      }
+   }
+
+   private void updateJointsAtDesiredPosition()
+   {
+      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(jointspaceControlState.getJointDesiredPosition(i));
+            jointsAtDesiredPosition[i].setQd(jointspaceControlState.getJointDesiredVelocity(i));
+         }
+      }
+      else
+      {
+         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
+         {
+            jointsAtDesiredPosition[i].setQ(controlledJoints[i].getQ());
+            jointsAtDesiredPosition[i].setQd(controlledJoints[i].getQd());
+         }
+      }
+
+      jointsAtDesiredPosition[0].updateFramesRecursively();
+   }
+
 }
