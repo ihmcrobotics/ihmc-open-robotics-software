@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -61,7 +60,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          RigidBody hand = fullRobotModel.getHand(robotSide);
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          double[] armDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, armJoints.length, 0.1);
-         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.USER_CONTROL_MODE, armDesiredJointAccelerations);
+         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
@@ -77,7 +76,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
          assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
-         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.IHMC_CONTROL_MODE, null);
+         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, null);
 
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 
@@ -86,7 +85,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
          assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
 
-         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.USER_CONTROL_MODE, armDesiredJointAccelerations);
+         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
 
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 

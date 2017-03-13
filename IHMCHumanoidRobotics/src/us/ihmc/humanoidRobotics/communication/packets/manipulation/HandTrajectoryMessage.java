@@ -8,7 +8,6 @@ import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -47,7 +46,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandTrajectoryMessage(Random random)
@@ -55,7 +53,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       super(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       baseForControl = RandomNumbers.nextEnum(random, BaseForControl.class);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -65,8 +62,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
       super(handTrajectoryMessage);
-      setUniqueId(handTrajectoryMessage.getUniqueId());
-      setDestination(handTrajectoryMessage.getDestination());
       robotSide = handTrajectoryMessage.robotSide;
       baseForControl = handTrajectoryMessage.baseForControl;
    }
@@ -96,7 +91,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
       super(trajectoryTime, desiredPosition, desiredOrientation);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.baseForControl = base;
    }
@@ -112,7 +106,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
       this.baseForControl = base;
    }
@@ -123,7 +116,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       super.set(other);
       robotSide = other.robotSide;
       baseForControl = other.baseForControl;
-      setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
    }
 
    public RobotSide getRobotSide()
@@ -145,14 +137,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
          return false;
 
       return super.epsilonEquals(other, epsilon);
-   }
-
-   @Override
-   public HandTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      HandTrajectoryMessage transformedHandTrajectoryMessage = new HandTrajectoryMessage(this);
-      transformedHandTrajectoryMessage.applyTransform(transform);
-      return transformedHandTrajectoryMessage;
    }
 
    @Override

@@ -431,22 +431,11 @@ public class HandControlModule
       if (!ControllerCommandValidationTools.checkArmDesiredAccelerationsCommand(controlledJoints, command))
          return;
 
-      switch (command.getArmControlMode())
-      {
-      case IHMC_CONTROL_MODE:
-         if (stateMachine.getCurrentStateEnum() == HandControlMode.USER_CONTROL_MODE)
-            holdPositionInJointspace();
-         return;
-      case USER_CONTROL_MODE:
-         boolean success = userControlModeState.handleArmDesiredAccelerationsMessage(command);
-         if (success)
-            requestedState.set(userControlModeState.getStateEnum());
-         else
-            PrintTools.warn(this, "Can't execute ArmDesiredAccelerationsCommand! " + command.getRobotSide());
-         return;
-      default:
-         throw new RuntimeException("Unknown ArmControlMode: " + command.getArmControlMode());
-      }
+      boolean success = userControlModeState.handleArmDesiredAccelerationsMessage(command);
+      if (success)
+         requestedState.set(userControlModeState.getStateEnum());
+      else
+         PrintTools.warn(this, "Can't execute ArmDesiredAccelerationsCommand! " + command.getRobotSide());
    }
 
    public void handleHandComplianceControlParametersCommand(HandComplianceControlParametersCommand command)
