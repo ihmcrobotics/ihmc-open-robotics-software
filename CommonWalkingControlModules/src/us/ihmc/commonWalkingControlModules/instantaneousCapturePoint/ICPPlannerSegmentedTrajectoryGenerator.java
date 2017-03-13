@@ -61,12 +61,17 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    private final FramePoint endOfSplineICPInitialFrame = new FramePoint();
    private final FrameVector endOfSplineICPVelocityInitialFrame = new FrameVector();
 
+   private final FramePoint startOfSplineCoM = new FramePoint();
+   private final FramePoint endOfSplineCoM = new FramePoint();
+
    private final FramePoint initialCornerPointFinalFrame = new FramePoint();
    private final FramePoint finalCornerPointFinalFrame = new FramePoint();
    private final FramePoint initialCMPFinalFrame = new FramePoint();
    private final FramePoint finalCMPFinalFrame = new FramePoint();
    private final FramePoint initialICPFinalFrame = new FramePoint();
    private final FramePoint finalICPFinalFrame = new FramePoint();
+
+   private final FramePoint initialCoM = new FramePoint();
 
    private final FramePoint startOfSplineICPFinalFrame = new FramePoint();
    private final FrameVector startOfSplineICPVelocityFinalFrame = new FrameVector();
@@ -86,6 +91,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private final FramePoint desiredICPOutput = new FramePoint();
    private final FrameVector desiredICPVelocityOutput = new FrameVector();
+
+   private final FramePoint desiredCoMOutput = new FramePoint();
 
    private final VelocityConstrainedPositionTrajectoryGenerator spline;
 
@@ -185,6 +192,12 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       finalICP.getFrameTupleIncludingFrame(finalICPFinalFrame);
    }
 
+   public void setInitialCoMPosition(YoFramePoint initialCoM, ReferenceFrame attachedFrame)
+   {
+      initialCoM.getFrameTupleIncludingFrame(this.initialCoM);
+      this.initialCoM.changeFrame(attachedFrame);
+   }
+
    @Override
    public void initialize()
    {
@@ -239,6 +252,15 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
             finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPFinalFrame);
       CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), endOfSplineTime - timeSpentOnInitialCMP.getDoubleValue(),
             finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPVelocityFinalFrame);
+
+      // compute CoM waypoints
+      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime, omega0.getDoubleValue(), initialCMPFinalFrame, initialCMPFinalFrame,
+            initialCoM, startOfSplineCoM);
+
+      initializeSpline();
+      double splineDuration = endOfSplineTime - startOfSplineTime;
+      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(splineDuration, omega0.getDoubleValue(), spline.getXPolynomial(), spline.getYPolynomial(),
+            initialCoM, endOfSplineCoM);
    }
 
    public void computeFinalCoMPosition(YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
@@ -255,14 +277,12 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private void computeCoMPositionAfterFirstSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
    {
-      //// FIXME: 3/13/17 there may be a frame issue
-      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame, initialCoM,
-            finalCoMToPack);
+      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), omega0.getDoubleValue(), initialCMPFinalFrame,
+            initialICPFinalFrame, initialCoM, finalCoMToPack);
    }
 
    private void computeCoMPositionAfterSecondSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
    {
-      /// FIXME: 3/13/17 this may have some issues with the bounds of the spline
       initializeSpline();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
       CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(splineDuration, omega0.getDoubleValue(), spline.getXPolynomial(), spline.getYPolynomial(),
@@ -271,9 +291,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private void computeCoMPositionAfterThirdSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
    {
-      //// FIXME: 3/13/17 there may be a frame issue and some things may have not been initialized
-      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame, initialCoM,
-            finalCoMToPack);
+      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), omega0.getDoubleValue(), finalCMPFinalFrame,
+            endOfSplineICPFinalFrame, initialCoM, finalCoMToPack);
    }
 
    @Override
@@ -288,16 +307,19 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       {
          currentSegment.set(1);
          computeFirstSegment(time);
+         computeCenterOfMassFirstSegment(time);
       }
       else if (time >= endOfSplineTime.getDoubleValue())
       {
          currentSegment.set(3);
          computeThirdSegment(time - endOfSplineTime.getDoubleValue());
+         computeCenterOfMassThirdSegment(time - startOfSplineTime.getDoubleValue());
       }
       else
       {
          currentSegment.set(2);
          computeSecondSegment(time - startOfSplineTime.getDoubleValue());
+         computeCenterOfMassSecondSegment(time - startOfSplineTime.getDoubleValue());
       }
    }
 
@@ -318,6 +340,12 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
             progressionInPercent.getDoubleValue());
    }
 
+   public void computeCenterOfMassFirstSegment(double timeInFirstSegment)
+   {
+      CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, timeInFirstSegment, omega0.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame,
+            initialCoM, desiredCoMOutput);
+   }
+
    private void computeSecondSegment(double timeInSecondSegment)
    {
       initializeSpline();
@@ -325,6 +353,16 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
       spline.getPosition(desiredICPOutput);
       spline.getVelocity(desiredICPVelocityOutput);
+   }
+
+   public void computeCenterOfMassSecondSegment(double timeInSecondSegment)
+   {
+      double segmentDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
+      YoPolynomial xPolynomial = spline.getXPolynomial();
+      YoPolynomial yPolynomial = spline.getYPolynomial();
+
+      CoMIntegrationTools.computeCoMPositionUsingCubicICP(0.0, timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), xPolynomial, yPolynomial, startOfSplineCoM,
+            desiredCoMOutput);
    }
 
    private void initializeSpline()
@@ -349,6 +387,12 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       interpolatePointFromInitialToFinalFrame(desiredICPOutput, desiredICPInitialFrame, desiredICPFinalFrame, progressionInPercent.getDoubleValue());
       interpolateVectorFromInitialToFinalFrame(desiredICPVelocityOutput, desiredICPVelocityInitialFrame, desiredICPVelocityFinalFrame,
             progressionInPercent.getDoubleValue());
+   }
+   
+   public void computeCenterOfMassThirdSegment(double timeInThirdSegment)
+   {
+      CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, timeInThirdSegment, omega0.getDoubleValue(), finalCMPFinalFrame,
+            endOfSplineICPFinalFrame, endOfSplineCoM, desiredCoMOutput);
    }
 
    private void updateSplineBoundaries()
@@ -437,6 +481,11 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    public void getAcceleration(YoFrameVector accelerationToPack)
    {
       accelerationToPack.setToZero();
+   }
+
+   public void getCoMPosition(YoFramePoint positionToPack)
+   {
+      positionToPack.set(desiredCoMOutput);
    }
 
    @Override

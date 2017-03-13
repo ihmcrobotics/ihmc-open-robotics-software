@@ -7,10 +7,10 @@ import us.ihmc.robotics.math.trajectories.YoPolynomial;
 public class CoMIntegrationTools
 {
 
-   public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, FramePoint constantCMP, FramePoint initialICP, FramePoint initialCoM,
-         FramePoint finalCoMToPack)
+   public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, FramePoint constantCMP, FramePoint initialICP,
+         FramePoint initialCoM, FramePoint finalCoMToPack)
    {
-      computeCoMPositionUsingConstantCMP(0.0, segmentDuration, segmentDuration, constantCMP, initialICP, initialCoM, finalCoMToPack);
+      computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack);
    }
 
    public static void computeCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
