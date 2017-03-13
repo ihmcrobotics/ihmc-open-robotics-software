@@ -110,7 +110,7 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
    private final YoFramePointInMultipleFrames singleSupportFinalICP;
    private final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
-   private final YoFramePointInMultipleFrames initialCoM;
+   private final YoFramePointInMultipleFrames singleSupportInitialCoM;
    private final YoFramePointInMultipleFrames singleSupportFinalCoM;
 
    private final YoFramePoint desiredCentroidalMomentumPivotPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
@@ -120,6 +120,8 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
    private final YoFrameVector desiredCapturePointVelocity = new YoFrameVector(namePrefix + "DesiredCapturePointVelocity", worldFrame, registry);
    private final YoFrameVector desiredCapturePointAcceleration = new YoFrameVector(namePrefix + "DesiredCapturePointAcceleration", worldFrame, registry);
    private final DoubleYoVariable omega0 = new DoubleYoVariable(namePrefix + "Omega0", registry);
+
+   private final YoFramePoint desiredCenterOfMassPosition = new YoFramePoint(namePrefix + "DesiredCenterOfMassPosition", worldFrame, registry);
 
    private final BooleanYoVariable requestedHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
    private final BooleanYoVariable isHoldingPosition = new BooleanYoVariable(namePrefix + "IsHoldingPosition", registry);
@@ -157,7 +159,7 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
       actualICPToHold.setToNaN();
       isHoldingPosition.set(false);
 
-      icpDoubleSupportTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix + "DoubleSupport", worldFrame, registry);
+      icpDoubleSupportTrajectoryGenerator = new ICPPlannerTrajectoryGenerator(namePrefix + "DoubleSupport", worldFrame, omega0, registry);
       icpSingleSupportTrajectoryGenerator = new ICPPlannerSegmentedTrajectoryGenerator(namePrefix + "SingleSupport", worldFrame, omega0, yoGraphicsListRegistry,
                                                                                        registry);
       icpSingleSupportTrajectoryGenerator.setMaximumSplineDuration(icpPlannerParameters.getMaxDurationForSmoothingEntryToExitCMPSwitch());
@@ -188,7 +190,7 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
-      initialCoM = new YoFramePointInMultipleFrames(namePrefix + "InitialCoM", registry, framesToRegister);
+      singleSupportInitialCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialCoM", registry, framesToRegister);
       singleSupportFinalCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalCoM", registry, framesToRegister);
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
@@ -253,6 +255,11 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
                                                                          YoAppearance.Chocolate(), GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalICPViz);
       artifactList.add(singleSupportFinalICPViz.createArtifact());
+
+      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("desiredCenterOfMassPositionViz",
+            desiredCenterOfMassPosition, 0.004, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      yoGraphicsList.add(desiredCenterOfMassPositionViz);
+      artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
 
       YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM",
             singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly(), 0.004, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
@@ -351,28 +358,9 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
       desiredCapturePointVelocity.setY(currentDesiredCapturePointVelocity.getY());
    }
 
-   public void setInitialCoMState(FramePoint currentCoMPosition)
+   public void setDesiredCenterOfMassPosition(YoFramePoint currentDesiredCenterOfMassPosition)
    {
-      initialCoM.set(currentCoMPosition);
-   }
-
-   public void setInitialCoMState(YoFramePoint currentCoMPosition)
-   {
-      initialCoM.set(currentCoMPosition);
-   }
-
-   public void setInitialCoMState(FramePoint2d currentCoMPosition)
-   {
-      initialCoM.checkReferenceFrameMatch(currentCoMPosition);
-      initialCoM.setX(currentCoMPosition.getX());
-      initialCoM.setY(currentCoMPosition.getY());
-   }
-
-   public void setInitialCoMState(YoFramePoint2d currentCoMPosition)
-   {
-      initialCoM.checkReferenceFrameMatch(currentCoMPosition);
-      initialCoM.setX(currentCoMPosition.getX());
-      initialCoM.setY(currentCoMPosition.getY());
+      desiredCenterOfMassPosition.set(currentDesiredCenterOfMassPosition);
    }
 
 
@@ -519,15 +507,16 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
       icpDoubleSupportTrajectoryGenerator.setTrajectoryTime(transferTimes.get(0).getDoubleValue());
       icpDoubleSupportTrajectoryGenerator.setInitialConditions(desiredCapturePointPosition, desiredCapturePointVelocity, initialFrame);
       icpDoubleSupportTrajectoryGenerator.setFinalConditions(singleSupportInitialICP, singleSupportInitialICPVelocity, finalFrame);
+      icpDoubleSupportTrajectoryGenerator.setInitialCoMPosition(desiredCenterOfMassPosition, worldFrame);
       icpDoubleSupportTrajectoryGenerator.initialize();
    }
 
    private void computeCoMFinalCoMPositionInTransfer()
    {
-      icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(transferTimes.get(0).getDoubleValue(), omega0.getDoubleValue(), initialCoM, singleSupportFinalCoM);
+      icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(desiredCenterOfMassPosition, singleSupportInitialCoM);
 
-      updateSingleSupportPlan(); // // TODO: 3/13/17
-      icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM, singleSupportFinalCoM);
+      updateSingleSupportPlan(); // // TODO: 3/13/17 this may not work
+      icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM, singleSupportFinalCoM);
    }
 
 
@@ -584,6 +573,7 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
          icpSingleSupportTrajectoryGenerator.setCornerPoints(entryCornerPoints.get(0), exitCornerPoints.get(0));
          icpSingleSupportTrajectoryGenerator.setReferenceCMPs(entryCMPs.get(0), exitCMPs.get(0));
          icpSingleSupportTrajectoryGenerator.setReferenceFrames(supportSoleFrame, worldFrame);
+         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
          icpSingleSupportTrajectoryGenerator.setTrajectoryTime(timeRemainingOnEntryCMP, timeToSpendOnExitCMPBeforeDoubleSupport);
          icpSingleSupportTrajectoryGenerator.initialize();
 
@@ -596,6 +586,9 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
                                             singleSupportInitialICP);
          computeDesiredCapturePointPosition(omega0, doubleSupportTimeSpentAfterEntryCornerPoint + swingTimes.get(0).getDoubleValue(), entryCornerPoints.get(0),
                                             entryCMPs.get(0), singleSupportFinalICP);
+         
+         
+         // // TODO: 3/13/17 CoM position computation
       }
 
       singleSupportInitialICP.changeFrame(supportSoleFrame);
@@ -734,6 +727,8 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
          icpDoubleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
          icpDoubleSupportTrajectoryGenerator.getVelocity(desiredCapturePointVelocity);
          icpDoubleSupportTrajectoryGenerator.getAcceleration(desiredCapturePointAcceleration);
+
+         icpDoubleSupportTrajectoryGenerator.getCoMPosition(desiredCenterOfMassPosition);
       }
       else if (useTwoConstantCMPsPerSupport.getBooleanValue())
       {
@@ -741,6 +736,8 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
          icpSingleSupportTrajectoryGenerator.get(desiredCapturePointPosition);
          icpSingleSupportTrajectoryGenerator.getVelocity(desiredCapturePointVelocity);
          icpSingleSupportTrajectoryGenerator.getAcceleration(desiredCapturePointAcceleration);
+
+         icpSingleSupportTrajectoryGenerator.getCoMPosition(desiredCenterOfMassPosition);
       }
       else
       {
