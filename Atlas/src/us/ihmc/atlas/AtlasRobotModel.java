@@ -95,7 +95,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final DRCRobotModel.RobotTarget target;
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
-   private static final double ESTIMATOR_DT = Conversions.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
+   private static final double ESTIMATOR_DT = Conversions.nanosecondsToSeconds(ESTIMATOR_DT_IN_NS);
    private static final double CONTROL_DT = 0.004;    // 0.006;
 
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;

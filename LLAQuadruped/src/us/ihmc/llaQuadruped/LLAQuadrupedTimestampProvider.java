@@ -16,7 +16,7 @@ public class LLAQuadrupedTimestampProvider implements SensorTimestampHolder
    @Override
    public long getTimestamp()
    {
-      return Conversions.secondsToNanoSeconds(sdfRobot.getYoTime().getDoubleValue());
+      return Conversions.secondsToNanoseconds(sdfRobot.getYoTime().getDoubleValue());
    }
 
    @Override

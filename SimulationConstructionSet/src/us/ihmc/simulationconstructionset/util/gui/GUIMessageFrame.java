@@ -17,8 +17,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.tools.gui.GUIMessagePanel;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class GUIMessageFrame
 {

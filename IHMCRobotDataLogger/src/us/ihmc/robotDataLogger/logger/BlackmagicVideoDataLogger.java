@@ -123,7 +123,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
       {
          if(frame % 60 == 0)
          {
-            System.out.println("[Decklink " + decklink + "] Received frame " + frame + " at time " + hardwareTime + "ns, delay: " + Conversions.nanoSecondstoSeconds(circularLongMap.getLatestKey() - hardwareTime) + "s. pts: " + pts);
+            System.out.println("[Decklink " + decklink + "] Received frame " + frame + " at time " + hardwareTime + "ns, delay: " + Conversions.nanosecondsToSeconds(circularLongMap.getLatestKey() - hardwareTime) + "s. pts: " + pts);
          }
 
          
