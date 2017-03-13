@@ -13,8 +13,8 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -63,14 +63,14 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-         assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
-         assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
-         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(robotSide, armJoints, scs);
+         assertEquals(RigidBodyControlMode.USER, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(hand.getName(), robotSide, armJoints, scs);
          assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
          double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
          assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
@@ -78,7 +78,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
          assertTrue(success);
 
-         assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
       }
    }
 
@@ -92,14 +92,15 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       return qdd_ds;
    }
 
-   public static double[] findControllerDesiredJointAccelerations(RobotSide robotSide, OneDoFJoint[] armJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredJointAccelerations(String bodyName, RobotSide robotSide, OneDoFJoint[] armJoints, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[armJoints.length];
-      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + "Hand" + HandUserControlModeState.class.getSimpleName();
+      String nameSpace = bodyName + "UserControlModule";
 
       for (int i = 0; i < armJoints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(nameSpace, "qdd_d_user_" + armJoints[i].getName()).getValueAsDouble();
+         String variable = bodyName + "UserMode_" + armJoints[i].getName() + "_qdd_d";
+         qdd_ds[i] = scs.getVariable(nameSpace, variable).getValueAsDouble();
       }
       return qdd_ds;
    }
