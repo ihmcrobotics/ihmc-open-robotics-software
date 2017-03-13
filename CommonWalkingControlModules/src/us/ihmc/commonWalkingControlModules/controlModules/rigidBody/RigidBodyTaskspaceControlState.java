@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -13,7 +13,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -83,7 +82,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private ReferenceFrame trajectoryFrame;
 
    public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-         Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+         Collection<ReferenceFrame> controlFrames, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyName, yoTime);
       this.baseFrame = baseFrame;
@@ -110,9 +109,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
 
-      if (controlFrameMap != null)
+      if (controlFrames != null)
       {
-         for (ReferenceFrame frameToRegister : controlFrameMap.values())
+         for (ReferenceFrame frameToRegister : controlFrames)
          {
             positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
             orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);

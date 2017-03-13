@@ -34,6 +34,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.tools.io.printing.PrintTools;
 
 public class HighLevelControlManagerFactory
@@ -147,11 +148,9 @@ public class HighLevelControlManagerFactory
       // TODO: replace this when we support reference frames
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      Map<BaseForControl, ReferenceFrame> controlFrameMap = new EnumMap<>(BaseForControl.class);
-      controlFrameMap.put(BaseForControl.CHEST, fullRobotModel.getChest().getBodyFixedFrame());
-      controlFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
-      controlFrameMap.put(BaseForControl.WORLD, ReferenceFrame.getWorldFrame());
-
+      ReferenceFrameHashCodeResolver referenceFrameResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+      Collection<ReferenceFrame> controlFrames = referenceFrameResolver.getAllReferenceFrames();
+      
       // Gains
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
       YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(bodyName);
@@ -169,7 +168,7 @@ public class HighLevelControlManagerFactory
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, elevator, homeConfiguration, positionControlledJoints,
-            controlFrameMap, rootFrame, yoTime, registry);
+            controlFrames, rootFrame, yoTime, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 
