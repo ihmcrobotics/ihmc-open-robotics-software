@@ -3,7 +3,6 @@ package us.ihmc.avatar.controllerAPI;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +15,8 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -25,10 +25,10 @@ import us.ihmc.humanoidRobotics.communication.packets.TrajectoryPoint1DMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
@@ -154,13 +154,13 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          OneDoFJoint[] armJoints = armsJoints.get(robotSide);
          ArmTrajectoryMessage armTrajectoryMessage = armTrajectoryMessages.get(robotSide);
 
-         assertNumberOfWaypoints(armJoints, numberOfTrajectoryPoints + 1, scs);
-         
+         assertNumberOfWaypoints(fullRobotModel.getHand(robotSide).getName(), armJoints, numberOfTrajectoryPoints + 1, scs);
+
          for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
          {
             OneDoFJoint armJoint = armJoints[jointIndex];
 
-            for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+            for (int trajectoryPointIndex = 0; trajectoryPointIndex < RigidBodyJointspaceControlState.maxPointsInGenerator - 1; trajectoryPointIndex++)
             {
                TrajectoryPoint1DMessage expectedTrajectoryPoint = armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, trajectoryPointIndex);
                SimpleTrajectoryPoint1D controllerTrajectoryPoint = findTrajectoryPoint(armJoint, trajectoryPointIndex + 1, scs);
@@ -177,7 +177,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (RobotSide robotSide : RobotSide.values)
       {
          OneDoFJoint[] armJoints = armsJoints.get(robotSide);
-         
+
          double[] desiredJointPositions = new double[armJoints.length];
          double[] desiredJointVelocities = new double[armJoints.length];
 
@@ -194,129 +194,56 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      Random random = new Random(564654L);
-      double epsilon = 1.0e-10;
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
       drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
-
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      RobotSide robotSide = RobotSide.LEFT;
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      double firstWaypointTime = 0.5;
-      double timePerWaypoint = 0.1;
-      int numberOfTrajectoryPoints = 97;
+      RigidBody chest = fullRobotModel.getChest();
+      RigidBody hand = fullRobotModel.getHand(robotSide);
+      OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+      int numberOfJoints = ScrewTools.computeDegreesOfFreedom(ScrewTools.createOneDoFJointPath(chest, hand));
 
-      SideDependentList<OneDoFJoint[]> armsJoints = new SideDependentList<>();
-      SideDependentList<ArmTrajectoryMessage> armTrajectoryMessages = new SideDependentList<>();
-
-      for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
-         armsJoints.put(robotSide, armJoints);
-         int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
-
-         ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
-         TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
-
-         double[] desiredJointPositions = findControllerDesiredPositions(armJoints, scs);
-
-
-         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints;
+         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfPoints);
+         double time = 0.0;
+         for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
-            OneDoFJoint joint = armJoints[jointIndex];
-            double waypointTime = firstWaypointTime;
-
-            trajectoryPoint1DCalculator.clear();
-
-            for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-            {
-               double averageVelocity = RandomNumbers.nextDouble(random, 1.0);
-               desiredJointPositions[jointIndex] += averageVelocity * timePerWaypoint;
-               desiredJointPositions[jointIndex] = MathTools.clamp(desiredJointPositions[jointIndex], joint.getJointLimitLower(), joint.getJointLimitUpper());
-               trajectoryPoint1DCalculator.appendTrajectoryPoint(waypointTime, desiredJointPositions[jointIndex]);
-               waypointTime += timePerWaypoint;
-            }
-
-            trajectoryPoint1DCalculator.computeTrajectoryPointVelocities(true);
-            SimpleTrajectoryPoint1DList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
-
-            for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-            {
-               SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-               armTrajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
-                     trajectoryPoint.getVelocity());
-            }
+            for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+               message.setTrajectoryPoint(jointIdx, pointIdx, time, 0.0, 0.0);
+            time = time + 0.05;
          }
+         drcSimulationTestHelper.send(message);
 
-         armTrajectoryMessages.put(robotSide, armTrajectoryMessage);
-         drcSimulationTestHelper.send(armTrajectoryMessage);
-      }
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(firstWaypointTime);
-      assertTrue(success);
-
-      int expectedTrajectoryPointIndex = 0;
-      boolean isDone = false;
-
-      while (!isDone)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-            assertNumberOfWaypoints(armsJoints.get(robotSide), Math.min(defaultMaximumNumberOfWaypoints, numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1), scs);
-
-         double simulationTime = 0.0;
-
-         for (int trajectoryPointIndex = 0; trajectoryPointIndex < defaultMaximumNumberOfWaypoints - 1; trajectoryPointIndex++)
-         {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               OneDoFJoint[] armJoints = armsJoints.get(robotSide);
-               ArmTrajectoryMessage armTrajectoryMessage = armTrajectoryMessages.get(robotSide);
-
-               for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
-               {
-                  OneDoFJoint armJoint = armJoints[jointIndex];
-
-                  TrajectoryPoint1DMessage expectedTrajectoryPoint = armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, expectedTrajectoryPointIndex);
-                  SimpleTrajectoryPoint1D controllerTrajectoryPoint = findTrajectoryPoint(armJoint, trajectoryPointIndex + 1, scs);
-                  assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), epsilon);
-                  assertEquals(expectedTrajectoryPoint.getPosition(), controllerTrajectoryPoint.getPosition(), epsilon);
-                  assertEquals(expectedTrajectoryPoint.getVelocity(), controllerTrajectoryPoint.getVelocity(), epsilon);
-               }
-            }
-
-            expectedTrajectoryPointIndex++;
-            simulationTime += timePerWaypoint;
-
-            if (expectedTrajectoryPointIndex == numberOfTrajectoryPoints)
-            {
-               isDone = true;
-               break;
-            }
-         }
-
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
          assertTrue(success);
+
+         String bodyName = fullRobotModel.getHand(robotSide).getName();
+         assertNumberOfWaypoints(bodyName, armJoints, 1, drcSimulationTestHelper.getSimulationConstructionSet());
       }
 
-      for (RobotSide robotSide : RobotSide.values)
       {
-         OneDoFJoint[] armJoints = armsJoints.get(robotSide);
-         
-         double[] desiredJointPositions = new double[armJoints.length];
-         double[] desiredJointVelocities = new double[armJoints.length];
+         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints - 1;
+         ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfPoints);
+         double time = 0.0;
+         for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
+         {
+            for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
+               message.setTrajectoryPoint(jointIdx, pointIdx, time, 0.0, 0.0);
+            time = time + 0.05;
+         }
+         drcSimulationTestHelper.send(message);
 
-         for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
-            desiredJointPositions[jointIndex] = armTrajectoryMessages.get(robotSide).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         assertTrue(success);
 
-         assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
+         String bodyName = fullRobotModel.getHand(robotSide).getName();
+         assertNumberOfWaypoints(bodyName, armJoints, RigidBodyJointspaceControlState.maxPoints, drcSimulationTestHelper.getSimulationConstructionSet());
       }
    }
 
@@ -341,63 +268,59 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       double timePerWaypoint = 0.5;
       int numberOfMessages = 5;
       int numberOfTrajectoryPoints = 5;
-      double trajectoryTime = (numberOfTrajectoryPoints + 1) * timePerWaypoint;
 
-      SideDependentList<OneDoFJoint[]> armsJoints = new SideDependentList<>();
-      SideDependentList<List<ArmTrajectoryMessage>> armTrajectoryMessages = new SideDependentList<>();
+      OneDoFJoint[] armJoints;
+      List<ArmTrajectoryMessage> armTrajectoryMessages;
 
       long id = 1264L;
+      RobotSide robotSide = RobotSide.LEFT;
 
-      for (RobotSide robotSide : RobotSide.values)
+      RigidBody chest = fullRobotModel.getChest();
+      RigidBody hand = fullRobotModel.getHand(robotSide);
+      armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
+      int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
+
+      armTrajectoryMessages = new ArrayList<>();
+
+      for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
       {
-         RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
-         OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
-         armsJoints.put(robotSide, armJoints);
-         int numberOfJoints = ScrewTools.computeDegreesOfFreedom(armJoints);
+         ArmTrajectoryMessage trajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
+         trajectoryMessage.setUniqueId(id);
+         if (messageIndex > 0)
+            trajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+         id++;
 
-         List<ArmTrajectoryMessage> messageList = new ArrayList<>();
+         TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
 
-         for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
+         for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {
-            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfTrajectoryPoints);
-            armTrajectoryMessage.setUniqueId(id);
-            if (messageIndex > 0)
-               armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
-            id++;
-            
-            TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
+            OneDoFJoint joint = armJoints[jointIndex];
+            trajectoryPoint1DCalculator.clear();
 
-            for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+            double timeAtWaypoint = timePerWaypoint;
+            for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
             {
-               OneDoFJoint joint = armJoints[jointIndex];
-
-               trajectoryPoint1DCalculator.clear();
-
-               for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-               {
-                  double desiredJointPosition = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
-                  trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
-               }
-
-               trajectoryPoint1DCalculator.computeTrajectoryPointTimes(timePerWaypoint, trajectoryTime);
-               trajectoryPoint1DCalculator.computeTrajectoryPointVelocities(true);
-               SimpleTrajectoryPoint1DList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
-
-               for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-               {
-                  SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
-                  armTrajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
-                        trajectoryPoint.getVelocity());
-               }
+               double desiredJointPosition = RandomNumbers.nextDouble(random, joint.getJointLimitLower(), joint.getJointLimitUpper());
+               trajectoryPoint1DCalculator.appendTrajectoryPoint(timeAtWaypoint, desiredJointPosition);
+               timeAtWaypoint += timePerWaypoint;
             }
-            messageList.add(armTrajectoryMessage);
-            drcSimulationTestHelper.send(armTrajectoryMessage);
 
-            success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-            assertTrue(success);
+            trajectoryPoint1DCalculator.computeTrajectoryPointVelocities(true);
+            SimpleTrajectoryPoint1DList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
+
+            for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+            {
+               SimpleTrajectoryPoint1D trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
+               trajectoryMessage.setTrajectoryPoint(jointIndex, trajectoryPointIndex, trajectoryPoint.getTime(), trajectoryPoint.getPosition(),
+                     trajectoryPoint.getVelocity());
+            }
          }
-         armTrajectoryMessages.put(robotSide, messageList);
+
+         armTrajectoryMessages.add(trajectoryMessage);
+         drcSimulationTestHelper.send(trajectoryMessage);
+
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         assertTrue(success);
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
@@ -405,50 +328,45 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      double timeOffset = 0.0;
+      int totalNumberOfPoints = numberOfTrajectoryPoints * numberOfMessages + 1;
+      boolean firstSegment = true;
 
-      for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
+      while (true)
       {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            OneDoFJoint[] armJoints = armsJoints.get(robotSide);
-            ArmTrajectoryMessage armTrajectoryMessage = armTrajectoryMessages.get(robotSide).get(messageIndex);
+         int expectedNumberOfPointsInGenerator = Math.min(totalNumberOfPoints, RigidBodyJointspaceControlState.maxPointsInGenerator);
+         if (firstSegment)
+            expectedNumberOfPointsInGenerator = Math.min(RigidBodyJointspaceControlState.maxPointsInGenerator, numberOfTrajectoryPoints + 1);
+         int expectedPointsInQueue = totalNumberOfPoints - expectedNumberOfPointsInGenerator;
 
-            assertNumberOfWaypoints(armJoints, numberOfTrajectoryPoints + 1, scs);
-
-            for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
-            {
-               OneDoFJoint armJoint = armJoints[jointIndex];
-
-               for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-               {
-                  TrajectoryPoint1DMessage expectedTrajectoryPoint = armTrajectoryMessage.getJointTrajectoryPoint(jointIndex, trajectoryPointIndex);
-                  SimpleTrajectoryPoint1D controllerTrajectoryPoint = findTrajectoryPoint(armJoint, trajectoryPointIndex + 1, scs);
-                  assertEquals(expectedTrajectoryPoint.getTime() + timeOffset, controllerTrajectoryPoint.getTime(), epsilon);
-                  assertEquals(expectedTrajectoryPoint.getPosition(), controllerTrajectoryPoint.getPosition(), epsilon);
-                  assertEquals(expectedTrajectoryPoint.getVelocity(), controllerTrajectoryPoint.getVelocity(), epsilon);
-                  assertEquals(numberOfMessages - messageIndex - 1, findNumberOfQueuedCommands(armJoint, scs));
-               }
-            }
-         }
-         timeOffset += trajectoryTime + timePerWaypoint;
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + timePerWaypoint);
-         assertTrue(success);
-      }
-
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         OneDoFJoint[] armJoints = armsJoints.get(robotSide);
-         
-         double[] desiredJointPositions = new double[armJoints.length];
-         double[] desiredJointVelocities = new double[armJoints.length];
+         String bodyName = fullRobotModel.getHand(robotSide).getName();
+         assertNumberOfWaypoints(bodyName, armJoints, totalNumberOfPoints, scs);
 
          for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
-            desiredJointPositions[jointIndex] = armTrajectoryMessages.get(robotSide).get(numberOfMessages - 1).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
+         {
+            OneDoFJoint armJoint = armJoints[jointIndex];
+            for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+               assertEquals(expectedPointsInQueue, findNumberOfQueuedPoints(bodyName, armJoint, scs));
+         }
 
-         assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions((expectedNumberOfPointsInGenerator - 1) * timePerWaypoint);
+         assertTrue(success);
+
+         totalNumberOfPoints = totalNumberOfPoints - (expectedNumberOfPointsInGenerator - 1);
+         firstSegment = false;
+
+         if (expectedPointsInQueue == 0)
+            break;
       }
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      double[] desiredJointPositions = new double[armJoints.length];
+      double[] desiredJointVelocities = new double[armJoints.length];
+
+      for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
+         desiredJointPositions[jointIndex] = armTrajectoryMessages.get(numberOfMessages - 1).getJointTrajectoryPointList(jointIndex).getLastTrajectoryPoint().getPosition();
+
+      assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, epsilon, scs);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 10.7)
@@ -497,11 +415,11 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
                long previousMessageId = id - 1;
                if (messageIndex == numberOfMessages - 1)
                   previousMessageId = id + 100; // Bad ID
-               
+
                armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, previousMessageId);
             }
             id++;
-            
+
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
 
             for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
@@ -538,6 +456,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             drcSimulationTestHelper.send(armTrajectoryMessages.get(robotSide).get(messageIndex));
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+
          assertTrue(success);
       }
 
@@ -555,11 +474,11 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
          {
             OneDoFJoint armJoint = armJoints[jointIndex];
-            assertEquals(1, findNumberOfTrajectoryPoints(armJoint, scs));
+            assertEquals(1, findNumberOfTrajectoryPoints(fullRobotModel.getHand(robotSide).getName(), armJoint, scs));
             desiredJointPositions[jointIndex] = armJoints[jointIndex].getQ();
          }
 
-         assertNumberOfWaypoints(armJoints, 1, scs);
+         assertNumberOfWaypoints(fullRobotModel.getHand(robotSide).getName(), armJoints, 1, scs);
          assertSingleWaypointExecuted(armJoints, desiredJointPositions, desiredJointVelocities, 0.01, scs);
       }
    }
@@ -606,7 +525,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             if (messageIndex > 0)
                armTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
-            
+
             TrajectoryPoint1DCalculator trajectoryPoint1DCalculator = new TrajectoryPoint1DCalculator();
 
             for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
@@ -663,7 +582,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          OneDoFJoint[] armJoints = armsJoints.get(robotSide);
          ArmTrajectoryMessage overridingMessage = overridingMessages.get(robotSide);
 
-         assertNumberOfWaypoints(armJoints, 2, scs);
+         assertNumberOfWaypoints(fullRobotModel.getHand(robotSide).getName(), armJoints, 2, scs);
 
          for (int jointIndex = 0; jointIndex < armJoints.length; jointIndex++)
          {
@@ -674,7 +593,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), epsilon);
             assertEquals(expectedTrajectoryPoint.getPosition(), controllerTrajectoryPoint.getPosition(), epsilon);
             assertEquals(expectedTrajectoryPoint.getVelocity(), controllerTrajectoryPoint.getVelocity(), epsilon);
-            assertEquals(0, findNumberOfQueuedCommands(armJoint, scs));
+            assertEquals(0, findNumberOfQueuedPoints(fullRobotModel.getHand(robotSide).getName(), armJoint, scs));
          }
       }
 
@@ -684,7 +603,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       for (RobotSide robotSide : RobotSide.values)
       {
          OneDoFJoint[] armJoints = armsJoints.get(robotSide);
-         
+
          double[] desiredJointPositions = new double[armJoints.length];
          double[] desiredJointVelocities = new double[armJoints.length];
 
@@ -732,7 +651,6 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          assertTrue(success);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-         double timeStopSent = scs.getRobots()[0].getYoTime().getDoubleValue();
          double[] actualJointPositions = new double[numberOfJoints];
          double[] zeroVelocities = new double[numberOfJoints];
          for (int i = 0; i < numberOfJoints; i++)
@@ -745,23 +663,21 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
          assertTrue(success);
 
-         HandControlMode controllerState = findControllerState(robotSide, scs);
-         double switchTime = findControllerSwitchTime(robotSide, scs);
+         RigidBodyControlMode controllerState = findControllerState(robotSide, scs);
          double[] controllerDesiredJointPositions = findControllerDesiredPositions(armJoints, scs);
          double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(armJoints, scs);
 
-         assertEquals(HandControlMode.JOINTSPACE, controllerState);
-         assertEquals(timeStopSent, switchTime, getRobotModel().getControllerDT());
+         assertEquals(RigidBodyControlMode.JOINTSPACE, controllerState);
          assertArrayEquals(actualJointPositions, controllerDesiredJointPositions, 0.01);
          assertArrayEquals(zeroVelocities, controllerDesiredJointVelocities, 1.0e-10);
       }
    }
 
-   public static void assertNumberOfWaypoints(OneDoFJoint[] armJoints, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
+   public static void assertNumberOfWaypoints(String bodyName, OneDoFJoint[] armJoints, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
    {
       for (int i = 0; i < armJoints.length; i++)
       {
-         int controllerNumberOfTrajectoryPoints = findNumberOfTrajectoryPoints(armJoints[i], scs);
+         int controllerNumberOfTrajectoryPoints = findNumberOfTrajectoryPoints(bodyName, armJoints[i], scs);
          assertTrue(
                "Unexpected number of trajectory points: expected = " + expectedNumberOfTrajectoryPoints + ", controller = " + controllerNumberOfTrajectoryPoints,
                controllerNumberOfTrajectoryPoints == expectedNumberOfTrajectoryPoints);
@@ -771,41 +687,56 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    public static void assertSingleWaypointExecuted(OneDoFJoint[] armJoints, double[] desiredJointPositions, double[] desiredJointVelocities, double epsilon,
          SimulationConstructionSet scs)
    {
-      double[] controllerDesiredJointPositions = findControllerDesiredPositions(armJoints, scs);
-      double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(armJoints, scs);
-
-      assertArrayEquals(desiredJointPositions, controllerDesiredJointPositions, epsilon);
-      assertArrayEquals(desiredJointVelocities, controllerDesiredJointVelocities, epsilon);
-
-      if (DEBUG)
+      for (int jointIdx = 0; jointIdx < armJoints.length; jointIdx++)
       {
-         for (int i = 0; i < armJoints.length; i++)
-         {
-            OneDoFJoint joint = armJoints[i];
-            double q_err = desiredJointPositions[i] - joint.getQ();
-            System.out.println(joint.getName() + ": q_err = " + q_err + ", controller q_d = " + controllerDesiredJointPositions[i] + ", message q_d = "
-                  + desiredJointPositions[i] + ", q = " + joint.getQ());
-         }
-
-         for (int i = 0; i < armJoints.length; i++)
-         {
-            OneDoFJoint joint = armJoints[i];
-            System.out.println(joint.getName() + ": controller qd_d = " + controllerDesiredJointVelocities[i]);
-         }
+         assertJointDesired(scs, armJoints[jointIdx], desiredJointPositions[jointIdx], desiredJointVelocities[jointIdx], epsilon);
       }
    }
 
-   @SuppressWarnings("unchecked")
-   public static HandControlMode findControllerState(RobotSide robotSide, SimulationConstructionSet scs)
+   private static void assertJointDesired(SimulationConstructionSet scs, OneDoFJoint joint, double desiredPosition, double desiredVelocity, double epsilon)
    {
-      String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-      return ((EnumYoVariable<HandControlMode>) scs.getVariable(handControlModuleName, handControlModuleName)).getEnumValue();
+      DoubleYoVariable scsDesiredPosition = findJointDesiredPosition(scs, joint);
+      assertEquals(desiredPosition, scsDesiredPosition.getDoubleValue(), epsilon);
+      DoubleYoVariable scsDesiredVelocity = findJointDesiredVelocity(scs, joint);
+      assertEquals(desiredVelocity, scsDesiredVelocity.getDoubleValue(), epsilon);
    }
 
-   public static double findControllerSwitchTime(RobotSide robotSide, SimulationConstructionSet scs)
+   private static DoubleYoVariable findJointDesiredPosition(SimulationConstructionSet scs, OneDoFJoint joint)
+   {
+      String jointName = joint.getName();
+      String namespace = jointName + "PDController";
+      String variable = "q_d_" + jointName;
+      return getDoubleYoVariable(scs, variable, namespace);
+   }
+
+   private static DoubleYoVariable findJointDesiredVelocity(SimulationConstructionSet scs, OneDoFJoint joint)
+   {
+      String jointName = joint.getName();
+      String namespace = jointName + "PDController";
+      String variable = "qd_d_" + jointName;
+      return getDoubleYoVariable(scs, variable, namespace);
+   }
+
+   private static DoubleYoVariable getDoubleYoVariable(SimulationConstructionSet scs, String name, String namespace)
+   {
+      return getYoVariable(scs, name, namespace, DoubleYoVariable.class);
+   }
+
+   private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
+   {
+      YoVariable<?> uncheckedVariable = scs.getVariable(namespace, name);
+      if (uncheckedVariable == null)
+         throw new RuntimeException("Could not find yo variable: " + namespace + "/" + name + ".");
+      if (!clazz.isInstance(uncheckedVariable))
+         throw new RuntimeException("YoVariable " + name + " is not of type " + clazz.getSimpleName());
+      return clazz.cast(uncheckedVariable);
+   }
+
+   @SuppressWarnings("unchecked")
+   public static RigidBodyControlMode findControllerState(RobotSide robotSide, SimulationConstructionSet scs)
    {
       String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-      return scs.getVariable(handControlModuleName, handControlModuleName + "SwitchTime").getValueAsDouble();
+      return ((EnumYoVariable<RigidBodyControlMode>) scs.getVariable(handControlModuleName, handControlModuleName)).getEnumValue();
    }
 
    public static double[] findControllerDesiredPositions(OneDoFJoint[] armJoints, SimulationConstructionSet scs)
@@ -838,12 +769,11 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return controllerDesiredJointVelocities;
    }
 
-   public static int findNumberOfTrajectoryPoints(OneDoFJoint armJoint, SimulationConstructionSet scs)
+   public static int findNumberOfTrajectoryPoints(String bodyName, OneDoFJoint armJoint, SimulationConstructionSet scs)
    {
-      String jointName = armJoint.getName();
-      String trajectoryName = jointName + MultipleWaypointsTrajectoryGenerator.class.getSimpleName();
-      String variableName = jointName + "NumberOfWaypoints";
-      return ((IntegerYoVariable) scs.getVariable(trajectoryName, variableName)).getIntegerValue();
+      String namespace = bodyName + "JointspaceControlModule";
+      String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPoints";
+      return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
    }
 
    public static SimpleTrajectoryPoint1D findTrajectoryPoint(OneDoFJoint armJoint, int trajectoryPointIndex, SimulationConstructionSet scs)
@@ -863,15 +793,17 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       return trajectoryPoint;
    }
 
-   public static SimpleTrajectoryPoint1D findLastTrajectoryPoint(OneDoFJoint armJoint, SimulationConstructionSet scs)
+   public static SimpleTrajectoryPoint1D findLastTrajectoryPoint(String bodyName, OneDoFJoint armJoint, SimulationConstructionSet scs)
    {
-      int lastTrajectoryPointIndex = findNumberOfTrajectoryPoints(armJoint, scs) - 1;
+      int lastTrajectoryPointIndex = findNumberOfTrajectoryPoints(bodyName, armJoint, scs) - 1;
       return findTrajectoryPoint(armJoint, lastTrajectoryPointIndex, scs);
    }
 
-   public static int findNumberOfQueuedCommands(OneDoFJoint armJoint, SimulationConstructionSet scs)
+   public static int findNumberOfQueuedPoints(String bodyName, OneDoFJoint armJoint, SimulationConstructionSet scs)
    {
-      return ((IntegerYoVariable) scs.getVariable(armJoint.getName() + "NumberOfQueuedCommands")).getIntegerValue();
+      String namespace = bodyName + "JointspaceControlModule";
+      String variable = bodyName + "Jointspace_" + armJoint.getName() + "_numberOfPointsInQueue";
+      return ((IntegerYoVariable) scs.getVariable(namespace, variable)).getIntegerValue();
    }
 
    private ArmTrajectoryMessage generateRandomArmTrajectoryMessage(Random random, int numberOfTrajectoryPoints, double trajectoryTime, RobotSide robotSide,
