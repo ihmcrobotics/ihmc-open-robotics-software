@@ -3,11 +3,11 @@ package us.ihmc.communication;
 import java.util.EnumMap;
 import java.util.HashMap;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packetCommunicator.interfaces.GlobalPacketConsumer;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.TrackablePacket;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class PacketRouter<T extends Enum<T>>
 {

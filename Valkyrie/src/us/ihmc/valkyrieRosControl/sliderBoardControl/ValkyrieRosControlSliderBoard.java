@@ -9,6 +9,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.MathTools;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.rosControl.EffortJointHandle;
 import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -238,7 +238,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
    {
       if (startTime == -1)
          startTime = time;
-      yoTime.set(Conversions.nanoSecondstoSeconds(time - startTime));
+      yoTime.set(Conversions.nanosecondsToSeconds(time - startTime));
 
       tauFunctionSelected.set(selectedFunctionGenerator.getValue());
 

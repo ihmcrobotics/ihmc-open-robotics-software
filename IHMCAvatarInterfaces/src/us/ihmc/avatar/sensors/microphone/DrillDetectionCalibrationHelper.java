@@ -2,9 +2,9 @@ package us.ihmc.avatar.sensors.microphone;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
 
@@ -61,7 +61,7 @@ public class DrillDetectionCalibrationHelper extends DrillDetectionAlgorithm
 
       double[][] fftData = BodePlotConstructor.computeFreqMagPhase(time, input);
       double[] frequency = fftData[0];
-      double[] magnitude = BodeUnitsConverter.convertMagnitudeToDecibels(fftData[1]);
+      double[] magnitude = Conversions.convertMagnitudeToDecibels(fftData[1]);
 
 
       double lowerFrequency;

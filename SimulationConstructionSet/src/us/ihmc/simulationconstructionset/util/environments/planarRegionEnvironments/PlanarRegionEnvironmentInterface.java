@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.util.environments.planarRegionEnvironm
 
 import java.util.List;
 
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -35,6 +36,13 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
       ensureHasBeenGenerated();
       
       return environment.getCombinedTerrainObject3D();
+   }
+   
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      ensureHasBeenGenerated();
+      
+      return generator.getPlanarRegionsList();
    }
    
    @Override

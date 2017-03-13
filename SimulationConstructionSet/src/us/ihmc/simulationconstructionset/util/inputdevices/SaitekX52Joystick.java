@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import net.java.games.input.Component;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -14,7 +15,6 @@ import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.mapping.SaitekX52Mapping;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * @deprecated Use us.ihmc.tools.inputDevices.joystick.Joystick

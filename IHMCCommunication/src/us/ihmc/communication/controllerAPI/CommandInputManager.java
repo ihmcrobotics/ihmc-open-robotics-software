@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.CompilableCommand;
 import us.ihmc.communication.controllerAPI.command.MultipleCommandHolder;
@@ -15,7 +16,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * CommandInputManager is used to generate a thread-safe input API for a controller.

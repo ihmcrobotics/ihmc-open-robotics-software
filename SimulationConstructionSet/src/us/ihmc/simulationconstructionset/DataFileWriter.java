@@ -17,9 +17,9 @@ import com.jmatio.io.MatFileIncrementalWriter;
 import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLStructure;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class DataFileWriter
 {

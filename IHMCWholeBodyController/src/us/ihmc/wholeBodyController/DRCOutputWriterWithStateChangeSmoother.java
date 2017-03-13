@@ -51,10 +51,10 @@ public class DRCOutputWriterWithStateChangeSmoother implements DRCOutputWriter
       if (hasHighLevelControllerStateChanged.get())
       {
          hasHighLevelControllerStateChanged.set(false);
-         timeAtHighLevelControllerStateChange.set(Conversions.nanoSecondstoSeconds(timestamp));
+         timeAtHighLevelControllerStateChange.set(Conversions.nanosecondsToSeconds(timestamp));
       }
 
-      double currentTime = Conversions.nanoSecondstoSeconds(timestamp);
+      double currentTime = Conversions.nanosecondsToSeconds(timestamp);
       double deltaTime = Math.max(currentTime - timeAtHighLevelControllerStateChange.getDoubleValue(), 0.0);
       
       if (deltaTime < slopTime.getDoubleValue())

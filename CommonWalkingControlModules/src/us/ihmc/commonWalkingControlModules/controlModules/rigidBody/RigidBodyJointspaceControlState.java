@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValid
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -21,7 +22,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryG
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class RigidBodyJointspaceControlState extends RigidBodyControlState
 {
