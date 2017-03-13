@@ -356,6 +356,21 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       return finalVelocity;
    }
 
+   public YoPolynomial getXPolynomial()
+   {
+      return xPolynomial;
+   }
+
+   public YoPolynomial getYPolynomial()
+   {
+      return yPolynomial;
+   }
+
+   public YoPolynomial getZPolynomial()
+   {
+      return zPolynomial;
+   }
+
    @Override
    public void showVisualization()
    {

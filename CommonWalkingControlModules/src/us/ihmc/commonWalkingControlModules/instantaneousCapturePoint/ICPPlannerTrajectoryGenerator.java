@@ -1,12 +1,16 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerator
@@ -42,6 +46,19 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       finalVelocity.getFrameTupleIncludingFrame(finalVelocityInSpecificFrame);
       finalPositionInSpecificFrame.changeFrame(attachedFrame);
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
+   }
+
+   public void computeFinalCoMPosition(double duration, double omega0, YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeFinalCoMPosition(duration, omega0, initialCoM.getFrameTuple(), finalCoMToPack.getFrameTuple());
+   }
+
+   public void computeFinalCoMPosition(double duration, double omega0, FramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
+      YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();
+
+      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(duration, omega0, xPolynomial, yPolynomial, initialCoM, finalCoMToPack);
    }
 
    @Override
