@@ -110,6 +110,9 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
    private final YoFramePointInMultipleFrames singleSupportFinalICP;
    private final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
+   private final YoFramePointInMultipleFrames initialCoM;
+   private final YoFramePointInMultipleFrames singleSupportFinalCoM;
+
    private final YoFramePoint desiredCentroidalMomentumPivotPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    private final YoFrameVector desiredCentroidalMomentumPivotVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame,
                                                                                           registry);
@@ -185,6 +188,9 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
+      initialCoM = new YoFramePointInMultipleFrames(namePrefix + "InitialCoM", registry, framesToRegister);
+      singleSupportFinalCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalCoM", registry, framesToRegister);
+
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
       {
          YoFramePointInMultipleFrames earlyCornerPoint = new YoFramePointInMultipleFrames(namePrefix + "EntryCornerPoints" + i, registry, framesToRegister);
@@ -247,6 +253,11 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
                                                                          YoAppearance.Chocolate(), GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalICPViz);
       artifactList.add(singleSupportFinalICPViz.createArtifact());
+
+      YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM",
+            singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly(), 0.004, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      yoGraphicsList.add(singleSupportFinalCoMViz);
+      artifactList.add(singleSupportFinalCoMViz.createArtifact());
 
       icpSingleSupportTrajectoryGenerator.createVisualizers(yoGraphicsList, artifactList);
 
@@ -340,6 +351,31 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
       desiredCapturePointVelocity.setY(currentDesiredCapturePointVelocity.getY());
    }
 
+   public void setInitialCoMState(FramePoint currentCoMPosition)
+   {
+      initialCoM.set(currentCoMPosition);
+   }
+
+   public void setInitialCoMState(YoFramePoint currentCoMPosition)
+   {
+      initialCoM.set(currentCoMPosition);
+   }
+
+   public void setInitialCoMState(FramePoint2d currentCoMPosition)
+   {
+      initialCoM.checkReferenceFrameMatch(currentCoMPosition);
+      initialCoM.setX(currentCoMPosition.getX());
+      initialCoM.setY(currentCoMPosition.getY());
+   }
+
+   public void setInitialCoMState(YoFramePoint2d currentCoMPosition)
+   {
+      initialCoM.checkReferenceFrameMatch(currentCoMPosition);
+      initialCoM.setX(currentCoMPosition.getX());
+      initialCoM.setY(currentCoMPosition.getY());
+   }
+
+
    @Override
    public void holdCurrentICP(double initialTime, FramePoint actualICPToHold)
    {
@@ -369,6 +405,7 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
          transferTimes.get(numberOfFootstepRegistered).set(finalTransferTime.getDoubleValue());
 
       updateTransferPlan();
+      computeCoMFinalCoMPositionInTransfer();
    }
 
    private void updateTransferPlan()
@@ -484,6 +521,15 @@ public class ContinuousTransferICPPlanner implements ICPPlanner
       icpDoubleSupportTrajectoryGenerator.setFinalConditions(singleSupportInitialICP, singleSupportInitialICPVelocity, finalFrame);
       icpDoubleSupportTrajectoryGenerator.initialize();
    }
+
+   private void computeCoMFinalCoMPositionInTransfer()
+   {
+      icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(transferTimes.get(0).getDoubleValue(), omega0.getDoubleValue(), initialCoM, singleSupportFinalCoM);
+
+      updateSingleSupportPlan(); // // TODO: 3/13/17
+      icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM, singleSupportFinalCoM);
+   }
+
 
    @Override
    public void initializeForSingleSupport(double initialTime)

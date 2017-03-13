@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -12,11 +13,14 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajectoryGenerator
@@ -237,6 +241,41 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
             finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPVelocityFinalFrame);
    }
 
+   public void computeFinalCoMPosition(YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeFinalCoMPosition(initialCoM.getFrameTuple(), finalCoMToPack.getFrameTuple());
+   }
+
+   public void computeFinalCoMPosition(FramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      computeCoMPositionAfterFirstSegment(initialCoM, finalCoMToPack);
+      computeCoMPositionAfterSecondSegment(finalCoMToPack, finalCoMToPack);
+      computeCoMPositionAfterThirdSegment(finalCoMToPack, finalCoMToPack);
+   }
+
+   private void computeCoMPositionAfterFirstSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      //// FIXME: 3/13/17 there may be a frame issue
+      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame, initialCoM,
+            finalCoMToPack);
+   }
+
+   private void computeCoMPositionAfterSecondSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      /// FIXME: 3/13/17 this may have some issues with the bounds of the spline
+      initializeSpline();
+      double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
+      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(splineDuration, omega0.getDoubleValue(), spline.getXPolynomial(), spline.getYPolynomial(),
+         initialCoM, finalCoMToPack);
+   }
+
+   private void computeCoMPositionAfterThirdSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      //// FIXME: 3/13/17 there may be a frame issue and some things may have not been initialized
+      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame, initialCoM,
+            finalCoMToPack);
+   }
+
    @Override
    public void compute(double time)
    {
@@ -281,13 +320,18 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    private void computeSecondSegment(double timeInSecondSegment)
    {
-      spline.setInitialConditions(startOfSplineICP, startOfSplineICPVelocity);
-      spline.setFinalConditions(endOfSplineICP, endOfSplineICPVelocity);
-      spline.initialize();
+      initializeSpline();
       spline.compute(timeInSecondSegment);
 
       spline.getPosition(desiredICPOutput);
       spline.getVelocity(desiredICPVelocityOutput);
+   }
+
+   private void initializeSpline()
+   {
+      spline.setInitialConditions(startOfSplineICP, startOfSplineICPVelocity);
+      spline.setFinalConditions(endOfSplineICP, endOfSplineICPVelocity);
+      spline.initialize();
    }
 
    private void computeThirdSegment(double timeInThirdSegment)
