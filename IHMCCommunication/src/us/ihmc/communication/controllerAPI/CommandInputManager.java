@@ -175,22 +175,13 @@ public class CommandInputManager
       }
       
       Class<?> commandClass = nextCommand.getClass();
-      if (commandConverter.isConvertible(nextCommand, message))
+      if (commandConverter != null && commandConverter.isConvertible(nextCommand, message))
+      {
          commandConverter.process(nextCommand, message);
+      }
       else
          nextCommand.set(message);
          
-//      if(conversionInterfaceMap.containsKey(commandClass))
-//      {
-//         ArrayList<CommandConversionInterface> conversionHelpers = conversionInterfaceMap.get(commandClass);
-//         for(int i = 0; i < conversionHelpers.size(); i++)
-//         {
-//            CommandConversionInterface commandConversionInterface = conversionHelpers.get(i);
-//            commandConversionInterface.process(nextCommand, message);
-//         }
-//      }
-//      
-//      nextCommand.set(message);
       buffer.commit();
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)
