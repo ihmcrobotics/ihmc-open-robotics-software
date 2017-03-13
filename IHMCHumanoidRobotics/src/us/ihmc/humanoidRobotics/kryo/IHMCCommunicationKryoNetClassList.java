@@ -85,7 +85,6 @@ import us.ihmc.humanoidRobotics.communication.packets.driving.VehiclePosePacket;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.heightQuadTree.HeightQuadTreeNodeMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasDesiredPumpPSIPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectricMotorAutoEnableFlagPacket;
@@ -283,7 +282,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(SE3TrajectoryPointMessage.class);
       registerPacketClass(BodyPart.class);
 
-      registerPacketField(ArmControlMode.class);
       registerPacketField(BaseForControl.class);
       registerPacketField(OneDoFJointTrajectoryMessage.class);
       registerPacketField(OneDoFJointTrajectoryMessage[].class);

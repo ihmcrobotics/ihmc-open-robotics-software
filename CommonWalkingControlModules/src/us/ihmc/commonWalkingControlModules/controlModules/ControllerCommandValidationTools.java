@@ -6,7 +6,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.OneDoFJointTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
@@ -31,7 +30,7 @@ public class ControllerCommandValidationTools
 
    public static boolean checkArmDesiredAccelerationsCommand(OneDoFJoint[] joints, ArmDesiredAccelerationsCommand command)
    {
-      return command.getArmControlMode() != ArmControlMode.USER_CONTROL_MODE || command.getNumberOfJoints() == joints.length;
+      return command.getNumberOfJoints() == joints.length;
    }
 
    public static boolean checkOneDoFJointTrajectoryCommandList(OneDoFJoint[] joints, RecyclingArrayList<OneDoFJointTrajectoryCommand> trajectoryPointLists)
@@ -46,7 +45,7 @@ public class ControllerCommandValidationTools
       {
          if (!ControllerCommandValidationTools.checkJointspaceTrajectoryPointList(joints[jointIndex], trajectoryPointLists.get(jointIndex)))
          {
-            
+
             PrintTools.warn("Invalid joint trajectory ( "+jointIndex+" - "+joints[jointIndex].getName()+")");
             return false;
          }
