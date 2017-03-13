@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -35,7 +34,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class HighLevelControlManagerFactory
 {
@@ -146,12 +144,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       // TODO: replace this when we support reference frames
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      Map<BaseForControl, ReferenceFrame> controlFrameMap = new EnumMap<>(BaseForControl.class);
-      controlFrameMap.put(BaseForControl.CHEST, fullRobotModel.getChest().getBodyFixedFrame());
-      controlFrameMap.put(BaseForControl.WALKING_PATH, referenceFrames.getMidFeetUnderPelvisFrame());
-      controlFrameMap.put(BaseForControl.WORLD, ReferenceFrame.getWorldFrame());
+      Collection<ReferenceFrame> controlFrames = new ArrayList<>();
 
       // Gains
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
@@ -171,7 +164,7 @@ public class HighLevelControlManagerFactory
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
 
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, elevator, homeConfiguration, positionControlledJoints,
-            integrationSettings, controlFrameMap, rootFrame, yoTime, registry);
+            integrationSettings, controlFrames, rootFrame, yoTime, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 

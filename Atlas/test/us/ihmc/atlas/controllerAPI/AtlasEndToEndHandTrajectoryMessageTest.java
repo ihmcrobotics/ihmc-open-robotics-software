@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.geometry.FramePose;
@@ -71,7 +70,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       Quaternion waypointOrientation1 = new Quaternion();
       waypoint0.getPose(waypointPosition0, waypointOrientation0);
       waypoint1.getPose(waypointPosition1, waypointOrientation1);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.CHEST, 2);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
       handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D());
       handTrajectoryMessage.setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D());
 
@@ -91,7 +90,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
        * As went the bug is present, the error magnitude goes up to [-0.31, 0.002, -0.027] (as rotation vector) against [-0.03, -0.01, -0.01] without the bug.
        */
       assertTrue(rotationError.length() < 0.05);
-   }   
+   }
 
    @Override
    public DRCRobotModel getRobotModel()
