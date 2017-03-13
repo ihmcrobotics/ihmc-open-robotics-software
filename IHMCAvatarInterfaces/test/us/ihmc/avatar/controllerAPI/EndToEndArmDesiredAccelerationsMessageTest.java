@@ -64,10 +64,9 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
          assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
-
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
          assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
@@ -75,24 +74,6 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
          double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
          assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
-
-         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, null);
-
-         drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
-
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
-         assertTrue(success);
-
-         assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
-
-         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
-
-         drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
-
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
-         assertTrue(success);
-
-         assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
          assertTrue(success);

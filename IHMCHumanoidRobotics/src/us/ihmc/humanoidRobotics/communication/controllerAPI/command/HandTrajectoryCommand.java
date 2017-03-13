@@ -41,6 +41,17 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    public void set(HandTrajectoryCommand other)
    {
       super.set(other);
+      setPropertiesOnly(other);
+   }
+
+   /**
+    * Same as {@link #set(HandTrajectoryCommand)} but does not change the trajectory points.
+    * @param other
+    */
+   @Override
+   public void setPropertiesOnly(HandTrajectoryCommand other)
+   {
+      super.setPropertiesOnly(other);
       robotSide = other.robotSide;
       baseForControl = other.baseForControl;
    }
