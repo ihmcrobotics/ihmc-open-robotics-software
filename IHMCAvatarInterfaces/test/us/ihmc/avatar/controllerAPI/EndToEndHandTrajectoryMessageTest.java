@@ -86,8 +86,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 23.2)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 50000)
    public void testSingleTrajectoryPoint() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -146,8 +146,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 22.5)
-   @Test(timeout = 110000)
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 50000)
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -276,8 +276,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 27.3)
-   @Test(timeout = 140000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 30000)
    public void testMessageWithTooManyTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -334,8 +334,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 31.3)
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 40.0)
+   @Test(timeout = 80000)
    public void testQueuedMessages() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -510,8 +510,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), desiredOrientation, 0.001);
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 14.0)
-   @Test(timeout = 70000)
+   @ContinuousIntegrationTest(estimatedDuration = 15.0)
+   @Test(timeout = 30000)
    public void testQueueWithWrongPreviousId() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -622,8 +622,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 14.5)
-   @Test(timeout = 72000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 40000)
    public void testQueueStoppedWithOverrideMessage() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -807,8 +807,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return taskspaceToJointspaceCalculator;
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 21.2)
-   @Test(timeout = 110000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 60000)
    public void testStopAllTrajectory() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

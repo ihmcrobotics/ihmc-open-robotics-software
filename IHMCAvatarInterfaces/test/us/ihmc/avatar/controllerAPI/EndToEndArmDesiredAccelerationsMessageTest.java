@@ -36,8 +36,8 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.1)
-   @Test(timeout = 90000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 40000)
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

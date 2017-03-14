@@ -33,8 +33,8 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
     * Test revealing a bug that was preventing the trajectory from flipping the sign of the final orientation (necessary to prevent an extra rotation).
     * This bug was due to limiting the angle described by a Quaternion to be in [-Pi; Pi].
     */
-   @ContinuousIntegrationTest(estimatedDuration = 23.2)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 60000)
    public void testBugFromActualSimDataWithTwoTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
