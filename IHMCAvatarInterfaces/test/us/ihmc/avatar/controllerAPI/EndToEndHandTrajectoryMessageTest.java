@@ -24,7 +24,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -720,61 +719,54 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       double overrideTrajectoryTime = 1.0;
-      SideDependentList<HandTrajectoryMessage> overridingMessages = new SideDependentList<>();
-      Random random = new Random(792L);
+      SideDependentList<FramePose> overridingPoses = new SideDependentList<>();
+      fullRobotModel.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody chest = fullRobotModel.getChest();
-         RigidBody hand = fullRobotModel.getHand(robotSide);
 
-         OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
-
-         ScrewTestTools.setRandomPositionsWithinJointLimits(armClone, random);
-
-         RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
-         FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
-         desiredRandomHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+         FramePose desiredHandPose = new FramePose(chest.getBodyFixedFrame());
+         desiredHandPose.setPosition(0.25, robotSide.negateIfRightSide(0.35), -0.4);
+         desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
-         desiredRandomHandPose.getPose(desiredPosition, desiredOrientation);
+         desiredHandPose.getPose(desiredPosition, desiredOrientation);
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition,
                desiredOrientation);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
-         overridingMessages.put(robotSide, handTrajectoryMessage);
+         overridingPoses.put(robotSide, desiredHandPose);
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
+      fullRobotModel.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         overridingPoses.get(robotSide).changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertNumberOfWaypoints(handName, 2, scs);
-
-         SE3TrajectoryPointMessage fromMessage = overridingMessages.get(robotSide).getLastTrajectoryPoint();
-         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-         expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
-         SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findLastTrajectoryPoint(handName, scs);
-         assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
       }
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(overrideTrajectoryTime);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(overrideTrajectoryTime + 1.0);
       assertTrue(success);
+      fullRobotModel.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         HandTrajectoryMessage handTrajectoryMessage = overridingMessages.get(robotSide);
-         String handName = fullRobotModel.getHand(robotSide).getName();
+         FramePose desiredPose = overridingPoses.get(robotSide);
+         desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         SE3TrajectoryPointMessage fromMessage = handTrajectoryMessage.getLastTrajectoryPoint();
-         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-         expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
+         String handName = fullRobotModel.getHand(robotSide).getName();
          SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(handName, scs);
-         controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime()); // Don't want to check the time here.
-         assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
+         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
+         expectedTrajectoryPoint.setPosition(desiredPose.getPosition());
+         expectedTrajectoryPoint.setOrientation(desiredPose.getOrientation());
+
+         assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
       }
    }
 
@@ -878,7 +870,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(armJoints, scs);
          double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(armJoints, scs);
 
-         assertEquals(HandControlMode.JOINTSPACE, controllerState);
+         assertEquals(RigidBodyControlMode.JOINTSPACE, controllerState);
          assertArrayEquals(actualJointPositions, controllerDesiredJointPositions, 0.01);
          assertArrayEquals(zeroVelocities, controllerDesiredJointVelocities, 1.0e-10);
       }
