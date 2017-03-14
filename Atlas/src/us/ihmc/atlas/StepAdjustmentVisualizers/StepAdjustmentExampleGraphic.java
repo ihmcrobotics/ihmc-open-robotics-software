@@ -1278,7 +1278,7 @@ public class StepAdjustmentExampleGraphic
       return new CapturePointPlannerParameters()
       {
          @Override
-         public double getDoubleSupportSplitFraction()
+         public double getTransferDurationAlpha()
          {
             return 0.5;
          }
@@ -1314,7 +1314,7 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public double getTimeSpentOnExitCMPInPercentOfStepTime()
+         public double getSwingDurationAlpha()
          {
             return 0.5;
          }

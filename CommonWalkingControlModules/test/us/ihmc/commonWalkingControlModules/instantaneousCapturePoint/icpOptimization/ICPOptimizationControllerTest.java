@@ -86,7 +86,7 @@ public class ICPOptimizationControllerTest
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
       List<Footstep> footsteps = footstepTestHelper.createFootsteps(stepWidth, stepLength, 3);
       FootstepTiming defaultTiming = new FootstepTiming(singleSupportDuration, doubleSupportDuration);
-      icpPlanner.setFinalTransferTime(doubleSupportDuration);
+      icpPlanner.setFinalTransferDuration(doubleSupportDuration);
 
       for (int i = 0; i < footsteps.size(); i++)
       {

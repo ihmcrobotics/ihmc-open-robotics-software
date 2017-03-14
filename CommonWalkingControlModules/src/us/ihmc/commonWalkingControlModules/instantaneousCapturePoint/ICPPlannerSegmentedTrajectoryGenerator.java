@@ -368,7 +368,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       return progressionInPercent.getDoubleValue() * totalTrajectoryTime.getDoubleValue() > endOfSplineTime.getDoubleValue();
    }
 
-   public void get(YoFramePoint positionToPack)
+   public void getPosition(YoFramePoint positionToPack)
    {
       positionToPack.set(desiredICPOutput);
    }
@@ -397,6 +397,13 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    @Override
    public void getLinearData(FramePoint positionToPack, FrameVector velocityToPack, FrameVector accelerationToPack)
+   {
+      getPosition(positionToPack);
+      getVelocity(velocityToPack);
+      getAcceleration(accelerationToPack);
+   }
+
+   public void getLinearData(YoFramePoint positionToPack, YoFrameVector velocityToPack, YoFrameVector accelerationToPack)
    {
       getPosition(positionToPack);
       getVelocity(velocityToPack);
