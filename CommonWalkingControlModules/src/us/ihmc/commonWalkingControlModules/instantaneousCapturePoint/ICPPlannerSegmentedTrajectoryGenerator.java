@@ -233,6 +233,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       this.startOfSplineTime.set(startOfSplineTime);
       this.endOfSplineTime.set(endOfSplineTime);
 
+      double splineDuration = endOfSplineTime - startOfSplineTime;
       spline.setTrajectoryTime(endOfSplineTime - startOfSplineTime);
 
       CapturePointTools.computeDesiredCapturePointPosition(omega0.getDoubleValue(), startOfSplineTime, initialICPInitialFrame, initialCMPInitialFrame,
@@ -254,21 +255,15 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
             finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPVelocityFinalFrame);
 
       // compute CoM waypoints
-      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime, omega0.getDoubleValue(), initialCMPFinalFrame, initialCMPFinalFrame,
+      CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime, omega0.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame,
             initialCoM, startOfSplineCoM);
 
       initializeSpline();
-      double splineDuration = endOfSplineTime - startOfSplineTime;
-      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(splineDuration, omega0.getDoubleValue(), spline.getXPolynomial(), spline.getYPolynomial(),
-            initialCoM, endOfSplineCoM);
+      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(splineDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
+            spline.getXPolynomial(), spline.getYPolynomial(), startOfSplineCoM, endOfSplineCoM);
    }
 
-   public void computeFinalCoMPosition(YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
-   {
-      computeFinalCoMPosition(initialCoM.getFrameTuple(), finalCoMToPack.getFrameTuple());
-   }
-
-   public void computeFinalCoMPosition(FramePoint initialCoM, FramePoint finalCoMToPack)
+   public void computeFinalCoMPosition(FramePoint finalCoMToPack)
    {
       computeCoMPositionAfterFirstSegment(initialCoM, finalCoMToPack);
       computeCoMPositionAfterSecondSegment(finalCoMToPack, finalCoMToPack);
@@ -276,6 +271,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    }
 
    private void computeCoMPositionAfterFirstSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
+
    {
       CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), omega0.getDoubleValue(), initialCMPFinalFrame,
             initialICPFinalFrame, initialCoM, finalCoMToPack);
@@ -285,8 +281,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    {
       initializeSpline();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
-      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(splineDuration, omega0.getDoubleValue(), spline.getXPolynomial(), spline.getYPolynomial(),
-         initialCoM, finalCoMToPack);
+      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(splineDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(), spline.getXPolynomial(),
+            spline.getYPolynomial(), initialCoM, finalCoMToPack);
    }
 
    private void computeCoMPositionAfterThirdSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
@@ -358,11 +354,9 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    public void computeCenterOfMassSecondSegment(double timeInSecondSegment)
    {
       double segmentDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
-      YoPolynomial xPolynomial = spline.getXPolynomial();
-      YoPolynomial yPolynomial = spline.getYPolynomial();
 
-      CoMIntegrationTools.computeCoMPositionUsingCubicICP(0.0, timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), xPolynomial, yPolynomial, startOfSplineCoM,
-            desiredCoMOutput);
+      CoMIntegrationTools.computeCoMPositionUsingCubicICP(0.0, timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
+            spline.getXPolynomial(), spline.getYPolynomial(), startOfSplineCoM, desiredCoMOutput);
    }
 
    private void initializeSpline()
