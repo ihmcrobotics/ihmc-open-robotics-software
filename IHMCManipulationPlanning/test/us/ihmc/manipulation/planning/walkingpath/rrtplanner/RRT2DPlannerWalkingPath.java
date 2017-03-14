@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.walkingpath.rrt;
+package us.ihmc.manipulation.planning.walkingpath.rrtplanner;
 
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTPlanner;

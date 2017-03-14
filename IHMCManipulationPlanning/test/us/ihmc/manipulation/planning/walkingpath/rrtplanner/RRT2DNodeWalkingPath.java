@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.walkingpath.rrt;
+package us.ihmc.manipulation.planning.walkingpath.rrtplanner;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -58,7 +58,7 @@ public class RRT2DNodeWalkingPath extends RRTNode
    @Override
    public RRTNode createNode()
    {
-      return  new RRT2DNodeWalkingPath();
+      return new RRT2DNodeWalkingPath();
    }
 
    private void setUpCollisionDetector()

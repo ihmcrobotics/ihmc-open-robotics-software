@@ -38,6 +38,8 @@ public class RRTTree
    protected ArrayList<RRTNode> pathNode = new ArrayList<RRTNode>();
 
    private RRTNode nodeCreator;
+   
+   // numberOfNodes, ArrayList<RRTNode> nodes. every node of the nodes has its parent node.
 
    public RRTTree(RRTNode rootNode)
    {
