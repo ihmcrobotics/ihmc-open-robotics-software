@@ -25,6 +25,7 @@ import org.ros.node.NodeConfiguration;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import ihmc_msgs.Point2dRosMessage;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
@@ -37,7 +38,6 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class GenericROSTranslationTools
 {

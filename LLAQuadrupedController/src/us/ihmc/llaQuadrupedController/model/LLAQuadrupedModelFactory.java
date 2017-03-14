@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
@@ -14,7 +15,6 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
 {

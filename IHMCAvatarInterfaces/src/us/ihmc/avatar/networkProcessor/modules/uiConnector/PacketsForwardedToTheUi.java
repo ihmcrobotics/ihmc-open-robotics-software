@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.UIPositionCheckerPacket;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.bdi.BDIBehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeResponsePacket;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorStatusPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.DoorLocationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.SimpleCoactiveBehaviorDataPacket;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.ValveLocationPacket;
@@ -78,6 +79,7 @@ public class PacketsForwardedToTheUi
       HandRotateAboutAxisPacket.class,
       DepthDataClearCommand.class,
       ValveLocationPacket.class,
+      BehaviorStatusPacket.class,
       DoorLocationPacket.class,
       PointCloudWorldPacket.class,
       HandJointAnglePacket.class,

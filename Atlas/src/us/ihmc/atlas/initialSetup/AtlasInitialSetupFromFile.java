@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -14,7 +15,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>

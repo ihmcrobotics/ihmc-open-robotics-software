@@ -1,7 +1,7 @@
 package us.ihmc.avatar.ros;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf1Publisher;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;

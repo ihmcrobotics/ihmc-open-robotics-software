@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.screwTheory.RevoluteJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 
@@ -67,8 +67,8 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
       PrintTools.debug(DEBUG, "Running on real robot: " + isRunningOnRealRobot);
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.fullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
-      this.controlDTInNS = Conversions.secondsToNanoSeconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = Conversions.secondsToNanoSeconds(robotModel.getEstimatorDT());
+      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = Conversions.secondsToNanoseconds(robotModel.getEstimatorDT());
       sendFingerJointGains.set(true);
       fingerTrajectoryTime.set(0.5);
 
@@ -164,7 +164,7 @@ public class ValkyrieFingerController implements MultiThreadedRobotControlElemen
    public void read(long currentClockTime)
    {
       long timestamp = threadDataSynchronizer.getTimestamp();
-      fingerControllerTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+      fingerControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
 
       for (RobotSide robotSide : RobotSide.values)
       {

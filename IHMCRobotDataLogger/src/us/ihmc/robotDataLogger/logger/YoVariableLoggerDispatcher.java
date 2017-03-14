@@ -6,13 +6,13 @@ import java.net.NetworkInterface;
 
 import com.martiansoftware.jsap.JSAPException;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogBroadcastListener;
 import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcastClient;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class YoVariableLoggerDispatcher implements LogBroadcastListener
 {

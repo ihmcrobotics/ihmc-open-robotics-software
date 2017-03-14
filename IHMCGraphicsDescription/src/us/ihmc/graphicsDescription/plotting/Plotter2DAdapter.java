@@ -24,6 +24,8 @@ import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
 
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.plotting.frames.MetersReferenceFrame;
@@ -32,8 +34,6 @@ import us.ihmc.graphicsDescription.plotting.frames.PlotterReferenceFrame;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
-import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
-import us.ihmc.tools.io.printing.PrintTools;
 
 @SuppressWarnings("unused") // it's a wrapper, unused is fine
 /**
@@ -275,8 +275,8 @@ public class Plotter2DAdapter
                          pixelate(plotCenter.getY()),
                          pixelate(2.0 * plotRadii.getX()),
                          pixelate(2.0 * plotRadii.getY()),
-                         pixelate(BodeUnitsConverter.convertRadianToDegrees(startAngle)),
-                         pixelate(BodeUnitsConverter.convertRadianToDegrees(arcAngle)));
+                         pixelate(Conversions.convertRadianToDegrees(startAngle)),
+                         pixelate(Conversions.convertRadianToDegrees(arcAngle)));
    }
 
    public void drawString(PlotterReferenceFrame frame, String string, Point2D startPoint)

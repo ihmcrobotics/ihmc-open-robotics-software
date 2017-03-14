@@ -86,7 +86,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void receivedTimestampAndData(long timestamp, ByteBuffer buffer)
    {
-      long delay = Conversions.nanoSecondsToMillis(lastTimestamp - timestamp);
+      long delay = Conversions.nanosecondsToMilliseconds(lastTimestamp - timestamp);
       delayValue.setText(delayFormat.format(delay));
 
       if (recording)
@@ -95,7 +95,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          {
             jointUpdaters.get(i).update();
          }
-         scs.setTime(Conversions.nanoSecondstoSeconds(timestamp));
+         scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
          scs.tickAndUpdate();
       }
    }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.exampleSimulations.beetle.controller.HexapodSimulationController;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleGroundContactParameters;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleInverseDynamicsParameters;
@@ -26,7 +27,6 @@ import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class RhinoBeetleSimpleSimulation
 {
