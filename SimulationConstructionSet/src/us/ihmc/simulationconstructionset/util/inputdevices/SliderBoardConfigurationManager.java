@@ -2,8 +2,8 @@ package us.ihmc.simulationconstructionset.util.inputdevices;
 
 import java.util.Hashtable;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.io.printing.PrintTools;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SliderBoardConfigurationManager extends MidiSliderBoard

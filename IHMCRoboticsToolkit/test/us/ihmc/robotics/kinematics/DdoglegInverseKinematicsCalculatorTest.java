@@ -71,7 +71,7 @@ public class DdoglegInverseKinematicsCalculatorTest
 
          if (i > 500)
          {
-            timeStatistics.addValue(Conversions.nanoSecondstoSeconds(solutionTime));
+            timeStatistics.addValue(Conversions.nanosecondsToSeconds(solutionTime));
             iterationStatistics.addValue(calculator.getNumberOfIterations());
          }
       }
@@ -114,7 +114,7 @@ public class DdoglegInverseKinematicsCalculatorTest
          calculator.solve(desiredTransform);
          long tf = System.nanoTime();
          long solutionTime = tf - t0;
-         timeStatistics.addValue(Conversions.nanoSecondstoSeconds(solutionTime));
+         timeStatistics.addValue(Conversions.nanosecondsToSeconds(solutionTime));
          iterationStatistics.addValue(calculator.getNumberOfIterations());
 
          RigidBodyTransform solvedTransform = jacobian.getEndEffectorFrame().getTransformToDesiredFrame(jacobian.getBaseFrame());

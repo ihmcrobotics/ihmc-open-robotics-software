@@ -74,6 +74,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCWholeBodyController")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCRobotDescription")
    compile ihmc.getProjectDependency(":IHMCRobotModels")
@@ -81,6 +82,7 @@ dependencies {
    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 }
 
 remotes {

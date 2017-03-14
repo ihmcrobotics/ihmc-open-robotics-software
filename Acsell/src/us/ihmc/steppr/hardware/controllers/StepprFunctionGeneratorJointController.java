@@ -61,7 +61,7 @@ public class StepprFunctionGeneratorJointController extends StepprPDJointControl
          OneDoFJoint joint = joints.get(i);
          if(joint.getName().equals(funcGenJoint.getEnumValue().getSdfName()))
          {
-            joint.setTau(funcGen.getValue(Conversions.nanoSecondstoSeconds(timestamp))+joint.getTau());
+            joint.setTau(funcGen.getValue(Conversions.nanosecondsToSeconds(timestamp))+joint.getTau());
          }
       } 
    }

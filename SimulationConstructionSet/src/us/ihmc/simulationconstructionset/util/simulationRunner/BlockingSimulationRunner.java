@@ -3,11 +3,11 @@ package us.ihmc.simulationconstructionset.util.simulationRunner;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
