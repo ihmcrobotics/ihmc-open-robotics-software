@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public enum SupportedGraphics3DAdapter
 {

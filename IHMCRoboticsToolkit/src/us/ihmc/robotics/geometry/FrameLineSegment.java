@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -12,9 +13,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * 
  * @author dcalvert
  */
-public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, LineSegment3d>
+public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, LineSegment3D>
 {
-   private final LineSegment3d lineSegment3d;
+   private final LineSegment3D lineSegment3d;
 
    public FrameLineSegment()
    {
@@ -23,13 +24,13 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
 
    public FrameLineSegment(ReferenceFrame referenceFrame)
    {
-      super(referenceFrame, new LineSegment3d());
+      super(referenceFrame, new LineSegment3D());
       lineSegment3d = getGeometryObject();
    }
 
    public FrameLineSegment(ReferenceFrame referenceFrame, Point3DReadOnly firstEndpoint, Point3DReadOnly secondEndpoint)
    {
-      super(referenceFrame, new LineSegment3d(firstEndpoint, secondEndpoint));
+      super(referenceFrame, new LineSegment3D(firstEndpoint, secondEndpoint));
       lineSegment3d = getGeometryObject();
    }
 
@@ -126,7 +127,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
    public void getMidpoint(FramePoint midpointToPack)
    {
       checkReferenceFrameMatch(midpointToPack);
-      lineSegment3d.getMidpoint(midpointToPack.getPoint());
+      lineSegment3d.midpoint(midpointToPack.getPoint());
    }
 
    public void getDirection(boolean normalize, FrameVector directionToPack)
@@ -189,7 +190,7 @@ public class FrameLineSegment extends AbstractFrameObject<FrameLineSegment, Line
       getSecondEndpointIncludingFrame(secondEndpointToPack);
    }
 
-   public LineSegment3d getLineSegment3d()
+   public LineSegment3D getLineSegment3d()
    {
       return lineSegment3d;
    }

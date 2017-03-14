@@ -91,7 +91,7 @@ public class StepprAirwalk implements StepprController
    @Override
    public void doControl(long timestamp)
    {
-      double time = Conversions.nanoSecondstoSeconds(timestamp);
+      double time = Conversions.nanosecondsToSeconds(timestamp);
       switch (airwalkState.getEnumValue())
       {
       case WAIT:

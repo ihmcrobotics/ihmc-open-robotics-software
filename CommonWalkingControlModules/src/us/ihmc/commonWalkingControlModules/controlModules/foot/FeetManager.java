@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -38,6 +39,7 @@ public class FeetManager
 
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
 
+   private final ToeOffHelper toeOffHelper;
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
@@ -47,20 +49,26 @@ public class FeetManager
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
 
    // TODO Needs to be cleaned up someday... (Sylvain)
-   public FeetManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      this.momentumBasedController = momentumBasedController;
-      feet = momentumBasedController.getContactableFeet();
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(momentumBasedController, walkingControllerParameters, feet, registry);
+      this.controllerToolbox = controllerToolbox;
+      feet = controllerToolbox.getContactableFeet();
 
-      this.footSwitches = momentumBasedController.getFootSwitches();
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         contactStates.put(robotSide, controllerToolbox.getContactState(feet.get(robotSide)));
+
+      toeOffHelper = new ToeOffHelper(contactStates, feet, walkingControllerParameters, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(controllerToolbox, toeOffHelper, walkingControllerParameters, feet, registry);
+
+      this.footSwitches = controllerToolbox.getFootSwitches();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
 
@@ -72,8 +80,8 @@ public class FeetManager
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, walkingControllerParameters, swingFootControlGains,
-               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, momentumBasedController, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffHelper, walkingControllerParameters, swingFootControlGains,
+               holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, controllerToolbox, registry);
          footControlModule.setAttemptToStraightenLegs(walkingControllerParameters.attemptToStraightenLegs());
 
          footControlModules.put(robotSide, footControlModule);
@@ -268,7 +276,7 @@ public class FeetManager
       footControlModules.get(robotSide).setContactState(ConstraintType.FULL, footNormalContactVector);
 
       if (footControlModules.get(robotSide).getCurrentConstraintType() == ConstraintType.TOES)
-         momentumBasedController.restorePreviousFootContactPoints(robotSide);
+         controllerToolbox.restorePreviousFootContactPoints(robotSide);
 
       FootControlModule supportFootControlModule = footControlModules.get(robotSide.getOppositeSide());
       supportFootControlModule.setAllowFootholdAdjustments(true);
@@ -300,23 +308,27 @@ public class FeetManager
    }
 
    /**
-    * {@link WalkOnTheEdgesManager#updateToeOffStatus(RobotSide, FramePoint2d, FramePoint2d, FramePoint2d)}
+    * {@link WalkOnTheEdgesManager#updateToeOffStatus(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafe(RobotSide trailingLeg, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public boolean checkIfToeOffSafe(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
-      walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, desiredECMP, desiredICP, currentICP);
+      walkOnTheEdgesManager.inDoubleSupport();
+      walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
 
       return walkOnTheEdgesManager.doToeOff();
    }
 
    /**
-    * {@link WalkOnTheEdgesManager#updateToeOffStatusSingleSupport(Footstep, FramePoint2d, FramePoint2d, FramePoint2d, boolean)}.
+    * {@link WalkOnTheEdgesManager#updateToeOffStatus(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}.
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP, boolean isOnExitCMP)
+   public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP)
    {
-      walkOnTheEdgesManager.updateToeOffStatusSingleSupport(nextFootstep, desiredECMP, currentICP, desiredICP, isOnExitCMP);
+      RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
+      walkOnTheEdgesManager.inSingleSupport();
+      walkOnTheEdgesManager.submitNextFootstep(nextFootstep);
+      walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
 
       return walkOnTheEdgesManager.doToeOff();
    }
@@ -328,9 +340,10 @@ public class FeetManager
       setOnToesContactState(trailingLeg);
    }
 
-   public void setExitCMPForToeOff(RobotSide robotSide, FramePoint exitCMP)
+   public void computeToeOffContactPoint(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
-      footControlModules.get(robotSide).setExitCMPForToeOff(exitCMP);
+      toeOffHelper.setExitCMP(exitCMP, trailingLeg);
+      toeOffHelper.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
    public void reset()

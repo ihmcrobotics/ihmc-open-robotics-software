@@ -75,7 +75,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
-         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
+         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, controllerToolbox, robotSide);
       else
          legJointLimitAvoidanceControlModule = null;
 

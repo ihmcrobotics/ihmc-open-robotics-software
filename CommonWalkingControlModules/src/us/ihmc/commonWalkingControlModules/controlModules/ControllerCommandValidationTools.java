@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
@@ -10,7 +11,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class ControllerCommandValidationTools
 {
@@ -62,7 +62,7 @@ public class ControllerCommandValidationTools
          double waypointPosition = trajectoryPointList.getTrajectoryPoint(i).getPosition();
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();
-         if (!MathTools.isInsideBoundsInclusive(waypointPosition, jointLimitLower, jointLimitUpper))
+         if (!MathTools.intervalContains(waypointPosition, jointLimitLower, jointLimitUpper))
          {
             PrintTools.warn("Joint out of bounds: "+joint.getName()+" (" +jointLimitLower+", "+jointLimitUpper+ ") = "+waypointPosition+" (t="+i+")");
             return false;

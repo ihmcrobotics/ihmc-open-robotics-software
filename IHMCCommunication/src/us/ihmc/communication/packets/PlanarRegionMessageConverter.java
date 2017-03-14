@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
@@ -11,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -64,7 +64,7 @@ public class PlanarRegionMessageConverter
 
       Vector3D regionOrigin = new Vector3D(planarRegionMessage.getRegionOrigin());
       Vector3D regionNormal = new Vector3D(planarRegionMessage.getRegionNormal());
-      AxisAngle regionOrientation = GeometryTools.getAxisAngleFromZUpToVector(regionNormal);
+      AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal);
       transformToWorld.set(regionOrientation, regionOrigin);
 
       List<Point2D32[]> messageHullsVertices = planarRegionMessage.getConcaveHullsVertices();

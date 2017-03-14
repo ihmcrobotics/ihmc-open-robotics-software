@@ -92,8 +92,8 @@ public class EuclideanTrajectoryPointCalculator
 
    public void enableWeightMethod(double maxWeight, double minWeight)
    {
-      MathTools.checkIfInRange(minWeight, 1.0-3, 100.0);
-      MathTools.checkIfInRange(maxWeight, 1.0-3, 100.0);
+      MathTools.checkIntervalContains(minWeight, 1.0-3, 100.0);
+      MathTools.checkIntervalContains(maxWeight, 1.0-3, 100.0);
 
       this.useWeightMethod = true;
       double weightRatio = maxWeight / minWeight;

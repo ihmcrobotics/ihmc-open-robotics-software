@@ -16,9 +16,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class PathToolsTest
 {
@@ -321,4 +322,9 @@ public class PathToolsTest
 	   fakeJavaFile.add("}");
 	   return fakeJavaFile;
 	}
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(PathTools.class, PathToolsTest.class);
+   }
 }

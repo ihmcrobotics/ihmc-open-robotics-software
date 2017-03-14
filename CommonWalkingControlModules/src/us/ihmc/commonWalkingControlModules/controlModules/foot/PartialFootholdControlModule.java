@@ -87,7 +87,7 @@ public class PartialFootholdControlModule
 
    private final int footCornerPoints;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final FramePoint2d capturePoint = new FramePoint2d();
    private RobotSide robotSide;
 
@@ -101,12 +101,12 @@ public class PartialFootholdControlModule
    private final BooleanYoVariable expectingLineContact;
    private final FramePoint2d dummyDesiredCop = new FramePoint2d();
 
-   public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public PartialFootholdControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
+      ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       String namePrefix = contactableFoot.getRigidBody().getName();
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;
 
       footCornerPoints = contactableFoot.getTotalNumberOfContactPoints();
@@ -167,8 +167,8 @@ public class PartialFootholdControlModule
       expectingLineContact = new BooleanYoVariable(namePrefix + "ExpectingLineContact", registry);
       expectingLineContact.set(false);
 
-      double dt = momentumBasedController.getControlDT();
-      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      double dt = controllerToolbox.getControlDT();
+      TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
 
       FootRotationCalculator velocityFootRotationCalculator =
             new VelocityFootRotationCalculator(namePrefix, dt, contactableFoot, twistCalculator, explorationParameters, yoGraphicsListRegistry, registry);
@@ -342,12 +342,12 @@ public class PartialFootholdControlModule
       controllerFootPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       // if the icp is in the area that would be cut off exit
-      FrameConvexPolygon2d oppositeFootPolygon = momentumBasedController.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
+      FrameConvexPolygon2d oppositeFootPolygon = controllerToolbox.getBipedSupportPolygons().getFootPolygonInWorldFrame(robotSide.getOppositeSide());
       fullSupportAfterShrinking.setIncludingFrameAndUpdate(oppositeFootPolygon);
       fullSupportAfterShrinking.changeFrameAndProjectToXYPlane(worldFrame);
       fullSupportAfterShrinking.addVertices(controllerFootPolygonInWorld);
       fullSupportAfterShrinking.update();
-      momentumBasedController.getCapturePoint(capturePoint);
+      controllerToolbox.getCapturePoint(capturePoint);
       yoFullSupportAfterShrinking.setFrameConvexPolygon2d(fullSupportAfterShrinking);
 //      boolean icpInPolygon = fullSupportAfterShrinking.isPointInside(capturePoint);
 //      if (!icpInPolygon)

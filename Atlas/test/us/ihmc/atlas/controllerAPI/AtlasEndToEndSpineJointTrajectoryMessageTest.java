@@ -45,11 +45,25 @@ public class AtlasEndToEndSpineJointTrajectoryMessageTest extends EndToEndSpineJ
       super.testMultipleWaypoints();
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 35.0, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
    @Test (timeout = 100000)
    public void testLongMessage() throws SimulationExceededMaximumTimeException
    {
       super.testLongMessage();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
+   @Test (timeout = 100000)
+   public void testMessageQueuing() throws SimulationExceededMaximumTimeException
+   {
+      super.testMessageQueuing();
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 35.0)
+   @Test (timeout = 100000)
+   public void testMessageWithDifferentTrajectoryLengthsPerJoint() throws SimulationExceededMaximumTimeException
+   {
+      super.testMessageWithDifferentTrajectoryLengthsPerJoint();
    }
 
    @Override

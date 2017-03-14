@@ -160,7 +160,7 @@ public class SimulatedSensorHolderAndReader implements SensorReader
          sensorProcessing.setForceSensorValue(forceTorqueSensors.get(i).getLeft(), forceTorqueSensor.getWrench());
       }
 
-      long timestamp = Conversions.secondsToNanoSeconds(yoTime.getDoubleValue());
+      long timestamp = Conversions.secondsToNanoseconds(yoTime.getDoubleValue());
       sensorProcessing.startComputation(timestamp, timestamp, -1);
 
       step.increment();

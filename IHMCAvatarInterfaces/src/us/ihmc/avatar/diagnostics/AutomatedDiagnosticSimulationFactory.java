@@ -267,7 +267,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       outputWriter.writeAfterController(0);
       long endTime = System.nanoTime();
-      controllerTime.set(Conversions.nanoSecondstoSeconds(endTime - startTime));
+      controllerTime.set(Conversions.nanosecondsToSeconds(endTime - startTime));
       averageControllerTime.update();
    }
 

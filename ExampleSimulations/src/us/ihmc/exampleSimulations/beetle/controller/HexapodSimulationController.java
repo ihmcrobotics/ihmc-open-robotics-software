@@ -225,6 +225,6 @@ public class HexapodSimulationController implements RobotController
       outputWriter.write();
 
       totalTimeToCompleteTick.set(System.nanoTime() - startTime);
-      totalTimeToCompleteTickInSeconds.set(Conversions.nanoSecondstoSeconds(System.nanoTime() - startTime));
+      totalTimeToCompleteTickInSeconds.set(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
    }
 }

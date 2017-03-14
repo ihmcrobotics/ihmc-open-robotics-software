@@ -27,9 +27,9 @@ import org.opencv.videoio.VideoCapture;
 
 import boofcv.gui.image.ImagePanel;
 import boofcv.gui.image.ShowImages;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 public class OpenCVFaceDetector

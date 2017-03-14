@@ -2,10 +2,13 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -82,5 +85,26 @@ public class FootstepTestHelper
       ret.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(robotSide).getContactPoints2d());
 
       return ret;
+   }
+
+   public List<Footstep> convertToFootsteps(FootstepDataListMessage footstepDataListMessage)
+   {
+      return footstepDataListMessage.footstepDataList.stream().map(this::convertToFootstep).collect(Collectors.toList());
+   }
+
+   public Footstep convertToFootstep(FootstepDataMessage footstepDataMessage)
+   {
+      RobotSide robotSide = footstepDataMessage.getRobotSide();
+      RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
+      ReferenceFrame soleFrame = contactableFeet.get(robotSide).getSoleFrame();
+      Footstep footstep = new Footstep(foot, robotSide, soleFrame);
+      FramePose solePose = new FramePose(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+      footstep.setSolePose(solePose);
+      if (footstepDataMessage.getPredictedContactPoints() != null && !footstepDataMessage.getPredictedContactPoints().isEmpty())
+         footstep.setPredictedContactPointsFromPoint2ds(footstepDataMessage.getPredictedContactPoints());
+      else
+         footstep.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(robotSide).getContactPoints2d());
+
+      return footstep;
    }
 }

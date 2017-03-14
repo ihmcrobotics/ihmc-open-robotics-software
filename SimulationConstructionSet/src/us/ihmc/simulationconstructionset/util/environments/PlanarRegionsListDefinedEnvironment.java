@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -9,7 +10,6 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -62,6 +62,11 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
       return combinedTerrainObject3D;
    }
 
+   public CombinedTerrainObject3D getCombinedTerrainObject3D()
+   {
+      return combinedTerrainObject;
+   }
+   
    @Override
    public TerrainObject3D getTerrainObject3D()
    {

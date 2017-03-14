@@ -339,7 +339,7 @@ public class FourBarKinematicLoop
          double interiorAngle = convertJointAngleToInteriorAngle(jointAngleLimit, jointIndex);
          double masterJointLimit;
 
-         if (!MathTools.isInsideBoundsExclusive(interiorAngle, 0.0, Math.PI))
+         if (!MathTools.intervalContains(interiorAngle, 0.0, Math.PI, false, false))
             return;
 
          switch (jointIndex)

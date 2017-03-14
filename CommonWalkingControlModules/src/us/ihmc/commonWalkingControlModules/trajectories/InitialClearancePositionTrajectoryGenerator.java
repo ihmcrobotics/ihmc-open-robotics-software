@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -20,7 +21,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
@@ -238,7 +238,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.initialDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.leaveDistance.set(leaveDistance);
@@ -253,7 +253,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    public void setTrajectoryTime(double newTrajectoryTime, double leaveTime)
    {
       trajectoryTime.set(newTrajectoryTime);
-      MathTools.checkIfInRange(leaveTime, 0.0, newTrajectoryTime);
+      MathTools.checkIntervalContains(leaveTime, 0.0, newTrajectoryTime);
       this.leaveTime.set(leaveTime);
    }
 
@@ -265,7 +265,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       changeFrame(tangentialPlane, false);
 
       currentTime.set(0.0);
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       double tIntermediate = leaveTime.getDoubleValue();
       xyPolynomial.setCubic(tIntermediate, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
       double z0 = initialPosition.getZ();

@@ -350,6 +350,19 @@ public class Link implements java.io.Serializable
    }
 
    /**
+    * Sets the mass and moment of inertia of this link. The moments of inertia are computed as
+    * Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationY), etc.
+    * This is equivalent to the mass being concentrated on the surface of a thin ellipsoid with the given radii of gyration.
+    * 
+    * @param mass Mass of the link.
+    * @param radiiOfGyration Radii of gyration in the x, y, and z directions.
+    */
+   public void setMassAndRadiiOfGyration(double mass, Vector3D radiiOfGyration)
+   {
+      setMassAndRadiiOfGyration(mass, radiiOfGyration.getX(), radiiOfGyration.getY(), radiiOfGyration.getZ());
+   }
+
+   /**
     * Sets the graphical representation of this link to the provided LinkGraphics.
     * LinkGraphics store the graphical data for each link allowing different shapes and
     * features to be created and stored.

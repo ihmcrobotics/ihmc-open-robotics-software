@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -8,7 +9,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.GeometryTools;
 
 public class Plane3d implements GeometryObject<Plane3d>
 {
@@ -187,7 +187,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     */
    public boolean isParallel(Plane3d otherPlane, double angleEpsilon)
    {
-      return GeometryTools.areVectorsCollinear(normal, otherPlane.normal, angleEpsilon);
+      return EuclidGeometryTools.areVector3DsParallel(normal, otherPlane.normal, angleEpsilon);
    }
 
    /**
@@ -210,7 +210,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     */
    public boolean isCoincident(Plane3d otherPlane, double angleEpsilon, double distanceEpsilon)
    {
-      return GeometryTools.arePlanesCoincident(point, normal, otherPlane.point, otherPlane.normal, angleEpsilon, distanceEpsilon);
+      return EuclidGeometryTools.arePlane3DsCoincident(point, normal, otherPlane.point, otherPlane.normal, angleEpsilon, distanceEpsilon);
    }
    
    public Point3D orthogonalProjectionCopy(Point3DReadOnly point)

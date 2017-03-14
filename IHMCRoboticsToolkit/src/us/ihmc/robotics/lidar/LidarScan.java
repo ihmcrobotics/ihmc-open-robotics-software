@@ -7,11 +7,11 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.geometry.Ray3d;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 
@@ -94,7 +94,7 @@ public class LidarScan
       return getPoint3f(index, ranges[index]);
    }
 
-   public LineSegment3d getLineSegment(int index)
+   public LineSegment3D getLineSegment(int index)
    {
       return getLineSegment(index, ranges[index]);
    }
@@ -170,9 +170,9 @@ public class LidarScan
 
    public Ray3d getRay(int index)
    {
-      LineSegment3d unitSegment = getLineSegment(index, 1.0f);
+      LineSegment3D unitSegment = getLineSegment(index, 1.0f);
 
-      return new Ray3d(unitSegment.getFirstEndpoint(), unitSegment.getDirectionCopy(true));
+      return new Ray3d(unitSegment.getFirstEndpoint(), unitSegment.getDirection(true));
    }
 
 
@@ -199,14 +199,14 @@ public class LidarScan
       return p;
    }
 
-   protected LineSegment3d getLineSegment(int index, float range)
+   protected LineSegment3D getLineSegment(int index, float range)
    {
       Vector3D origin = new Vector3D();
       RigidBodyTransform transform = new RigidBodyTransform();
       getInterpolatedTransform(index, transform);
       transform.getTranslation(origin);
 
-      return new LineSegment3d(new Point3D(origin), getPoint(index, range));
+      return new LineSegment3D(new Point3D(origin), getPoint(index, range));
    }
 
    public void getInterpolatedTransform(int index, RigidBodyTransform target)

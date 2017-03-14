@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class YoVariableHandshakeParser
 {
@@ -278,7 +278,7 @@ public class YoVariableHandshakeParser
       return Collections.unmodifiableList(variables);
    }
 
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
    }
