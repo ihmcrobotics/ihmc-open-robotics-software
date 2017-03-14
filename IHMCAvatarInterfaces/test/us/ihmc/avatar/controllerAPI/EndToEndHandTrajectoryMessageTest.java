@@ -3,8 +3,8 @@ package us.ihmc.avatar.controllerAPI;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -18,6 +18,11 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
@@ -38,6 +43,8 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.AxisAngleOrientationController;
+import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -49,6 +56,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
@@ -270,132 +278,46 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
-      fullRobotModel.updateFrames();
-      double firstTrajectoryPointTime = 0.5;
-      int numberOfTrajectoryPoints = 100;
-      double trajectoryTime = 7.0;
-
-      SideDependentList<HandTrajectoryMessage> handTrajectoryMessages = new SideDependentList<>();
-
+      RobotSide robotSide = RobotSide.LEFT;
+      String handName = fullRobotModel.getHand(robotSide).getName();
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-
-         ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         FramePoint sphereCenter = new FramePoint(chestFrame);
-         sphereCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.45);
-         double radius = 0.15;
-         FramePoint tempPoint = new FramePoint();
-         TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
-         FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator, 500);
-
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
-
-         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
-         euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
-
-         Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints);
-
-         for (int i = 0; i < numberOfTrajectoryPoints; i++)
+         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints;
+         HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
+         double time = 0.0;
+         for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
-            if (robotSide == RobotSide.RIGHT)
-               pointsOnSphere[i].negate();
-            tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
-            tempPoint.add(sphereCenter);
-            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            message.setTrajectoryPoint(pointIdx, time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
+            time = time + 0.05;
          }
+         drcSimulationTestHelper.send(message);
 
-         euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
-         euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
-
-         RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-
-         for (int i = 0; i < numberOfTrajectoryPoints; i++)
-         {
-            Point3D desiredPosition = new Point3D();
-            Vector3D desiredLinearVelocity = new Vector3D();
-            Quaternion desiredOrientation = new Quaternion();
-            Vector3D desiredAngularVelocity = new Vector3D();
-            tempOrientation.getQuaternion(desiredOrientation);
-
-            double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
-
-            Graphics3DObject sphere = new Graphics3DObject();
-            sphere.translate(desiredPosition);
-            sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
-            scs.addStaticLinkGraphics(sphere);
-
-            handTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
-         }
-
-         handTrajectoryMessages.put(robotSide, handTrajectoryMessage);
-
-         drcSimulationTestHelper.send(handTrajectoryMessage);
-
-      }
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(firstTrajectoryPointTime + 2.0 * getRobotModel().getControllerDT());
-      assertTrue(success);
-
-      int expectedTrajectoryPointIndex = 0;
-      boolean isDone = false;
-      double previousTimeInState = firstTrajectoryPointTime;
-
-      while(!isDone)
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            String handName = fullRobotModel.getHand(robotSide).getName();
-            assertNumberOfWaypoints(handName, Math.min(defaultMaximumNumberOfWaypoints, numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1), scs);
-         }
-
-         double timeInState = 0.0;
-
-         for (int trajectoryPointIndex = 0; trajectoryPointIndex < defaultMaximumNumberOfWaypoints - 1; trajectoryPointIndex++)
-         {
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide);
-               String handName = fullRobotModel.getHand(robotSide).getName();
-
-               SE3TrajectoryPointMessage fromMessage = handTrajectoryMessage.getTrajectoryPoint(expectedTrajectoryPointIndex);
-               SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-               expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
-               SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(handName, trajectoryPointIndex + 1, scs);
-               assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
-
-               timeInState = Math.max(fromMessage.time, timeInState);
-            }
-
-            expectedTrajectoryPointIndex++;
-
-            if (expectedTrajectoryPointIndex == numberOfTrajectoryPoints)
-            {
-               isDone = true;
-               break;
-            }
-         }
-
-         double simulationTime = timeInState - previousTimeInState;
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
          assertTrue(success);
-         previousTimeInState = timeInState;
+
+         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         assertTrue(controllerState == RigidBodyControlMode.JOINTSPACE);
+         assertNumberOfWaypoints(handName, 0, scs);
       }
 
-      for (RobotSide robotSide : RobotSide.values)
       {
-         HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide);
-         String handName = fullRobotModel.getHand(robotSide).getName();
+         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints - 1;
+         HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
+         double time = 0.0;
+         for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
+         {
+            message.setTrajectoryPoint(pointIdx, time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
+            time = time + 0.05;
+         }
+         drcSimulationTestHelper.send(message);
 
-         SE3TrajectoryPointMessage fromMessage = handTrajectoryMessage.getLastTrajectoryPoint();
-         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-         expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
-         SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(handName, scs);
-         controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime()); // Don't want to check the time here.
-         assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         assertTrue(success);
+
+         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         assertTrue(controllerState == RigidBodyControlMode.TASKSPACE);
+         assertNumberOfWaypoints(handName, RigidBodyJointspaceControlState.maxPoints, drcSimulationTestHelper.getSimulationConstructionSet());
       }
    }
 
@@ -405,7 +327,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
 
@@ -420,125 +342,159 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       int numberOfMessages = 10;
       double trajectoryTime = 7.0;
 
-      SideDependentList<ArrayList<HandTrajectoryMessage>> handTrajectoryMessages = new SideDependentList<>(new ArrayList<HandTrajectoryMessage>(), new ArrayList<HandTrajectoryMessage>());
+      ArrayList<HandTrajectoryMessage> handTrajectoryMessages = new ArrayList<>();
+      ArrayDeque<SE3TrajectoryPointMessage> handTrajectoryPoints = new ArrayDeque<>();
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-      for (RobotSide robotSide : RobotSide.values)
+      RobotSide robotSide = RobotSide.LEFT;
+      String handName = fullRobotModel.getHand(robotSide).getName();
+      fullRobotModel.updateFrames();
+      ReferenceFrame chestBodyFixedFrame = fullRobotModel.getChest().getBodyFixedFrame();
+
+      FramePoint sphereCenter = new FramePoint(chestBodyFixedFrame);
+      sphereCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.45);
+      double radius = 0.15;
+      FramePoint tempPoint = new FramePoint();
+      TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
+      FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator, 500);
+
+      EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
+      euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
+
+      Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
+
+      for (int i = 0; i < numberOfTrajectoryPoints * numberOfMessages; i++)
       {
-         RigidBody chest = fullRobotModel.getChest();
+         if (robotSide == RobotSide.RIGHT)
+            pointsOnSphere[i].negate();
+         tempPoint.setIncludingFrame(chestBodyFixedFrame, pointsOnSphere[i]);
+         tempPoint.add(sphereCenter);
+         tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+         euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+      }
 
-         ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         FramePoint sphereCenter = new FramePoint(chestFrame);
-         sphereCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.45);
-         double radius = 0.15;
-         FramePoint tempPoint = new FramePoint();
-         TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
-         FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator, 500);
+      euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
+      euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
 
+      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
 
-         EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
-         euclideanTrajectoryPointCalculator.enableWeightMethod(2.0, 1.0);
+      int calculatorIndex = 0;
+      long id = 4678L;
 
-         Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(radius, numberOfTrajectoryPoints * numberOfMessages);
+      for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
+      {
+         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
+         handTrajectoryMessage.setUniqueId(id);
+         if (messageIndex > 0)
+            handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
+         id++;
+         double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
 
-         for (int i = 0; i < numberOfTrajectoryPoints * numberOfMessages; i++)
+         for (int i = 0; i < numberOfTrajectoryPoints; i++)
          {
-            if (robotSide == RobotSide.RIGHT)
-               pointsOnSphere[i].negate();
-            tempPoint.setIncludingFrame(chestFrame, pointsOnSphere[i]);
-            tempPoint.add(sphereCenter);
-            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
-            euclideanTrajectoryPointCalculator.appendTrajectoryPoint(tempPoint.getPoint());
+            Point3D desiredPosition = new Point3D();
+            Vector3D desiredLinearVelocity = new Vector3D();
+            Quaternion desiredOrientation = new Quaternion();
+            Vector3D desiredAngularVelocity = new Vector3D();
+            tempOrientation.getQuaternion(desiredOrientation);
+
+            double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
+
+            Graphics3DObject sphere = new Graphics3DObject();
+            sphere.translate(desiredPosition);
+            sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
+            scs.addStaticLinkGraphics(sphere);
+
+            handTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+
+            SE3TrajectoryPointMessage point = new SE3TrajectoryPointMessage(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+            handTrajectoryPoints.addLast(point);
+
+            calculatorIndex++;
          }
 
-         euclideanTrajectoryPointCalculator.computeTrajectoryPointTimes(firstTrajectoryPointTime, trajectoryTime);
-         euclideanTrajectoryPointCalculator.computeTrajectoryPointVelocities(true);
-
-         RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanTrajectoryPointCalculator.getTrajectoryPoints();
-
-         int calculatorIndex = 0;
-         long id = 4678L;
-
-         for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
-         {
-            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
-            handTrajectoryMessage.setUniqueId(id);
-            if (messageIndex > 0)
-               handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
-            id++;
-            double timeToSubtract = messageIndex == 0 ? 0.0 : trajectoryPoints.get(calculatorIndex - 1).getTime();
-
-            for (int i = 0; i < numberOfTrajectoryPoints; i++)
-            {
-               Point3D desiredPosition = new Point3D();
-               Vector3D desiredLinearVelocity = new Vector3D();
-               Quaternion desiredOrientation = new Quaternion();
-               Vector3D desiredAngularVelocity = new Vector3D();
-               tempOrientation.getQuaternion(desiredOrientation);
-
-               double time = trajectoryPoints.get(calculatorIndex).get(desiredPosition, desiredLinearVelocity);
-
-               Graphics3DObject sphere = new Graphics3DObject();
-               sphere.translate(desiredPosition);
-               sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
-               scs.addStaticLinkGraphics(sphere);
-
-               handTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
-               calculatorIndex++;
-            }
-
-            handTrajectoryMessages.get(robotSide).add(handTrajectoryMessage);
-            drcSimulationTestHelper.send(handTrajectoryMessage);
-            success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
-            assertTrue(success);
-         }
+         handTrajectoryMessages.add(handTrajectoryMessage);
+         drcSimulationTestHelper.send(handTrajectoryMessage);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         assertTrue(success);
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
       assertTrue(success);
 
       double timeOffset = 0.0;
+      int totalNumberOfPoints = numberOfMessages * numberOfTrajectoryPoints + 1;
+      boolean firstSegment = true;
+      FrameSE3TrajectoryPoint lastPoint = new FrameSE3TrajectoryPoint();
 
-      for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
+      while (true)
       {
-         double simulationTime = 0.0;
+         int expectedNumberOfPointsInGenerator = Math.min(totalNumberOfPoints, RigidBodyTaskspaceControlState.maxPointsInGenerator);
+         if (firstSegment)
+            expectedNumberOfPointsInGenerator = Math.min(RigidBodyTaskspaceControlState.maxPointsInGenerator, numberOfTrajectoryPoints + 1);
+         int expectedPointsInQueue = totalNumberOfPoints - expectedNumberOfPointsInGenerator;
+         assertNumberOfWaypoints(handName, totalNumberOfPoints, scs);
 
-         for (RobotSide robotSide : RobotSide.values)
+         double lastPointTime = 0.0;
+         fullRobotModel.updateFrames();
+
+         for (int trajectoryPointIndex = 1; trajectoryPointIndex < expectedNumberOfPointsInGenerator; trajectoryPointIndex++)
          {
-            HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide).get(messageIndex);
-            String handName = fullRobotModel.getHand(robotSide).getName();
+            SE3TrajectoryPointMessage point = handTrajectoryPoints.removeFirst();
+            FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
+            framePoint.set(point.time, point.position, point.orientation, point.linearVelocity, point.angularVelocity);
+            framePoint.changeFrame(chestBodyFixedFrame);
 
-            assertNumberOfWaypoints(handName, handTrajectoryMessage.getNumberOfTrajectoryPoints() + 1, scs);
+            SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(handName, trajectoryPointIndex, scs);
+            SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
+            framePoint.get(expectedTrajectoryPoint);
 
-            for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-            {
-               SE3TrajectoryPointMessage fromMessage = handTrajectoryMessage.getTrajectoryPoint(trajectoryPointIndex);
-               SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-               expectedTrajectoryPoint.set(fromMessage.time + timeOffset, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
-               SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(handName, trajectoryPointIndex + 1, scs);
-               assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
+            assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
+            assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
 
-               simulationTime = Math.max(fromMessage.time, simulationTime);
-            }
+            lastPointTime = Math.max(point.time, lastPointTime);
+            lastPoint.setIncludingFrame(framePoint);
          }
-         timeOffset += simulationTime;
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(lastPointTime - timeOffset);
          assertTrue(success);
+
+         timeOffset = lastPointTime;
+         totalNumberOfPoints = totalNumberOfPoints - (expectedNumberOfPointsInGenerator - 1);
+         firstSegment = false;
+
+         if (expectedPointsInQueue == 0)
+            break;
       }
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide).get(numberOfMessages - 1);
-         String handName = fullRobotModel.getHand(robotSide).getName();
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
 
-         SE3TrajectoryPointMessage fromMessage = handTrajectoryMessage.getLastTrajectoryPoint();
-         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-         expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
-         SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(handName, scs);
-         controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime()); // Don't want to check the time here.
-         assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
-      }
+      // check internal tracking is decent:
+      String nameSpaceRotation = handName + AxisAngleOrientationController.class.getSimpleName();
+      String varnameRotation = handName + "RotationErrorInBody";
+      Vector3D rotationError = findVector3d(nameSpaceRotation, varnameRotation, scs);
+
+      String nameSpacePosition = handName + EuclideanPositionController.class.getSimpleName();
+      String varnamePosition = handName + "PositionError";
+      Vector3D positionError = findVector3d(nameSpacePosition, varnamePosition, scs);
+
+      assertTrue(rotationError.length() < 0.05);
+      assertTrue(positionError.length() < 0.05);
+
+      // check internal desired matches last trajectory point:
+      String nameSpacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
+      String varnamePositionDesired = handName + Type.DESIRED.getName() + Space.POSITION.getName();
+      Vector3D desiredPosition = findVector3d(nameSpacePositionDesired, varnamePositionDesired, scs);
+
+      String nameSpaceOrientationDesired = FeedbackControllerToolbox.class.getSimpleName();
+      String varnameOrientationDesired = handName + Type.DESIRED.getName() + Space.ORIENTATION.getName();
+      Quaternion desiredOrientation = findQuat4d(nameSpaceOrientationDesired, varnameOrientationDesired, scs);
+
+      lastPoint.changeFrame(ReferenceFrame.getWorldFrame());
+      EuclidCoreTestTools.assertTuple3DEquals(lastPoint.getPositionCopy().getPoint(), desiredPosition, 0.001);
+      EuclidCoreTestTools.assertQuaternionEquals(lastPoint.getOrientationCopy().getQuaternion(), desiredOrientation, 0.001);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 14.0)
