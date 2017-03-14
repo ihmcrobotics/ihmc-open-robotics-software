@@ -348,6 +348,7 @@ public class HandControlModule
    public void handleHandTrajectoryCommand(HandTrajectoryCommand command)
    {
       computeDesiredPose(initialPose);
+      taskspaceControlState.setControlFrame(handControlFrame);
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
          requestState(taskspaceControlState.getStateEnum());
       else
