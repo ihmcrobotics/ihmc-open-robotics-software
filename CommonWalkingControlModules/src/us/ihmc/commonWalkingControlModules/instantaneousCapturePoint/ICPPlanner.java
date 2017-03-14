@@ -82,7 +82,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class ICPPlanner
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -110,8 +110,10 @@ public class ICPPlanner
    private final YoFramePointInMultipleFrames singleSupportFinalICP;
    private final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
-   private final YoFramePointInMultipleFrames singleSupportInitialCoM;
-   private final YoFramePointInMultipleFrames singleSupportFinalCoM;
+   private final YoFramePointInMultipleFrames yoSingleSupportInitialCoM;
+   private final YoFramePointInMultipleFrames yoSingleSupportFinalCoM;
+   private final FramePoint singleSupportInitialCoM = new FramePoint();
+   private final FramePoint singleSupportFinalCoM = new FramePoint();
 
    private final YoFramePoint desiredCentroidalMomentumPivotPosition = new YoFramePoint(namePrefix + "DesiredCentroidalMomentumPosition", worldFrame, registry);
    private final YoFrameVector desiredCentroidalMomentumPivotVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame,
@@ -190,8 +192,8 @@ public class ICPPlanner
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
-      singleSupportInitialCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialCoM", registry, framesToRegister);
-      singleSupportFinalCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalCoM", registry, framesToRegister);
+      yoSingleSupportInitialCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialCoM", registry, framesToRegister);
+      yoSingleSupportFinalCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalCoM", registry, framesToRegister);
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
       {
@@ -256,15 +258,20 @@ public class ICPPlanner
       yoGraphicsList.add(singleSupportFinalICPViz);
       artifactList.add(singleSupportFinalICPViz.createArtifact());
 
-      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("desiredCenterOfMassPositionViz",
-            desiredCenterOfMassPosition, 0.004, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("desiredCenterOfMassPosition",
+            desiredCenterOfMassPosition, 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
       yoGraphicsList.add(desiredCenterOfMassPositionViz);
       artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
 
       YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM",
-            singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly(), 0.004, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+            yoSingleSupportFinalCoM.buildUpdatedYoFramePointForVisualizationOnly(), 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
       yoGraphicsList.add(singleSupportFinalCoMViz);
       artifactList.add(singleSupportFinalCoMViz.createArtifact());
+
+      YoGraphicPosition singleSupportInitialCoMViz = new YoGraphicPosition("singleSupportInitialCoM",
+            yoSingleSupportInitialCoM.buildUpdatedYoFramePointForVisualizationOnly(), 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+      yoGraphicsList.add(singleSupportInitialCoMViz);
+      artifactList.add(singleSupportInitialCoMViz.createArtifact());
 
       icpSingleSupportTrajectoryGenerator.createVisualizers(yoGraphicsList, artifactList);
 
@@ -501,10 +508,13 @@ public class ICPPlanner
 
    private void computeCoMFinalCoMPositionInTransfer()
    {
-      icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(desiredCenterOfMassPosition, singleSupportInitialCoM);
+      yoSingleSupportInitialCoM.switchCurrentReferenceFrame(worldFrame);
+      icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM);
+      yoSingleSupportInitialCoM.setIncludingFrame(singleSupportInitialCoM);
 
       updateSingleSupportPlan(); // // TODO: 3/13/17 this may not work
-      icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM, singleSupportFinalCoM);
+      //icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM, singleSupportFinalCoM);
+      //yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
 
 
@@ -560,7 +570,7 @@ public class ICPPlanner
          icpSingleSupportTrajectoryGenerator.setCornerPoints(entryCornerPoints.get(0), exitCornerPoints.get(0));
          icpSingleSupportTrajectoryGenerator.setReferenceCMPs(entryCMPs.get(0), exitCMPs.get(0));
          icpSingleSupportTrajectoryGenerator.setReferenceFrames(supportSoleFrame, worldFrame);
-         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
+         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(yoSingleSupportInitialCoM, worldFrame);
          icpSingleSupportTrajectoryGenerator.setTrajectoryTime(timeRemainingOnEntryCMP, timeToSpendOnExitCMPBeforeDoubleSupport);
          icpSingleSupportTrajectoryGenerator.initialize();
 
