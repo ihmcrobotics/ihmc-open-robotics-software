@@ -125,7 +125,8 @@ public class HighLevelControlManagerFactory
       return centerOfMassHeightManager;
    }
 
-   public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody rootBody, ReferenceFrame rootFrame)
+   public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody baseBody, ReferenceFrame controlFrame,
+         ReferenceFrame baseFrame)
    {
       if (bodyToControl == null)
          return null;
@@ -144,7 +145,7 @@ public class HighLevelControlManagerFactory
          return null;
 
       // TODO: replace this when we support reference frames
-      Collection<ReferenceFrame> controlFrames = new ArrayList<>();
+      Collection<ReferenceFrame> trajectoryFrames = new ArrayList<>();
 
       // Gains
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
@@ -163,8 +164,8 @@ public class HighLevelControlManagerFactory
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, rootBody, elevator, homeConfiguration, positionControlledJoints,
-            integrationSettings, controlFrames, rootFrame, yoTime, registry);
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, positionControlledJoints,
+            integrationSettings, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 

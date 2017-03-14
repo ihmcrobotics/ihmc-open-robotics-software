@@ -82,13 +82,14 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final ReferenceFrame bodyFrame;
    private final FramePose controlFramePose = new FramePose();
 
-   public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-         Collection<ReferenceFrame> controlFrames, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+         ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE, bodyName, yoTime);
+      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime);
       this.baseFrame = baseFrame;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
 
+      String bodyName = bodyToControl.getName();
       String prefix = bodyName + "Taskspace";
       trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
       trackingPosition = new BooleanYoVariable(prefix + "TrackingPosition", registry);
@@ -103,6 +104,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(baseBody);
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
+      setControlFrame(controlFrame);
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", null, registry);
@@ -110,9 +112,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
 
-      if (controlFrames != null)
+      if (trajectoryFrames != null)
       {
-         for (ReferenceFrame frameToRegister : controlFrames)
+         for (ReferenceFrame frameToRegister : trajectoryFrames)
          {
             positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
             orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);

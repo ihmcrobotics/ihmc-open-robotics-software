@@ -158,7 +158,7 @@ public class HandControlModule
       String bodyName = hand.getName();
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, controlledJoints, homeConfigurationNew, yoTime, registry);
-      taskspaceControlState = new RigidBodyTaskspaceControlState(bodyName, hand, chest, elevator, null, chestFrame, yoTime, registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState(hand, chest, elevator, null, handControlFrame, chestFrame, yoTime, registry);
       userControlModeState = new RigidBodyUserControlState(bodyName, controlledJoints, yoTime, registry);
 
       taskspaceControlState.setGains(taskspaceGains.getOrientationGains(), taskspaceGains.getPositionGains());
@@ -354,7 +354,6 @@ public class HandControlModule
       initialPose.setToZero(handControlFrame);
       initialPose.changeFrame(worldFrame);
 
-      taskspaceControlState.setControlFrame(handControlFrame);
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
          requestState(taskspaceControlState.getStateEnum());
       else
