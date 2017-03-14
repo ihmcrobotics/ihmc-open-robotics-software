@@ -101,7 +101,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    }
 
    @Override
-   protected void setupDynamicGraphicObjects()
+   protected void setupYoGraphics()
    {
       //standard SCS Dynamic Graphics Object - automatically updated to the associated yoVariables
       double transparency = 0.5;
@@ -165,7 +165,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    }
 
    @Override
-   protected void updateDynamicGraphicsObjects(int index)
+   protected void updateYoGraphics(int index)
    {
       /*put yo-variablized objects here */
       FramePoint leftEE = new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM), 0, 0.13, 0);

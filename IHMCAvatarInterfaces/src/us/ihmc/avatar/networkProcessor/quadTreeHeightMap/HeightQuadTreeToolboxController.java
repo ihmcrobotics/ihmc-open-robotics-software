@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.net.PacketConsumer;
@@ -36,7 +37,6 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class HeightQuadTreeToolboxController extends ToolboxController
 {

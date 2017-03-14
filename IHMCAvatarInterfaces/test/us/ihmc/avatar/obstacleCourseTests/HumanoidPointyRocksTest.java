@@ -249,7 +249,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(-10.0, 0.0, 5.0);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-      drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
+      drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       setUpMomentum();
@@ -769,8 +769,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
-      HighLevelHumanoidControllerToolbox momentumBasedController = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
-                                                                                          .getMomentumBasedController();
+      HighLevelHumanoidControllerToolbox controllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
+                                                                                          .getHighLevelHumanoidControllerToolbox();
 
       int numberOfChanges = 4;
 
@@ -782,7 +782,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          if (!success) break;
 
          // check if the found support polygon is close to the actual one
-         FrameConvexPolygon2d foundSupport = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
+         FrameConvexPolygon2d foundSupport = controllerToolbox.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
          FrameConvexPolygon2d actualSupport = new FrameConvexPolygon2d(foundSupport.getReferenceFrame(), newContactPoints);
          double epsilon = 5.0; // cm^2
          boolean close = Math.abs(foundSupport.getArea() - actualSupport.getArea()) * 10000 < epsilon;

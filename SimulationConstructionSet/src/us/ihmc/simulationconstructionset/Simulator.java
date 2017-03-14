@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
-import us.ihmc.simulationconstructionset.physics.visualize.DefaultCollisionVisualizer;
+import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 
@@ -24,7 +24,6 @@ public class Simulator implements java.io.Serializable
    private CollisionArbiter collisionArbiter;
    private CollisionHandler collisionHandler;
    private DefaultCollisionVisualizer collisionVisualizer;
-   protected ArrayList<WrenchContactPoint> forceSensor = new ArrayList<WrenchContactPoint>();
 
    // private final YoVariable time;
 
@@ -57,16 +56,6 @@ public class Simulator implements java.io.Serializable
       if (scripts == null)
          scripts = new ArrayList<Script>();
       scripts.add(script);
-   }
-
-   public void addForceSensor(WrenchContactPoint sensor)
-   {
-      forceSensor.add(sensor);
-   }
-
-   public ArrayList<WrenchContactPoint> getForceSensors()
-   {
-      return forceSensor;
    }
 
    protected void simulate() throws UnreasonableAccelerationException
@@ -123,12 +112,6 @@ public class Simulator implements java.io.Serializable
 
             collisionHandler.handleCollisions(cachedCollisions);
          }
-      }
-
-      for (int i = 0; i < forceSensor.size(); i++)
-      {
-         WrenchContactPoint wrenchContactPoint = forceSensor.get(i);
-         wrenchContactPoint.updateForce();
       }
    }
 

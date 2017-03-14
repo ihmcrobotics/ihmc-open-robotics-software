@@ -8,8 +8,8 @@ import org.bytedeco.javacpp.caffe.FloatBlob;
 import org.bytedeco.javacpp.caffe.FloatBlobVector;
 import org.bytedeco.javacpp.caffe.FloatNet;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.tools.io.printing.PrintTools;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

@@ -14,7 +14,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
    private boolean hasMetGoal = false;
 
-   private YoVariableTestGoal(YoVariable<?>... yoVariables)
+   protected YoVariableTestGoal(YoVariable<?>... yoVariables)
    {
       for (YoVariable<?> yoVariable : yoVariables)
       {
@@ -240,6 +240,11 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
             return "not " + goal.toString();
          }
       };
+   }
+   
+   public static YoVariableTestGoal timeInFuture(DoubleYoVariable timeYoVariable, double durationFromNow)
+   {
+      return doubleGreaterThan(timeYoVariable, timeYoVariable.getDoubleValue() + durationFromNow);
    }
 
    private static String getFormattedBooleanYoVariable(final BooleanYoVariable booleanYoVariable)

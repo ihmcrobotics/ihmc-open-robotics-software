@@ -15,6 +15,6 @@ public interface RobotControllerExecutor
    
    void stop();
 
-   void updateDynamicGraphicObjectListRegistry();
+   void updateYoGraphicsListRegistry();
 
 }

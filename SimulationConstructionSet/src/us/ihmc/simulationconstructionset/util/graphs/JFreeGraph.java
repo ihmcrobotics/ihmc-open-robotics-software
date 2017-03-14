@@ -46,10 +46,10 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class JFreeGraph extends JPanel
 {

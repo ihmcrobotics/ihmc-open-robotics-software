@@ -29,7 +29,7 @@ public class CenterOfPressureVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final Map<RigidBody, YoFramePoint> footRawCoPPositionsInWorld = new HashMap();
+   private final Map<RigidBody, YoFramePoint> footRawCoPPositionsInWorld = new HashMap<>();
    private final YoFramePoint overallRawCoPPositionInWorld;
    private final FramePoint2d tempRawCoP2d = new FramePoint2d();
    private final FramePoint tempRawCoP = new FramePoint();
@@ -52,16 +52,16 @@ public class CenterOfPressureVisualizer
          YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(rigidBody, rawCoPPositionInWorld);
 
-         YoGraphicPosition copDynamicGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
-         YoArtifactPosition copArtifact = copDynamicGraphic.createArtifact();
+         YoGraphicPosition copYoGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+         YoArtifactPosition copArtifact = copYoGraphic.createArtifact();
          yoGraphicsListRegistry.registerArtifact("StateEstimator", copArtifact);
 
          footList.add(rigidBody);
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
-      YoGraphicPosition overallRawCoPDynamicGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
-      YoArtifactPosition overallRawCoPArtifact = overallRawCoPDynamicGraphic.createArtifact();
+      YoGraphicPosition overallRawCoPYoGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+      YoArtifactPosition overallRawCoPArtifact = overallRawCoPYoGraphic.createArtifact();
       overallRawCoPArtifact.setVisible(false);
       yoGraphicsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
 

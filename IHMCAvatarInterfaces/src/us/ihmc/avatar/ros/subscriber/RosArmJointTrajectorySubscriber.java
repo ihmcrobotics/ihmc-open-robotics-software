@@ -69,7 +69,7 @@ public class RosArmJointTrajectorySubscriber extends AbstractRosTopicSubscriber<
          }
          
          long nsecs = rosMessage.getPoints().get(waypointIndex).getTimeFromStart().totalNsecs();
-         double time = Conversions.nanoSecondstoSeconds(nsecs);
+         double time = Conversions.nanosecondsToSeconds(nsecs);
          
          for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
          {

@@ -87,7 +87,7 @@ public abstract class SpatialMotionVector
     */
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] array)
    {
-      MathTools.checkIfEqual(SIZE, array.length);
+      MathTools.checkEquals(SIZE, array.length);
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;

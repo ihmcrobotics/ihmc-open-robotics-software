@@ -25,7 +25,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       implements SE3TrajectoryPointInterface<FrameSE3TrajectoryPoint>
 {
    private final SimpleSE3TrajectoryPoint geometryObject;
-   
+
    public FrameSE3TrajectoryPoint()
    {
       super(new SimpleSE3TrajectoryPoint());
@@ -72,7 +72,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
    @Override
    public void setOrientation(QuaternionReadOnly orientation)
    {
-      geometryObject.setOrientation(orientation); 
+      geometryObject.setOrientation(orientation);
    }
 
    public void setOrientation(FrameOrientation orientation)
@@ -125,7 +125,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       checkReferenceFrameMatch(angularVelocity);
       geometryObject.set(time, position.getPoint(), orientation.getQuaternion(), linearVelocity.getVector(), angularVelocity.getVector());
    }
- 
+
    public void setIncludingFrame(double time, FramePoint position, FrameOrientation orientation, FrameVector linearVelocity, FrameVector angularVelocity)
    {
       position.checkReferenceFrameMatch(orientation);
@@ -169,7 +169,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       setToZero(frameSE3Waypoint.getReferenceFrame());
       set(time, frameSE3Waypoint);
    }
- 
+
    @Override
    public void setPositionToZero()
    {
@@ -228,11 +228,11 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       se3WaypointToPack.setOrientation(so3Waypoint.getOrientation());
       se3WaypointToPack.setAngularVelocity(so3Waypoint.getAngularVelocity());
    }
-   
+
    public void getFrameSE3Waypoint(FrameSE3Waypoint frameSE3Waypoint)
    {
       checkReferenceFrameMatch(frameSE3Waypoint);
- 
+
       EuclideanWaypoint euclideanWaypoint = geometryObject.getEuclideanWaypoint();
       frameSE3Waypoint.setPosition(euclideanWaypoint.getPosition());
       frameSE3Waypoint.setLinearVelocity(euclideanWaypoint.getLinearVelocity());
@@ -291,7 +291,7 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       checkReferenceFrameMatch(orientationToPack);
       geometryObject.getOrientation(orientationToPack.getQuaternion());
    }
-   
+
    public FrameOrientation getOrientationCopy()
    {
       FrameOrientation orientationCopy = new FrameOrientation(getReferenceFrame());
@@ -435,4 +435,5 @@ public class FrameSE3TrajectoryPoint extends FrameTrajectoryPoint<FrameSE3Trajec
       String timeToString = "time = " + doubleFormat.format(getTime());
       return "SE3 trajectory point: (" + timeToString + ", " + geometryObject + ")";
    }
+
 }

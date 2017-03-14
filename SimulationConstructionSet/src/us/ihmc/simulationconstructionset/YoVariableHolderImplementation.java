@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * <p>Title: YoVariableHolderImplementation</p>

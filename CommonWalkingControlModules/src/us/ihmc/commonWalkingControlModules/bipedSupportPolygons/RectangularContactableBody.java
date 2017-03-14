@@ -13,8 +13,8 @@ public class RectangularContactableBody extends ListOfPointsContactablePlaneBody
    public RectangularContactableBody(RigidBody rigidBody, ReferenceFrame soleFrame, double forward, double back, double left, double right)
    {
       super(rigidBody, soleFrame, createContactPoints(forward, back, left, right));
-      MathTools.checkIfInRange(forward, back, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(left, right, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(forward, back, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(left, right, Double.POSITIVE_INFINITY);
    }
 
    private static List<Point2D> createContactPoints(double forward, double back, double left, double right)

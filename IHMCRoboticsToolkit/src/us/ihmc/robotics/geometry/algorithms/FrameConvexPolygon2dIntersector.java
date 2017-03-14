@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry.algorithms;
 import org.apache.commons.math3.util.Pair;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -15,7 +16,6 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
@@ -248,8 +248,8 @@ public class FrameConvexPolygon2dIntersector
          Point2DReadOnly pointOne = polygon.getVertex(index);
          Point2DReadOnly pointTwo = polygon.getNextVertex(index);
 
-         boolean insideOne = GeometryTools.dotProduct(pointOne, pointTwo, pointOne, point) > 0.0;
-         boolean insideTwo = GeometryTools.dotProduct(pointTwo, pointOne, pointTwo, point) > 0.0;
+         boolean insideOne = EuclidGeometryTools.dotProduct(pointOne, pointTwo, pointOne, point) > 0.0;
+         boolean insideTwo = EuclidGeometryTools.dotProduct(pointTwo, pointOne, pointTwo, point) > 0.0;
 
          if (insideOne && insideTwo)
          {
@@ -267,7 +267,7 @@ public class FrameConvexPolygon2dIntersector
             double x = pointOne.getX() + alpha * vx1;
             double y = pointOne.getY() + alpha * vy1;
 
-            double distance = GeometryTools.distanceBetweenPoints(point.getX(), point.getY(), x, y);
+            double distance = EuclidGeometryTools.distanceBetweenPoint2Ds(point.getX(), point.getY(), x, y);
             if (distance < closestDistance)
             {
                closestPointToPack.set(x, y);

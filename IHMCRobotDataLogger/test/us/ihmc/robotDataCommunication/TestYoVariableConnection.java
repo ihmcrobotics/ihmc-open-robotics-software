@@ -89,7 +89,7 @@ public class TestYoVariableConnection
             gc.set(false);
          }
          
-         timestamp += Conversions.milliSecondsToNanoSeconds(1);
+         timestamp += Conversions.millisecondsToNanoseconds(1);
          server.update(timestamp);
          ThreadTools.sleep(timeout.getIntegerValue());
       }

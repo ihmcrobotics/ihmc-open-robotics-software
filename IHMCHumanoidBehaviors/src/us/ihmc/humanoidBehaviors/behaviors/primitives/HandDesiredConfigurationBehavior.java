@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
@@ -8,7 +9,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredCo
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class HandDesiredConfigurationBehavior extends AbstractBehavior
 {

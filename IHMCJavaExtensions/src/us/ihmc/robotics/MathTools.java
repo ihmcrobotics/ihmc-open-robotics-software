@@ -1,6 +1,5 @@
 package us.ihmc.robotics;
 
-import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
@@ -84,7 +83,7 @@ public class MathTools
    }
 
    /**
-    * True if value |(v1-v2)| <= |epsilon|
+    * True if value |(v1-v2)| <= epsilon
     * True if v1 and v2 are Double.NaN
     * True if v1 and v2 are Positive Infinity
     * True if v1 and v2 are Negative Infinity
@@ -94,25 +93,29 @@ public class MathTools
     * @param v2 double
     * @param epsilon double
     * @return boolean
+    * @throws RuntimeException is epsilon is less than zero.
     */
    public static boolean epsilonEquals(double v1, double v2, double epsilon)
    {
-      if(Double.isNaN(v1) && Double.isNaN(v2))
+      if (epsilon < 0.0)
+      {
+         throw new RuntimeException("epilson is less than 0.0");
+      }
+      
+      if (Double.compare(v1, v2) == 0)
       {
          return true;
       }
-      
-      //catches infinites
-      if(v1 == v2)
+      if (Math.abs(v1 - v2) <= epsilon)
       {
          return true;
       }
-      
-      return Math.abs(v1 - v2) <= Math.abs(epsilon);
+
+      return false;
    }
 
    /**
-    * True if value |(v1-v2)| <= |epsilon|
+    * True if value |(v1-v2)| <= epsilon
     * True if v1 and v2 are Float.NaN
     * True if v1 and v2 are Positive Infinity
     * True if v1 and v2 are Negative Infinity
@@ -122,9 +125,15 @@ public class MathTools
     * @param v2 float
     * @param epsilon float
     * @return boolean
+    * @throws RuntimeException is epsilon is less than zero.
     */
    public static boolean epsilonEquals(float v1, float v2, float epsilon)
    {
+      if (epsilon < 0.0)
+      {
+         throw new RuntimeException("epilson is less than 0.0");
+      }
+      
       if(Float.isNaN(v1) && Float.isNaN(v2))
       {
          return true;
@@ -254,177 +263,247 @@ public class MathTools
       
       return (Math.min(max, Math.max(value, min)));
    }
+   
+   /**
+    * <p>Rounds <code>value</code> to the given precision.</p>
+    * 
+    * <p>Example: roundToPrecision(19.5, 1.0) = 20.0;</p> 
+    * 
+    * @param value value to round to precision
+    * @param precision precision to round to
+    * @return <code>value</code> rounded to <code>precision</code>
+    */
+   public static double roundToPrecision(double value, double precision)
+   {
+      return Math.round(value / precision) * precision;
+   }
+   
+   /**
+    * <p>Floors <code>value</code> to the given precision.</p>
+    * 
+    * <p>Example: floorToPrecision(19.9, 1.0) = 19.0;</p> 
+    * 
+    * @param value value to floor to precision
+    * @param precision precision to floor to
+    * @return <code>value</code> floored to <code>precision</code>
+    */
+   public static double floorToPrecision(double value, double precision)
+   {
+      return Math.floor(value / precision) * precision;
+   }
+   
+   /**
+    * <p>Ceils <code>value</code> to the given precision.</p>
+    * 
+    * <p>Example: ceilToPrecision(19.2, 1.0) = 20.0;</p> 
+    * 
+    * @param value value to ceil to precision
+    * @param precision precision to ceil to
+    * @return <code>value</code> ceiled to <code>precision</code>
+    */
+   public static double ceilToPrecision(double value, double precision)
+   {
+      return Math.ceil(value / precision) * precision;
+   }
 
    /**
-    * Checks to see if val is Inside Bounds of max and min
+    * Returns if the interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval can be
+    * open or closed using <code>includeLowerEndpoint</code> and
+    * <code>includeUpperEndpoint</code>.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @param includeLowerEndpoint whether to return true if <code>value == lowerEndpoint</code>
+    * @param includeUpperEndpoint whether to return true if <code>value == upperEndpoint</code>
+    * @return <code>lowerEndpoint <(=) value <(=) upperEndpoint</code>
+    */
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, boolean includeLowerEndpoint, boolean includeUpperEndpoint)
+   {
+      if (lowerEndpoint > upperEndpoint + Epsilons.ONE_TEN_BILLIONTH)
+      {
+         throw new RuntimeException(MathTools.class.getSimpleName()
+               + ".intervalContains(double, double, double, boolean, boolean): lowerEndpoint > upperEndpoint (" + lowerEndpoint + " > " + upperEndpoint + ")");
+      }
+
+      return (includeLowerEndpoint ? value >= lowerEndpoint : value > (lowerEndpoint + Epsilons.ONE_TEN_BILLIONTH))
+            && (includeUpperEndpoint ? value <= upperEndpoint : value < (upperEndpoint - Epsilons.ONE_TEN_BILLIONTH));
+   }
+
+   /**
+    * Returns if the closed interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * true is returned.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @return <code>lowerEndpoint <= value <= upperEndpoint</code>
+    */
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint)
+   {
+      return intervalContains(value, lowerEndpoint, upperEndpoint, true, true);
+   }
+
+   /**
+    * Returns if the closed interval contains the given value. Interval is defined by
+    * <code>-endpointMinMax</code> and <code>endpointMinMax</code>. Interval is closed,
+    * meaning that if <code>value == -endpointMinMax</code> or <code>value == endpointMinMax</code>,
+    * true is returned.
+    * 
+    * @param value the values to check contains
+    * @param endpointMinMax min-max style parameter defining the interval endpoints as
+    * <code>-endpointMinMax</code> and <code>endpointMinMax</code>
+    * @return <code>-endpointMinMax <= value <= endpointMinMax</code>
+    */
+   public static boolean intervalContains(double value, double endpointMinMax)
+   {
+      return intervalContains(value, -endpointMinMax, endpointMinMax);
+   }
+
+   /**
+    * Returns if the closed interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * true is returned. This method rounds <code>value</code>, <code>lowerEndpoint</code>, and <code>upperEndpoint</code>
+    * to the given precision before performing comparisons.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @param precision the precision to round <code>value</code>, <code>lowerEndpoint</code>, and <code>upperEndpoint</code> to
+    * @return <code>lowerEndpoint <= value <= upperEndpoint</code>
+    */
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, double precision)
+   {
+      return intervalContains(roundToPrecision(value, precision), roundToPrecision(lowerEndpoint, precision), roundToPrecision(upperEndpoint, precision));
+   }
+
+   /**
+    * Returns if the interval contains the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval can be
+    * open or closed using <code>includeLowerEndpoint</code> and
+    * <code>includeUpperEndpoint</code>. This method rounds <code>value</code>,
+    * <code>lowerEndpoint</code>, and <code>upperEndpoint</code>
+    * to the given precision before performing comparisons.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @param precision the precision to round <code>value</code>, <code>lowerEndpoint</code>, and <code>upperEndpoint</code> to
+    * @param includeLowerEndpoint whether to return true if <code>value == lowerEndpoint</code>
+    * @param includeUpperEndpoint whether to return true if <code>value == upperEndpoint</code>
+    * @return <code>lowerEndpoint <(=) value <(=) upperEndpoint</code>
+    */
+   public static boolean intervalContains(double value, double lowerEndpoint, double upperEndpoint, double precision, boolean includeLowerEndpoint, boolean includeUpperEndpoint)
+   {
+      return intervalContains(roundToPrecision(value, precision), roundToPrecision(lowerEndpoint, precision), roundToPrecision(upperEndpoint, precision), includeLowerEndpoint, includeUpperEndpoint);
+   }
+
+   /**
+    * Throws exception if the closed interval does not contain the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * no exception is thrown.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @throws RuntimeException if !(<code>lowerEndpoint <= value <= upperEndpoint</code>)
+    */
+   public static void checkIntervalContains(double value, double lowerEndpoint, double upperEndpoint)
+   {
+      if (!intervalContains(value, lowerEndpoint, upperEndpoint))
+      {
+         throw new RuntimeException("Argument " + value + " not in range [" + lowerEndpoint + ", " + upperEndpoint + "].");
+      }
+   }
+
+   /**
+    * Throws exception if the closed interval does not contain the given value. Interval is defined by
+    * <code>lowerEndpoint</code> and <code>upperEndpoint</code>. Interval is closed,
+    * meaning that if <code>value == upperEndpoint</code> or <code>value == lowerEndpoint</code>,
+    * no exception is thrown.
+    * 
+    * @param value the values to check contains
+    * @param lowerEndpoint lower endpoint of the interval
+    * @param upperEndpoint upper endpoint of the interval
+    * @throws RuntimeException if !(<code>lowerEndpoint <= value <= upperEndpoint</code>)
+    */
+   public static void checkIntervalContains(long value, long lowerEndpoint, long upperEndpoint)
+   {
+      if (!intervalContains(value, lowerEndpoint, upperEndpoint))
+      {
+         throw new RuntimeException("Argument " + value + " not in range [" + lowerEndpoint + ", " + upperEndpoint + "].");
+      }
+   }
+
+   /**
+    * Sums the integers in an array.
     *
-    * @param val double
-    * @param min double
-    * @param max double
-    * @return boolean
+    * @param array array of integers
+    * @return The sum of integers.
     */
-   public static boolean isInsideBoundsExclusive(double val, double min, double max)
+   public static int sum(int[] array)
    {
-      if (min >= max)
+      int sum = 0;
+      for (int i = 0; i < array.length; i++)
       {
-         throw new RuntimeException("tried to check bounds on a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than the min value");
+         sum += array[i];
       }
-
-      return ((val > min) && (val < max));
-   }
-
-   public static boolean isBoundedByExclusive(double number, double boundaryOne, double boundaryTwo)
-   {
-      if (boundaryOne < boundaryTwo)
-      {
-         return number > boundaryOne && number < boundaryTwo;
-      }
-      else if (boundaryOne > boundaryTwo)
-      {
-         return number > boundaryTwo && number < boundaryOne;
-      }
-      else // (boundaryOne == boundaryTwo)
-      {
-         return false;
-      }
-   }
-
-   public static boolean isInsideBoundsInclusive(double val, double max)
-   {
-      return isInsideBoundsInclusive(val, -max, max);
-   }
-
-   public static boolean isInsideBoundsExclusive(double val, double max)
-   {
-      return isInsideBoundsExclusive(val, -max, max);
-   }
-
-   public static boolean isInsideBoundsInclusive(double val, double min, double max)
-   {
-      if (min > max)
-      {
-         throw new RuntimeException("tried to check bounds on a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than the min value");
-      }
-
-      return ((val >= min) && (val <= max));
-   }
-
-   public static boolean isBoundedByInclusive(double number, double boundaryOne, double boundaryTwo)
-   {
-      if (boundaryOne < boundaryTwo)
-      {
-         return number >= boundaryOne && number <= boundaryTwo;
-      }
-      else // (boundaryOne >= boundaryTwo)
-      {
-         return number >= boundaryTwo && number <= boundaryOne;
-      }
-   }
-
-   public static boolean isInsideBoundsInclusive(long val, long min, long max)
-   {
-      if (min > max)
-      {
-         throw new RuntimeException("tried to check bounds on a value " + val + " between a min of " + min + " and a max of " + max
-                                    + ". The max value is less than the min value");
-      }
-
-      return ((val >= min) && (val <= max));
-   }
-
-   public static boolean isPreciselyBoundedByInclusive(double number, double boundaryOne, double boundaryTwo, double precision)
-   {
-      return isBoundedByInclusive(roundToPrecision(number, precision), roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision));
-   }
-
-   public static boolean isPreciselyBoundedByExclusive(double boundaryOne, double boundaryTwo, double number, double precision)
-   {
-      return isBoundedByExclusive(roundToPrecision(number, precision), roundToPrecision(boundaryOne, precision), roundToPrecision(boundaryTwo, precision));
+      return sum;
    }
 
    /**
-    * Sums the integers in a collection
+    * Sums the doubles in an array.
     *
-    * @param integers collection of integers
-    * @return int the sum
+    * @param array array of doubles
+    * @return The sum of doubles.
     */
-   public static int sumIntegers(Collection<Integer> integers)
+   public static double sum(double[] array)
    {
-      int ret = 0;
-      for (int i : integers)
-      {
-         ret += i;
-      }
-
-      return ret;
-   }
-
-   /**
-    * Sums the integers in an array
-    *
-    * @param integers array of integers
-    * @return int the sum
-    */
-   public static int sumIntegers(int[] integers)
-   {
-      int ret = 0;
-      for (int i : integers)
-      {
-         ret += i;
-      }
-
-      return ret;
-   }
-
-   /**
-    * Sums the doubles in a collection
-    *
-    * @param doubles collection of doubles
-    * @return double the sum
-    */
-   public static double sumDoubles(Collection<Double> doubles)
-   {
-      double ret = 0.0;
-      for (double d : doubles)
-      {
-         ret += d;
-      }
-
-      return ret;
-   }
-
-   /**
-    * Finds the sum of doubles in an array
-    *
-    * @param doubles double[]
-    * return double
-    */
-   public static double sumDoubles(double[] doubles)
-   {
-      double ret = 0.0;
-      for (double d : doubles)
-      {
-         ret += d;
-      }
-
-      return ret;
-   }
-
-   /**
-    * Computes the cumulative sum array for a given array of doubles.
-    * For example, the cumulative sum sequence of the input sequence {a, b, c, ...} is {a, a + b, a + b + c, ...}
-    * @param doubles input sequence
-    * @return cumulative sum sequence
-    */
-   public static double[] cumulativeSumDoubles(double[] doubles)
-   {
-      double[] ret = new double[doubles.length];
       double sum = 0.0;
-      for (int i = 0; i < doubles.length; i++)
+      for (int i = 0; i < array.length; i++)
       {
-         sum += doubles[i];
+         sum += array[i];
+      }
+      return sum;
+   }
+
+   /**
+    * Sums the doubles in a list.
+    *
+    * @param list list of doubles
+    * @return The sum of doubles.
+    */
+   public static double sum(List<Double> list)
+   {
+      double sum = 0.0;
+      for (int i = 0; i < list.size(); i++)
+      {
+         sum += list.get(i);
+      }
+      return sum;
+   }
+
+   /**
+    * <p>Computes the cumulative sum array for a given array of doubles.</p>
+    * 
+    * <p>Example: The cumulative sum sequence of the input sequence {a, b, c, ...}
+    * is {a, a + b, a + b + c, ...}</p>
+    * 
+    * @param array input sequence
+    * @return Cumulative sum sequence.
+    */
+   public static double[] cumulativeSum(double[] array)
+   {
+      double[] ret = new double[array.length];
+      double sum = 0.0;
+      for (int i = 0; i < array.length; i++)
+      {
+         sum += array[i];
          ret[i] = sum;
       }
 
@@ -432,151 +511,172 @@ public class MathTools
    }
 
    /**
-    * Finds and returns the min value in an array of doubles
+    * The minimum value in an array of doubles.
     *
     * @param array double[]
-    * @return double
+    * @return Minimum value.
     */
    public static double min(double[] array)
    {
-      double ret = Double.MAX_VALUE;
-      for (double d : array)
+      double min = Double.MAX_VALUE;
+      for (int i = 0; i < array.length; i++)
       {
-         ret = Math.min(ret, d);
+         min = Math.min(min, array[i]);
       }
-
-      return ret;
+      return min;
    }
 
    /**
-    * Finds and returns the max value in an array of Doubles
+    * The maximum value in an array of doubles.
     *
     * @param array double[]
-    * @return double
+    * @return Maximum value.
     */
    public static double max(double[] array)
    {
-      double ret = -Double.MAX_VALUE;
-      for (double d : array)
+      double max = -Double.MAX_VALUE;
+      for (int i = 0; i < array.length; i++)
       {
-         ret = Math.max(ret, d);
+         max = Math.max(max, array[i]);
       }
-
-      return ret;
+      return max;
    }
 
    /**
-    *
+    * Average value in an array of doubles.
     *
     * @param array double[]
-    * @return double
+    * @return Average value.
     */
-   public static double mean(double[] array)
+   public static double average(double[] array)
    {
-      double tot = 0.0;
-      for (double d : array)
-      {
-         tot += d;
-      }
-
-      double ret = tot / (array.length);
-
-      // System.err.println("MathTools::mean: tot : " + tot);
-      // System.err.println("MathTools::mean: array.length : " +
-      // array.length);
-      // System.err.println("MathTools::mean: ret : " + ret);
-      return ret;
+      return sum(array) / array.length;
    }
 
    /**
+    * Average value in a list of doubles.
     *
-    *
-    * @param array ArrayList<Double>
-    * @return double
+    * @param list list of doubles
+    * @return Average value.
     */
-   public static double mean(List<Double> array)
+   public static double average(List<Double> list)
    {
-      double tot = 0.0;
-      for (double d : array)
-      {
-         tot += d;
-      }
-
-      double ret = tot / (array.size());
-
-      return ret;
+      return sum(list) / list.size();
    }
 
-   public static void checkIfInRange(double argument, double min, double max)
+   /**
+    * Throw exception if value is less than zero.
+    * No exception thrown if <code>value == 0.0</code>.
+    * 
+    * @param value value to check
+    * @throws RuntimeException if value is negative.
+    */
+   public static void checkPositive(double value)
    {
-      if (!isInsideBoundsInclusive(argument, min, max))
+      if (value < 0.0)
       {
-         throw new RuntimeException("Argument " + argument + " not in range [" + min + ", " + max + "].");
-      }
-   }
-
-   public static void checkIfInRange(long argument, long min, long max)
-   {
-      if (!isInsideBoundsInclusive(argument, min, max))
-      {
-         throw new RuntimeException("Argument " + argument + " not in range [" + min + ", " + max + "].");
+         throw new RuntimeException("Value " + value + " is negative.");
       }
    }
 
-   public static void checkIfPositive(double argument)
+   /**
+    * Throw exception if value is greater than zero.
+    * No exception thrown if <code>value == 0.0</code>.
+    * 
+    * @param value value to check
+    * @throws RuntimeException if value is positive.
+    */
+   public static void checkNegative(double value)
    {
-      if (argument < 0.0)
-         throw new RuntimeException("Argument " + argument + " not positive.");
-   }
-
-   public static void checkIfGreaterOrEqual(double argument, double desired)
-   {
-      if (argument < desired)
-         throw new RuntimeException("Argument " + argument + " less than: " + desired);
-   }
-
-   public static void checkIfNegative(double argument)
-   {
-      if (argument > 0.0)
-         throw new RuntimeException("Argument " + argument + " not negative.");
-   }
-
-   public static void checkIfLessOrEqual(double argument, double desired)
-   {
-      if (argument > desired)
-         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
-   }
-
-   public static void checkIfLessOrEqual(int argument, int desired)
-   {
-      if (argument > desired)
-         throw new RuntimeException("Argument " + argument + " greater than: " + desired);
-   }
-
-   public static void checkIfEqual(double val, double desired, double epsilon)
-   {
-      if (!(Math.abs(val - desired) < epsilon))
+      if (value > 0.0)
       {
-         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+         throw new RuntimeException("Value " + value + " is positive.");
       }
    }
 
-   public static void checkIfEqual(int val, int desired)
+   /**
+    * Throw exception if <code>greater</code> not greater than or equal to <code>lesser</code>.
+    * No exception thrown if <code>greater == lesser</code>.
+    * 
+    * @param greater greater value
+    * @param lesser lesser value
+    * @throws RuntimeException if <code>greater</code> not greater than or equal to <code>lesser</code>.
+    */
+   public static void checkGreaterThanOrEquals(double greater, double lesser)
    {
-      if (val != desired)
+      if (greater < lesser)
       {
-         throw new RuntimeException("Argument " + val + " does not equal desired " + desired);
+         throw new RuntimeException("Not greater than or equal. " + greater + " < " + lesser);
       }
    }
 
-   public static double square(double x)
+   /**
+    * Throw exception if <code>lesser</code> not less than or equal to <code>greater</code>.
+    * No exception thrown if <code>lesser == greater</code>.
+    * 
+    * @param lesser lesser value
+    * @param greater greater value
+    * @throws RuntimeException if <code>lesser</code> not less than or equal to <code>greater</code>.
+    */
+   public static void checkLessThanOrEquals(double lesser, double greater)
    {
-      return x * x;
+      if (lesser > greater)
+      {
+         throw new RuntimeException("Not less than or equal. " + lesser + " > " + greater);
+      }
    }
 
-   public static double cube(double x)
+   /**
+    * Throw exception if <code>value1</code> not epsilon equal to <code>value2</code>.
+    * 
+    * @param value1 value to check
+    * @param value2 value to check
+    * @param epsilon epsilon
+    * @throws RuntimeException if <code>value1</code> not epsilon equal to <code>value2</code>.
+    */
+   public static void checkEpsilonEquals(double value1, double value2, double epsilon)
    {
-      return x * x * x;
+      if (!epsilonEquals(value1, value2, epsilon))
+      {
+         throw new RuntimeException("Not epsilon equal.  " + value1 + " != " + value2 + " +/- " + epsilon);
+      }
+   }
+
+   /**
+    * Throw exception if <code>value1</code> not equal to <code>value2</code>.
+    * 
+    * @param value1 value to check
+    * @param value2 value to check
+    * @throws RuntimeException if <code>value1</code> not equal to <code>value2</code>.
+    */
+   public static void checkEquals(int value1, int value2)
+   {
+      if (value1 != value2)
+      {
+         throw new RuntimeException("Not equal. " + value1 + " !=" + value2);
+      }
+   }
+
+   /**
+    * Squares value.
+    * 
+    * @param value value to be squared
+    * @return <code>value * value</code>
+    */
+   public static double square(double value)
+   {
+      return value * value;
+   }
+
+   /**
+    * Cubes value.
+    * 
+    * @param value value to be cubed
+    * @return <code>value * value * value</code>
+    */
+   public static double cube(double value)
+   {
+      return value * value * value;
    }
 
    public static double powWithInteger(double x, int exponent)
@@ -665,33 +765,18 @@ public class MathTools
       return lcm(a[0], lcm(b));
    }
 
-   public static double floorToGivenPrecision(double value, double precisionFactor)
+   public static double roundToSignificantFigures(double value, int significantFigures)
    {
-      long longValue = (long) (value / precisionFactor); 
-      double roundedValue = ((double) longValue) * precisionFactor;
-      return roundedValue;
-   }
-
-   public static double roundToPrecision(double value, double precision)
-   {
-      double adjustmentFactor = (value > 0.0) ? 0.5 * precision : -0.5 * precision;
-      long longValue = (long) ((value + adjustmentFactor) / precision);
-      double roundedValue = ((double) longValue) * precision;
-      return roundedValue;
-   }
-
-   public static double roundToSignificantFigures(double number, int significantFigures)
-   {
-      if (Math.abs(number) < Double.MIN_VALUE)
+      if (Math.abs(value) < Double.MIN_VALUE)
       {
          return 0.0;
       }
    
-      final double log10 = Math.ceil(Math.log10(Math.abs(number)));
+      final double log10 = Math.ceil(Math.log10(Math.abs(value)));
       final int power = significantFigures - (int) log10;
    
       final double magnitude = Math.pow(10, power);
-      final long shifted = Math.round(number * magnitude);
+      final long shifted = Math.round(value * magnitude);
       return shifted / magnitude;
    }
 

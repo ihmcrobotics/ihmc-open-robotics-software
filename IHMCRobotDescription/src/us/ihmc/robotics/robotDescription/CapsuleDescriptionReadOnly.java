@@ -1,20 +1,20 @@
 package us.ihmc.robotics.robotDescription;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.LineSegment3d;
 
 public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
 {
    private final double radius;
-   private final LineSegment3d capToCapLineSegment = new LineSegment3d();
+   private final LineSegment3D capToCapLineSegment = new LineSegment3D();
 
    public CapsuleDescriptionReadOnly(double radius, double height, RigidBodyTransform transformToCenter)
    {
       this(radius, height, Axis.Z, transformToCenter);
    }
 
-   public CapsuleDescriptionReadOnly(double radius, LineSegment3d capToCapLineSegment, RigidBodyTransform transformToCenter)
+   public CapsuleDescriptionReadOnly(double radius, LineSegment3D capToCapLineSegment, RigidBodyTransform transformToCenter)
    {
       this.radius = radius;
       this.capToCapLineSegment.set(capToCapLineSegment);
@@ -54,7 +54,7 @@ public class CapsuleDescriptionReadOnly implements ConvexShapeDescription
       return radius;
    }
 
-   public void getCapToCapLineSegment(LineSegment3d lineSegmentToPack)
+   public void getCapToCapLineSegment(LineSegment3D lineSegmentToPack)
    {
       lineSegmentToPack.set(capToCapLineSegment);
    }

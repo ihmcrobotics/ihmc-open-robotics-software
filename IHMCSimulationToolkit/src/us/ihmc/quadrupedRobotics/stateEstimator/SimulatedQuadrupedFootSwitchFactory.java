@@ -2,6 +2,7 @@ package us.ihmc.quadrupedRobotics.stateEstimator;
 
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.quadrupedRobotics.estimator.stateEstimator.QuadrupedFootSwitchFactory;
@@ -15,7 +16,6 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.tools.factories.OptionalFactoryField;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SimulatedQuadrupedFootSwitchFactory extends QuadrupedFootSwitchFactory
 {
