@@ -1,4 +1,4 @@
-package us.ihmc.avatar.rrtwalkingpath;
+package us.ihmc.avatar.rrtWalkingpath;
 
 import static org.junit.Assert.assertTrue;
 
@@ -32,8 +32,8 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataRecei
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStep;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
-import us.ihmc.manipulation.planning.walkingpath.rrt.RRT2DNodeWalkingPath;
-import us.ihmc.manipulation.planning.walkingpath.rrt.RRT2DPlannerWalkingPath;
+import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DNodeWalkingPath;
+import us.ihmc.manipulation.planning.walkingpath.rrtplanner.RRT2DPlannerWalkingPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;

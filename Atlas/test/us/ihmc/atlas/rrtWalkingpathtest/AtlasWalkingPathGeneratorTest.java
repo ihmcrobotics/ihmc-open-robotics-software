@@ -1,10 +1,10 @@
-package us.ihmc.atlas.walkingpathtest;
+package us.ihmc.atlas.rrtWalkingpathtest;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.avatar.rrtwalkingpath.AvatarWalkingPathGeneratorTest;
+import us.ihmc.avatar.rrtWalkingpath.AvatarWalkingPathGeneratorTest;
 
 public class AtlasWalkingPathGeneratorTest extends AvatarWalkingPathGeneratorTest
 {
