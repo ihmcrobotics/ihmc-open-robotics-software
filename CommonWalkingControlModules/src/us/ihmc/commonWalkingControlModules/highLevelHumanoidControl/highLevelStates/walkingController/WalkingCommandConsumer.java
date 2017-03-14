@@ -86,11 +86,13 @@ public class WalkingCommandConsumer
       RigidBody pelvis = controllerToolbox.getFullRobotModel().getPelvis();
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
-      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+      ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
+      ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
+
+      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
+      this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
-      headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, chestFrame);
       manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       feetManager = managerFactory.getOrCreateFeetManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
