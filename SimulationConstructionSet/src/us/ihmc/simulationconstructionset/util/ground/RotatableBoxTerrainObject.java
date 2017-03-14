@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -39,11 +39,11 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
       {
          for (Direction direction : Direction.values())
          {
-            double coordinate = MathTools.get(cornerPoint, direction);
-            if (coordinate > MathTools.get(maxPoint, direction))
-               MathTools.set(maxPoint, direction, coordinate);
-            if (coordinate < MathTools.get(minPoint, direction))
-               MathTools.set(minPoint, direction, coordinate);
+            double coordinate = Direction.get(cornerPoint, direction);
+            if (coordinate > Direction.get(maxPoint, direction))
+               Direction.set(maxPoint, direction, coordinate);
+            if (coordinate < Direction.get(minPoint, direction))
+               Direction.set(minPoint, direction, coordinate);
          }
       }
 
@@ -104,7 +104,7 @@ public class RotatableBoxTerrainObject implements TerrainObject3D, HeightMapWith
          Plane3d face = box.getFace(faceName);
          face.getIntersectionWithLine(intersection, tempPoint, zVector);
 
-         if (MathTools.isFinite(intersection))
+         if (EuclidCoreMissingTools.isFinite(intersection))
          {
 //            // check if point in range
             if (box.isInsideOrOnSurface(intersection, 1e-9) && intersection.getZ() > maxHeight)

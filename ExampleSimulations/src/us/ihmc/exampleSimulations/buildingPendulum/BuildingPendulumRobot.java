@@ -7,7 +7,7 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
+import us.ihmc.simulationconstructionset.RigidJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 
@@ -27,7 +27,7 @@ public class BuildingPendulumRobot extends Robot
    {
       super("BuildingPendulumRobot");
 
-      NullJoint rootJoint = new NullJoint("CeilingJoint", new Vector3D(), this);
+      RigidJoint rootJoint = new RigidJoint("CeilingJoint", new Vector3D(), this);
 
 
 

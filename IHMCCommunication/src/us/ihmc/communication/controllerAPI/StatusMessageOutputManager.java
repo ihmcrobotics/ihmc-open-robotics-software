@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.concurrent.Builder;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * StatusMessageOutputManager is used to create an output API for a controller.

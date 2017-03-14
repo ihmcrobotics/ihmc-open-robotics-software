@@ -3,7 +3,7 @@ package us.ihmc.tools.compression;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 public class SnappyUtils
 {

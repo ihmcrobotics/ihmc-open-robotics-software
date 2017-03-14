@@ -10,7 +10,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class Twist extends SpatialMotionVector
@@ -375,8 +375,8 @@ public class Twist extends SpatialMotionVector
                                            double angularVelocityMagnitude, double linearVelocityMagnitude)
    {
       Twist randomTwist = new Twist(bodyFrame, baseFrame, expressedInFrame);
-      randomTwist.setLinearPart(RandomTools.generateRandomVector(random, linearVelocityMagnitude));
-      randomTwist.setAngularPart(RandomTools.generateRandomVector(random, angularVelocityMagnitude));
+      randomTwist.setLinearPart(RandomGeometry.nextVector3D(random, linearVelocityMagnitude));
+      randomTwist.setAngularPart(RandomGeometry.nextVector3D(random, angularVelocityMagnitude));
       return randomTwist;
    }
 

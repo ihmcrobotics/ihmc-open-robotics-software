@@ -2,7 +2,7 @@ package us.ihmc.tools.inputDevices.joystick;
 
 import org.apache.commons.lang3.SystemUtils;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 public enum JoystickModel
 {

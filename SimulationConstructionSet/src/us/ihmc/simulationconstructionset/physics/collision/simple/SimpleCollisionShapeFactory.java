@@ -2,11 +2,11 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.ConvexPolytopeConstructor;
-import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.robotics.robotDescription.CapsuleDescriptionReadOnly;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ConvexShapeDescription;
@@ -61,7 +61,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
       return new CapsuleShapeDescription(radius, height);
    }
 
-   public CollisionShapeDescription<?> createCapsule(double radius, LineSegment3d capToCapLineSegment)
+   public CollisionShapeDescription<?> createCapsule(double radius, LineSegment3D capToCapLineSegment)
    {
       return new CapsuleShapeDescription(radius, capToCapLineSegment);
    }
@@ -102,7 +102,7 @@ public class SimpleCollisionShapeFactory implements CollisionShapeFactory
          {
             CapsuleDescriptionReadOnly capsule = (CapsuleDescriptionReadOnly) convexShapeDescription;
 
-            LineSegment3d capToCapLineSegment = new LineSegment3d();
+            LineSegment3D capToCapLineSegment = new LineSegment3D();
             capsule.getCapToCapLineSegment(capToCapLineSegment);
 
             CollisionShapeDescription<?> collisionShapeDescription = createCapsule(capsule.getRadius(), capToCapLineSegment);

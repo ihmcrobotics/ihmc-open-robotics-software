@@ -2,16 +2,14 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
-import org.apache.commons.math3.geometry.euclidean.threed.Line;
-
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -21,6 +19,8 @@ import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
+   private static final double EPS = 1.0e-12;
+
    protected final BoundingBox3d boundingBox;
    protected final Cylinder3d cylinder;
    private final RigidBodyTransform location;
@@ -30,7 +30,6 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    private final Point3D tempPoint = new Point3D();
    private final Vector3D zVector = new Vector3D(0.0, 0.0, 1.0);
-
 
    // TODO: change box based surface equations to cylinder surface equations
 
@@ -49,18 +48,15 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
       for (Point3D cornerPoint : vertices)
       {
-         for (Direction direction : Direction.values())
+         for (int i = 0; i < 3; i++)
          {
-            double coordinate = MathTools.get(cornerPoint, direction);
-            if (coordinate > MathTools.get(maxPoint, direction))
-               MathTools.set(maxPoint, direction, coordinate);
-            if (coordinate < MathTools.get(minPoint, direction))
-               MathTools.set(minPoint, direction, coordinate);
+            double coordinate = cornerPoint.getElement(i);
+            if (coordinate > maxPoint.getElement(i))
+               maxPoint.setElement(i, coordinate);
+            if (coordinate < minPoint.getElement(i))
+               minPoint.setElement(i, coordinate);
          }
       }
-
-//    minPoint.set(-1.0, -1.0, -1.0);
-//    maxPoint.set(1.0, 1.0, 10.0);
 
       boundingBox = new BoundingBox3d(minPoint, maxPoint);
 
@@ -87,12 +83,10 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       return TransformTools.transformLocalZ(location, -height / 2.0);
    }
 
-
    @Override
    public Graphics3DObject getLinkGraphics()
    {
       return linkGraphics;
-
    }
 
    @Override
@@ -113,11 +107,9 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    @Override
    public double heightAt(double x, double y, double z)
    {
-      Line axis = getAxis();
-
-      org.apache.commons.math3.geometry.euclidean.threed.Vector3D zero = new org.apache.commons.math3.geometry.euclidean.threed.Vector3D(x, y, z);
-      org.apache.commons.math3.geometry.euclidean.threed.Vector3D zVector3D = new org.apache.commons.math3.geometry.euclidean.threed.Vector3D(0.0, 0.0, 1.0);
-      Line zLine = new Line(zero, zero.add(zVector3D));
+      Line3D axis = getAxis();
+      Point3D testPoint = new Point3D(x, y, z);
+      Line3D zLine = new Line3D(testPoint, zVector);
 
       double distance = axis.distance(zLine);
 
@@ -127,7 +119,6 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       ArrayList<Point3D> intersections = new ArrayList<Point3D>();
 
       // Find intersections of line with planes at end of cylinder
-      Point3D testPoint = new Point3D(x, y, z);
       Vector3D testDirection = zVector;
 
       addCylinderEndIntersectionsWithLine(intersections, testPoint, testDirection);
@@ -188,7 +179,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
          Point3D localSideIntersection = new Point3D();
          localSideIntersection.scaleAdd(t[i], localVector, localTestPoint);
 
-         if ((localSideIntersection.getZ() >= -height / 2) && (localSideIntersection.getZ() <= height / 2))
+         if ((localSideIntersection.getZ() > -height / 2 - EPS) && (localSideIntersection.getZ() < height / 2 + EPS))
          {
             location.transform(localSideIntersection);
             intersections.add(localSideIntersection);
@@ -204,7 +195,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
          Point3D intersectionToPack = new Point3D();
          plane.getIntersectionWithLine(intersectionToPack, testPoint, testDirection);
 
-         if (MathTools.isFinite(intersectionToPack) && (intersectionToPack.distanceSquared(plane.getPointCopy()) < radius * radius))
+         if (EuclidCoreMissingTools.isFinite(intersectionToPack) && (intersectionToPack.distanceSquared(plane.getPointCopy()) < radius * radius + EPS))
          {
             intersections.add(intersectionToPack);
          }
@@ -227,36 +218,21 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
       inverseTransform.transform(localDirectionVectorToPack);
    }
 
-   public Line getAxis()
+   public Line3D getAxis()
    {
-      Vector3D axisOrigin = new Vector3D();
+      Point3D axisOrigin = new Point3D();
       location.getTranslation(axisOrigin);
 
       Vector3D axisDirection = getAxisDirectionCopy();
 
-      org.apache.commons.math3.geometry.euclidean.threed.Vector3D axisOrigin_ = vector3DFromVector3d(axisOrigin);
-      org.apache.commons.math3.geometry.euclidean.threed.Vector3D axisDirection_ = vector3DFromVector3d(axisDirection);
-      Line line = new Line(axisOrigin_, axisOrigin_.add(axisDirection_));
-
-      return line;
+      return new Line3D(axisOrigin, axisDirection);
    }
 
    public Vector3D getAxisDirectionCopy()
    {
-      RotationMatrix rotation = new RotationMatrix();
-      location.getRotation(rotation);
-
       Vector3D axisDirection = new Vector3D();
-      rotation.getColumn(Direction.Z.getIndex(), axisDirection);
-
+      location.getRotationMatrix().getColumn(Direction.Z.getIndex(), axisDirection);
       return axisDirection;
-   }
-
-   private org.apache.commons.math3.geometry.euclidean.threed.Vector3D vector3DFromVector3d(Vector3D vector3d)
-   {
-      org.apache.commons.math3.geometry.euclidean.threed.Vector3D vector3D = new org.apache.commons.math3.geometry.euclidean.threed.Vector3D(vector3d.getX(), vector3d.getY(), vector3d.getZ());
-
-      return vector3D;
    }
 
    public double getXMin()

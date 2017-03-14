@@ -14,7 +14,7 @@ import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -66,7 +66,7 @@ public class AngularVelocityMeasurementModelElementTest
       twistCalculator.compute();
 
       FrameVector measuredAngularVelocity = getAngularVelocity(twistCalculator, measurementLink, measurementFrame);
-      FrameVector bias = new FrameVector(measurementFrame, RandomTools.generateRandomVector(random));
+      FrameVector bias = new FrameVector(measurementFrame, RandomGeometry.nextVector3D(random));
       measuredAngularVelocity.add(bias);
       angularVelocityMeasurementInputPort.setData(measuredAngularVelocity.getVectorCopy());
 

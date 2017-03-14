@@ -40,7 +40,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
     compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.ejml', name: 'core', version: '0.30'
     compile "org.apache.commons:commons-lang3:3.4"
@@ -51,6 +51,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":ModelFileLoader")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
     compile ihmc.getProjectDependency(":IHMCQuadrupedRobotics")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":CommonWalkingControlModules")
@@ -68,6 +69,7 @@ dependencies {
     
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 }
 
 jar {

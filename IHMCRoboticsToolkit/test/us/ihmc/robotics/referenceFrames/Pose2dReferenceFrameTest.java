@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose2d;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Pose2dReferenceFrameTest
 {
@@ -145,7 +145,7 @@ public class Pose2dReferenceFrameTest
    private void doRandomPoseChangeAndUpdate(Pose2dReferenceFrame poseReferenceFrame, Random random)
    {
 
-      Point2D randomPoint2d = RandomTools.generateRandomPoint2d(random, 1234, 1234);
+      Point2D randomPoint2d = RandomGeometry.nextPoint2D(random, 1234, 1234);
       FramePose2d framePose = new FramePose2d(poseReferenceFrame.getParent(), randomPoint2d,random.nextGaussian());
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }

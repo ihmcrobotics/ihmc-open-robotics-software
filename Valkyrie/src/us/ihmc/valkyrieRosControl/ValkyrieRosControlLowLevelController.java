@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.yaml.snakeyaml.Yaml;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
@@ -32,7 +33,6 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.taskExecutor.Task;
 import us.ihmc.tools.taskExecutor.TaskExecutor;
 import us.ihmc.valkyrieRosControl.dataHolders.YoEffortJointHandleHolder;
@@ -124,7 +124,7 @@ public class ValkyrieRosControlLowLevelController
          public void doAction()
          {
             double newRatio = doIHMCControlRatio.getDoubleValue() - updateDT / controlRatioRampDuration.getDoubleValue();
-            doIHMCControlRatio.set(MathTools.clipToMinMax(newRatio, 0.0, 1.0));
+            doIHMCControlRatio.set(MathTools.clamp(newRatio, 0.0, 1.0));
          }
 
          @Override
@@ -140,7 +140,7 @@ public class ValkyrieRosControlLowLevelController
          public void doAction()
          {
             double newRatio = doIHMCControlRatio.getDoubleValue() + updateDT / controlRatioRampDuration.getDoubleValue();
-            doIHMCControlRatio.set(MathTools.clipToMinMax(newRatio, 0.0, 1.0));
+            doIHMCControlRatio.set(MathTools.clamp(newRatio, 0.0, 1.0));
          }
 
          @Override
@@ -262,7 +262,7 @@ public class ValkyrieRosControlLowLevelController
 
    public void setDoIHMCControlRatio(double controlRatio)
    {
-      doIHMCControlRatio.set(MathTools.clipToMinMax(controlRatio, 0.0, 1.0));
+      doIHMCControlRatio.set(MathTools.clamp(controlRatio, 0.0, 1.0));
    }
 
    public void requestCalibration()
@@ -275,9 +275,9 @@ public class ValkyrieRosControlLowLevelController
       long timestamp = timestampProvider.getTimestamp();
 
       if (wakeUpTime.isNaN())
-         wakeUpTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+         wakeUpTime.set(Conversions.nanosecondsToSeconds(timestamp));
 
-      yoTime.set(Conversions.nanoSecondstoSeconds(timestamp) - wakeUpTime.getDoubleValue());
+      yoTime.set(Conversions.nanosecondsToSeconds(timestamp) - wakeUpTime.getDoubleValue());
 
       taskExecutor.doControl();
       ValkyrieLowLevelControlModeMessage.ControlMode newRequest = requestedLowLevelControlModeAtomic.getAndSet(null);
@@ -367,7 +367,7 @@ public class ValkyrieRosControlLowLevelController
          timeInStandprep.set(yoTime.getDoubleValue() - standPrepStartTime.getDoubleValue());
 
          double ramp = timeInStandprep.getDoubleValue() / standPrepRampDuration.getDoubleValue();
-         ramp = MathTools.clipToMinMax(ramp, 0.0, 1.0);
+         ramp = MathTools.clamp(ramp, 0.0, 1.0);
 
          for (int i = 0; i < effortControlCommandCalculators.size(); i++)
          {

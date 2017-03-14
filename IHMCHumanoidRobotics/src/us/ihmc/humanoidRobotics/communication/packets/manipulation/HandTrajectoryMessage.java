@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
@@ -13,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
@@ -53,8 +53,8 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage(Random random)
    {
       super(random);
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
-      baseForControl = RandomTools.generateRandomEnum(random, BaseForControl.class);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
+      baseForControl = RandomNumbers.nextEnum(random, BaseForControl.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -123,7 +123,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       super.set(other);
       robotSide = other.robotSide;
       baseForControl = other.baseForControl;
-      executionMode = other.executionMode;
+      setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
    }
 
    public RobotSide getRobotSide()

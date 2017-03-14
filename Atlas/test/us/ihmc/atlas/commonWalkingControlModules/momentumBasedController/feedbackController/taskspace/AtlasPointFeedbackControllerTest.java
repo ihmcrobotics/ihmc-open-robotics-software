@@ -2,7 +2,10 @@ package us.ihmc.atlas.commonWalkingControlModules.momentumBasedController.feedba
 
 import org.junit.Test;
 
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackControllerTest;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -29,6 +32,7 @@ public class AtlasPointFeedbackControllerTest extends PointFeedbackControllerTes
    @Override
    protected MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
-      return new AtlasMomentumOptimizationSettings();
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+      return new AtlasMomentumOptimizationSettings(robotModel.getJointMap());
    }
 }

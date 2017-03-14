@@ -40,7 +40,7 @@ public class ConstantVelocityTrajectoryGenerator implements DoubleTrajectoryGene
    public void compute(double time)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       polynomial.compute(time);
    }
 

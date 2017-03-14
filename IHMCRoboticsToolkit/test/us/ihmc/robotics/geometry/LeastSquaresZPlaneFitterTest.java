@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -15,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class LeastSquaresZPlaneFitterTest
 {
@@ -102,23 +103,23 @@ public class LeastSquaresZPlaneFitterTest
    {
       for (int i = 0; i < numberOfTests; i++)
       {
-         Point3D planePoint = RandomTools.generateRandomPoint(random, maxXYZ, maxXYZ, maxXYZ);
-         Vector3D planeNormal = RandomTools.generateRandomVector(random, 1.0);
+         Point3D planePoint = RandomGeometry.nextPoint3D(random, maxXYZ, maxXYZ, maxXYZ);
+         Vector3D planeNormal = RandomGeometry.nextVector3D(random, 1.0);
 
          if (planeNormal.getZ() < 0.0)
             planeNormal.scale(-1.0);
 
          Plane3d plane3d = new Plane3d(planePoint, planeNormal);
 
-         int numberOfPoints = RandomTools.generateRandomInt(random, 3, 50);
+         int numberOfPoints = RandomNumbers.nextInt(random, 3, 50);
          ArrayList<Point3D> listOfPoints = new ArrayList<Point3D>();
 
          for (int j = 0; j < numberOfPoints; j++)
          {
-            Point3D point = RandomTools.generateRandomPoint(random, maxXYZ, maxXYZ, maxXYZ);
+            Point3D point = RandomGeometry.nextPoint3D(random, maxXYZ, maxXYZ, maxXYZ);
             plane3d.orthogonalProjection(point);
 
-            point.add(RandomTools.generateRandomVector(random, pointNoiseAmplitude));
+            point.add(RandomGeometry.nextVector3D(random, pointNoiseAmplitude));
             
             listOfPoints.add(point);
          }

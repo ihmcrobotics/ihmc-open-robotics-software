@@ -17,7 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 /**
  * Created with IntelliJ IDEA.
@@ -231,7 +231,7 @@ public class JMEGeometryUtilsTest
       Random random = new Random(100L);
       for (int i = 0; i < 100; i++)
       {
-         AxisAngle axisAngle4d = RandomTools.generateRandomRotation(random);
+         AxisAngle axisAngle4d = RandomGeometry.nextAxisAngle(random);
          QuaternionBasics quat4d = new us.ihmc.euclid.tuple4D.Quaternion();
          quat4d.set(axisAngle4d);
 

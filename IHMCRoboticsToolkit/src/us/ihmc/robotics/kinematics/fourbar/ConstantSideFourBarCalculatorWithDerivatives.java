@@ -1,13 +1,11 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import static java.lang.Math.PI;
-import static java.lang.Math.abs;
-import static java.lang.Math.cos;
+import static java.lang.Math.*;
 import static java.lang.Math.min;
-import static java.lang.Math.sin;
-import static us.ihmc.robotics.MathTools.clipToMinMax;
-import static us.ihmc.robotics.geometry.GeometryTools.getUnknownTriangleSideLengthByLawOfCosine;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.*;
+import static us.ihmc.robotics.MathTools.*;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.robotics.MathTools;
 
 public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalculatorWithDerivatives
@@ -79,8 +77,8 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
    public boolean updateAnglesGivenAngleDAB(double angleDABInRadians)
    {
       // Solve angles
-      double A = clipToMinMax(angleDABInRadians, minA, maxA);
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
+      double A = clamp(angleDABInRadians, minA, maxA);
+      double e = unknownTriangleSideLengthByLawOfCosine(a, b, A);
       double C = FourbarCalculatorTools.getAngleWithCosineLaw(c, d, e);
       double angleDBA = FourbarCalculatorTools.getAngleWithCosineLaw(b, e, a);
       double angleDBC = FourbarCalculatorTools.getAngleWithCosineLaw(c, e, d);
@@ -91,7 +89,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
       this.angleBCD = C;
       this.angleCDA = D;
 
-      return !MathTools.isInsideBoundsInclusive(angleDABInRadians, minA, maxA);
+      return !MathTools.intervalContains(angleDABInRadians, minA, maxA);
    }
    
    /**
@@ -101,7 +99,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
    public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
    {
       double B = angleABCInRadians;
-      double f = getUnknownTriangleSideLengthByLawOfCosine(b, c, B);
+      double f = unknownTriangleSideLengthByLawOfCosine(b, c, B);
       double D = FourbarCalculatorTools.getAngleWithCosineLaw(d, a, f);
       double angleACB = FourbarCalculatorTools.getAngleWithCosineLaw(c, f, b);
       double angleACD = FourbarCalculatorTools.getAngleWithCosineLaw(d, f, a);
@@ -117,7 +115,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
    public void computeMasterJointAngleGivenAngleBCD(double angleBCDInRadians)
    {
       double C = angleBCDInRadians;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(c, d, C);
+      double e = unknownTriangleSideLengthByLawOfCosine(c, d, C);
       double A = FourbarCalculatorTools.getAngleWithCosineLaw(a, b, e);
       this.angleDAB = A;
    }      
@@ -129,7 +127,7 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
    public void computeMasterJointAngleGivenAngleCDA(double angleCDAInRadians)
    {
       double D = angleCDAInRadians;
-      double f = getUnknownTriangleSideLengthByLawOfCosine(d, a, D);
+      double f = unknownTriangleSideLengthByLawOfCosine(d, a, D);
       double angleCAD = FourbarCalculatorTools.getAngleWithCosineLaw(a, f, d);
       double angleCAB = FourbarCalculatorTools.getAngleWithCosineLaw(b, f, c);
       double A = angleCAD + angleCAB;
@@ -148,9 +146,9 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
       boolean isAHittingBounds = updateAnglesGivenAngleDAB(angleDABInRadians);
 
       // Solve angular velocity
-      double A = clipToMinMax(angleDABInRadians, minA, maxA);
+      double A = clamp(angleDABInRadians, minA, maxA);
       double dAdT = angularVelocityDAB;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
+      double e = unknownTriangleSideLengthByLawOfCosine(a, b, A);
       double eDot = a * b * sin(A) * dAdT / e;
       double dCdT = FourbarCalculatorTools.getAngleDotWithCosineLaw(c, d, 0.0, e, eDot);
       double angleDotDBA = FourbarCalculatorTools.getAngleDotWithCosineLaw(b, e, eDot, a, 0.0);
@@ -178,10 +176,10 @@ public class ConstantSideFourBarCalculatorWithDerivatives implements FourbarCalc
       boolean isAHittingBounds = updateAnglesAndVelocitiesGivenAngleDAB(angleDABInRadians, angularVelocityDAB);
 
       // Solve angular acceleration
-      double A = clipToMinMax(angleDABInRadians, minA, maxA);
+      double A = clamp(angleDABInRadians, minA, maxA);
       double dAdT = angularVelocityDAB;
       double dAdT2 = angularAccelerationDAB;
-      double e = getUnknownTriangleSideLengthByLawOfCosine(a, b, A);
+      double e = unknownTriangleSideLengthByLawOfCosine(a, b, A);
       double eDot = a * b * sin(A) * dAdT / e;
       double eDDot = a * b / e * (cos(A) * dAdT * dAdT + sin(A) * (dAdT2 - eDot * dAdT / e));
       double dCdT2 = FourbarCalculatorTools.getAngleDDotWithCosineLaw(c, d, 0.0, 0.0, e, eDot, eDDot);

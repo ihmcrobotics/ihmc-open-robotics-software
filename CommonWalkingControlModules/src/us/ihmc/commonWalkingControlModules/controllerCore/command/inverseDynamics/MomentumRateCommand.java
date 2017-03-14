@@ -111,16 +111,16 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
    public void setLinearAlphaTaskPriority(double linearX, double linearY, double linearZ)
    {
-      alphaTaskPriorityVector.set(3, 0, MathTools.clipToMinMax(linearX, 0.0, 1.0));
-      alphaTaskPriorityVector.set(4, 0, MathTools.clipToMinMax(linearY, 0.0, 1.0));
-      alphaTaskPriorityVector.set(5, 0, MathTools.clipToMinMax(linearZ, 0.0, 1.0));
+      alphaTaskPriorityVector.set(3, 0, MathTools.clamp(linearX, 0.0, 1.0));
+      alphaTaskPriorityVector.set(4, 0, MathTools.clamp(linearY, 0.0, 1.0));
+      alphaTaskPriorityVector.set(5, 0, MathTools.clamp(linearZ, 0.0, 1.0));
    }
 
    public void setAngularAlphasTaskPriority(double angularX, double angularY, double angularZ)
    {
-      alphaTaskPriorityVector.set(0, 0, MathTools.clipToMinMax(angularX, 0.0, 1.0));
-      alphaTaskPriorityVector.set(1, 0, MathTools.clipToMinMax(angularY, 0.0, 1.0));
-      alphaTaskPriorityVector.set(2, 0, MathTools.clipToMinMax(angularZ, 0.0, 1.0));
+      alphaTaskPriorityVector.set(0, 0, MathTools.clamp(angularX, 0.0, 1.0));
+      alphaTaskPriorityVector.set(1, 0, MathTools.clamp(angularY, 0.0, 1.0));
+      alphaTaskPriorityVector.set(2, 0, MathTools.clamp(angularZ, 0.0, 1.0));
    }
 
    public void resetAlphaTaskPriority()

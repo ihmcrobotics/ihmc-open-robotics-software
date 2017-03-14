@@ -1283,7 +1283,7 @@ public class SkippyController implements RobotController
 
       public void doAction()
       {
-         System.out.println("prepareState");
+ 
       }
 
       public void doTransitionIntoAction()

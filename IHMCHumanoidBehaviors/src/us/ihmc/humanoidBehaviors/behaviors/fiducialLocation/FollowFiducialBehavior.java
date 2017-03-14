@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.fiducialLocation;
 
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
@@ -41,7 +42,6 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.time.Timer;
 
 public class FollowFiducialBehavior extends AbstractBehavior
 {
@@ -82,7 +82,7 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private final FramePose tempFirstFootstepPose = new FramePose();
    private final Point3D tempFootstepPosePosition = new Point3D();
    private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
-   private final Timer footstepSentTimer = new Timer();
+   private final Stopwatch footstepSentTimer = new Stopwatch();
 
    public FollowFiducialBehavior(CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel,
                                  HumanoidReferenceFrames referenceFrames, GoalDetectorBehaviorService goalDetectorBehaviorService)
@@ -440,8 +440,8 @@ public class FollowFiducialBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setDefaultSwingTime(0.5);
-      footstepDataListMessage.setDefaultTransferTime(0.1);
+      footstepDataListMessage.setDefaultSwingDuration(0.5);
+      footstepDataListMessage.setDefaultTransferDuration(0.1);
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {

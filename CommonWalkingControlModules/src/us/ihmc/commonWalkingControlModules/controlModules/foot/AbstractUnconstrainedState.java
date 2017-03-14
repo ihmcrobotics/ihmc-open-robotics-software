@@ -75,7 +75,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
-         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
+         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, controllerToolbox, robotSide);
       else
          legJointLimitAvoidanceControlModule = null;
 
@@ -83,7 +83,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
 
       spatialFeedbackControlCommand.set(rootBody, foot);
-      spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
       spatialFeedbackControlCommand.setGains(gains);
       FramePose anklePoseInFoot = new FramePose(ankleFrame);
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());

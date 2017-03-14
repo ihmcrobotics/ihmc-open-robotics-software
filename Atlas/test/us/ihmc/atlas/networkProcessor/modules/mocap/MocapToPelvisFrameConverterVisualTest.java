@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -59,10 +59,10 @@ public class MocapToPelvisFrameConverterVisualTest
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      Vector3D pelvisTranslation = RandomTools.generateRandomVector(random, 1.5);
-      Vector3D mocapTranslation = RandomTools.generateRandomVector(random, 1.5);
-      RotationMatrix pelvisRotation = RandomTools.generateRandomRotationMatrix(random);
-      RotationMatrix mocapRotation = RandomTools.generateRandomRotationMatrix(random);
+      Vector3D pelvisTranslation = RandomGeometry.nextVector3D(random, 1.5);
+      Vector3D mocapTranslation = RandomGeometry.nextVector3D(random, 1.5);
+      RotationMatrix pelvisRotation = RandomGeometry.nextRotationMatrix(random);
+      RotationMatrix mocapRotation = RandomGeometry.nextRotationMatrix(random);
 
       RigidBodyTransform pelvisToWorldTransform = new RigidBodyTransform(pelvisRotation, pelvisTranslation);
       RigidBodyTransform mocapToWorldTransform = new RigidBodyTransform(mocapRotation, mocapTranslation);

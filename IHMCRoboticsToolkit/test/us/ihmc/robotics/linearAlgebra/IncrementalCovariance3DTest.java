@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +12,12 @@ import org.ejml.ops.MatrixFeatures;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class IncrementalCovariance3DTest
 {
@@ -60,7 +61,7 @@ public class IncrementalCovariance3DTest
 
       for (int i = 0; i < 100; i++)
       {
-         Point3D average = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point3D average = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
          List<Point3D> dataset = createRandomDataset(random, average, length, maxAmplitude);
 
          incrementalCovariance3D.clear();
@@ -76,7 +77,7 @@ public class IncrementalCovariance3DTest
 
    private void assertCovarianceIsCorrect(IncrementalCovariance3D incrementalCovariance3D, List<Point3D> dataset)
    {
-      Point3D expectedMean = GeometryTools.averagePoint3ds(dataset);
+      Point3D expectedMean = EuclidGeometryTools.averagePoint3Ds(dataset);
       Point3D actualMean = new Point3D();
       incrementalCovariance3D.getMean(actualMean);
       EuclidCoreTestTools.assertTuple3DEquals(expectedMean, actualMean, EPSILON);
@@ -112,7 +113,7 @@ public class IncrementalCovariance3DTest
       max.add(average, maxAmplitude);
 
       for (int i = 0; i < length; i++)
-         dataset.add(RandomTools.generateRandomPoint3d(random, min, max));
+         dataset.add(RandomGeometry.nextPoint3D(random, min, max));
 
       return dataset;
    }
@@ -126,7 +127,7 @@ public class IncrementalCovariance3DTest
       int n = dataset.size();
       DenseMatrix64F datasetMatrix = new DenseMatrix64F(n, 3);
 
-      Point3D average = GeometryTools.averagePoint3ds(dataset);
+      Point3D average = EuclidGeometryTools.averagePoint3Ds(dataset);
 
       for (int i = 0; i < n; i++)
       {

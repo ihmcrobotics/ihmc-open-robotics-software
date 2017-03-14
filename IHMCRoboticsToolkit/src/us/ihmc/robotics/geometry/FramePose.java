@@ -5,6 +5,7 @@ import java.util.Random;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -12,11 +13,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePose extends AbstractFrameObject<FramePose, Pose>
@@ -75,8 +77,8 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
 
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double maxAbsoluteX, double maxAbsoluteY, double maxAbsoluteZ)
    {
-      return new FramePose(referenceFrame, RandomTools.generateRandomPoint(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ),
-                           RandomTools.generateRandomQuaternion(random));
+      return new FramePose(referenceFrame, RandomGeometry.nextPoint3D(random, maxAbsoluteX, maxAbsoluteY, maxAbsoluteZ),
+                           RandomGeometry.nextQuaternion(random));
    }
 
    public static FramePose generateRandomFramePose(Random random, ReferenceFrame referenceFrame, double[] xyzMin, double[] xyzMax, double[] yawPitchRollMin,
@@ -366,6 +368,34 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
    {
       pose.translate(x, y, z);
    }
+   
+   /**
+    * <p>Translate the pose with a translation in local frame.</p>
+    * 
+    * <p>Not thread safe. Will transform transform to world frame and back.</p>
+    * 
+    * @param localTranslation translation in local pose frame
+    */
+   public void translateLocally(Vector3DBasics localTranslation)
+   {
+      pose.transformToWorld(localTranslation);
+      pose.translate(localTranslation);
+      pose.transformToLocal(localTranslation);
+   }
+   
+   /**
+    * <p>Rotate the pose with a translation in local frame.</p>
+    * 
+    * <p>Not thread safe. Will transform transform to world frame and back.</p>
+    * 
+    * @param localRotation translation in local pose frame
+    */
+   public void rotateLocally(QuaternionBasics localRotation)
+   {
+      pose.transformToWorld(localRotation);
+      pose.rotate(localRotation);
+      pose.transformToLocal(localRotation);
+   }
 
    public double getX()
    {
@@ -505,7 +535,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       }
       else
       {
-         GeometryTools.getTopVertexOfIsoscelesTriangle(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle,
+         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle,
                                                        originToPack.getPoint());
       }
    }

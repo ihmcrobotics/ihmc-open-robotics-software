@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.InclusionFunction;
 
 public class DoubleHashHeightMap implements HeightMapWithPoints
@@ -38,7 +37,7 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
       if (!row.containsKey(y))
          return false;
       Double height = row.get(y);
-      if (!MathTools.isFinite(height))
+      if (!Double.isFinite(height))
          return false;
 
       return true;
@@ -63,7 +62,7 @@ public class DoubleHashHeightMap implements HeightMapWithPoints
 
       synchronized (rows)
       {
-         if (MathTools.isFinite(z))
+         if (Double.isFinite(z))
          {
             if (!rows.containsKey(xIndex))
             {

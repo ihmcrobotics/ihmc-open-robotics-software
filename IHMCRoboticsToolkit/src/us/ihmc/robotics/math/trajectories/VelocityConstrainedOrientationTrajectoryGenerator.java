@@ -162,7 +162,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
 
    public void setTrajectoryTime(double duration)
    {
-      MathTools.checkIfInRange(duration, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(duration, 0.0, Double.POSITIVE_INFINITY);
       trajectoryTime.set(duration);
    }
 
@@ -312,7 +312,7 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
          return;
       }
 
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
 
       interpolateOrientation(time - dtForFiniteDifference, initialQuaternionDrifted, finalQuaternionDrifted, qInterpolatedPrevious);
       interpolateOrientation(time + dtForFiniteDifference, initialQuaternionDrifted, finalQuaternionDrifted, qInterpolatedNext);
@@ -344,14 +344,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       if (initialDriftSaturated.getBooleanValue())
       {
          double integratedAngle = initialAngularVelocityMagnitude.getDoubleValue() * time;
-         saturationPolynomial.compute(MathTools.clipToMinMax(Math.abs(integratedAngle), 0.0, PI));
+         saturationPolynomial.compute(MathTools.clamp(Math.abs(integratedAngle), 0.0, PI));
          double alphaSaturation = saturationPolynomial.getPosition();
          initialAlphaSaturation.set(alphaSaturation);
          computeDriftSaturated(time, alphaSaturation, initialAngularVelocity, initialAngularVelocityMagnitude, initialDrift);
       }
       else
       {
-         double alphaDecay = MathTools.clipToMinMax(2.0 * time / trajectoryTime.getDoubleValue(), 0.0, 1.0);
+         double alphaDecay = MathTools.clamp(2.0 * time / trajectoryTime.getDoubleValue(), 0.0, 1.0);
          computeDrift(time, alphaDecay, initialAngularVelocity, initialDrift);
       }
 
@@ -359,14 +359,14 @@ public class VelocityConstrainedOrientationTrajectoryGenerator extends Orientati
       if (finalDriftSaturated.getBooleanValue())
       {
          double integratedAngle = finalAngularVelocityMagnitude.getDoubleValue() * finalDriftIntegrationTime;
-         saturationPolynomial.compute(MathTools.clipToMinMax(Math.abs(integratedAngle), 0.0, PI));
+         saturationPolynomial.compute(MathTools.clamp(Math.abs(integratedAngle), 0.0, PI));
          double alphaSaturation = saturationPolynomial.getPosition();
          finalAlphaSaturation.set(alphaSaturation);
          computeDriftSaturated(finalDriftIntegrationTime, alphaSaturation, finalAngularVelocity, finalAngularVelocityMagnitude, finalDrift);
       }
       else
       {
-         double alphaDecay = MathTools.clipToMinMax(1.0 - 2.0 * time / trajectoryTime.getDoubleValue(), 0.0, 1.0);
+         double alphaDecay = MathTools.clamp(1.0 - 2.0 * time / trajectoryTime.getDoubleValue(), 0.0, 1.0);
          computeDrift(finalDriftIntegrationTime, alphaDecay, finalAngularVelocity, finalDrift);
       }
 

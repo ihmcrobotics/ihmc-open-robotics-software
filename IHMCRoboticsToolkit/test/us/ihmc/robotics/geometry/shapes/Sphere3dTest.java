@@ -8,11 +8,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Sphere3dTest
 {
@@ -29,8 +30,8 @@ public class Sphere3dTest
       
       for (int i=0; i<numberOfShapes; i++)
       {
-         Point3D center = RandomTools.generateRandomPoint(random, 1.0, 1.0, 1.0);
-         double radius = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         Point3D center = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 1.0);
+         double radius = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Sphere3d sphere3d = new Sphere3d(center, radius);
          testHelper.runSimpleTests(sphere3d, random, numberOfPoints);
       }

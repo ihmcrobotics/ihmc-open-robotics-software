@@ -241,11 +241,11 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
 
       if (swingLegSide == RobotSide.LEFT)
       {
-         desiredOffsetFromAnkle.setY(MathTools.clipToMinMax(desiredOffsetFromAnkle.getY(), minStepWidth.getDoubleValue(), maxStepWidth.getDoubleValue()));
+         desiredOffsetFromAnkle.setY(MathTools.clamp(desiredOffsetFromAnkle.getY(), minStepWidth.getDoubleValue(), maxStepWidth.getDoubleValue()));
       }
       else
       {
-         desiredOffsetFromAnkle.setY(MathTools.clipToMinMax(desiredOffsetFromAnkle.getY(), -maxStepWidth.getDoubleValue(), -minStepWidth.getDoubleValue()));
+         desiredOffsetFromAnkle.setY(MathTools.clamp(desiredOffsetFromAnkle.getY(), -maxStepWidth.getDoubleValue(), -minStepWidth.getDoubleValue()));
       }
 
       return desiredOffsetFromAnkle;
@@ -291,12 +291,12 @@ public class BlindWalkingDesiredFootstepCalculator extends AbstractDesiredFootst
 
       if (swingLegSide == RobotSide.LEFT)
       {
-         amountToYaw = MathTools.clipToMinMax(amountToYaw, -maxTurnInAngle, maxTurnOutAngle);
+         amountToYaw = MathTools.clamp(amountToYaw, -maxTurnInAngle, maxTurnOutAngle);
 
       }
       else
       {
-         amountToYaw = MathTools.clipToMinMax(amountToYaw, -maxTurnOutAngle, maxTurnInAngle);
+         amountToYaw = MathTools.clamp(amountToYaw, -maxTurnOutAngle, maxTurnInAngle);
       }
 
       RotationMatrix yawRotation = new RotationMatrix();

@@ -47,7 +47,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -494,7 +494,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 //      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3D(1, 1, 0.3), new Quat4d(), 0.6);
 //      drcSimulationTestHelper.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2);
-      long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
+      long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
       RigidBodyTransform yawTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1, 1, 0.8, 0, 0, Math.PI);
       TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(yawTransform, timeStamp);
       StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
@@ -508,7 +508,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 //      FootPosePacket packet = new FootPosePacket(RobotSide.RIGHT, new Point3D(1.0, 1.0, 0.3), new Quat4d(), 0.6);
 //      drcSimulationTestHelper.send(packet);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
-      long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
+      long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
       RigidBodyTransform outsideOfFootTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1.5, 1.0, 0.8, 0.0, 0.0, 0.0);
       TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(outsideOfFootTransform, timeStamp);
       StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
@@ -568,7 +568,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
    private boolean yawBigInDoubleSupport(ExternalPelvisPoseCreator externalPelvisPoseCreator) throws SimulationExceededMaximumTimeException
    {
-      long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
+      long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
       RigidBodyTransform yawTransform = TransformTools.createTransformFromTranslationAndEulerAngles(1, 1, 0.8, 0, 0, Math.PI);
       TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(yawTransform, timeStamp);
       StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
@@ -605,7 +605,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       {
          targets[i] = new RigidBodyTransform();
          targets[i].setRotationEulerAndZeroTranslation(0, 0, random.nextDouble() * 2.0 * Math.PI);
-         targets[i].setTranslation(RandomTools.generateRandomVector(random, 1.0));
+         targets[i].setTranslation(RandomGeometry.nextVector3D(random, 1.0));
       }
       return targets;
    }
@@ -648,7 +648,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          target.setYawPitchRoll(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
-         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
@@ -720,7 +720,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          target.setYawPitchRoll(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
-         long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
+         long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
          TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(targets[i], timeStamp);
          StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);
 
@@ -784,7 +784,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
                {
                   Thread.sleep(900);
                   pelvisTransform.set(pelvis.getJointTransform3D());
-                  long timeStamp = Conversions.secondsToNanoSeconds(simulationConstructionSet.getTime());
+                  long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
                   Thread.sleep((int) (random.nextDouble() * 200));
                   TimeStampedTransform3D timeStampedTransform = new TimeStampedTransform3D(pelvisTransform, timeStamp);
                   StampedPosePacket posePacket = new StampedPosePacket("/pelvis", timeStampedTransform, 1.0);

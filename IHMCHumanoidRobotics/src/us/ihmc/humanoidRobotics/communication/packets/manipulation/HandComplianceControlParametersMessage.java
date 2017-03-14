@@ -3,9 +3,10 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 import java.util.Arrays;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -78,7 +79,7 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
 
    public HandComplianceControlParametersMessage(Random random)
    {
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       enableLinearCompliance = new boolean[3];
       for(int i = 0; i < 3; i++)
       {
@@ -91,8 +92,8 @@ public class HandComplianceControlParametersMessage extends Packet<HandComplianc
          enableAngularCompliance[i] = random.nextBoolean();
       }
 
-      desiredForce = RandomTools.generateRandomVector3f(random);
-      desiredTorque = RandomTools.generateRandomVector3f(random);
+      desiredForce = RandomGeometry.nextVector3D32(random);
+      desiredTorque = RandomGeometry.nextVector3D32(random);
 
       wrenchDeadzones = new float[2];
       wrenchDeadzones[0] = random.nextFloat();

@@ -17,7 +17,7 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class RotationToolsTest
 {
@@ -33,7 +33,7 @@ public class RotationToolsTest
       for (int i = 0; i < 100; i++)
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
-         Vector3D randomAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
          double randomAngleCompleteRotations = random.nextInt(2) * (2.0 * Math.PI);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, randomAngle);
@@ -45,7 +45,7 @@ public class RotationToolsTest
       for (int i = 0; i < 100; i++)
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
-         Vector3D randomAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
          double randomAngleNotCompleteRotations = random.nextInt(2) * (2.0 * Math.PI) + 0.25 * AngleTools.generateRandomAngle(random);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, randomAngle);
@@ -62,7 +62,7 @@ public class RotationToolsTest
       for (int i = 0; i < 100; i++)
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
-         Vector3D randomAxisA = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
          Vector3D randomAxisA_flipped = new Vector3D(randomAxisA);
          randomAxisA_flipped.negate();
 
@@ -76,7 +76,7 @@ public class RotationToolsTest
       {
          double randomAngle = AngleTools.generateRandomAngle(random);
 
-         Vector3D randomAxisA = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
          Vector3D randomAxisA_flipped = new Vector3D(randomAxisA);
          randomAxisA_flipped.negate();
 
@@ -95,8 +95,8 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxisA = RandomTools.generateRandomVector(random, 1.0);
-         Vector3D randomAxisB = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, 0.0);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, 0.0);
@@ -118,8 +118,8 @@ public class RotationToolsTest
          double randomAngleA_MultipleOfTwoPi = random.nextInt(2) * (2.0 * Math.PI);
          double randomAngleB_MultipleOfTwoPi = random.nextInt(2) * (2.0 * Math.PI);
 
-         Vector3D randomAxisA = RandomTools.generateRandomVector(random, 1.0);
-         Vector3D randomAxisB = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, randomAngleA_MultipleOfTwoPi);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, randomAngleB_MultipleOfTwoPi);
@@ -130,14 +130,14 @@ public class RotationToolsTest
       for (int i = 0; i < numberOfTests; i++)
       {
          double randomAngleMultipleOfTwoPi = random.nextInt(2) * (2.0 * Math.PI);
-         double randomAngleEpsilonToHalfPiMinusEpsilon = MathTools.clipToMinMax(random.nextDouble(), 0.1, Math.PI / 2.0 - 0.1);
+         double randomAngleEpsilonToHalfPiMinusEpsilon = MathTools.clamp(random.nextDouble(), 0.1, Math.PI / 2.0 - 0.1);
          double randomAngleNotZeroOrMultipleOfTwoPi = randomAngleMultipleOfTwoPi + randomAngleEpsilonToHalfPiMinusEpsilon;
 
          double remainder = randomAngleNotZeroOrMultipleOfTwoPi % (2.0 * Math.PI);
          assertTrue(randomAngleNotZeroOrMultipleOfTwoPi + " is divisible by 2*PI, but should not be!", Math.abs(remainder) != 0.0);
 
-         Vector3D randomAxisA = RandomTools.generateRandomVector(random, 1.0);
-         Vector3D randomAxisB = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, randomAngleMultipleOfTwoPi);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, randomAngleNotZeroOrMultipleOfTwoPi);
@@ -154,7 +154,7 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, -Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxis, -Math.PI);
@@ -165,8 +165,8 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxisA = RandomTools.generateRandomVector(random, 1.0);
-         Vector3D randomAxisB = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, -Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, -Math.PI);
@@ -184,7 +184,7 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxis = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxis = RandomGeometry.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxis, Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxis, Math.PI);
@@ -195,8 +195,8 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Vector3D randomAxisA = RandomTools.generateRandomVector(random, 1.0);
-         Vector3D randomAxisB = RandomTools.generateRandomVector(random, 1.0);
+         Vector3D randomAxisA = RandomGeometry.nextVector3D(random, 1.0);
+         Vector3D randomAxisB = RandomGeometry.nextVector3D(random, 1.0);
 
          AxisAngle axisAngleA = new AxisAngle(randomAxisA, Math.PI);
          AxisAngle axisAngleB = new AxisAngle(randomAxisB, Math.PI);
@@ -251,7 +251,7 @@ public class RotationToolsTest
 
       for (int i = 0; i < numTests; i++)
       {
-         Quaternion quatToPack = RandomTools.generateRandomQuaternion(random);
+         Quaternion quatToPack = RandomGeometry.nextQuaternion(random);
          RotationMatrix rotationMatrixToPack = new RotationMatrix();
          double yaw = quatToPack.getYaw();
          rotationMatrixToPack.set(quatToPack);
@@ -356,7 +356,7 @@ public class RotationToolsTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Quaternion randomQuaternion = RandomTools.generateRandomQuaternion(random);
+         Quaternion randomQuaternion = RandomGeometry.nextQuaternion(random);
          RotationMatrix rotationMatrix = new RotationMatrix();
          rotationMatrix.set(randomQuaternion);
 
@@ -378,7 +378,7 @@ public class RotationToolsTest
    {
       for (int i = 0; i < 100; i++)
       {
-         Vector3D expectedAngularVelocity = RandomTools.generateRandomVector(random);
+         Vector3D expectedAngularVelocity = RandomGeometry.nextVector3D(random);
          Vector3D actualAngularVelocity = new Vector3D();
 
          Quaternion integrationResultPrevious = new Quaternion();

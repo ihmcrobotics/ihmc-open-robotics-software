@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -28,7 +29,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
@@ -156,7 +156,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
          transferToFootstep = footsteps.remove(0);
 
          if (changeZRandomly)
-            transferToFootstep.setZ(transferToFootstep.getZ() + RandomTools.generateRandomDouble(random, 0.0, maxZChange));
+            transferToFootstep.setZ(transferToFootstep.getZ() + RandomNumbers.nextDouble(random, 0.0, maxZChange));
          previousFootstep = transferToFootstep;
 
          Footstep upcomingFootstep = footsteps.get(0);
@@ -237,7 +237,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
             pelvisFrame.setY(queryPosition.getY());
             pelvisFrame.update();
 
-            boolean switchSupportSides = RandomTools.generateRandomBoolean(random);
+            boolean switchSupportSides = random.nextBoolean();
             if (switchSupportSides)
             {
                supportLegFrameSide.set(supportLegFrameSide.getEnumValue().getOppositeSide());

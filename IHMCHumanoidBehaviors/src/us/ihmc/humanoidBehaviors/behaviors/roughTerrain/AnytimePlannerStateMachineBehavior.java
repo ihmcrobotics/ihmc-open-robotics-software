@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 import java.util.Random;
 
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
@@ -56,9 +57,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 
@@ -328,7 +328,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
    private class RequestAndWaitForPlanarRegionsListBehavior extends AbstractBehavior
    {
       private final BooleanYoVariable receivedPlanarRegionsList = new BooleanYoVariable(prefix + "ReceivedPlanarRegionsList", registry);
-      private final YoTimer requestNewPlanarRegionsTimer = new YoTimer(yoTime);
+      private final YoStopwatch requestNewPlanarRegionsTimer = new YoStopwatch(yoTime);
       private final DoubleYoVariable planarRegionsResponseTimeout = new DoubleYoVariable(prefix + "PlanarRegionsResponseTimeout", registry);
       private PlanarRegionsList planarRegionsList;
 
@@ -606,8 +606,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                                                      double transferTime)
       {
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingTime(swingTime);
-         footstepDataListMessage.setDefaultTransferTime(transferTime);
+         footstepDataListMessage.setDefaultSwingDuration(swingTime);
+         footstepDataListMessage.setDefaultTransferDuration(transferTime);
          int numSteps = plan.getNumberOfSteps();
          int lastStepIndex = Math.min(startIndex + maxNumberOfStepsToTake + 1, numSteps);
          for (int i = 1 + startIndex; i < lastStepIndex; i++)
@@ -635,8 +635,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
                                                                      double transferTime, PlanarRegionsList planarRegionsList)
       {
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingTime(swingTime);
-         footstepDataListMessage.setDefaultTransferTime(transferTime);
+         footstepDataListMessage.setDefaultSwingDuration(swingTime);
+         footstepDataListMessage.setDefaultTransferDuration(transferTime);
          int numSteps = plan.getNumberOfSteps();
          int lastStepIndex = Math.min(startIndex + maxNumberOfStepsToTake + 1, numSteps);
          
@@ -712,8 +712,8 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
          // make footstep data message
          FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingTime(swingTime.getDoubleValue());
-         footstepDataListMessage.setDefaultTransferTime(transferTime.getDoubleValue());
+         footstepDataListMessage.setDefaultSwingDuration(swingTime.getDoubleValue());
+         footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
          Point3D position = new Point3D();
          Quaternion orientation = new Quaternion();
          stepPose.getPosition(position);

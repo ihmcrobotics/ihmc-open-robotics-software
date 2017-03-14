@@ -18,7 +18,7 @@ import javax.xml.bind.Unmarshaller;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -177,7 +177,7 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       final Random random = new Random();
       Vector3D[] jointAxes = new Vector3D[random.nextInt(10)];
       for (int i = 0; i < jointAxes.length; i++)
-         jointAxes[i] = RandomTools.generateRandomVector(random, 1.0);
+         jointAxes[i] = RandomGeometry.nextVector3D(random, 1.0);
       ScrewTestTools.createRandomChainRobot("blop", revoluteJoints, rootBody, jointAxes, random);
       final List<OneDoFJoint> oneDoFJoints = new ArrayList<>();
       for (RevoluteJoint revoluteJoint : revoluteJoints)

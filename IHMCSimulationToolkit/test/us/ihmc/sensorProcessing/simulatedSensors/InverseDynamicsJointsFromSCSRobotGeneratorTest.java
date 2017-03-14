@@ -34,7 +34,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
@@ -78,10 +77,6 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
          blockingSimulationRunner = null;
       }
       
-      GlobalTimer.clearTimers();
-      
-      
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    

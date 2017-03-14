@@ -1,10 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -12,13 +8,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.math.Epsilons;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class LineSegment2dTest
 {
@@ -484,26 +482,26 @@ public class LineSegment2dTest
       // Test on line segment
       for (int i = 0; i < 1000; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
 
          Point2D pointOnLineSegment = new Point2D();
 
          // Test between end points
-         double expectedPercentage = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         double expectedPercentage = RandomNumbers.nextDouble(random, 0.0, 1.0);
          pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
          double actualPercentage = lineSegment.percentageAlongLineSegment(pointOnLineSegment);
          assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
 
          // Test before end points
-         expectedPercentage = RandomTools.generateRandomDouble(random, -10.0, 0.0);
+         expectedPercentage = RandomNumbers.nextDouble(random, -10.0, 0.0);
          pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
          actualPercentage = lineSegment.percentageAlongLineSegment(pointOnLineSegment);
          assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
 
          // Test after end points
-         expectedPercentage = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         expectedPercentage = RandomNumbers.nextDouble(random, 1.0, 10.0);
          pointOnLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
          actualPercentage = lineSegment.percentageAlongLineSegment(pointOnLineSegment);
          assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
@@ -512,34 +510,34 @@ public class LineSegment2dTest
       // Test off line segment
       for (int i = 0; i < 1000; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
 
          Point2D pointOffLineSegment = new Point2D();
          Vector2D lineSegmentDirection = new Vector2D();
          lineSegmentDirection.sub(lineSegmentEnd, lineSegmentStart);
-         Vector2D orthogonal = GeometryTools.getPerpendicularVector(lineSegmentDirection);
+         Vector2D orthogonal = EuclidGeometryTools.perpendicularVector2D(lineSegmentDirection);
          orthogonal.normalize();
 
          // Test between end points
-         double expectedPercentage = RandomTools.generateRandomDouble(random, 0.0, 1.0);
+         double expectedPercentage = RandomNumbers.nextDouble(random, 0.0, 1.0);
          pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
-         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         pointOffLineSegment.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, pointOffLineSegment);
          double actualPercentage = lineSegment.percentageAlongLineSegment(pointOffLineSegment);
          assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
 
          // Test before end points
-         expectedPercentage = RandomTools.generateRandomDouble(random, -10.0, 0.0);
+         expectedPercentage = RandomNumbers.nextDouble(random, -10.0, 0.0);
          pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
-         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         pointOffLineSegment.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, pointOffLineSegment);
          actualPercentage = lineSegment.percentageAlongLineSegment(pointOffLineSegment);
          assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
 
          // Test after end points
-         expectedPercentage = RandomTools.generateRandomDouble(random, 1.0, 10.0);
+         expectedPercentage = RandomNumbers.nextDouble(random, 1.0, 10.0);
          pointOffLineSegment.interpolate(lineSegmentStart, lineSegmentEnd, expectedPercentage);
-         pointOffLineSegment.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, pointOffLineSegment);
+         pointOffLineSegment.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, pointOffLineSegment);
          actualPercentage = lineSegment.percentageAlongLineSegment(pointOffLineSegment);
          assertEquals(expectedPercentage, actualPercentage, Epsilons.ONE_TRILLIONTH);
       }
@@ -594,58 +592,58 @@ public class LineSegment2dTest
 
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
 
          Point2D expectedIntersection = new Point2D();
-         expectedIntersection.interpolate(lineSegmentStart1, lineSegmentEnd1, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         expectedIntersection.interpolate(lineSegmentStart1, lineSegmentEnd1, RandomNumbers.nextDouble(random, 0.0, 1.0));
 
-         Vector2D lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection2 = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D lineSegmentStart2 = new Point2D();
          Point2D lineSegmentEnd2 = new Point2D();
 
          // Expecting intersection
-         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
-         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
+         lineSegmentStart2.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentEnd2.scaleAdd(RandomNumbers.nextDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
          assertAllCombinationsOfIntersectionWith(expectedIntersection, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
 
          // Not expecting intersection
-         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
-         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentStart2.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentEnd2.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
          assertOnlyExistenceOfIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
       }
 
       // Test intersection at one of the end points
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
 
          Point2D expectedIntersection = new Point2D(lineSegmentStart1);
 
-         Vector2D lineDirection2 = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection2 = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D lineSegmentStart2 = new Point2D();
          Point2D lineSegmentEnd2 = new Point2D();
 
          // Not expecting intersection
-         lineSegmentStart2.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
-         lineSegmentEnd2.scaleAdd(RandomTools.generateRandomDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
+         lineSegmentStart2.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection2, expectedIntersection);
+         lineSegmentEnd2.scaleAdd(RandomNumbers.nextDouble(random, -10.0, 0.0), lineDirection2, expectedIntersection);
          assertAllCombinationsOfIntersectionWith(expectedIntersection, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
       }
 
       // Test with parallel/collinear line segments
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd1 = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd1 = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
 
          Point2D lineSegmentStart2 = new Point2D();
          Point2D lineSegmentEnd2 = new Point2D();
 
-         double alpha1 = RandomTools.generateRandomDouble(random, 2.0);
-         double alpha2 = RandomTools.generateRandomDouble(random, 2.0);
+         double alpha1 = RandomNumbers.nextDouble(random, 2.0);
+         double alpha2 = RandomNumbers.nextDouble(random, 2.0);
 
          // Make the second line segment collinear to the first one
          lineSegmentStart2.interpolate(lineSegmentStart1, lineSegmentEnd1, alpha1);
@@ -666,7 +664,7 @@ public class LineSegment2dTest
          orthogonal.set(-orthogonal.getY(), orthogonal.getX());
          orthogonal.normalize();
 
-         double distance = RandomTools.generateRandomDouble(random, 1.0e-10, 10.0);
+         double distance = RandomNumbers.nextDouble(random, 1.0e-10, 10.0);
          lineSegmentStart2.scaleAdd(distance, orthogonal, lineSegmentStart2);
          lineSegmentEnd2.scaleAdd(distance, orthogonal, lineSegmentEnd2);
          assertOnlyExistenceOfIntersectionAllCombinations(false, lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
@@ -735,16 +733,16 @@ public class LineSegment2dTest
 
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
 
          Point2D expectedIntersection = new Point2D();
-         expectedIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 0.0, 1.0));
+         expectedIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 0.0, 1.0));
 
          Point2D pointOnLine = new Point2D(expectedIntersection);
-         Vector2D lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection = RandomGeometry.nextVector2D(random, 1.0);
 
          // Expecting intersection
          Point2D actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
@@ -753,7 +751,7 @@ public class LineSegment2dTest
          actualIntersection = reverseLineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
          actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
@@ -764,25 +762,25 @@ public class LineSegment2dTest
       // Make the intersection happen outside the line segment
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
          
          Point2D pointOnLine = new Point2D();
-         Vector2D lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D lineLineIntersection = new Point2D();
-         lineLineIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 1.0, 2.0));
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, lineLineIntersection);
+         lineLineIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 1.0, 2.0));
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection, lineLineIntersection);
          Point2D actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          assertNull(actualIntersection);
 
          actualIntersection = reverseLineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          assertNull(actualIntersection);
 
-         lineLineIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, -1.0, 0.0));
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, lineLineIntersection);
+         lineLineIntersection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, -1.0, 0.0));
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection, lineLineIntersection);
          actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          assertNull(actualIntersection);
 
@@ -793,17 +791,17 @@ public class LineSegment2dTest
       // Make the intersection happen on each end point of the line segment
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
 
          Point2D pointOnLine = new Point2D();
-         Vector2D lineDirection = RandomTools.generateRandomVector2d(random, 1.0);
+         Vector2D lineDirection = RandomGeometry.nextVector2D(random, 1.0);
 
          Point2D expectedIntersection = new Point2D();
          expectedIntersection.set(lineSegmentStart);
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
          Point2D actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
@@ -811,7 +809,7 @@ public class LineSegment2dTest
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
          expectedIntersection.set(lineSegmentEnd);
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection, expectedIntersection);
          actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          EuclidCoreTestTools.assertTuple2DEquals(expectedIntersection, actualIntersection, epsilon);
 
@@ -822,8 +820,8 @@ public class LineSegment2dTest
       // Make the line segment and the line parallel not collinear.
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          
          Point2D pointOnLine = new Point2D(lineSegmentStart);
@@ -835,8 +833,8 @@ public class LineSegment2dTest
 
          Vector2D orthogonal = new Vector2D(-lineDirection.getY(), lineDirection.getY());
 
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), orthogonal, pointOnLine);
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, pointOnLine);
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), orthogonal, pointOnLine);
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection, pointOnLine);
          Point2D actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          assertNull(actualIntersection);
       }
@@ -844,8 +842,8 @@ public class LineSegment2dTest
       // Make the line segment and the line collinear.
       for (int i = 0; i < 100; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          LineSegment2d reverseLineSegment = new LineSegment2d(lineSegmentEnd, lineSegmentStart);
          
@@ -856,7 +854,7 @@ public class LineSegment2dTest
          if (random.nextBoolean())
             lineDirection.negate();
 
-         pointOnLine.scaleAdd(RandomTools.generateRandomDouble(random, 0.0, 10.0), lineDirection, pointOnLine);
+         pointOnLine.scaleAdd(RandomNumbers.nextDouble(random, 0.0, 10.0), lineDirection, pointOnLine);
          Point2D actualIntersection = lineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
          EuclidCoreTestTools.assertTuple2DEquals(lineSegmentStart, actualIntersection, epsilon);
          actualIntersection = reverseLineSegment.intersectionWith(new Line2d(pointOnLine, lineDirection));
@@ -1178,32 +1176,32 @@ public class LineSegment2dTest
 
       for (int i = 0; i < 1000; i++)
       {
-         Point2D lineSegmentStart = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
-         Point2D lineSegmentEnd = RandomTools.generateRandomPoint2d(random, 10.0, 10.0);
+         Point2D lineSegmentStart = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
+         Point2D lineSegmentEnd = RandomGeometry.nextPoint2D(random, 10.0, 10.0);
          LineSegment2d lineSegment = new LineSegment2d(lineSegmentStart, lineSegmentEnd);
          Vector2D orthogonal = new Vector2D();
          orthogonal.sub(lineSegmentEnd, lineSegmentStart);
-         GeometryTools.getPerpendicularVector(orthogonal, orthogonal);
+         EuclidGeometryTools.perpendicularVector2D(orthogonal, orthogonal);
          orthogonal.normalize();
          Point2D expectedProjection = new Point2D();
          Point2D testPoint = new Point2D();
 
          // Between end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 0.0, 1.0));
-         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, expectedProjection);
+         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 0.0, 1.0));
+         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
          Point2D actualProjection = lineSegment.orthogonalProjectionCopy(testPoint);
          EuclidCoreTestTools.assertTuple2DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
 
          // Before end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, -10.0, 0.0));
-         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, expectedProjection);
+         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, -10.0, 0.0));
+         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
          expectedProjection.set(lineSegmentStart);
          actualProjection = lineSegment.orthogonalProjectionCopy(testPoint);
          EuclidCoreTestTools.assertTuple2DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);
 
          // After end points
-         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomTools.generateRandomDouble(random, 1.0, 10.0));
-         testPoint.scaleAdd(RandomTools.generateRandomDouble(random, 10.0), orthogonal, expectedProjection);
+         expectedProjection.interpolate(lineSegmentStart, lineSegmentEnd, RandomNumbers.nextDouble(random, 1.0, 10.0));
+         testPoint.scaleAdd(RandomNumbers.nextDouble(random, 10.0), orthogonal, expectedProjection);
          expectedProjection.set(lineSegmentEnd);
          actualProjection = lineSegment.orthogonalProjectionCopy(testPoint);
          EuclidCoreTestTools.assertTuple2DEquals(expectedProjection, actualProjection, Epsilons.ONE_TRILLIONTH);

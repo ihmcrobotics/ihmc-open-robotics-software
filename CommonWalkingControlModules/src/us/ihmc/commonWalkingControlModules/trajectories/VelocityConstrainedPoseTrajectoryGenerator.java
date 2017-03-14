@@ -424,7 +424,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
 
       trajectoryFrame = initialOrientation.getReferenceFrame();
       // Translational part
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       xPolynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), initialPosition.getX(), initialVelocity.getX(), 0.0, finalPosition.getX(),
             finalVelocity.getX(), 0.0);
       yPolynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), initialPosition.getY(), initialVelocity.getY(), 0.0, finalPosition.getY(),
@@ -480,7 +480,7 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    {
       this.currentTime.set(time);
       currentTrajectoryFrame.update();
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
 
       xPolynomial.compute(time);
       yPolynomial.compute(time);

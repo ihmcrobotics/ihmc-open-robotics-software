@@ -7,13 +7,13 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.random.RandomTools;
 
 public class JointWrenchSensorTest
 {
@@ -92,16 +92,16 @@ public class JointWrenchSensorTest
       Tuple3DBasics jointTorque = new Vector3D();
       
       Random random = new Random(1797L);
-      pinJointOne.setQ(RandomTools.generateRandomDoubleInRange(random, -Math.PI, Math.PI));
-      pinJointTwo.setQ(RandomTools.generateRandomDoubleInRange(random, -Math.PI, Math.PI));
+      pinJointOne.setQ(RandomNumbers.nextDouble(random, -Math.PI, Math.PI));
+      pinJointTwo.setQ(RandomNumbers.nextDouble(random, -Math.PI, Math.PI));
       
-      pinJointOne.setQd(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
-      pinJointTwo.setQd(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
+      pinJointOne.setQd(RandomNumbers.nextDouble(random, -1.0, 1.0));
+      pinJointTwo.setQd(RandomNumbers.nextDouble(random, -1.0, 1.0));
       
       for (int i=0; i<100; i++)
       {
-         pinJointOne.setTau(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
-         pinJointTwo.setTau(RandomTools.generateRandomDoubleInRange(random, -1.0, 1.0));
+         pinJointOne.setTau(RandomNumbers.nextDouble(random, -1.0, 1.0));
+         pinJointTwo.setTau(RandomNumbers.nextDouble(random, -1.0, 1.0));
          
          robot.doDynamicsAndIntegrate(0.0001);
          

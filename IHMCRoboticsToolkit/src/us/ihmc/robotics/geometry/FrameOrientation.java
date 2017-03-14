@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -11,7 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quaternion>
@@ -80,16 +81,16 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
 
    public static FrameOrientation generateRandomFrameOrientation(Random random, ReferenceFrame referenceFrame)
    {
-      FrameOrientation randomOrientation = new FrameOrientation(referenceFrame, RandomTools.generateRandomQuaternion(random));
+      FrameOrientation randomOrientation = new FrameOrientation(referenceFrame, RandomGeometry.nextQuaternion(random));
       return randomOrientation;
    }
 
    public static FrameOrientation generateRandomFrameOrientation(Random random, ReferenceFrame referenceFrame, double yawMin, double yawMax, double pitchMin,
                                                                  double pitchMax, double rollMin, double rollMax)
    {
-      double yaw = RandomTools.generateRandomDouble(random, yawMin, yawMax);
-      double pitch = RandomTools.generateRandomDouble(random, pitchMin, pitchMax);
-      double roll = RandomTools.generateRandomDouble(random, rollMin, rollMax);
+      double yaw = RandomNumbers.nextDouble(random, yawMin, yawMax);
+      double pitch = RandomNumbers.nextDouble(random, pitchMin, pitchMax);
+      double roll = RandomNumbers.nextDouble(random, rollMin, rollMax);
       FrameOrientation randomOrientation = new FrameOrientation(referenceFrame, yaw, pitch, roll);
       return randomOrientation;
    }
@@ -271,14 +272,14 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    public void interpolate(FrameOrientation orientationOne, FrameOrientation orientationTwo, double alpha)
    {
       orientationOne.checkReferenceFrameMatch(orientationTwo);
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       quaternion.interpolate(orientationOne.quaternion, orientationTwo.quaternion, alpha);
       referenceFrame = orientationOne.getReferenceFrame();
    }
 
    public void interpolate(QuaternionReadOnly quaternion1, QuaternionReadOnly quaternion2, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       quaternion.interpolate(quaternion1, quaternion2, alpha);
    }
 

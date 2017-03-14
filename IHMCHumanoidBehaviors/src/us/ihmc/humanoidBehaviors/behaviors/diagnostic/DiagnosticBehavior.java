@@ -9,6 +9,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -55,6 +56,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.communication.subscribers.TimeStampedTransformBuffer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -70,7 +72,6 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -78,7 +79,7 @@ import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPoint1DCalculator;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -449,7 +450,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          FramePoint tempPoint = new FramePoint(hand.getParentJoint().getFrameAfterJoint());
          tempPoint.changeFrame(armJoints[1].getFrameAfterJoint());
          FrameVector tempVector = new FrameVector(tempPoint);
-         MathTools.floorToGivenPrecision(tempVector.getVector(), 1.0e-2);
+         EuclidCoreMissingTools.floorToGivenPrecision(tempVector.getVector(), 1.0e-2);
          tempVector.normalize();
 
          Vector3D expectedArmZeroConfiguration = new Vector3D(0.0, robotSide.negateIfRightSide(1.0), 0.0);
@@ -461,7 +462,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          else
          {
             AxisAngle rotation = new AxisAngle();
-            GeometryTools.getAxisAngleFromFirstToSecondVector(expectedArmZeroConfiguration, tempVector.getVector(), rotation);
+            EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(expectedArmZeroConfiguration, tempVector.getVector(), rotation);
             armZeroJointAngleConfigurationOffset.setRotation(rotation);
          }
 
@@ -2244,7 +2245,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          double qLow = joint.getJointLimitLower();
          double qUp = joint.getJointLimitUpper();
          double qRange = qUp - qLow;
-         desiredUpperArmJointAngles[i] = MathTools.clipToMinMax(qDesired, qLow + 0.01 * qRange, qUp - 0.01 * qRange);
+         desiredUpperArmJointAngles[i] = MathTools.clamp(qDesired, qLow + 0.01 * qRange, qUp - 0.01 * qRange);
       }
 
       return desiredUpperArmJointAngles;
@@ -2677,13 +2678,13 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       RigidBodyTransform lastPelvisPoseInWorldFrame = new RigidBodyTransform();
       lastPelvisPoseInWorldFrame.set(fullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-      stateEstimatorPelvisPoseBuffer.put(lastPelvisPoseInWorldFrame, Conversions.secondsToNanoSeconds(yoTime.getDoubleValue()));
+      stateEstimatorPelvisPoseBuffer.put(lastPelvisPoseInWorldFrame, Conversions.secondsToNanoseconds(yoTime.getDoubleValue()));
 
       if (isIcpOffsetSenderEnabled.getBooleanValue())
       {
          if (yoTime.getDoubleValue() > previousIcpPacketSentTime.getDoubleValue() + 1.0)
          {
-            long timestamp = Conversions.secondsToNanoSeconds(yoTime.getDoubleValue() - icpTimeDelay.getDoubleValue());
+            long timestamp = Conversions.secondsToNanoseconds(yoTime.getDoubleValue() - icpTimeDelay.getDoubleValue());
 
             TimeStampedTransform3D pelvisTimeStampedTransformInThePast = new TimeStampedTransform3D();
             stateEstimatorPelvisPoseBuffer.findTransform(timestamp, pelvisTimeStampedTransformInThePast);
@@ -2693,8 +2694,8 @@ public class DiagnosticBehavior extends AbstractBehavior
             pelvisTransformInPast_Translation.setRotationToZero();
             pelvisTransformInPast_Rotation.setTranslationToZero();
 
-            Quaternion orientationOffset = RandomTools.generateRandomQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
-            Vector3D translationOffset = RandomTools.generateRandomVector(random, minMaxIcpTranslationOffset.getDoubleValue());
+            Quaternion orientationOffset = RandomGeometry.nextQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
+            Vector3D translationOffset = RandomGeometry.nextVector3D(random, minMaxIcpTranslationOffset.getDoubleValue());
 
             RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3D());
             RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quaternion(), translationOffset);

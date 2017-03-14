@@ -5,13 +5,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreator
 {

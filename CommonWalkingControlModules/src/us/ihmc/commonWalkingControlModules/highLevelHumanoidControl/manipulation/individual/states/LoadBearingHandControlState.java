@@ -25,7 +25,7 @@ public class LoadBearingHandControlState extends HandControlState
    private final YoVariableRegistry registry;
 
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final DoubleYoVariable coefficientOfFriction;
    private final SpatialAccelerationVector handAcceleration;
@@ -37,7 +37,7 @@ public class LoadBearingHandControlState extends HandControlState
    private final ReferenceFrame elevatorFrame;
 
 
-   public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public LoadBearingHandControlState(String namePrefix, HandControlMode stateEnum, RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox,
          RigidBody elevator, RigidBody endEffector, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
@@ -48,7 +48,7 @@ public class LoadBearingHandControlState extends HandControlState
       spatialAccelerationCommand.set(elevator, endEffector);
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
 
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
 
       parentRegistry.addChild(registry);
 
@@ -58,13 +58,13 @@ public class LoadBearingHandControlState extends HandControlState
       elevatorFrame = elevator.getBodyFixedFrame();
       handFrame = endEffector.getBodyFixedFrame();
 
-      SideDependentList<ContactablePlaneBody> contactableHands = momentumBasedController.getContactableHands();
+      SideDependentList<ContactablePlaneBody> contactableHands = controllerToolbox.getContactableHands();
       if (contactableHands != null)
       {
          handPalm = contactableHands.get(robotSide);
          contactNormal = new FrameVector();
          contactNormal.setToNaN();
-         momentumBasedController.setPlaneContactStateFree(handPalm);
+         controllerToolbox.setPlaneContactStateFree(handPalm);
       }
       else
       {
@@ -108,7 +108,7 @@ public class LoadBearingHandControlState extends HandControlState
    {
       if (handPalm == null)
       {
-         System.out.println("No YoPlaneContactState for the hands in the MomentumBasedController, leaving the hand load bearing state.");
+         System.out.println("No YoPlaneContactState for the hands in the HighLevelHumanoidControllerToolbox, leaving the hand load bearing state.");
 
          return;
       }
@@ -117,7 +117,7 @@ public class LoadBearingHandControlState extends HandControlState
          contactNormal.setIncludingFrame(handPalm.getSoleFrame(), 0.0, 0.0, 1.0);
 
       contactNormal.changeFrame(ReferenceFrame.getWorldFrame());
-      momentumBasedController.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), contactNormal);
+      controllerToolbox.setPlaneContactStateFullyConstrained(handPalm, coefficientOfFriction.getDoubleValue(), contactNormal);
    }
 
    @Override
@@ -126,7 +126,7 @@ public class LoadBearingHandControlState extends HandControlState
       if (handPalm == null)
          return;
 
-      momentumBasedController.setPlaneContactStateFree(handPalm);
+      controllerToolbox.setPlaneContactStateFree(handPalm);
       contactNormal.setToNaN();
    }
 

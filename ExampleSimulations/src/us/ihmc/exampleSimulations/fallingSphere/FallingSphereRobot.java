@@ -80,18 +80,18 @@ public class FallingSphereRobot extends Robot
             GroundContactPoint gc = new GroundContactPoint(gcName, new Vector3D(x, y, z), this);
             floatingJoint.addGroundContactPoint(gc);
             
-            YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(gcName + "Position", gc.getYoPosition(), 0.01, YoAppearance.Red());
-            yoGraphicsListRegistry.registerYoGraphic("FallingSphereGCPoints", dynamicGraphicPosition);
+            YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(gcName + "Position", gc.getYoPosition(), 0.01, YoAppearance.Red());
+            yoGraphicsListRegistry.registerYoGraphic("FallingSphereGCPoints", yoGraphicPosition);
 
             if (useImpulseGroundModel)
             {
-               YoGraphicVector dynamicGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoImpulse(), 10.0, YoAppearance.Pink());
-               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", dynamicGraphicVector);
+               YoGraphicVector yoGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoImpulse(), 10.0, YoAppearance.Pink());
+               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", yoGraphicVector);
             }
             else
             {
-               YoGraphicVector dynamicGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoForce(), 1.0/50.0);
-               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", dynamicGraphicVector);
+               YoGraphicVector yoGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoForce(), 1.0/50.0);
+               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", yoGraphicVector);
             }
          }
       }
@@ -121,7 +121,7 @@ public class FallingSphereRobot extends Robot
       initRobot();
       
       this.getRobotsYoVariableRegistry().addChild(registry);
-      this.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+      this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
    }
 
    private Link ball()

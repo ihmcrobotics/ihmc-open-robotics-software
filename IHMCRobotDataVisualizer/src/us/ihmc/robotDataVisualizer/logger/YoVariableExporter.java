@@ -124,7 +124,7 @@ public class YoVariableExporter extends YoVariableLogReader
             }
             
             timestamp.setReal(entryTimestamp, i - startPosition);
-            robotTime.setReal(Conversions.nanoSecondstoSeconds(entryTimestamp - firstTimestamp), i - startPosition);
+            robotTime.setReal(Conversions.nanosecondsToSeconds(entryTimestamp - firstTimestamp), i - startPosition);
             
             for (int dh = 0; dh < dataHolders.size(); dh++)
             {

@@ -7,6 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -17,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -41,7 +42,7 @@ public class FootTrajectoryMessageTransformerTest
       RobotSide robotSide;
       for (int i = 0; i < numberOfTests; i++)
       {
-         AxisAngle axisAngle = RandomTools.generateRandomRotation(random);
+         AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
          Quaternion quat = new Quaternion();
          quat.set(axisAngle);
 
@@ -50,9 +51,9 @@ public class FootTrajectoryMessageTransformerTest
          else
             robotSide = RobotSide.RIGHT;
 
-         Point3D point3d = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
+         Point3D point3d = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
 
-         double trajectoryTime = RandomTools.generateRandomDouble(random, 0.6, 5.0);
+         double trajectoryTime = RandomNumbers.nextDouble(random, 0.6, 5.0);
 
          FootTrajectoryMessage starting = new FootTrajectoryMessage(robotSide, trajectoryTime, point3d, quat);
 

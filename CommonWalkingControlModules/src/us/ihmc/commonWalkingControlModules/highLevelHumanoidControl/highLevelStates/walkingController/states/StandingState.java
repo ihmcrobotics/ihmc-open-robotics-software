@@ -19,7 +19,7 @@ public class StandingState extends WalkingState
 {
    private final CommandInputManager commandInputManager;
    private final WalkingMessageHandler walkingMessageHandler;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
@@ -30,7 +30,7 @@ public class StandingState extends WalkingState
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
    private final BooleanYoVariable doPreparePelvisForLocomotion = new BooleanYoVariable("doPreparePelvisForLocomotion", registry);
 
-   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
@@ -38,7 +38,7 @@ public class StandingState extends WalkingState
 
       this.commandInputManager = commandInputManager;
       this.walkingMessageHandler = walkingMessageHandler;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
@@ -65,12 +65,12 @@ public class StandingState extends WalkingState
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
 
-      momentumBasedController.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+      controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       walkingMessageHandler.reportWalkingComplete();
 
       failureDetectionControlModule.setNextFootstep(null);
-      momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
+      controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
    }
 
    @Override
@@ -83,7 +83,7 @@ public class StandingState extends WalkingState
          pelvisOrientationManager.prepareForLocomotion();
 
       balanceManager.disablePelvisXYControl();
-      momentumBasedController.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
+      controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.IN_MOTION);
    }
 
    @Override

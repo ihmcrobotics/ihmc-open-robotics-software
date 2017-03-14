@@ -15,7 +15,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -45,7 +45,7 @@ public class FrameMatrix3DTest
       assertTrue(frameMatrix3D.getReferenceFrame() == worldFrame);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
 
-      matrixExpected = RandomTools.generateRandomMatrix3d(random, 100.0);
+      matrixExpected = RandomGeometry.nextMatrix3D(random, 100.0);
       frameMatrix3D = new FrameMatrix3D(aFrame, matrixExpected);
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(frameMatrix3D.getReferenceFrame() == aFrame);
@@ -63,9 +63,9 @@ public class FrameMatrix3DTest
    public void testSetters()
    {
       Matrix3D matrixTested = new Matrix3D();
-      Matrix3D matrixExpected = RandomTools.generateRandomDiagonalMatrix3d(random);
+      Matrix3D matrixExpected = RandomGeometry.nextDiagonalMatrix3D(random);
 
-      FrameMatrix3D frameMatrix3D = new FrameMatrix3D(aFrame, RandomTools.generateRandomMatrix3d(random, 100.0));
+      FrameMatrix3D frameMatrix3D = new FrameMatrix3D(aFrame, RandomGeometry.nextMatrix3D(random, 100.0));
 
       frameMatrix3D.set(matrixExpected);
       frameMatrix3D.getMatrix(matrixTested);
@@ -79,7 +79,7 @@ public class FrameMatrix3DTest
       assertTrue(frameMatrix3D.getReferenceFrame() == worldFrame);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
 
-      FrameMatrix3D secondFrameMatrix3D = new FrameMatrix3D(aFrame, RandomTools.generateRandomMatrix3d(random, 100.0));
+      FrameMatrix3D secondFrameMatrix3D = new FrameMatrix3D(aFrame, RandomGeometry.nextMatrix3D(random, 100.0));
 
       try
       {
@@ -97,14 +97,14 @@ public class FrameMatrix3DTest
       assertTrue(frameMatrix3D.getReferenceFrame() == secondFrameMatrix3D.getReferenceFrame());
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
 
-      secondFrameMatrix3D.set(RandomTools.generateRandomMatrix3d(random, 100.0));
+      secondFrameMatrix3D.set(RandomGeometry.nextMatrix3D(random, 100.0));
       frameMatrix3D.set(secondFrameMatrix3D);
       frameMatrix3D.getMatrix(matrixExpected);
       secondFrameMatrix3D.getMatrix(matrixTested);
       assertTrue(frameMatrix3D.getReferenceFrame() == secondFrameMatrix3D.getReferenceFrame());
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
 
-      matrixExpected = RandomTools.generateRandomMatrix3d(random, 10.0);
+      matrixExpected = RandomGeometry.nextMatrix3D(random, 10.0);
       frameMatrix3D = new FrameMatrix3D();
       frameMatrix3D.setM00(matrixExpected.getM00());
       frameMatrix3D.setM01(matrixExpected.getM01());
@@ -118,7 +118,7 @@ public class FrameMatrix3DTest
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
 
-      matrixExpected = RandomTools.generateRandomMatrix3d(random, 10.0);
+      matrixExpected = RandomGeometry.nextMatrix3D(random, 10.0);
       frameMatrix3D = new FrameMatrix3D();
       for (int row = 0; row < 3; row++)
       {
@@ -130,7 +130,7 @@ public class FrameMatrix3DTest
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
 
-      matrixExpected = RandomTools.generateRandomMatrix3d(random, 10.0);
+      matrixExpected = RandomGeometry.nextMatrix3D(random, 10.0);
       frameMatrix3D = new FrameMatrix3D();
       for (int row = 0; row < 3; row++)
       {
@@ -141,7 +141,7 @@ public class FrameMatrix3DTest
       frameMatrix3D.getMatrix(matrixTested);
       assertTrue(matrixExpected.epsilonEquals(matrixTested, EPSILON));
 
-      matrixExpected = RandomTools.generateRandomMatrix3d(random, 10.0);
+      matrixExpected = RandomGeometry.nextMatrix3D(random, 10.0);
       frameMatrix3D = new FrameMatrix3D();
       for (int column = 0; column < 3; column++)
       {
@@ -158,7 +158,7 @@ public class FrameMatrix3DTest
    public void testGetters()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
-      Matrix3D matrixExpected = RandomTools.generateRandomMatrix3d(random, 10.0);
+      Matrix3D matrixExpected = RandomGeometry.nextMatrix3D(random, 10.0);
       frameMatrix3D.setIncludingFrame(aFrame, matrixExpected);
 
       for (int row = 0; row < 3; row++)
@@ -203,7 +203,7 @@ public class FrameMatrix3DTest
    public void testSetToNaN()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
-      frameMatrix3D.setIncludingFrame(aFrame, RandomTools.generateRandomMatrix3d(random, 10.0));
+      frameMatrix3D.setIncludingFrame(aFrame, RandomGeometry.nextMatrix3D(random, 10.0));
       frameMatrix3D.setToNaN();
 
       assertTrue(frameMatrix3D.getReferenceFrame() == aFrame);
@@ -232,7 +232,7 @@ public class FrameMatrix3DTest
    public void testSetToZero()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
-      frameMatrix3D.setIncludingFrame(aFrame, RandomTools.generateRandomMatrix3d(random, 10.0));
+      frameMatrix3D.setIncludingFrame(aFrame, RandomGeometry.nextMatrix3D(random, 10.0));
       frameMatrix3D.setToZero();
 
       assertTrue(frameMatrix3D.getReferenceFrame() == aFrame);
@@ -261,7 +261,7 @@ public class FrameMatrix3DTest
    public void testSetToIdentity()
    {
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
-      frameMatrix3D.setIncludingFrame(aFrame, RandomTools.generateRandomMatrix3d(random, 10.0));
+      frameMatrix3D.setIncludingFrame(aFrame, RandomGeometry.nextMatrix3D(random, 10.0));
       frameMatrix3D.setToIdentity();
 
       assertTrue(frameMatrix3D.getReferenceFrame() == aFrame);
@@ -302,7 +302,7 @@ public class FrameMatrix3DTest
       for (int i = 0; i < 1000; i++)
       {
          Matrix3D matrixTested = new Matrix3D();
-         Matrix3D matrixOriginal = RandomTools.generateRandomDiagonalMatrix3d(random);
+         Matrix3D matrixOriginal = RandomGeometry.nextDiagonalMatrix3D(random);
          Matrix3D matrixTransformed = new Matrix3D();
 
          ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("randomFrame" + i, ReferenceFrame.getWorldFrame(),
@@ -341,8 +341,8 @@ public class FrameMatrix3DTest
       {
          randomFrameA.setPoseAndUpdate(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
          randomFrameB.setPoseAndUpdate(EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
-         originalVector.setIncludingFrame(randomFrameA, RandomTools.generateRandomVector(random, 1.0));
-         transformationMatrixToBeTested.setIncludingFrame(randomFrameA, RandomTools.generateRandomMatrix3d(random, 1.0));
+         originalVector.setIncludingFrame(randomFrameA, RandomGeometry.nextVector3D(random, 1.0));
+         transformationMatrixToBeTested.setIncludingFrame(randomFrameA, RandomGeometry.nextMatrix3D(random, 1.0));
 
          transformationMatrixToBeTested.transform(originalVector, vectorTransformedInFrameA);
 

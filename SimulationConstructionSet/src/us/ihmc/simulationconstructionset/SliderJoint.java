@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.SliderJointPhysics;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.SliderJointPhysics;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>

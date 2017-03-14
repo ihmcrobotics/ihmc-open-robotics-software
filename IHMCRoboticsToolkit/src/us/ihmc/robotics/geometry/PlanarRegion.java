@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegion
 {
@@ -420,7 +420,7 @@ public class PlanarRegion
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
-      if (!MathTools.isInsideBoundsInclusive(localPoint.getZ(), maximumOrthogonalDistance))
+      if (!MathTools.intervalContains(localPoint.getZ(), maximumOrthogonalDistance))
          return false;
       else
          return isPointInside(localPoint.getX(), localPoint.getY());
@@ -435,7 +435,7 @@ public class PlanarRegion
     */
    public boolean isPointOnOrSlightlyAbove(Point3DReadOnly point3dInWorld, double distanceFromPlane)
    {
-      MathTools.checkIfPositive(distanceFromPlane);
+      MathTools.checkPositive(distanceFromPlane);
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
@@ -455,7 +455,7 @@ public class PlanarRegion
     */
    public boolean isPointOnOrSlightlyBelow(Point3DReadOnly point3dInWorld, double distanceFromPlane)
    {
-      MathTools.checkIfPositive(distanceFromPlane);
+      MathTools.checkPositive(distanceFromPlane);
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
@@ -825,8 +825,8 @@ public class PlanarRegion
       for (ConvexPolygon2d convexPolygon : regionConvexPolygons)
          convexPolygon.update();
 
-      Vector3D randomTranslation = RandomTools.generateRandomVector(random, 10.0);
-      Quaternion randomOrientation = RandomTools.generateRandomQuaternion(random, Math.toRadians(45.0));
+      Vector3D randomTranslation = RandomGeometry.nextVector3D(random, 10.0);
+      Quaternion randomOrientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
       RigidBodyTransform regionTransform = new RigidBodyTransform(randomOrientation, randomTranslation);
 
       return new PlanarRegion(regionTransform, regionConvexPolygons);

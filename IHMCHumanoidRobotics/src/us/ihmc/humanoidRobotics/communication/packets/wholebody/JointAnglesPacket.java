@@ -186,7 +186,7 @@ public class JointAnglesPacket extends Packet<JointAnglesPacket> implements Visu
       //      this.trajectoryTime = trajectoryTime;
 
       // limiting motor speed for safe joint speed. if the arms exceed (700 rad / sec) / (100 gear ratio) = 7 rad/sec we are in trouble
-      this.trajectoryTime = MathTools.clipToMinMax(trajectoryTime, 2.0, Double.MAX_VALUE);
+      this.trajectoryTime = MathTools.clamp(trajectoryTime, 2.0, Double.MAX_VALUE);
    }
    
    /////////////////////////////////////////////////////////////////////////////////////////////////////

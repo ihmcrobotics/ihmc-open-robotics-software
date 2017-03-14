@@ -13,6 +13,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -20,7 +21,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.OrientationFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -107,9 +108,9 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform, false, false, false);
 
-      double x = RandomTools.generateRandomDouble(random, -100.0, 100.0);
-      double y = RandomTools.generateRandomDouble(random, -100.0, 100.0);
-      double z = RandomTools.generateRandomDouble(random, -100.0, 100.0);
+      double x = RandomNumbers.nextDouble(random, -100.0, 100.0);
+      double y = RandomNumbers.nextDouble(random, -100.0, 100.0);
+      double z = RandomNumbers.nextDouble(random, -100.0, 100.0);
 
       frameTuple.set(x, y, z);
       testGetters(frameTuple, x, y, z);
@@ -128,7 +129,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       Random random = new Random(15613L);
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform, false, false, false);
-      Tuple3DBasics randomTuple = RandomTools.generateRandomPoint(random, 100.0, 100.0, 100.0);
+      Tuple3DBasics randomTuple = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 100.0);
 
       frameTuple.set(randomTuple);
       testGetters(frameTuple, randomTuple);
@@ -156,7 +157,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       ReferenceFrame randomFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("childFrame", ReferenceFrame.getWorldFrame(), randomTransform, false, false, false);
 
-      Tuple3DBasics randomTuple = RandomTools.generateRandomPoint(random, 100.0, 100.0, 100.0);
+      Tuple3DBasics randomTuple = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 100.0);
 
       randomFrameTuple.setIncludingFrame(randomFrame, randomTuple);
 
@@ -1474,7 +1475,7 @@ public abstract class FrameTupleTest<T extends Tuple3DBasics & GeometryObject<T>
       assertTrue(point1.getName() == null);
 
       Random random = new Random(685685L);
-      double[] xyz = RandomTools.generateRandomDoubleArray(random, 3, Double.MAX_VALUE);
+      double[] xyz = RandomNumbers.nextDoubleArray(random, 3, Double.MAX_VALUE);
       point1 = createFrameTuple(worldFrame, xyz[0], xyz[1], xyz[2]);
       assertTrue(point1.getName() == null);
 

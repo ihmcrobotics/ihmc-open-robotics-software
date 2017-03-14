@@ -3,10 +3,10 @@ package us.ihmc.avatar.posePlayback;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
@@ -125,7 +125,7 @@ public class PosePlaybackExampleSequence
          
          if (jointLimitLower < -Math.PI) jointLimitLower = -Math.PI;
          if (jointLimitUpper > Math.PI) jointLimitUpper = Math.PI;
-         pose.put(joint, RandomTools.generateRandomDouble(random, jointLimitLower, jointLimitUpper));
+         pose.put(joint, RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper));
       }
 
       return new PlaybackPose(pose, poseDelay, trajectoryTime);

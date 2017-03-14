@@ -98,7 +98,7 @@ public class PushStickRobot extends Robot
       yoGraphicsListRegistry.registerYoGraphic("PushStickRobot", pushStickForceVector);
       yoGraphicsListRegistry.registerYoGraphic("PushStickRobot", pushStickBackEndGraphicPosition);
       
-      this.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+      this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
       addRootJoint(xJoint);
       xJoint.addJoint(yJoint);

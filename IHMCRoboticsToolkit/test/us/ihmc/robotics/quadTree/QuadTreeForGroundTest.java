@@ -11,11 +11,12 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class QuadTreeForGroundTest
 {
@@ -355,8 +356,8 @@ public class QuadTreeForGroundTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         double xQuery = RandomTools.generateRandomDouble(random, bounds.minX, bounds.maxX);
-         double yQuery = RandomTools.generateRandomDouble(random, bounds.minY, bounds.maxY);
+         double xQuery = RandomNumbers.nextDouble(random, bounds.minX, bounds.maxX);
+         double yQuery = RandomNumbers.nextDouble(random, bounds.minY, bounds.maxY);
 
          quadTree.getClosestPoint(xQuery, yQuery, closestPoint);
 
@@ -454,9 +455,9 @@ public class QuadTreeForGroundTest
       {
          pointsWithinDistance.clear();
 
-         double xQuery = RandomTools.generateRandomDouble(random, bounds.minX, bounds.maxX);
-         double yQuery = RandomTools.generateRandomDouble(random, bounds.minY, bounds.maxY);
-         double distance = RandomTools.generateRandomDouble(random, 0.0, 5.0);
+         double xQuery = RandomNumbers.nextDouble(random, bounds.minX, bounds.maxX);
+         double yQuery = RandomNumbers.nextDouble(random, bounds.minY, bounds.maxY);
+         double distance = RandomNumbers.nextDouble(random, 0.0, 5.0);
 
          quadTree.getAllPointsWithinDistance(xQuery, yQuery, distance, pointsWithinDistance);
 
@@ -516,7 +517,7 @@ public class QuadTreeForGroundTest
    {
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D point = RandomTools.generateRandomPoint(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
          quadTree.put(point.getX(), point.getY(), point.getZ());
       }
    }
@@ -526,7 +527,7 @@ public class QuadTreeForGroundTest
       ArrayList<Point3D> pointsToReturn = new ArrayList<Point3D>();
       for (int i = 0; i < numberOfPoints; i++)
       {
-         Point3D point = RandomTools.generateRandomPoint(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
+         Point3D point = RandomGeometry.nextPoint3D(random, bounds.minX, bounds.minY, minZ, bounds.maxX, bounds.maxY, maxZ);
          pointsToReturn.add(point);
       }
 

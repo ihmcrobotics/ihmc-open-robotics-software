@@ -10,7 +10,7 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class GlitchFilterForDataSetTest
 {

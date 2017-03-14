@@ -17,7 +17,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 
 public class TestICPOptimizationBehavior extends AbstractBehavior
 {
@@ -29,7 +29,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    private final BooleanYoVariable stepInPlace = new BooleanYoVariable("StepInPlace", registry);
    private final BooleanYoVariable abortBehavior = new BooleanYoVariable("AbortBehavior", registry);
 
-   private final YoTimer timer;
+   private final YoStopwatch timer;
 
    public TestICPOptimizationBehavior(CommunicationBridgeInterface communicationBridge, HumanoidReferenceFrames referenceFrames, DoubleYoVariable yoTime)
    {
@@ -41,7 +41,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       sleepTime.set(10.0);
       stepLength.set(0.3);
 
-      timer = new YoTimer(yoTime);
+      timer = new YoStopwatch(yoTime);
    }
 
    @Override

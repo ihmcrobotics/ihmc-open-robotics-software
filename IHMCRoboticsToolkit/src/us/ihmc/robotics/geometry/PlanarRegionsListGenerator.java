@@ -24,21 +24,27 @@ public class PlanarRegionsListGenerator
       transformGeneratorTwo.translate(0.0, 0.0, heightZ / 2.0);
       addRectangle(transformGeneratorTwo, lengthX, widthY);
       transformGeneratorTwo.translate(0.0, 0.0, -heightZ);
+      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
       addRectangle(transformGeneratorTwo, lengthX, widthY);
+      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
 
       transformGeneratorTwo.set(transformGenerator);
       transformGeneratorTwo.rotate(Math.PI / 2.0, Axis.Y);
       transformGeneratorTwo.translate(0.0, 0.0, lengthX / 2.0);
       addRectangle(transformGeneratorTwo, heightZ, widthY);
       transformGeneratorTwo.translate(0.0, 0.0, -lengthX);
+      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
       addRectangle(transformGeneratorTwo, heightZ, widthY);
+      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
 
       transformGeneratorTwo.set(transformGenerator);
       transformGeneratorTwo.rotate(Math.PI / 2.0, Axis.X);
       transformGeneratorTwo.translate(0.0, 0.0, widthY / 2.0);
       addRectangle(transformGeneratorTwo, lengthX, heightZ);
       transformGeneratorTwo.translate(0.0, 0.0, -widthY);
+      transformGeneratorTwo.rotate(Math.PI, Axis.X);
       addRectangle(transformGeneratorTwo, lengthX, heightZ);
+      transformGeneratorTwo.rotate(Math.PI, Axis.X);
    }
 
    public void addCubeReferencedAtBottomMiddle(double lengthX, double widthY, double heightZ)

@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -60,8 +60,8 @@ public class FootstepDataTansformerTest
    {
       FootstepDataMessage ret = new FootstepDataMessage();
       ret.robotSide = RobotSide.LEFT;
-      ret.location = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      AxisAngle axisAngle = RandomTools.generateRandomRotation(random);
+      ret.location = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
       
       Quaternion orientation = new Quaternion();
       orientation.set(axisAngle);
@@ -71,7 +71,7 @@ public class FootstepDataTansformerTest
       {
          for (int i = 0; i < 30; i++)
          {
-            listOfPoints.add(RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0));
+            listOfPoints.add(RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0));
          }
       }
 

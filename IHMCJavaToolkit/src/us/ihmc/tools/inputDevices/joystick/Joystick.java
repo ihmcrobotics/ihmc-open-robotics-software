@@ -9,8 +9,8 @@ import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class Joystick

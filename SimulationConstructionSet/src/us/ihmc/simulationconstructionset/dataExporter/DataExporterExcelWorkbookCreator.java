@@ -18,10 +18,10 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.simulationconstructionset.DataBuffer;
@@ -32,7 +32,6 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class DataExporterExcelWorkbookCreator
 {
@@ -339,7 +338,7 @@ public class DataExporterExcelWorkbookCreator
          for (Direction direction : Direction.values())
          {
             addHeaderEntry(configDataSheet, column, "Joint offset " + direction.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, MathTools.get(offset, direction));
+            addNumberToSheet(configDataSheet, column++, row, Direction.get(offset, direction));
          }
 
          // Mass
@@ -354,7 +353,7 @@ public class DataExporterExcelWorkbookCreator
          for (Direction direction : Direction.values())
          {
             addHeaderEntry(configDataSheet, column, "CoM offset " + direction.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, MathTools.get(offset, direction));
+            addNumberToSheet(configDataSheet, column++, row, Direction.get(offset, direction));
          }
 
          // Mass moment of inertia

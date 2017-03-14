@@ -20,7 +20,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
@@ -111,16 +111,16 @@ public class CenterOfPressureResolverTest
 
       for (int i = 0; i < numberOfTests; i++)
       {
-         Point3D groundPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
+         Point3D groundPoint = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.2);
 
-         Vector3D groundNormal = RandomTools.generateRandomVector(random);
+         Vector3D groundNormal = RandomGeometry.nextVector3D(random);
          groundNormal.setZ(1.0);
          groundNormal.normalize();
 
-         Point3D centerOfMassPoint = RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.2);
+         Point3D centerOfMassPoint = RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.2);
          centerOfMassPoint.setZ(1.2);
 
-         Vector3D centerOfMassForce = RandomTools.generateRandomVector(random, 100.0);
+         Vector3D centerOfMassForce = RandomGeometry.nextVector3D(random, 100.0);
          centerOfMassForce.setZ(127.0);
 
          Vector3D centerOfMassTorque = new Vector3D(0.0, 0.0, 0.0);

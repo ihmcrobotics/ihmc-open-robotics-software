@@ -136,7 +136,7 @@ public class BacklashProcessingYoVariable extends DoubleYoVariable implements Pr
       }
 
       double percent = timeSinceSloppy.getDoubleValue() / slopTime.getDoubleValue();
-      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+      percent = MathTools.clamp(percent, 0.0, 1.0);
       if (Double.isNaN(percent) || slopTime.getDoubleValue() < dt)
          percent = 1.0;
 

@@ -6,6 +6,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
+import us.ihmc.tools.FormattingTools;
 
 public abstract class YoVariableTestGoal implements VariableChangedListener
 {
@@ -13,7 +14,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
    private boolean hasMetGoal = false;
 
-   private YoVariableTestGoal(YoVariable<?>... yoVariables)
+   protected YoVariableTestGoal(YoVariable<?>... yoVariables)
    {
       for (YoVariable<?> yoVariable : yoVariables)
       {
@@ -60,7 +61,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          {
             String numberStringOne = getFormattedDoubleYoVariable(variableOne);
             String numberStringTwo = getFormattedDoubleYoVariable(variableTwo);
-            String epsilonString = getFormattedToSignificantFigures(epsilon, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+            String epsilonString = FormattingTools.getFormattedToSignificantFigures(epsilon, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
             return numberStringOne + " (+/- " + epsilonString + ") == " + numberStringTwo;
          }
       };
@@ -80,8 +81,8 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          public String toString()
          {
             String numberString = getFormattedDoubleYoVariable(doubleYoVariable);
-            String epsilonString = getFormattedToSignificantFigures(epsilon, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
-            String goalString = getFormattedToSignificantFigures(goalValue, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+            String epsilonString = FormattingTools.getFormattedToSignificantFigures(epsilon, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+            String goalString = FormattingTools.getFormattedToSignificantFigures(goalValue, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
             return numberString + " (+/- " + epsilonString + ") == " + goalString;
          }
       };
@@ -101,7 +102,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          public String toString()
          {
             String numberString = getFormattedDoubleYoVariable(doubleYoVariable);
-            String greaterThanString = getFormattedToSignificantFigures(greaterThan, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+            String greaterThanString = FormattingTools.getFormattedToSignificantFigures(greaterThan, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
             return numberString + " > " + greaterThanString;
          }
       };
@@ -122,7 +123,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          {
             String minuendString = getFormattedDoubleYoVariable(minuend);
             String subtrahendString = getFormattedDoubleYoVariable(subtrahend);
-            String differenceString = getFormattedToSignificantFigures(difference, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+            String differenceString = FormattingTools.getFormattedToSignificantFigures(difference, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
             return minuendString + " - " + subtrahendString + " > " + differenceString;
          }
       };
@@ -142,7 +143,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          public String toString()
          {
             String numberString = getFormattedDoubleYoVariable(doubleYoVariable);
-            String lessThanString = getFormattedToSignificantFigures(lessThan, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+            String lessThanString = FormattingTools.getFormattedToSignificantFigures(lessThan, SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
             return numberString + " < " + lessThanString;
          }
       };
@@ -184,7 +185,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
       };
    }
-   
+
    public static YoVariableTestGoal or(YoVariableTestGoal goalOne, YoVariableTestGoal goalTwo)
    {
       return new YoVariableTestGoal()
@@ -203,7 +204,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
       };
    }
-   
+
    public static YoVariableTestGoal and(YoVariableTestGoal goalOne, YoVariableTestGoal goalTwo)
    {
       return new YoVariableTestGoal()
@@ -240,6 +241,11 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
          }
       };
    }
+   
+   public static YoVariableTestGoal timeInFuture(DoubleYoVariable timeYoVariable, double durationFromNow)
+   {
+      return doubleGreaterThan(timeYoVariable, timeYoVariable.getDoubleValue() + durationFromNow);
+   }
 
    private static String getFormattedBooleanYoVariable(final BooleanYoVariable booleanYoVariable)
    {
@@ -253,25 +259,7 @@ public abstract class YoVariableTestGoal implements VariableChangedListener
 
    public static String getFormattedDoubleYoVariable(DoubleYoVariable doubleYoVariable)
    {
-      return doubleYoVariable.getName() + ":" + getFormattedToSignificantFigures(doubleYoVariable.getDoubleValue(), SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
+      return doubleYoVariable.getName() + ":"
+            + FormattingTools.getFormattedToSignificantFigures(doubleYoVariable.getDoubleValue(), SIGNIFICANT_FIGURES_FOR_PRINT_OUT);
    }
-
-   public static String getFormattedToSignificantFigures(double number, int significantFigures)
-   {
-      if (number == 0.0) return "0.0";
-
-      final double d = Math.ceil(Math.log10(number < 0 ? -number : number));
-      final int power = significantFigures - (int) d;
-
-      final double magnitude = Math.pow(10, power);
-      final long shifted = Math.round(number * magnitude);
-      double roundToSignificantFigures = shifted / magnitude;
-
-      if (roundToSignificantFigures >= Math.pow(10, significantFigures - 1))
-         return String.valueOf((int) roundToSignificantFigures);
-      else
-         return String.valueOf(roundToSignificantFigures);
-   }
-
-
 }

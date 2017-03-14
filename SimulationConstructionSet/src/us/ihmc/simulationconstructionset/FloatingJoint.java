@@ -10,7 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.FloatJointPhysics;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingJointPhysics;
 
 /**
  * Title:        Yobotics! Simulation Construction Set<p>
@@ -63,7 +63,7 @@ public class FloatingJoint extends Joint implements FloatingSCSJoint
    {
       super(jname, offset, rob, 6);
 
-      physics = new FloatJointPhysics(this);
+      physics = new FloatingJointPhysics(this);
 
       YoVariableRegistry registry = rob.getRobotsYoVariableRegistry();
 

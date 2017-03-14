@@ -164,7 +164,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
 
    public void setTrajectoryTime(double duration)
    {
-      MathTools.checkIfInRange(duration, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(duration, 0.0, Double.POSITIVE_INFINITY);
       trajectoryTime.set(duration);
    }
 
@@ -401,7 +401,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
          return;
       }
 
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       double timePrevious = time - dtForFiniteDifference;
       double timeNext = time + dtForFiniteDifference;
 

@@ -2,13 +2,13 @@ package us.ihmc.humanoidRobotics.communication.packets.walking;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -212,6 +212,6 @@ public class FootstepStatus extends StatusPacket<FootstepStatus>
    public FootstepStatus(Random random)
    {
       this.status = Status.values()[random.nextInt(Status.values().length)];
-      this.footstepIndex = RandomTools.generateRandomIntWithEdgeCases(random, 0.1);
+      this.footstepIndex = RandomNumbers.nextIntWithEdgeCases(random, 0.1);
    }
 }

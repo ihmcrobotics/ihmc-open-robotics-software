@@ -12,7 +12,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class YoParabolicTrajectoryGeneratorTest
@@ -145,9 +145,9 @@ public class YoParabolicTrajectoryGeneratorTest
       int nTests = 100;
       for (int i = 0; i < nTests; i++)
       {
-         FramePoint initialPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
-         FramePoint intermediatePosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
-         FramePoint finalPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
+         FramePoint initialPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
+         FramePoint intermediatePosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
+         FramePoint finalPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
          double intermediateParameter = random.nextDouble();
          trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
 
@@ -181,9 +181,9 @@ public class YoParabolicTrajectoryGeneratorTest
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
 
-      FramePoint initialPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
-      FrameVector initialVelocity = new FrameVector(referenceFrame, RandomTools.generateRandomVector(random));
-      FramePoint finalPosition = new FramePoint(referenceFrame, RandomTools.generateRandomVector(random));
+      FramePoint initialPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
+      FrameVector initialVelocity = new FrameVector(referenceFrame, RandomGeometry.nextVector3D(random));
+      FramePoint finalPosition = new FramePoint(referenceFrame, RandomGeometry.nextVector3D(random));
       trajectoryGenerator.initialize(initialPosition, initialVelocity, finalPosition);
 
       FramePoint initialPositionBack = new FramePoint(referenceFrame);

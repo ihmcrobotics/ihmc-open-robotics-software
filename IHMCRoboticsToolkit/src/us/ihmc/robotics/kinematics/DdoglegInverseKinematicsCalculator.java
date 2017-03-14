@@ -230,7 +230,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
          double newQ = UtilAngle.bound(parameters[i]);
          if (Double.isNaN(newQ))
             continue;
-         newQ = parameters[i] = MathTools.clipToMinMax(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
+         newQ = parameters[i] = MathTools.clamp(newQ, oneDoFJoint.getJointLimitLower(), oneDoFJoint.getJointLimitUpper());
          oneDoFJoint.setQ(newQ);
          oneDoFJoint.getFrameAfterJoint().update();
       }

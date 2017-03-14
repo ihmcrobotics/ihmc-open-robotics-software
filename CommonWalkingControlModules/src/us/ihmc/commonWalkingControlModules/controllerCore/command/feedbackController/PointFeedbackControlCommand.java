@@ -35,6 +35,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       pointAccelerationCommand.set(base, endEffector);
    }
 
+   public void setPrimaryBase(RigidBody primaryBase)
+   {
+      pointAccelerationCommand.setPrimaryBase(primaryBase);
+   }
+
    public void setGains(PositionPIDGainsInterface gains)
    {
       this.gains.set(gains);

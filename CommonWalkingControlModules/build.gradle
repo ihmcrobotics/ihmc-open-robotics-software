@@ -32,13 +32,31 @@ repositories {
     }
 }
 
+project.sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+
+        resources {
+            srcDirs = ['src', 'resources']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test', 'visualizers']
+        }
+    }
+}
+
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.1'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
     compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
@@ -58,15 +76,18 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
 
 
 	testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
     testCompile ihmc.getProjectTestDependency(":ConvexOptimizationAdapter")
 }
