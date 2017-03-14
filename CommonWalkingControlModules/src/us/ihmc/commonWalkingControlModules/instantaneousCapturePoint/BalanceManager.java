@@ -165,7 +165,7 @@ public class BalanceManager
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
-      icpPlanner.setFinalTransferTime(walkingControllerParameters.getDefaultTransferTime());
+      icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -606,7 +606,7 @@ public class BalanceManager
 
    private void setFinalTransferTime(double finalTransferTime)
    {
-      icpPlanner.setFinalTransferTime(finalTransferTime);
+      icpPlanner.setFinalTransferDuration(finalTransferTime);
    }
 
    /**
