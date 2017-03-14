@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,15 +24,13 @@ import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationconstructionset.util.environments.planarRegionEnvironments.LittleWallsWithIncreasingHeightPlanarRegionEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -53,29 +52,12 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       double maxSwingSpeed = 1.0;
       int steps = 10;
 
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-
-      generator.translate(2.0, 0.0, -0.01);
-      generator.addCubeReferencedAtCenter(6.0, 1.0, 0.00005);
-      generator.translate(-2.0, 0.0, 0.0);
-      generator.translate(0.35, 0.2, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.1);
-      generator.translate(0.62, 0.0, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.14);
-      generator.translate(0.3, -0.3, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.15);
-      generator.translate(0.4, 0.1, 0.0);
-      generator.addCubeReferencedAtBottomMiddle(0.1, 1.0, 0.11);
-      //      generator.translate(0.0, 0.28, 0.0);
-      //      generator.addCubeReferencedAtBottomMiddle(0.1, 0.1, 0.14);
-
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-
-      PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 1e-2, false);
+      LittleWallsWithIncreasingHeightPlanarRegionEnvironment environment = new LittleWallsWithIncreasingHeightPlanarRegionEnvironment();
+      PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
 
       DRCStartingLocation startingLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, className, startingLocation, simulationTestingParameters, robotModel);
+      drcSimulationTestHelper = new DRCSimulationTestHelper(new LittleWallsWithIncreasingHeightPlanarRegionEnvironment(), className, startingLocation, simulationTestingParameters, robotModel);
       ThreadTools.sleep(1000);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(8.0, -8.0, 5.0);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(1.5, 0.0, 0.8);

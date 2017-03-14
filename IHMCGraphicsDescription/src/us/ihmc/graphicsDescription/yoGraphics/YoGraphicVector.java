@@ -22,8 +22,8 @@ import us.ihmc.tools.gui.GraphicsUpdatable;
 public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
    private double lineRadiusWhenOneMeterLong = 0.015;
-   private double minScaleFactor = 0.3;
-   private double maxScaleFactor = 3.0;
+   private double minRadiusScaleFactor = 0.3;
+   private double maxRadiusScaleFactor = 3.0;
 
    private final DoubleYoVariable baseX, baseY, baseZ, x, y, z;
    protected final double scaleFactor;
@@ -59,7 +59,7 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicVector. startPoint = " + startPoint + ", frameVector = "
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicVector. startPoint = " + startPoint + ", frameVector = "
                + frameVector);
       }
    }
@@ -91,10 +91,10 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       this.lineRadiusWhenOneMeterLong = lineRadiusWhenOneMeterLong;
    }
 
-   public void setMinAndMaxScaleFactors(double minScaleFactor, double maxScaleFactor)
+   public void setMinAndMaxRadiusScaleFactors(double minRadiusScaleFactor, double maxRadiusScaleFactor)
    {
-      this.minScaleFactor = minScaleFactor;
-      this.maxScaleFactor = maxScaleFactor;
+      this.minRadiusScaleFactor = minRadiusScaleFactor;
+      this.maxRadiusScaleFactor = maxRadiusScaleFactor;
    }
 
    public void setDrawArrowhead(boolean drawArrowhead)
@@ -164,18 +164,24 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
 
       translationVector.set(baseX.getDoubleValue(), baseY.getDoubleValue(), baseZ.getDoubleValue());
 
-      double xyScaleFactor = length * scaleFactor;
-
-      if (xyScaleFactor < minScaleFactor)
+      double globalScale = 1.0;
+      if (globalScaleProvider != null)
       {
-         xyScaleFactor = minScaleFactor;
-      }
-      if (xyScaleFactor > maxScaleFactor)
-      {
-         xyScaleFactor = maxScaleFactor;
+         globalScale = globalScaleProvider.getValue();
       }
 
-      transform3D.setScale(xyScaleFactor, xyScaleFactor, length * scaleFactor);
+      double xyScaleFactor = length * scaleFactor * globalScale;
+
+      if (xyScaleFactor < minRadiusScaleFactor)
+      {
+         xyScaleFactor = minRadiusScaleFactor;
+      }
+      if (xyScaleFactor > maxRadiusScaleFactor)
+      {
+         xyScaleFactor = maxRadiusScaleFactor;
+      }
+
+      transform3D.setScale(xyScaleFactor, xyScaleFactor, length * scaleFactor * globalScale);
       transform3D.setTranslation(translationVector);
       transform3D.setRotation(rotMatrix);
    }

@@ -21,8 +21,8 @@ public class WeightedSubtractionPositionSensor extends LinearCombinationPosition
 
    private static LinkedHashMap<ProcessedPositionSensor, Double> createSensorsAndCoefficientsMap(ProcessedPositionSensor sensor1, ProcessedPositionSensor sensor2, double weight1, double weight2)
    {
-      MathTools.checkIfInRange(weight1, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(weight2, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(weight1, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(weight2, 0.0, Double.POSITIVE_INFINITY);
       
       LinkedHashMap<ProcessedPositionSensor, Double> ret = new LinkedHashMap<ProcessedPositionSensor, Double>();
       ret.put(sensor1, weight1);

@@ -29,7 +29,7 @@ import us.ihmc.quadrupedRobotics.communication.packets.PlanarVelocityPacket;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.RotationTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class QuadrupedControllerInputProviderTest
@@ -40,11 +40,11 @@ public class QuadrupedControllerInputProviderTest
    {
       double epsilon = 0.01;
       Random random = new Random(151515);
-      Point3D randomComPosition = RandomTools.generateRandomPoint3d(random, -1000.0, 1000.0);
-      Vector3D randomComVelocity = RandomTools.generateRandomVector(random, 1000.0); 
-      Quaternion randomBodyOrientation = RandomTools.generateRandomQuaternion(random);
-      Vector3D randomBodyAngularVelocity = RandomTools.generateRandomVector(random, 1000.0); 
-      Vector3D randomPlanarVelocity = RandomTools.generateRandomVector(random, 1000.0); 
+      Point3D randomComPosition = RandomGeometry.nextPoint3D(random, -1000.0, 1000.0);
+      Vector3D randomComVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
+      Quaternion randomBodyOrientation = RandomGeometry.nextQuaternion(random);
+      Vector3D randomBodyAngularVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
+      Vector3D randomPlanarVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
 
       ComPositionPacket comPositionPacket = new ComPositionPacket(randomComPosition);
       ComVelocityPacket comVelocityPacket = new ComVelocityPacket(randomComVelocity);
@@ -136,11 +136,11 @@ public class QuadrupedControllerInputProviderTest
    {
       double epsilon = 0.001;
       Random random = new Random(515151);
-      Point3D randomComPosition = RandomTools.generateRandomPoint3d(random, 1000.0, 1000.0);
-      Vector3D randomComVelocity = RandomTools.generateRandomVector(random, 1000.0); 
-      Quaternion randomBodyOrientation = RandomTools.generateRandomQuaternion(random);
-      Vector3D randomBodyAngularVelocity = RandomTools.generateRandomVector(random, 1000.0); 
-      Vector3D randomPlanarVelocity = RandomTools.generateRandomVector(random, 1000.0); 
+      Point3D randomComPosition = RandomGeometry.nextPoint3D(random, 1000.0, 1000.0);
+      Vector3D randomComVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
+      Quaternion randomBodyOrientation = RandomGeometry.nextQuaternion(random);
+      Vector3D randomBodyAngularVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
+      Vector3D randomPlanarVelocity = RandomGeometry.nextVector3D(random, 1000.0); 
 
       YoVariableRegistry registry = new YoVariableRegistry("inputProvider");
       QuadrupedPostureInputProvider postureInputProvider = new QuadrupedPostureInputProvider(null, registry);

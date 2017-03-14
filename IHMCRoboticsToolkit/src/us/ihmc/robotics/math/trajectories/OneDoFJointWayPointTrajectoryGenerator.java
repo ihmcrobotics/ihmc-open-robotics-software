@@ -103,7 +103,7 @@ public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajec
    public void compute(double time)
    {
       currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
 
       if (currentTime.getDoubleValue() - currentTimeOffset.getDoubleValue() > subTrajectoryTime.getDoubleValue())
       {
@@ -113,7 +113,7 @@ public class OneDoFJointWayPointTrajectoryGenerator implements OneDoFJointTrajec
       }
 
       time -= currentTimeOffset.getDoubleValue();
-      time = MathTools.clipToMinMax(time, 0.0, subTrajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, subTrajectoryTime.getDoubleValue());
       
       findCurrentPolynomial().compute(time);
    }

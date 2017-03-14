@@ -43,7 +43,7 @@ public class ExternalWrenchHandler
          List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       this.centerOfMassFrame = centerOfMassFrame;
-      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 

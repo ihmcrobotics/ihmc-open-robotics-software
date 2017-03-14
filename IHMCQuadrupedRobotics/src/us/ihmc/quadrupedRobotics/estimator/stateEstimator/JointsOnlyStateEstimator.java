@@ -50,7 +50,7 @@ public class JointsOnlyStateEstimator implements DRCStateEstimatorInterface
 
    public double getCurrentTime()
    {
-      return Conversions.nanoSecondstoSeconds(sensorOutputMapReadOnly.getTimestamp());
+      return Conversions.nanosecondsToSeconds(sensorOutputMapReadOnly.getTimestamp());
    }
 
    @Override

@@ -189,7 +189,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          ramp.set(1.0);
       }
 
-      ramp.set(MathTools.clipToMinMax(ramp.getDoubleValue(), 0.0, 1.0));
+      ramp.set(MathTools.clamp(ramp.getDoubleValue(), 0.0, 1.0));
 
       double positionOffset = ramp.getDoubleValue() * functionGenerator.getValue(getTimeInCurrentTask());
       double velocityOffset = ramp.getDoubleValue() * functionGenerator.getValueDot();

@@ -95,4 +95,20 @@ public class SnapAndWiggleSingleStep
          super("Foot Snapping_Failed");
       }
    }
+   
+   public static void main(String[] args)
+   {
+      PoseReferenceFrame bot1 = new PoseReferenceFrame("bot1", ReferenceFrame.getWorldFrame());
+      bot1.setPositionWithoutChecksAndUpdate(0, 2, 0);
+      
+      PoseReferenceFrame bot2 = new PoseReferenceFrame("bot2", ReferenceFrame.getWorldFrame());
+      bot2.setPositionWithoutChecksAndUpdate(0, -3, 0);
+      
+      
+      bot1.update();
+      bot2.update();
+      RigidBodyTransform transform = bot1.getTransformToDesiredFrame(bot2);
+      
+      System.out.println(transform);
+   }
 }

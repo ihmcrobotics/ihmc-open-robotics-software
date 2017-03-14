@@ -11,8 +11,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class SmallAngleRotationDerivativeTest
 {
@@ -22,13 +21,13 @@ public class SmallAngleRotationDerivativeTest
    public void test()
    {
       Random random = new Random(125123412L);
-      AxisAngle nominalAxisAngle = RandomTools.generateRandomRotation(random);
+      AxisAngle nominalAxisAngle = RandomGeometry.nextAxisAngle(random);
       Quaternion nominalQuaternion = new Quaternion();
       nominalQuaternion.set(nominalAxisAngle);
       RotationMatrix nominalRotation = new RotationMatrix();
       nominalRotation.set(nominalQuaternion);
 
-      Vector3D vector = RandomTools.generateRandomVector(random);
+      Vector3D vector = RandomGeometry.nextVector3D(random);
       Vector3D transformedVector = new Vector3D(vector);
       nominalRotation.transform(transformedVector);
 
@@ -42,7 +41,7 @@ public class SmallAngleRotationDerivativeTest
       for (Direction direction : Direction.values())
       {
          Vector3D perturbationRotationVector = new Vector3D();
-         MathTools.set(perturbationRotationVector, direction, perturbationMagnitude);
+         Direction.set(perturbationRotationVector, direction, perturbationMagnitude);
 
          // expected
          Vector3D expected = new Vector3D(perturbationRotationVector);

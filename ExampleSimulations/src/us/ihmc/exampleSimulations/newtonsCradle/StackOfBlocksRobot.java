@@ -3,11 +3,11 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
@@ -43,8 +43,8 @@ public class StackOfBlocksRobot
          double z = (objectHeight * 1.05) * (i + 1.0);
 
          double yaw = 0.0;
-         double pitch = RandomTools.generateRandomDouble(random, -Math.PI/90.0, Math.PI/90.0);
-         double roll = RandomTools.generateRandomDouble(random, -Math.PI/90.0, Math.PI/90.0);
+         double pitch = RandomNumbers.nextDouble(random, -Math.PI/90.0, Math.PI/90.0);
+         double roll = RandomNumbers.nextDouble(random, -Math.PI/90.0, Math.PI/90.0);
 
          floatingJoint.setPosition(x, y, z);
          floatingJoint.setYawPitchRoll(yaw, pitch, roll);

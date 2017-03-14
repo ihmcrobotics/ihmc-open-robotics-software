@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.Assertions;
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -22,7 +23,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -481,7 +482,7 @@ public class FramePointTest extends FrameTupleTest<Point3D>
    public void testConstructors()
    {
       Random random = new Random();
-      double[] xyz = RandomTools.generateRandomDoubleArray(random, 3, Double.MAX_VALUE);
+      double[] xyz = RandomNumbers.nextDoubleArray(random, 3, Double.MAX_VALUE);
       FramePoint pointToBeTested;
       ReferenceFrame referenceFrame = null;
       pointToBeTested = new FramePoint(referenceFrame, xyz);
@@ -492,14 +493,14 @@ public class FramePointTest extends FrameTupleTest<Point3D>
       assertTrue(pointToBeTested.getPoint().epsilonEquals(point3dExpected, epsilon));
 
       double max = Double.MAX_VALUE / 2.0;
-      point3dExpected = RandomTools.generateRandomPoint(random, max, max, max);
+      point3dExpected = RandomGeometry.nextPoint3D(random, max, max, max);
       pointToBeTested = new FramePoint(referenceFrame, point3dExpected, "");
 
       pointToBeTested = new FramePoint(aFrame, point3dExpected, "");
       assertTrue(aFrame == pointToBeTested.getReferenceFrame());
       assertTrue("Expected: " + point3dExpected + ", actual: " + pointToBeTested.getPoint(), point3dExpected.epsilonEquals(pointToBeTested.getPoint(), epsilon));
 
-      xyz = RandomTools.generateRandomDoubleArray(random, 3, Double.MAX_VALUE);
+      xyz = RandomNumbers.nextDoubleArray(random, 3, Double.MAX_VALUE);
       pointToBeTested = new FramePoint(referenceFrame, xyz, "");
 
       pointToBeTested = new FramePoint(aFrame, xyz, "");

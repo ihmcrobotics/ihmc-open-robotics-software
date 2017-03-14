@@ -64,7 +64,7 @@ public class ExplorationHelper
       soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
 
-      YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       if (graphicObjectsListRegistry != null)
       {
          yoDesiredCop = new YoFramePoint2d(prefix + "DesiredExplorationCop", ReferenceFrame.getWorldFrame(), registry);
@@ -144,7 +144,7 @@ public class ExplorationHelper
       if (timeExploringCurrentCorner <= timeToGoToCorner)
       {
          double percent = timeExploringCurrentCorner / timeToGoToCorner;
-         percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+         percent = MathTools.clamp(percent, 0.0, 1.0);
          desiredCenterOfPressure.interpolate(centroid, currentCorner, percent);
       }
       else

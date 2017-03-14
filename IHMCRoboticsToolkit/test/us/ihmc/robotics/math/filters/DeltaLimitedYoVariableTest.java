@@ -5,9 +5,9 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomTools;
 
 /**
  *
@@ -30,7 +30,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
          double input = reference / 2.0;
          double delta = Math.abs(input - reference);
 
@@ -55,7 +55,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
          double input = reference * 2;
          double delta = Math.abs(input - reference);
 
@@ -80,7 +80,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
          double input = reference / 2.0;
          double delta = Math.abs(input - reference);
 
@@ -105,7 +105,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
          double input = reference * 2;
          double delta = Math.abs(input - reference);
 
@@ -130,7 +130,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
          double input = reference * -0.5;
          double delta = Math.abs(input - reference);
 
@@ -155,7 +155,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
          double input = reference * -0.5;
          double delta = Math.abs(input - reference);
 
@@ -180,7 +180,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
          double input = reference / 2.0;
          double delta = Math.abs(input - reference) / 2.0;
 
@@ -209,7 +209,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
          double input = reference * 2;
          double delta = Math.abs(input - reference) / 2.0;
 
@@ -238,7 +238,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
          double input = reference * 2;
          double delta = Math.abs(input - reference) / 2.0;
 
@@ -267,7 +267,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
          double input = reference / 2.0;
          double delta = Math.abs(input - reference) / 2.0;
 
@@ -296,7 +296,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND);
          double input = reference * -0.5;
          double delta = Math.abs(input - reference) / 2.0;
 
@@ -325,7 +325,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
          double input = reference * -0.5;
          double delta = Math.abs(input - reference) / 2.0;
 
@@ -354,7 +354,7 @@ public class DeltaLimitedYoVariableTest
 
       for(int i = 0; i < 60000; i++)
       {
-         double reference = RandomTools.generateRandomInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
+         double reference = RandomNumbers.nextInt(random, RANDOM_LOWER_BOUND, RANDOM_UPPER_BOUND) * -1.0;
          double input = reference * -0.5;
          double delta = Math.abs(input - reference) / 2.0;
 

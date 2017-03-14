@@ -15,6 +15,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
+import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -106,7 +107,7 @@ public class CameraRotationCalculator
    {
       Vector3D left = new Vector3D();
       left.cross(up, forward);
-      if (!MathTools.epsilonEquals(left.length(), 1.0, 1.0 - 5))
+      if (!MathTools.epsilonEquals(left.length(), 1.0, Epsilons.ONE_HUNDRED_THOUSANDTH))
          throw new RuntimeException("The vectors up and forward must be orthogonal. Received: up = " + up + ", forward = " + forward);
 
       this.up.set(up);
@@ -195,9 +196,9 @@ public class CameraRotationCalculator
    {
       double newLatitude = latitude.get() + deltaLatitude;
       if (restrictLatitude.get())
-         newLatitude = MathTools.clipToMinMax(newLatitude, minLatitude.get(), maxLatitude.get());
+         newLatitude = MathTools.clamp(newLatitude, minLatitude.get(), maxLatitude.get());
       else
-         newLatitude = MathTools.clipToMinMax(newLatitude, Math.PI);
+         newLatitude = MathTools.clamp(newLatitude, Math.PI);
       latitude.set(newLatitude);
       double newLongitude = longitude.get() + deltaLongitude;
       newLongitude = AngleTools.trimAngleMinusPiToPi(newLongitude);
@@ -257,9 +258,9 @@ public class CameraRotationCalculator
    public void setRotation(double latitude, double longitude, double roll)
    {
       if (restrictLatitude.get())
-         this.latitude.set(MathTools.clipToMinMax(latitude, minLatitude.get(), maxLatitude.get()));
+         this.latitude.set(MathTools.clamp(latitude, minLatitude.get(), maxLatitude.get()));
       else
-         this.latitude.set(MathTools.clipToMinMax(latitude, Math.PI / 2.0));
+         this.latitude.set(MathTools.clamp(latitude, Math.PI / 2.0));
 
       this.longitude.set(AngleTools.trimAngleMinusPiToPi(longitude));
       this.roll.set(AngleTools.trimAngleMinusPiToPi(roll));

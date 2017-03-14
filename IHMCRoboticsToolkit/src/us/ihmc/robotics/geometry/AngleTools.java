@@ -4,6 +4,7 @@ import java.util.Random;
 
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.robotics.MathTools;
 
@@ -295,4 +296,39 @@ public class AngleTools
       return heading;
    }
 
+   /**
+    * Pass in a vector. Get its angle in polar coordinates.
+    * 
+    * @param vx
+    * @param vy
+    * @return angle of vector from 0 to 2PI
+    */
+   public static double angleFromZeroToTwoPi(double vx, double vy)
+   {
+      double angleFromNegtivePiToPi = Math.atan2(vy, vx);
+      
+      if (angleFromNegtivePiToPi < 0.0)
+      {
+         return 2.0 * Math.PI + angleFromNegtivePiToPi;
+      }
+      else
+      {
+         return angleFromNegtivePiToPi;
+      }
+   }
+
+   public static double roundToGivenPrecisionForAngle(double angleValue, double precisionFactor)
+   {
+      double centeredAngleValue = trimAngleMinusPiToPi(angleValue + 0.5 * precisionFactor);
+      long longValue = (long) (centeredAngleValue / precisionFactor);
+      double roundedValue = ((double) longValue) * precisionFactor;
+      return trimAngleMinusPiToPi(roundedValue);
+   }
+
+   public static void roundToGivenPrecisionForAngles(Tuple3DBasics tuple3d, double precision)
+   {
+      tuple3d.setX(roundToGivenPrecisionForAngle(tuple3d.getX(), precision));
+      tuple3d.setY(roundToGivenPrecisionForAngle(tuple3d.getY(), precision));
+      tuple3d.setZ(roundToGivenPrecisionForAngle(tuple3d.getZ(), precision));
+   }
 }

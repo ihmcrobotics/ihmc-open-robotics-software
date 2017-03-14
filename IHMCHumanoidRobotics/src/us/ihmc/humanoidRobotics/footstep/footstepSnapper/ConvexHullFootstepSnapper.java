@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
@@ -298,7 +297,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       double tolerance = parameters.getZDistanceTolerance();
       double errorThreshold = 1.0;
 
-      if ((avgSquaredError > errorThreshold) || MathTools.containsNaN(surfaceNormal))
+      if ((avgSquaredError > errorThreshold) || surfaceNormal.containsNaN())
       {
          badPlane = true;
       }

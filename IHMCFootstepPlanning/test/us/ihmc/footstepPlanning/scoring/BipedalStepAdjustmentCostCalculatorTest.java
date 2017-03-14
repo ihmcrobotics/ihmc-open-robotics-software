@@ -10,6 +10,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -26,7 +27,7 @@ import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePose;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotControllerAdapter;
 import us.ihmc.simulationconstructionset.Robot;
@@ -70,16 +71,16 @@ public class BipedalStepAdjustmentCostCalculatorTest
       for (int i = 0; i < numberOfIdealStepsToTest; i++)
       {
          FramePose stanceFoot = new FramePose(worldFrame);
-         stanceFoot.setPosition(RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.3));
-         stanceFoot.setOrientation(RandomTools.generateRandomQuaternion(random));
+         stanceFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+         stanceFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
          FramePose swingStartFoot = new FramePose(worldFrame);
-         swingStartFoot.setPosition(RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.3));
-         swingStartFoot.setOrientation(RandomTools.generateRandomQuaternion(random));
+         swingStartFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+         swingStartFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
          FramePose idealFootstep = new FramePose(worldFrame);
-         idealFootstep.setPosition(RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.3));
-         idealFootstep.setOrientation(RandomTools.generateRandomQuaternion(random));
+         idealFootstep.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+         idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
 
          FramePose candidateFootstep = new FramePose(worldFrame);
          candidateFootstep.setPose(idealFootstep);
@@ -93,22 +94,22 @@ public class BipedalStepAdjustmentCostCalculatorTest
       for (int i = 0; i<numberOfRandomXYTranslations; i++)
       {
          FramePose stanceFoot = new FramePose(worldFrame);
-         stanceFoot.setPosition(RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.3));
-         stanceFoot.setOrientation(RandomTools.generateRandomQuaternion(random));
+         stanceFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+         stanceFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
          FramePose swingStartFoot = new FramePose(worldFrame);
-         swingStartFoot.setPosition(RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.3));
-         swingStartFoot.setOrientation(RandomTools.generateRandomQuaternion(random));
+         swingStartFoot.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+         swingStartFoot.setOrientation(RandomGeometry.nextQuaternion(random));
 
          FramePose idealFootstep = new FramePose(worldFrame);
-         idealFootstep.setPosition(RandomTools.generateRandomPoint(random, 1.0, 1.0, 0.3));
-         idealFootstep.setOrientation(RandomTools.generateRandomQuaternion(random));
+         idealFootstep.setPosition(RandomGeometry.nextPoint3D(random, 1.0, 1.0, 0.3));
+         idealFootstep.setOrientation(RandomGeometry.nextQuaternion(random));
 
          FramePose candidateFootstep = new FramePose(worldFrame);
          candidateFootstep.set(idealFootstep);
 
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(RandomTools.generateRandomDouble(random, 0.1), RandomTools.generateRandomDouble(random, 0.1), 0.0);
+         transform.setTranslation(RandomNumbers.nextDouble(random, 0.1), RandomNumbers.nextDouble(random, 0.1), 0.0);
          candidateFootstep.applyTransform(transform);
          double footstepCost = stepAdjustmentCostCalculator.calculateCost(stanceFoot, swingStartFoot, idealFootstep, candidateFootstep, 1.0);
 
@@ -263,7 +264,7 @@ public class BipedalStepAdjustmentCostCalculatorTest
       cost = -cost;
 
       double index = cost * 1000.0 / (greenCost - redCost);
-      index = MathTools.clipToMinMax(index, 0, 999);
+      index = MathTools.clamp(index, 0, 999);
 
       colorIndexYoVariable.set(index);
 

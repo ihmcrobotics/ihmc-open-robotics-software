@@ -273,7 +273,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
 
    public void interpolate(QuaternionReadOnly quaternion1, QuaternionReadOnly quaternion2, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
 
       frameOrientation.interpolate(quaternion1, quaternion2, alpha);
       frameOrientation.checkQuaternionIsUnitMagnitude();

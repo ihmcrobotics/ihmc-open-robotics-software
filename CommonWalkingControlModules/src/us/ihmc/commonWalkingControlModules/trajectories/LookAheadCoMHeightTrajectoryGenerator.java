@@ -5,7 +5,7 @@ import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,12 +14,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -33,6 +31,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.geometry.StringStretcher2d;
+import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator;
@@ -40,7 +39,6 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * TODO There is not enough HumanoidReferenceFrames in that class, it is pretty fragile
@@ -54,11 +52,11 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private static final boolean PROCESS_GO_HOME_COMMANDS = false;
 
-   private boolean VISUALIZE = true;
+   private boolean visualize = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final FourPointSpline1D spline = new FourPointSpline1D(registry);
+   private final YoFourPointCubicSpline1D spline = new YoFourPointCubicSpline1D("height", registry);
 
    private final BooleanYoVariable isTrajectoryOffsetStopped = new BooleanYoVariable("isPelvisOffsetHeightTrajectoryStopped", registry);
 
@@ -113,7 +111,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final BooleanYoVariable isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
-   private final CommandArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new CommandArrayDeque<>(PelvisHeightTrajectoryCommand.class);
+   private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class);
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
          double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
@@ -164,19 +162,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
       parentRegistry.addChild(registry);
 
       if (yoGraphicsListRegistry == null)
-      {
-         VISUALIZE = false;
-      }
+         visualize = false;
 
-      if (VISUALIZE)
+      if (visualize)
       {
          double pointSize = 0.03;
 
          YoGraphicPosition position0 = new YoGraphicPosition("contactFrame0", contactFrameZeroPosition, pointSize, YoAppearance.Purple());
          YoGraphicPosition position1 = new YoGraphicPosition("contactFrame1", contactFrameOnePosition, pointSize, YoAppearance.Orange());
-
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", position0);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", position1);
 
          pointS0Viz = new YoGraphicPosition("pointS0", "", registry, pointSize, YoAppearance.CadetBlue());
          pointSFViz = new YoGraphicPosition("pointSF", "", registry, pointSize, YoAppearance.Chartreuse());
@@ -198,26 +191,31 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          bagOfBalls = new BagOfBalls(registry, yoGraphicsListRegistry);
 
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointS0Viz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSFViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointD0Viz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointDFViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSNextViz);
-
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointS0MinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSFMinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointD0MinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointDFMinViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSNextMinViz);
-
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointS0MaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSFMaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointD0MaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointDFMaxViz);
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", pointSNextMaxViz);
-
          YoGraphicPosition desiredCoMPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 1.1 * pointSize, YoAppearance.Gold());
-         yoGraphicsListRegistry.registerYoGraphic("CoMHeightTrajectoryGenerator", desiredCoMPositionViz);
+
+         String graphicListName = "CoMHeightTrajectoryGenerator";
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, position0);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, position1);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0Viz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0Viz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextViz);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0MinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFMinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFMinViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextMinViz);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointS0MaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSFMaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointD0MaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointDFMaxViz);
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, pointSNextMaxViz);
+
+         yoGraphicsListRegistry.registerYoGraphic(graphicListName, desiredCoMPositionViz);
 
       }
       else
@@ -264,10 +262,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       correctForCoMHeightDrift.set(activate);
    }
 
-   private final Point2D[] points = new Point2D[4];
-   private final double[] endpointSlopes = new double[] {0.0, 0.0};
-   private final double[] waypointSlopes = new double[2];
-
    public void setSupportLeg(RobotSide supportLeg)
    {
       ReferenceFrame newFrame = ankleZUpFrames.get(supportLeg);
@@ -288,18 +282,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       tempFramePoint.changeFrame(newFrame);
       sF.setY(tempFramePoint.getZ());
 
-      points[0] = s0;
-      points[1] = d0;
-      points[2] = dF;
-      points[3] = sF;
-
-      endpointSlopes[0] = 0.0;
-      endpointSlopes[1] = 0.0;
-
-      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
-      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
-
-      spline.setPoints(points, endpointSlopes, waypointSlopes);
+      spline.initialize(s0, d0, dF, sF);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -459,16 +442,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
       computeHeightsToUseByStretchingString(transferFromFootstep.getRobotSide());
       previousZFinals.get(transferToFootstep.getRobotSide()).set(sF.getY());
 
-      Point2D[] points = new Point2D[] {s0, d0, dF, sF};
-      double[] endpointSlopes = new double[] {0.0, 0.0};
+      spline.initialize(s0, d0, dF, sF);
 
-      double[] waypointSlopes = new double[2];
-      waypointSlopes[0] = (points[2].getY() - points[0].getY()) / (points[2].getX() - points[0].getX());
-      waypointSlopes[1] = (points[3].getY() - points[1].getY()) / (points[3].getX() - points[1].getX());
-
-      spline.setPoints(points, endpointSlopes, waypointSlopes);
-
-      if (VISUALIZE)
+      if (visualize)
       {
          framePointS0.setIncludingFrame(transferFromContactFramePosition);
          framePointS0.setZ(s0.getY() + offsetHeightAboveGround.getDoubleValue());
@@ -580,7 +556,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
       // s0 is at previous
-      double z0 = MathTools.clipToMinMax(previousZFinals.get(transferFromSide).getDoubleValue(), s0Min.getY(), s0Max.getY());
+      double z0 = MathTools.clamp(previousZFinals.get(transferFromSide).getDoubleValue(), s0Min.getY(), s0Max.getY());
       s0.setY(z0);
 
       StringStretcher2d stringStretcher2d = new StringStretcher2d();
@@ -732,7 +708,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final FramePoint height = new FramePoint();
    private final FramePoint desiredPosition = new FramePoint();
-   private final double[] splineOutput = new double[3];
    private final double[] partialDerivativesWithRespectToS = new double[2];
 
    private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2D queryPoint, boolean isInDoubleSupport)
@@ -744,7 +719,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       if (isInDoubleSupport)
          splineQuery = Math.min(splineQuery, dF.getX());
 
-      spline.getZSlopeAndSecondDerivative(splineQuery, splineOutput);
+      spline.compute(splineQuery);
 
       handleInitializeToCurrent();
 
@@ -766,9 +741,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       offsetHeightAboveGroundPrevValue.set(offsetHeightTrajectoryGenerator.getValue());
 
-      double z = splineOutput[0] + offsetHeightAboveGroundTrajectoryOutput.getValue();
-      double dzds = splineOutput[1];
-      double ddzdds = splineOutput[2];
+      double z = spline.getY() + offsetHeightAboveGroundTrajectoryOutput.getValue();
+      double dzds = spline.getYDot();
+      double ddzdds = spline.getYDDot();
 
       getPartialDerivativesWithRespectToS(projectionSegment, partialDerivativesWithRespectToS);
       double dsdx = partialDerivativesWithRespectToS[0];
@@ -804,7 +779,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          desiredPosition.setToZero(pelvisFrame);
          desiredPosition.changeFrame(frameOfLastFoostep);
 
-         double heightOffset = desiredPosition.getZ() - splineOutput[0];
+         double heightOffset = desiredPosition.getZ() - spline.getY();
 
          offsetHeightAboveGround.set(heightOffset);
          offsetHeightAboveGroundTrajectoryTimeProvider.set(0.0);
@@ -907,7 +882,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
          desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, z);
          desiredPosition.changeFrame(frameOfLastFoostep);
 
-         double zOffset = desiredPosition.getZ() - splineOutput[0];
+         double zOffset = desiredPosition.getZ() - spline.getY();
 
          offsetHeightTrajectoryGenerator.appendWaypoint(time, zOffset, zDot);
       }
@@ -948,17 +923,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
       this.lastCommandId.set(lastCommandId);
    }
 
-   public void handleGoHomeCommand(GoHomeCommand command)
+   public void goHome(double trajectoryTime)
    {
       if (!PROCESS_GO_HOME_COMMANDS)
-         return;
-      if (!command.getRequest(BodyPart.PELVIS))
          return;
 
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       offsetHeightTrajectoryGenerator.clear();
       offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
-      offsetHeightTrajectoryGenerator.appendWaypoint(command.getTrajectoryTime(), 0.0, 0.0);
+      offsetHeightTrajectoryGenerator.appendWaypoint(trajectoryTime, 0.0, 0.0);
       offsetHeightTrajectoryGenerator.initialize();
       isTrajectoryOffsetStopped.set(false);
    }

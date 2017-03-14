@@ -1049,6 +1049,15 @@ public class MatrixTools
       }
    }
 
+   /**
+    * <p>
+    * Scales the elements of {@param column} of {@param matrix} by the value {@param alpha}.
+    * </p>
+    *
+    * @param alpha value to scale by
+    * @param column column to scale
+    * @param matrix matrix modify
+    */
    public static void scaleColumn(double alpha, int column, DenseMatrix64F matrix)
    {
       if( column < 0 || column >= matrix.getNumCols())
@@ -1058,6 +1067,15 @@ public class MatrixTools
          matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
    }
 
+   /**
+    * <p>
+    * Scales the elements of {@param row} of {@param matrix} by the value {@param alpha}.
+    * </p>
+    *
+    * @param alpha value to scale by
+    * @param row row to scale
+    * @param matrix matrix modify
+    */
    public static void scaleRow(double alpha, int row, DenseMatrix64F matrix)
    {
       if( row < 0 || row >= matrix.getNumRows())
@@ -1066,7 +1084,33 @@ public class MatrixTools
       for (int column = 0; column < matrix.getNumCols(); column++)
          matrix.unsafe_set(row, column, alpha * matrix.unsafe_get(row, column));
    }
-   
+
+   /**
+    * <p>
+    * Zeros the elements of {@param column} of {@param matrix}.
+    * </p>
+    *
+    * @param column column to scale
+    * @param matrix matrix modify
+    */
+   public static void zeroColumn(int column, DenseMatrix64F matrix)
+   {
+      scaleColumn(0.0, column, matrix);
+   }
+
+   /**
+    * <p>
+    * Zeros the elements of {@param row} of {@param matrix}.
+    * </p>
+    *
+    * @param row row to scale
+    * @param matrix matrix modify
+    */
+   public static void zeroRow(int row, DenseMatrix64F matrix)
+   {
+      scaleRow(0.0, row, matrix);
+   }
+
    public static void printJavaForConstruction(String name, DenseMatrix64F matrix)
    {
       StringBuffer stringBuffer = new StringBuffer();

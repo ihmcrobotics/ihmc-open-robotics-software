@@ -9,7 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
-import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -27,6 +27,7 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
@@ -36,7 +37,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * @author twan
@@ -87,7 +87,7 @@ public class TaskspaceHandControlState extends HandControlState
 
    private final BooleanYoVariable isReadyToHandleQueuedCommands;
    private final LongYoVariable numberOfQueuedCommands;
-   private final CommandArrayDeque<HandTrajectoryCommand> commandQueue = new CommandArrayDeque<>(HandTrajectoryCommand.class);
+   private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
 
    public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoSE3PIDGainsInterface gains,
          Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -126,8 +126,6 @@ public class TaskspaceHandControlState extends HandControlState
       }
 
       setupVisualization(namePrefix, yoGraphicsListRegistry);
-
-      privilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(chest, endEffector);
 
       abortTaskspaceControlState = new BooleanYoVariable(namePrefix + "AbortTaskspaceControlState", registry);
       lastCommandId = new LongYoVariable(namePrefix + "LastCommandId", registry);

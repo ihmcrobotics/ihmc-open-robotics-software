@@ -9,7 +9,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 /**
  * Used to apply a torque to the point
  *
- * @author Peter Abeles
  */
 public class ExternalTorque implements java.io.Serializable
 {

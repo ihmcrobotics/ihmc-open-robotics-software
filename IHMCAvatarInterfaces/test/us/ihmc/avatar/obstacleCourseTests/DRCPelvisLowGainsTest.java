@@ -29,7 +29,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * This end to end test is to make sure the pelvis doesn't flip out when it has low gains. In March, 2015 we started investigating this bug.
- * It seems to have something to do with either some sort of problem in the MomentumBasedController or InverseDynamicsCalculator or State Estimator.
+ * It seems to have something to do with either some sort of problem in the HighLevelHumanoidControllerToolbox or InverseDynamicsCalculator or State Estimator.
  *
  */
 public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
@@ -64,7 +64,7 @@ public abstract class DRCPelvisLowGainsTest implements MultiRobotTestInterface
 
    public abstract InverseDynamicsCalculatorListener getInverseDynamicsCalculatorListener(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot);
 
-   // 150313: This test currently fails, seemingly due to some sort of problem in the MomentumBasedController or InverseDynamicsCalculator. Trying to fix it...
+   // 150313: This test currently fails, seemingly due to some sort of problem in the HighLevelHumanoidControllerToolbox or InverseDynamicsCalculator. Trying to fix it...
 	@ContinuousIntegrationTest(estimatedDuration = 38.0)
    @Test(timeout = 190000)
    public void testStandingWithLowPelvisOrientationGains() throws SimulationExceededMaximumTimeException

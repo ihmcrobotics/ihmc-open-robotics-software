@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraMountInterface;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.kinematics.CommonJoint;
-import us.ihmc.simulationconstructionset.physics.engine.jerry.JointPhysics;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.JointPhysics;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 
@@ -908,4 +908,37 @@ public abstract class Joint implements CommonJoint, java.io.Serializable
    {
       return physics.getExternalForcePoints();
    }
+
+   public ExternalForcePoint recursiveGetExternalForcePoint(String name)
+   {
+      ExternalForcePoint externalForcePoint = physics.getExternalForcePoint(name);
+      if (externalForcePoint != null) 
+         return externalForcePoint;
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         Joint child = childrenJoints.get(i);
+         externalForcePoint = child.recursiveGetExternalForcePoint(name);
+         if (externalForcePoint != null) 
+            return externalForcePoint;
+      }
+
+      return null;
+   }
+
+   public Joint recursivelyGetJoint(String name)
+   {
+      if (this.getName().equals(name)) return this;
+
+      for (int i = 0; i < childrenJoints.size(); i++)
+      {
+         Joint child = childrenJoints.get(i);
+         Joint jointToReturn = child.recursivelyGetJoint(name);
+         if (jointToReturn != null) 
+            return jointToReturn;
+      }
+
+      return null;
+   }
+
 }

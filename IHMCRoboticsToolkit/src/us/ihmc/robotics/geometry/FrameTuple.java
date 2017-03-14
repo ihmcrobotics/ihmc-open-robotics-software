@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -67,6 +66,36 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    {
       this.referenceFrame = referenceFrame;
       set(x, y, z);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startIndex, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startIndex, tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleDenseMatrix);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, tupleDenseMatrix);
+   }
+   
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, int column, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, column, tupleDenseMatrix);
    }
 
    public final void set(FrameTuple<?, ?> frameTuple)
@@ -142,7 +171,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
 
    public final void set(Direction direction, double value)
    {
-      MathTools.set(tuple, direction, value);
+      Direction.set(tuple, direction, value);
    }
 
    /**
@@ -169,7 +198,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
 
    public final double get(Direction direction)
    {
-      return MathTools.get(tuple, direction);
+      return Direction.get(tuple, direction);
    }
 
    public final void scale(double scaleFactor)
@@ -241,16 +270,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    {
       setToZero();
       this.referenceFrame = referenceFrame;
-   }
-
-   /**
-    * Sets this tuple to the location of the origin of passed in referenceFrame.
-    */
-   protected void setFromReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      ReferenceFrame thisReferenceFrame = getReferenceFrame();
-      setToZero(referenceFrame);
-      changeFrame(thisReferenceFrame);
    }
 
    @Override

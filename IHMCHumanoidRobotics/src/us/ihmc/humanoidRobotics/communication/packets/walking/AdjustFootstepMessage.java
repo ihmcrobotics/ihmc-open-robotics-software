@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -19,7 +20,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -281,8 +282,8 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
       uniqueId = VALID_MESSAGE_DEFAULT_ID;
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
-      this.location = RandomTools.generateRandomPointWithEdgeCases(random, 0.05);
-      this.orientation = RandomTools.generateRandomQuaternion(random);
+      this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
+      this.orientation = RandomGeometry.nextQuaternion(random);
       int numberOfPredictedContactPoints = random.nextInt(10);
       this.predictedContactPoints = new ArrayList<>();
 

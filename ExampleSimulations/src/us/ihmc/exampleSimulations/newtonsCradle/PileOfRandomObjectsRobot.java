@@ -3,10 +3,10 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -108,15 +108,15 @@ public class PileOfRandomObjectsRobot
          floatingJointDescription.setLink(link);
          robotDescription.addRootJoint(floatingJointDescription);
 
-         double x = RandomTools.generateRandomDouble(random, -xExtents, xExtents);
-         double y = RandomTools.generateRandomDouble(random, -yExtents, yExtents);
+         double x = RandomNumbers.nextDouble(random, -xExtents, xExtents);
+         double y = RandomNumbers.nextDouble(random, -yExtents, yExtents);
 
-         double z = RandomTools.generateRandomDouble(random, zMin, zMax);
+         double z = RandomNumbers.nextDouble(random, zMin, zMax);
 
          double angleExtents = Math.PI / 2.0;
-         double yaw = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
-         double pitch = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
-         double roll = RandomTools.generateRandomDouble(random, -angleExtents, angleExtents);
+         double yaw = RandomNumbers.nextDouble(random, -angleExtents, angleExtents);
+         double pitch = RandomNumbers.nextDouble(random, -angleExtents, angleExtents);
+         double roll = RandomNumbers.nextDouble(random, -angleExtents, angleExtents);
 
          Robot robot = new RobotFromDescription(robotDescription);
 
@@ -194,10 +194,10 @@ public class PileOfRandomObjectsRobot
 
    private LinkDescription createRandomBox(Random random, int i)
    {
-      double objectLength = sizeScale * RandomTools.generateRandomDouble(random, 0.04, 0.1);
-      double objectWidth = sizeScale * RandomTools.generateRandomDouble(random, 0.04, 0.2);
-      double objectHeight = sizeScale * RandomTools.generateRandomDouble(random, 0.04, 0.1);
-      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectLength = sizeScale * RandomNumbers.nextDouble(random, 0.04, 0.1);
+      double objectWidth = sizeScale * RandomNumbers.nextDouble(random, 0.04, 0.2);
+      double objectHeight = sizeScale * RandomNumbers.nextDouble(random, 0.04, 0.1);
+      double objectMass = massScale * RandomNumbers.nextDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectLength / 2.0, objectWidth / 2.0, objectHeight / 2.0);
@@ -221,8 +221,8 @@ public class PileOfRandomObjectsRobot
 
    private LinkDescription createRandomSphere(Random random, int i)
    {
-      double objectRadius = sizeScale * RandomTools.generateRandomDouble(random, 0.01, 0.05);
-      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectRadius = sizeScale * RandomNumbers.nextDouble(random, 0.01, 0.05);
+      double objectMass = massScale * RandomNumbers.nextDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectRadius / 2.0);
@@ -245,9 +245,9 @@ public class PileOfRandomObjectsRobot
 
    private LinkDescription createRandomCapsule(Random random, int i)
    {
-      double objectRadius = sizeScale * RandomTools.generateRandomDouble(random, 0.01, 0.05);
-      double objectHeight = sizeScale * 2.0 * objectRadius + RandomTools.generateRandomDouble(random, 0.02, 0.05);
-      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectRadius = sizeScale * RandomNumbers.nextDouble(random, 0.01, 0.05);
+      double objectHeight = sizeScale * 2.0 * objectRadius + RandomNumbers.nextDouble(random, 0.02, 0.05);
+      double objectMass = massScale * RandomNumbers.nextDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);
@@ -270,9 +270,9 @@ public class PileOfRandomObjectsRobot
 
    private LinkDescription createRandomCylinder(Random random, int i)
    {
-      double objectHeight = sizeScale * RandomTools.generateRandomDouble(random, 0.05, 0.15);
-      double objectRadius = sizeScale * RandomTools.generateRandomDouble(random, 0.01, 0.10);
-      double objectMass = massScale * RandomTools.generateRandomDouble(random, 0.2, 1.0);
+      double objectHeight = sizeScale * RandomNumbers.nextDouble(random, 0.05, 0.15);
+      double objectRadius = sizeScale * RandomNumbers.nextDouble(random, 0.01, 0.10);
+      double objectMass = massScale * RandomNumbers.nextDouble(random, 0.2, 1.0);
 
       LinkDescription link = new LinkDescription("object" + i);
       link.setMassAndRadiiOfGyration(objectMass, objectRadius / 2.0, objectRadius / 2.0, objectHeight / 2.0);

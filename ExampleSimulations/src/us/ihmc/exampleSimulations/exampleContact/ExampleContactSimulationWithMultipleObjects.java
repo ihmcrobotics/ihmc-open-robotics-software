@@ -9,7 +9,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -71,7 +71,7 @@ public class ExampleContactSimulationWithMultipleObjects
          Vector3D toroidPosition = new Vector3D(randomDouble(random, 0.0, 5.0), randomDouble(random, 0.0, 5.0), randomDouble(random, 0.2, 0.6));
          RigidBodyTransform transform3d = new RigidBodyTransform();
          
-         AxisAngle randomRotation = RandomTools.generateRandomRotation(random);
+         AxisAngle randomRotation = RandomGeometry.nextAxisAngle(random);
          transform3d.setTranslation(toroidPosition);
          transform3d.setRotation(randomRotation);
 
@@ -95,7 +95,7 @@ public class ExampleContactSimulationWithMultipleObjects
          Vector3D cylinderPosition = new Vector3D(randomDouble(random, 0.0, 5.0), randomDouble(random, 0.0, 5.0), randomDouble(random, -1.2, 0));
          RigidBodyTransform transform3d = new RigidBodyTransform();
          
-         AxisAngle randomRotation = RandomTools.generateRandomRotation(random);
+         AxisAngle randomRotation = RandomGeometry.nextAxisAngle(random);
          transform3d.setTranslation(cylinderPosition);
          transform3d.setRotation(randomRotation);
 

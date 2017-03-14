@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
@@ -189,7 +189,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       this.finalDirection.normalize();
       this.finalDirection.get(tempVector);
       tempVector.negate();
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.finalDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.approachDistance.set(approachDistance);
@@ -204,7 +204,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
    public void setTrajectoryTime(double newTrajectoryTime, double approachTime)
    {
       trajectoryTime.set(newTrajectoryTime);
-      MathTools.checkIfInRange(approachTime, 0.0, newTrajectoryTime);
+      MathTools.checkIntervalContains(approachTime, 0.0, newTrajectoryTime);
       this.approachTime.set(approachTime);
    }
 
@@ -217,7 +217,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       changeFrame(tangentialPlane, false);
 
       currentTime.set(0.0);
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       double tIntermediate = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
       xyPolynomial.setCubic(0.0, tIntermediate, 0.0, 0.0, 1.0, 0.0);
       double z0 = initialPosition.getZ();
@@ -244,8 +244,8 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       currentTime.set(time);
 
       double tIntermediate = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
-      time = MathTools.clipToMinMax(time, 0.0, tIntermediate);
-      xyPolynomial.compute(MathTools.clipToMinMax(time, 0.0, tIntermediate));
+      time = MathTools.clamp(time, 0.0, tIntermediate);
+      xyPolynomial.compute(MathTools.clamp(time, 0.0, tIntermediate));
       boolean shouldBeZero = currentTime.getDoubleValue() >= tIntermediate || currentTime.getDoubleValue() < 0.0;
       double alphaDot = shouldBeZero ? 0.0 : xyPolynomial.getVelocity();
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
@@ -254,7 +254,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
       currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
 
-      time = MathTools.clipToMinMax(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(currentTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue());
       zPolynomial.compute(time);
       shouldBeZero = isDone() || currentTime.getDoubleValue() < 0.0;
       alphaDot = shouldBeZero ? 0.0 : zPolynomial.getVelocity();

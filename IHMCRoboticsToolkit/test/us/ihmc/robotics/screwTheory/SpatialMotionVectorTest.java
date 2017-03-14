@@ -15,9 +15,9 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.robotics.testing.JUnitTools;
 
 public class SpatialMotionVectorTest
 {
@@ -75,8 +75,8 @@ public class SpatialMotionVectorTest
 	@Test(timeout = 30000)
    public void testInvert()
    {
-      Vector3D linearPart = RandomTools.generateRandomVector(random);
-      Vector3D angularPart = RandomTools.generateRandomVector(random);
+      Vector3D linearPart = RandomGeometry.nextVector3D(random);
+      Vector3D angularPart = RandomGeometry.nextVector3D(random);
 
       Vector3D linearPartInverse = new Vector3D(linearPart);
       linearPartInverse.scale(-1.0);
@@ -149,8 +149,8 @@ public class SpatialMotionVectorTest
       double linearLength = 10.0;
       double angularLength = 6.3;
 
-      Vector3D linearPart = RandomTools.generateRandomVector(random, linearLength);
-      Vector3D angularPart = RandomTools.generateRandomVector(random, angularLength);
+      Vector3D linearPart = RandomGeometry.nextVector3D(random, linearLength);
+      Vector3D angularPart = RandomGeometry.nextVector3D(random, angularLength);
       
       SpatialMotionVector vector = createSpatialMotionVector(frameB, frameA, frameA, linearPart, angularPart);
             

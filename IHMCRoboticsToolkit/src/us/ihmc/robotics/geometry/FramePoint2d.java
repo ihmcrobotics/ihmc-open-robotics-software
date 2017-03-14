@@ -2,11 +2,11 @@ package us.ihmc.robotics.geometry;
 
 import java.util.Random;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -138,8 +138,8 @@ public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements
 
    public static FramePoint2d generateRandomFramePoint2d(Random random, ReferenceFrame zUpFrame, double xMin, double xMax, double yMin, double yMax)
    {
-      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomTools.generateRandomDouble(random, xMin, xMax),
-                                                  RandomTools.generateRandomDouble(random, yMin, yMax));
+      FramePoint2d randomPoint = new FramePoint2d(zUpFrame, RandomNumbers.nextDouble(random, xMin, xMax),
+                                                  RandomNumbers.nextDouble(random, yMin, yMax));
 
       return randomPoint;
    }

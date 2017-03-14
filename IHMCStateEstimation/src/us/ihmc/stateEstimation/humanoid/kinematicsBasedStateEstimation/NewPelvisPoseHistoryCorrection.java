@@ -288,7 +288,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
             if (!hasOneIcpPacketEverBeenReceived.getBooleanValue())
                hasOneIcpPacketEverBeenReceived.set(true);
             double confidence = newPacket.getConfidenceFactor();
-            confidence = MathTools.clipToMinMax(confidence, 0.0, 1.0);
+            confidence = MathTools.clamp(confidence, 0.0, 1.0);
             confidenceFactor.set(confidence);
             addNewExternalPose(timeStampedExternalPose);
          }

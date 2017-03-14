@@ -350,6 +350,19 @@ public class Link implements java.io.Serializable
    }
 
    /**
+    * Sets the mass and moment of inertia of this link. The moments of inertia are computed as
+    * Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationY), etc.
+    * This is equivalent to the mass being concentrated on the surface of a thin ellipsoid with the given radii of gyration.
+    * 
+    * @param mass Mass of the link.
+    * @param radiiOfGyration Radii of gyration in the x, y, and z directions.
+    */
+   public void setMassAndRadiiOfGyration(double mass, Vector3D radiiOfGyration)
+   {
+      setMassAndRadiiOfGyration(mass, radiiOfGyration.getX(), radiiOfGyration.getY(), radiiOfGyration.getZ());
+   }
+
+   /**
     * Sets the graphical representation of this link to the provided LinkGraphics.
     * LinkGraphics store the graphical data for each link allowing different shapes and
     * features to be created and stored.
@@ -423,6 +436,31 @@ public class Link implements java.io.Serializable
 
    // ////////// Graphics from Mass Properties Here ///////////////////////
 
+   /**
+    * Goes through the given robot and finds all Links and adds an ellipsoid based on mass properties
+    * @param robot
+    * @param appearance
+    */
+   public static void addEllipsoidFromMassPropertiesToAllLinks(RobotFromDescription robot, AppearanceDefinition appearance)
+   {
+      ArrayList<Joint> joints = new ArrayList<>(robot.getRootJoints());
+      
+      while(!joints.isEmpty())
+      {
+         int lastIndex = joints.size() - 1;
+         Joint joint = joints.get(lastIndex);
+         joint.getLink().addEllipsoidFromMassProperties(appearance);
+
+         joints.remove(lastIndex);
+
+         ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
+         if (childrenJoints != null)
+         {
+            joints.addAll(childrenJoints);
+         }
+      }
+   }
+   
    /**
     * Adds an ellipsoid representing the mass and inertia of the link at its center of mass.
     * This ellipsoid has a default matte black appearance.

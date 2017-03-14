@@ -449,7 +449,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       //chose the smaller alpha (so the slower correction) between translation and rotation
       cLippedAlphaFilterValue.set(Math.min(temporaryTranslationAlphaClipped.getDoubleValue(), temporaryRotationAlphaClipped.getDoubleValue()));
-      cLippedAlphaFilterValue.set(MathTools.clipToMinMax(cLippedAlphaFilterValue.getDoubleValue(), 0.0, 1.0));
+      cLippedAlphaFilterValue.set(MathTools.clamp(cLippedAlphaFilterValue.getDoubleValue(), 0.0, 1.0));
       
       
       previousClippedAlphaFilterValue.set(cLippedAlphaFilterValue.getDoubleValue());

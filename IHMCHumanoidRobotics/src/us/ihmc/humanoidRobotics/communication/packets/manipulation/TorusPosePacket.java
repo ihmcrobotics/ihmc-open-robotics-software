@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.TransformTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class TorusPosePacket extends Packet<TorusPosePacket> implements TransformableDataObject<TorusPosePacket>
 {
@@ -87,8 +87,8 @@ public class TorusPosePacket extends Packet<TorusPosePacket> implements Transfor
       Point3D point = new Point3D();
       Quaternion quat = new Quaternion();
 
-      point.set(RandomTools.generateRandomPoint(random, 0.288, 0.288, 0.288));    // magic numbers so point will not exceed XYZ_MIN / MAX in TorusPosePacketSerializer
-      quat.set(RandomTools.generateRandomRotation(random));
+      point.set(RandomGeometry.nextPoint3D(random, 0.288, 0.288, 0.288));    // magic numbers so point will not exceed XYZ_MIN / MAX in TorusPosePacketSerializer
+      quat.set(RandomGeometry.nextAxisAngle(random));
 
       this.orientation = quat;
       this.position = point;

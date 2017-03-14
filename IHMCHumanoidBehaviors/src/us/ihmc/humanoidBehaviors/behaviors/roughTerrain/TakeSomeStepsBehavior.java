@@ -25,7 +25,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 
 public class TakeSomeStepsBehavior extends AbstractBehavior
 {
@@ -57,7 +57,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private final FramePose tempFirstFootstepPose = new FramePose();
    private final Point3D tempFootstepPosePosition = new Point3D();
    private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
-   private final YoTimer footstepSentTimer;
+   private final YoStopwatch footstepSentTimer;
 
    public TakeSomeStepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
@@ -73,7 +73,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
       currentlySwingingFoot = new EnumYoVariable<>("currentlySwingingFoot", registry, RobotSide.class, true);
 
-      footstepSentTimer = new YoTimer(yoTime);
+      footstepSentTimer = new YoStopwatch(yoTime);
       footstepSentTimer.start();
 
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
@@ -218,8 +218,8 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setDefaultSwingTime(0.5);
-      footstepDataListMessage.setDefaultTransferTime(0.1);
+      footstepDataListMessage.setDefaultSwingDuration(0.5);
+      footstepDataListMessage.setDefaultTransferDuration(0.1);
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {

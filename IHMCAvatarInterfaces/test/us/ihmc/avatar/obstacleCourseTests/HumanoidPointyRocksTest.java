@@ -16,6 +16,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -45,7 +46,6 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.partNames.LimbName;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -249,7 +249,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       Point3D cameraFix = new Point3D(0.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(-10.0, 0.0, 5.0);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
-      drcSimulationTestHelper.getSimulationConstructionSet().hideAllDynamicGraphicObjects();
+      drcSimulationTestHelper.getSimulationConstructionSet().hideAllYoGraphics();
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       setUpMomentum();
@@ -563,8 +563,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
          if (typeOfContactChange == 0)
          {
-            double shrinkageLengthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
-            double shrinkageWidthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
+            double shrinkageLengthPercent = RandomNumbers.nextDouble(random, 0.5, 0.6);
+            double shrinkageWidthPercent = RandomNumbers.nextDouble(random, 0.5, 0.6);
             newContactPoints = generateContactPointsForUniformFootShrinkage(getRobotModel().getWalkingControllerParameters(), shrinkageLengthPercent, shrinkageWidthPercent);
          }
          else if (typeOfContactChange == 1)
@@ -573,7 +573,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          }
          else if (typeOfContactChange == 2)
          {
-            double percentOfFootToKeep = RandomTools.generateRandomDouble(random, 0.0, 0.5);
+            double percentOfFootToKeep = RandomNumbers.nextDouble(random, 0.0, 0.5);
             newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters(), percentOfFootToKeep);
          }
          else
@@ -646,8 +646,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
          if (typeOfContactChange == 0)
          {
-            double shrinkageLengthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
-            double shrinkageWidthPercent = RandomTools.generateRandomDouble(random, 0.5, 0.6);
+            double shrinkageLengthPercent = RandomNumbers.nextDouble(random, 0.5, 0.6);
+            double shrinkageWidthPercent = RandomNumbers.nextDouble(random, 0.5, 0.6);
             newContactPoints = generateContactPointsForUniformFootShrinkage(getRobotModel().getWalkingControllerParameters(), shrinkageLengthPercent, shrinkageWidthPercent);
          }
          else if (typeOfContactChange == 1)
@@ -656,7 +656,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          }
          else if (typeOfContactChange == 2)
          {
-            double percentOfFootToKeep = RandomTools.generateRandomDouble(random, 0.3, 0.6);
+            double percentOfFootToKeep = RandomNumbers.nextDouble(random, 0.3, 0.6);
             newContactPoints = generateContactPointsForHalfOfFoot(random, getRobotModel().getWalkingControllerParameters(), percentOfFootToKeep);
          }
          else
@@ -769,8 +769,8 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       RobotSide robotSide = RobotSide.LEFT;
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       SideDependentList<String> jointNames = getFootJointNames(fullRobotModel);
-      HighLevelHumanoidControllerToolbox momentumBasedController = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
-                                                                                          .getMomentumBasedController();
+      HighLevelHumanoidControllerToolbox controllerToolbox = drcSimulationTestHelper.getAvatarSimulation().getMomentumBasedControllerFactory()
+                                                                                          .getHighLevelHumanoidControllerToolbox();
 
       int numberOfChanges = 4;
 
@@ -782,7 +782,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
          if (!success) break;
 
          // check if the found support polygon is close to the actual one
-         FrameConvexPolygon2d foundSupport = momentumBasedController.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
+         FrameConvexPolygon2d foundSupport = controllerToolbox.getBipedSupportPolygons().getFootPolygonInSoleFrame(robotSide);
          FrameConvexPolygon2d actualSupport = new FrameConvexPolygon2d(foundSupport.getReferenceFrame(), newContactPoints);
          double epsilon = 5.0; // cm^2
          boolean close = Math.abs(foundSupport.getArea() - actualSupport.getArea()) * 10000 < epsilon;
@@ -1211,7 +1211,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    private ArrayList<Point2D> generateContactPointsForRandomRotatedLineOfContact(Random random)
    {
-      return generateContactPointsForRotatedLineOfContact(RandomTools.generateRandomDouble(random, Math.PI));
+      return generateContactPointsForRotatedLineOfContact(RandomNumbers.nextDouble(random, Math.PI));
    }
 
    private ArrayList<Point2D> generateContactPointsForRotatedLineOfContact(double angle)

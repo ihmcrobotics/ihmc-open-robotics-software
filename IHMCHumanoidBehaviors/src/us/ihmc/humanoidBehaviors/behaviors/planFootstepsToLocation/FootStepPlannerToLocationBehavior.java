@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.planFootstepsToLocation;
 
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsListMessage;
@@ -33,7 +34,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationData;
-import us.ihmc.tools.time.Timer;
 
 public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 {
@@ -65,7 +65,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
 
    private final YoFramePose footstepPlannerInitialStancePose;
 
-   private final Timer footstepSentTimer;
+   private final Stopwatch footstepSentTimer;
 
    private final FramePose tempFirstFootstepPose = new FramePose();
    private final us.ihmc.euclid.tuple3D.Point3D tempFootstepPosePosition = new us.ihmc.euclid.tuple3D.Point3D();
@@ -100,7 +100,7 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
       currentlySwingingFoot = new EnumYoVariable<RobotSide>(prefix + "currentlySwingingFoot", registry, RobotSide.class, true);
       footstepPlannerInitialStancePose = new YoFramePose(prefix + "footstepPlannerInitialStancePose", ReferenceFrame.getWorldFrame(), registry);
 
-      footstepSentTimer = new Timer();
+      footstepSentTimer = new Stopwatch();
       footstepSentTimer.start();
 
       latestFootstepStatus = new SideDependentList<>();
@@ -275,8 +275,8 @@ public class FootStepPlannerToLocationBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setDefaultSwingTime(swingTime.getDoubleValue());
-      footstepDataListMessage.setDefaultTransferTime(transferTime.getDoubleValue());
+      footstepDataListMessage.setDefaultSwingDuration(swingTime.getDoubleValue());
+      footstepDataListMessage.setDefaultTransferDuration(transferTime.getDoubleValue());
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {

@@ -6,8 +6,8 @@ import java.io.File;
 
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.time.DateTools;
 
 public class TorqueSpeedDataExporter implements ActionListener
 {
@@ -71,7 +71,7 @@ public class TorqueSpeedDataExporter implements ActionListener
          return;
 
       // create label
-      String timeStamp = DateTools.getDateString() + "_" + DateTools.getTimeString();
+      String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
       String tagName = timeStamp + "_" + robot.getName();
 
       // figure out svn revsision number for project

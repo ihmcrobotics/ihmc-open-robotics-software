@@ -2,15 +2,15 @@ package us.ihmc.ihmcPerception.depthData;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.time.Timer;
 
 public class AsyncPointCloudReceiver implements PointCloudDataReceiverInterface
 {
    private final boolean DEBUG = false;
-   private Timer timer = DEBUG ? new Timer().start() : null;
+   private Stopwatch timer = DEBUG ? new Stopwatch().start() : null;
 
    private volatile ArrayList<Point3D> pointsInWorldFrame;
    private volatile double groundHeight;

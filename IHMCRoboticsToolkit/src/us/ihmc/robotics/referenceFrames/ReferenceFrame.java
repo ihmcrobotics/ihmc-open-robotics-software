@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -114,7 +115,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       
       AxisAngle rotationToDesired = new AxisAngle();
       alignAxisWithThis.changeFrame(referenceNormal.getReferenceFrame());
-      GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
       
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
 
@@ -166,7 +167,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       ReferenceFrame initialFrame = alignAxisWithThis.getReferenceFrame();
       alignAxisWithThis.changeFrame(currentXYZAxis.getReferenceFrame());
       AxisAngle rotationToDesired = new AxisAngle();
-      GeometryTools.getAxisAngleFromFirstToSecondVector(currentXYZAxis.getVector(), alignAxisWithThis.getVector(), rotationToDesired);
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(currentXYZAxis.getVector(), alignAxisWithThis.getVector(), rotationToDesired);
       alignAxisWithThis.changeFrame(initialFrame);
       
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
@@ -620,7 +621,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       RigidBodyTransform ret = new RigidBodyTransform();
 
-      ret.setRotation(GeometryTools.getAxisAngleFromZUpToVector(zAxis.getVectorCopy()));
+      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVectorCopy()));
       Vector3D translation = new Vector3D();
       point.get(translation);
       ret.setTranslation(translation);

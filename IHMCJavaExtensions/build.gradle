@@ -56,4 +56,5 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
     testCompile group: 'org.pitest', name: 'pitest-command-line', version: '1.1.9'
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 }

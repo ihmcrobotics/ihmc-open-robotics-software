@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -16,7 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class Ramp3dTest
 {
@@ -38,9 +39,9 @@ public class Ramp3dTest
       for (int i = 0; i < numberOfShapes; i++)
       {
          RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-         double length = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double width = RandomTools.generateRandomDouble(random, 0.01, 10.0);
-         double height = RandomTools.generateRandomDouble(random, 0.01, 10.0);
+         double length = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double width = RandomNumbers.nextDouble(random, 0.01, 10.0);
+         double height = RandomNumbers.nextDouble(random, 0.01, 10.0);
          Ramp3d box3d = new Ramp3d(transform, width, length, height);
          testHelper.runSimpleTests(box3d, random, numberOfPoints);
       }
@@ -189,7 +190,7 @@ public class Ramp3dTest
          double minZ = 0.0;
          double maxZ = 1.0;
          
-         Point3D pointToTestOnRamp = RandomTools.generateRandomPoint(random, minX, minY, minZ, maxX, maxY, maxZ);
+         Point3D pointToTestOnRamp = RandomGeometry.nextPoint3D(random, minX, minY, minZ, maxX, maxY, maxZ);
          pointToTestOnRamp = transformFromAngledToWorldFrame(ramp, pointToTestOnRamp);
          ramp.orthogonalProjection(pointToTestOnRamp);
 
@@ -354,7 +355,7 @@ public class Ramp3dTest
          Ramp3d ramp = createRandomRamp(random);
          
          double insideRamp = 0.02;
-         Point3D pointToTestAboveRamp = RandomTools.generateRandomPoint(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
+         Point3D pointToTestAboveRamp = RandomGeometry.nextPoint3D(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
          Point3D pointOnRampBelowTestPoint = new Point3D(pointToTestAboveRamp);
          pointOnRampBelowTestPoint.setZ(0.0);
          double heightAboveRamp = pointToTestAboveRamp.getZ();
@@ -401,7 +402,7 @@ public class Ramp3dTest
          printIfDebug("\nramp = " + ramp);
 
          double insideRamp = 0.02;
-         Point3D pointToTestAboveRamp = RandomTools.generateRandomPoint(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
+         Point3D pointToTestAboveRamp = RandomGeometry.nextPoint3D(random, insideRamp, -ramp.getWidth()/2.0 + insideRamp, insideRamp, ramp.getRampLength() - insideRamp, ramp.getWidth()/2.0 + insideRamp, 1.0);
          pointToTestAboveRamp = transformFromAngledToWorldFrame(ramp, pointToTestAboveRamp);
 
          printIfDebug("rampLength = " + ramp.getRampLength());
@@ -484,9 +485,9 @@ public class Ramp3dTest
    {
       RigidBodyTransform configuration = createRandomTransform(random);      
       
-      double width = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
-      double length = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
-      double height = RandomTools.generateRandomDouble(random, 0.05, 1.0); 
+      double width = RandomNumbers.nextDouble(random, 0.05, 1.0); 
+      double length = RandomNumbers.nextDouble(random, 0.05, 1.0); 
+      double height = RandomNumbers.nextDouble(random, 0.05, 1.0); 
 
       return new Ramp3d(configuration, length, width, height);
    }

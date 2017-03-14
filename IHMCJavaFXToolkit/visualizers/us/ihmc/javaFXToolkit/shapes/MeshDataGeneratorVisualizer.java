@@ -14,7 +14,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class MeshDataGeneratorVisualizer extends Application
 {
@@ -133,7 +133,7 @@ public class MeshDataGeneratorVisualizer extends Application
 
       while (polygon.getNumberOfVertices() < numberOfPoints)
       {
-         randomVertex.add(RandomTools.generateRandomPoint2d(random, 0.03, 0.03));
+         randomVertex.add(RandomGeometry.nextPoint2D(random, 0.03, 0.03));
          polygon.addVertex(randomVertex);
          polygon.update();
       }

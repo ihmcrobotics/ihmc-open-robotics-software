@@ -26,7 +26,7 @@ public class GraphicsDynamicGraphicsObject extends Graphics3DNode implements Gra
    @Override
    public void update()
    {
-      // IMPORTANT: can't do this here because it causes threading issues. Each thread is responsible for updating its own DynamicGraphicObjects!
+      // IMPORTANT: can't do this here because it causes threading issues. Each thread is responsible for updating its own YoGraphics!
 //      yoGraphic.update();
       
       AffineTransform j3dTransform = yoGraphic.getTransform();

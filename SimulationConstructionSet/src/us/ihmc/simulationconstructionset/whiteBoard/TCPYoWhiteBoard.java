@@ -14,7 +14,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class TCPYoWhiteBoard extends DataStreamYoWhiteBoard

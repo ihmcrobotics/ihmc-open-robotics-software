@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -23,7 +24,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class ICPOptimizationController
 {
@@ -221,6 +221,23 @@ public class ICPOptimizationController
       parentRegistry.addChild(registry);
    }
 
+   public void setFootstepWeights(double forwardWeight, double lateralWeight)
+   {
+      forwardFootstepWeight.set(forwardWeight);
+      lateralFootstepWeight.set(lateralWeight);
+   }
+
+   public void setFeedbackWeights(double forwardWeight, double lateralWeight)
+   {
+      feedbackForwardWeight.set(forwardWeight);
+      feedbackLateralWeight.set(lateralWeight);
+   }
+
+   public void setDynamicRelaxationWeight(double relaxationWeight)
+   {
+      dynamicRelaxationWeight.set(relaxationWeight);
+   }
+
    public void setStepDurations(double doubleSupportDuration, double singleSupportDuration)
    {
       setDoubleSupportDuration(doubleSupportDuration);
@@ -348,12 +365,13 @@ public class ICPOptimizationController
 
    private int initializeOnContactChange(double initialTime)
    {
+      setProblemBooleans();
+
       int numberOfFootstepsToConsider = clipNumberOfFootstepsToConsiderToProblem(this.numberOfFootstepsToConsider.getIntegerValue());
 
       this.initialTime.set(initialTime);
       speedUpTime.set(0.0);
 
-      setProblemBooleans();
 
       beginningOfStateICP.set(solutionHandler.getControllerReferenceICP());
       beginningOfStateICPVelocity.set(solutionHandler.getControllerReferenceICPVelocity());
@@ -368,6 +386,12 @@ public class ICPOptimizationController
          */
 
       return numberOfFootstepsToConsider;
+   }
+
+   public void setBeginningOfStateICP(FramePoint2d beginningOfStateICP, FrameVector2d beginningOfStateICPVelocity)
+   {
+      this.beginningOfStateICP.set(beginningOfStateICP);
+      this.beginningOfStateICPVelocity.set(beginningOfStateICPVelocity);
    }
 
    private void setProblemBooleans()

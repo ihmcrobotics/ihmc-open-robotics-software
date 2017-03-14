@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
@@ -49,7 +50,10 @@ public class ExecutionTimerTest
       }
       
       assertEquals(max, executionTimer.getMaxTime().getDoubleValue()*1000.0, 10);
-
    }
-
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(ExecutionTimer.class, ExecutionTimerTest.class);
+   }
 }

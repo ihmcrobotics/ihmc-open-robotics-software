@@ -9,13 +9,14 @@ import java.util.Random;
 import org.junit.After;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -256,8 +257,8 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
 
       for (int i = 0; i<1000; i++)
       {
-         double firstVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
-         double secondVectorLength = RandomTools.generateRandomDouble(random, 0.0, 10.0);
+         double firstVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
+         double secondVectorLength = RandomNumbers.nextDouble(random, 0.0, 10.0);
          FrameVector2d firstVector = FrameVector2d.generateRandomFrameVector2d(random, worldFrame);
          firstVector.scale(firstVectorLength / firstVector.length());
          FrameVector2d secondVector = new FrameVector2d();
@@ -344,7 +345,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       Random random = new Random(398742498237598750L);
       RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Vector3D vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
+      Vector3D vectorToTransform = RandomGeometry.nextVector3D(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
       FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2D(vectorToTransform.getX(), vectorToTransform.getY())); 
 
       try
@@ -377,7 +378,7 @@ public class FrameVector2dTest extends FrameTuple2dTest<FrameVector2d>
       Random random = new Random(398742498237598750L);
       RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Vector3D vectorToTransform = RandomTools.generateRandomVector(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
+      Vector3D vectorToTransform = RandomGeometry.nextVector3D(random, 0.0, 0.0, 0.0, 100.0, 100.0, 0.0);
       FrameVector2d vectorToTest = new FrameVector2d(null, new Vector2D(vectorToTransform.getX(), vectorToTransform.getY())); 
 
       try

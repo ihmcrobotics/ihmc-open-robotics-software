@@ -31,7 +31,7 @@ public class TransformInterpolationCalculator
     */
    public void computeInterpolation(RigidBodyTransform transform1, RigidBodyTransform transform2, RigidBodyTransform result, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       
       transform1.get(transform1Quaternion, transform1Translation);
       transform2.get(transform2Quaternion, transform2Translation);
@@ -48,7 +48,7 @@ public class TransformInterpolationCalculator
       long timeStamp1 = timeStampedTransform1.getTimeStamp();
       long timeStamp2 = timeStampedTransform2.getTimeStamp();
 
-      MathTools.checkIfInRange(timeStamp, timeStamp1, timeStamp2);
+      MathTools.checkIntervalContains(timeStamp, timeStamp1, timeStamp2);
 
       RigidBodyTransform transform1 = timeStampedTransform1.getTransform3D();
       RigidBodyTransform transform2 = timeStampedTransform2.getTransform3D();

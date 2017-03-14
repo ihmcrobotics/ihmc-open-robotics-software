@@ -13,7 +13,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
@@ -292,7 +292,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       Random random = new Random(398742498237598750L);
       RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Point3D pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
+      Point3D pointToTransform = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 0.0);
       FramePoint2d pointToTest = new FramePoint2d(null, new Point2D(pointToTransform.getX(), pointToTransform.getY()));
 
       transform.transform(pointToTransform);
@@ -332,7 +332,7 @@ public class FramePoint2dTest extends FrameTuple2dTest<FramePoint2d>
       Random random = new Random(398742498237598750L);
       RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
-      Point3D pointToTransform = RandomTools.generateRandomPoint(random, 100.0, 100.0, 0.0);
+      Point3D pointToTransform = RandomGeometry.nextPoint3D(random, 100.0, 100.0, 0.0);
       FramePoint2d pointToTest = new FramePoint2d(null, new Point2D(pointToTransform.getX(), pointToTransform.getY()));
 
       try

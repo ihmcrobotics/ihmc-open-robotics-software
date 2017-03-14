@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.controllerAPI.command.CommandArrayDeque;
 import us.ihmc.communication.packets.TextToSpeechPacket;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
@@ -29,6 +30,7 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.lists.RecyclingArrayDeque;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -36,7 +38,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class WalkingMessageHandler
 {
@@ -54,7 +55,7 @@ public class WalkingMessageHandler
    private final SideDependentList<Footstep> footstepsAtCurrentLocation = new SideDependentList<>();
    private final SideDependentList<Footstep> lastDesiredFootsteps = new SideDependentList<>();
 
-   private final SideDependentList<CommandArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
+   private final SideDependentList<RecyclingArrayDeque<FootTrajectoryCommand>> upcomingFootTrajectoryCommandListForFlamingoStance = new SideDependentList<>();
 
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -105,7 +106,7 @@ public class WalkingMessageHandler
          Footstep footstepAtCurrentLocation = new Footstep(endEffector, robotSide, soleFrame, poseReferenceFrame);
          footstepsAtCurrentLocation.put(robotSide, footstepAtCurrentLocation);
 
-         upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new CommandArrayDeque<>(FootTrajectoryCommand.class));
+         upcomingFootTrajectoryCommandListForFlamingoStance.put(robotSide, new RecyclingArrayDeque<>(FootTrajectoryCommand.class));
       }
 
       for (int i = 0; i < numberOfFootstepsToVisualize; i++)
@@ -142,15 +143,15 @@ public class WalkingMessageHandler
       }
 
       isWalkingPaused.set(false);
-      double commandDefaultTransferTime = command.getDefaultTransferTime();
-      double commandDefaultSwingTime = command.getDefaultSwingTime();
+      double commandDefaultTransferTime = command.getDefaultTransferDuration();
+      double commandDefaultSwingTime = command.getDefaultSwingDuration();
       if (!Double.isNaN(commandDefaultSwingTime) && commandDefaultSwingTime > 1.0e-2 && !Double.isNaN(commandDefaultTransferTime) && commandDefaultTransferTime >= 0.0)
       {
          defaultTransferTime.set(commandDefaultTransferTime);
          defaultSwingTime.set(commandDefaultSwingTime);
       }
 
-      double commandFinalTransferTime = command.getFinalTransferTime();
+      double commandFinalTransferTime = command.getFinalTransferDuration();
       if (commandFinalTransferTime >= 0.0)
          finalTransferTime.set(commandFinalTransferTime);
       else
@@ -160,7 +161,7 @@ public class WalkingMessageHandler
       {
          Footstep newFootstep = createFootstep(command.getFootstep(i));
          upcomingFootsteps.add(newFootstep);
-         FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i));
+         FootstepTiming newFootstepTiming = createFootstepTiming(command.getFootstep(i), command.getExecutionTiming());
          upcomingFootstepTimings.add(newFootstepTiming);
       }
 
@@ -381,6 +382,7 @@ public class WalkingMessageHandler
 
    public void reportWalkingComplete()
    {
+      System.out.println("reportWalkingComplete");
       WalkingStatusMessage walkingStatusMessage = new WalkingStatusMessage();
       walkingStatusMessage.setWalkingStatus(WalkingStatusMessage.Status.COMPLETED);
       statusOutputManager.reportStatusMessage(walkingStatusMessage);
@@ -587,20 +589,46 @@ public class WalkingMessageHandler
       return footstep;
    }
 
-   private FootstepTiming createFootstepTiming(FootstepDataCommand footstep)
+   private FootstepTiming createFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming)
    {
       FootstepTiming timing = new FootstepTiming();
-      if (footstep.hasTimings())
-         timing.setTimings(footstep.getSwingTime(), footstep.getTransferTime());
-      else
+
+      double swingDuration = footstep.getSwingDuration();
+      if (Double.isNaN(swingDuration) || swingDuration <= 0.0)
+         swingDuration = defaultSwingTime.getDoubleValue();
+
+      double transferDuration = footstep.getTransferDuration();
+      if (Double.isNaN(transferDuration) || transferDuration <= 0.0)
       {
          if (upcomingFootstepTimings.isEmpty())
-            timing.setTimings(defaultSwingTime.getDoubleValue(), defaultInitialTransferTime.getDoubleValue());
+            transferDuration = defaultInitialTransferTime.getDoubleValue();
          else
-            timing.setTimings(defaultSwingTime.getDoubleValue(), defaultTransferTime.getDoubleValue());
+            transferDuration = defaultTransferTime.getDoubleValue();
       }
-      if (footstep.hasAbsoluteTime())
-         timing.setAbsoluteTime(footstep.getSwingStartTime(), footstepDataListRecievedTime.getDoubleValue());
+
+      timing.setTimings(swingDuration, transferDuration);
+
+      switch (executionTiming)
+      {
+      case CONTROL_DURATIONS:
+         break;
+      case CONTROL_ABSOLUTE_TIMINGS:
+         int stepsInQueue = upcomingFootstepTimings.size();
+         if (stepsInQueue == 0)
+         {
+            timing.setAbsoluteTime(transferDuration, footstepDataListRecievedTime.getDoubleValue());
+         }
+         else
+         {
+            FootstepTiming previousTiming = upcomingFootstepTimings.get(stepsInQueue - 1);
+            double swingStartTime = previousTiming.getSwingStartTime() + previousTiming.getSwingTime() + transferDuration;
+            timing.setAbsoluteTime(swingStartTime, footstepDataListRecievedTime.getDoubleValue());
+         }
+         break;
+      default:
+         throw new RuntimeException("Timing mode not implemented.");
+      }
+
       return timing;
    }
 

@@ -10,6 +10,8 @@ import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,14 +33,12 @@ import us.ihmc.robotics.kinematics.RandomRestartInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implements MultiRobotTestInterface
 {
@@ -418,7 +418,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
          double minRange = jointLimits.get(name).get(0) - bufferAwayFromJointLimits;
          double maxRange = jointLimits.get(name).get(1) + bufferAwayFromJointLimits;
 
-         double randomJointAngle = RandomTools.generateRandomDouble(random, minRange, maxRange);
+         double randomJointAngle = RandomNumbers.nextDouble(random, minRange, maxRange);
          jointAngles.put(name, randomJointAngle);
          oneDoFJoints.get(name).setQ(jointAngles.get(name));
       }
@@ -435,7 +435,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
 
          double middleRangeJointAngle = (minRange + maxRange) / 2.0;
 
-         double deviation = RandomTools.generateRandomDouble(random, maxAngleDeviationFromMidRange);
+         double deviation = RandomNumbers.nextDouble(random, maxAngleDeviationFromMidRange);
 
          jointAngles.put(name, middleRangeJointAngle + deviation);
          oneDoFJoints.get(name).setQ(jointAngles.get(name));

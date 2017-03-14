@@ -104,7 +104,7 @@ public class StepprStandPrep implements StepprController
          break;
 
       case INITIALIZE:
-         initialTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+         initialTime.set(Conversions.nanosecondsToSeconds(timestamp));
          trajectory.setCubic(0.0, trajectoryTime, 0.0, 0.0, 1.0, 0.0);
 
          for (StepprJoint joint : StepprJoint.values)
@@ -116,7 +116,7 @@ public class StepprStandPrep implements StepprController
          break;
 
       case EXECUTE:
-         double timeInTrajectory = MathTools.clipToMinMax(Conversions.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
+         double timeInTrajectory = MathTools.clamp(Conversions.nanosecondsToSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
 

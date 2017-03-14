@@ -47,7 +47,7 @@ public abstract class PolynomialTrajectoryGenerator implements DoubleTrajectoryG
    public void compute(double time)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       polynomial.compute(time);
       currentValue.set(polynomial.getPosition());
       currentVelocity.set(polynomial.getVelocity());

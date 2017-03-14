@@ -265,7 +265,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
 
    public void initialize()
    {
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       quinticParameterPolynomial.setQuintic(0.0, trajectoryTime.getDoubleValue(), 0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
 
       reset();
@@ -288,7 +288,7 @@ public class StraightLinePoseTrajectoryGenerator implements PoseTrajectoryGenera
    public void compute(double time)
    {
       this.currentTime.set(time);
-      time = MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue());
+      time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       quinticParameterPolynomial.compute(time);
       boolean isDone = isDone();
       double alphaVel = isDone ? 0.0 : quinticParameterPolynomial.getVelocity();

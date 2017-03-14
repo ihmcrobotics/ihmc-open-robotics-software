@@ -9,6 +9,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -17,7 +18,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RevoluteJoint;
@@ -245,7 +245,7 @@ public class PelvisRotationalStateUpdaterTest
 
    private IMUDefinition createRandomIMUDefinition(String suffix, ArrayList<RevoluteJoint> joints)
    {
-      int indexOfIMUParentJoint = RandomTools.generateRandomInt(random, 0, joints.size() - 1);
+      int indexOfIMUParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
       RigidBody rigidBody = joints.get(indexOfIMUParentJoint).getSuccessor();
       RigidBodyTransform transformFromIMUToJoint = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       IMUDefinition imuDefinition = new IMUDefinition("IMU" + suffix, rigidBody, transformFromIMUToJoint);
@@ -255,7 +255,7 @@ public class PelvisRotationalStateUpdaterTest
    private static FullInverseDynamicsStructure createFullInverseDynamicsStructure(ScrewTestTools.RandomFloatingChain randomFloatingChain,
          ArrayList<RevoluteJoint> joints)
    {
-      int indexOfEstimationParentJoint = RandomTools.generateRandomInt(random, 0, joints.size() - 1);
+      int indexOfEstimationParentJoint = RandomNumbers.nextInt(random, 0, joints.size() - 1);
       RigidBody estimationLink = joints.get(indexOfEstimationParentJoint).getSuccessor();
       SixDoFJoint rootInverseDynamicsJoint = randomFloatingChain.getRootJoint();
       RigidBody elevator = randomFloatingChain.getElevator();

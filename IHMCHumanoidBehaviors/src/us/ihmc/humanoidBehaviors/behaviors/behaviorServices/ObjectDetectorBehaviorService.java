@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.imageio.ImageIO;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,9 +22,8 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.VideoPacket;
 import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.time.DateTools;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 {
@@ -162,8 +162,8 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
 
       public VideoPacketToImageFilesRecorder(Path workingDirectory) throws IOException
       {
-         String dateString = DateTools.getDateString();
-         String timeStringWithSeconds = DateTools.getTimeStringWithSeconds();
+         String dateString = FormattingTools.getDateString();
+         String timeStringWithSeconds = FormattingTools.getTimeStringWithSeconds();
 
          this.workingDirectory = workingDirectory;
          Files.createDirectories(this.workingDirectory);

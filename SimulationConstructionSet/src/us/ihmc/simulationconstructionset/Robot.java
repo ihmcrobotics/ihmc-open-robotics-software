@@ -252,7 +252,7 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       getRobotsYoVariableRegistry().addChild(registry);
    }
 
-   public void addDynamicGraphicObjectsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (yoGraphicsListRegistry == null)
       {
@@ -732,6 +732,21 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       }
 
       return ret;
+   }
+
+   public ExternalForcePoint getExternalForcePoint(String name)
+   {
+      ArrayList<Joint> children = this.getRootJoints();
+
+      for (int i = 0; i < children.size(); i++)
+      {
+         Joint rootJoint = children.get(i);
+         ExternalForcePoint externalForcePoint = rootJoint.recursiveGetExternalForcePoint(name);
+         if (externalForcePoint != null) 
+            return externalForcePoint;
+      }
+
+      return null;
    }
 
    /**
@@ -1981,6 +1996,18 @@ public class Robot implements YoVariableHolder, GroundContactPointsHolder
       }
       
       return true;
+   }
+
+   public Joint getJoint(String name)
+   {
+      for (int i=0; i<rootJoints.size(); i++)
+      {
+         Joint rootJoint = rootJoints.get(i);
+         Joint joint = rootJoint.recursivelyGetJoint(name);
+         if (joint != null)
+            return joint;
+      }
+      return null;
    }
    
 //   public void resetup()

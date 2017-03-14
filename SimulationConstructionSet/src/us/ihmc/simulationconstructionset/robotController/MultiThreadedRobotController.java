@@ -21,16 +21,16 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
    public void addController(MultiThreadedRobotControlElement controller, int executionsPerControlTick, boolean skipFirstControlCycle)
    {
       controllers.add(new MultiThreadedRobotControllerExecutor(simulatedRobot, controller, executionsPerControlTick, skipFirstControlCycle, registry));
-      if(controller.getDynamicGraphicObjectsListRegistry() != null)
+      if(controller.getYoGraphicsListRegistry() != null)
       {
-         scs.addYoGraphicsListRegistry(controller.getDynamicGraphicObjectsListRegistry(), false);
+         scs.addYoGraphicsListRegistry(controller.getYoGraphicsListRegistry(), false);
       }
    }
 
    @Override
    public void wasRewound()
    {
-      updateDynamicGraphicObjectListRegistries();
+      updateYoGraphicsListRegistries();
 //      long lcm;
 //      if (controllers.size() == 0)
 //      {
@@ -59,18 +59,18 @@ public class MultiThreadedRobotController extends AbstractThreadedRobotControlle
    }
 
 
-   private void updateDynamicGraphicObjectListRegistries()
+   private void updateYoGraphicsListRegistries()
    {
       for (int i = 0; i < controllers.size(); i++)
       {
-         controllers.get(i).updateDynamicGraphicObjectListRegistry();
+         controllers.get(i).updateYoGraphicsListRegistry();
       }
    }
 
    @Override
    public void update(int tick)
    {
-      updateDynamicGraphicObjectListRegistries();
+      updateYoGraphicsListRegistries();
    }
 
 

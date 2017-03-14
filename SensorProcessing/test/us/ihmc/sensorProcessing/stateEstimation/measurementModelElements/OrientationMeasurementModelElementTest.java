@@ -16,7 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -53,7 +53,7 @@ public class OrientationMeasurementModelElementTest
             estimationFrame, measurementFrame, name, registry);
 
       RotationMatrix orientation = new RotationMatrix();
-      orientation.set(RandomTools.generateRandomRotation(random));
+      orientation.set(RandomGeometry.nextAxisAngle(random));
       orientationPort.setData(new FrameOrientation(ReferenceFrame.getWorldFrame(), orientation));
 
       randomFloatingChain.setRandomPositionsAndVelocities(random);

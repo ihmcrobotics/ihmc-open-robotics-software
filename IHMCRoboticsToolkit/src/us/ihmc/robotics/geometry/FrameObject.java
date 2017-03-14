@@ -13,4 +13,17 @@ public interface FrameObject<T extends FrameObject<T>> extends ReferenceFrameHol
    public abstract void setToZero(ReferenceFrame referenceFrame);
 
    public abstract void setToNaN(ReferenceFrame referenceFrame);
+   
+   /**
+    * Sets this frame object to zero at the origin of the given reference frame,
+    * then changes back to this objects current frame.
+    * 
+    * @param referenceFrame reference frame to set to
+    */
+   public default void setFromReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      ReferenceFrame thisReferenceFrame = getReferenceFrame();
+      setToZero(referenceFrame);
+      changeFrame(thisReferenceFrame);
+   }
 }

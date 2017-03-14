@@ -68,7 +68,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
 
    public void setOneDoFJointDesiredAcceleration(int jointIndex, double desiredAcceleration)
    {
-      MathTools.checkIfEqual(joints.get(jointIndex).getDegreesOfFreedom(), 1);
+      MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       desiredAccelerations.get(jointIndex).reshape(1, 1);
       desiredAccelerations.get(jointIndex).set(0, 0, desiredAcceleration);
    }
@@ -114,7 +114,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
 
    private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
    {
-      MathTools.checkIfEqual(joint.getDegreesOfFreedom(), desiredAcceleration.getNumRows());
+      MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredAcceleration.getNumRows());
    }
 
    public boolean getHasWeight()

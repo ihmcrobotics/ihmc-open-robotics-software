@@ -105,12 +105,12 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
             long ppsFromROSAge = rosMainNode.getCurrentTime().totalNsecs() - multisensePPSTimestamp;
 
             // Check if timestamps are approximately the same age. If not, we discard this measurement and wait for the next one.
-            if (Math.abs(ppsFromRobotAge - ppsFromROSAge) > Conversions.milliSecondsToNanoSeconds(100))
+            if (Math.abs(ppsFromRobotAge - ppsFromROSAge) > Conversions.millisecondsToNanoseconds(100))
             {
                if (DEBUG)
                {
-                  System.out.println("[AtlasPPSTimestampOffsetProvider] Last received pps (robot age: " + Conversions.nanoSecondstoSeconds(ppsFromRobotAge)
-                        + ", ros age:" + Conversions.nanoSecondstoSeconds(ppsFromROSAge) + ") are not of the same signal. Ignoring this measurement. Current offset is " + currentTimeStampOffset.get());
+                  System.out.println("[AtlasPPSTimestampOffsetProvider] Last received pps (robot age: " + Conversions.nanosecondsToSeconds(ppsFromRobotAge)
+                        + ", ros age:" + Conversions.nanosecondsToSeconds(ppsFromROSAge) + ") are not of the same signal. Ignoring this measurement. Current offset is " + currentTimeStampOffset.get());
                }
                return;
             }
@@ -120,7 +120,7 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
                long newOffset = lastPPSTimestampFromRobot - multisensePPSTimestamp;
                long lastTimestampOffset = currentTimeStampOffset.getAndSet(newOffset);
 
-               if (offsetIsDetermined && Math.abs(newOffset - lastTimestampOffset) > Conversions.milliSecondsToNanoSeconds(1))
+               if (offsetIsDetermined && Math.abs(newOffset - lastTimestampOffset) > Conversions.millisecondsToNanoseconds(1))
                {
                   System.err.println("[AtlasPPSTimestampOffsetProvider] Unstable PPS offset. New offset: " + newOffset + ", previous offset: "
                         + lastTimestampOffset);

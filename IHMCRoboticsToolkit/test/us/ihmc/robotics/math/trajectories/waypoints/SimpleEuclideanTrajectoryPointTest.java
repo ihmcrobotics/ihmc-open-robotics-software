@@ -8,6 +8,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,7 +20,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.EuclideanWaypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.interfaces.EuclideanTrajectoryPointInterface;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -90,18 +91,18 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition, expectedLinearVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleEuclideanTrajectoryPoint expectedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition,
             expectedLinearVelocity);
@@ -112,9 +113,9 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedSimpleEuclideanTrajectoryPoint.getTime(),
             expectedPosition, expectedLinearVelocity, testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      final double expectedFinalTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      final Point3D expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      final Vector3D expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
+      final double expectedFinalTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      final Point3D expectedFinalPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      final Vector3D expectedFinalLinearVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
@@ -144,45 +145,45 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
 
       testedSimpleEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleEuclideanTrajectoryPoint expectedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition,
             expectedLinearVelocity);
 
       testedSimpleEuclideanTrajectoryPoint.set(expectedSimpleEuclideanTrajectoryPoint);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
 
       expectedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition, expectedLinearVelocity);
 
@@ -192,11 +193,11 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedSimpleEuclideanTrajectoryPoint.getTime(),
             expectedPosition, expectedLinearVelocity, testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      final double expectedFinalTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      final Point3D expectedFinalPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      final Quaternion expectedFinalOrientation = RandomTools.generateRandomQuaternion(random);
-      final Vector3D expectedFinalLinearVelocity = RandomTools.generateRandomVector(random);
-      final Vector3D expectedFinalAngularVelocity = RandomTools.generateRandomVector(random);
+      final double expectedFinalTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      final Point3D expectedFinalPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      final Quaternion expectedFinalOrientation = RandomGeometry.nextQuaternion(random);
+      final Vector3D expectedFinalLinearVelocity = RandomGeometry.nextVector3D(random);
+      final Vector3D expectedFinalAngularVelocity = RandomGeometry.nextVector3D(random);
 
       SimpleEuclideanTrajectoryPoint expectedEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint();
       expectedEuclideanTrajectoryPoint.setTime(expectedFinalTime);
@@ -219,9 +220,9 @@ public class SimpleEuclideanTrajectoryPointTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       ReferenceFrame expectedFrame = worldFrame;
-      double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      Point3D expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Vector3D expectedLinearVelocity = new Vector3D(RandomTools.generateRandomVector(random));
+      double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      Point3D expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      Vector3D expectedLinearVelocity = new Vector3D(RandomGeometry.nextVector3D(random));
       SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition,
             expectedLinearVelocity);
 
@@ -245,9 +246,9 @@ public class SimpleEuclideanTrajectoryPointTest
       double epsilon = 1.0e-10;
       Random random = new Random(21651016L);
 
-      double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      Point3D expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Vector3D expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      Point3D expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      Vector3D expectedLinearVelocity = RandomGeometry.nextVector3D(random);
       SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition,
             expectedLinearVelocity);
 
@@ -259,9 +260,9 @@ public class SimpleEuclideanTrajectoryPointTest
       assertTrajectoryPointContainsExpectedData(expectedTime, expectedPosition, expectedLinearVelocity,
             testedSimpleEuclideanTrajectoryPoint, epsilon);
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
       testedSimpleEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
       expectedTime = 0.0;
@@ -279,18 +280,18 @@ public class SimpleEuclideanTrajectoryPointTest
    {
       Random random = new Random(21651016L);
 
-      double expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      Point3D expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      Vector3D expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      double expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      Point3D expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      Vector3D expectedLinearVelocity = RandomGeometry.nextVector3D(random);
       SimpleEuclideanTrajectoryPoint testedSimpleEuclideanTrajectoryPoint = new SimpleEuclideanTrajectoryPoint(expectedTime, expectedPosition, expectedLinearVelocity);
 
       testedSimpleEuclideanTrajectoryPoint.setToNaN();
       assertTrue(Double.isNaN(testedSimpleEuclideanTrajectoryPoint.getTime()));
       assertTrue(testedSimpleEuclideanTrajectoryPoint.containsNaN());
 
-      expectedTime = RandomTools.generateRandomDouble(random, 0.0, 1000.0);
-      expectedPosition = RandomTools.generateRandomPoint(random, 10.0, 10.0, 10.0);
-      expectedLinearVelocity = RandomTools.generateRandomVector(random);
+      expectedTime = RandomNumbers.nextDouble(random, 0.0, 1000.0);
+      expectedPosition = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
+      expectedLinearVelocity = RandomGeometry.nextVector3D(random);
       testedSimpleEuclideanTrajectoryPoint.set(expectedTime, expectedPosition, expectedLinearVelocity);
 
       testedSimpleEuclideanTrajectoryPoint.setToNaN();

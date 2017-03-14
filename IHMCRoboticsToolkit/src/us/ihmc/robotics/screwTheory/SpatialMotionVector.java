@@ -87,7 +87,7 @@ public abstract class SpatialMotionVector
     */
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] array)
    {
-      MathTools.checkIfEqual(SIZE, array.length);
+      MathTools.checkEquals(SIZE, array.length);
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
@@ -555,6 +555,19 @@ public abstract class SpatialMotionVector
       if (this.bodyFrame != bodyFrame) throw new ReferenceFrameMismatchException("this.bodyFrame != bodyFrame");
       if (this.baseFrame != baseFrame) throw new ReferenceFrameMismatchException("this.baseFrame != baseFrame");
       if (this.expressedInFrame != expressedInFrame) throw new ReferenceFrameMismatchException("this.expressedInFrame != expressedInFrame");
+   }
+
+   public boolean containsNaN(SpatialMotionVector spatialMotionVector)
+   {
+      if (Double.isNaN(getLinearPartX())) return true;
+      if (Double.isNaN(getLinearPartY())) return true;
+      if (Double.isNaN(getLinearPartZ())) return true;
+      
+      if (Double.isNaN(getAngularPartX())) return true;
+      if (Double.isNaN(getAngularPartY())) return true;
+      if (Double.isNaN(getAngularPartZ())) return true;
+
+      return false;
    }
 
    ///CLOVER:OFF

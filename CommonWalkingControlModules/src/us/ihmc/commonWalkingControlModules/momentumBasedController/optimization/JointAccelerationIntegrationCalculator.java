@@ -48,11 +48,11 @@ public class JointAccelerationIntegrationCalculator
          int localJointIndex = jointsToComputeDesiredPositionFor.indexOf(jointToComputeDesierdPositionFor);
 
          double newAlphaPosition = command.getJointAlphaPosition(commandJointIndex);
-         if (Double.isNaN(newAlphaPosition) || !MathTools.isInsideBoundsInclusive(newAlphaPosition, 0.0, 1.0))
+         if (Double.isNaN(newAlphaPosition) || !MathTools.intervalContains(newAlphaPosition, 0.0, 1.0))
             newAlphaPosition = defaultAlphaPositionIntegration.getDoubleValue();
 
          double newAlphaVelocity = command.getJointAlphaVelocity(commandJointIndex);
-         if (Double.isNaN(newAlphaVelocity) || !MathTools.isInsideBoundsInclusive(newAlphaVelocity, 0.0, 1.0))
+         if (Double.isNaN(newAlphaVelocity) || !MathTools.intervalContains(newAlphaVelocity, 0.0, 1.0))
             newAlphaVelocity = defaultAlphaVelocityIntegration.getDoubleValue();
 
          double newMaxPositionError = command.getJointMaxPositionError(commandJointIndex);
@@ -106,12 +106,12 @@ public class JointAccelerationIntegrationCalculator
 
          desiredVelocity *= alphaVelocity;
          desiredVelocity += desiredAcceleration * controlDT;
-         desiredVelocity = MathTools.clipToMinMax(desiredVelocity, maxVelocity);
+         desiredVelocity = MathTools.clamp(desiredVelocity, maxVelocity);
          desiredPosition += desiredVelocity * controlDT;
 
-         double errorPosition = MathTools.clipToMinMax(desiredPosition - joint.getQ(), maxPositionError);
+         double errorPosition = MathTools.clamp(desiredPosition - joint.getQ(), maxPositionError);
          desiredPosition = joint.getQ() + errorPosition;
-         desiredPosition = MathTools.clipToMinMax(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
+         desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
          desiredPosition = alphaPosition * desiredPosition + (1.0 - alphaPosition) * joint.getQ();
          desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 

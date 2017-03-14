@@ -21,7 +21,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * This class allows constructs RemoteDynamicGraphic objects from parsed
+ * This class allows constructs RemoteYoGraphic objects from parsed
  * data retrieved by the YoVariableHandshakeClient.
  *
  * @author Alex Lesman
