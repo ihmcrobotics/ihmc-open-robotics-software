@@ -17,7 +17,6 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -211,7 +210,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       {
          int numberOfPoints = RigidBodyJointspaceControlState.maxPoints;
          ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfPoints);
-         double time = 0.0;
+         double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -220,7 +219,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();
@@ -230,7 +229,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       {
          int numberOfPoints = RigidBodyJointspaceControlState.maxPoints - 1;
          ArmTrajectoryMessage message = new ArmTrajectoryMessage(robotSide, numberOfJoints, numberOfPoints);
-         double time = 0.0;
+         double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -239,7 +238,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
          String bodyName = fullRobotModel.getHand(robotSide).getName();
@@ -663,7 +662,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
          assertTrue(success);
 
-         RigidBodyControlMode controllerState = findControllerState(robotSide, scs);
+         RigidBodyControlMode controllerState = findControllerState(hand.getName(), scs);
          double[] controllerDesiredJointPositions = findControllerDesiredPositions(armJoints, scs);
          double[] controllerDesiredJointVelocities = findControllerDesiredVelocities(armJoints, scs);
 
@@ -733,10 +732,10 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    }
 
    @SuppressWarnings("unchecked")
-   public static RigidBodyControlMode findControllerState(RobotSide robotSide, SimulationConstructionSet scs)
+   public static RigidBodyControlMode findControllerState(String bodyName, SimulationConstructionSet scs)
    {
-      String handControlModuleName = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-      return ((EnumYoVariable<RigidBodyControlMode>) scs.getVariable(handControlModuleName, handControlModuleName)).getEnumValue();
+      String managerName = bodyName + "Manager";
+      return ((EnumYoVariable<RigidBodyControlMode>) scs.getVariable(managerName, managerName + "State")).getEnumValue();
    }
 
    public static double[] findControllerDesiredPositions(OneDoFJoint[] armJoints, SimulationConstructionSet scs)

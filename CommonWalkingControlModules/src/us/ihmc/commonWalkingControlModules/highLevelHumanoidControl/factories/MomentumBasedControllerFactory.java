@@ -127,7 +127,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
       managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
-      managerFactory.setArmControlParameters(armControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
@@ -409,7 +408,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
          if (managerFactory != null)
          {
-            managerFactory.getOrCreateManipulationControlModule().initializeDesiredToCurrent();
             managerFactory.getOrCreatePelvisOrientationManager().setToHoldCurrentInWorldFrame();
          }
       }

@@ -298,7 +298,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       {
          int numberOfPoints = RigidBodyJointspaceControlState.maxPoints;
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
-         double time = 0.0;
+         double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             message.setTrajectoryPoint(pointIdx, time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
@@ -306,10 +306,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
-         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
          assertTrue(controllerState == RigidBodyControlMode.JOINTSPACE);
          assertNumberOfWaypoints(handName, 0, scs);
       }
@@ -317,7 +317,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       {
          int numberOfPoints = RigidBodyJointspaceControlState.maxPoints - 1;
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
-         double time = 0.0;
+         double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
             message.setTrajectoryPoint(pointIdx, time, new Point3D(), new Quaternion(), new Vector3D(), new Vector3D());
@@ -325,10 +325,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          }
          drcSimulationTestHelper.send(message);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
-         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
          assertTrue(controllerState == RigidBodyControlMode.TASKSPACE);
          assertNumberOfWaypoints(handName, RigidBodyJointspaceControlState.maxPoints, drcSimulationTestHelper.getSimulationConstructionSet());
       }
@@ -617,7 +617,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         String handName = fullRobotModel.getHand(robotSide).getName();
+         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
          assertTrue(controllerState == RigidBodyControlMode.JOINTSPACE);
       }
    }
@@ -830,6 +831,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          double trajectoryTime = 5.0;
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
+         String handName = fullRobotModel.getHand(robotSide).getName();
 
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
 
@@ -850,7 +852,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
          assertEquals(RigidBodyControlMode.TASKSPACE, controllerState);
 
          int numberOfJoints = armJoints.length;
@@ -866,7 +868,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
          assertTrue(success);
 
-         controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs);
+         controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
          double[] controllerDesiredJointPositions = EndToEndArmTrajectoryMessageTest.findControllerDesiredPositions(armJoints, scs);
          double[] controllerDesiredJointVelocities = EndToEndArmTrajectoryMessageTest.findControllerDesiredVelocities(armJoints, scs);
 

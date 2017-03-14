@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
@@ -25,14 +24,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class HighLevelControlManagerFactory
@@ -54,7 +51,6 @@ public class HighLevelControlManagerFactory
    private WalkingControllerParameters walkingControllerParameters;
    private CapturePointPlannerParameters capturePointPlannerParameters;
    private ICPOptimizationParameters icpOptimizationParameters;
-   private ArmControllerParameters armControllerParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    public HighLevelControlManagerFactory(StatusMessageOutputManager statusOutputManager, YoVariableRegistry parentRegistry)
@@ -82,11 +78,6 @@ public class HighLevelControlManagerFactory
    public void setICPOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
    {
       this.icpOptimizationParameters = icpOptimizationParameters;
-   }
-
-   public void setArmControlParameters(ArmControllerParameters armControllerParameters)
-   {
-      this.armControllerParameters = armControllerParameters;
    }
 
    public BalanceManager getOrCreateBalanceManager()
@@ -173,47 +164,6 @@ public class HighLevelControlManagerFactory
       return manager;
    }
 
-   public ManipulationControlModule getOrCreateManipulationControlModule()
-   {
-      if (manipulationControlModule != null)
-         return manipulationControlModule;
-
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-
-      if (fullRobotModel.getChest() == null)
-      {
-         robotMissingBodyWarning("chest", ManipulationControlModule.class);
-         return null;
-      }
-
-      if (fullRobotModel.getHand(RobotSide.LEFT) == null)
-      {
-         robotMissingBodyWarning("left hand", ManipulationControlModule.class);
-         return null;
-      }
-
-      if (fullRobotModel.getHand(RobotSide.RIGHT) == null)
-      {
-         robotMissingBodyWarning("right hand", ManipulationControlModule.class);
-         return null;
-      }
-
-      if (!hasArmControllerParameters(ManipulationControlModule.class))
-         return null;
-      if (!hasHighLevelHumanoidControllerToolbox(ManipulationControlModule.class))
-         return null;
-      if (!hasMomentumOptimizationSettings(ManipulationControlModule.class))
-         return null;
-
-      manipulationControlModule = new ManipulationControlModule(armControllerParameters, controllerToolbox, registry);
-      double handJointspaceWeight = momentumOptimizationSettings.getHandJointspaceWeight();
-      Vector3D handAngularTaskspaceWeight = momentumOptimizationSettings.getHandAngularTaskspaceWeight();
-      Vector3D handLinearTaskspaceWeight = momentumOptimizationSettings.getHandLinearTaskspaceWeight();
-      double handUserModeWeight = momentumOptimizationSettings.getHandUserModeWeight();
-      manipulationControlModule.setWeights(handJointspaceWeight, handAngularTaskspaceWeight, handLinearTaskspaceWeight, handUserModeWeight);
-      return manipulationControlModule;
-   }
-
    public FeetManager getOrCreateFeetManager()
    {
       if (feetManager != null)
@@ -276,14 +226,6 @@ public class HighLevelControlManagerFactory
       return false;
    }
 
-   private boolean hasArmControllerParameters(Class<?> managerClass)
-   {
-      if (armControllerParameters != null)
-         return true;
-      missingObjectWarning(ArmControllerParameters.class, managerClass);
-      return false;
-   }
-
    private boolean hasMomentumOptimizationSettings(Class<?> managerClass)
    {
       if (momentumOptimizationSettings != null)
@@ -295,11 +237,6 @@ public class HighLevelControlManagerFactory
    private void missingObjectWarning(Class<?> missingObjectClass, Class<?> managerClass)
    {
       PrintTools.warn(this, missingObjectClass.getSimpleName() + " has not been set, cannot create: " + managerClass.getSimpleName());
-   }
-
-   private void robotMissingBodyWarning(String missingBodyName, Class<?> managerClass)
-   {
-      PrintTools.warn(this, "The robot is missing the body: " + missingBodyName + ", cannot create: " + managerClass.getSimpleName());
    }
 
    public void initializeManagers()

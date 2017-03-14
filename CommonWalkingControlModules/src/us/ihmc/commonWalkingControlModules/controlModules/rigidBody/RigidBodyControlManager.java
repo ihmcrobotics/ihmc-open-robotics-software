@@ -37,6 +37,8 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineToo
 
 public class RigidBodyControlManager
 {
+   public static final double DEFAULT_GO_HOME_TIME = 2.0;
+
    private final String bodyName;
    private final YoVariableRegistry registry;
    private final GenericStateMachine<RigidBodyControlMode, RigidBodyControlState> stateMachine;
@@ -52,15 +54,14 @@ public class RigidBodyControlManager
    private final double[] initialJointPositions;
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FramePose initialPose = new FramePose();
+   private final ReferenceFrame controlFrame;
 
    private final OneDoFJoint[] jointsOriginal;
-   private final OneDoFJoint[] jointsAtDesiredPosition;
-
-   private final ReferenceFrame bodyFrame;
-   private final ReferenceFrame baseFrame;
 
    private final BooleanYoVariable allJointsEnabled;
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+
+   private final BooleanYoVariable hasBeenInitialized;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
@@ -70,15 +71,14 @@ public class RigidBodyControlManager
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoVariableRegistry(namePrefix);
-      bodyFrame = bodyToControl.getBodyFixedFrame();
-      this.baseFrame = baseFrame;
+      this.controlFrame = controlFrame;
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
+      hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
 
       OneDoFJoint[] jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
       jointsOriginal = jointsToControl;
-      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(baseBody, bodyToControl);
       initialJointPositions = new double[jointsOriginal.length];
 
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
@@ -130,11 +130,17 @@ public class RigidBodyControlManager
 
    public void initialize()
    {
-      holdInJointspace();
+      if (!hasBeenInitialized.getBooleanValue())
+      {
+         goToHomeFromCurrent(DEFAULT_GO_HOME_TIME);
+         hasBeenInitialized.set(true);
+      }
    }
 
    public void compute()
    {
+      initialize();
+
       checkForDisabledJoints();
 
       if (stateMachine.getCurrentState().abortState())
@@ -146,52 +152,21 @@ public class RigidBodyControlManager
       positionControlHelper.update();
    }
 
-   public void holdOrientationInTaskspace()
-   {
-      computeDesiredOrientation(initialOrientation);
-      initialOrientation.changeFrame(baseFrame);
-      taskspaceControlState.holdOrientation(initialOrientation);
-      requestState(taskspaceControlState.getStateEnum());
-   }
-
-   public void holdPoseInTaskspace()
-   {
-      computeDesiredPose(initialPose);
-      initialPose.changeFrame(baseFrame);
-      taskspaceControlState.holdPose(initialPose);
-      requestState(taskspaceControlState.getStateEnum());
-   }
-
    public void holdInJointspace()
    {
       jointspaceControlState.holdCurrent();
       requestState(jointspaceControlState.getStateEnum());
    }
 
-   private void holdOrientation()
-   {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
-         holdOrientationInTaskspace();
-      else
-         holdInJointspace();
-   }
-
-   private void holdPose()
-   {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
-         holdPoseInTaskspace();
-      else
-         holdInJointspace();
-   }
-
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      stateMachine.getCurrentState().handleStopAllTrajectoryCommand(command);
+      if (command.isStopAllTrajectory())
+         holdInJointspace();
    }
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
-      computeDesiredOrientation(initialOrientation);
+      initialOrientation.setToZero(controlFrame);
       initialOrientation.changeFrame(command.getReferenceFrame());
 
       if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialOrientation))
@@ -201,13 +176,13 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
-         holdOrientation();
+         holdInJointspace();
       }
    }
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
-      computeDesiredPose(initialPose);
+      initialPose.setToZero(controlFrame);
       initialPose.changeFrame(command.getReferenceFrame());
 
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
@@ -217,7 +192,7 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
-         holdPose();
+         holdInJointspace();
       }
    }
 
@@ -283,46 +258,6 @@ public class RigidBodyControlManager
          jointsOriginal[jointIdx].resetIntegrator();
    }
 
-   public boolean isControllingPoseInFrame(ReferenceFrame referenceFrame)
-   {
-      // TODO: check if the taskspace controller is active and whether it is controlling the body in the given frame
-      return false;
-   }
-
-   private void computeDesiredPose(FramePose desiredPoseToPack)
-   {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
-      {
-         taskspaceControlState.getDesiredPose(desiredPoseToPack);
-      }
-      else
-      {
-         updateJointsAtDesiredPosition();
-         ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
-         desiredPoseToPack.setToZero(desiredEndEffectorFrame);
-      }
-
-      if (desiredPoseToPack.containsNaN())
-         desiredPoseToPack.setToZero(bodyFrame);
-   }
-
-   private void computeDesiredOrientation(FrameOrientation desiredOrientationToPack)
-   {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.TASKSPACE)
-      {
-         taskspaceControlState.getDesiredOrientation(desiredOrientationToPack);
-      }
-      else
-      {
-         updateJointsAtDesiredPosition();
-         ReferenceFrame desiredEndEffectorFrame = jointsAtDesiredPosition[jointsAtDesiredPosition.length - 1].getSuccessor().getBodyFixedFrame();
-         desiredOrientationToPack.setToZero(desiredEndEffectorFrame);
-      }
-
-      if (desiredOrientationToPack.containsNaN())
-         desiredOrientationToPack.setToZero(bodyFrame);
-   }
-
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
    {
       if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
@@ -332,32 +267,9 @@ public class RigidBodyControlManager
       }
       else
       {
-         updateJointsAtDesiredPosition();
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-            desiredJointPositionsToPack[i] = jointsAtDesiredPosition[i].getQ();
+         for (int i = 0; i < jointsOriginal.length; i++)
+            desiredJointPositionsToPack[i] = jointsOriginal[i].getQ();
       }
-   }
-
-   private void updateJointsAtDesiredPosition()
-   {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
-      {
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-         {
-            jointsAtDesiredPosition[i].setQ(jointspaceControlState.getJointDesiredPosition(i));
-            jointsAtDesiredPosition[i].setQd(jointspaceControlState.getJointDesiredVelocity(i));
-         }
-      }
-      else
-      {
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-         {
-            jointsAtDesiredPosition[i].setQ(jointsOriginal[i].getQ());
-            jointsAtDesiredPosition[i].setQd(jointsOriginal[i].getQd());
-         }
-      }
-
-      jointsAtDesiredPosition[0].updateFramesRecursively();
    }
 
    private void requestState(RigidBodyControlMode state)
