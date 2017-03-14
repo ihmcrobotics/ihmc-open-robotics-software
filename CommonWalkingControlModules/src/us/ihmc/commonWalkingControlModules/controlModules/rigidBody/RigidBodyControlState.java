@@ -8,7 +8,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -91,11 +90,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    protected void resetLastCommandId()
    {
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
-   }
-
-   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
-   {
-      trajectoryStopped.set(command.isStopAllTrajectory());
    }
 
    public boolean abortState()

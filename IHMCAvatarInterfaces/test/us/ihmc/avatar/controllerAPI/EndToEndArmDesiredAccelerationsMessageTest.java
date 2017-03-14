@@ -58,18 +58,20 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       {
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
+         String handName = fullRobotModel.getHand(robotSide).getName();
+
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
          double[] armDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, armJoints.length, 0.1);
          ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
-         assertEquals(RigidBodyControlMode.USER, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(RigidBodyControlMode.USER, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));
          double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(hand.getName(), robotSide, armJoints, scs);
          assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
          double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
@@ -78,7 +80,7 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
          assertTrue(success);
 
-         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));
       }
    }
 
