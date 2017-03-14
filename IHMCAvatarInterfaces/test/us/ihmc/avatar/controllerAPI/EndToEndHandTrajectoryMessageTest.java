@@ -153,7 +153,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
 
@@ -169,14 +169,14 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = numberOfTrajectoryPoints * timePerWaypoint;
 
       SideDependentList<HandTrajectoryMessage> handTrajectoryMessages = new SideDependentList<>();
+      SideDependentList<ArrayDeque<SE3TrajectoryPointMessage>> handTrajectoryPoints = new SideDependentList<>(new ArrayDeque<>(), new ArrayDeque<>());
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      RigidBody chest = fullRobotModel.getChest();
+      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-
-         ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          FramePoint circleCenter = new FramePoint(chestFrame);
          circleCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.35);
          double radius = 0.15;
@@ -218,6 +218,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             scs.addStaticLinkGraphics(sphere);
 
             handTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+
+            SE3TrajectoryPointMessage point = new SE3TrajectoryPointMessage(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+            handTrajectoryPoints.get(robotSide).addLast(point);
          }
 
          handTrajectoryMessages.put(robotSide, handTrajectoryMessage);
@@ -228,38 +231,49 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * getRobotModel().getControllerDT());
       assertTrue(success);
+      fullRobotModel.updateFrames();
+      int expectedNumberOfPointsInGenerator = Math.min(RigidBodyTaskspaceControlState.maxPointsInGenerator, numberOfTrajectoryPoints + 1);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertNumberOfWaypoints(handName, numberOfTrajectoryPoints + 1, scs);
 
-         HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide);
-
-         for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+         for (int trajectoryPointIndex = 1; trajectoryPointIndex < expectedNumberOfPointsInGenerator; trajectoryPointIndex++)
          {
-            SE3TrajectoryPointMessage fromMessage = handTrajectoryMessage.getTrajectoryPoint(trajectoryPointIndex);
+            SE3TrajectoryPointMessage point = handTrajectoryPoints.get(robotSide).removeFirst();
+            FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
+            framePoint.set(point.time, point.position, point.orientation, point.linearVelocity, point.angularVelocity);
+            framePoint.changeFrame(chestFrame);
+
+            SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(handName, trajectoryPointIndex, scs);
             SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-            expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
-            SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(handName, trajectoryPointIndex + 1, scs);
-            assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
+            framePoint.get(expectedTrajectoryPoint);
+
+            assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
+            assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
          }
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + firstTrajectoryPointTime);
       assertTrue(success);
+      fullRobotModel.updateFrames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide);
          String handName = fullRobotModel.getHand(robotSide).getName();
+         HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide);
+         SE3TrajectoryPointMessage point = handTrajectoryMessage.getLastTrajectoryPoint();
 
-         SE3TrajectoryPointMessage fromMessage = handTrajectoryMessage.getLastTrajectoryPoint();
-         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
-         expectedTrajectoryPoint.set(fromMessage.time, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
+         FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(ReferenceFrame.getWorldFrame());
+         framePoint.set(point.time, point.position, point.orientation, point.linearVelocity, point.angularVelocity);
+
          SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(handName, scs);
-         controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime()); // Don't want to check the time here.
-         assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
+         SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
+         framePoint.get(expectedTrajectoryPoint);
+
+         controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime());
+         assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
       }
    }
 
@@ -872,22 +886,22 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    public static Point3D findControllerDesiredPosition(String bodyName, SimulationConstructionSet scs)
    {
-      return findPoint3d("FeedbackControllerToolbox", bodyName + "DesiredPosition", scs);
+      return findPoint3d(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.POSITION.getName(), scs);
    }
 
    public static Quaternion findControllerDesiredOrientation(String bodyName, SimulationConstructionSet scs)
    {
-      return findQuat4d("FeedbackControllerToolbox", bodyName + "DesiredOrientation", scs);
+      return findQuat4d(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.ORIENTATION.getName(), scs);
    }
 
    public static Vector3D findControllerDesiredLinearVelocity(String bodyName, SimulationConstructionSet scs)
    {
-      return findVector3d("FeedbackControllerToolbox", bodyName + "DesiredLinearVelocity", scs);
+      return findVector3d(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.LINEAR_VELOCITY.getName(), scs);
    }
 
    public static Vector3D findControllerDesiredAngularVelocity(String bodyName, SimulationConstructionSet scs)
    {
-      return findVector3d("FeedbackControllerToolbox", bodyName + "DesiredAngularVelocity", scs);
+      return findVector3d(FeedbackControllerToolbox.class.getSimpleName(), bodyName + Type.DESIRED.getName() + Space.ANGULAR_VELOCITY.getName(), scs);
    }
 
    public static int findNumberOfWaypoints(String bodyName, SimulationConstructionSet scs)
