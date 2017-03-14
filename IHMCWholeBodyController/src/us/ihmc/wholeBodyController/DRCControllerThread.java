@@ -109,8 +109,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
       this.robotVisualizer = robotVisualizer;
-      this.controlDTInNS = Conversions.secondsToNanoSeconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = Conversions.secondsToNanoSeconds(estimatorDT);
+      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = Conversions.secondsToNanoseconds(estimatorDT);
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       this.controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
@@ -296,7 +296,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             {
                long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
                long timestamp = threadDataSynchronizer.getTimestamp();
-               controllerTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+               controllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
                actualControlDT.set(currentClockTime - controllerStartTime.getLongValue());
 
                if (expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
@@ -368,13 +368,13 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          if (runController.getBooleanValue())
          {
-            outputWriter.writeAfterController(Conversions.secondsToNanoSeconds(controllerTime.getDoubleValue()));
+            outputWriter.writeAfterController(Conversions.secondsToNanoseconds(controllerTime.getDoubleValue()));
             totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
 
             threadDataSynchronizer.publishControllerData();
             if (robotVisualizer != null)
             {
-               robotVisualizer.update(Conversions.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
+               robotVisualizer.update(Conversions.secondsToNanoseconds(controllerTime.getDoubleValue()), registry);
             }
 
             rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());

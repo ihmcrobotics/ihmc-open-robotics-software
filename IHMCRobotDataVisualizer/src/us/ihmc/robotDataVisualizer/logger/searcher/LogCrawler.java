@@ -111,7 +111,7 @@ public class LogCrawler implements Runnable
       {
          robot.close();
          long endTime = System.currentTimeMillis();
-         System.out.println("Finished searching " + logFileName + ", took " + Conversions.milliSecondsToMinutes(endTime - startTime) + " minutes");
+         System.out.println("Finished searching " + logFileName + ", took " + Conversions.millisecondsToMinutes(endTime - startTime) + " minutes");
          playbackListener.onFinish();
       }
    }

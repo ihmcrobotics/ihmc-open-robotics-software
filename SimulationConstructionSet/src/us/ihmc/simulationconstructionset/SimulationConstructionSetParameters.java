@@ -7,11 +7,10 @@ public class SimulationConstructionSetParameters
    private boolean showWindows = true;
    private int dataBufferSize = 8192;
    private boolean showYoGraphicObjects = true;
-  
+   private double yoGraphicsGlobalScale = 1.0;
 
    public SimulationConstructionSetParameters()
    {
-      
    }
 
    public SimulationConstructionSetParameters(boolean createGUI, int bufferSize)
@@ -68,7 +67,14 @@ public class SimulationConstructionSetParameters
       {
          Boolean showYoGraphicsObjects = Boolean.parseBoolean(property);
          setShowYoGraphicObjects(showYoGraphicsObjects);
-      }      
+      }
+
+      property = System.getProperty("scs.yographics.globalscale");
+      if (property != null)
+      {
+         Double yoGraphicsGlobalScale = Double.parseDouble(property);
+         setYoGraphicsGlobalScale(yoGraphicsGlobalScale);
+      }
    }
 
    public int getDataBufferSize()
@@ -120,7 +126,17 @@ public class SimulationConstructionSetParameters
    {
       this.showYoGraphicObjects = showYoGraphicObjects;
    }
+
+   public double getYoGraphicsGlobalScale()
+   {
+      return yoGraphicsGlobalScale;
+   }
    
+   public void setYoGraphicsGlobalScale(double yoGraphicsGlobalScale)
+   {
+      this.yoGraphicsGlobalScale = yoGraphicsGlobalScale;
+   }
+ 
    @Override
    public String toString()
    {
@@ -129,6 +145,7 @@ public class SimulationConstructionSetParameters
       st += "showWindows: " + showWindows + "\n";    
       st += "dataBufferSize: " + dataBufferSize + "\n";    
       st += "showYoGraphicObjects: " + showYoGraphicObjects + "\n";    
+      st += "yoGraphicsGlobalScale: " + yoGraphicsGlobalScale + "\n";    
       return st;   
    }
 }

@@ -32,6 +32,7 @@ import javax.swing.JTextField;
 
 import com.jme3.renderer.Camera;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -85,12 +86,12 @@ import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecu
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
@@ -108,7 +109,6 @@ import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
 import us.ihmc.simulationconstructionset.util.graphics.YoGraphicCheckBoxMenuItem;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -2286,6 +2286,8 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          {
             yoGraphicMenuManager.hideAllGraphics();
          }
+
+         this.setYoGraphicsGlobalScale(parameters.getYoGraphicsGlobalScale());
       }
 
       hasSimulationThreadStarted = true;
@@ -4354,6 +4356,17 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
 
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
+   }
+
+   public void setYoGraphicsGlobalScale(double globalScale)
+   {
+      myGUI.setYoGraphicsGlobalScale(globalScale);
+      parameters.setYoGraphicsGlobalScale(globalScale);
+   }
+
+   public double getGlobalYoGraphicsScale()
+   {
+      return myGUI.getYoGraphicsGlobalScale();
    }
 
    private void addCheckBoxesToYoGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)

@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.util.Scanner;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.communication.net.KryoStreamDeSerializer;
 import us.ihmc.communication.net.NetStateListener;
@@ -14,7 +15,6 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class AtlasUIPacketLoader

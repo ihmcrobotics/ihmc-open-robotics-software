@@ -11,7 +11,7 @@ public class SimulatedDRCRobotTimeProvider extends AtomicSettableTimestampProvid
    
    public SimulatedDRCRobotTimeProvider(double controlDT)
    {
-      nanoSecondsPerTick = Conversions.secondsToNanoSeconds(controlDT);
+      nanoSecondsPerTick = Conversions.secondsToNanoseconds(controlDT);
    }
 
    public void initialize()

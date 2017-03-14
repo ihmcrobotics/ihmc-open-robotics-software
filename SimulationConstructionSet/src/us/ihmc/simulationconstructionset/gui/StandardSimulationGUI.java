@@ -74,6 +74,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
@@ -214,7 +215,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    
    private List<String> panelsSelectedEarly = new ArrayList<>();
    private boolean scsWindowOpened = false;
-   
+
+   private final SettableDoubleProvider yoGraphicsGlobalScaleProvider = new SettableDoubleProvider(1.0);
+
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
          DataBuffer buffer, VarGroupList varGroupList, JApplet jApplet, YoVariableRegistry rootRegistry)
@@ -2830,6 +2833,21 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       }
    }
 
+   public void setYoGraphicsGlobalScale(double globalScale)
+   {
+      this.yoGraphicsGlobalScaleProvider.setValue(globalScale);
+   }
+
+   public double getYoGraphicsGlobalScale()
+   {
+      return yoGraphicsGlobalScaleProvider.getValue();
+   }
+
+   public SettableDoubleProvider getYoGraphicsGlobalScaleProvider()
+   {
+      return yoGraphicsGlobalScaleProvider;
+   }
+
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry, boolean updateFromSimulationThread)
    {
       if (!updateFromSimulationThread && graphics3dAdapter != null)
@@ -2847,6 +2865,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(updateFromSimulationThread);
       yoGraphicsListRegistry.setYoGraphicsRegistered();
+      
+      yoGraphicsListRegistry.setGlobalScaleProvider(yoGraphicsGlobalScaleProvider);
    }
 
    public GraphGroupList getGraphGroupList()
