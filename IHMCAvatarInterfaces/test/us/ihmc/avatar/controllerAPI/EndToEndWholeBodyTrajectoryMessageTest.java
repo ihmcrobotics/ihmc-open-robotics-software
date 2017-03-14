@@ -139,7 +139,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(humanoidReferenceFrames.getPelvisZUpFrame());
-
+      for (RobotSide robotSide : RobotSide.values)
+         desiredHandPoses.get(robotSide).changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
@@ -154,7 +155,11 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       for (RobotSide robotSide : RobotSide.values)
       {
          String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
-         EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(handName, desiredHandPoses.get(robotSide).getFramePointCopy().getPoint(), desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion(), scs);
+         desiredHandPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
+         Point3D desiredHandPosition = desiredHandPoses.get(robotSide).getFramePointCopy().getPoint();
+         Quaternion desiredHandOrientation = desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion();
+
+         EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(handName, desiredHandPosition, desiredHandOrientation, scs);
       }
    }
 
