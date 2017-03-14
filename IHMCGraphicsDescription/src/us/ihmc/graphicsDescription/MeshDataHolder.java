@@ -3,7 +3,9 @@ package us.ihmc.graphicsDescription;
 import java.lang.reflect.Array;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -14,7 +16,7 @@ import us.ihmc.euclid.tuple4D.Quaternion32;
  * It contains all the data necessary to create a mesh.
  * Using the corresponding mesh data interpreter, a {@link MeshDataHolder} can be translated into a specific mesh data type usable by a specific graphics engine such as JME or JavaFX.
  */
-public class MeshDataHolder
+public class MeshDataHolder implements Transformable
 {
    private final Point3D32[] vertices;
    private final TexCoord2f[] texturePoints;
@@ -77,6 +79,16 @@ public class MeshDataHolder
    public void setName(String name)
    {
       this.name = name;
+   }
+
+   @Override
+   public void applyTransform(Transform transform)
+   {
+      for (int i = 0; i < vertices.length; i++)
+         vertices[i].applyTransform(transform);
+
+      for (int i = 0; i < vertexNormals.length; i++)
+         vertexNormals[i].applyTransform(transform);
    }
 
    /**

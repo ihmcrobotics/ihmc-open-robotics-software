@@ -109,7 +109,7 @@ public class WandererStandPrep implements WandererController
          break;
 
       case INITIALIZE:
-         initialTime.set(Conversions.nanoSecondstoSeconds(timestamp));
+         initialTime.set(Conversions.nanosecondsToSeconds(timestamp));
          trajectory.setCubic(0.0, trajectoryTime, 0.0, 0.0, 1.0, 0.0);
 
          for (WandererJoint joint : WandererJoint.values)
@@ -121,7 +121,7 @@ public class WandererStandPrep implements WandererController
          break;
 
       case EXECUTE:
-         double timeInTrajectory = MathTools.clamp(Conversions.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
+         double timeInTrajectory = MathTools.clamp(Conversions.nanosecondsToSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
 
@@ -159,7 +159,7 @@ public class WandererStandPrep implements WandererController
                   qDesired -= 0.5 * crouch.getDoubleValue();
                   break;
                case HIP_X:
-                  qDesired += springCalibrationScript(Conversions.nanoSecondstoSeconds(timestamp));
+                  qDesired += springCalibrationScript(Conversions.nanosecondsToSeconds(timestamp));
                default:
                   break;
                }

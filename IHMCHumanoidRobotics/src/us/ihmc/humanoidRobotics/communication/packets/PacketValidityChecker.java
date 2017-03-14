@@ -116,7 +116,7 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultSwingTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultSwingDuration);
       if (packetFieldErrorType != null)
       {
          String messageClassName = packetToCheck.getClass().getSimpleName();
@@ -124,17 +124,13 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultTransferTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultTransferDuration);
       if (packetFieldErrorType != null)
       {
          String messageClassName = packetToCheck.getClass().getSimpleName();
          String errorMessage = messageClassName + "'s transferTime field" + packetFieldErrorType.getMessage();
          return errorMessage;
       }
-
-      boolean timingsValid = true;
-      boolean atLeastOneFootstepHadTiming = false;
-      double lastTime = 0.0;
 
       if (packetToCheck.getDataList() != null)
       {
@@ -149,19 +145,7 @@ public abstract class PacketValidityChecker
                String errorMessage = messageClassName + " field contains a FootstepData in which " + footstepDataListErrorMessage;
                return errorMessage;
             }
-
-            boolean timeIncreasing = footstepData.getSwingStartTime() > lastTime;
-            timingsValid = timingsValid && footstepData.hasAbsoluteTime() && timeIncreasing;
-            atLeastOneFootstepHadTiming = atLeastOneFootstepHadTiming || footstepData.hasAbsoluteTime();
-            lastTime = footstepData.getSwingStartTime();
          }
-      }
-
-      if (atLeastOneFootstepHadTiming && !timingsValid)
-      {
-         String messageClassName = packetToCheck.getClass().getSimpleName();
-         String errorMessage = messageClassName + " contained at least one footstep with absolute timing but the timing was invalid.";
-         return errorMessage;
       }
 
       return null;

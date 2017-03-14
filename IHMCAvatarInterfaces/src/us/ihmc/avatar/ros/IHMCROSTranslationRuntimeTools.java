@@ -86,11 +86,12 @@ public class IHMCROSTranslationRuntimeTools
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-      footsteps.defaultSwingTime = message.getDefaultSwingTime();
-      footsteps.defaultTransferTime = message.getDefaultTransferTime();
+      footsteps.defaultSwingDuration = message.getDefaultSwingTime();
+      footsteps.defaultTransferDuration = message.getDefaultTransferTime();
       footsteps.setUniqueId(message.getUniqueId());
       footsteps.executionMode = ExecutionMode.values[message.getExecutionMode()];
-      footsteps.finalTransferTime = message.getFinalTransferTime();
+      footsteps.finalTransferDuration = message.getFinalTransferTime();
+//      footsteps.executionTiming = ExecutionTiming.values[message.getExecutionTiming()];
 
       ArrayList<FootstepDataMessage> stepData = new ArrayList<>();
       for (FootstepDataRosMessage footstepDataRosMessage : message.getFootstepDataList())
@@ -114,16 +115,8 @@ public class IHMCROSTranslationRuntimeTools
       ihmcMessage.setSwingHeight(message.getSwingHeight());
       ihmcMessage.setTrajectoryType(TrajectoryType.values()[message.getTrajectoryType()]);
       ihmcMessage.setUniqueId(message.getUniqueId());
-
-      if (message.getHasTimings())
-      {
-         ihmcMessage.setTimings(message.getSwingTime(), message.getTransferTime());
-      }
-
-      if (message.getHasAbsoluteTime())
-      {
-         ihmcMessage.setAbsoluteTime(message.getSwingStartTime());
-      }
+//      ihmcMessage.setSwingDuration(message.getSwingDuration());
+//      ihmcMessage.setTransferDuration(message.getTransferDuration());
 
       ArrayList<Point2D> predictedContactPoints = new ArrayList<>();
       for (Point2dRosMessage point2dRosMessage : message.getPredictedContactPoints())
@@ -255,29 +248,8 @@ public class IHMCROSTranslationRuntimeTools
       message.setRobotSide((byte) footstep.getRobotSide().ordinal());
       message.setSwingHeight(footstep.getSwingHeight());
       message.setTrajectoryType((byte) footstep.getTrajectoryType().ordinal());
-
-      if(footstep.hasTimings)
-      {
-         message.setSwingTime(footstep.swingTime);
-         message.setTransferTime(footstep.transferTime);
-      }
-      else
-      {
-         message.setSwingTime(Double.NaN);
-         message.setTransferTime(Double.NaN);
-      }
-
-      message.setHasTimings(footstep.hasTimings);
-
-      if(footstep.hasAbsoluteTime)
-      {
-         message.setSwingStartTime(footstep.swingStartTime);
-      }
-      else
-      {
-         message.setSwingStartTime(0.0);
-      }
-      message.setHasAbsoluteTime(footstep.hasAbsoluteTime);
+//      message.setSwingDuration(footstep.swingDuration);
+//      message.setTransferDuration(footstep.transferDuration);
 
       List<Point2dRosMessage> predictedContatcPointsRos = new ArrayList<>();
       if (footstep.predictedContactPoints != null)
@@ -311,11 +283,12 @@ public class IHMCROSTranslationRuntimeTools
 
       FootstepDataListRosMessage message = messageFactory.newFromType(rosAnnotation.rosPackage() + "/" + rosMessageClassNameFromIHMCMessage);
 
-      message.setDefaultSwingTime(footstepList.defaultSwingTime);
-      message.setDefaultTransferTime(footstepList.defaultTransferTime);
+      message.setDefaultSwingTime(footstepList.defaultSwingDuration);
+      message.setDefaultTransferTime(footstepList.defaultTransferDuration);
       message.setUniqueId(footstepList.getUniqueId());
       message.setExecutionMode((byte) footstepList.executionMode.ordinal());
-      message.setFinalTransferTime(footstepList.finalTransferTime);
+      message.setFinalTransferTime(footstepList.finalTransferDuration);
+//      message.setExecutionTiming((byte) footstepList.getExecutionTiming().ordinal());
 
       List<FootstepDataRosMessage> convertedFootsteps = new ArrayList<>();
       for (FootstepDataMessage footstepDataMessage : footstepList.footstepDataList)
