@@ -79,12 +79,15 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
 
    private final ReferenceFrame baseFrame;
+   private final ReferenceFrame bodyFrame;
+   private final FramePose controlFramePose = new FramePose();
 
    public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
          Collection<ReferenceFrame> controlFrames, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyName, yoTime);
       this.baseFrame = baseFrame;
+      this.bodyFrame = bodyToControl.getBodyFixedFrame();
 
       String prefix = bodyName + "Taskspace";
       trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
@@ -312,6 +315,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       trajectoryDone.set(false);
       trackingOrientation.set(true);
       trackingPosition.set(true);
+   }
+
+   public void setControlFrame(ReferenceFrame controlFrame)
+   {
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(bodyFrame);
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
    }
 
    public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FrameOrientation initialOrientation)
