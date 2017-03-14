@@ -94,6 +94,9 @@ public class HandControlModule
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame handControlFrame;
 
+   private final double[] initialJointPositions;
+   private final FramePose initialPose = new FramePose();
+
    public HandControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, ArmControllerParameters armControlParameters,
          YoPIDGains jointspaceGains, YoSE3PIDGainsInterface taskspaceGains, YoVariableRegistry parentRegistry)
    {
@@ -124,7 +127,6 @@ public class HandControlModule
       handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
 
       controlledJoints = ScrewTools.createOneDoFJointPath(chest, hand);
-      jointsAtDesiredPosition = ScrewTools.cloneOneDoFJointPath(chest, hand);
       initialJointPositions = new double[controlledJoints.length];
 
       requestedState = new EnumYoVariable<RigidBodyControlMode>(name + "RequestedState", "", registry, RigidBodyControlMode.class, true);
@@ -340,14 +342,18 @@ public class HandControlModule
 
    public void holdPositionInChest()
    {
-      computeDesiredPose(initialPose);
+      initialPose.setToZero(handControlFrame);
+      initialPose.changeFrame(worldFrame);
+
       taskspaceControlState.holdPose(initialPose);
       requestedState.set(taskspaceControlState.getStateEnum());
    }
 
    public void handleHandTrajectoryCommand(HandTrajectoryCommand command)
    {
-      computeDesiredPose(initialPose);
+      initialPose.setToZero(handControlFrame);
+      initialPose.changeFrame(worldFrame);
+
       taskspaceControlState.setControlFrame(handControlFrame);
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
          requestState(taskspaceControlState.getStateEnum());
@@ -369,7 +375,9 @@ public class HandControlModule
 
    public void handleArmTrajectoryCommand(ArmTrajectoryCommand command)
    {
-      computeDesiredJointPositions(initialJointPositions);
+      for (int jointIdx = 0; jointIdx < controlledJoints.length; jointIdx++)
+         initialJointPositions[jointIdx] = controlledJoints[jointIdx].getQ();
+
       if (jointspaceControlState.handleTrajectoryCommand(command, initialJointPositions))
          requestState(jointspaceControlState.getStateEnum());
       else
@@ -456,52 +464,4 @@ public class HandControlModule
       }
       return ret;
    }
-
-   private final double[] initialJointPositions;
-   private final FramePose initialPose = new FramePose();
-   private final OneDoFJoint[] jointsAtDesiredPosition;
-
-   private void computeDesiredPose(FramePose desiredPoseToPack)
-   {
-      desiredPoseToPack.setToZero(hand.getBodyFixedFrame());
-      desiredPoseToPack.changeFrame(worldFrame);
-   }
-
-   private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
-   {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
-      {
-         for (int i = 0; i < controlledJoints.length; i++)
-            desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
-      }
-      else
-      {
-         updateJointsAtDesiredPosition();
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-            desiredJointPositionsToPack[i] = jointsAtDesiredPosition[i].getQ();
-      }
-   }
-
-   private void updateJointsAtDesiredPosition()
-   {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
-      {
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-         {
-            jointsAtDesiredPosition[i].setQ(jointspaceControlState.getJointDesiredPosition(i));
-            jointsAtDesiredPosition[i].setQd(jointspaceControlState.getJointDesiredVelocity(i));
-         }
-      }
-      else
-      {
-         for (int i = 0; i < jointsAtDesiredPosition.length; i++)
-         {
-            jointsAtDesiredPosition[i].setQ(controlledJoints[i].getQ());
-            jointsAtDesiredPosition[i].setQd(controlledJoints[i].getQd());
-         }
-      }
-
-      jointsAtDesiredPosition[0].updateFramesRecursively();
-   }
-
 }
