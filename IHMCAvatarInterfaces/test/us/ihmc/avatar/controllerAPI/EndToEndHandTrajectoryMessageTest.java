@@ -18,7 +18,6 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
@@ -306,7 +305,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
       {
-         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints;
+         int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints;
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
          double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
@@ -325,7 +324,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
 
       {
-         int numberOfPoints = RigidBodyJointspaceControlState.maxPoints - 1;
+         int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints - 1;
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
          double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
@@ -340,7 +339,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          RigidBodyControlMode controllerState = EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs);
          assertTrue(controllerState == RigidBodyControlMode.TASKSPACE);
-         assertNumberOfWaypoints(handName, RigidBodyJointspaceControlState.maxPoints, drcSimulationTestHelper.getSimulationConstructionSet());
+         assertNumberOfWaypoints(handName, RigidBodyTaskspaceControlState.maxPoints, drcSimulationTestHelper.getSimulationConstructionSet());
       }
    }
 
