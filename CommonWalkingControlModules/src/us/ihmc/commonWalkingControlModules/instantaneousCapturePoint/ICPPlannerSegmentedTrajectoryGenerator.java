@@ -269,13 +269,12 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    public void computeFinalCoMPosition(FramePoint finalCoMToPack)
    {
-      computeCoMPositionAfterFirstSegment(initialCoM, finalCoMToPack);
-      computeCoMPositionAfterSecondSegment(finalCoMToPack, finalCoMToPack);
-      computeCoMPositionAfterThirdSegment(finalCoMToPack, finalCoMToPack);
+      computeCoMPositionAfterFirstSegment(initialCoM, startOfSplineCoM);
+      computeCoMPositionAfterSecondSegment(startOfSplineCoM, endOfSplineCoM);
+      computeCoMPositionAfterThirdSegment(endOfSplineCoM, finalCoMToPack);
    }
 
    private void computeCoMPositionAfterFirstSegment(FramePoint initialCoM, FramePoint finalCoMToPack)
-
    {
       CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(startOfSplineTime.getDoubleValue(), omega0.getDoubleValue(), initialCMPFinalFrame,
             initialICPFinalFrame, initialCoM, finalCoMToPack);
