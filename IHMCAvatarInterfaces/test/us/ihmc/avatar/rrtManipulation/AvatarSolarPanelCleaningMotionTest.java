@@ -1,56 +1,47 @@
 package us.ihmc.avatar.rrtManipulation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
-import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
-import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningBehavior;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTestInterface
@@ -60,22 +51,20 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    private DRCBehaviorTestHelper drcBehaviorTestHelper;
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
+      
+   SolarPanel solarPanel;
    
-   
-   
-   public class WalkingPathTestEnvironment implements CommonAvatarEnvironmentInterface
+   public class SolarPanelCleaningEnvironment implements CommonAvatarEnvironmentInterface
    {
       private final CombinedTerrainObject3D EnvSet;
 
-      public WalkingPathTestEnvironment()
+      public SolarPanelCleaningEnvironment()
       {
+         setUpSolarPanel();
+         
          EnvSet = DefaultCommonAvatarEnvironment.setUpGround("Ground");
                   
-//         EnvSet.addSphere(goalState.getX(), goalState.getY(), goalState.getZ(), 0.1, YoAppearance.Blue());
-//         
-//         RigidBodyTransform location = new RigidBodyTransform();
-//         location.setTranslation(initialState);
-         
+         EnvSet.addRotatableBox(solarPanel.getRigidBodyTransform(), solarPanel.getSizeX(), solarPanel.getSizeY(), solarPanel.getSizeZ(), YoAppearance.Aqua());
       }
       
       @Override
@@ -123,8 +112,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()) // set
-      //if (simulationTestingParameters.getKeepSCSUp())
+      //if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer()) // set
+      if (simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -157,23 +146,24 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      CommonAvatarEnvironmentInterface envrionment = new FlatGroundEnvironment();
+      CommonAvatarEnvironmentInterface envrionment = new SolarPanelCleaningEnvironment();
+      //CommonAvatarEnvironmentInterface envrionment = new FlatGroundEnvironment();
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
 
       setupKinematicsToolboxModule();
    }
    
-   @ContinuousIntegrationTest(estimatedDuration = 30.0) // Tests position and orientation of the two hands after a movement of 20cm in the positive x direction
-   @Test(timeout = 160000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0) 
+   //@Test(timeout = 160000)
    public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
    {
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
+      PrintTools.info("a"+drcBehaviorTestHelper.getYoTime());
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
+      setupCamera(scs);
       drcBehaviorTestHelper.updateRobotModel();
 
       WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
@@ -185,22 +175,16 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       FramePose desiredHandPoseR = new FramePose(handControlFrameR);
       desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseR.translate(0.20, 0.0, 0.0);
-      ik.setTrajectoryTime(1.0);
+      desiredHandPoseR.translate(0.20, 0.0, 0.0);      
+      ik.setTrajectoryTime(3.0);
       ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
       FramePose desiredHandPoseL = new FramePose(handControlFrameL);
       desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
       desiredHandPoseL.translate(0.20, 0.0, 0.0);
-      ik.setTrajectoryTime(2.0);
+      ik.setTrajectoryTime(3.0);
       ik.setDesiredHandPose(RobotSide.LEFT, desiredHandPoseL);
       drcBehaviorTestHelper.dispatchBehavior(ik);
-
-      while (!ik.isDone())
-      {
-         ThreadTools.sleep(100);
-      }
-      assertFalse("Bad solution: " + ik.getSolutionQuality(), ik.hasSolverFailed());
-
+      
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       assertTrue(success);
 
@@ -211,26 +195,86 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       Quaternion desiredHandOrientationL = new Quaternion();
       desiredHandPoseL.getOrientation(desiredHandOrientationL);
 
-      double handAngleEpsilon = Math.toRadians(1);
-
       Point3D controllerDesiredHandPositionR = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(RobotSide.RIGHT, scs);
       Point3D controllerDesiredHandPositionL = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(RobotSide.LEFT, scs);
       Point3D rightPosition = new Point3D();
       desiredHandPoseR.getPosition(rightPosition);
       Point3D leftPosition = new Point3D();
       desiredHandPoseL.getPosition(leftPosition);
-      double rightDifference = rightPosition.distance(controllerDesiredHandPositionR);
-      double leftDifference = leftPosition.distance(controllerDesiredHandPositionL);
 
-      double positionEpsilon = 1.0e-4;
 
-      assertTrue("Position difference: " + rightDifference, rightDifference <positionEpsilon);
-      assertTrue("Position difference: " + leftDifference, leftDifference <positionEpsilon);
+   }
+   
+   @Test(timeout = 160000)
+   public void testCombinedMotion() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+      setupCamera(scs);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
-      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+      
+      // ********** Planning *** //
+      
+      
+
+      
+      // ********** Behavior *** //
+      
+      
+      
+      drcBehaviorTestHelper.updateRobotModel();
+
+      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
+                                                                                     getRobotModel().createFullRobotModel());
+      
+      SolarPanelCleaningBehavior solarPanelCleaningBehavior = new SolarPanelCleaningBehavior(solarPanel, ik);
+      
+      double motionTime = 2.0;
+      SolarPanelCleaningPose startPose = new SolarPanelCleaningPose(new Point3D(0.5,  -0.25,  1.2), 0.0, -Math.PI/0.25, 0.0);
+      solarPanelCleaningBehavior.setIKwithGoalPose(startPose, motionTime);
+      PrintTools.info("goto Ready");
+      drcBehaviorTestHelper.dispatchBehavior(ik);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime+0.1);
+      
+      
+      solarPanelCleaningBehavior.generateMotion();      
+      ArrayList<SolarPanelCleaningPose> poses = solarPanelCleaningBehavior.getTrajectory().getPoses();
+      
+      for (int i =0;i<poses.size();i++)
+      {
+         ik.clear();
+         
+         PrintTools.info("ad");
+         solarPanelCleaningBehavior.setIKwithGoalPose(poses.get(i), 0.5);
+         PrintTools.info("ad");
+         drcBehaviorTestHelper.dispatchBehavior(ik);
+         PrintTools.info("ad");
+         drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions( 0.5+0.1);
+         PrintTools.info("ad");
+      }
+
+      
+      
+      
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
+   }
+   
+   private void setUpSolarPanel()
+   {
+      Pose poseSolarPanel = new Pose();
+      Quaternion quaternionSolarPanel = new Quaternion();
+      poseSolarPanel.setPosition(0.7, 0.05, 1.0);
+      quaternionSolarPanel.appendRollRotation(0.0);
+      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+      poseSolarPanel.setOrientation(quaternionSolarPanel);
+      
+      solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
    }
 
-   private void setupCamera(SimulationConstructionSet scs)
+   public void setupCamera(SimulationConstructionSet scs)
    {
       Point3D cameraFix = new Point3D(1.0, 0.0, 1.0);
       Point3D cameraPosition = new Point3D(-2.5, 5.0, 3.0);

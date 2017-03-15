@@ -1,9 +1,9 @@
 package us.ihmc.manipulation.planning.walkingpath.rrtplanner;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTPlanner;
 import us.ihmc.manipulation.planning.walkingpath.footstep.SkeletonPathFootStepPlanner;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class RRT2DPlannerWalkingPath extends RRTPlanner
 {

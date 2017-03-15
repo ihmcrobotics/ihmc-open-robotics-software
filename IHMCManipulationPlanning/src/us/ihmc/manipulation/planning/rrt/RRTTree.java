@@ -3,7 +3,7 @@ package us.ihmc.manipulation.planning.rrt;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 /**
  * Every tree has a root node.
