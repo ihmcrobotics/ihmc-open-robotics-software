@@ -2,9 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
-
-import com.badlogic.gdx.utils.Array;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -54,7 +51,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
