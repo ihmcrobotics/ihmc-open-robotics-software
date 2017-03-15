@@ -9,9 +9,34 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class CoMIntegrationTools
 {
    public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, FramePoint constantCMP, FramePoint initialICP,
+         FramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack.getFrameTuple());
+   }
+
+   public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, FramePoint constantCMP, FramePoint initialICP,
+         YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP, initialICP, initialCoM.getFrameTuple(), finalCoMToPack.getFrameTuple());
+   }
+
+   public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, YoFramePoint constantCMP, YoFramePoint initialICP,
+         YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP.getFrameTuple(), initialICP.getFrameTuple(), initialCoM.getFrameTuple(),
+            finalCoMToPack.getFrameTuple());
+   }
+
+   public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, FramePoint constantCMP, FramePoint initialICP,
          FramePoint initialCoM, FramePoint finalCoMToPack)
    {
       computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack);
+   }
+
+   public static void computeCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
+         YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingConstantCMP(initialTime, finalTime, omega0, constantCMP, initialICP, initialCoM.getFrameTuple(), finalCoMToPack.getFrameTuple());
    }
 
    public static void computeCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
@@ -38,6 +63,16 @@ public class CoMIntegrationTools
       position += cmpPosition;
 
       return position;
+   }
+
+   public static void computeFinalCoMPositionFromCubicICP(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
+         YoPolynomial yPolynomial, FramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      if (segmentDuration == 0.0)
+         finalCoMToPack.set(initialCoM);
+      else
+         computeCoMPositionUsingCubicICP(0.0, segmentDuration, segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
+               finalCoMToPack.getFrameTuple());
    }
 
    public static void computeFinalCoMPositionFromCubicICP(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
