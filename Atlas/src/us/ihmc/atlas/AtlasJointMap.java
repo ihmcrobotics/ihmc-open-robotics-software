@@ -81,6 +81,14 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
+   public static final SideDependentList<String> handNames = new SideDependentList<>();
+   static
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handNames.put(robotSide, getRobotSidePrefix(robotSide) + "hand");
+      }
+   }
 
    private final LegJointName[] legJoints = {HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL};
    private final ArmJointName[] armJoints;
@@ -226,7 +234,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       return spineJointStrings.get(SPINE_ROLL);
    }
 
-   private String getRobotSidePrefix(RobotSide robotSide)
+   private static String getRobotSidePrefix(RobotSide robotSide)
    {
       return (robotSide == RobotSide.LEFT) ? "l_" : "r_";
    }
@@ -283,6 +291,11 @@ public class AtlasJointMap implements DRCRobotJointMap
    public String getHeadName()
    {
       return headName;
+   }
+
+   public String getHandName(RobotSide robotSide)
+   {
+      return handNames.get(robotSide);
    }
 
    @Override
