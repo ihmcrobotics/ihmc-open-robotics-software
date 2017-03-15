@@ -149,7 +149,7 @@ public class CoMIntegrationToolsTest
       while (time < swingDuration)
       {
          icpTrajectoryGenerator.compute(time);
-         icpTrajectoryGenerator.get(desiredCapturePoint);
+         icpTrajectoryGenerator.getPosition(desiredCapturePoint);
          icpTrajectoryGenerator.getCoMPosition(desiredCoMPosition);
 
          desiredCoMVelocity.set(desiredCapturePoint);

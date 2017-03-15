@@ -41,16 +41,6 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
 
    public VelocityConstrainedPositionTrajectoryGenerator(String name, boolean allowMultipleFrames, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
-      this(name, allowMultipleFrames, 4, referenceFrame, parentRegistry);
-   }
-
-   public VelocityConstrainedPositionTrajectoryGenerator(String name, int numberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
-   {
-      this(name, false, numberOfCoefficients, referenceFrame, parentRegistry);
-   }
-
-   public VelocityConstrainedPositionTrajectoryGenerator(String name, boolean allowMultipleFrames, int numberOfCoefficients, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
-   {
       super(allowMultipleFrames, referenceFrame);
       registry = new YoVariableRegistry(name);
 
@@ -100,9 +90,9 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       currentTime = new DoubleYoVariable(name + "CurrentTime", registry);
       trajectoryTime = new DoubleYoVariable(name + "TrajectoryTime", registry);
 
-      xPolynomial = new YoPolynomial(name + "PolynomialX", numberOfCoefficients, registry);
-      yPolynomial = new YoPolynomial(name + "PolynomialY", numberOfCoefficients, registry);
-      zPolynomial = new YoPolynomial(name + "PolynomialZ", numberOfCoefficients, registry);
+      xPolynomial = new YoPolynomial(name + "PolynomialX", 4, registry);
+      yPolynomial = new YoPolynomial(name + "PolynomialY", 4, registry);
+      zPolynomial = new YoPolynomial(name + "PolynomialZ", 4, registry);
 
       parentRegistry.addChild(registry);
    }

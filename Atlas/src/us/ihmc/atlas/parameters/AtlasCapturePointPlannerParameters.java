@@ -14,7 +14,7 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
       super(atlasPhysicalProperties.getModelScale());
       scale = atlasPhysicalProperties.getModelScale();
       this.atlasPhysicalProperties = atlasPhysicalProperties;
-      useTwoCMPsPerSupport = true;
+      useTwoCMPsPerSupport = false;
    }
 
    /** {@inheritDoc} */
