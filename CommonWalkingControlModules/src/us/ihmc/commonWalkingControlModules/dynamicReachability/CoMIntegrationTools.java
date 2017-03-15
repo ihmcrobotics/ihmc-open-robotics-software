@@ -2,12 +2,12 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CoMIntegrationTools
 {
-
    public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, FramePoint constantCMP, FramePoint initialICP,
          FramePoint initialCoM, FramePoint finalCoMToPack)
    {

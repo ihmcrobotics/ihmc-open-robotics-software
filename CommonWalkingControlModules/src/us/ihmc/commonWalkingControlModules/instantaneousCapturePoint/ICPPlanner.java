@@ -7,6 +7,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -115,7 +116,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
@@ -210,8 +211,8 @@ public class ICPPlanner
 
    private final YoFramePointInMultipleFrames yoSingleSupportInitialCoM;
    private final YoFramePointInMultipleFrames yoSingleSupportFinalCoM;
-   private final FramePoint singleSupportInitialCoM = new FramePoint();
-   private final FramePoint singleSupportFinalCoM = new FramePoint();
+   private final FramePoint singleSupportInitialCoM = new FramePoint(); // // TODO: 3/14/17  eliminate
+   private final FramePoint singleSupportFinalCoM = new FramePoint(); // // TODO: 3/14/17  eliminate
 
    private final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
 
@@ -238,6 +239,7 @@ public class ICPPlanner
 
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
+   private final FramePoint tempCoM = new FramePoint();
 
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ICPPlanner}.
@@ -359,18 +361,18 @@ public class ICPPlanner
       yoGraphicsList.add(singleSupportFinalICPViz);
       artifactList.add(singleSupportFinalICPViz.createArtifact());
 
-      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("desiredCoMPosition", desiredCoMPosition, 0.01, YoAppearance.Black(),
+      YoGraphicPosition desiredCenterOfMassPositionViz = new YoGraphicPosition("desiredCoMLocation", desiredCoMPosition, 0.01, YoAppearance.Black(),
             GraphicType.BALL_WITH_CROSS);
       yoGraphicsList.add(desiredCenterOfMassPositionViz);
       artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
 
       YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM",
-            yoSingleSupportFinalCoM.buildUpdatedYoFramePointForVisualizationOnly(), 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+            yoSingleSupportFinalCoM.buildUpdatedYoFramePointForVisualizationOnly(), 0.01, YoAppearance.Black(), GraphicType.SOLID_BALL);
       yoGraphicsList.add(singleSupportFinalCoMViz);
       artifactList.add(singleSupportFinalCoMViz.createArtifact());
 
       YoGraphicPosition singleSupportInitialCoMViz = new YoGraphicPosition("singleSupportInitialCoM",
-            yoSingleSupportInitialCoM.buildUpdatedYoFramePointForVisualizationOnly(), 0.01, YoAppearance.Black(), GraphicType.BALL_WITH_CROSS);
+            yoSingleSupportInitialCoM.buildUpdatedYoFramePointForVisualizationOnly(), 0.008, YoAppearance.Black(), GraphicType.BALL);
       yoGraphicsList.add(singleSupportInitialCoMViz);
       artifactList.add(singleSupportInitialCoMViz.createArtifact());
 
@@ -660,13 +662,26 @@ public class ICPPlanner
 
    private void computeCoMFinalCoMPositionInTransfer()
    {
-      yoSingleSupportInitialCoM.switchCurrentReferenceFrame(worldFrame);
       icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM);
       yoSingleSupportInitialCoM.setIncludingFrame(singleSupportInitialCoM);
 
       updateSingleSupportPlan(); // // TODO: 3/13/17 this may not work
-      //icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM, singleSupportFinalCoM);
-      //yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
+
+      if (useTwoConstantCMPsPerSupport.getBooleanValue())
+      {
+         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(yoSingleSupportInitialCoM, worldFrame);
+         icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM);
+         yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
+      }
+      else
+      {
+         double swingDuration = swingDurations.get(0).getDoubleValue();
+         List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
+         singleSupportInitialICP.changeFrame(worldFrame);
+         CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0).getFrameTuple(),
+               singleSupportInitialICP.getFrameTuple(), singleSupportInitialCoM, singleSupportFinalCoM);
+         yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
+      }
    }
 
    /**
@@ -917,6 +932,9 @@ public class ICPPlanner
          computeDesiredCapturePointPosition(omega0, time, tempICP, tempConstantCMP, desiredICPPosition);
          computeDesiredCapturePointVelocity(omega0, time, tempICP, tempConstantCMP, desiredICPVelocity);
          computeDesiredCapturePointAcceleration(omega0, time, tempICP, tempConstantCMP, desiredICPAcceleration);
+
+         CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
+         desiredCoMPosition.set(tempCoM);
       }
 
       decayDesiredVelocityIfNeeded();
