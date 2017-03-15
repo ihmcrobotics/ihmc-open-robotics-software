@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -33,7 +35,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -77,13 +78,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
-   private final RigidBodyControlManager chestManager;
-   private final RigidBodyControlManager headManager;
+   private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
 
    private final OneDoFJoint[] allOneDoFjoints;
 
@@ -143,7 +142,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       allOneDoFjoints = fullRobotModel.getOneDoFJoints();
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      this.manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
       RigidBody head = fullRobotModel.getHead();
@@ -151,10 +149,22 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
-      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+      ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
+      ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
 
-      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
-      this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, chestFrame);
+      RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
+      bodyManagers.add(chestManager);
+
+      RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
+      bodyManagers.add(headManager);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
+         bodyManagers.add(handManager);
+      }
 
       this.walkingControllerParameters = walkingControllerParameters;
 
@@ -434,12 +444,12 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          pelvisOrientationManager.setToHoldCurrentInWorldFrame();
       }
 
-      if (manipulationControlModule != null)
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
-         manipulationControlModule.holdCurrentArmConfiguration();
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
+            bodyManager.initialize();
       }
-
-      chestManager.goToHomeFromCurrent(1.0);
 
       balanceManager.initialize();
       feetManager.initialize();
@@ -594,19 +604,24 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             isRecoveringFromPush, feetManager));
 
       feetManager.compute();
-      if (manipulationControlModule != null)
-         manipulationControlModule.doControl();
-      if (headManager != null)
-         headManager.compute();
-      if (chestManager != null)
-         chestManager.compute();
+
+      boolean bodyManagerIsLoadBearing = false;
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      {
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
+         {
+            bodyManager.compute();
+
+            if (bodyManager.isLoadBearing())
+               bodyManagerIsLoadBearing = true;
+         }
+      }
+
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.compute();
 
-      boolean keepCMPInsideSupportPolygon = true;
-      if (manipulationControlModule != null && manipulationControlModule.isAtLeastOneHandLoadBearing())
-         keepCMPInsideSupportPolygon = false;
-
+      boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon);
    }
 
@@ -635,28 +650,15 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
-      if (manipulationControlModule != null)
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
          {
-            controllerCoreCommand.addFeedbackControlCommand(manipulationControlModule.getFeedbackControlCommand(robotSide));
-            controllerCoreCommand.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
-            controllerCoreCommand.completeLowLevelJointData(manipulationControlModule.getLowLevelJointDesiredData(robotSide));
+            controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
+            controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
+            controllerCoreCommand.completeLowLevelJointData(bodyManager.getLowLevelJointDesiredData());
          }
-      }
-
-      if (headManager != null)
-      {
-         controllerCoreCommand.addFeedbackControlCommand(headManager.getFeedbackControlCommand());
-         controllerCoreCommand.addInverseDynamicsCommand(headManager.getInverseDynamicsCommand());
-         controllerCoreCommand.completeLowLevelJointData(headManager.getLowLevelJointDesiredData());
-      }
-
-      if (chestManager != null)
-      {
-         controllerCoreCommand.addFeedbackControlCommand(chestManager.getFeedbackControlCommand());
-         controllerCoreCommand.addInverseDynamicsCommand(chestManager.getInverseDynamicsCommand());
-         controllerCoreCommand.completeLowLevelJointData(chestManager.getLowLevelJointDesiredData());
       }
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());

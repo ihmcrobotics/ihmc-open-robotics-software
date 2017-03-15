@@ -33,6 +33,8 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
 
       for (int i = 0; i < getNumberOfJoints(); i++)
          jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(trajectoryMessage.jointTrajectoryMessages[i]);
+
+      setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
    }
 
    /**
@@ -89,8 +91,8 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
 
    public AbstractJointspaceTrajectoryMessage(Random random)
    {
-      this(random.nextInt(10) + 1);
-
+      super(random);
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[random.nextInt(10) + 1];
       for (int i = 0; i < getNumberOfJoints(); i++)
          setTrajectory1DMessage(i, new OneDoFJointTrajectoryMessage(random));
    }

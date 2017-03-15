@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -14,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -80,13 +79,17 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
 
    private final ReferenceFrame baseFrame;
+   private final ReferenceFrame bodyFrame;
+   private final FramePose controlFramePose = new FramePose();
 
-   public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-         Map<BaseForControl, ReferenceFrame> controlFrameMap, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+         ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE, bodyName, yoTime);
+      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime);
       this.baseFrame = baseFrame;
+      this.bodyFrame = bodyToControl.getBodyFixedFrame();
 
+      String bodyName = bodyToControl.getName();
       String prefix = bodyName + "Taskspace";
       trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
       trackingPosition = new BooleanYoVariable(prefix + "TrackingPosition", registry);
@@ -101,6 +104,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(baseBody);
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
+      setControlFrame(controlFrame);
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", null, registry);
@@ -108,9 +112,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
 
-      if (controlFrameMap != null)
+      if (trajectoryFrames != null)
       {
-         for (ReferenceFrame frameToRegister : controlFrameMap.values())
+         for (ReferenceFrame frameToRegister : trajectoryFrames)
          {
             positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
             orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
@@ -313,6 +317,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       trajectoryDone.set(false);
       trackingOrientation.set(true);
       trackingPosition.set(true);
+   }
+
+   public void setControlFrame(ReferenceFrame controlFrame)
+   {
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(bodyFrame);
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
    }
 
    public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FrameOrientation initialOrientation)

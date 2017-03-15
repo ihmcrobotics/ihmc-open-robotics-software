@@ -166,7 +166,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       stateMachine.doAction();
 
       //a behavior has finished or has aborted and has transitioned to STOP
-      if (stateMachine.getCurrentStateEnum().equals(stopBehavior) && !currentBehavior.equals(stopBehavior))
+      
+      
+      if (stateMachine.getCurrentStateEnum().equals(stopBehavior) && currentBehavior!=null && !currentBehavior.equals(stopBehavior))
       {
          communicationBridge.sendPacketToUI(new BehaviorStatusPacket(CurrentBehaviorStatus.NO_BEHAVIOR_RUNNING));
       }
