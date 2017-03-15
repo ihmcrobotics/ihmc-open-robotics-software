@@ -237,6 +237,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    private static final boolean TESTING_LOAD_STUFF = false;
 
    /**
+    * If set top true this will print YoVariable hotspots. Those are YoVariableRegistries with more
+    * then the specified number of variables or children.
+    */
+   private static final boolean SHOW_REGISTRY_SIZES_ON_STARTUP = false;
+   private static final int MIN_VARIABLES_FOR_HOTSPOT = 75;
+   private static final int MIN_CHILDREN_FOR_HOTSPOT = 15;
+
+   /**
     * The default size of the data buffer in record steps.
     */
    public static final String rootRegistryName = "root";
@@ -489,7 +497,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                myGUI.getGraphics3dAdapter().play();
          }
       });
-      
+
       if (robots != null)
       {
          for (Robot robot : robots)
@@ -1165,7 +1173,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.setCameraPosition(cameraPosition);
-      }      
+      }
    }
 
    /**
@@ -1192,6 +1200,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void startOnAThread()
    {
       ThreadTools.startAThread(this, "Simulation Contruction Set");
+
+      if (SHOW_REGISTRY_SIZES_ON_STARTUP)
+      {
+         int totalNumberOfVariables = rootRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT);
+         PrintTools.info("Total Number of YoVariables: " + totalNumberOfVariables);
+      }
 
       while (!this.hasSimulationThreadStarted())
       {
@@ -1384,7 +1398,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this.setTime(timeToSetInSeconds);
       this.tickAndUpdate();
    }
-   
+
    /**
     * Increments the data buffer index and updates all of the entries min & max values.  If a GUI exists, its graphs are updated.
     */
@@ -1961,7 +1975,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
       addRobot(robot);
-      return robot; 
+      return robot;
    }
 
    /**
@@ -1971,7 +1985,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void addRobot(Robot robot)
    {
       //TODO: Clean this up and clean up setRobot too.
-      
+
       YoVariableRegistry robotsYoVariableRegistry = robot.getRobotsYoVariableRegistry();
       YoVariableRegistry parentRegistry = robotsYoVariableRegistry.getParent();
       if (parentRegistry != null)
@@ -2226,7 +2240,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void run()
    {
       // myGUI.setupConfiguration("all", "all", "all", "all");
-      
+
       if (!TESTING_LOAD_STUFF)
       {
          if ((!defaultLoaded) && (myGUI != null))
@@ -2302,6 +2316,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       fastTicks = 0;
 
       // t = rob.getVariable("t");
+
+      if (SHOW_REGISTRY_SIZES_ON_STARTUP)
+      {
+         int totalNumberOfVariables = rootRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT);
+         PrintTools.info("Total Number of YoVariables: " + totalNumberOfVariables);
+      }
 
       // Three state loop, simulation is either playing, running, or waiting
       while (true)
@@ -4178,7 +4198,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void addExtraJpanel(Component extraPanel, String name, boolean showOnStart)
    {
       setupExtraPanel(new ExtraPanelConfiguration(name, extraPanel, showOnStart));
-      
+
       if (showOnStart)
       {
          getStandardSimulationGUI().selectPanel(name);
@@ -4393,7 +4413,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          }
       });
    }
-   
+
    public SimulationOverheadPlotterFactory createSimulationOverheadPlotterFactory()
    {
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = new SimulationOverheadPlotterFactory();
