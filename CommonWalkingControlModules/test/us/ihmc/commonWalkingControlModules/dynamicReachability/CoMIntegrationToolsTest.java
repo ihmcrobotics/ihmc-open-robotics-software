@@ -56,7 +56,7 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
       icpTrajectoryGenerator.initialize();
 
-      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
+      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM.getFrameTuple());
 
       FramePoint dummyPoint = new FramePoint();
 
@@ -137,11 +137,11 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setCornerPoints(entryCornerPoint, exitCornerPoint);
       icpTrajectoryGenerator.setReferenceCMPs(entryCMP, exitCMP);
       icpTrajectoryGenerator.setReferenceFrames(worldFrame, worldFrame);
-      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
+      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM.getFrameTuple(), worldFrame);
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
+      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM.getFrameTuple());
 
       FramePoint dummyPoint = new FramePoint();
 
@@ -224,11 +224,11 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setCornerPoints(entryCornerPoint, exitCornerPoint);
       icpTrajectoryGenerator.setReferenceCMPs(entryCMP, exitCMP);
       icpTrajectoryGenerator.setReferenceFrames(worldFrame, worldFrame);
-      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
+      icpTrajectoryGenerator.setInitialCoMPosition(initialCoM.getFrameTuple(), worldFrame);
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
+      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM.getFrameTuple());
 
       FramePoint dummyPoint = new FramePoint();
 
