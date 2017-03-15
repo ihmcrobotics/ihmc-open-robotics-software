@@ -116,7 +116,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
@@ -349,13 +349,13 @@ public class ICPPlanner
       }
 
       YoFramePoint initialICPInWorld = singleSupportInitialICP.buildUpdatedYoFramePointForVisualizationOnly();
-      YoGraphicPosition singleSupportInitialICPViz = new YoGraphicPosition("singleSupportInitialICP", initialICPInWorld, 0.01, YoAppearance.Chocolate(),
+      YoGraphicPosition singleSupportInitialICPViz = new YoGraphicPosition("singleSupportInitialICP", initialICPInWorld, 0.004, YoAppearance.Chocolate(),
                                                                            GraphicType.SOLID_BALL);
       yoGraphicsList.add(singleSupportInitialICPViz);
       artifactList.add(singleSupportInitialICPViz.createArtifact());
 
       YoFramePoint finalICPInWorld = singleSupportFinalICP.buildUpdatedYoFramePointForVisualizationOnly();
-      YoGraphicPosition singleSupportFinalICPViz = new YoGraphicPosition("singleSupportFinalICP", finalICPInWorld, 0.01, YoAppearance.Chocolate(),
+      YoGraphicPosition singleSupportFinalICPViz = new YoGraphicPosition("singleSupportFinalICP", finalICPInWorld, 0.004, YoAppearance.Chocolate(),
                                                                          GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalICPViz);
       artifactList.add(singleSupportFinalICPViz.createArtifact());
@@ -366,13 +366,13 @@ public class ICPPlanner
       artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
 
       YoFramePoint initialCoMInWorld = yoSingleSupportInitialCoM.buildUpdatedYoFramePointForVisualizationOnly();
-      YoGraphicPosition singleSupportInitialCoMViz = new YoGraphicPosition("singleSupportInitialCoM", initialCoMInWorld, 0.01, YoAppearance.Black(),
+      YoGraphicPosition singleSupportInitialCoMViz = new YoGraphicPosition("singleSupportInitialCoM", initialCoMInWorld, 0.004, YoAppearance.Black(),
             GraphicType.SOLID_BALL);
       yoGraphicsList.add(singleSupportInitialCoMViz);
       artifactList.add(singleSupportInitialCoMViz.createArtifact());
 
       YoFramePoint finalCoMInWorld = yoSingleSupportFinalCoM.buildUpdatedYoFramePointForVisualizationOnly();
-      YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM", finalCoMInWorld, 0.01, YoAppearance.Black(),
+      YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM", finalCoMInWorld, 0.004, YoAppearance.Black(),
             GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalCoMViz);
       artifactList.add(singleSupportFinalCoMViz.createArtifact());
@@ -664,9 +664,9 @@ public class ICPPlanner
       icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM);
       yoSingleSupportInitialCoM.set(singleSupportInitialCoM);
 
+      double swingDuration = swingDurations.get(0).getDoubleValue();
       if (useTwoConstantCMPsPerSupport.getBooleanValue())
       {
-         double swingDuration = swingDurations.get(0).getDoubleValue();
          double swingAlpha = swingDurationAlpha.getDoubleValue();
          double timeOnEntryDuringSwing = swingDuration * swingAlpha;
          double timeOnExitDuringSwing = swingDuration * (1.0 - swingAlpha);
@@ -680,9 +680,17 @@ public class ICPPlanner
          icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
          icpSingleSupportTrajectoryGenerator.setTrajectoryTime(timeOnEntryDuringSwing, timeOnExitDuringSwing);
          icpSingleSupportTrajectoryGenerator.initialize();
-      }
 
-      computeFinalCoMPositionInSwing();
+         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
+         icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM);
+      }
+      else
+      {
+         singleSupportInitialICP.changeFrame(worldFrame);
+         CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1),
+               singleSupportInitialICP, singleSupportInitialCoM, singleSupportFinalCoM);
+      }
+      yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
 
    /**
@@ -956,7 +964,8 @@ public class ICPPlanner
          computeDesiredCapturePointVelocity(omega0, time, tempICP, tempConstantCMP, desiredICPVelocity);
          computeDesiredCapturePointAcceleration(omega0, time, tempICP, tempConstantCMP, desiredICPAcceleration);
 
-         CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, desiredCoMPosition);
+         CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
+         desiredCoMPosition.set(tempCoM);
       }
 
       decayDesiredVelocityIfNeeded();
