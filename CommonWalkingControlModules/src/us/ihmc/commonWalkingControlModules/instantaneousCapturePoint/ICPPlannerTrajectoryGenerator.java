@@ -88,7 +88,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
       YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();
 
-      CoMIntegrationTools.computeCoMPositionUsingCubicICP(0.0, time, doubleSupportCapturePointTrajectory.getTrajectoryTime(), omega0.getDoubleValue(),
+      CoMIntegrationTools.integrateCoMPositionUsingCubicICP(0.0, time, doubleSupportCapturePointTrajectory.getTrajectoryTime(), omega0.getDoubleValue(),
             doubleSupportCapturePointTrajectory.getCurrentTrajectoryFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame, comPositionToPack);
    }
 

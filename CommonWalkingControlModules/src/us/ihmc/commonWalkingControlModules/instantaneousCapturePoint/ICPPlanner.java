@@ -116,7 +116,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
@@ -687,7 +687,7 @@ public class ICPPlanner
       else
       {
          singleSupportInitialICP.changeFrame(worldFrame);
-         CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1),
+         CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1),
                singleSupportInitialICP, singleSupportInitialCoM, singleSupportFinalCoM);
       }
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
@@ -796,7 +796,7 @@ public class ICPPlanner
          double swingDuration = swingDurations.get(0).getDoubleValue();
          List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
          singleSupportInitialICP.changeFrame(worldFrame);
-         CoMIntegrationTools.computeFinalCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0), singleSupportInitialICP,
+         CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0), singleSupportInitialICP,
                singleSupportInitialCoM, singleSupportFinalCoM);
       }
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
@@ -964,7 +964,7 @@ public class ICPPlanner
          computeDesiredCapturePointVelocity(omega0, time, tempICP, tempConstantCMP, desiredICPVelocity);
          computeDesiredCapturePointAcceleration(omega0, time, tempICP, tempConstantCMP, desiredICPAcceleration);
 
-         CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
+         CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
          desiredCoMPosition.set(tempCoM);
       }
 
