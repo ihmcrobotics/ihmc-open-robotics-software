@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.head.HeadOrientationMa
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -41,7 +40,6 @@ public class HighLevelControlManagerFactory
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
    private HeadOrientationManager headOrientationManager;
-   private ManipulationControlModule manipulationControlModule;
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
 
@@ -245,8 +243,6 @@ public class HighLevelControlManagerFactory
          balanceManager.initialize();
       if (centerOfMassHeightManager != null)
          centerOfMassHeightManager.initialize();
-      if (manipulationControlModule != null)
-         manipulationControlModule.initialize();
       if (headOrientationManager != null)
          headOrientationManager.initialize();
 
@@ -261,13 +257,6 @@ public class HighLevelControlManagerFactory
    public FeedbackControlCommandList createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
-
-      if (manipulationControlModule != null)
-      {
-         FeedbackControlCommandList template = manipulationControlModule.createFeedbackControlTemplate();
-         for (int i = 0; i < template.getNumberOfCommands(); i++)
-            ret.addCommand(template.getCommand(i));
-      }
 
       if (feetManager != null)
       {

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -112,7 +111,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
-         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
+         CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
