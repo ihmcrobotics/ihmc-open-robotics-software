@@ -3,14 +3,6 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep.dataObjects;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Random;
-
-import org.junit.Test;
-
-import us.ihmc.commons.RandomNumbers;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -18,9 +10,7 @@ import us.ihmc.humanoidRobotics.communication.packets.SE3TrajectoryPointMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,39 +21,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class FootTrajectoryMessageTransformerTest
 {
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testTransformPacket() throws Exception
-   {
-      int numberOfTests = 10;
-      Random random = new Random(100L);
-      RigidBodyTransform transform3D;
-      RobotSide robotSide;
-      for (int i = 0; i < numberOfTests; i++)
-      {
-         AxisAngle axisAngle = RandomGeometry.nextAxisAngle(random);
-         Quaternion quat = new Quaternion();
-         quat.set(axisAngle);
-
-         if (i % 2 == 0)
-            robotSide = RobotSide.LEFT;
-         else
-            robotSide = RobotSide.RIGHT;
-
-         Point3D point3d = RandomGeometry.nextPoint3D(random, 10.0, 10.0, 10.0);
-
-         double trajectoryTime = RandomNumbers.nextDouble(random, 0.6, 5.0);
-
-         FootTrajectoryMessage starting = new FootTrajectoryMessage(robotSide, trajectoryTime, point3d, quat);
-
-         transform3D = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
-
-         FootTrajectoryMessage ending = starting.transform(transform3D);
-
-         performEqualsTest(starting, transform3D, ending);
-      }
-   }
 
    private static void performEqualsTest(FootTrajectoryMessage starting, RigidBodyTransform transform3D, FootTrajectoryMessage ending)
    {
@@ -79,7 +36,7 @@ public class FootTrajectoryMessageTransformerTest
          // Point3D position;
          double distance = getDistanceBetweenPoints(startingWaypoint.position, transform3D, endingWaypoint.position);
          assertEquals("not equal", 0.0, distance, 1e-6);
-         
+
          // Quat4d orientation;
          Quaternion startQuat = startingWaypoint.orientation;
          Quaternion endQuat = endingWaypoint.orientation;

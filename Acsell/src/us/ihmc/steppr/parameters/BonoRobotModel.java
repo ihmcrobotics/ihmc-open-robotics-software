@@ -17,9 +17,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.NoArmsArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -70,10 +68,8 @@ public class BonoRobotModel implements DRCRobotModel
    private final JaxbSDFLoader loader;
    private final BonoJointMap jointMap = new BonoJointMap();
    private final DRCRobotSensorInformation sensorInformation;
-   private final NoArmsArmControllerParameters armControlParameters;
    private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
-   private final BonoWalkingControllerParameters multiContactControllerParameters;
 
    private boolean enableJointDamping = true;
 
@@ -92,9 +88,7 @@ public class BonoRobotModel implements DRCRobotModel
       }
 
       capturePointPlannerParameters = new BonoCapturePointPlannerParameters(runningOnRealRobot);
-      armControlParameters = new NoArmsArmControllerParameters();
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
-      multiContactControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
       robotDescription = createRobotDescription();
    }
 
@@ -112,12 +106,6 @@ public class BonoRobotModel implements DRCRobotModel
    public RobotDescription getRobotDescription()
    {
       return robotDescription;
-   }
-
-   @Override
-   public ArmControllerParameters getArmControllerParameters()
-   {
-      return armControlParameters;
    }
 
    @Override

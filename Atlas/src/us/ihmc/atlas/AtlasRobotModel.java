@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import com.jme3.math.Transform;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
@@ -29,7 +28,6 @@ import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOf
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -108,7 +106,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasPhysicalProperties atlasPhysicalProperties;
    private final AtlasJointMap jointMap;
    private final AtlasSensorInformation sensorInformation;
-   private final AtlasArmControllerParameters armControllerParameters;
    private final AtlasCapturePointPlannerParameters capturePointPlannerParameters;
    private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
@@ -152,7 +149,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(atlasPhysicalProperties);
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
-      armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
@@ -175,12 +171,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public RobotDescription getRobotDescription()
    {
       return robotDescription;
-   }
-
-   @Override
-   public ArmControllerParameters getArmControllerParameters()
-   {
-      return armControllerParameters;
    }
 
    @Override
