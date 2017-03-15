@@ -17,6 +17,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeig
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisOrientationTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
@@ -53,12 +54,14 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private final SideDependentList<YoFrameQuaternion> yoDesiredHandOrientations = new SideDependentList<>();
    private final YoFrameQuaternion yoDesiredChestOrientation;
    private final YoFrameQuaternion yoDesiredPelvisOrientation;
+   private final DoubleYoVariable yoDesiredPelvisHeight;
    private final DoubleYoVariable trajectoryTime;
 
    private final KinematicsToolboxOutputConverter outputConverter;
    private final FullHumanoidRobotModel fullRobotModel;
    private ChestTrajectoryMessage chestTrajectoryMessage;
    private PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage;
+   private PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage;
    private SideDependentList<HandTrajectoryMessage> handTrajectoryMessage = new SideDependentList<>();
    private TrackingWeightsMessage trackingWeightsMessage;
 
@@ -104,6 +107,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       yoDesiredChestOrientation = new YoFrameQuaternion(behaviorName + "DesiredChest", worldFrame, registry);
       yoDesiredPelvisOrientation = new YoFrameQuaternion(behaviorName + "DesiredPelvis", worldFrame, registry);
+      yoDesiredPelvisHeight = new DoubleYoVariable(behaviorName + "DesiredPelvisHeight", registry);
 
       outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
@@ -127,6 +131,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
       yoDesiredChestOrientation.setToNaN();
       yoDesiredPelvisOrientation.setToNaN();
+      yoDesiredPelvisHeight.setToNaN();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -232,16 +237,34 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
 
    public void setPelvisAngularControl(boolean roll, boolean pitch, boolean yaw)
    {
-      double[] controlledPositionAxes = new double[] {0.0, 0.0, 0.0};
       double[] controlledOrientationAxes = new double[] {(roll) ? 1.0 : 0.0, (pitch) ? 1.0 : 0.0, (yaw) ? 1.0 : 0.0};
-      setPelvisControlledAxes(controlledPositionAxes, controlledOrientationAxes);
+      setPelvisControlledAxes(controlledOrientationAxes);
    }
 
-   public void setPelvisControlledAxes(double[] controlledPositionAxes, double[] controlledOrientationAxes)
+   public void setPelvisControlledAxes(double[] controlledOrientationAxes)
    {
       DenseMatrix64F selectionMatrix = pelvisSelectionMatrix;
-      double[] data = ArrayUtils.addAll(controlledOrientationAxes, controlledPositionAxes);
+      double[] data = ArrayUtils.addAll(controlledOrientationAxes, new double[] {0.0, 0.0, 0.0});
       organizeDataInSelectionMatrix(selectionMatrix, data);
+   }
+
+   public void holdCurrentPelvisHeight()
+   {
+      FramePoint currentPelvisPosition = new FramePoint(fullRobotModel.getPelvis().getParentJoint().getFrameAfterJoint());
+      currentPelvisPosition.changeFrame(worldFrame);
+      yoDesiredPelvisHeight.set(currentPelvisPosition.getZ());
+   }
+
+   public void setDesiredPelvisHeight(FramePoint pointContainingDesiredHeight)
+   {
+      pointContainingDesiredHeight = new FramePoint(pointContainingDesiredHeight);
+      pointContainingDesiredHeight.changeFrame(worldFrame);
+      yoDesiredPelvisHeight.set(pointContainingDesiredHeight.getZ());
+   }
+
+   public void setDesiredPelvisHeight(double desiredHeightInWorld)
+   {
+      yoDesiredPelvisHeight.set(desiredHeightInWorld);
    }
 
    public void setBodyWeights(BodyWeights bodyWeights)
@@ -319,11 +342,15 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
          yoDesiredPelvisQuaternion.get(desiredPelvisOrientation);
          pelvisOrientationTrajectoryMessage = new PelvisOrientationTrajectoryMessage(0.0, desiredPelvisOrientation);
       }
-//
-//      if (trackingWeightsMessage == null)
-//      {
-//         trackingWeightsMessage = new TrackingWeightsMessage(BodyWeights.STANDARD);
-//      }
+
+      if (yoDesiredPelvisHeight.isNaN())
+      {
+         pelvisHeightTrajectoryMessage = null;
+      }
+      else
+      {
+         pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(0.0, yoDesiredPelvisHeight.getDoubleValue());
+      }
    }
 
    @Override
@@ -353,6 +380,12 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             pelvisOrientationTrajectoryMessage.setSelectionMatrix(pelvisSelectionMatrix);
             pelvisOrientationTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
             sendPacket(pelvisOrientationTrajectoryMessage);
+         }
+
+         if (pelvisHeightTrajectoryMessage != null)
+         {
+            pelvisHeightTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+            sendPacket(pelvisHeightTrajectoryMessage);
          }
 
          if (trackingWeightsMessage != null)
@@ -432,6 +465,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       solutionSentToController = null;
       chestTrajectoryMessage = null;
       pelvisOrientationTrajectoryMessage = null;
+      pelvisHeightTrajectoryMessage = null;
       trackingWeightsMessage = null;
 
       for (RobotSide robotSide : RobotSide.values)
