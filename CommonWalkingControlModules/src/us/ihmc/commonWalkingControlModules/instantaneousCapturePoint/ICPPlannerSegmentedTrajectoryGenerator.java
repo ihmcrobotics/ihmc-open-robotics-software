@@ -335,7 +335,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    public void computeCenterOfMassFirstSegment(double timeInFirstSegment, FramePoint comToPack)
    {
-      CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, timeInFirstSegment, omega0.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame,
+      CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(0.0, timeInFirstSegment, omega0.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame,
             startOfSingleSupportCoM, comToPack);
    }
 
@@ -353,7 +353,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       double segmentDuration = spline.getTrajectoryTime();
 
       yoStartOfSplineCoM.getFrameTuple(startOfSplineCoM);
-      CoMIntegrationTools.computeCoMPositionUsingCubicICP(0.0, timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
+      CoMIntegrationTools.integrateCoMPositionUsingCubicICP(timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
             spline.getXPolynomial(), spline.getYPolynomial(), startOfSplineCoM, comToPack);
    }
 
@@ -381,7 +381,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    public void computeCenterOfMassThirdSegment(double timeInThirdSegment, FramePoint comToPack)
    {
       yoEndOfSplineCoM.getFrameTuple(endOfSplineCoM);
-      CoMIntegrationTools.computeCoMPositionUsingConstantCMP(0.0, timeInThirdSegment, omega0.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame,
+      CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(0.0, timeInThirdSegment, omega0.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame,
             endOfSplineCoM, comToPack);
    }
 
