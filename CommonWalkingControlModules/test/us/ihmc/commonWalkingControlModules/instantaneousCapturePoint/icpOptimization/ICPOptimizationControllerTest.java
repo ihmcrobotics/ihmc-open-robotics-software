@@ -86,7 +86,7 @@ public class ICPOptimizationControllerTest
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
       List<Footstep> footsteps = footstepTestHelper.createFootsteps(stepWidth, stepLength, 3);
       FootstepTiming defaultTiming = new FootstepTiming(singleSupportDuration, doubleSupportDuration);
-      icpPlanner.setFinalTransferTime(doubleSupportDuration);
+      icpPlanner.setFinalTransferDuration(doubleSupportDuration);
 
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -105,7 +105,9 @@ public class ICPOptimizationControllerTest
       FramePoint2d desiredICP = new FramePoint2d();
       FrameVector2d desiredICPVelocity = new FrameVector2d();
       FramePoint2d perfectCMP = new FramePoint2d();
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
+      icpPlanner.compute(currentTime);
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
       icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
 

@@ -1,6 +1,12 @@
 package us.ihmc.atlas.StepAdjustmentVisualizers;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -31,7 +37,12 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.ConvexPolygonShrinker;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -46,11 +57,6 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 public class StepAdjustmentExampleGraphic
 {
@@ -161,7 +167,6 @@ public class StepAdjustmentExampleGraphic
 
       icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(omega0.getDoubleValue());
-      icpPlanner.setDesiredCapturePointState(new FramePoint2d(ReferenceFrame.getWorldFrame()), new FrameVector2d(ReferenceFrame.getWorldFrame()));
 
       icpOptimizationController = new ICPOptimizationController(capturePointPlannerParameters, icpOptimizationParameters, walkingControllerParameters, bipedSupportPolygons,
             contactableFeet, controlDT, registry, yoGraphicsListRegistry);
@@ -323,7 +328,9 @@ public class StepAdjustmentExampleGraphic
 
       icpPlanner.setSupportLeg(supportSide);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue());
+      icpPlanner.compute(yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
 
       icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
       icpOptimizationController.compute(yoTime.getDoubleValue() + doubleSupportDuration.getDoubleValue(), desiredICP, desiredICPVelocity, desiredICP, omega0.getDoubleValue());
@@ -360,10 +367,14 @@ public class StepAdjustmentExampleGraphic
 
       icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0.getDoubleValue());
 
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue());
+      icpPlanner.compute(yoTime.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpOptimizationController.setBeginningOfStateICP(desiredICP, desiredICPVelocity);
 
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, yoTime.getDoubleValue() + timeToConsiderAdjustment.getDoubleValue());
+      icpPlanner.compute(yoTime.getDoubleValue() + timeToConsiderAdjustment.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       yoCurrentICP.set(desiredICP);
 
       initialTime = yoTime.getDoubleValue();
@@ -456,7 +467,9 @@ public class StepAdjustmentExampleGraphic
       }
 
       double currentTime = timeToConsiderAdjustment.getDoubleValue() + initialTime;
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
+      icpPlanner.compute(currentTime);
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       yoDesiredICP.set(desiredICP);
 
       updateCurrentICPPosition();
@@ -592,7 +605,9 @@ public class StepAdjustmentExampleGraphic
       for (int i = 0; i < numberOfBalls; i++)
       {
          double currentTime = i * trajectoryDT + initialTime;
-         icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
+         icpPlanner.compute(currentTime);
+         icpPlanner.getDesiredCapturePointPosition(desiredICP);
+         icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
          desiredICP3d.setXY(desiredICP);
          bagOfBalls.setBall(desiredICP3d, i);
       }
@@ -1263,7 +1278,7 @@ public class StepAdjustmentExampleGraphic
       return new CapturePointPlannerParameters()
       {
          @Override
-         public double getDoubleSupportSplitFraction()
+         public double getTransferDurationAlpha()
          {
             return 0.5;
          }
@@ -1299,7 +1314,7 @@ public class StepAdjustmentExampleGraphic
          }
 
          @Override
-         public double getTimeSpentOnExitCMPInPercentOfStepTime()
+         public double getSwingDurationAlpha()
          {
             return 0.5;
          }
