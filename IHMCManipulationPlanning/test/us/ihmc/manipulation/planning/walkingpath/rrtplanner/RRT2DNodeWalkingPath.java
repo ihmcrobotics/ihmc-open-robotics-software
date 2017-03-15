@@ -6,7 +6,6 @@ import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionResult;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionDetector;
 import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisionShapeFactory;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class RRT2DNodeWalkingPath extends RRTNode
 {

@@ -2,7 +2,7 @@ package us.ihmc.manipulation.planning.rrt;
 
 import java.util.ArrayList;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 /**
  * This class provides only expanding tree, expanding tree until reaching goal node and updating an optimal path.

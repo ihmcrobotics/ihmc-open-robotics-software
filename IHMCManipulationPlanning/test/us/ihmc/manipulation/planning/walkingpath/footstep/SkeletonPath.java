@@ -4,9 +4,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.printing.PrintTools;
-
 public class SkeletonPath
 {
    private ArrayList<Line2D> pathSegments = new ArrayList<Line2D>();

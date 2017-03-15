@@ -2,7 +2,7 @@ package us.ihmc.manipulation.planning.rrt;
 
 import java.util.ArrayList;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 public class RRTPiecewiseNode
 {

@@ -57,6 +57,8 @@ dependencies {
     compile ihmc.getProjectDependency(":IHMCFootstepPlanning")
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
+    compile ihmc.getProjectDependency(":IHMCHumanoidBehaviors")
+    
 
     testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
 }
