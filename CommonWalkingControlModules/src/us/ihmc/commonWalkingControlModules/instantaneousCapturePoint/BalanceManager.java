@@ -140,7 +140,6 @@ public class BalanceManager
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
-      double minimumSwingTimeForDisturbanceRecovery = walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery();
 
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
@@ -165,9 +164,8 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.setControlHeightWithMomentum(walkingControllerParameters.controlHeightWithMomentum());
 
       icpPlanner = new ICPPlannerWithTimeFreezer(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, registry, yoGraphicsListRegistry);
-      icpPlanner.setMinimumSingleSupportTimeForDisturbanceRecovery(minimumSwingTimeForDisturbanceRecovery);
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
-      icpPlanner.setFinalTransferTime(walkingControllerParameters.getDefaultTransferTime());
+      icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -290,7 +288,9 @@ public class BalanceManager
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
 
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredCapturePoint2d, desiredCapturePointVelocity2d, capturePoint2d, yoTime.getDoubleValue());
+      icpPlanner.compute(capturePoint2d, yoTime.getDoubleValue());
+      icpPlanner.getDesiredCapturePointPosition(desiredCapturePoint2d);
+      icpPlanner.getDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
 
       pelvisICPBasedTranslationManager.compute(supportLeg, capturePoint2d);
@@ -375,7 +375,7 @@ public class BalanceManager
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
       controllerToolbox.getCapturePoint(capturePoint2d);
-      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(yoTime.getDoubleValue(), capturePoint2d);
+      return icpPlanner.estimateTimeRemainingForStateUnderDisturbance(capturePoint2d);
    }
 
    public void freezePelvisXYControl()
@@ -415,7 +415,7 @@ public class BalanceManager
 
    public double getTimeRemainingInCurrentState()
    {
-      return icpPlanner.computeAndReturnTimeInCurrentState(yoTime.getDoubleValue());
+      return icpPlanner.getTimeInCurrentState();
    }
 
    public void goHome()
@@ -441,7 +441,7 @@ public class BalanceManager
       controllerToolbox.getCapturePoint(tempCapturePoint);
       yoDesiredCapturePoint.setByProjectionOntoXYPlane(tempCapturePoint);
 
-      icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), tempCapturePoint);
+      icpPlanner.holdCurrentICP(tempCapturePoint);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
 
       linearMomentumRateOfChangeControlModule.initializeForStanding();
@@ -525,7 +525,7 @@ public class BalanceManager
 
    public boolean isICPPlanDone()
    {
-      return icpPlanner.isDone(yoTime.getDoubleValue());
+      return icpPlanner.isDone();
    }
 
    public boolean isOnExitCMP()
@@ -591,7 +591,7 @@ public class BalanceManager
       centerOfMassPosition.setXY(centerOfMassPosition2d);
 
       centerOfMassPosition.changeFrame(worldFrame);
-      icpPlanner.holdCurrentICP(yoTime.getDoubleValue(), centerOfMassPosition);
+      icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
    private void setDefaultDoubleSupportTime(double defaultDoubleSupportTime)
@@ -606,7 +606,7 @@ public class BalanceManager
 
    private void setFinalTransferTime(double finalTransferTime)
    {
-      icpPlanner.setFinalTransferTime(finalTransferTime);
+      icpPlanner.setFinalTransferDuration(finalTransferTime);
    }
 
    /**
@@ -653,12 +653,6 @@ public class BalanceManager
    public void updateCurrentICPPlan()
    {
       icpPlanner.updateCurrentPlan();
-   }
-
-   public void updateICPPlanForSingleSupportDisturbances()
-   {
-      controllerToolbox.getCapturePoint(capturePoint2d);
-      icpPlanner.updatePlanForSingleSupportDisturbances(yoTime.getDoubleValue(), capturePoint2d);
    }
 
    public void updateSwingTimeRemaining(double timeRemainingInSwing)
