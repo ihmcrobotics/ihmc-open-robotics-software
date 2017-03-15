@@ -7,7 +7,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -238,6 +241,39 @@ public class HighLevelHumanoidControllerManager implements RobotController
    public String getDescription()
    {
       return getName();
+   }
+
+   /**
+    * Warmup the walking behavior by running all states for a number of iterations.
+    * 
+    * Also warms up the controller core
+    * 
+    * @param iterations number of times to run a single state
+    * @param walkingBehavior 
+    */
+   public void warmup(int iterations, WalkingHighLevelHumanoidController walkingBehavior)
+   {
+      PrintTools.info(this, "Starting JIT warmup routine");
+      ArrayList<WalkingStateEnum> states = new ArrayList<>();
+      controllerCore.initialize();
+      walkingBehavior.doTransitionIntoAction();
+      
+      walkingBehavior.getOrderedWalkingStates(states);
+      for(WalkingStateEnum walkingState : states)
+      {
+         PrintTools.info(this, "Warming up " + walkingState);
+         for(int i = 0; i < iterations; i++)
+         {
+            walkingBehavior.warmupStateIteration(walkingState);
+            ControllerCoreCommand controllerCoreCommandList = walkingBehavior.getControllerCoreCommand();
+            controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
+            controllerCore.compute();
+         }
+      }
+
+      walkingBehavior.doTransitionOutOfAction();
+      walkingBehavior.getControllerCoreCommand().clear();
+      PrintTools.info(this, "Finished JIT warmup routine");
    }
 
 }
