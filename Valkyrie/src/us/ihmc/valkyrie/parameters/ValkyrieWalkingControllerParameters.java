@@ -14,13 +14,16 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -31,7 +34,6 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 import us.ihmc.valkyrie.configuration.ValkyrieSliderBoardControlledNeckJoints;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerJointLimits;
 import us.ihmc.valkyrie.fingers.ValkyrieRealRobotFingerJoint;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieWalkingControllerParameters extends WalkingControllerParameters
 {
@@ -44,22 +46,24 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    private final double LowerNeckPitchUpperLimit = 1.162;
    private final double LowerNeckPitchLowerLimit = 0;
 
-   private final DRCRobotJointMap jointMap;
+   private final ValkyrieJointMap jointMap;
 
    private final LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>> sliderBoardControlledNeckJointNamesWithLimits = new LinkedHashMap<NeckJointName, ImmutablePair<Double, Double>>();
    private final SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>> sliderBoardControlledFingerJointNamesWithLimits = new SideDependentList<LinkedHashMap<String, ImmutablePair<Double, Double>>>();
 
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
+   private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
+   private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
-   public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap)
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap)
    {
       this(jointMap, DRCRobotModel.RobotTarget.SCS);
    }
 
-   public ValkyrieWalkingControllerParameters(DRCRobotJointMap jointMap, DRCRobotModel.RobotTarget target)
+   public ValkyrieWalkingControllerParameters(ValkyrieJointMap jointMap, DRCRobotModel.RobotTarget target)
    {
       this.jointMap = jointMap;
       this.target = target;
@@ -650,7 +654,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
       double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
 
-      YoPIDGains spineGains = new YoPIDGains("DefaultJointspace", registry);
+      YoPIDGains spineGains = new YoPIDGains("SpineJointspace", registry);
       spineGains.setKp(kp);
       spineGains.setZeta(zeta);
       spineGains.setKi(ki);
@@ -660,6 +664,75 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       spineGains.createDerivativeGainUpdater(true);
 
       return spineGains;
+   }
+
+   private YoPIDGains createArmControlGains(YoVariableRegistry registry)
+   {
+      YoPIDGains armGains = new YoPIDGains("ArmJointspace", registry);
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      double kp = runningOnRealRobot ? 200.0 : 120.0; // 200.0
+      double zeta = runningOnRealRobot ? 1.0 : 0.7;
+      double ki = runningOnRealRobot ? 0.0 : 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 50.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 750.0 : Double.POSITIVE_INFINITY;
+
+      armGains.setKp(kp);
+      armGains.setZeta(zeta);
+      armGains.setKi(ki);
+      armGains.setMaximumIntegralError(maxIntegralError);
+      armGains.setMaximumFeedback(maxAccel);
+      armGains.setMaximumFeedbackRate(maxJerk);
+      armGains.createDerivativeGainUpdater(true);
+
+      return armGains;
+   }
+
+   private YoOrientationPIDGainsInterface createHandOrientationControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains orientationGains = new YoSymmetricSE3PIDGains("HandOrientation", registry);
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      double kp = 100.0;
+      double zeta = runningOnRealRobot ? 0.6 : 1.0;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      orientationGains.setProportionalGain(kp);
+      orientationGains.setDampingRatio(zeta);
+      orientationGains.setIntegralGain(ki);
+      orientationGains.setMaximumIntegralError(maxIntegralError);
+      orientationGains.setMaximumFeedback(maxAccel);
+      orientationGains.setMaximumFeedbackRate(maxJerk);
+      orientationGains.createDerivativeGainUpdater(true);
+
+      return orientationGains;
+   }
+
+   private YoPositionPIDGainsInterface createHandPositionControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains positionGains = new YoSymmetricSE3PIDGains("HandPosition", registry);
+      boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
+
+      double kp = 100.0;
+      double zeta = runningOnRealRobot ? 0.6 : 1.0;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      positionGains.setProportionalGain(kp);
+      positionGains.setDampingRatio(zeta);
+      positionGains.setIntegralGain(ki);
+      positionGains.setMaximumIntegralError(maxIntegralError);
+      positionGains.setMaximumFeedback(maxAccel);
+      positionGains.setMaximumFeedbackRate(maxJerk);
+      positionGains.createDerivativeGainUpdater(true);
+
+      return positionGains;
    }
 
    /** {@inheritDoc} */
@@ -679,6 +752,13 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       for (NeckJointName name : jointMap.getNeckJointNames())
          jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
 
+      YoPIDGains armGains = createArmControlGains(registry);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ArmJointName name : jointMap.getArmJointNames())
+            jointspaceGains.put(jointMap.getArmJointName(robotSide, name), armGains);
+      }
+
       return jointspaceGains;
    }
 
@@ -697,7 +777,27 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
       taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
 
+      YoOrientationPIDGainsInterface handAngularGains = createHandOrientationControlGains(registry);
+      for (RobotSide robotSide : RobotSide.values)
+         taskspaceAngularGains.put(jointMap.getHandName(robotSide), handAngularGains);
+
       return taskspaceAngularGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   {
+      if (taskspaceLinearGains != null)
+         return taskspaceLinearGains;
+
+      taskspaceLinearGains = new HashMap<>();
+
+      YoPositionPIDGainsInterface handLinearGains = createHandPositionControlGains(registry);
+      for (RobotSide robotSide : RobotSide.values)
+         taskspaceLinearGains.put(jointMap.getHandName(robotSide), handLinearGains);
+
+      return taskspaceLinearGains;
    }
 
    /** {@inheritDoc} */
@@ -754,6 +854,46 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       }
 
       return positionControlledJoints;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   {
+      if (integrationSettings != null)
+         return integrationSettings;
+
+      integrationSettings = new HashMap<String, JointAccelerationIntegrationSettings>();
+
+      JointAccelerationIntegrationSettings neckJointSettings = new JointAccelerationIntegrationSettings();
+      neckJointSettings.setAlphaPosition(0.9996);
+      neckJointSettings.setAlphaVelocity(0.95);
+      neckJointSettings.setMaxPositionError(0.2);
+      neckJointSettings.setMaxVelocity(2.0);
+
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
+
+      JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
+      elbowJointSettings.setAlphaPosition(0.999);
+      elbowJointSettings.setAlphaVelocity(0.83);
+      elbowJointSettings.setMaxPositionError(0.2);
+      elbowJointSettings.setMaxVelocity(2.0);
+
+      JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
+      wristJointSettings.setAlphaPosition(0.999);
+      wristJointSettings.setAlphaVelocity(0.83);
+      wristJointSettings.setMaxPositionError(0.2);
+      wristJointSettings.setMaxVelocity(2.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), elbowJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), wristJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), wristJointSettings);
+      }
+
+      return integrationSettings;
    }
 
    @Override

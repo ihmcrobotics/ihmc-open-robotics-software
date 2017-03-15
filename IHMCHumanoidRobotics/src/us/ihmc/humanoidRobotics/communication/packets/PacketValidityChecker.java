@@ -6,7 +6,6 @@ import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -786,23 +785,14 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.armControlMode);
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s armControlMode field" + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      boolean isInUserControlMode = armDesiredAccelerationsMessage.armControlMode == ArmControlMode.USER_CONTROL_MODE;
-      if (isInUserControlMode && armDesiredAccelerationsMessage.armDesiredJointAccelerations == null)
+      if (armDesiredAccelerationsMessage.desiredJointAccelerations == null)
       {
          String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";
          return errorMessage;
       }
 
-      if (isInUserControlMode && armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
+      if (armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
       {
          String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";
