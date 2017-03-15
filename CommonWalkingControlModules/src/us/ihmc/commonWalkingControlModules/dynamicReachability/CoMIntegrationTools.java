@@ -14,6 +14,12 @@ public class CoMIntegrationTools
       computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack.getFrameTuple());
    }
 
+   public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, YoFramePoint constantCMP, YoFramePoint initialICP,
+         FramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP.getFrameTuple(), initialICP.getFrameTuple(), initialCoM, finalCoMToPack);
+   }
+
    public static void computeFinalCoMPositionUsingConstantCMP(double segmentDuration, double omega0, FramePoint constantCMP, FramePoint initialICP,
          YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
    {
@@ -33,10 +39,25 @@ public class CoMIntegrationTools
       computeCoMPositionUsingConstantCMP(0.0, segmentDuration, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack);
    }
 
+
+
+
    public static void computeCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
          YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
    {
       computeCoMPositionUsingConstantCMP(initialTime, finalTime, omega0, constantCMP, initialICP, initialCoM.getFrameTuple(), finalCoMToPack.getFrameTuple());
+   }
+
+   public static void computeCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
+         YoFramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingConstantCMP(initialTime, finalTime, omega0, constantCMP, initialICP, initialCoM.getFrameTuple(), finalCoMToPack);
+   }
+
+   public static void computeCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
+         FramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingConstantCMP(initialTime, finalTime, omega0, constantCMP, initialICP, initialCoM, finalCoMToPack.getFrameTuple());
    }
 
    public static void computeCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
@@ -65,14 +86,26 @@ public class CoMIntegrationTools
       return position;
    }
 
+
+
+
+   public static void computeFinalCoMPositionFromCubicICP(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
+         YoPolynomial yPolynomial, YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeFinalCoMPositionFromCubicICP(segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM.getFrameTuple(),
+            finalCoMToPack.getFrameTuple());
+   }
+
+   public static void computeFinalCoMPositionFromCubicICP(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
+         YoPolynomial yPolynomial, YoFramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      computeFinalCoMPositionFromCubicICP(segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM.getFrameTuple(), finalCoMToPack);
+   }
+
    public static void computeFinalCoMPositionFromCubicICP(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, FramePoint initialCoM, YoFramePoint finalCoMToPack)
    {
-      if (segmentDuration == 0.0)
-         finalCoMToPack.set(initialCoM);
-      else
-         computeCoMPositionUsingCubicICP(0.0, segmentDuration, segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
-               finalCoMToPack.getFrameTuple());
+      computeFinalCoMPositionFromCubicICP(segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM, finalCoMToPack.getFrameTuple());
    }
 
    public static void computeFinalCoMPositionFromCubicICP(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
@@ -82,6 +115,28 @@ public class CoMIntegrationTools
          finalCoMToPack.set(initialCoM);
       else
          computeCoMPositionUsingCubicICP(0.0, segmentDuration, segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM, finalCoMToPack);
+   }
+
+
+   public static void computeCoMPositionUsingCubicICP(double initialTime, double finalTime, double segmentDuration, double omega0, ReferenceFrame polynomialFrame,
+         YoPolynomial xPolynomial, YoPolynomial yPolynomial, YoFramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingCubicICP(initialTime, finalTime, segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM.getFrameTuple(),
+            finalCoMToPack.getFrameTuple());
+   }
+
+   public static void computeCoMPositionUsingCubicICP(double initialTime, double finalTime, double segmentDuration, double omega0, ReferenceFrame polynomialFrame,
+         YoPolynomial xPolynomial, YoPolynomial yPolynomial, YoFramePoint initialCoM, FramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingCubicICP(initialTime, finalTime, segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM.getFrameTuple(),
+            finalCoMToPack);
+   }
+
+   public static void computeCoMPositionUsingCubicICP(double initialTime, double finalTime, double segmentDuration, double omega0, ReferenceFrame polynomialFrame,
+         YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint initialCoM, YoFramePoint finalCoMToPack)
+   {
+      computeCoMPositionUsingCubicICP(initialTime, finalTime, segmentDuration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
+            finalCoMToPack.getFrameTuple());
    }
 
    public static void computeCoMPositionUsingCubicICP(double initialTime, double finalTime, double segmentDuration, double omega0, ReferenceFrame polynomialFrame,
@@ -103,6 +158,10 @@ public class CoMIntegrationTools
       finalCoMToPack.setX(xPosition);
       finalCoMToPack.setY(yPosition);
    }
+
+
+
+
 
    public static void computeFinalCoMPositionFromCubicDCM(double segmentDuration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, YoPolynomial zPolynomial, FramePoint initialCoM, FramePoint finalCoMToPack)

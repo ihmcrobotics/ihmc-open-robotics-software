@@ -59,13 +59,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void computeFinalCoMPosition(YoFramePoint finalCoMToPack)
+   public void computeFinalCoMPosition(FramePoint finalCoMToPack)
    {
-      YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
-      YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();
-
-      CoMIntegrationTools.computeFinalCoMPositionFromCubicICP(doubleSupportCapturePointTrajectory.getTrajectoryTime(), omega0.getDoubleValue(),
-            doubleSupportCapturePointTrajectory.getCurrentTrajectoryFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame, finalCoMToPack);
+      computeCoMPosition(doubleSupportCapturePointTrajectory.getTrajectoryTime(), finalCoMToPack);
    }
 
    @Override
@@ -84,11 +80,16 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.initialize();
       doubleSupportCapturePointTrajectory.compute(time);
 
+      computeCoMPosition(time, desiredCoMPosition);
+   }
+
+   public void computeCoMPosition(double time, FramePoint comPositionToPack)
+   {
       YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
       YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();
 
       CoMIntegrationTools.computeCoMPositionUsingCubicICP(0.0, time, doubleSupportCapturePointTrajectory.getTrajectoryTime(), omega0.getDoubleValue(),
-            doubleSupportCapturePointTrajectory.getCurrentTrajectoryFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame, desiredCoMPosition);
+            doubleSupportCapturePointTrajectory.getCurrentTrajectoryFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame, comPositionToPack);
    }
 
    @Override
