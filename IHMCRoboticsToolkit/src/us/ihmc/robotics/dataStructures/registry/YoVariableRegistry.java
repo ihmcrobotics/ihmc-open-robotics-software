@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
@@ -33,6 +35,11 @@ public class YoVariableRegistry implements YoVariableHolder
    private boolean isSent = false;
 
    private static final Pattern illegalCharacters = Pattern.compile("[ .*?@#$%/^&()<>,:{}'\"\\\\]");
+
+   /** Used to keep track of the class that created this registry. */
+   private final String className;
+   /** Used to keep track of the line at which this registry was created. */
+   private final int lineNumber;
 
    protected static void checkForIllegalCharacters(String name)
    {
@@ -67,6 +74,13 @@ public class YoVariableRegistry implements YoVariableHolder
 
       this.isLogged = isLogged;
       this.isSent = isSent;
+
+      // keep track of location of creation of this registry
+      int stackTraceIndex = 2;
+      Throwable throwable = new Throwable();
+      String[] classNameSplit = throwable.getStackTrace()[stackTraceIndex].getClassName().split("\\.");
+      className = classNameSplit[classNameSplit.length - 1].split("\\$")[0];
+      lineNumber = throwable.getStackTrace()[stackTraceIndex].getLineNumber();
    }
 
    public String getName()
@@ -352,7 +366,7 @@ public class YoVariableRegistry implements YoVariableHolder
    {
       addChild(child, true);
    }
-   
+
    public void addChild(YoVariableRegistry child, boolean notifyListeners)
    {
       // Prepend the parents nameSpace to the child. NameSpace will figure out if it's valid or not.
@@ -401,25 +415,25 @@ public class YoVariableRegistry implements YoVariableHolder
          child.prependNameSpace(parentNameSpace);
       }
    }
-   
+
    public void recursivelyChangeNamespaces(NameSpaceRenamer nameSpaceRenamer)
    {
       NameSpace nameSpace = this.getNameSpace();
       String nameSpaceString = nameSpace.getName();
-      
+
       nameSpaceString = nameSpaceRenamer.changeNamespaceString(nameSpaceString);
       this.changeNameSpace(nameSpaceString);
-      
+
       System.out.println(nameSpaceString);
-      
+
       ArrayList<YoVariableRegistry> children = this.getChildren();
-      
+
       for (YoVariableRegistry child : children)
       {
          child.recursivelyChangeNamespaces(nameSpaceRenamer);
       }
    }
-   
+
    public void changeNameSpace(String newNamespace)
    {
       System.err.println("Warning: Changing namespace from " + this.nameSpace + " to " + newNamespace);
@@ -892,7 +906,7 @@ public class YoVariableRegistry implements YoVariableHolder
          }
       }
    }
-   
+
    public void closeAndDispose()
    {
       if (controlVars != null)
@@ -900,7 +914,7 @@ public class YoVariableRegistry implements YoVariableHolder
          controlVars.clear();
          controlVars = null;
       }
-      
+
       if (controlVarsHashMap != null)
       {
          controlVarsHashMap.clear();
@@ -923,11 +937,48 @@ public class YoVariableRegistry implements YoVariableHolder
          simulationRewoundListeners.clear();
          simulationRewoundListeners = null;
       }
-      
+
       if (yoVariableRegistryChangedListeners != null)
       {
          yoVariableRegistryChangedListeners.clear();
          yoVariableRegistryChangedListeners = null;
       }
    }
+
+   public int printSizeRecursively(int minVariablesToPrint, int minChildrenToPrint)
+   {
+      int variables = getNumberOfYoVariables();
+      int children = getChildren().size();
+
+      if (variables >= minVariablesToPrint || children >= minChildrenToPrint)
+      {
+         int maxPropertyLength = 17;
+         String variableString = trimStringToLength("Variables: " + variables, maxPropertyLength, "...");
+         String childrenString = trimStringToLength("Children: " + children, maxPropertyLength, "...");
+
+         int maxNameLength = 60;
+         String name = getClass().getSimpleName() + " " + getName();
+         name = trimStringToLength(name, maxNameLength, "...");
+
+         System.out.println(name + " " + variableString + " " + childrenString);
+      }
+
+      int totalNumberOfVariables = variables;
+      for (int childIdx = 0; childIdx < children; childIdx++)
+         totalNumberOfVariables += getChildren().get(childIdx).printSizeRecursively(minVariablesToPrint, minChildrenToPrint);
+
+      return totalNumberOfVariables;
+   }
+
+   private static String trimStringToLength(String original, int length, String placeholder)
+   {
+      int chararcters = original.length();
+      int placeholderLength = placeholder.length();
+
+      if (chararcters > length)
+         return original.substring(0, length - placeholderLength) + placeholder;
+      else
+         return StringUtils.rightPad(original, length, " ");
+   }
+
 }
