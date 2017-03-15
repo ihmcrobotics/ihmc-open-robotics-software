@@ -184,6 +184,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    @Override
    public void doAction()
    {
+      if (!hasGains.getBooleanValue() || !hasWeights.getBooleanValue())
+      {
+         PrintTools.warn(warningPrefix + "Can not send joint trajectory commands. Do not have all weights and gains set.");
+         throw new RuntimeException(warningPrefix + "Has no gains or weights.");
+      }
+
       double timeInTrajectory = getTimeInTrajectory();
       boolean allDone = true;
 
