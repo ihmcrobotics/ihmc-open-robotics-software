@@ -7,18 +7,18 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ValkyriePhysicalProperties implements DRCRobotPhysicalProperties
-{  
+{
    public static final double footsizeReduction = 0.04;
-   
+
    public static final double ankleHeight = 0.09; // Should be 0.075 + 0.015 (sole thickness)
    public static final double footLength = 0.25 - footsizeReduction;
    public static final double footBack = 0.058 - footsizeReduction/2.0;
    public static final double footForward = footLength - footBack;
    public static final double footWidth = 0.15 - footsizeReduction;
-   
+
    public static final double thighLength = 0.431;
    public static final double shinLength = 0.406;
-   
+
    public static final SideDependentList<RigidBodyTransform> soleToAnkleFrameTransforms = new SideDependentList<>();
    public static final SideDependentList<RigidBodyTransform> handControlFrameToWristTransforms = new SideDependentList<RigidBodyTransform>();
 
@@ -52,5 +52,10 @@ public class ValkyriePhysicalProperties implements DRCRobotPhysicalProperties
    public static RigidBodyTransform getSoleToAnkleFrameTransform(RobotSide side)
    {
       return soleToAnkleFrameTransforms.get(side);
+   }
+
+   public static double getLegLength()
+   {
+      return thighLength + shinLength;
    }
 }

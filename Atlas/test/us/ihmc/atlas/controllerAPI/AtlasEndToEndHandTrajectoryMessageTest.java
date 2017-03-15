@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -103,4 +104,12 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
+
+   @Override
+   public double getLegLength()
+   {
+      AtlasPhysicalProperties physicalProperties = new AtlasPhysicalProperties();
+      return physicalProperties.getShinLength() + physicalProperties.getThighLength();
+   }
+
 }

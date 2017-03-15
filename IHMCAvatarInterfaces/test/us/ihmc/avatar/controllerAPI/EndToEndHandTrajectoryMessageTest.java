@@ -86,6 +86,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
+   /**
+    * Method used to scale down trajectories for different robots.
+    * @return shinLength + thighLength of the robot
+    */
+   public abstract double getLegLength();
+
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
    @Test(timeout = 50000)
    public void testSingleTrajectoryPoint() throws Exception
@@ -174,11 +180,15 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       RigidBody chest = fullRobotModel.getChest();
       ReferenceFrame chestFrame = chest.getBodyFixedFrame();
 
+      // This test was originally made for Atlas, a robot with a leg length of ~0.8m
+      double scale = getLegLength() / 0.8;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          FramePoint circleCenter = new FramePoint(chestFrame);
          circleCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.35);
-         double radius = 0.15;
+         circleCenter.scale(scale);
+         double radius = 0.15 * scale;
          FramePoint tempPoint = new FramePoint();
          TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
          FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, circleCenter, taskspaceToJointspaceCalculator, 500);
@@ -365,9 +375,13 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       fullRobotModel.updateFrames();
       ReferenceFrame chestBodyFixedFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
+      // This test was originally made for Atlas, a robot with a leg length of ~0.8m
+      double scale = getLegLength() / 0.8;
+
       FramePoint sphereCenter = new FramePoint(chestBodyFixedFrame);
       sphereCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.45);
-      double radius = 0.15;
+      sphereCenter.scale(scale);
+      double radius = 0.15 * scale;
       FramePoint tempPoint = new FramePoint();
       TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
       FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator, 500);
@@ -531,6 +545,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       int numberOfMessages = 10;
       double trajectoryTime = 7.0;
 
+      // This test was originally made for Atlas, a robot with a leg length of ~0.8m
+      double scale = getLegLength() / 0.8;
+
       SideDependentList<ArrayList<HandTrajectoryMessage>> handTrajectoryMessages = new SideDependentList<>(new ArrayList<HandTrajectoryMessage>(), new ArrayList<HandTrajectoryMessage>());
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
@@ -542,7 +559,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          FramePoint sphereCenter = new FramePoint(chestFrame);
          sphereCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.45);
-         double radius = 0.15;
+         sphereCenter.scale(scale);
+         double radius = 0.15 * scale;
          FramePoint tempPoint = new FramePoint();
          TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
          FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator, 500);
@@ -646,6 +664,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
+      // This test was originally made for Atlas, a robot with a leg length of ~0.8m
+      double scale = getLegLength() / 0.8;
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody chest = fullRobotModel.getChest();
@@ -653,7 +674,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
          FramePoint sphereCenter = new FramePoint(chestFrame);
          sphereCenter.set(0.35, robotSide.negateIfRightSide(0.45), -0.45);
-         double radius = 0.15;
+         sphereCenter.scale(scale);
+         double radius = 0.15 * scale;
          FramePoint tempPoint = new FramePoint();
          TaskspaceToJointspaceCalculator taskspaceToJointspaceCalculator = createTaskspaceToJointspaceCalculator(fullRobotModel, robotSide);
          FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, sphereCenter, taskspaceToJointspaceCalculator, 500);
@@ -728,7 +750,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBody chest = fullRobotModel.getChest();
 
          FramePose desiredHandPose = new FramePose(chest.getBodyFixedFrame());
-         desiredHandPose.setPosition(0.25, robotSide.negateIfRightSide(0.35), -0.4);
+         Point3D position = new Point3D(0.25, robotSide.negateIfRightSide(0.35), -0.4);
+         position.scale(scale);
+         desiredHandPose.setPosition(position);
          desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          Point3D desiredPosition = new Point3D();
