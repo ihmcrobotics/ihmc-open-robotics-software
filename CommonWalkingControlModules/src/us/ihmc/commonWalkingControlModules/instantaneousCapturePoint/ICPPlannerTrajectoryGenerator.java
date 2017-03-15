@@ -59,7 +59,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void computeFinalCoMPosition(FramePoint finalCoMToPack)
+   public void computeFinalCoMPosition(YoFramePoint finalCoMToPack)
    {
       YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
       YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();
