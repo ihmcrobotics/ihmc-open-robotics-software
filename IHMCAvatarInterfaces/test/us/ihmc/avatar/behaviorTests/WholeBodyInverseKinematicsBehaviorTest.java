@@ -18,7 +18,6 @@ import us.ihmc.avatar.controllerAPI.EndToEndPelvisTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
@@ -113,9 +112,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       RobotSide robotSide = RobotSide.RIGHT;
 
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-      String varname = nameSpace + "SwitchTime";
-      double initialSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
 
       drcBehaviorTestHelper.updateRobotModel();
 
@@ -152,10 +148,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      double newSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
-
-      assertNotEquals(initialSwitchTime, newSwitchTime, 1.0e-3);
 
       Quaternion controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
       Quaternion controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
@@ -266,9 +258,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       RobotSide robotSide = RobotSide.RIGHT;
 
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-      String varname = nameSpace + "SwitchTime";
-      double initialSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
 
       drcBehaviorTestHelper.updateRobotModel();
 
@@ -304,10 +293,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      double newSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
-
-      assertNotEquals(initialSwitchTime, newSwitchTime, 1.0e-3);
 
       String handName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
       Quaternion controllerDesiredHandOrientation = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(handName, scs);
@@ -622,9 +607,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       RobotSide robotSide = RobotSide.RIGHT;
 
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + HandControlModule.class.getSimpleName();
-      String varname = nameSpace + "SwitchTime";
-      double initialSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
 
       drcBehaviorTestHelper.updateRobotModel();
 
@@ -663,10 +645,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      double newSwitchTime = scs.getVariable(nameSpace, varname).getValueAsDouble();
-
-      assertNotEquals(initialSwitchTime, newSwitchTime, 1.0e-3);
 
       Quaternion controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
       Quaternion controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
