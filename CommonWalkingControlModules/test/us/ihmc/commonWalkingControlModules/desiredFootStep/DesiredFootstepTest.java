@@ -27,6 +27,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -292,6 +293,7 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(PauseWalkingMessage.class);
       netClassList.registerPacketClass(FootstepStatus.class);
       netClassList.registerPacketClass(ExecutionMode.class);
+      netClassList.registerPacketClass(ExecutionTiming.class);
 
       netClassList.registerPacketField(ArrayList.class);
       netClassList.registerPacketField(Point3D.class);
