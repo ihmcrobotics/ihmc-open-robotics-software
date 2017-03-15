@@ -139,11 +139,11 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       yoGraphicsList.add(endOfSplineICPViz);
       artifactList.add(endOfSplineICPViz.createArtifact());
 
-      YoGraphicPosition startOfSplineCoMViz = new YoGraphicPosition("singleSupportInitialSplineCoM", yoStartOfSplineCoM, 0.01, YoAppearance.Teal(), GraphicType.SOLID_BALL);
+      YoGraphicPosition startOfSplineCoMViz = new YoGraphicPosition("singleSupportInitialSplineCoM", yoStartOfSplineCoM, 0.004, YoAppearance.Teal(), GraphicType.SOLID_BALL);
       yoGraphicsList.add(startOfSplineCoMViz);
       artifactList.add(startOfSplineCoMViz.createArtifact());
 
-      YoGraphicPosition endOfSplineCoMViz = new YoGraphicPosition("singleSupportFinalSplineCoM", yoEndOfSplineCoM, 0.01, YoAppearance.Teal(), GraphicType.BALL);
+      YoGraphicPosition endOfSplineCoMViz = new YoGraphicPosition("singleSupportFinalSplineCoM", yoEndOfSplineCoM, 0.004, YoAppearance.Teal(), GraphicType.BALL);
       yoGraphicsList.add(endOfSplineCoMViz);
       artifactList.add(endOfSplineCoMViz.createArtifact());
    }
