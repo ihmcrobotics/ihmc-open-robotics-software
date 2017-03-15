@@ -28,10 +28,11 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
-   private final String chestName = "torso";
-   private final String pelvisName = "pelvis";
-   private final String fullPelvisNameInSdf = pelvisName;
-   private final String headName = "upperNeckPitchLink";
+   private static final String chestName = "torso";
+   private static final String pelvisName = "pelvis";
+   private static final String fullPelvisNameInSdf = pelvisName;
+   private static final String headName = "upperNeckPitchLink";
+   private static final SideDependentList<String> handNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Palm", getRobotSidePrefix(RobotSide.RIGHT) + "Palm");
 
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
@@ -154,7 +155,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    }
 
-   private String getRobotSidePrefix(RobotSide robotSide)
+   private static String getRobotSidePrefix(RobotSide robotSide)
    {
       return robotSide.getCamelCaseNameForStartOfExpression();// "Left" or "Right"
    }
@@ -229,6 +230,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public String getHeadName()
    {
       return headName;
+   }
+
+   public String getHandName(RobotSide robotSide)
+   {
+      return handNames.get(robotSide);
    }
 
    @Override

@@ -1,24 +1,30 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTrajectoryCommand, HandTrajectoryMessage>
 {
    private RobotSide robotSide;
-   private BaseForControl baseForControl;
 
    public HandTrajectoryCommand()
    {
    }
 
-   public HandTrajectoryCommand(ReferenceFrame referenceFrame, RobotSide robotSide, BaseForControl baseForControl)
+   public HandTrajectoryCommand(ReferenceFrame referenceFrame, RobotSide robotSide)
    {
       super.clear(referenceFrame);
       this.robotSide = robotSide;
-      this.baseForControl = baseForControl;
+   }
+
+   public HandTrajectoryCommand(ReferenceFrame referenceFrame, RobotSide robotSide, BaseForControl baseForControl)
+   {
+      // TODO: nuke this constructor once BaseForControl is no more.
+
+      super.clear(referenceFrame);
+      this.robotSide = robotSide;
    }
 
    @Override
@@ -26,7 +32,6 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    {
       super.clear();
       robotSide = null;
-      baseForControl = null;
    }
 
    @Override
@@ -34,7 +39,6 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    {
       super.clear(referenceFrame);
       robotSide = null;
-      baseForControl = null;
    }
 
    @Override
@@ -48,11 +52,11 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
     * Same as {@link #set(HandTrajectoryCommand)} but does not change the trajectory points.
     * @param other
     */
+   @Override
    public void setPropertiesOnly(HandTrajectoryCommand other)
    {
       super.setPropertiesOnly(other);
       robotSide = other.robotSide;
-      baseForControl = other.baseForControl;
    }
 
    @Override
@@ -60,7 +64,6 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    {
       super.set(message);
       this.robotSide = message.getRobotSide();
-      this.baseForControl = message.getBase();
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -68,19 +71,9 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
       this.robotSide = robotSide;
    }
 
-   public void setBase(BaseForControl baseForControl)
-   {
-      this.baseForControl = baseForControl;
-   }
-
    public RobotSide getRobotSide()
    {
       return robotSide;
-   }
-
-   public BaseForControl getBase()
-   {
-      return baseForControl;
    }
 
    @Override
@@ -92,6 +85,13 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    @Override
    public boolean isCommandValid()
    {
-      return robotSide != null && baseForControl != null && super.isCommandValid();
+      return robotSide != null && super.isCommandValid();
+   }
+
+   public BaseForControl getBase()
+   {
+      // TODO: nuke this once BaseForControl is no more.
+
+      return BaseForControl.WORLD;
    }
 }

@@ -106,8 +106,8 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       taskspaceAngularWeights.put(jointMap.getHeadName(), headAngularWeight);
       for (RobotSide robotSide : RobotSide.values)
       {
-         taskspaceAngularWeights.put(jointMap.getJointBeforeHandName(robotSide), handAngularWeight);
-         taskspaceLinearWeights.put(jointMap.getJointBeforeHandName(robotSide), handLinearWeight);
+         taskspaceAngularWeights.put(jointMap.getHandName(robotSide), handAngularWeight);
+         taskspaceLinearWeights.put(jointMap.getHandName(robotSide), handLinearWeight);
       }
    }
 

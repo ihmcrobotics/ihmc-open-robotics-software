@@ -1,7 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
@@ -17,6 +16,7 @@ import org.junit.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -28,7 +28,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -579,7 +578,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05 + getRobotModel().getControllerDT());
       assertTrue(success);
 
-      assertNumberOfWaypoints(1, scs, chest);
+      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(0, scs, chest);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 16.8)
@@ -752,7 +752,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Quaternion desiredOrientationBeforeStop = findControllerDesiredOrientation(scs, chest);
 
-      assertFalse(findControllerStopBoolean(scs, chest));
+      assertEquals(RigidBodyControlMode.TASKSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(2, scs, chest);
 
       StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
       drcSimulationTestHelper.send(stopAllTrajectoryMessage);
@@ -762,7 +763,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Quaternion desiredOrientationAfterStop = findControllerDesiredOrientation(scs, chest);
 
-      assertTrue(findControllerStopBoolean(scs, chest));
+      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(0, scs, chest);
+
       EuclidCoreTestTools.assertQuaternionEquals(desiredOrientationBeforeStop, desiredOrientationAfterStop, 1.0e-3);
       assertControlErrorIsLow(scs, chest, 1.0e-2);
    }
@@ -777,12 +780,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
       String chestPrefix = chest.getName();
       return findVector3d("FeedbackControllerToolbox", chestPrefix + "DesiredAngularVelocity", scs);
-   }
-
-   public static boolean findControllerStopBoolean(SimulationConstructionSet scs, RigidBody chest)
-   {
-      String chestPrefix = chest.getName();
-      return ((BooleanYoVariable) scs.getVariable(chestPrefix + "TaskspaceControlModule", chestPrefix + "TaskspaceTrajectoryStopped")).getBooleanValue();
    }
 
    public static int findControllerNumberOfWaypoints(SimulationConstructionSet scs, RigidBody chest)
