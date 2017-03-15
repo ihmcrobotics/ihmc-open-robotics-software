@@ -228,6 +228,15 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
       lowLevelJointData.setDesiredAcceleration(desiredAcceleration);
    }
 
+   public void setDesiredJointCurrent(OneDoFJoint joint, double desiredCurrent)
+   {
+      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
+      if (lowLevelJointData == null)
+         throwJointNotRegisteredException(joint);
+
+      lowLevelJointData.setDesiredCurrent(desiredCurrent);
+   }
+
    public void setupForPositionControl(OneDoFJoint joint, double desiredPosition, double desiredVelocity)
    {
       LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
@@ -338,6 +347,15 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    }
 
    @Override
+   public double getDesiredJointCurrent(OneDoFJoint joint)
+   {
+      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
+      if (lowLevelJointData == null)
+         throwJointNotRegisteredException(joint);
+      return lowLevelJointData.getDesiredCurrent();
+   }
+
+   @Override
    public boolean pollResetJointIntegrators(OneDoFJoint joint)
    {
       LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
@@ -409,6 +427,16 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
          return false;
       else
          return lowLevelJointData.hasDesiredAcceleration();
+   }
+
+   @Override
+   public boolean hasDesiredCurrentForJoint(OneDoFJoint joint)
+   {
+      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
+      if (lowLevelJointData == null)
+         return false;
+      else
+         return lowLevelJointData.hasDesiredCurrent();
    }
 
    static void throwJointAlreadyRegisteredException(OneDoFJoint joint)
