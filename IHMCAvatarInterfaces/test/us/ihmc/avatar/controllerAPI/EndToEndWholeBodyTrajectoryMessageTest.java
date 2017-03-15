@@ -16,8 +16,8 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
@@ -140,7 +140,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(pelvisZUpFrame);
-
+      for (RobotSide robotSide : RobotSide.values)
+         desiredHandPoses.get(robotSide).changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
@@ -153,7 +154,14 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
       EndToEndFootTrajectoryMessageTest.assertSingleWaypointExecuted(footSide, desiredFootPose.getFramePointCopy().getPoint(), desiredFootPose.getFrameOrientationCopy().getQuaternion(), scs);
       for (RobotSide robotSide : RobotSide.values)
-         EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(robotSide, desiredHandPoses.get(robotSide).getFramePointCopy().getPoint(), desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion(), scs);
+      {
+         String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
+         desiredHandPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
+         Point3D desiredHandPosition = desiredHandPoses.get(robotSide).getFramePointCopy().getPoint();
+         Quaternion desiredHandOrientation = desiredHandPoses.get(robotSide).getFrameOrientationCopy().getQuaternion();
+
+         EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(handName, desiredHandPosition, desiredHandOrientation, scs);
+      }
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 10.9)

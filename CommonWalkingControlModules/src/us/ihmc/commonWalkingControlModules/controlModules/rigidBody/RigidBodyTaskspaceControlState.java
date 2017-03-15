@@ -79,15 +79,19 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FrameSE3TrajectoryPoint lastPointAdded = new FrameSE3TrajectoryPoint();
 
    private final ReferenceFrame baseFrame;
+   private final ReferenceFrame bodyFrame;
    private ReferenceFrame trajectoryFrame;
+   private final FramePose controlFramePose = new FramePose();
 
    public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-         Collection<ReferenceFrame> controlFrames, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+         Collection<ReferenceFrame> controlFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE, bodyName, yoTime);
+      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime);
       this.baseFrame = baseFrame;
       this.trajectoryFrame = baseFrame;
+      this.bodyFrame = bodyToControl.getBodyFixedFrame();
 
+      String bodyName = bodyToControl.getName();
       String prefix = bodyName + "Taskspace";
       trackingOrientation = new BooleanYoVariable(prefix + "TrackingOrientation", registry);
       trackingPosition = new BooleanYoVariable(prefix + "TrackingPosition", registry);
@@ -102,6 +106,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(baseBody);
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
+      setControlFrame(controlFrame);
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", null, registry);
@@ -314,6 +319,13 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       trajectoryDone.set(false);
       trackingOrientation.set(true);
       trackingPosition.set(true);
+   }
+
+   public void setControlFrame(ReferenceFrame controlFrame)
+   {
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(bodyFrame);
+      spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(controlFramePose);
    }
 
    public boolean handleOrientationTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command, FrameOrientation initialOrientation)

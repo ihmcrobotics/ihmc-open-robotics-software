@@ -3,16 +3,19 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 public class StandingState extends WalkingState
@@ -24,8 +27,8 @@ public class StandingState extends WalkingState
 
    private final CenterOfMassHeightManager comHeightManager;
    private final BalanceManager balanceManager;
-   private final ManipulationControlModule manipulationControlModule;
    private final PelvisOrientationManager pelvisOrientationManager;
+   private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final BooleanYoVariable doPrepareManipulationForLocomotion = new BooleanYoVariable("doPrepareManipulationForLocomotion", registry);
    private final BooleanYoVariable doPreparePelvisForLocomotion = new BooleanYoVariable("doPreparePelvisForLocomotion", registry);
@@ -41,9 +44,19 @@ public class StandingState extends WalkingState
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
+      RigidBody chest = controllerToolbox.getFullRobotModel().getChest();
+      ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
+         ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
+         handManagers.put(robotSide, handManager);
+      }
+
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
 
       doPrepareManipulationForLocomotion.set(walkingControllerParameters.doPrepareManipulationForLocomotion());
@@ -76,8 +89,14 @@ public class StandingState extends WalkingState
    @Override
    public void doTransitionOutOfAction()
    {
-      if (manipulationControlModule != null && doPrepareManipulationForLocomotion.getBooleanValue())
-         manipulationControlModule.prepareForLocomotion();
+      if (doPrepareManipulationForLocomotion.getBooleanValue())
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            if (handManagers.get(robotSide) != null)
+               handManagers.get(robotSide).holdInJointspace();
+         }
+      }
 
       if (pelvisOrientationManager != null && doPreparePelvisForLocomotion.getBooleanValue())
          pelvisOrientationManager.prepareForLocomotion();
