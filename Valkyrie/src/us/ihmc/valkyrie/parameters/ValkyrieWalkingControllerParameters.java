@@ -426,6 +426,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
+   public boolean controlToeDuringSwing()
+   {
+      return true;
+   }
+
+   @Override
    public double getMaxAngleTurnOutwards()
    {
       return Math.PI / 4.0;
