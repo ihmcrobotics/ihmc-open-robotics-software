@@ -219,7 +219,7 @@ public class RigidBodyControlManager
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
       computeDesiredPose(initialPose);
-      initialPose.changeFrame(command.getReferenceFrame());
+      initialPose.changeFrame(command.getExpressedInFrame());
 
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
       {
