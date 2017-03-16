@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -7,12 +9,14 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import java.util.List;
 
 public class ToeOffHelper
 {
@@ -31,6 +35,8 @@ public class ToeOffHelper
 
    private final DoubleYoVariable toeOffContactInterpolation;
    private final BooleanYoVariable hasComputedToeOffContactPoint;
+
+   private final FramePoint2d[] intersectionWithRay = new FramePoint2d[] {new FramePoint2d(), new FramePoint2d()};
 
    public ToeOffHelper(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
                        WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
@@ -106,7 +112,7 @@ public class ToeOffHelper
          rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
       }
 
-      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRayCopy(rayThroughExitCMP);
+      footPolygon.intersectionWithRay(rayThroughExitCMP, intersectionWithRay[0], intersectionWithRay[1]);
       toeOffContactPoint2d.set(intersectionWithRay[0]);
 
       hasComputedToeOffContactPoint.set(true);
