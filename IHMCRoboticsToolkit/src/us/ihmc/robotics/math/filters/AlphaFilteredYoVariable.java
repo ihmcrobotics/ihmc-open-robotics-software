@@ -29,7 +29,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  */
 public class AlphaFilteredYoVariable extends DoubleYoVariable implements ProcessingYoVariable
 {
-   private double alpha;
    private final DoubleYoVariable alphaVariable;
 
    private final DoubleYoVariable position;
@@ -70,9 +69,11 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
       super(name, description, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", description, registry);
       position = positionVariable;
-      this.alphaVariable = alphaVariable;
 
-      this.alpha = alpha;
+      if (alphaVariable != null)
+         this.alphaVariable = alphaVariable;
+      else
+         this.alphaVariable = new DoubleYoVariable(name + "AlphaVariable", registry);
 
       reset();
    }
@@ -101,26 +102,14 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
          set(currentPosition);
       }
 
-      if (alphaVariable == null)
-      {
-         set(alpha * getDoubleValue() + (1.0 - alpha) * currentPosition);
-      }
-      else
-      {
-         set(alphaVariable.getDoubleValue() * getDoubleValue() + (1.0 - alphaVariable.getDoubleValue()) * currentPosition);
-      }
+
+      set(alphaVariable.getDoubleValue() * getDoubleValue() + (1.0 - alphaVariable.getDoubleValue()) * currentPosition);
+
    }
 
    public void setAlpha(double alpha)
    {
-      if (alphaVariable == null)
-      {
-         this.alpha = alpha;
-      }
-      else
-      {
-         alphaVariable.set(alpha);
-      }
+      this.alphaVariable.set(alpha);
    }
 
    /**
