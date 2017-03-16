@@ -722,7 +722,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
     * 
     * @param states return list of walking states
     */
-   public void getOrderedWalkingStates(List<WalkingStateEnum> states)
+   public void getOrderedWalkingStatesForWarmup(List<WalkingStateEnum> states)
    {
       
       states.add(WalkingStateEnum.TO_STANDING);
@@ -731,14 +731,14 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       states.add(WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
       states.add(WalkingStateEnum.WALKING_LEFT_SUPPORT);
       
-      states.add(WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
-      states.add(WalkingStateEnum.WALKING_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.WALKING_RIGHT_SUPPORT);
       
       states.add(WalkingStateEnum.TO_FLAMINGO_LEFT_SUPPORT);
       states.add(WalkingStateEnum.FLAMINGO_LEFT_SUPPORT);
       
-      states.add(WalkingStateEnum.TO_FLAMINGO_RIGHT_SUPPORT);
-      states.add(WalkingStateEnum.FLAMINGO_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.TO_FLAMINGO_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.FLAMINGO_RIGHT_SUPPORT);
       
    }
    
