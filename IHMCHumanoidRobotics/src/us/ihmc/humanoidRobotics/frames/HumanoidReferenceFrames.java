@@ -50,6 +50,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final SideDependentList<EnumMap<ArmJointName, ReferenceFrame>> armJointFrames = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final SideDependentList<EnumMap<LegJointName, ReferenceFrame>> legJointFrames = SideDependentList.createListOfEnumMaps(LegJointName.class);
 
+   private final SideDependentList<ReferenceFrame> handZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<ReferenceFrame>();
@@ -120,8 +121,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       for (RobotSide robotSide : RobotSide.values)
      {
-         ZUpFrame ankleZUpFrame = new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp");
+         ZUpFrame ankleZUpFrame = new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
+         
+         ZUpFrame handZUpFrame = new ZUpFrame(worldFrame, getHandFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
+         handZUpFrames.put(robotSide, handZUpFrame);
 
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
          soleFrames.put(robotSide, soleFrame);
@@ -256,6 +260,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    {
       return armJointFrames.get(robotSide).get(armJointName);
    }
+   
+   public ReferenceFrame getHandZUpFrame(RobotSide robotSide)
+   {
+      return handZUpFrames.get(robotSide);
+   }
 
    // LEGS
    @Override
@@ -342,6 +351,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       for (RobotSide robotSide : RobotSide.values)
       {
          ankleZUpFrames.get(robotSide).update();
+         handZUpFrames.get(robotSide).update();
          soleFrames.get(robotSide).update();
          soleZUpFrames.get(robotSide).update();
       }
