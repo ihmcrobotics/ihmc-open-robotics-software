@@ -258,7 +258,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
       controllerCore.initialize();
       walkingBehavior.doTransitionIntoAction();
       
-      walkingBehavior.getOrderedWalkingStates(states);
+      walkingBehavior.getOrderedWalkingStatesForWarmup(states);
       for(WalkingStateEnum walkingState : states)
       {
          PrintTools.info(this, "Warming up " + walkingState);
