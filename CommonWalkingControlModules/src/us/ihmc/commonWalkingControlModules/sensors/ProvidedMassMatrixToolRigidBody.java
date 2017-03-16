@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.sensors;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
@@ -63,8 +62,8 @@ public class ProvidedMassMatrixToolRigidBody
    private final FrameVector temporaryVector = new FrameVector();
    private final SpatialAccelerationVector toolAcceleration = new SpatialAccelerationVector();
 
-   public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity,
-         ArmControllerParameters armControllerParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public ProvidedMassMatrixToolRigidBody(RobotSide robotSide, final FullHumanoidRobotModel fullRobotModel, double gravity, YoVariableRegistry parentRegistry,
+         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";
       this.registry = new YoVariableRegistry(name);
@@ -134,7 +133,7 @@ public class ProvidedMassMatrixToolRigidBody
       temporaryPoint.changeFrame(elevatorFrame);
       toolFrame.setPositionAndUpdate(temporaryPoint);
 
-      // Visualization 
+      // Visualization
       toolFramePoint.setToZero(toolFrame);
       toolFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
       objectCenterOfMassInWorld.set(toolFramePoint);

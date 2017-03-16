@@ -17,7 +17,6 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.avatar.sensors.DRCRenderedSceneVideoHandler;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
@@ -98,7 +97,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean setupControllerNetworkSubscriber = true;
 
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ArmControllerParameters armControllerParameters;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
    private final RobotContactPointParameters contactPointParameters;
@@ -146,7 +144,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       }
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      this.armControllerParameters = robotModel.getArmControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       this.icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
@@ -414,8 +411,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
-                                                             walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
-                                                             HighLevelState.WALKING);
+            walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       if (setupControllerNetworkSubscriber)
