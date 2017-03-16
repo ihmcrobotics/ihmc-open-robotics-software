@@ -38,11 +38,6 @@ public class YoVariableRegistry implements YoVariableHolder
 
    private static final Pattern illegalCharacters = Pattern.compile("[ .*?@#$%/^&()<>,:{}'\"\\\\]");
 
-   /** Used to keep track of the class that created this registry. */
-   private final String className;
-   /** Used to keep track of the line at which this registry was created. */
-   private final int lineNumber;
-
    protected static void checkForIllegalCharacters(String name)
    {
       // String.matches() only matches the whole string ( as if you put ^$ around it ). Use .find() of the Matcher class instead!
@@ -76,13 +71,6 @@ public class YoVariableRegistry implements YoVariableHolder
 
       this.isLogged = isLogged;
       this.isSent = isSent;
-
-      // keep track of location of creation of this registry
-      int stackTraceIndex = 2;
-      Throwable throwable = new Throwable();
-      String[] classNameSplit = throwable.getStackTrace()[stackTraceIndex].getClassName().split("\\.");
-      className = classNameSplit[classNameSplit.length - 1].split("\\$")[0];
-      lineNumber = throwable.getStackTrace()[stackTraceIndex].getLineNumber();
    }
 
    public String getName()
