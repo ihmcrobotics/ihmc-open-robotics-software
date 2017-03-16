@@ -29,10 +29,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFramePoint2d;
-import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
-import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -145,7 +142,7 @@ public class ICPPlanner
    /** Desired velocity for the Centroidal Momentum Pivot (CMP) */
    private final YoFrameVector desiredCMPVelocity = new YoFrameVector(namePrefix + "DesiredCentroidalMomentumVelocity", worldFrame, registry);
    /** Desired position for the Center of Mass (CoM) */
-   private final YoFramePoint desiredCoMPosition = new YoFramePoint(namePrefix + "DesiredCoMPosition", worldFrame, registry);
+   private final YoFramePoint2d desiredCoMPosition = new YoFramePoint2d(namePrefix + "DesiredCoMPosition", worldFrame, registry);
 
    //////////////////////////////// End Planner Output ////////////////////////////////
 
@@ -214,10 +211,10 @@ public class ICPPlanner
    private final YoFramePointInMultipleFrames singleSupportFinalICP;
    private final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
-   private final YoFramePointInMultipleFrames yoSingleSupportInitialCoM;
-   private final YoFramePointInMultipleFrames yoSingleSupportFinalCoM;
-   private final FramePoint singleSupportInitialCoM = new FramePoint();
-   private final FramePoint singleSupportFinalCoM = new FramePoint();
+   private final YoFramePoint2dInMultipleFrames yoSingleSupportInitialCoM;
+   private final YoFramePoint2dInMultipleFrames yoSingleSupportFinalCoM;
+   private final FramePoint2d singleSupportInitialCoM = new FramePoint2d();
+   private final FramePoint2d singleSupportFinalCoM = new FramePoint2d();
 
    private final BooleanYoVariable requestedHoldPosition = new BooleanYoVariable(namePrefix + "RequestedHoldPosition", registry);
    private final BooleanYoVariable isHoldingPosition = new BooleanYoVariable(namePrefix + "IsHoldingPosition", registry);
@@ -242,7 +239,7 @@ public class ICPPlanner
 
    private final FramePoint tempConstantCMP = new FramePoint();
    private final FramePoint tempICP = new FramePoint();
-   private final FramePoint tempCoM = new FramePoint();
+   private final FramePoint2d tempCoM = new FramePoint2d();
 
    /**
     * Creates an ICP planner. Refer to the class documentation: {@link ICPPlanner}.
@@ -297,8 +294,8 @@ public class ICPPlanner
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
-      yoSingleSupportInitialCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialCoM", registry, framesToRegister);
-      yoSingleSupportFinalCoM = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalCoM", registry, framesToRegister);
+      yoSingleSupportInitialCoM = new YoFramePoint2dInMultipleFrames(namePrefix + "SingleSupportInitialCoM", registry, framesToRegister);
+      yoSingleSupportFinalCoM = new YoFramePoint2dInMultipleFrames(namePrefix + "SingleSupportFinalCoM", registry, framesToRegister);
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
       {
@@ -368,13 +365,13 @@ public class ICPPlanner
       yoGraphicsList.add(desiredCenterOfMassPositionViz);
       artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
 
-      YoFramePoint initialCoMInWorld = yoSingleSupportInitialCoM.buildUpdatedYoFramePointForVisualizationOnly();
+      YoFramePoint2d initialCoMInWorld = yoSingleSupportInitialCoM.buildUpdatedYoFramePointForVisualizationOnly();
       YoGraphicPosition singleSupportInitialCoMViz = new YoGraphicPosition("singleSupportInitialCoM", initialCoMInWorld, 0.004, YoAppearance.Black(),
             GraphicType.SOLID_BALL);
       yoGraphicsList.add(singleSupportInitialCoMViz);
       artifactList.add(singleSupportInitialCoMViz.createArtifact());
 
-      YoFramePoint finalCoMInWorld = yoSingleSupportFinalCoM.buildUpdatedYoFramePointForVisualizationOnly();
+      YoFramePoint2d finalCoMInWorld = yoSingleSupportFinalCoM.buildUpdatedYoFramePointForVisualizationOnly();
       YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM", finalCoMInWorld, 0.004, YoAppearance.Black(),
             GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalCoMViz);
@@ -593,6 +590,7 @@ public class ICPPlanner
       {
          desiredICPPosition.set(icpPositionToHold);
          desiredICPVelocity.setToZero();
+         desiredCoMPosition.set(icpPositionToHold.getX(), icpPositionToHold.getY());
          singleSupportInitialICP.setIncludingFrame(icpPositionToHold);
          singleSupportFinalICP.setIncludingFrame(icpPositionToHold);
          singleSupportInitialICPVelocity.set(0.0, 0.0, 0.0);
@@ -721,7 +719,7 @@ public class ICPPlanner
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
-      desiredCoMPosition.getFrameTuple(singleSupportInitialCoM);
+      desiredCoMPosition.getFrameTuple2d(singleSupportInitialCoM);
       updateSingleSupportPlan();
       computeFinalCoMPositionInSwing();
    }
@@ -746,7 +744,7 @@ public class ICPPlanner
       switchCornerPointsToWorldFrame();
       singleSupportInitialICP.switchCurrentReferenceFrame(worldFrame);
       singleSupportFinalICP.switchCurrentReferenceFrame(worldFrame);
-      yoSingleSupportInitialCoM.getFrameTuple(singleSupportInitialCoM);
+      yoSingleSupportInitialCoM.getFrameTuple2d(singleSupportInitialCoM);
 
       ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide);
       double omega0 = this.omega0.getDoubleValue();
@@ -959,7 +957,7 @@ public class ICPPlanner
       {
          referenceCMPsCalculator.getNextEntryCMP(tempConstantCMP);
          singleSupportInitialICP.getFrameTupleIncludingFrame(tempICP);
-         yoSingleSupportInitialCoM.getFrameTuple(singleSupportInitialCoM);
+         yoSingleSupportInitialCoM.getFrameTuple2d(singleSupportInitialCoM);
          tempICP.changeFrame(worldFrame);
          double swingDuration = swingDurations.get(0).getDoubleValue();
          time = MathTools.clamp(time, 0.0, swingDuration);
@@ -1088,7 +1086,7 @@ public class ICPPlanner
     *
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
-   public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
+   public void getDesiredCenterOfMassPosition(YoFramePoint2d desiredCenterOfMassPositionToPack)
    {
       desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
    }
@@ -1314,20 +1312,27 @@ public class ICPPlanner
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
    }
 
+   private final FramePoint2d tempFinalCoM = new FramePoint2d();
+
    /**
     * Retrieves the desired CoM position at the end of the current step.
     *
     * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
     */
-   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FramePoint2d finalDesiredCenterOfMassPositionToPack)
    {
       if (isStanding.getBooleanValue())
+      {
          referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+         tempFinalCoM.setByProjectionOntoXYPlane(tempFinalICP);
+      }
       else
-         tempFinalICP.set(singleSupportFinalCoM);
+      {
+         tempFinalCoM.set(singleSupportFinalCoM);
+      }
 
-      tempFinalICP.changeFrame(worldFrame);
-      finalDesiredCenterOfMassPositionToPack.setIncludingFrame(tempFinalICP);
+      tempFinalCoM.changeFrame(worldFrame);
+      finalDesiredCenterOfMassPositionToPack.setIncludingFrame(tempFinalCoM);
    }
 
    /**
