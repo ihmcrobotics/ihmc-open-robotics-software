@@ -1202,10 +1202,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       ThreadTools.startAThread(this, "Simulation Contruction Set");
 
       if (SHOW_REGISTRY_SIZES_ON_STARTUP)
-      {
-         int totalNumberOfVariables = rootRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT);
-         PrintTools.info("Total Number of YoVariables: " + totalNumberOfVariables);
-      }
+         YoVariableRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT, rootRegistry);
 
       while (!this.hasSimulationThreadStarted())
       {
@@ -2318,10 +2315,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       // t = rob.getVariable("t");
 
       if (SHOW_REGISTRY_SIZES_ON_STARTUP)
-      {
-         int totalNumberOfVariables = rootRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT);
-         PrintTools.info("Total Number of YoVariables: " + totalNumberOfVariables);
-      }
+         YoVariableRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT, rootRegistry);
 
       // Three state loop, simulation is either playing, running, or waiting
       while (true)
