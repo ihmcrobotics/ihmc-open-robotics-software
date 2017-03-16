@@ -116,7 +116,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
