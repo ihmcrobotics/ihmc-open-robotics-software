@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -102,6 +102,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * <li>To get the ICP velocity, use either {@link #getDesiredCapturePointVelocity(FrameVector)},
  * {@link #getDesiredCapturePointVelocity(FrameVector2d)}, or
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
+ * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint)},
+ * {@link #getDesiredCenterOfMassPosition(FramePoint2d)}, or
+ * {@link #getDesiredCenterOfMassPosition(YoFramePoint)}.
  * <li>To get the CMP position, use either
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint)}, or
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
@@ -687,8 +690,8 @@ public class ICPPlanner
       else
       {
          singleSupportInitialICP.changeFrame(worldFrame);
-         CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1),
-               singleSupportInitialICP, singleSupportInitialCoM, singleSupportFinalCoM);
+         integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1), singleSupportInitialICP,
+               singleSupportInitialCoM, singleSupportFinalCoM);
       }
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
@@ -796,8 +799,8 @@ public class ICPPlanner
          double swingDuration = swingDurations.get(0).getDoubleValue();
          List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
          singleSupportInitialICP.changeFrame(worldFrame);
-         CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0), singleSupportInitialICP,
-               singleSupportInitialCoM, singleSupportFinalCoM);
+         integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0), singleSupportInitialICP, singleSupportInitialCoM,
+               singleSupportFinalCoM);
       }
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
@@ -964,7 +967,7 @@ public class ICPPlanner
          computeDesiredCapturePointVelocity(omega0, time, tempICP, tempConstantCMP, desiredICPVelocity);
          computeDesiredCapturePointAcceleration(omega0, time, tempICP, tempConstantCMP, desiredICPAcceleration);
 
-         CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
+         integrateCoMPositionUsingConstantCMP(0.0, time, omega0, tempConstantCMP, tempICP, singleSupportInitialCoM, tempCoM);
          desiredCoMPosition.set(tempCoM);
       }
 
@@ -1048,6 +1051,47 @@ public class ICPPlanner
       desiredCapturePointPositionToPack.set(desiredICPPosition);
    }
 
+   /**
+    * Gets the current CoM position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
+    */
+   public void getDesiredCenterOfMassPosition(FramePoint desiredCenterOfMassPositionToPack)
+   {
+      desiredCoMPosition.getFrameTupleIncludingFrame(desiredCenterOfMassPositionToPack);
+   }
+
+   /**
+    * Gets the current CoM position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
+    */
+   public void getDesiredCenterOfMassPosition(FramePoint2d desiredCenterOfMassPositionToPack)
+   {
+      desiredCoMPosition.getFrameTuple2dIncludingFrame(desiredCenterOfMassPositionToPack);
+   }
+
+   /**
+    * Gets the current CoM position.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
+    */
+   public void getDesiredCenterOfMassPosition(YoFramePoint desiredCenterOfMassPositionToPack)
+   {
+      desiredCenterOfMassPositionToPack.set(desiredCoMPosition);
+   }
    /**
     * Gets the current ICP velocity.
     * <p>
