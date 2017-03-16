@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the pelvis to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -21,6 +22,8 @@ import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
                   topic = "/control/pelvis_trajectory")
 public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<PelvisTrajectoryMessage> implements VisualizablePacket
 {
+   private static final long WORLD_FRAME_HASH_CODE = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
+
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -57,7 +60,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
     */
    public PelvisTrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation);
+      super(trajectoryTime, desiredPosition, desiredOrientation, WORLD_FRAME_HASH_CODE, WORLD_FRAME_HASH_CODE);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
@@ -93,5 +96,10 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    public String validateMessage()
    {
       return PacketValidityChecker.validatePelvisTrajectoryMessage(this);
+   }
+   
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
+   {
+      super.setTrajectoryPoint(trajectoryPointIndex, time, position, orientation, linearVelocity, angularVelocity, WORLD_FRAME_HASH_CODE);
    }
 }

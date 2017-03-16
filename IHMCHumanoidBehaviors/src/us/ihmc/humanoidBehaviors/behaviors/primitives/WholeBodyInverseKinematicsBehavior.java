@@ -70,6 +70,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    private KinematicsToolboxOutputStatus solutionSentToController = null;
    
    private final ReferenceFrame pelvisZUpFrame;
+   private final ReferenceFrame chestFrame;
 
    private final DoubleYoVariable yoTime;
    private final DoubleYoVariable timeSolutionSentToController;
@@ -87,7 +88,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();;
+      pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
 
       solutionQualityThreshold = new DoubleYoVariable(behaviorName + "SolutionQualityThreshold", registry);
       solutionQualityThreshold.set(0.005);
@@ -319,7 +321,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
             Quaternion desiredHandOrientation = new Quaternion();
             yoDesiredHandPosition.get(desiredHandPosition);
             yoDesiredHandOrientation.get(desiredHandOrientation);
-            HandTrajectoryMessage temporaryHandTrajectoryMessage = new HandTrajectoryMessage(robotSide, 0.0, desiredHandPosition, desiredHandOrientation);
+            HandTrajectoryMessage temporaryHandTrajectoryMessage = new HandTrajectoryMessage(robotSide, 0.0, desiredHandPosition, desiredHandOrientation, worldFrame, chestFrame);
             handTrajectoryMessage.put(robotSide, temporaryHandTrajectoryMessage);
          }
       }

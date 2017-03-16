@@ -92,8 +92,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    public void getTrajectoryPoints(FrameSO3TrajectoryPointList trajectoryPointListToPack)
    {
-//      trajectoryPointListToPack.clear(ReferenceFrame.getWorldFrame());
-
+      checkIfTrajectoryFrameIdsMatch(this.expressedInReferenceFrameId, trajectoryPointListToPack.getReferenceFrame());
       SO3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.length;
 

@@ -23,6 +23,12 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
    }
 
+   public SE3TrajectoryControllerCommand(ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame)
+   {
+      clear(expressedInFrame);
+      this.trajectoryFrame = trajectoryFrame;
+   }
+
    @Override
    public void clear()
    {

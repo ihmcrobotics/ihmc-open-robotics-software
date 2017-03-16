@@ -6,7 +6,6 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
@@ -111,14 +110,14 @@ public class KinematicsToolboxOutputConverter
    {
       checkIfDataHasBeenSet();
 
-      BaseForControl baseForControl = BaseForControl.WORLD;
+      ReferenceFrame trajectoryFrame = worldFrame;
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame handControlFrame = fullRobotModelToUseForConversion.getHandControlFrame(robotSide);
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(worldFrame);
       desiredHandPose.getPose(desiredPosition, desiredOrientation);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, baseForControl, trajectoryTime, desiredPosition, desiredOrientation);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame, trajectoryFrame);
       output.setHandTrajectoryMessage(handTrajectoryMessage);
    }
 
