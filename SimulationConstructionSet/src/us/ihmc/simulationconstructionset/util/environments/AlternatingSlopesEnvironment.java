@@ -8,9 +8,14 @@ public class AlternatingSlopesEnvironment extends PlanarRegionEnvironmentInterfa
 {
    private final double rampWidth;
    
-   public AlternatingSlopesEnvironment(double rampWidth)
+   public AlternatingSlopesEnvironment(double rampWidth, double landingLength)
    {
+      super();
       this.rampWidth = rampWidth;
+      
+      generator.addRectangle(Math.sqrt(MathTools.square(landingLength)), rampWidth);
+      generator.translate(landingLength / 2.0, 0.0, 0.0);
+      
    }
 
    public void addRamp(double length, double deltaZ)
