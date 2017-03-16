@@ -169,7 +169,7 @@ public class BalanceManager
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
-      dynamicReachabilityValidator = new DynamicReachabilityValidator(icpPlanner, fullRobotModel, centerOfMassFrame);
+      dynamicReachabilityValidator = new DynamicReachabilityValidator(icpPlanner, fullRobotModel, centerOfMassFrame, registry);
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -249,6 +249,20 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep);
    }
 
+   /**
+    * Sets the next footstep that the robot will take. Should be set at the beginning of transfer.
+    * @param upcomingFootstep
+    */
+   public void setUpcomingFootstep(Footstep upcomingFootstep)
+   {
+      dynamicReachabilityValidator.setUpcomingFootstep(upcomingFootstep);
+   }
+
+   /**
+    * Sets the next footstep that the robot will take. Should be set at the beginning of swing. Modifies the momentum recovery control module, which checks
+    * the stability of the robot.
+    * @param nextFootstep
+    */
    public void setNextFootstep(Footstep nextFootstep)
    {
       momentumRecoveryControlModule.setNextFootstep(nextFootstep);
@@ -491,6 +505,8 @@ public class BalanceManager
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
+
+      dynamicReachabilityValidator.checkReachabilityOfStep();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
