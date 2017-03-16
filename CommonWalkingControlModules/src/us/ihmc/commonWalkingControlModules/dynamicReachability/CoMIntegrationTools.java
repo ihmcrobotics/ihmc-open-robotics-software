@@ -22,7 +22,7 @@ public class CoMIntegrationTools
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, YoFramePoint constantCMP, YoFramePoint initialICP,
          FramePoint initialCoM, FramePoint finalCoMToPack)
@@ -44,7 +44,7 @@ public class CoMIntegrationTools
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double duration, double omega0, FramePoint constantCMP, FramePoint initialICP,
          FramePoint initialCoM, FramePoint finalCoMToPack)
@@ -66,7 +66,7 @@ public class CoMIntegrationTools
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
          YoFramePoint initialCoM, FramePoint finalCoMToPack)
@@ -85,7 +85,7 @@ public class CoMIntegrationTools
     * @param constantCMP constant location of the CMP during the integration interval.
     * @param initialICP initial location of the ICP at the beginning of the integration interval.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingConstantCMP(double initialTime, double finalTime, double omega0, FramePoint constantCMP, FramePoint initialICP,
          FramePoint initialCoM, FramePoint finalCoMToPack)
@@ -133,7 +133,7 @@ public class CoMIntegrationTools
     * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
     * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionFromCubicICP(double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, YoFramePoint initialCoM, FramePoint finalCoMToPack)
@@ -157,7 +157,7 @@ public class CoMIntegrationTools
     * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
     * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionFromCubicICP(double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, FramePoint initialCoM, FramePoint finalCoMToPack)
@@ -184,7 +184,7 @@ public class CoMIntegrationTools
     * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
     * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double time, double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, FramePoint initialCoM, FramePoint finalCoMToPack)
@@ -211,7 +211,7 @@ public class CoMIntegrationTools
     * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
     * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double initialTime, double finalTime, double duration, double omega0,
          ReferenceFrame polynomialFrame, YoPolynomial xPolynomial, YoPolynomial yPolynomial, YoFramePoint initialCoM, FramePoint finalCoMToPack)
@@ -234,7 +234,7 @@ public class CoMIntegrationTools
     * @param xPolynomial polynomial value that defines the coefficients for the ICP trajectory in the X-Direction.
     * @param yPolynomial polynomial value that defines the coefficients for the ICP trajectory in the Y-Direction.
     * @param initialCoM initial location of the CoM at the beginning of the integration interval.
-    * @param finalCoMToPack location of the center of mass at the end of the integration duration.
+    * @param finalCoMToPack location of the center of mass at the end of the integration duration. Modified.
     */
    public static void integrateCoMPositionUsingCubicICP(double initialTime, double finalTime, double segmentDuration, double omega0,
          ReferenceFrame polynomialFrame, YoPolynomial xPolynomial, YoPolynomial yPolynomial, FramePoint initialCoM, FramePoint finalCoMToPack)

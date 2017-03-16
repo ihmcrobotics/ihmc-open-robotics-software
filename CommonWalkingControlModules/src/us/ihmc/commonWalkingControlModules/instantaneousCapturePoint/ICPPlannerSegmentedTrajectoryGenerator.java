@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
 import static us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools.*;
 
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -335,7 +335,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
 
    public void computeCenterOfMassFirstSegment(double timeInFirstSegment, FramePoint comToPack)
    {
-      CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(0.0, timeInFirstSegment, omega0.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame,
+      integrateCoMPositionUsingConstantCMP(0.0, timeInFirstSegment, omega0.getDoubleValue(), initialCMPFinalFrame, initialICPFinalFrame,
             startOfSingleSupportCoM, comToPack);
    }
 
@@ -353,7 +353,7 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       double segmentDuration = spline.getTrajectoryTime();
 
       yoStartOfSplineCoM.getFrameTuple(startOfSplineCoM);
-      CoMIntegrationTools.integrateCoMPositionUsingCubicICP(timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
+      integrateCoMPositionUsingCubicICP(timeInSecondSegment, segmentDuration, omega0.getDoubleValue(), spline.getCurrentTrajectoryFrame(),
             spline.getXPolynomial(), spline.getYPolynomial(), startOfSplineCoM, comToPack);
    }
 
@@ -381,8 +381,8 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
    public void computeCenterOfMassThirdSegment(double timeInThirdSegment, FramePoint comToPack)
    {
       yoEndOfSplineCoM.getFrameTuple(endOfSplineCoM);
-      CoMIntegrationTools.integrateCoMPositionUsingConstantCMP(0.0, timeInThirdSegment, omega0.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame,
-            endOfSplineCoM, comToPack);
+      integrateCoMPositionUsingConstantCMP(0.0, timeInThirdSegment, omega0.getDoubleValue(), finalCMPFinalFrame, endOfSplineICPFinalFrame, endOfSplineCoM,
+            comToPack);
    }
 
    private void updateSplineBoundaries()
