@@ -33,7 +33,6 @@ public class CoMIntegrationToolsTest
       YoFramePoint finalICP = new YoFramePoint("finalICP", worldFrame, registry);
       YoFrameVector finalICPVelocity = new YoFrameVector("finalICPVelocity", worldFrame, registry);
       YoFramePoint initialCoM = new YoFramePoint("initialCoM", worldFrame, registry);
-      YoFramePoint finalCoM = new YoFramePoint("finalCoM", worldFrame, registry);
 
       YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", worldFrame, registry);
       YoFramePoint desiredCoMPosition = new YoFramePoint("desiredCoMPosition", worldFrame, registry);
@@ -56,7 +55,8 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setInitialCoMPosition(initialCoM, worldFrame);
       icpTrajectoryGenerator.initialize();
 
-      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM.getFrameTuple());
+      FramePoint finalCoM = new FramePoint();
+      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
       FramePoint dummyPoint = new FramePoint();
 
@@ -110,7 +110,6 @@ public class CoMIntegrationToolsTest
       YoFramePoint initialICP = new YoFramePoint("initialICP", worldFrame, registry);
       YoFramePoint finalICP = new YoFramePoint("finalICP", worldFrame, registry);
       YoFramePoint initialCoM = new YoFramePoint("initialCoM", worldFrame, registry);
-      YoFramePoint finalCoM = new YoFramePoint("finalCoM", worldFrame, registry);
       finalICP.set(-0.07, 0.4, 0.0);
 
       YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", worldFrame, registry);
@@ -141,7 +140,8 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM.getFrameTuple());
+      FramePoint finalCoM = new FramePoint();
+      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
       FramePoint dummyPoint = new FramePoint();
 
@@ -195,7 +195,6 @@ public class CoMIntegrationToolsTest
       YoFramePoint initialICP = new YoFramePoint("initialICP", worldFrame, registry);
       YoFramePoint finalICP = new YoFramePoint("finalICP", worldFrame, registry);
       YoFramePoint initialCoM = new YoFramePoint("initialCoM", worldFrame, registry);
-      YoFramePoint finalCoM = new YoFramePoint("finalCoM", worldFrame, registry);
       finalICP.set(-0.07, 0.4, 0.0);
 
       YoFramePoint desiredCapturePoint = new YoFramePoint("desiredCapturePoint", worldFrame, registry);
@@ -228,7 +227,8 @@ public class CoMIntegrationToolsTest
       icpTrajectoryGenerator.setTrajectoryTime(swingInitialDuration, swingFinalDuration);
       icpTrajectoryGenerator.initialize();
 
-      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM.getFrameTuple());
+      FramePoint finalCoM = new FramePoint();
+      icpTrajectoryGenerator.computeFinalCoMPosition(finalCoM);
 
       FramePoint dummyPoint = new FramePoint();
 
