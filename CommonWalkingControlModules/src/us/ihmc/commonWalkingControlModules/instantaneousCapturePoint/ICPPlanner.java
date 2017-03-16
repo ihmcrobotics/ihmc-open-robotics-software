@@ -202,7 +202,7 @@ public class ICPPlanner
     * Output of the linear reduction being applied on the desired ICP velocity when the current
     * state is done.
     * <p>
-    * This reduction in desired ICP velocity is particularly useful to reduce the CIP tracking error
+    * This reduction in desired ICP velocity is particularly useful to reduce the ICP tracking error
     * when the robot is getting stuck at the end of transfer.
     * </p>
     */
@@ -1282,6 +1282,8 @@ public class ICPPlanner
       return isInitialTransfer.getBooleanValue();
    }
 
+   private final FramePoint tempFinalICP = new FramePoint();
+
    /**
     * Retrieves the desired ICP position at the end of the current state.
     * 
@@ -1297,8 +1299,6 @@ public class ICPPlanner
       finalDesiredCapturePointPositionToPack.setIncludingFrame(tempFinalICP);
    }
 
-   private final FramePoint tempFinalICP = new FramePoint();
-
    /**
     * Retrieves the desired ICP position at the end of the current state.
     * 
@@ -1312,6 +1312,22 @@ public class ICPPlanner
          entryCornerPoints.get(1).getFrameTupleIncludingFrame(tempFinalICP);
       tempFinalICP.changeFrame(finalDesiredCapturePointPositionToPack.getReferenceFrame());
       finalDesiredCapturePointPositionToPack.setByProjectionOntoXYPlane(tempFinalICP);
+   }
+
+   /**
+    * Retrieves the desired CoM position at the end of the current step.
+    *
+    * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
+    */
+   public void getFinalDesiredCenterOfMassPosition(FramePoint finalDesiredCenterOfMassPositionToPack)
+   {
+      if (isStanding.getBooleanValue())
+         referenceCMPsCalculator.getNextEntryCMP(tempFinalICP);
+      else
+         tempFinalICP.set(singleSupportFinalCoM);
+
+      tempFinalICP.changeFrame(worldFrame);
+      finalDesiredCenterOfMassPositionToPack.setIncludingFrame(tempFinalICP);
    }
 
    /**
