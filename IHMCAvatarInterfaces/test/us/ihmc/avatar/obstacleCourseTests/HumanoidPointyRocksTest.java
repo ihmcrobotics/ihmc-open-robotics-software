@@ -305,6 +305,14 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
 
+      // should make the test more robust
+      BooleanYoVariable allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("allowUpperBodyMomentumInSingleSupport");
+      BooleanYoVariable allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("allowUpperBodyMomentumInDoubleSupport");
+      BooleanYoVariable allowUsingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("allowUsingHighMomentumWeight");
+      allowUsingHighMomentumWeight.set(true);
+      allowUpperBodyMomentumInSingleSupport.set(true);
+      allowUpperBodyMomentumInDoubleSupport.set(true);
+
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
       setupCameraForWalkingUpToRamp();
