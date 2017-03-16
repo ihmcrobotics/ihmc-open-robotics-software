@@ -83,8 +83,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private ReferenceFrame trajectoryFrame;
    private final FramePose controlFramePose = new FramePose();
 
-   public RigidBodyTaskspaceControlState(String bodyName, RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator,
-         Collection<ReferenceFrame> controlFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
+         ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime);
       this.baseFrame = baseFrame;
@@ -114,9 +114,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
 
-      if (controlFrames != null)
+      if (trajectoryFrames != null)
       {
-         for (ReferenceFrame frameToRegister : controlFrames)
+         for (ReferenceFrame frameToRegister : trajectoryFrames)
          {
             positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
             orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
@@ -393,10 +393,17 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (override || isEmpty())
       {
          overrideTrajectory();
+         trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
             queueInitialPoint(initialPose);
       }
+      else if(command.getTrajectoryFrame() != trajectoryFrame)
+      {
+         PrintTools.warn(warningPrefix + "Was executing in ." + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
+         return false;
+      }
 
+      command.getTrajectoryPointList().changeFrame(trajectoryFrame);
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
          if (!checkTime(command.getTrajectoryPoint(i).getTime()))
@@ -482,11 +489,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (atCapacityLimit())
          return false;
 
-      FrameSE3TrajectoryPoint point = pointQueue.addLast();
       desiredOrientation.setToNaN(trajectoryPoint.getReferenceFrame());
       trajectoryPoint.getOrientation(desiredOrientation);
       desiredAngularVelocity.setToNaN(trajectoryPoint.getReferenceFrame());
       trajectoryPoint.getAngularVelocity(desiredAngularVelocity);
+      
+      FrameSE3TrajectoryPoint point = pointQueue.addLast();
       point.setToZero(trajectoryPoint.getReferenceFrame());
       point.setOrientation(desiredOrientation);
       point.setAngularVelocity(desiredAngularVelocity);

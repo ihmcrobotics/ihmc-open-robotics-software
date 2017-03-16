@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
@@ -25,6 +26,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
 {
    @RosExportedField(documentation = "Specifies the which foot will execute the trajectory.")
    public RobotSide robotSide;
+   private static final long WORLD_FRAME_HASH_CODE = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    /**
     * Empty constructor for serialization.
@@ -65,11 +67,11 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation);
+      super(trajectoryTime, desiredPosition, desiredOrientation, WORLD_FRAME_HASH_CODE, WORLD_FRAME_HASH_CODE);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
    }
-
+   
    /**
     * Use this constructor to build a message with more than one trajectory point.
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
@@ -115,5 +117,10 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public String validateMessage()
    {
       return PacketValidityChecker.validateFootTrajectoryMessage(this);
+   }
+   
+   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
+   {
+      super.setTrajectoryPoint(trajectoryPointIndex, time, position, orientation, linearVelocity, angularVelocity, WORLD_FRAME_HASH_CODE);
    }
 }
