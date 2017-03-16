@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -202,6 +203,19 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public List<String> getOrCreatePositionControlledJoints()
    {
       return new ArrayList<String>();
+   }
+
+   /**
+    * The map returned contains the integration settings for position controlled joints. The settings
+    * define how the controller core integrated desired accelerations to find desired joint positions
+    * and velocities. The key of the map is the joint name as defined in the robot joint map. If a
+    * joint is not contained in the map, position control is not supported for that joint.
+    *
+    * @return map containing acceleration integration settings by joint name
+    */
+   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   {
+      return new HashMap<String, JointAccelerationIntegrationSettings>();
    }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);

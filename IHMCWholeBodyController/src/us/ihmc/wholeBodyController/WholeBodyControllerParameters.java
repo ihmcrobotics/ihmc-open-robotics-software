@@ -1,6 +1,5 @@
 package us.ihmc.wholeBodyController;
- 
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
+
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -15,17 +14,13 @@ public interface WholeBodyControllerParameters extends FullHumanoidRobotModelFac
 
 	public ICPOptimizationParameters getICPOptimizationParameters();
 
-	public ArmControllerParameters getArmControllerParameters();
-
 	public WalkingControllerParameters getWalkingControllerParameters();
-		
+
 	public RobotContactPointParameters getContactPointParameters();
-	
+
 	public double getControllerDT();
 
-	
-	
 	public OutputProcessor getOutputProcessor(FullRobotModel controllerFullRobotModel);
-	
+
 	public DefaultArmConfigurations getDefaultArmConfigurations();
 }

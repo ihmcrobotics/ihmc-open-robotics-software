@@ -16,7 +16,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -98,7 +97,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       if (simulationTestingParameters.getCheckNothingChangedInSimulation()) maximumWalkTime = 3.0;
 
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
@@ -109,8 +107,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 
-
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, robotInitialSetup);
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -180,7 +177,6 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean cheatWithGroundHeightAtForFootstep = true;
 
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
 
 //      drcControlParameters.setNominalHeightAboveAnkle(drcControlParameters.nominalHeightAboveAnkle() - 0.03);    // Need to do this or the leg goes straight and the robot falls.
 
@@ -191,7 +187,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.01, 0);
 
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, null, combinedTerrainObject, drawGroundProfile, useVelocityAndHeadingScript,
             cheatWithGroundHeightAtForFootstep, robotInitialSetup);
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
@@ -313,11 +309,10 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean drawGroundProfile = true;
 
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
-      ArmControllerParameters armControllerParameters = robotModel.getArmControllerParameters();
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 
-      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, armControllerParameters, groundProfile, null, drawGroundProfile,
-            useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, robotInitialSetup);
+      DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters, groundProfile, null, drawGroundProfile, useVelocityAndHeadingScript,
+            cheatWithGroundHeightAtForFootstep, robotInitialSetup);
 
       SimulationConstructionSet scs = track.getSimulationConstructionSet();
 
@@ -365,9 +360,9 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
 
    boolean setupForCheatingUsingGroundHeightAtForFootstepProvider = false;
 
-   private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, ArmControllerParameters
-         armControllerParameters, GroundProfile3D groundProfile, GroundProfile3D groundProfile3D, boolean drawGroundProfile,
-         boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, GroundProfile3D groundProfile,
+         GroundProfile3D groundProfile3D, boolean drawGroundProfile, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+         DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 
