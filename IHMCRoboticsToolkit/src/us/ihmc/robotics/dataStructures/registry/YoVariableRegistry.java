@@ -3,6 +3,7 @@ package us.ihmc.robotics.dataStructures.registry;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
@@ -10,6 +11,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
@@ -945,29 +947,67 @@ public class YoVariableRegistry implements YoVariableHolder
       }
    }
 
-   public int printSizeRecursively(int minVariablesToPrint, int minChildrenToPrint)
+   public static void printSizeRecursively(int minVariablesToPrint, int minChildrenToPrint, YoVariableRegistry root)
    {
-      int variables = getNumberOfYoVariables();
-      int children = getChildren().size();
+      ArrayList<YoVariableRegistry> registriesOfInterest = new ArrayList<>();
+      int totalVariables = collectRegistries(minVariablesToPrint, minChildrenToPrint, root, registriesOfInterest);
+      Collections.sort(registriesOfInterest, new Comparator<YoVariableRegistry>()
+      {
+         @Override
+         public int compare(YoVariableRegistry o1, YoVariableRegistry o2)
+         {
+            if (o1.getNumberOfYoVariables() == o2.getNumberOfYoVariables())
+               return 0;
+            return o1.getNumberOfYoVariables() > o2.getNumberOfYoVariables() ? -1 : 1;
+         }
+      });
+
+      System.out.println("");
+      PrintTools.info("String recursively at " + root.getName() + " registry.");
+      System.out.println("Total Number of YoVariables: " + totalVariables);
+      System.out.println("Listing Variables with more then " + minVariablesToPrint + " variables or more then " + minChildrenToPrint + " children.");
+      System.out.println("Sorting by number of children.\n");
+
+      for (int registryIdx = 0; registryIdx < registriesOfInterest.size(); registryIdx++)
+         YoVariableRegistry.printInfo(registriesOfInterest.get(registryIdx));
+
+      System.out.println("");
+   }
+
+   private static int collectRegistries(int minVariablesToPrint, int minChildrenToPrint, YoVariableRegistry registry,
+         ArrayList<YoVariableRegistry> registriesOfInterest)
+   {
+      int variables = registry.getNumberOfYoVariables();
+      int children = registry.getChildren().size();
 
       if (variables >= minVariablesToPrint || children >= minChildrenToPrint)
-      {
-         int maxPropertyLength = 17;
-         String variableString = trimStringToLength("Variables: " + variables, maxPropertyLength, "...");
-         String childrenString = trimStringToLength("Children: " + children, maxPropertyLength, "...");
-
-         int maxNameLength = 60;
-         String name = getClass().getSimpleName() + " " + getName();
-         name = trimStringToLength(name, maxNameLength, "...");
-
-         System.out.println(name + " " + variableString + " " + childrenString);
-      }
+         registriesOfInterest.add(registry);
 
       int totalNumberOfVariables = variables;
       for (int childIdx = 0; childIdx < children; childIdx++)
-         totalNumberOfVariables += getChildren().get(childIdx).printSizeRecursively(minVariablesToPrint, minChildrenToPrint);
+      {
+         YoVariableRegistry childRegistry = registry.getChildren().get(childIdx);
+         totalNumberOfVariables += YoVariableRegistry.collectRegistries(minVariablesToPrint, minChildrenToPrint, childRegistry,
+               registriesOfInterest);
+      }
 
       return totalNumberOfVariables;
+   }
+
+   private static void printInfo(YoVariableRegistry registry)
+   {
+      int variables = registry.getNumberOfYoVariables();
+      int children = registry.getChildren().size();
+
+      int maxPropertyLength = 17;
+      String variableString = trimStringToLength("Variables: " + variables, maxPropertyLength, "...");
+      String childrenString = trimStringToLength("Children: " + children, maxPropertyLength, "...");
+
+      int maxNameLength = 60;
+      String name = registry.getClass().getSimpleName() + " " + registry.getName();
+      name = trimStringToLength(name, maxNameLength, "...");
+
+      System.out.println(name + " " + variableString + " " + childrenString);
    }
 
    private static String trimStringToLength(String original, int length, String placeholder)
