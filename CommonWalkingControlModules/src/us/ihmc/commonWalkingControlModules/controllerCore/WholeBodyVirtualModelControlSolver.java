@@ -322,7 +322,7 @@ public class WholeBodyVirtualModelControlSolver
    private DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE);
    private void handleJointSpaceCommand(JointspaceAccelerationCommand command)
    {
-      if(command.getHasWeight())
+      if(!command.isHardConstraint())
       {
          for(int i = 0; i < command.getNumberOfJoints(); i++)
          {

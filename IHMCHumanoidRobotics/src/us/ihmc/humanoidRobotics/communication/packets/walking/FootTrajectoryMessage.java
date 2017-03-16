@@ -7,7 +7,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -100,14 +99,6 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    }
 
    @Override
-   public FootTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      FootTrajectoryMessage transformedFootTrajectoryMessage = new FootTrajectoryMessage(this);
-      transformedFootTrajectoryMessage.applyTransform(transform);
-      return transformedFootTrajectoryMessage;
-   }
-
-   @Override
    public String toString()
    {
       String ret = "";
@@ -118,7 +109,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
 
       return ret + ", robotSide = " + robotSide + ".";
    }
-   
+
    /** {@inheritDoc} */
    @Override
    public String validateMessage()

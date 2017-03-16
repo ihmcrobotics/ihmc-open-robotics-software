@@ -5,7 +5,6 @@ import java.util.Random;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -81,14 +80,6 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    }
 
    @Override
-   public PelvisTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      PelvisTrajectoryMessage transformedPelvisTrajectoryMessage = new PelvisTrajectoryMessage(this);
-      transformedPelvisTrajectoryMessage.applyTransform(transform);
-      return transformedPelvisTrajectoryMessage;
-   }
-
-   @Override
    public String toString()
    {
       if (taskspaceTrajectoryPoints != null)
@@ -96,7 +87,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
       else
          return "Pelvis SE3 trajectory: no SE3 trajectory points";
    }
-   
+
    /** {@inheritDoc} */
    @Override
    public String validateMessage()
