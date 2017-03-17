@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
@@ -15,13 +15,13 @@ import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -124,7 +124,7 @@ public abstract class DRCWallWorldTest implements MultiRobotTestInterface
       assertTrue(success);
       Point3D center = new Point3D(0.022237149581994832, 3.6888378632721963, 0.7893353089719684);
       Vector3D plusMinusVector = new Vector3D(0.4, 0.3, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }

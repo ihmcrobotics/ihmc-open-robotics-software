@@ -31,20 +31,11 @@ package us.ihmc.jMonkeyEngineToolkit.jme;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import static org.lwjgl.opengl.EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glReadBuffer;
-import static org.lwjgl.opengl.GL11.glReadPixels;
-import static org.lwjgl.opengl.GL12.GL_BGRA;
-import static org.lwjgl.opengl.GL15.GL_READ_ONLY;
-import static org.lwjgl.opengl.GL15.GL_STATIC_READ;
-import static org.lwjgl.opengl.GL15.glBindBuffer;
-import static org.lwjgl.opengl.GL15.glBufferData;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
-import static org.lwjgl.opengl.GL15.glMapBuffer;
-import static org.lwjgl.opengl.GL15.glUnmapBuffer;
-import static org.lwjgl.opengl.GL21.GL_PIXEL_PACK_BUFFER;
+import static org.lwjgl.opengl.EXTFramebufferObject.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL21.*;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;

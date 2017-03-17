@@ -1,11 +1,11 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 /**
@@ -61,7 +61,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return planarRegion.getBoundingBox3dInWorld();
    }
@@ -78,7 +78,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return planarRegion.getBoundingBox3dInWorld().isXYInside(x, y);
+      return planarRegion.getBoundingBox3dInWorld().isXYInsideInclusive(x, y);
    }
 
    @Override

@@ -8,7 +8,6 @@ import javax.swing.JFrame;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachinesJPanel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.gui.setterUpper.GUISetterUpper;
 
 public class StateMachineJPanelGuiSetterUpper implements GUISetterUpper
 {

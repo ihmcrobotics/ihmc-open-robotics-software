@@ -20,10 +20,10 @@ import com.badlogic.gdx.physics.bullet.collision.btManifoldPoint;
 import com.badlogic.gdx.physics.bullet.collision.btPersistentManifold;
 import com.badlogic.gdx.physics.bullet.collision.btSphereShape;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
@@ -238,7 +238,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
    {
       private btCollisionShape shape;
       private final RigidBodyTransform transform = new RigidBodyTransform();
-      private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      private final BoundingBox3D boundingBox = new BoundingBox3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       public BulletShapeDescription(btCollisionShape shape)
       {
@@ -276,7 +276,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+      public void getBoundingBox(BoundingBox3D boundingBoxToPack)
       {
          boundingBoxToPack.set(boundingBox);
       }
@@ -307,7 +307,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       private final RigidBodyTransform shapeToLink = new RigidBodyTransform();
       private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-      private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      private final BoundingBox3D boundingBox = new BoundingBox3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
       public BulletCollisionShapeWithLink(String name, BulletShapeDescription description, Link link, boolean isGround, RigidBodyTransform shapeToLink)
       {
@@ -421,7 +421,7 @@ public class GdxCollisionDetector implements ScsCollisionDetector
       }
 
       @Override
-      public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+      public void getBoundingBox(BoundingBox3D boundingBoxToPack)
       {
          boundingBoxToPack.set(boundingBox);
       }

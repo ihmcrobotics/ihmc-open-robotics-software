@@ -1,6 +1,6 @@
 package us.ihmc.atlas.ObstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,7 +27,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -112,7 +112,7 @@ public class AtlasFinalsWorldStairsTest
 
       Point3D center = new Point3D(1.0, -15.7, 1.8);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
 
@@ -160,7 +160,7 @@ public class AtlasFinalsWorldStairsTest
 
       Point3D center = new Point3D(1.0, -15.7, 1.8);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
 
