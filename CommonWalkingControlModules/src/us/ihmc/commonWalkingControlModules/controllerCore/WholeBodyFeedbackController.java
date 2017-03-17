@@ -18,7 +18,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.OrientationFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
-import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -238,8 +237,6 @@ public class WholeBodyFeedbackController
 
    private void submitJointspaceFeedbackControlCommand(JointspaceFeedbackControlCommand feedbackControlCommand)
    {
-      PDGainsInterface gains = feedbackControlCommand.getGains();
-
       for (int i = 0; i < feedbackControlCommand.getNumberOfJoints(); i++)
       {
          OneDoFJoint joint = feedbackControlCommand.getJoint(i);
@@ -248,9 +245,9 @@ public class WholeBodyFeedbackController
          double feedForwardAcceleration = feedbackControlCommand.getFeedForwardAcceleration(i);
 
          OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
-         controller.setGains(gains);
+         controller.setGains(feedbackControlCommand.getGains(i));
          controller.setDesireds(desiredPosition, desiredVelocity, feedForwardAcceleration);
-         controller.setWeightForSolver(feedbackControlCommand.getWeightForSolver());
+         controller.setWeightForSolver(feedbackControlCommand.getWeightForSolver(i));
          controller.setEnabled(true);
       }
    }

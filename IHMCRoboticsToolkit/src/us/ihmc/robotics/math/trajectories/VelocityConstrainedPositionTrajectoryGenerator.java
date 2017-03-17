@@ -253,6 +253,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       currentTime.set(trajectoryTime.getDoubleValue() + 0.01);
    }
 
+   public double getTrajectoryTime()
+   {
+      return trajectoryTime.getDoubleValue();
+   }
+
    @Override
    public void getPosition(FramePoint positionToPack)
    {
@@ -344,6 +349,21 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
    public YoFrameVector getFinalVelocity()
    {
       return finalVelocity;
+   }
+
+   public YoPolynomial getXPolynomial()
+   {
+      return xPolynomial;
+   }
+
+   public YoPolynomial getYPolynomial()
+   {
+      return yPolynomial;
+   }
+
+   public YoPolynomial getZPolynomial()
+   {
+      return zPolynomial;
    }
 
    @Override
