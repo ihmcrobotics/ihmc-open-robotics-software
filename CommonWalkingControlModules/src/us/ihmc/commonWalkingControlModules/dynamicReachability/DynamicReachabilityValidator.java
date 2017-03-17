@@ -25,6 +25,7 @@ public class DynamicReachabilityValidator
 
    private final BooleanYoVariable reachableWRTStanceFoot = new BooleanYoVariable("reachableWRTStanceFoot", registry);
    private final BooleanYoVariable reachableWRTFootstep = new BooleanYoVariable("reachableWRTFootstep", registry);
+   private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
 
 
    private final SideDependentList<FrameVector> centerOfMassOffsetFromHips = new SideDependentList<>();
@@ -105,8 +106,9 @@ public class DynamicReachabilityValidator
 
       this.reachableWRTStanceFoot.set(stanceHeightLine.length() > 0.0);
       this.reachableWRTFootstep.set(stepHeightLine.length() > 0.0);
+      this.isStepReachable.set(stanceHeightLine.isOverlappingExclusive(stepHeightLine));
 
-      return stanceHeightLine.isOverlappingInclusive(stepHeightLine);
+      return isStepReachable.getBooleanValue();
    }
 
    private void updateOffsets()
@@ -140,7 +142,7 @@ public class DynamicReachabilityValidator
       this.maximumLegLength.set(thighLength + shinLength);
 
       double minimumLegLength = Math.pow(thighLength, 2.0) + Math.pow(shinLength, 2.0) +
-            2 * thighLength * shinLength * Math.sin(maximumDesiredKneeBend.getDoubleValue());
+            2 * thighLength * shinLength * Math.cos(maximumDesiredKneeBend.getDoubleValue());
       minimumLegLength = Math.sqrt(minimumLegLength);
       this.minimumLegLength.set(minimumLegLength);
    }
@@ -161,11 +163,11 @@ public class DynamicReachabilityValidator
       double planarDistance = tempFinalCoM.distance(tempPoint2d);
 
       double minimumHeight, maximumHeight;
-      if (planarDistance <= minimumLegLength.getDoubleValue())
+      if (planarDistance >= minimumLegLength.getDoubleValue())
          minimumHeight = 0.0;
       else
          minimumHeight = Math.sqrt(Math.pow(minimumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
-      if (planarDistance <= maximumLegLength.getDoubleValue())
+      if (planarDistance >= maximumLegLength.getDoubleValue())
          maximumHeight = 0.0;
       else
          maximumHeight = Math.sqrt(Math.pow(maximumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
@@ -180,7 +182,7 @@ public class DynamicReachabilityValidator
       ReferenceFrame upcomingSoleFrame = nextFootstep.getSoleReferenceFrame();
       tempAnklePoint.setToZero(upcomingSoleFrame);
       tempAnklePoint.changeFrame(fullRobotModel.getSoleFrame(swingSide));
-      tempAnklePoint.add(soleFrameOffsetFromAnkles.get(swingSide));
+      tempAnklePoint.sub(soleFrameOffsetFromAnkles.get(swingSide));
       tempAnklePoint.changeFrame(centerOfMassFrame);
       tempAnklePoint.getFrameTuple2d(tempPoint2d);
 
@@ -193,11 +195,11 @@ public class DynamicReachabilityValidator
       double planarDistance = tempFinalCoM.distance(tempPoint2d);
 
       double minimumHeight, maximumHeight;
-      if (planarDistance <= minimumLegLength.getDoubleValue())
+      if (planarDistance >= minimumLegLength.getDoubleValue())
          minimumHeight = 0.0;
       else
          minimumHeight = Math.sqrt(Math.pow(minimumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
-      if (planarDistance <= maximumLegLength.getDoubleValue())
+      if (planarDistance >= maximumLegLength.getDoubleValue())
          maximumHeight = 0.0;
       else
          maximumHeight = Math.sqrt(Math.pow(maximumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
