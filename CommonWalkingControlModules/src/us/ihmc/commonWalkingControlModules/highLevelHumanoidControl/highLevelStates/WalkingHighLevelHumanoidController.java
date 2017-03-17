@@ -553,7 +553,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean haveContactStatesChanged = false;
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoPlaneContactState contactState = controllerToolbox.getContactState(feet.get(robotSide));
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          if (contactState.pollContactHasChangedNotification())
             haveContactStatesChanged = true;
       }
@@ -644,7 +644,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
 
-         YoPlaneContactState contactState = controllerToolbox.getContactState(feet.get(robotSide));
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          planeContactStateCommand.setUseHighCoPDamping(isHighCoPDampingNeeded);

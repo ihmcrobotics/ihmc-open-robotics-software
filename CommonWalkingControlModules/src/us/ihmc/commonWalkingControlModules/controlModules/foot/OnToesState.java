@@ -46,7 +46,7 @@ public class OnToesState extends AbstractFootControlState
 
    private final FramePoint contactPointPosition = new FramePoint();
 
-   private final YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
+   private final YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
 
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
