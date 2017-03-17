@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 /**
  * Description of the collision shape.  The same description can be linked to multiple objects ({@link us.ihmc.simulationconstructionset.Link})
@@ -15,7 +15,7 @@ public interface CollisionShapeDescription<T extends CollisionShapeDescription<T
    public abstract void setFrom(T collisionShapeDescription);
    public abstract void applyTransform(RigidBodyTransform transformToWorld);
    public abstract CollisionShapeDescription<T> copy();
-   public abstract void getBoundingBox(BoundingBox3d boundingBoxToPack);
+   public abstract void getBoundingBox(BoundingBox3D boundingBoxToPack);
    public abstract boolean isPointInside(Point3D pointInWorld);
    
    /**

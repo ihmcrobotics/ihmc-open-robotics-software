@@ -3,6 +3,8 @@ package us.ihmc.simulationconstructionset.util.ground;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -13,8 +15,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox2d;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
@@ -22,7 +22,7 @@ import us.ihmc.robotics.geometry.shapes.Plane3d;
 
 public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    private final ConvexPolygon2d convexPolygon;
    private final Plane3d topPlane;
    private final List<Plane3d> sidePlanes = new ArrayList<Plane3d>();
@@ -46,7 +46,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       Point3D centroid = new Point3D(convexPolygon.getCentroid().getX(), convexPolygon.getCentroid().getY(), centroidHeight);
       this.topPlane = new Plane3d(centroid, normal);
 
-      BoundingBox2d polygonBoundingBox = convexPolygon.getBoundingBoxCopy();
+      BoundingBox2D polygonBoundingBox = convexPolygon.getBoundingBoxCopy();
       double highest = Double.NEGATIVE_INFINITY;
       double lowest = 0.0;
 
@@ -66,7 +66,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       double[] minPoint3d = {minPoint.getX(), minPoint.getY(), lowest};
       double[] maxPoint3d = {maxPoint.getX(), maxPoint.getY(), highest};
 
-      this.boundingBox = new BoundingBox3d(minPoint3d, maxPoint3d);
+      this.boundingBox = new BoundingBox3D(minPoint3d, maxPoint3d);
 
       initSidePlanes();
 
@@ -75,9 +75,9 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       addLinkGraphics(convexPolygon, boundingBox);
    }
 
-   private void addLinkGraphics(ConvexPolygon2d convexPolygon, BoundingBox3d boundingBox)
+   private void addLinkGraphics(ConvexPolygon2d convexPolygon, BoundingBox3D boundingBox)
    {
-      double lowValue = boundingBox.getZMin();
+      double lowValue = boundingBox.getMinZ();
 
       Point2DReadOnly firstPoint;
       Point2DReadOnly secondPoint;
@@ -142,7 +142,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          for (int j : indices)
          {
             Point2DReadOnly vertex = convexPolygon.getVertex(j);
-            checkingPoint.set(vertex.getX(), vertex.getY(), boundingBox.getZMin());
+            checkingPoint.set(vertex.getX(), vertex.getY(), boundingBox.getMinZ());
             checkingPoint.scale(0.25);
             centerPoint.add(checkingPoint);
 
@@ -178,13 +178,13 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          return tempPlaneCentroid.getZ() - (tempPlaneNormal.getX() * (x - tempPlaneCentroid.getX()) + tempPlaneNormal.getY() * (y - tempPlaneCentroid.getY())) / tempPlaneNormal.getZ();
       }
 
-      return boundingBox.getZMin();
+      return boundingBox.getMinZ();
    }
 
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return boundingBox.isInside(x, y, z);
+      return boundingBox.isInsideInclusive(x, y, z);
    }
 
 //   private void closestIntersectionTo(double x, double y, double z, Point3D intersectionToPack)
@@ -265,7 +265,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       {
          Point2DReadOnly vertex = convexPolygon.getVertex(j);
          height = heightAt(vertex.getX(), vertex.getY(), 0.0);
-         lowerVertices.add(new Point3D(vertex.getX(), vertex.getY(), boundingBox.getZMin()));
+         lowerVertices.add(new Point3D(vertex.getX(), vertex.getY(), boundingBox.getMinZ()));
          upperVertices.add(new Point3D(vertex.getX(), vertex.getY(), height));
       }
 
@@ -364,7 +364,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

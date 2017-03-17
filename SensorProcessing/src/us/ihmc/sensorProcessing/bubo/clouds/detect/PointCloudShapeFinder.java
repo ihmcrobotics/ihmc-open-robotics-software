@@ -18,12 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect;
 
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.shapes.Box3D_F64;
-import org.ddogleg.struct.GrowQueue_I32;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ddogleg.struct.GrowQueue_I32;
+
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.shapes.Box3D_F64;
 
 /**
  * High level interface for finding different primitive shapes inside a point cloud. A list of found shapes is returned

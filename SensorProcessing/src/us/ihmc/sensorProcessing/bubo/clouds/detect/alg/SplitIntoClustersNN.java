@@ -18,10 +18,10 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
-import org.ddogleg.struct.FastQueue;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.ddogleg.struct.FastQueue;
 
 /**
  * Uses nearest-neighbor connectivity graph to find clusters of connected points.  Connect points not

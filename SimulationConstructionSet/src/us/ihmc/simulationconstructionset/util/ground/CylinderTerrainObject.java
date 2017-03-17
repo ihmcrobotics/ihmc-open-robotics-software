@@ -2,6 +2,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,7 +11,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.EuclidCoreMissingTools;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Direction;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
@@ -21,7 +21,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 {
    private static final double EPS = 1.0e-12;
 
-   protected final BoundingBox3d boundingBox;
+   protected final BoundingBox3D boundingBox;
    protected final Cylinder3d cylinder;
    private final RigidBodyTransform location;
    private final double height;
@@ -58,7 +58,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
          }
       }
 
-      boundingBox = new BoundingBox3d(minPoint, maxPoint);
+      boundingBox = new BoundingBox3D(minPoint, maxPoint);
 
       addGraphics(appearance);
    }
@@ -90,7 +90,7 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }
@@ -237,28 +237,28 @@ public class CylinderTerrainObject implements TerrainObject3D, HeightMapWithNorm
 
    public double getXMin()
    {
-      return boundingBox.getXMin();
+      return boundingBox.getMinX();
    }
 
    public double getYMin()
    {
-      return boundingBox.getYMin();
+      return boundingBox.getMinY();
    }
 
    public double getXMax()
    {
-      return boundingBox.getXMax();
+      return boundingBox.getMaxX();
    }
 
    public double getYMax()
    {
-      return boundingBox.getYMax();
+      return boundingBox.getMaxY();
    }
 
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return boundingBox.isXYInside(x, y);
+      return boundingBox.isXYInsideInclusive(x, y);
    }
 
    public void closestIntersectionTo(double x, double y, double z, Point3D intersectionToPack)

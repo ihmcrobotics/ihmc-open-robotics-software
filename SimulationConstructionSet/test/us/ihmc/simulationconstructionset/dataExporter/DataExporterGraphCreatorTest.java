@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.dataExporter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FilenameFilter;

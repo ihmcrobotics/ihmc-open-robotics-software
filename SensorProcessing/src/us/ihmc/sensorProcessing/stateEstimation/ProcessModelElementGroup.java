@@ -16,10 +16,10 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.linearDynamicSystems.SplitUpMatrixExponentialStateSpaceSystemDiscretizer;
 import us.ihmc.robotics.linearDynamicSystems.StateSpaceSystemDiscretizer;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.sensorProcessing.stateEstimation.processModelElements.ProcessModelElement;
 
 public class ProcessModelElementGroup
 {

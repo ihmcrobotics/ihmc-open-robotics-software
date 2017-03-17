@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -10,7 +11,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
@@ -18,7 +18,7 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    private final double xLocalMin, xLocalMax, yLocalMin, yLocalMax;
    private final double height, run;
 
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    private RigidBodyTransform transform;
    private RigidBodyTransform inverseTransform;
@@ -81,7 +81,7 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
       Point3D minPoint = new Point3D(xGlobalMin, yGlobalMin, Double.NEGATIVE_INFINITY);
       Point3D maxPoint = new Point3D(xGlobalMax, yGlobalMax, height);
 
-      boundingBox = new BoundingBox3d(minPoint, maxPoint);
+      boundingBox = new BoundingBox3D(minPoint, maxPoint);
    }
 
    public RotatableRampTerrainObject(double xCenter, double yCenter, double run, double width, double height,
@@ -232,11 +232,11 @@ public class RotatableRampTerrainObject implements TerrainObject3D, HeightMapWit
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return boundingBox.isXYInside(x, y);
+      return boundingBox.isXYInsideInclusive(x, y);
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }
