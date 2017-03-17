@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -43,6 +44,7 @@ public class HighLevelControlManagerFactory
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
 
+   private List<String> contactableRigidBodyNames = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -76,6 +78,12 @@ public class HighLevelControlManagerFactory
    public void setICPOptimizationParameters(ICPOptimizationParameters icpOptimizationParameters)
    {
       this.icpOptimizationParameters = icpOptimizationParameters;
+   }
+
+   public void setContactableBodies(List<ContactablePlaneBody> contactablePlaneBodies)
+   {
+      for (int bodyIdx = 0; bodyIdx < contactablePlaneBodies.size(); bodyIdx++)
+         contactableRigidBodyNames.add(contactablePlaneBodies.get(bodyIdx).getRigidBody().getName());
    }
 
    public BalanceManager getOrCreateBalanceManager()
@@ -153,8 +161,9 @@ public class HighLevelControlManagerFactory
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
 
+      boolean createLoadBearingState = contactableRigidBodyNames.contains(bodyName);
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, positionControlledJoints,
-            integrationSettings, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
+            integrationSettings, trajectoryFrames, controlFrame, baseFrame, createLoadBearingState, yoTime, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 
@@ -284,4 +293,5 @@ public class HighLevelControlManagerFactory
 
       return ret;
    }
+
 }

@@ -1,12 +1,8 @@
 package us.ihmc.atlas.parameters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,14 +17,13 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
 {
    private boolean handContactPointsHaveBeenCreated = false;
    private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
-   private final SideDependentList<List<Point2D>> handContactPoints = new SideDependentList<>();
    private final AtlasJointMap jointMap;
    private final AtlasRobotVersion atlasVersion;
 
    private boolean useSoftGroundContactParameters = false;
 
    public AtlasContactPointParameters(AtlasJointMap jointMap, AtlasRobotVersion atlasVersion, boolean createFootContactPoints,
-         FootContactPoints footContactPoints)
+         FootContactPoints footContactPoints, boolean createAdditionalContactPoints)
    {
       super(jointMap, jointMap.getPhysicalProperties().getToeWidthForControl(), jointMap.getPhysicalProperties().getFootWidthForControl(), jointMap.getPhysicalProperties().getFootLengthForControl(), jointMap.getPhysicalProperties().getSoleToAnkleFrameTransforms());
 
@@ -41,6 +36,9 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
          else
             createFootContactPoints(footContactPoints);
       }
+
+      if (createAdditionalContactPoints)
+         createAdditionalHandContactPoints();
    }
 
    public void createAdditionalHandContactPoints()
@@ -84,20 +82,14 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
          handContactPointTransform.setRotationRollAndZeroTranslation(robotSide.negateIfRightSide(Math.PI / 2.0));
          handContactPointTransform.setTranslation(new Vector3D(0.0, robotSide.negateIfRightSide(0.13), robotSide.negateIfRightSide(0.01)));
          handContactPointTransforms.put(robotSide, handContactPointTransform);
-         handContactPoints.put(robotSide, new ArrayList<Point2D>());
-         handContactPoints.get(robotSide).add(new Point2D());
 
-         for (Point2D point : handContactPoints.get(robotSide))
-         {
-            Point3D point3d = new Point3D(point.getX(), point.getY(), 0.0);
+         Point3D pointLocation = new Point3D();
+         handContactPointTransforms.get(robotSide).transform(pointLocation);
+         addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), pointLocation);
 
-            handContactPointTransforms.get(robotSide).transform(point3d);
-            addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), point3d);
-         }
+         String bodyName = jointMap.getHandName(robotSide);
+         contactableBodiesFactory.addAdditionalContactPoint(bodyName, bodyName + "Contact", pointLocation);
       }
-
-      // TODO: re-implement this non-hand specific.
-//      contactableBodiesFactory.addHandContactParameters(nameOfJointBeforeHands, handContactPoints, handContactPointTransforms);
    }
 
    private void createRobotiqHandContactPoints(RobotSide robotSide, boolean areHandsFlipped)

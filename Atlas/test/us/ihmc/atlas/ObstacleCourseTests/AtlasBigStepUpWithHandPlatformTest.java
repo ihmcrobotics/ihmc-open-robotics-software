@@ -15,8 +15,8 @@ public class AtlasBigStepUpWithHandPlatformTest extends DRCBigStepUpWithHandPlat
 
    public AtlasBigStepUpWithHandPlatformTest()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-      robotModel.createAdditionalHandContactPoints();
+      boolean createAdditionalContactPoints = true;
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false, createAdditionalContactPoints);
    }
 
    @Override
@@ -31,4 +31,3 @@ public class AtlasBigStepUpWithHandPlatformTest extends DRCBigStepUpWithHandPlat
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
 }
-

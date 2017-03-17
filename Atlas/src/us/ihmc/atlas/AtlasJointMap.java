@@ -119,10 +119,11 @@ public class AtlasJointMap implements DRCRobotJointMap
 
    public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
    {
-      this(atlasVersion, atlasPhysicalProperties, null);
+      this(atlasVersion, atlasPhysicalProperties, null, false);
    }
 
-   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, FootContactPoints simulationContactPoints)
+   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, FootContactPoints simulationContactPoints,
+         boolean createAdditionalContactPoints)
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;
@@ -198,9 +199,6 @@ public class AtlasJointMap implements DRCRobotJointMap
          jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      boolean createFootContactPoints = true;
-      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints, simulationContactPoints);
-
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
@@ -212,6 +210,9 @@ public class AtlasJointMap implements DRCRobotJointMap
 
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
+
+      boolean createFootContactPoints = true;
+      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints, simulationContactPoints, createAdditionalContactPoints);
    }
 
    @Override

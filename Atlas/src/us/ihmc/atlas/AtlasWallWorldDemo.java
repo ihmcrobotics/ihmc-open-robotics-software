@@ -13,9 +13,10 @@ public class AtlasWallWorldDemo
 
    public static void main(final String[] args) throws JSAPException
    {
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+      boolean createAdditionalContactPoints = true;
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false,
+            createAdditionalContactPoints);
       CommonAvatarEnvironmentInterface environment = new WallWorldEnvironment(-10.0, 10.0);
-      robotModel.createAdditionalHandContactPoints();
 
 //      double stepHeight = 0.2;
 //      CommonAvatarEnvironmentInterface environment = new BigStepUpWithHandPlatformEnvironment(stepHeight);

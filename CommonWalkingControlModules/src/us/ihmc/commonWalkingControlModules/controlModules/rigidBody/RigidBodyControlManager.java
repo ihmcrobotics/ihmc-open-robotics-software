@@ -60,14 +60,14 @@ public class RigidBodyControlManager
    private final OneDoFJoint[] jointsOriginal;
 
    private final BooleanYoVariable allJointsEnabled;
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-
    private final BooleanYoVariable hasBeenInitialized;
+
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
-         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime,
-         YoVariableRegistry parentRegistry)
+         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, boolean loadbearingPossible,
+         DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -82,12 +82,16 @@ public class RigidBodyControlManager
       jointsOriginal = jointsToControl;
       initialJointPositions = new double[jointsOriginal.length];
 
+      positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
+
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
-      loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, elevator, yoTime, registry);
 
-      positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
+      if (!positionControlHelper.hasPositionControlledJoints() && loadbearingPossible)
+         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, elevator, yoTime, registry);
+      else
+         loadBearingControlState = null;
 
       allJointsEnabled = new BooleanYoVariable(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
@@ -102,7 +106,8 @@ public class RigidBodyControlManager
       states.add(jointspaceControlState);
       states.add(taskspaceControlState);
       states.add(userControlState);
-      states.add(loadBearingControlState);
+      if (loadBearingControlState != null)
+         states.add(loadBearingControlState);
 
       for (RigidBodyControlState fromState : states)
       {
@@ -240,9 +245,9 @@ public class RigidBodyControlManager
 
    public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command)
    {
-      if (positionControlHelper.hasPositionControlledJoints())
+      if (loadBearingControlState == null)
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing since some joints are position controlled.");
+         PrintTools.info(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing.");
          return;
       }
 
@@ -260,6 +265,9 @@ public class RigidBodyControlManager
 
    public boolean isLoadBearing()
    {
+      if (loadBearingControlState == null)
+         return false;
+
       return stateMachine.getCurrentStateEnum() == loadBearingControlState.getStateEnum();
    }
 
@@ -319,6 +327,10 @@ public class RigidBodyControlManager
       inverseDynamicsCommandList.clear();
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
       inverseDynamicsCommandList.addCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
+
+      if (loadBearingControlState != null)
+         inverseDynamicsCommandList.addCommand(loadBearingControlState.getEmptyPlaneContactStateCommand());
+
       return inverseDynamicsCommandList;
    }
 

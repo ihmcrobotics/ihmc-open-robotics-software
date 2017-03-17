@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -92,20 +91,6 @@ public abstract class RobotContactPointParameters
    {
       for (RobotSide robotSide : RobotSide.values)
          controllerFootGroundContactPoints.get(robotSide).clear();
-   }
-
-   protected final void addSimulationContactPoint(String parentJointName, RigidBodyTransform transformToParentJointFrame, double contactPointX, double contactPointY, double contactPointZ)
-   {
-      Point3D contactPoint = new Point3D(contactPointX, contactPointY, contactPointZ);
-      transformToParentJointFrame.transform(contactPoint);
-      addSimulationContactPoint(parentJointName, contactPoint);
-   }
-
-   protected final void addSimulationContactPoint(String parentJointName, RigidBodyTransform transformToParentJointFrame, Point2D contactPointPosition)
-   {
-      Point3D contactPoint = new Point3D(contactPointPosition.getX(), contactPointPosition.getY(), 0.0);
-      transformToParentJointFrame.transform(contactPoint);
-      addSimulationContactPoint(parentJointName, contactPoint);
    }
 
    protected final void addSimulationContactPoint(String parentJointName, Tuple3DBasics contactPointPositionInParentJointFrame)

@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -14,12 +14,17 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class ContactableBodiesFactory
 {
    private SideDependentList<? extends List<Point2D>> footContactPoints = null;
    private SideDependentList<? extends Point2D> toeContactPoints = null;
+
+   private final ArrayList<String> rigidBodyNames = new ArrayList<>();
+   private final ArrayList<String> contactNames = new ArrayList<>();
+   private final ArrayList<Point3D> contactPointsInBodyFrame = new ArrayList<>();
 
    public void addFootContactParameters(SideDependentList<? extends List<Point2D>> footContactPoints, SideDependentList<? extends Point2D> toeContactPoints)
    {
@@ -47,21 +52,40 @@ public class ContactableBodiesFactory
       return footContactableBodies;
    }
 
-   public Map<RigidBody, ContactablePlaneBody> createFootContactableBodiesMap(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames)
+   public void addAdditionalContactPoint(String bodyName, String contactName, Point3D contactPointInBodyFrame)
    {
-      if (footContactPoints == null)
-         return null;
+      // TODO: fix this.
+      if (rigidBodyNames.contains(bodyName))
+         throw new RuntimeException("Currently only supporting one additional contact point per rigid body.");
 
-      Map<RigidBody, ContactablePlaneBody> footContactableBodies = new LinkedHashMap<RigidBody, ContactablePlaneBody>();
+      rigidBodyNames.add(bodyName);
+      contactNames.add(contactName);
+      contactPointsInBodyFrame.add(contactPointInBodyFrame);
+   }
 
-      for (RobotSide robotSide : RobotSide.values)
+   public List<ContactablePlaneBody> createAdditionalContactPoints(FullHumanoidRobotModel fullRobotModel)
+   {
+      ArrayList<ContactablePlaneBody> ret = new ArrayList<>();
+      RigidBody[] bodies = ScrewTools.computeSubtreeSuccessors(fullRobotModel.getElevator());
+
+      for (int pointIdx = 0; pointIdx < rigidBodyNames.size(); pointIdx++)
       {
-         RigidBody foot = fullRobotModel.getFoot(robotSide);
-         ListOfPointsContactablePlaneBody footContactableBody = new ListOfPointsContactablePlaneBody(foot, referenceFrames.getSoleFrame(robotSide),
-               footContactPoints.get(robotSide));
-         footContactableBodies.put(footContactableBody.getRigidBody(), footContactableBody);
+         String bodyName = rigidBodyNames.get(pointIdx);
+         String contactName = contactNames.get(pointIdx);
+         Point3D contactPointInBodyFrame = contactPointsInBodyFrame.get(pointIdx);
+
+         RigidBody[] rigidBodies = ScrewTools.findRigidBodiesWithNames(bodies, bodyName);
+
+         if (rigidBodies.length == 0)
+            throw new RuntimeException("Did not find body with name " + bodyName);
+         if (rigidBodies.length > 1)
+            throw new RuntimeException("Found multiple bodies with name " + bodyName);
+
+         RigidBody rigidBody = rigidBodies[0];
+         ret.add(new SimpleContactPointPlaneBody(contactName, rigidBody, contactPointInBodyFrame));
       }
-      return footContactableBodies;
+
+      return ret;
    }
 
 }
