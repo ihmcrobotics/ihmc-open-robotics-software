@@ -39,7 +39,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineToo
 
 public class RigidBodyControlManager
 {
-   public static final double DEFAULT_GO_HOME_TIME = 2.0;
+   public static final double INITIAL_GO_HOME_TIME = 2.0;
 
    private final String bodyName;
    private final YoVariableRegistry registry;
@@ -137,7 +137,7 @@ public class RigidBodyControlManager
    {
       if (!hasBeenInitialized.getBooleanValue())
       {
-         goToHomeFromCurrent(DEFAULT_GO_HOME_TIME);
+         goToHomeFromCurrent(INITIAL_GO_HOME_TIME);
          hasBeenInitialized.set(true);
       }
    }
@@ -260,7 +260,7 @@ public class RigidBodyControlManager
 
    public boolean isLoadBearing()
    {
-      return stateMachine.getCurrentStateEnum() == RigidBodyControlMode.LOAD_BEARING;
+      return stateMachine.getCurrentStateEnum() == loadBearingControlState.getStateEnum();
    }
 
    public void resetJointIntegrators()
@@ -271,7 +271,7 @@ public class RigidBodyControlManager
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
    {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
+      if (stateMachine.getCurrentStateEnum() == jointspaceControlState.getStateEnum())
       {
          for (int i = 0; i < jointsOriginal.length; i++)
             desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
