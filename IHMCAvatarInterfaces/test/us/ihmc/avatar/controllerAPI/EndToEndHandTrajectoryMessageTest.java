@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -175,6 +176,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       SideDependentList<HandTrajectoryMessage> handTrajectoryMessages = new SideDependentList<>();
       SideDependentList<ArrayDeque<SE3TrajectoryPointMessage>> handTrajectoryPoints = new SideDependentList<>(new ArrayDeque<>(), new ArrayDeque<>());
+      SideDependentList<FrameSE3TrajectoryPoint> lastTrajectoryPoints = new SideDependentList<>();
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       RigidBody chest = fullRobotModel.getChest();
@@ -248,6 +250,13 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         
+         SE3TrajectoryPointMessage lastPoint = handTrajectoryPoints.get(robotSide).peekLast();
+         FrameSE3TrajectoryPoint lastFramePoint = new FrameSE3TrajectoryPoint(worldFrame);
+         lastFramePoint.set(lastPoint.time, lastPoint.position, lastPoint.orientation, lastPoint.linearVelocity, lastPoint.angularVelocity);
+         lastFramePoint.changeFrame(chestFrame);
+         lastTrajectoryPoints.put(robotSide, lastFramePoint);
+         
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertNumberOfWaypoints(handName, numberOfTrajectoryPoints + 1, scs);
 
@@ -262,8 +271,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
             framePoint.get(expectedTrajectoryPoint);
 
-            assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
+            assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
          }
       }
 
@@ -274,11 +283,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          String handName = fullRobotModel.getHand(robotSide).getName();
-         HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide);
-         SE3TrajectoryPointMessage point = handTrajectoryMessage.getLastTrajectoryPoint();
-
-         FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(worldFrame);
-         framePoint.set(point.time, point.position, point.orientation, point.linearVelocity, point.angularVelocity);
+         FrameSE3TrajectoryPoint framePoint = lastTrajectoryPoints.get(robotSide);
+         framePoint.changeFrame(worldFrame);
 
          SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findCurrentDesiredTrajectoryPoint(handName, scs);
          SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
@@ -312,6 +318,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       {
          int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints;
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         message.setTrajectoryReferenceFrameId(chestFrame);
          message.setExpressedInReferenceFrameId(worldFrame);
          double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
@@ -332,6 +340,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       {
          int numberOfPoints = RigidBodyTaskspaceControlState.maxPoints - 1;
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         message.setTrajectoryReferenceFrameId(chestFrame);
          message.setExpressedInReferenceFrameId(worldFrame);
          double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
@@ -372,7 +382,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 7.0;
 
       ArrayList<HandTrajectoryMessage> handTrajectoryMessages = new ArrayList<>();
-      ArrayDeque<SE3TrajectoryPointMessage> handTrajectoryPoints = new ArrayDeque<>();
+      ArrayDeque<FrameSE3TrajectoryPoint> handTrajectoryPoints = new ArrayDeque<>();
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -445,7 +455,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             handTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
 
             SE3TrajectoryPointMessage point = new SE3TrajectoryPointMessage(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
-            handTrajectoryPoints.addLast(point);
+            FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(worldFrame);
+            framePoint.set(time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+            framePoint.changeFrame(chestBodyFixedFrame);
+            handTrajectoryPoints.addLast(framePoint);
 
             calculatorIndex++;
          }
@@ -457,8 +470,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+      fullRobotModel.updateFrames();
       assertTrue(success);
-
+      
       double timeOffset = 0.0;
       int totalNumberOfPoints = numberOfMessages * numberOfTrajectoryPoints + 1;
       boolean firstSegment = true;
@@ -477,20 +491,17 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
          for (int trajectoryPointIndex = 1; trajectoryPointIndex < expectedNumberOfPointsInGenerator; trajectoryPointIndex++)
          {
-            SE3TrajectoryPointMessage point = handTrajectoryPoints.removeFirst();
-            FrameSE3TrajectoryPoint framePoint = new FrameSE3TrajectoryPoint(worldFrame);
-            framePoint.set(point.time, point.position, point.orientation, point.linearVelocity, point.angularVelocity);
-            framePoint.changeFrame(chestBodyFixedFrame);
+            FrameSE3TrajectoryPoint framePoint = handTrajectoryPoints.removeFirst();
 
             SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(handName, trajectoryPointIndex, scs);
             SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
             framePoint.get(expectedTrajectoryPoint);
-
-            assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
             assertEquals(expectedTrajectoryPoint.getTime(), controllerTrajectoryPoint.getTime(), EPSILON_FOR_DESIREDS);
+            assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, 0.01));
 
-            lastPointTime = Math.max(point.time, lastPointTime);
+            lastPointTime = Math.max(framePoint.getTime(), lastPointTime);
             lastPoint.setIncludingFrame(framePoint);
+            System.out.println(trajectoryPointIndex);
          }
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(lastPointTime - timeOffset);
