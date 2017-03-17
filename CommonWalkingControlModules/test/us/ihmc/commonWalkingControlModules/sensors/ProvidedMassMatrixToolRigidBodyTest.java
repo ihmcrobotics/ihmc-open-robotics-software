@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -29,8 +28,7 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
 
       ReferenceFrame elevatorFrame = fullRobotModel.getElevatorFrame();
 
-      ProvidedMassMatrixToolRigidBody providedMassMatrixToolRigidBody = new ProvidedMassMatrixToolRigidBody(robotSide, fullRobotModel, gravity,
-            getArmControllerParameters(), registry, null);
+      ProvidedMassMatrixToolRigidBody providedMassMatrixToolRigidBody = new ProvidedMassMatrixToolRigidBody(robotSide, fullRobotModel, gravity, registry, null);
       providedMassMatrixToolRigidBody.setMass(mass);
 
       SpatialAccelerationVector handSpatialAccelerationVector = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
@@ -44,6 +42,4 @@ public abstract class ProvidedMassMatrixToolRigidBodyTest
    }
 
    public abstract FullHumanoidRobotModel getFullRobotModel();
-
-   public abstract ArmControllerParameters getArmControllerParameters();
 }

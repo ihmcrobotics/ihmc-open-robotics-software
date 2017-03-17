@@ -3,11 +3,15 @@ package us.ihmc.robotics.dataStructures.registry;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.listener.YoVariableRegistryChangedListener;
@@ -352,7 +356,7 @@ public class YoVariableRegistry implements YoVariableHolder
    {
       addChild(child, true);
    }
-   
+
    public void addChild(YoVariableRegistry child, boolean notifyListeners)
    {
       // Prepend the parents nameSpace to the child. NameSpace will figure out if it's valid or not.
@@ -401,25 +405,25 @@ public class YoVariableRegistry implements YoVariableHolder
          child.prependNameSpace(parentNameSpace);
       }
    }
-   
+
    public void recursivelyChangeNamespaces(NameSpaceRenamer nameSpaceRenamer)
    {
       NameSpace nameSpace = this.getNameSpace();
       String nameSpaceString = nameSpace.getName();
-      
+
       nameSpaceString = nameSpaceRenamer.changeNamespaceString(nameSpaceString);
       this.changeNameSpace(nameSpaceString);
-      
+
       System.out.println(nameSpaceString);
-      
+
       ArrayList<YoVariableRegistry> children = this.getChildren();
-      
+
       for (YoVariableRegistry child : children)
       {
          child.recursivelyChangeNamespaces(nameSpaceRenamer);
       }
    }
-   
+
    public void changeNameSpace(String newNamespace)
    {
       System.err.println("Warning: Changing namespace from " + this.nameSpace + " to " + newNamespace);
@@ -892,7 +896,7 @@ public class YoVariableRegistry implements YoVariableHolder
          }
       }
    }
-   
+
    public void closeAndDispose()
    {
       if (controlVars != null)
@@ -900,7 +904,7 @@ public class YoVariableRegistry implements YoVariableHolder
          controlVars.clear();
          controlVars = null;
       }
-      
+
       if (controlVarsHashMap != null)
       {
          controlVarsHashMap.clear();
@@ -923,11 +927,86 @@ public class YoVariableRegistry implements YoVariableHolder
          simulationRewoundListeners.clear();
          simulationRewoundListeners = null;
       }
-      
+
       if (yoVariableRegistryChangedListeners != null)
       {
          yoVariableRegistryChangedListeners.clear();
          yoVariableRegistryChangedListeners = null;
       }
    }
+
+   public static void printSizeRecursively(int minVariablesToPrint, int minChildrenToPrint, YoVariableRegistry root)
+   {
+      ArrayList<YoVariableRegistry> registriesOfInterest = new ArrayList<>();
+      int totalVariables = collectRegistries(minVariablesToPrint, minChildrenToPrint, root, registriesOfInterest);
+      Collections.sort(registriesOfInterest, new Comparator<YoVariableRegistry>()
+      {
+         @Override
+         public int compare(YoVariableRegistry o1, YoVariableRegistry o2)
+         {
+            if (o1.getNumberOfYoVariables() == o2.getNumberOfYoVariables())
+               return 0;
+            return o1.getNumberOfYoVariables() > o2.getNumberOfYoVariables() ? -1 : 1;
+         }
+      });
+
+      System.out.println("");
+      PrintTools.info("String recursively at " + root.getName() + " registry.");
+      System.out.println("Total Number of YoVariables: " + totalVariables);
+      System.out.println("Listing Variables with more then " + minVariablesToPrint + " variables or more then " + minChildrenToPrint + " children.");
+      System.out.println("Sorting by number of children.\n");
+
+      for (int registryIdx = 0; registryIdx < registriesOfInterest.size(); registryIdx++)
+         YoVariableRegistry.printInfo(registriesOfInterest.get(registryIdx));
+
+      System.out.println("");
+   }
+
+   private static int collectRegistries(int minVariablesToPrint, int minChildrenToPrint, YoVariableRegistry registry,
+         ArrayList<YoVariableRegistry> registriesOfInterest)
+   {
+      int variables = registry.getNumberOfYoVariables();
+      int children = registry.getChildren().size();
+
+      if (variables >= minVariablesToPrint || children >= minChildrenToPrint)
+         registriesOfInterest.add(registry);
+
+      int totalNumberOfVariables = variables;
+      for (int childIdx = 0; childIdx < children; childIdx++)
+      {
+         YoVariableRegistry childRegistry = registry.getChildren().get(childIdx);
+         totalNumberOfVariables += YoVariableRegistry.collectRegistries(minVariablesToPrint, minChildrenToPrint, childRegistry,
+               registriesOfInterest);
+      }
+
+      return totalNumberOfVariables;
+   }
+
+   private static void printInfo(YoVariableRegistry registry)
+   {
+      int variables = registry.getNumberOfYoVariables();
+      int children = registry.getChildren().size();
+
+      int maxPropertyLength = 17;
+      String variableString = trimStringToLength("Variables: " + variables, maxPropertyLength, "...");
+      String childrenString = trimStringToLength("Children: " + children, maxPropertyLength, "...");
+
+      int maxNameLength = 60;
+      String name = registry.getClass().getSimpleName() + " " + registry.getName();
+      name = trimStringToLength(name, maxNameLength, "...");
+
+      System.out.println(name + " " + variableString + " " + childrenString);
+   }
+
+   private static String trimStringToLength(String original, int length, String placeholder)
+   {
+      int chararcters = original.length();
+      int placeholderLength = placeholder.length();
+
+      if (chararcters > length)
+         return original.substring(0, length - placeholderLength) + placeholder;
+      else
+         return StringUtils.rightPad(original, length, " ");
+   }
+
 }
