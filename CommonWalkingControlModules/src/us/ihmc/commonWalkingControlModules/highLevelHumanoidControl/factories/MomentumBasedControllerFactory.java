@@ -258,20 +258,13 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the different ContactablePlaneBodies ///////////////////////////////////////////////
-
-      RigidBody rootBody = fullRobotModel.getRootJoint().getSuccessor();
-      SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
-
-      /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches,
-            centerOfMassDataHolder, wristForceSensors, yoTime,
-            gravityZ, omega0, twistCalculator, feet, handContactableBodies, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder,
+            wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)

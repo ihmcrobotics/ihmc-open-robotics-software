@@ -128,9 +128,8 @@ public class LogDataProcessorHelper
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
       yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
-      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames,
-            stateEstimatorFootSwitches, null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, null, controllerDT,
-            updatables, null);
+      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames, stateEstimatorFootSwitches,
+            null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, controllerDT, updatables, null);
 
    }
 

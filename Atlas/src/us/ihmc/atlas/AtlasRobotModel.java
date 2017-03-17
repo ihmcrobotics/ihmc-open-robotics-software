@@ -66,7 +66,6 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -232,9 +231,9 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return jointMap.getContactPointParameters();
    }
 
-   public void createHandContactPoints(boolean useHighResolutionPointGrid)
+   public void createAdditionalHandContactPoints()
    {
-      jointMap.getContactPointParameters().createHandContactPoints(useHighResolutionPointGrid);
+      jointMap.getContactPointParameters().createAdditionalHandContactPoints();
    }
 
 //   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
@@ -383,31 +382,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public SideDependentList<HandCommandManager> createHandCommandManager()
    {
-      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
-      {
-         SideDependentList<HandCommandManager> handCommandManagers = new SideDependentList<HandCommandManager>();
-         switch (selectedVersion)
-         {
-            case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI :
-               handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
-               return handCommandManagers;
-
-            case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ :
-               handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
-               handCommandManagers.set(RobotSide.RIGHT, new RobotiqHandCommandManager(RobotSide.RIGHT));
-               return handCommandManagers;
-
-            case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS :
-               break;
-
-            case ATLAS_UNPLUGGED_V5_NO_HANDS :
-               break;
-
-            default :
-               break;
-         }
-      }
-
       return null;
    }
 
