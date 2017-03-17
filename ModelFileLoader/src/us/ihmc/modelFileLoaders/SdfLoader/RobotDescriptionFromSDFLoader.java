@@ -91,8 +91,8 @@ public class RobotDescriptionFromSDFLoader
          robotDescription.scale(jointNameMap.getModelScale(), jointNameMap.getMassScalePower(), Arrays.asList(jointNameMap.getHighInertiaForStableSimulationJoints()));
          // Everything from here on will be done in "scaled robot coordinates"
       }
-      
-      
+
+
       // Ground Contact Points from joint name map
       addGroundContactPoints(jointNameMap);
 
@@ -133,8 +133,9 @@ public class RobotDescriptionFromSDFLoader
 
             if (SHOW_CONTACT_POINTS)
             {
+               if (jointDescription.getLink().getLinkGraphics() == null)
+                  jointDescription.getLink().setLinkGraphics(new LinkGraphicsDescription());
                Graphics3DObject graphics = jointDescription.getLink().getLinkGraphics();
-               if (graphics == null) graphics = new Graphics3DObject();
 
                graphics.identity();
                graphics.translate(jointContactPoint.getRight());
@@ -191,7 +192,7 @@ public class RobotDescriptionFromSDFLoader
          }
          addJointsRecursively(child, rootJointDescription, useCollisionMeshes, lastSimulatedJoints, false);
       }
-      
+
       // Ground contact points from model
       for (SDFJointHolder child : rootLink.getChildren())
       {
