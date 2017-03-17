@@ -37,12 +37,7 @@ public class NameBasedHashCodeTools
       if (string == null)
          return NULL_HASHCODE;
 
-      long h = DEFAULT_HASHCODE;
-
-      for (int i = 0; i < string.length(); i++)
-         h = PRIME * h + string.charAt(i);
-
-      return h;
+      return string.hashCode();
    }
 
    public static long combineHashCodes(long hashCodeToUpdate, NameBasedHashCodeHolder holder)
@@ -58,5 +53,10 @@ public class NameBasedHashCodeTools
    public static long combineHashCodes(String string, NameBasedHashCodeHolder holder)
    {
       return PRIME * computeStringHashCode(string) + (holder == null ? NULL_HASHCODE : holder.getNameBasedHashCode());
+   }
+   
+   public static long combineHashCodes(String string, String parentName)
+   {
+      return PRIME * string.hashCode() + parentName.hashCode();
    }
 }

@@ -255,7 +255,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       this.frameName = frameName;
       this.parentFrame = parentFrame;
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
 
       this.transformToRoot = new RigidBodyTransform();
@@ -325,7 +325,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isBodyCenteredFrame, boolean isWorldFrame,
          boolean isZupFrame)
    {
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       this.frameName = frameName;
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
@@ -343,7 +343,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
    {
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       this.frameName = frameName;
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
