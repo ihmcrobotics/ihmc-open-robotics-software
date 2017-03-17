@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
@@ -27,9 +28,7 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -65,8 +64,6 @@ public class RigidBodyControlManager
 
    private final BooleanYoVariable hasBeenInitialized;
 
-   private final ReferenceFrame bodyFrame;
-
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
          Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime,
@@ -76,7 +73,6 @@ public class RigidBodyControlManager
       String namePrefix = bodyName + "Manager";
       registry = new YoVariableRegistry(namePrefix);
       this.controlFrame = controlFrame;
-      this.bodyFrame = bodyToControl.getBodyFixedFrame();
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
@@ -242,7 +238,7 @@ public class RigidBodyControlManager
       requestState(jointspaceControlState.getStateEnum());
    }
 
-   public void requestLoadBearing()
+   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command)
    {
       if (positionControlHelper.hasPositionControlledJoints())
       {
@@ -250,11 +246,15 @@ public class RigidBodyControlManager
          return;
       }
 
-      // TODO: replace these once there is a proper controller command for load bearing.
-      loadBearingControlState.setCoefficientOfFriction(0.8);
-      loadBearingControlState.setContactNormal(new FrameVector(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0));
-      loadBearingControlState.setContactPoint(new FramePoint(bodyFrame, 0.0, 0.0, 0.0));
+      if (!command.getLoad())
+      {
+         holdInJointspace();
+         return;
+      }
 
+      loadBearingControlState.setCoefficientOfFriction(command.getCoefficientOfFriction());
+      loadBearingControlState.setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
+      loadBearingControlState.setContactPoint(command.getContactPointInBodyFrame());
       requestState(loadBearingControlState.getStateEnum());
    }
 

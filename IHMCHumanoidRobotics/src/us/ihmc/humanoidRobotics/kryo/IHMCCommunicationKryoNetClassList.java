@@ -99,6 +99,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollision
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPowerCyclePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -246,6 +247,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
 
       // Endeffector load bearing message
       registerPacketClass(EndEffectorLoadBearingMessage.class);
+      registerPacketClass(HandLoadBearingMessage.class);
       registerPacketClass(LoadBearingRequest.class);
       registerPacketClass(EndEffector.class);
 

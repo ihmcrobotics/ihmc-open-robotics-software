@@ -5,10 +5,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -57,16 +57,14 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       this.coefficientOfFriction.set(coefficientOfFriction);
    }
 
-   public void setContactNormal(FrameVector contactNormal)
+   public void setContactNormalInWorldFrame(Vector3D contactNormalInWorldFrame)
    {
-      contactNormal.checkReferenceFrameMatch(worldFrame);
-      this.contactNormal.set(contactNormal);
+      contactNormal.set(contactNormalInWorldFrame);
    }
 
-   public void setContactPoint(FramePoint contactPoint)
+   public void setContactPoint(Point3D contactPointInBodyFrame)
    {
-      contactPoint.checkReferenceFrameMatch(bodyFrame);
-      this.contactPoint.set(contactPoint);
+      contactPoint.set(contactPointInBodyFrame);
    }
 
    @Override

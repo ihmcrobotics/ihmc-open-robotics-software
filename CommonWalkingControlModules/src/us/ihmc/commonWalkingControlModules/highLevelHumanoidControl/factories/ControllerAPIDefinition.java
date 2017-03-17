@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelStateCommand;
@@ -71,6 +72,7 @@ public abstract class ControllerAPIDefinition
       commands.add(PauseWalkingCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
       commands.add(SpineDesiredAccelerationCommand.class);
+      commands.add(HandLoadBearingCommand.class);
 
       supportedCommands = Collections.unmodifiableList(commands);
 
