@@ -141,7 +141,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(pelvisZUpFrame);
       for (RobotSide robotSide : RobotSide.values)
-         desiredHandPoses.get(robotSide).changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
+         desiredHandPoses.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
       assertTrue(success);
