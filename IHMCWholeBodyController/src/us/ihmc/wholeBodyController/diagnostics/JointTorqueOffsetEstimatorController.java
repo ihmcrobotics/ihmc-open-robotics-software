@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Di
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.PDController;
@@ -61,7 +60,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
+   private final SideDependentList<YoPlaneContactState> footContactStates;
 
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.OFF);
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
@@ -73,11 +72,7 @@ public class JointTorqueOffsetEstimatorController extends HighLevelBehavior impl
       super(HighLevelState.CALIBRATION);
 
       this.bipedSupportPolygons = highLevelControllerToolbox.getBipedSupportPolygons();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ContactablePlaneBody contactableFoot = highLevelControllerToolbox.getContactableFeet().get(robotSide);
-         footContactStates.put(robotSide, highLevelControllerToolbox.getContactState(contactableFoot));
-      }
+      this.footContactStates = highLevelControllerToolbox.getFootContactStates();
       this.controllerToolbox = highLevelControllerToolbox;
       this.torqueOffsetPrinter = torqueOffsetPrinter;
       this.fullRobotModel = highLevelControllerToolbox.getFullRobotModel();
