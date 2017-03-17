@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +42,7 @@ public class EuclideanTrajectoryPointCalculator
    private final TDoubleArrayList waypointDistanceFromStart = new TDoubleArrayList();
    private final TDoubleArrayList weightedSubLengths = new TDoubleArrayList();
    private final TDoubleArrayList weights = new TDoubleArrayList();
-
+   
    public EuclideanTrajectoryPointCalculator()
    {
       clear();
@@ -57,7 +58,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void changeFrame(ReferenceFrame referenceFrame)
    {
-      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
+      for (int i = 0; i < getNumberOfTrajectoryQuaternions(); i++)
          trajectoryPoints.get(i).changeFrame(referenceFrame);
       this.referenceFrame = referenceFrame;
    }
@@ -115,7 +116,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double trajectoryTime)
    {
-      int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
+      int numberOfTrajectoryPoints = getNumberOfTrajectoryQuaternions();
       if (numberOfTrajectoryPoints == 0)
          throw new RuntimeException("There is no trajectory point.");
 
@@ -202,7 +203,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void computeTrajectoryPointVelocities(boolean startAndFinishWithZeroVelocity)
    {
-      int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
+      int numberOfTrajectoryPoints = getNumberOfTrajectoryQuaternions();
       if (numberOfTrajectoryPoints < 3)
          throw new RuntimeException("Need at least 3 trajectory points.");
 
@@ -334,7 +335,7 @@ public class EuclideanTrajectoryPointCalculator
       }
    }
 
-   public int getNumberOfTrajectoryPoints()
+   public int getNumberOfTrajectoryQuaternions()
    {
       return trajectoryPoints.size();
    }
