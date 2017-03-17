@@ -15,11 +15,11 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
 
    public YoMultipleFramesHelper(String namePrefix, YoVariableRegistry registry, ReferenceFrame... referenceFrames)
    {
-      currentFrameId = new LongYoVariable(namePrefix + "FrameId", registry);
-      currentFrameId.set(referenceFrames[0].getNameBasedHashCode());
-
       if (referenceFrames == null || referenceFrames.length == 0)
          throw new RuntimeException("Need to provide at least one ReferenceFrame.");
+      
+      currentFrameId = new LongYoVariable(namePrefix + "FrameId", registry);
+      currentFrameId.set(referenceFrames[0].getNameBasedHashCode());
 
       for (ReferenceFrame referenceFrame : referenceFrames)
       {
@@ -33,7 +33,12 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
     */
    public ReferenceFrame getCurrentReferenceFrame()
    {
-      return referenceFrames.get(currentFrameId.getLongValue());
+      ReferenceFrame referenceFrame = referenceFrames.get(currentFrameId.getLongValue());
+      if(referenceFrame == null)
+      {
+         throw new RuntimeException("The current ID is invalid or has not been registered.: " + currentFrameId.getLongValue());
+      }
+      return referenceFrame;
    }
 
    /**
@@ -53,6 +58,11 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
    public ReferenceFrame switchCurrentReferenceFrame(ReferenceFrame newCurrentReferenceFrame)
    {
       ReferenceFrame previousReferenceFrame = getCurrentReferenceFrame();
+      if(!referenceFrames.contains(newCurrentReferenceFrame.getNameBasedHashCode()))
+      {
+         throw new RuntimeException("The frame: " + newCurrentReferenceFrame.getName() + " has not been registered.");
+      }
+      
       currentFrameId.set(newCurrentReferenceFrame.getNameBasedHashCode());
       return previousReferenceFrame;
    }
@@ -60,7 +70,7 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
    /**
     * Register a new reference frame.
     * @param newReferenceFrame
-    * @throws RuntimeException if newReferenceFrame has already been registered
+    * @throws RuntimeException if newReferenceFrame is null
     */
    public void registerReferenceFrame(ReferenceFrame newReferenceFrame)
    {
