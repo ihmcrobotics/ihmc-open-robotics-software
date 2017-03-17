@@ -40,7 +40,7 @@ public class YoVariableClient implements LogPacketHandler
    private final ThreadedLogPacketHandler threadedLogPacketHandler;
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;
    private final LogControlClient logControlClient;
-   private final YoVariableHandshakeParser handshakeParser;
+   private final ProtoBufferYoVariableHandshakeParser handshakeParser;
    private final List<YoVariable<?>> yoVariablesList;
    private final List<JointState> jointStates;
    private final int displayOneInNPackets;
@@ -90,7 +90,7 @@ public class YoVariableClient implements LogPacketHandler
       streamingDataTCPClient = new StreamingDataTCPClient(inetAddress, request.getDataPort(), threadedLogPacketHandler, displayOneInNPackets);
       
       logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), this.yoVariablesUpdatedListener);
-      handshakeParser = new YoVariableHandshakeParser(registryPrefix);
+      handshakeParser = new ProtoBufferYoVariableHandshakeParser(registryPrefix);
       yoVariablesList = handshakeParser.getYoVariablesList();
       jointStates = handshakeParser.getJointStates();
 

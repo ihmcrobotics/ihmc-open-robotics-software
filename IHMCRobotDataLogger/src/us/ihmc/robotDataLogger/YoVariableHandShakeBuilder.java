@@ -14,12 +14,13 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.AppearanceDefinitionMessage;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.YoRegistryDefinition;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.YoVariableDefinition.YoProtoType;
+import us.ihmc.idl.us.ihmc.robotDataLogger.AppearanceDefinitionMessage;
+import us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage;
+import us.ihmc.idl.us.ihmc.robotDataLogger.Handshake;
+import us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinition;
+import us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinition;
+import us.ihmc.idl.us.ihmc.robotDataLogger.YoType;
+import us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinition;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.jointState.JointHolderFactory;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -31,7 +32,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class YoVariableHandShakeBuilder
 {
-   private final YoProtoHandshake.Builder yoProtoHandshakeBuilder = YoProtoHandshake.newBuilder();
+   private final Handshake handshake = new Handshake();
    private final ArrayList<JointHolder> jointHolders = new ArrayList<JointHolder>();   
    private final HashMap<YoVariable<?>, Integer> yoVariableIndices = new HashMap<YoVariable<?>, Integer>();
    private final ArrayList<ImmutablePair<YoVariable<?>, YoVariableRegistry>> variablesAndRootRegistries = new ArrayList<>();
@@ -43,7 +44,7 @@ public class YoVariableHandShakeBuilder
    {
       createRootRegistry();
 
-      yoProtoHandshakeBuilder.setDt(dt);
+      handshake.setDt(dt);
 
       if (rootBodies != null)
       {
@@ -55,15 +56,16 @@ public class YoVariableHandShakeBuilder
    {
       ArrayList<YoGraphicsList> yoGraphicsLists = new ArrayList<YoGraphicsList>();
       yoGraphicsListRegistry.getRegisteredYoGraphicsLists(yoGraphicsLists);
-      DynamicGraphicMessage.Builder msg;
       for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
       {
          for (YoGraphic yoGraphic : yoGraphicsList.getYoGraphics())
          {
             if (yoGraphic instanceof RemoteYoGraphic)
             {
-               msg = messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic);
-               yoProtoHandshakeBuilder.addGraphicObject(msg.setListName(yoGraphicsList.getLabel()));
+               DynamicGraphicMessage msg = handshake.getGraphic_object().add();
+               msg.setList_name(yoGraphicsList.getLabel());
+               messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic, msg);
+               
             }
             else
             {
@@ -81,7 +83,8 @@ public class YoVariableHandShakeBuilder
          {
             if (artifact instanceof RemoteYoGraphic)
             {
-               yoProtoHandshakeBuilder.addArtifact(messageFromDynamicGraphicObject((RemoteYoGraphic) artifact));
+               DynamicGraphicMessage msg = handshake.getArtifact().add();
+               messageFromDynamicGraphicObject((RemoteYoGraphic) artifact, msg);
             }
             else
             {
@@ -98,10 +101,9 @@ public class YoVariableHandShakeBuilder
       {
          JointHolder jointHolder = JointHolderFactory.getJointHolder(joint);
 
-         YoProtoHandshake.JointDefinition.Builder jointDefinition = YoProtoHandshake.JointDefinition.newBuilder();
+         JointDefinition jointDefinition = handshake.getJoint().add();
          jointDefinition.setName(joint.getName());
          jointDefinition.setType(jointHolder.getJointType());
-         yoProtoHandshakeBuilder.addJoint(jointDefinition);
 
          jointHolders.add(jointHolder);
       }
@@ -119,10 +121,10 @@ public class YoVariableHandShakeBuilder
 
    private void createRootRegistry()
    {
-      YoRegistryDefinition.Builder yoRegistryDescription = YoRegistryDefinition.newBuilder();
+      
+      YoRegistryDefinition yoRegistryDescription = handshake.getRegistry().add();
       yoRegistryDescription.setName("main");
       yoRegistryDescription.setParent(0);
-      yoProtoHandshakeBuilder.addRegistry(yoRegistryDescription);
    }
 
    public int addRegistry(YoVariableRegistry registry, List<YoVariable<?>> variableListToPack)
@@ -137,10 +139,9 @@ public class YoVariableHandShakeBuilder
       int myID = registryID;
       registryID++;
 
-      YoRegistryDefinition.Builder yoRegistryDescription = YoRegistryDefinition.newBuilder();
+      YoRegistryDefinition yoRegistryDescription = handshake.getRegistry().add();
       yoRegistryDescription.setName(registry.getName());
       yoRegistryDescription.setParent(parentID);
-      yoProtoHandshakeBuilder.addRegistry(yoRegistryDescription);
 
       addVariables(myID, registry, variableListToPack, rootRegistry);
 
@@ -157,26 +158,26 @@ public class YoVariableHandShakeBuilder
 
       for (YoVariable<?> variable : variables)
       {
-         YoVariableDefinition.Builder yoVariableDefinition = YoVariableDefinition.newBuilder();
+         YoVariableDefinition yoVariableDefinition = handshake.getVariable().add();
          yoVariableDefinition.setName(variable.getName());
          yoVariableDefinition.setRegistry(registryID);
 
          switch (variable.getYoVariableType())
          {
          case DOUBLE:
-            yoVariableDefinition.setType(YoProtoType.DoubleYoVariable);
+            yoVariableDefinition.setType(YoType.DoubleYoVariable);
             break;
          case INTEGER:
-            yoVariableDefinition.setType(YoProtoType.IntegerYoVariable);
+            yoVariableDefinition.setType(YoType.IntegerYoVariable);
             break;
          case BOOLEAN:
-            yoVariableDefinition.setType(YoProtoType.BooleanYoVariable);
+            yoVariableDefinition.setType(YoType.BooleanYoVariable);
             break;
          case LONG:
-            yoVariableDefinition.setType(YoProtoType.LongYoVariable);
+            yoVariableDefinition.setType(YoType.LongYoVariable);
             break;
          case ENUM:
-            yoVariableDefinition.setType(YoProtoType.EnumYoVariable);
+            yoVariableDefinition.setType(YoType.EnumYoVariable);
 
             String[] enumTypes = ((EnumYoVariable<?>) variable).getEnumValuesAsString();
 
@@ -186,7 +187,7 @@ public class YoVariableHandShakeBuilder
                {
                   enumType = "null";
                }
-               yoVariableDefinition.addEnumValues(enumType);
+               yoVariableDefinition.getEnumValues().add(enumType);
             }
             yoVariableDefinition.setAllowNullValues(((EnumYoVariable<?>) variable).getAllowNullValue());
             break;
@@ -194,7 +195,6 @@ public class YoVariableHandShakeBuilder
             throw new RuntimeException("Unknown variable type: " + variable.getYoVariableType());
          }
 
-         yoProtoHandshakeBuilder.addVariable(yoVariableDefinition);
          variableListToPack.add(variable);
          variablesAndRootRegistries.add(new ImmutablePair<YoVariable<?>, YoVariableRegistry>(variable, rootRegistry));
          this.yoVariableIndices.put(variable, variablesAndRootRegistries.size() - 1);
@@ -203,21 +203,19 @@ public class YoVariableHandShakeBuilder
 
    }
 
-   private DynamicGraphicMessage.Builder messageFromDynamicGraphicObject(RemoteYoGraphic obj)
+   private void messageFromDynamicGraphicObject(RemoteYoGraphic obj, DynamicGraphicMessage objectMessage)
    {
-      DynamicGraphicMessage.Builder objectMessage = DynamicGraphicMessage.newBuilder();
 
       objectMessage.setType(obj.getRemoteGraphicType().ordinal());
       objectMessage.setName(obj.getName());
 
       try
       {
-         AppearanceDefinitionMessage.Builder appearanceMessage = AppearanceDefinitionMessage.newBuilder();
-         appearanceMessage.setX(obj.getAppearance().getColor().getX());
-         appearanceMessage.setY(obj.getAppearance().getColor().getY());
-         appearanceMessage.setZ(obj.getAppearance().getColor().getZ());
+         AppearanceDefinitionMessage appearanceMessage = objectMessage.getAppearance();
+         appearanceMessage.setR(obj.getAppearance().getColor().getX());
+         appearanceMessage.setG(obj.getAppearance().getColor().getY());
+         appearanceMessage.setB(obj.getAppearance().getColor().getZ());
          appearanceMessage.setTransparency(obj.getAppearance().getTransparency());
-         objectMessage.setAppearance(appearanceMessage.build());
       }
       catch (NotImplementedException e)
       {
@@ -231,15 +229,14 @@ public class YoVariableHandShakeBuilder
          {
             throw new RuntimeException("Backing YoVariableRegistry not added for " + obj.getName());
          }
-         objectMessage.addYoIndex(index);
+         objectMessage.getYo_index().add(index);
       }
 
       for (double d : obj.getConstants())
       {
-         objectMessage.addConstant(d);
+         objectMessage.getConstants().add(d);
       }
 
-      return objectMessage;
    }
    
 
@@ -253,10 +250,9 @@ public class YoVariableHandShakeBuilder
       return variablesAndRootRegistries;
    }
 
-   public byte[] toByteArray()
+   public Handshake getHandShake()
    {
-      YoProtoHandshake yoProtoHandshake = yoProtoHandshakeBuilder.build();
-      return yoProtoHandshake.toByteArray();
+      return handshake;
    }
 
 }

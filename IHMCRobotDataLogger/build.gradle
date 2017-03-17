@@ -38,6 +38,17 @@ repositories {
     }
 }
 
+sourceSets {
+        main {
+                java {
+                        srcDirs += ['generated-src']
+                }
+
+        }
+
+}
+
+
 def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
@@ -56,6 +67,7 @@ dependencies {
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
    compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
    compile group: 'org.tukaani', name: 'xz', version: '1.5'
+   compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.1.3'
    
    compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCCommunication")

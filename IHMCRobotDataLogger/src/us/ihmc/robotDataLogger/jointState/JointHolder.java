@@ -1,8 +1,6 @@
 package us.ihmc.robotDataLogger.jointState;
 
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
-
-
+import us.ihmc.idl.us.ihmc.robotDataLogger.JointType;
 
 public interface JointHolder
 {

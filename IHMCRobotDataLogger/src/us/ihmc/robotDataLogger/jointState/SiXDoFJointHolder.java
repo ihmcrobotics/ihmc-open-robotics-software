@@ -1,9 +1,8 @@
 package us.ihmc.robotDataLogger.jointState;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
-
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
+import us.ihmc.idl.us.ihmc.robotDataLogger.JointType;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.Twist;
 

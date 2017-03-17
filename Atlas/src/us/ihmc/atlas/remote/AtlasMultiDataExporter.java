@@ -28,7 +28,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.MultiVideoDataPlayer;
@@ -56,7 +56,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
    YoVariableLogPlaybackRobot robot;
    SimulationConstructionSet scs;
-   YoVariableHandshakeParser parser;
+   ProtoBufferYoVariableHandshakeParser parser;
    MultiVideoDataPlayer players = null;
    SimulateAndExport simulateExport;
    Thread simulation;
@@ -354,7 +354,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      parser = new YoVariableHandshakeParser("logged");
+      parser = new ProtoBufferYoVariableHandshakeParser("logged");
       parser.parseFrom(handshakeData);
 
 //      boolean useCollisionMeshes = false;
