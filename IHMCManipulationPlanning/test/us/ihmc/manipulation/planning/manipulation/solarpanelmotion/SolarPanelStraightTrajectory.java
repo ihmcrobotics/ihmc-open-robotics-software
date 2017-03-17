@@ -23,11 +23,10 @@ public class SolarPanelStraightTrajectory
    private void initialize()
    {  
       for(int i=0;i<numberOfWayPoints;i++)
-      {
-         
+      {         
          Point3D startLocation = startPose.getLocation();
          Point3D endLocation = endPose.getLocation();
-         Point3D wayPointLocation = new Point3D((endLocation.getX() - startLocation.getX())/(numberOfWayPoints-1)*i, (endLocation.getY() - startLocation.getY())/(numberOfWayPoints-1)*i, (endLocation.getZ() - startLocation.getZ())/(numberOfWayPoints-1)*i);
+         Point3D wayPointLocation = new Point3D((endLocation.getX() - startLocation.getX())/(numberOfWayPoints-1)*i+startLocation.getX(), (endLocation.getY() - startLocation.getY())/(numberOfWayPoints-1)*i+startLocation.getY(), (endLocation.getZ() - startLocation.getZ())/(numberOfWayPoints-1)*i+startLocation.getZ());
          SolarPanelCleaningPose wayPointPose = new SolarPanelCleaningPose(wayPointLocation, 0.0, -Math.PI/0.25, 0.0);
       
          wayPointPoses.add(wayPointPose);
