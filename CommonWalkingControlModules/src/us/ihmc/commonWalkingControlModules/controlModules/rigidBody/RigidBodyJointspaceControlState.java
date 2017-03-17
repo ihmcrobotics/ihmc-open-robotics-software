@@ -51,7 +51,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    public RigidBodyJointspaceControlState(String bodyName, OneDoFJoint[] jointsToControl, TObjectDoubleHashMap<String> homeConfiguration,
          DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime);
+      super(RigidBodyControlMode.JOINTSPACE, bodyName, yoTime, parentRegistry);
 
       this.jointsOriginal = jointsToControl;
       numberOfJoints = jointsOriginal.length;
@@ -83,8 +83,6 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
             throw new RuntimeException(warningPrefix + "Can not create control manager since joint home configuration is not defined.");
          jointsHomeConfiguration[jointIdx] = homeConfiguration.get(jointName);
       }
-
-      parentRegistry.addChild(registry);
    }
 
    public void setWeights(TObjectDoubleHashMap<String> weights)
