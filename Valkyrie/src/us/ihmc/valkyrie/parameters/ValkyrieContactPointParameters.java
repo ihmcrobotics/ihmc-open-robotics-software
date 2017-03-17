@@ -5,7 +5,6 @@ import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.footWidth;
 import static us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties.soleToAnkleFrameTransforms;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -25,8 +24,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 public class ValkyrieContactPointParameters extends RobotContactPointParameters
 {
    private final SideDependentList<ArrayList<Point2D>> footGroundContactPoints = new SideDependentList<>();
-   private final SideDependentList<List<Point2D>> handContactPoints = new SideDependentList<>();
-   private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
 
    private final DRCRobotJointMap jointMap;
 
@@ -38,7 +35,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
       if (footContactPoints == null)
          createDefaultFootContactPoints();
       else
-         createContactPoints(footContactPoints);
+         createFootContactPoints(footContactPoints);
    }
 
    private void checkJointChildren(SDFJointHolder joint)
@@ -143,17 +140,5 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters
             setControllerFootContactPoint(robotSide, footGroundContactPoints.get(robotSide));
          }
       }
-   }
-
-   @Override
-   public SideDependentList<RigidBodyTransform> getHandContactPointTransforms()
-   {
-      return handContactPointTransforms;
-   }
-
-   @Override
-   public SideDependentList<List<Point2D>> getHandContactPoints()
-   {
-      return handContactPoints;
    }
 }

@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.DRCWallWorldTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
@@ -17,15 +16,13 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasWallWorldTest extends DRCWallWorldTest
 {
    private final AtlasRobotModel robotModel;
-   
+
    public AtlasWallWorldTest()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-      
-      AtlasContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
-      contactPointParameters.createHandKnobContactPoints();
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+      robotModel.createAdditionalHandContactPoints();
    }
-   
+
    @Override
    public DRCRobotModel getRobotModel()
    {
@@ -37,7 +34,7 @@ public class AtlasWallWorldTest extends DRCWallWorldTest
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
-   
+
    @Override
    @ContinuousIntegrationTest(estimatedDuration = 192.2)
    @Test(timeout = 960000)

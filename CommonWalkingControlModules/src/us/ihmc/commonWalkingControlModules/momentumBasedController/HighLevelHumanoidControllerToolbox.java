@@ -156,9 +156,8 @@ public class HighLevelHumanoidControllerToolbox
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-         SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, double omega0,
-         TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT,
+         CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime,
+         double gravityZ, double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, double controlDT,
          ArrayList<Updatable> updatables, YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
