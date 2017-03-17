@@ -17,12 +17,10 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    public RigidBodyLoadBearingControlState(String bodyName, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.LOAD_BEARING, bodyName, yoTime);
+      super(RigidBodyControlMode.LOADBEARING, bodyName, yoTime, parentRegistry);
 
       int numberOfContactPlanes = 1;
       planeContactStateCommands = new RecyclingArrayList<>(numberOfContactPlanes, PlaneContactStateCommand.class);
-
-      parentRegistry.addChild(registry);
    }
 
    @Override

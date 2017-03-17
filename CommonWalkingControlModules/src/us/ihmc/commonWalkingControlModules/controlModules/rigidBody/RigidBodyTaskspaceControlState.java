@@ -85,7 +85,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime);
+      super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
       this.baseFrame = baseFrame;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
 
@@ -130,7 +130,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       hasLinearWeight = new BooleanYoVariable(prefix + "HasLinearWeights", registry);
 
       pointQueue.clear();
-      parentRegistry.addChild(registry);
    }
 
    public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
