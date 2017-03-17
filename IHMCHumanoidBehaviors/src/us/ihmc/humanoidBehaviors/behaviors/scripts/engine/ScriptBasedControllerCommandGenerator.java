@@ -19,15 +19,20 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMe
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class ScriptBasedControllerCommandGenerator
 {
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
+   private CommonHumanoidReferenceFrames referenceFrames;
+   private ReferenceFrame worldFrame;
    
-   public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands)
+   public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands, CommonHumanoidReferenceFrames referenceFrames)
    {
       this.controllerCommands = controllerCommands;
+      this.referenceFrames = referenceFrames;
+      worldFrame = ReferenceFrame.getWorldFrame();
    }
 
    public void loadScriptFile(Path scriptFilePath, ReferenceFrame referenceFrame)
@@ -84,15 +89,20 @@ public class ScriptBasedControllerCommandGenerator
       else if (scriptObject instanceof FootTrajectoryMessage)
       {
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
+         message.setTrajectoryReferenceFrameId(worldFrame);
+         message.setExpressedInReferenceFrameId(worldFrame);
          FootTrajectoryCommand command = new FootTrajectoryCommand();
-         command.set(message);
+         command.set(worldFrame, worldFrame, message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof HandTrajectoryMessage)
       {
+         ReferenceFrame chestFrame = referenceFrames.getChestFrame();
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
+         message.setTrajectoryReferenceFrameId(chestFrame);
+         message.setExpressedInReferenceFrameId(worldFrame);
          HandTrajectoryCommand command = new HandTrajectoryCommand();
-         command.set(message);
+         command.set(worldFrame, chestFrame, message);
          controllerCommands.add(command);
       }
       else if (scriptObject instanceof PelvisHeightTrajectoryMessage)
