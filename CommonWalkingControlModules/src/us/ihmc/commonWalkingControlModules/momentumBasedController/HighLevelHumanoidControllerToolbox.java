@@ -85,11 +85,6 @@ public class HighLevelHumanoidControllerToolbox
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
 
-//   private final SideDependentList<ContactablePlaneBody> hands;
-//   private final List<ContactablePlaneBody> contactablePlaneBodyList;
-//   private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
-//   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
-
    protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final DoubleYoVariable desiredCoPAlpha;
    private final LinkedHashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredFootDesiredCenterOfPressures = new LinkedHashMap<>();

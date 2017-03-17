@@ -19,8 +19,8 @@ public class AtlasWallWorldTest extends DRCWallWorldTest
 
    public AtlasWallWorldTest()
    {
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-      robotModel.createAdditionalHandContactPoints();
+      boolean createAdditionalContactPoints = true;
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false, createAdditionalContactPoints);
    }
 
    @Override

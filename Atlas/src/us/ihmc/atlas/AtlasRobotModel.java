@@ -118,12 +118,23 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
-      this(atlasVersion, target, headless, null);
+      this(atlasVersion, target, headless, null, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, boolean createAdditionalContactPoints)
+   {
+      this(atlasVersion, target, headless, null, createAdditionalContactPoints);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
-      if(SCALE_ATLAS)
+      this(atlasVersion, target, headless, simulationContactPoints, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+         boolean createAdditionalContactPoints)
+   {
+      if (SCALE_ATLAS)
       {
          atlasPhysicalProperties  = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
       }
@@ -133,7 +144,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       selectedVersion = atlasVersion;
-      jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties, simulationContactPoints);
+      jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties, simulationContactPoints, createAdditionalContactPoints);
       this.target = target;
 
       this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
@@ -229,11 +240,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public AtlasContactPointParameters getContactPointParameters()
    {
       return jointMap.getContactPointParameters();
-   }
-
-   public void createAdditionalHandContactPoints()
-   {
-      jointMap.getContactPointParameters().createAdditionalHandContactPoints();
    }
 
 //   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)

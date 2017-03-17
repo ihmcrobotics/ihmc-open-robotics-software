@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 
 public class AtlasEndToEndHandLoadBearingTest extends EndToEndHandLoadBearingTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false, true);
 
    @Override
    public DRCRobotModel getRobotModel()
