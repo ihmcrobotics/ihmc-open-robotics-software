@@ -522,6 +522,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       commandConsumer.consumePelvisCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.consumeManipulationCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
+      commandConsumer.consumeLoadBearingCommands();
 
       updateFailureDetection();
 

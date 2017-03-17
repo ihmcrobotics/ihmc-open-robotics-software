@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
@@ -37,8 +38,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -282,19 +281,32 @@ public class WalkingCommandConsumer
 
       EndEffectorLoadBearingCommand command = commandInputManager.pollAndCompileCommands(EndEffectorLoadBearingCommand.class);
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (handManagers.get(robotSide) == null)
-            continue;
-
-         LoadBearingRequest request = command.getRequest(robotSide, EndEffector.HAND);
-         if (request == LoadBearingRequest.LOAD)
-            handManagers.get(robotSide).requestLoadBearing();
-         else if (request == LoadBearingRequest.UNLOAD)
-            handManagers.get(robotSide).holdInJointspace();
-      }
+//      for (RobotSide robotSide : RobotSide.values)
+//      {
+//         if (handManagers.get(robotSide) == null)
+//            continue;
+//
+//         LoadBearingRequest request = command.getRequest(robotSide, EndEffector.HAND);
+//         if (request == LoadBearingRequest.LOAD)
+//            handManagers.get(robotSide).requestLoadBearing();
+//         else if (request == LoadBearingRequest.UNLOAD)
+//            handManagers.get(robotSide).holdInJointspace();
+//      }
 
       currentState.handleEndEffectorLoadBearingCommand(command);
+   }
+
+   public void consumeLoadBearingCommands()
+   {
+      List<HandLoadBearingCommand> handLoadBearingCommands = commandInputManager.pollNewCommands(HandLoadBearingCommand.class);
+
+      for (int i = 0; i < handLoadBearingCommands.size(); i++)
+      {
+         HandLoadBearingCommand command = handLoadBearingCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         if (handManagers.get(robotSide) != null)
+            handManagers.get(robotSide).handleLoadBearingCommand(command);
+      }
    }
 
    public void consumeStopAllTrajectoryCommands()

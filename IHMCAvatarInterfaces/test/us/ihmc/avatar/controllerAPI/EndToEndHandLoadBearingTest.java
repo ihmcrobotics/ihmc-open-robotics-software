@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -71,6 +72,14 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
       handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.5, 0.2, 0.5), handOrientation, new Vector3D(), new Vector3D());
       drcSimulationTestHelper.send(handTrajectoryMessage2);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+
+      // Activate load bearing
+      HandLoadBearingMessage loadBearingMessage = new HandLoadBearingMessage(RobotSide.LEFT);
+      loadBearingMessage.setLoad(true);
+      loadBearingMessage.setCoefficientOfFriction(0.8);
+      loadBearingMessage.setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
+      drcSimulationTestHelper.send(loadBearingMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
    }
 
