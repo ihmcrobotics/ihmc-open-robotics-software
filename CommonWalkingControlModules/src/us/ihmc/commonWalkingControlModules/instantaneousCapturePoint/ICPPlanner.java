@@ -101,7 +101,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * {@link #getDesiredCapturePointVelocity(YoFrameVector)}.
  * <li>To get the CoM position, use either {@link #getDesiredCenterOfMassPosition(FramePoint)},
  * {@link #getDesiredCenterOfMassPosition(FramePoint2d)}, or
- * {@link #getDesiredCenterOfMassPosition(YoFramePoint)}.
+ * {@link #getDesiredCenterOfMassPosition(YoFramePoint2d)}.
  * <li>To get the CMP position, use either
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint)}, or
  * {@link #getDesiredCentroidalMomentumPivotPosition(FramePoint2d)}.
@@ -211,8 +211,8 @@ public class ICPPlanner
    private final YoFramePointInMultipleFrames singleSupportFinalICP;
    private final YoFrameVector singleSupportFinalICPVelocity = new YoFrameVector(namePrefix + "SingleSupportFinalICPVelocity", worldFrame, registry);
 
-   private final YoFramePoint2dInMultipleFrames yoSingleSupportInitialCoM;
-   private final YoFramePoint2dInMultipleFrames yoSingleSupportFinalCoM;
+   private final YoFramePoint2d yoSingleSupportInitialCoM;
+   private final YoFramePoint2d yoSingleSupportFinalCoM;
    private final FramePoint2d singleSupportInitialCoM = new FramePoint2d();
    private final FramePoint2d singleSupportFinalCoM = new FramePoint2d();
 
@@ -294,8 +294,8 @@ public class ICPPlanner
       singleSupportInitialICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportInitialICP", registry, framesToRegister);
       singleSupportFinalICP = new YoFramePointInMultipleFrames(namePrefix + "SingleSupportFinalICP", registry, framesToRegister);
 
-      yoSingleSupportInitialCoM = new YoFramePoint2dInMultipleFrames(namePrefix + "SingleSupportInitialCoM", registry, framesToRegister);
-      yoSingleSupportFinalCoM = new YoFramePoint2dInMultipleFrames(namePrefix + "SingleSupportFinalCoM", registry, framesToRegister);
+      yoSingleSupportInitialCoM = new YoFramePoint2d(namePrefix + "SingleSupportInitialCoM", worldFrame, registry);
+      yoSingleSupportFinalCoM = new YoFramePoint2d(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
 
       for (int i = 0; i < numberFootstepsToConsider.getIntegerValue() - 1; i++)
       {
@@ -365,14 +365,12 @@ public class ICPPlanner
       yoGraphicsList.add(desiredCenterOfMassPositionViz);
       artifactList.add(desiredCenterOfMassPositionViz.createArtifact());
 
-      YoFramePoint2d initialCoMInWorld = yoSingleSupportInitialCoM.buildUpdatedYoFramePointForVisualizationOnly();
-      YoGraphicPosition singleSupportInitialCoMViz = new YoGraphicPosition("singleSupportInitialCoM", initialCoMInWorld, 0.004, YoAppearance.Black(),
+      YoGraphicPosition singleSupportInitialCoMViz = new YoGraphicPosition("singleSupportInitialCoM", yoSingleSupportInitialCoM, 0.004, YoAppearance.Black(),
             GraphicType.SOLID_BALL);
       yoGraphicsList.add(singleSupportInitialCoMViz);
       artifactList.add(singleSupportInitialCoMViz.createArtifact());
 
-      YoFramePoint2d finalCoMInWorld = yoSingleSupportFinalCoM.buildUpdatedYoFramePointForVisualizationOnly();
-      YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM", finalCoMInWorld, 0.004, YoAppearance.Black(),
+      YoGraphicPosition singleSupportFinalCoMViz = new YoGraphicPosition("singleSupportFinalCoM", yoSingleSupportFinalCoM, 0.004, YoAppearance.Black(),
             GraphicType.BALL);
       yoGraphicsList.add(singleSupportFinalCoMViz);
       artifactList.add(singleSupportFinalCoMViz.createArtifact());
