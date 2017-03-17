@@ -7,9 +7,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,10 +40,15 @@ public class DynamicReachabilityValidator
    private final FramePoint centerOfMassPosition = new FramePoint();
    private final FramePoint tempHipPoint = new FramePoint();
    private final FramePoint tempAnklePoint = new FramePoint();
+
    private final FramePoint2d tempFinalCoM = new FramePoint2d();
+   private final FramePoint2d tempPoint2d = new FramePoint2d();
 
    private final double thighLength;
    private final double shinLength;
+
+   private final LineSegment1d stanceHeightLine = new LineSegment1d();
+   private final LineSegment1d stepHeightLine = new LineSegment1d();
 
    public DynamicReachabilityValidator(ICPPlanner icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
          YoVariableRegistry parentRegistry)
@@ -97,16 +100,13 @@ public class DynamicReachabilityValidator
       updateOffsets();
       updateLegLengthLimits();
 
-      double requiredStanceLegLength = computeRequiredStanceLegLength(supportSide);
-      double requiredSwingLegLength = computeRequiredSwingLegLength(nextFootstep);
+      computeHeightLineFromStance(supportSide);
+      computeHeightLineFromStep(nextFootstep);
 
-      boolean reachableWRTStanceFoot = MathTools.intervalContains(requiredStanceLegLength, minimumLegLength.getDoubleValue(), maximumLegLength.getDoubleValue());
-      boolean reachableWRTFootstep = MathTools.intervalContains(requiredSwingLegLength, minimumLegLength.getDoubleValue(), maximumLegLength.getDoubleValue());
+      this.reachableWRTStanceFoot.set(stanceHeightLine.length() > 0.0);
+      this.reachableWRTFootstep.set(stepHeightLine.length() > 0.0);
 
-      this.reachableWRTStanceFoot.set(reachableWRTStanceFoot);
-      this.reachableWRTFootstep.set(reachableWRTFootstep);
-
-      return reachableWRTStanceFoot && reachableWRTFootstep;
+      return stanceHeightLine.isOverlappingInclusive(stepHeightLine);
    }
 
    private void updateOffsets()
@@ -145,22 +145,35 @@ public class DynamicReachabilityValidator
       this.minimumLegLength.set(minimumLegLength);
    }
 
-   private double computeRequiredStanceLegLength(RobotSide supportSide)
+   private void computeHeightLineFromStance(RobotSide supportSide)
    {
       OneDoFJoint supportAnklePitchJoint = fullRobotModel.getLegJoint(supportSide, LegJointName.ANKLE_PITCH);
       tempAnklePoint.setToZero(supportAnklePitchJoint.getFrameAfterJoint());
       tempAnklePoint.changeFrame(centerOfMassFrame);
+      tempAnklePoint.getFrameTuple2d(tempPoint2d);
 
-      icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM); // // FIXME: 3/16/17  doesn't have the height correct
-      // // FIXME: 3/16/17 include the height
-      tempHipPoint.setXY(tempFinalCoM);
-      tempHipPoint.changeFrame(centerOfMassFrame);
-      tempHipPoint.sub(centerOfMassOffsetFromHips.get(supportSide));
+      // get the hip location in XY
+      FrameVector offsetFromHips = centerOfMassOffsetFromHips.get(supportSide);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM);
+      tempFinalCoM.changeFrame(offsetFromHips.getReferenceFrame());
+      tempFinalCoM.sub(offsetFromHips.getX(), offsetFromHips.getY());
 
-      return tempHipPoint.distance(tempAnklePoint);
+      double planarDistance = tempFinalCoM.distance(tempPoint2d);
+
+      double minimumHeight, maximumHeight;
+      if (planarDistance <= minimumLegLength.getDoubleValue())
+         minimumHeight = 0.0;
+      else
+         minimumHeight = Math.sqrt(Math.pow(minimumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+      if (planarDistance <= maximumLegLength.getDoubleValue())
+         maximumHeight = 0.0;
+      else
+         maximumHeight = Math.sqrt(Math.pow(maximumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+
+      stanceHeightLine.set(minimumHeight, maximumHeight);
    }
 
-   private double computeRequiredSwingLegLength(Footstep nextFootstep)
+   private void computeHeightLineFromStep(Footstep nextFootstep)
    {
       RobotSide swingSide = nextFootstep.getRobotSide();
 
@@ -169,13 +182,26 @@ public class DynamicReachabilityValidator
       tempAnklePoint.changeFrame(fullRobotModel.getSoleFrame(swingSide));
       tempAnklePoint.add(soleFrameOffsetFromAnkles.get(swingSide));
       tempAnklePoint.changeFrame(centerOfMassFrame);
+      tempAnklePoint.getFrameTuple2d(tempPoint2d);
 
-      icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM); // // FIXME: 3/16/17  doesn't have the height correct
-      // // FIXME: 3/16/17 include the height
-      tempHipPoint.setXY(tempFinalCoM);
-      tempHipPoint.changeFrame(centerOfMassFrame);
-      tempHipPoint.sub(centerOfMassOffsetFromHips.get(swingSide));
+      // get the hip location in XY
+      FrameVector offsetFromHips = centerOfMassOffsetFromHips.get(swingSide);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM);
+      tempFinalCoM.changeFrame(offsetFromHips.getReferenceFrame());
+      tempFinalCoM.sub(offsetFromHips.getX(), offsetFromHips.getY());
 
-      return tempHipPoint.distance(tempAnklePoint);
+      double planarDistance = tempFinalCoM.distance(tempPoint2d);
+
+      double minimumHeight, maximumHeight;
+      if (planarDistance <= minimumLegLength.getDoubleValue())
+         minimumHeight = 0.0;
+      else
+         minimumHeight = Math.sqrt(Math.pow(minimumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+      if (planarDistance <= maximumLegLength.getDoubleValue())
+         maximumHeight = 0.0;
+      else
+         maximumHeight = Math.sqrt(Math.pow(maximumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+
+      stepHeightLine.set(minimumHeight, maximumHeight);
    }
 }
