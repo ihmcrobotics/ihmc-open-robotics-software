@@ -22,7 +22,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
@@ -111,7 +111,7 @@ public class LogVisualizer
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged");
+      ProtoBufferYoVariableHandshakeParser parser = new ProtoBufferYoVariableHandshakeParser("logged");
       parser.parseFrom(handshakeData);
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;

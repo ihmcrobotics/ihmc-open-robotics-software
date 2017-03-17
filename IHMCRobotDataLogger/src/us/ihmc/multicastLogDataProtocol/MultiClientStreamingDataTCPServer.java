@@ -59,7 +59,7 @@ public class MultiClientStreamingDataTCPServer extends Thread
    {
       LogHandshake handshake = new LogHandshake();
 
-      handshake.protoShake = handshakeBuilder.toByteArray();
+      handshake.protoShake = new byte[0];//handshakeBuilder.toByteArray();
 
       if (logModelProvider != null)
       {

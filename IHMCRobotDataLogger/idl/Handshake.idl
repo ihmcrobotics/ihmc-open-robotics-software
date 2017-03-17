@@ -1,0 +1,74 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	struct YoRegistryDefinition
+	{
+		long parent;
+		string name;
+	};
+	
+	enum YoType
+	{
+		DoubleYoVariable,
+		BooleanYoVariable,
+		IntegerYoVariable,
+		LongYoVariable,
+		EnumYoVariable
+	};
+	
+	enum JointType
+	{
+		SiXDoFJoint,
+		OneDoFJoint
+	};
+	
+	
+	struct YoVariableDefinition
+	{
+		string name;
+		long registry;
+		YoType type;
+		sequence<string, 255> enumValues;
+		boolean allowNullValues;
+	};
+	
+	struct JointDefinition
+	{
+		string name;
+		JointType type;
+		
+	};
+	
+	struct AppearanceDefinitionMessage
+	{
+		double r;
+		double g;
+		double b;
+		
+		double transparency;
+	};
+	
+	struct DynamicGraphicMessage
+	{
+		long type;
+		string name;
+		
+		sequence<long, 255> yo_index;
+		sequence<double, 255> constants;
+		AppearanceDefinitionMessage appearance;
+		string list_name;
+	};
+	
+	struct Handshake
+	{
+		double dt;
+		sequence<YoRegistryDefinition, 1024> registry;
+		sequence<YoVariableDefinition, 32767> variable;
+		sequence<JointDefinition, 255> joint;
+		sequence<DynamicGraphicMessage, 4096> graphic_object;
+		sequence<DynamicGraphicMessage, 4096> artifact;
+	};
+
+};
+};
+};

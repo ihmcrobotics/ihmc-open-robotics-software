@@ -1,0 +1,17 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	struct Announcement
+	{
+		octet guid[16];
+		
+		octet dataIP[4];
+		short dataPort;
+		
+		sequence<octet, 127> cameras;
+		string name;
+		boolean log;
+	};
+};
+};
+};

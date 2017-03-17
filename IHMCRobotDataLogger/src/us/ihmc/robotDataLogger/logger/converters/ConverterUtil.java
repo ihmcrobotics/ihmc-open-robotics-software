@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 
 public class ConverterUtil
@@ -22,7 +23,7 @@ public class ConverterUtil
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
    
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged");
+      ProtoBufferYoVariableHandshakeParser parser = new ProtoBufferYoVariableHandshakeParser("logged");
       parser.parseFrom(handshakeData);
       return parser;
    }

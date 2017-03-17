@@ -9,7 +9,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataLogger.logger.converters.LogFormatUpdater;
@@ -48,7 +48,7 @@ public class LogCrawler implements Runnable
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged");
+      ProtoBufferYoVariableHandshakeParser parser = new ProtoBufferYoVariableHandshakeParser("logged");
       parser.parseFrom(handshakeData);
       YoVariable<?>[] yoVariablesToUpdate = playbackListener.getYovariablesToUpdate(parser.getRootRegistry());
 

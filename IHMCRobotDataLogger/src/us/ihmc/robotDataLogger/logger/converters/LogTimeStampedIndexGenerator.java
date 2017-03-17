@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
@@ -30,7 +30,7 @@ public class LogTimeStampedIndexGenerator
       byte[] handshakeData = new byte[(int) handshake.length()];
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
-      int logLineLength = YoVariableHandshakeParser.getNumberOfVariables(handshakeData);
+      int logLineLength = ProtoBufferYoVariableHandshakeParser.getNumberOfVariables(handshakeData);
 
       File logdata = new File(logDirectory, logProperties.getVariableDataFile());
       if (!logdata.exists())
