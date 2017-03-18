@@ -328,7 +328,7 @@ public class RigidBodyControlManager
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
       inverseDynamicsCommandList.addCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
 
-      if (loadBearingControlState != null)
+      if (loadBearingControlState != null && !isLoadBearing())
          inverseDynamicsCommandList.addCommand(loadBearingControlState.getEmptyPlaneContactStateCommand());
 
       return inverseDynamicsCommandList;

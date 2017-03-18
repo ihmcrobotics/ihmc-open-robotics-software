@@ -75,6 +75,7 @@ public class YoContactPoint implements ContactPointInterface
    @Override
    public void setPosition(FramePoint position)
    {
+      position.changeFrame(yoPosition.getReferenceFrame());
       this.yoPosition.set(position);
    }
 

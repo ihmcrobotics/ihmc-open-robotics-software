@@ -33,10 +33,12 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final YoFrameVector contactNormal;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
+   private final RigidBody body;
 
    public RigidBodyLoadBearingControlState(RigidBody bodyToControl, RigidBody elevator, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
+      this.body = bodyToControl;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.elevatorFrame = elevator.getBodyFixedFrame();
 
@@ -49,7 +51,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       contactNormal = new YoFrameVector(bodyName + "ContactNormal", worldFrame, parentRegistry);
       contactPoint = new YoFramePoint(bodyName + "ContactPoint", bodyFrame, parentRegistry);
 
-      planeContactStateCommand.setContactingRigidBody(bodyToControl);
+      planeContactStateCommand.setContactingRigidBody(body);
+      planeContactStateCommand.setId(0L);
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -74,6 +77,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       planeContactStateCommand.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
       planeContactStateCommand.setContactNormal(contactNormal.getFrameTuple());
       planeContactStateCommand.addPointInContact(contactPoint.getFrameTuple());
+      planeContactStateCommand.setContactingRigidBody(body);
+      planeContactStateCommand.setId(1L);
 
       bodyAcceleration.setToZero(bodyFrame, elevatorFrame, bodyFrame);
       spatialAccelerationCommand.setSpatialAcceleration(bodyAcceleration);
@@ -87,7 +92,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public void doTransitionOutOfAction()
    {
-      contactNormal.setToNaN();
    }
 
    @Override
@@ -102,6 +106,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    public InverseDynamicsCommand<?> getEmptyPlaneContactStateCommand()
    {
       planeContactStateCommand.clearContactPoints();
+      planeContactStateCommand.setContactingRigidBody(body);
+      planeContactStateCommand.setId(0L);
+
       return planeContactStateCommand;
    }
 
