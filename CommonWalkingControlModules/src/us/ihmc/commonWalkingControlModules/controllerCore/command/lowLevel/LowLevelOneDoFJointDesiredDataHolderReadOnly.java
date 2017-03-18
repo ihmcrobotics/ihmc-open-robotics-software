@@ -14,6 +14,8 @@ public interface LowLevelOneDoFJointDesiredDataHolderReadOnly
 
    public abstract double getDesiredJointAcceleration(OneDoFJoint joint);
 
+   public abstract double getDesiredJointCurrent(OneDoFJoint joint);
+
    public abstract boolean pollResetJointIntegrators(OneDoFJoint joint);
 
    public abstract boolean peekResetJointIntegrators(OneDoFJoint joint);
@@ -29,6 +31,8 @@ public interface LowLevelOneDoFJointDesiredDataHolderReadOnly
    public abstract boolean hasDesiredVelocityForJoint(OneDoFJoint joint);
 
    public abstract boolean hasDesiredAcceleration(OneDoFJoint joint);
+
+   public abstract boolean hasDesiredCurrentForJoint(OneDoFJoint joint);
 
    public abstract OneDoFJoint getOneDoFJoint(int index);
 
