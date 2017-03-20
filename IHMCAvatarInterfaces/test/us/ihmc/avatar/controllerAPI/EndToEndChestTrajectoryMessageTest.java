@@ -581,6 +581,92 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
       assertNumberOfWaypoints(0, scs, chest);
    }
+   
+   @ContinuousIntegrationTest(estimatedDuration = 15.3)
+   @Test(timeout = 77000)
+   public void testQueueWithUsingDifferentTrajectoryFrameWithoutOverride() throws Exception
+   {
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      ThreadTools.sleep(1000);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames.updateFrames();
+      ReferenceFrame chestFrame = humanoidReferenceFrames.getChestFrame();
+      RigidBody chest = fullRobotModel.getChest();
+      
+      ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
+
+      double trajectoryTime = 1.0;
+      FrameOrientation lookStraightAhead = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), new Quaternion());
+      lookStraightAhead.changeFrame(ReferenceFrame.getWorldFrame());
+
+      Quaternion lookLeftQuat = new Quaternion();
+      lookLeftQuat.appendYawRotation(Math.PI / 8.0);
+      lookLeftQuat.appendPitchRotation(Math.PI / 16.0);
+      lookLeftQuat.appendRollRotation(-Math.PI / 16.0);
+      FrameOrientation lookLeft = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), lookLeftQuat);
+      lookLeft.changeFrame(ReferenceFrame.getWorldFrame());
+
+      Quaternion lookRightQuat = new Quaternion();
+      lookRightQuat.appendYawRotation(-Math.PI / 8.0);
+      lookRightQuat.appendPitchRotation(-Math.PI / 16.0);
+      lookRightQuat.appendRollRotation(Math.PI / 16.0);
+      FrameOrientation lookRight = new FrameOrientation(humanoidReferenceFrames.getPelvisZUpFrame(), lookRightQuat);
+      lookRight.changeFrame(ReferenceFrame.getWorldFrame());
+
+      ChestTrajectoryMessage lookStraightAheadMessage = new ChestTrajectoryMessage(trajectoryTime, lookStraightAhead.getQuaternion(), ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      lookStraightAheadMessage.setExecutionMode(ExecutionMode.OVERRIDE, -1);
+      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      assertNumberOfWaypoints(2, scs, chest); 
+      
+      ChestTrajectoryMessage lookRightMessage = new ChestTrajectoryMessage(trajectoryTime, lookRight.getQuaternion(), ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      lookRightMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      drcSimulationTestHelper.send(lookRightMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      assertNumberOfWaypoints(3, scs, chest); 
+      
+      ChestTrajectoryMessage LookLeftMessage = new ChestTrajectoryMessage(trajectoryTime, lookLeft.getQuaternion(), ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
+      LookLeftMessage.setExecutionMode(ExecutionMode.QUEUE, -1);
+      drcSimulationTestHelper.send(LookLeftMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      assertNumberOfWaypoints(4, scs, chest); 
+
+      ChestTrajectoryMessage LookLeftMessageWithChangeTrajFrame = new ChestTrajectoryMessage(trajectoryTime, lookLeft.getQuaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      LookLeftMessageWithChangeTrajFrame.setExecutionMode(ExecutionMode.QUEUE, -1);
+      drcSimulationTestHelper.send(LookLeftMessageWithChangeTrajFrame);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(0, scs, chest); 
+      
+      drcSimulationTestHelper.send(lookRightMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      assertNumberOfWaypoints(2, scs, chest); 
+      
+      drcSimulationTestHelper.send(LookLeftMessageWithChangeTrajFrame);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      
+      assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(chest.getName(), scs));
+      assertNumberOfWaypoints(0, scs, chest); 
+      
+      drcSimulationTestHelper.send(lookStraightAheadMessage);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      assertNumberOfWaypoints(2, scs, chest); 
+      
+      LookLeftMessageWithChangeTrajFrame.setExecutionMode(ExecutionMode.OVERRIDE, -1);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT() * 2.0));
+      drcSimulationTestHelper.send(LookLeftMessageWithChangeTrajFrame);
+      assertNumberOfWaypoints(2, scs, chest); 
+      
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0 * trajectoryTime + 1.0));
+   
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 16.8)
    @Test(timeout = 84000)
