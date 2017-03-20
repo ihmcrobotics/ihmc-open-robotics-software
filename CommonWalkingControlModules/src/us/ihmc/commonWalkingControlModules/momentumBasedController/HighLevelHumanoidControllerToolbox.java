@@ -82,6 +82,7 @@ public class HighLevelHumanoidControllerToolbox
    private final TwistCalculator twistCalculator;
 
    protected final SideDependentList<ContactableFoot> feet;
+   protected final List<ContactablePlaneBody> contactableBodies;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
 
@@ -153,7 +154,8 @@ public class HighLevelHumanoidControllerToolbox
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime,
          double gravityZ, double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, double controlDT,
-         ArrayList<Updatable> updatables, YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+         ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+         InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -191,6 +193,7 @@ public class HighLevelHumanoidControllerToolbox
 
       // Initialize the contactable bodies
       this.feet = feet;
+      this.contactableBodies = contactableBodies;
 
       RigidBody elevator = fullRobotModel.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
@@ -803,6 +806,14 @@ public class HighLevelHumanoidControllerToolbox
    public SideDependentList<ContactableFoot> getContactableFeet()
    {
       return feet;
+   }
+
+   public ContactablePlaneBody getContactableBody(RigidBody body)
+   {
+      for (ContactablePlaneBody contactableBody : contactableBodies)
+         if (contactableBody.getRigidBody().getName().equals(body.getName()))
+            return contactableBody;
+      return null;
    }
 
    public YoPlaneContactState getFootContactState(RobotSide robotSide)

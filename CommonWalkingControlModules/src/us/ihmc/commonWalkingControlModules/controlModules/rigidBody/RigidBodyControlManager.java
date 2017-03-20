@@ -14,6 +14,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
@@ -66,8 +68,8 @@ public class RigidBodyControlManager
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
-         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, boolean loadbearingPossible,
-         DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody,
+         DoubleYoVariable yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -88,8 +90,8 @@ public class RigidBodyControlManager
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
 
-      if (!positionControlHelper.hasPositionControlledJoints() && loadbearingPossible)
-         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, elevator, yoTime, registry);
+      if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
+         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, graphicsListRegistry, registry);
       else
          loadBearingControlState = null;
 
@@ -259,7 +261,7 @@ public class RigidBodyControlManager
 
       loadBearingControlState.setCoefficientOfFriction(command.getCoefficientOfFriction());
       loadBearingControlState.setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
-      loadBearingControlState.setContactPoint(command.getContactPointInBodyFrame());
+      loadBearingControlState.setContactFrame(command.getBodyFrameToContactFrame());
       requestState(loadBearingControlState.getStateEnum());
    }
 

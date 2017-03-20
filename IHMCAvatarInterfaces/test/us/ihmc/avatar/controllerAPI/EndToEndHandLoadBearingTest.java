@@ -10,8 +10,10 @@ import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -46,7 +48,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       String testName = getClass().getSimpleName();
       TestingEnvironment testingEnvironment = new TestingEnvironment();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(testingEnvironment, testName, selectedLocation, simulationTestingParameters, getRobotModel());
+      DRCRobotModel robotModel = getRobotModel();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(testingEnvironment, testName, selectedLocation, simulationTestingParameters, robotModel);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(0.2, -10.0, 1.0);
       drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(0.2, 0.0, 1.0);
 
@@ -62,23 +65,29 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
 
       Quaternion handOrientation = new Quaternion();
+      handOrientation.appendYawRotation(-Math.PI / 2.0);
       handOrientation.appendPitchRotation(Math.PI / 2.0);
 
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.5, 0.2, 0.6), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.6, 0.3, 0.625), handOrientation, new Vector3D(), new Vector3D());
       drcSimulationTestHelper.send(handTrajectoryMessage1);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.5, 0.2, 0.5), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.6, 0.3, 0.525), handOrientation, new Vector3D(), new Vector3D());
       drcSimulationTestHelper.send(handTrajectoryMessage2);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
 
       // Activate load bearing
+      RigidBodyTransform transformToContactFrame = new RigidBodyTransform();
+      transformToContactFrame.setTranslation(0.0, 0.09, 0.0);
+      transformToContactFrame.appendRollRotation(Math.PI);
+
       HandLoadBearingMessage loadBearingMessage = new HandLoadBearingMessage(RobotSide.LEFT);
       loadBearingMessage.setLoad(true);
       loadBearingMessage.setCoefficientOfFriction(0.8);
       loadBearingMessage.setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
+      loadBearingMessage.setBodyFrameToContactFrame(transformToContactFrame);
       drcSimulationTestHelper.send(loadBearingMessage);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
    }

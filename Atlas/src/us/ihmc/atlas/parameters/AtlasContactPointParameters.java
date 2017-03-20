@@ -5,6 +5,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
@@ -16,7 +17,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 public class AtlasContactPointParameters extends RobotContactPointParameters
 {
    private boolean handContactPointsHaveBeenCreated = false;
-   private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
    private final AtlasJointMap jointMap;
    private final AtlasRobotVersion atlasVersion;
 
@@ -77,18 +77,15 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyTransform handContactPointTransform = new RigidBodyTransform();
-
-         handContactPointTransform.setRotationRollAndZeroTranslation(robotSide.negateIfRightSide(Math.PI / 2.0));
-         handContactPointTransform.setTranslation(new Vector3D(0.0, robotSide.negateIfRightSide(0.13), robotSide.negateIfRightSide(0.01)));
-         handContactPointTransforms.put(robotSide, handContactPointTransform);
-
-         Point3D pointLocation = new Point3D();
-         handContactPointTransforms.get(robotSide).transform(pointLocation);
-         addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), pointLocation);
-
          String bodyName = jointMap.getHandName(robotSide);
-         contactableBodiesFactory.addAdditionalContactPoint(bodyName, bodyName + "Contact", pointLocation);
+         Point3D pointLocationInParentJoint = new Point3D(0.0, robotSide.negateIfRightSide(0.13), 0.0);
+
+         RigidBodyTransform transformToContactFrame = new RigidBodyTransform(new Quaternion(), pointLocationInParentJoint);
+         if (robotSide == RobotSide.LEFT)
+            transformToContactFrame.appendRollRotation(Math.PI);
+
+         addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), pointLocationInParentJoint);
+         contactableBodiesFactory.addAdditionalContactPoint(bodyName, bodyName + "Contact", transformToContactFrame);
       }
    }
 

@@ -1,12 +1,18 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import java.util.ArrayList;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -18,6 +24,8 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final long NO_CONTACT_ID = 0L;
+   private static final long IN_CONTACT_ID = 1L;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
@@ -33,14 +41,26 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final YoFrameVector contactNormal;
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
+   private final ReferenceFrame contactFrame;
    private final RigidBody body;
+   private final ContactablePlaneBody contactableBody;
 
-   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, RigidBody elevator, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+   private final RigidBodyTransform bodyToJointTransform = new RigidBodyTransform();
+   private final RigidBodyTransform contactToJointTransform = new RigidBodyTransform();
+
+   private final ArrayList<YoGraphic> graphics = new ArrayList<>();
+
+   public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, DoubleYoVariable yoTime,
+         YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.LOADBEARING, bodyToControl.getName(), yoTime, parentRegistry);
       this.body = bodyToControl;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
       this.elevatorFrame = elevator.getBodyFixedFrame();
+      this.contactFrame = contactableBody.getSoleFrame();
+      this.contactableBody = contactableBody;
+
+      body.getBodyFixedFrame().getTransformToDesiredFrame(bodyToJointTransform, body.getParentJoint().getFrameAfterJoint());
 
       bodyAcceleration = new SpatialAccelerationVector(bodyFrame, elevatorFrame, bodyFrame);
       spatialAccelerationCommand.set(elevator, bodyToControl);
@@ -49,10 +69,23 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       String bodyName = bodyToControl.getName();
       coefficientOfFriction = new DoubleYoVariable(bodyName + "CoefficientOfFriction", registry);
       contactNormal = new YoFrameVector(bodyName + "ContactNormal", worldFrame, parentRegistry);
-      contactPoint = new YoFramePoint(bodyName + "ContactPoint", bodyFrame, parentRegistry);
+      contactPoint = new YoFramePoint(bodyName + "ContactPoint", contactFrame, parentRegistry);
 
       planeContactStateCommand.setContactingRigidBody(body);
-      planeContactStateCommand.setId(0L);
+      planeContactStateCommand.setId(NO_CONTACT_ID);
+
+      setupViz(graphicsListRegistry);
+   }
+
+   private void setupViz(YoGraphicsListRegistry graphicsListRegistry)
+   {
+      if (graphicsListRegistry == null)
+         return;
+
+      String listName = getClass().getSimpleName();
+      YoGraphicReferenceFrame contactFrameViz = new YoGraphicReferenceFrame(contactFrame, registry, 0.1);
+      graphicsListRegistry.registerYoGraphic(listName, contactFrameViz);
+      graphics.add(contactFrameViz);
    }
 
    public void setCoefficientOfFriction(double coefficientOfFriction)
@@ -65,9 +98,12 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       contactNormal.set(contactNormalInWorldFrame);
    }
 
-   public void setContactPoint(Point3D contactPointInBodyFrame)
+   public void setContactFrame(RigidBodyTransform bodyToContactFrame)
    {
-      contactPoint.set(contactPointInBodyFrame);
+      contactToJointTransform.set(bodyToJointTransform);
+      contactToJointTransform.multiply(bodyToContactFrame);
+      contactableBody.setSoleFrameTransformFromParentJoint(contactToJointTransform);
+      contactPoint.setToZero();
    }
 
    @Override
@@ -78,10 +114,14 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       planeContactStateCommand.setContactNormal(contactNormal.getFrameTuple());
       planeContactStateCommand.addPointInContact(contactPoint.getFrameTuple());
       planeContactStateCommand.setContactingRigidBody(body);
-      planeContactStateCommand.setId(1L);
+      planeContactStateCommand.setId(IN_CONTACT_ID);
 
-      bodyAcceleration.setToZero(bodyFrame, elevatorFrame, bodyFrame);
+      bodyAcceleration.setToZero(contactFrame, elevatorFrame, contactFrame);
+      bodyAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFrame);
+      bodyAcceleration.changeFrameNoRelativeMotion(bodyFrame);
       spatialAccelerationCommand.setSpatialAcceleration(bodyAcceleration);
+
+      updateGraphics();
    }
 
    @Override
@@ -92,6 +132,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    @Override
    public void doTransitionOutOfAction()
    {
+      hideGraphics();
    }
 
    @Override
@@ -107,8 +148,9 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       planeContactStateCommand.clearContactPoints();
       planeContactStateCommand.setContactingRigidBody(body);
-      planeContactStateCommand.setId(0L);
+      planeContactStateCommand.setId(NO_CONTACT_ID);
 
+      updateGraphics();
       return planeContactStateCommand;
    }
 
@@ -130,6 +172,21 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       // this control mode does not support command queuing
       return 0.0;
+   }
+
+   private void updateGraphics()
+   {
+      for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
+      {
+         graphics.get(graphicsIdx).showGraphicObject();
+         graphics.get(graphicsIdx).update();
+      }
+   }
+
+   private void hideGraphics()
+   {
+      for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
+         graphics.get(graphicsIdx).hideGraphicObject();
    }
 
 }

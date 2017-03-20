@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.Command;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractLoadBearingMessage;
 
@@ -13,8 +13,8 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
    /** Sets the coefficient of friction that the controller will use for the contact point. */
    private double coefficientOfFriction = 0.0;
 
-   /** Sets the position of the contact point in the frame of the end effector body. */
-   private Point3D contactPointInBodyFrame = new Point3D();
+   /** Sets the transform of the contact frame in the frame of the end effector body. */
+   public RigidBodyTransform bodyFrameToContactFrame = new RigidBodyTransform();
 
    /** Sets the contact normal used by the controller to load the contact point. */
    private Vector3D contactNormalInWorldFrame = new Vector3D();
@@ -29,9 +29,9 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
       return coefficientOfFriction;
    }
 
-   public Point3D getContactPointInBodyFrame()
+   public RigidBodyTransform getBodyFrameToContactFrame()
    {
-      return contactPointInBodyFrame;
+      return bodyFrameToContactFrame;
    }
 
    public Vector3D getContactNormalInWorldFrame()
@@ -44,7 +44,7 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
    {
       load = other.getLoad();
       coefficientOfFriction = other.getCoefficientOfFriction();
-      contactPointInBodyFrame.set(other.getContactPointInBodyFrame());
+      bodyFrameToContactFrame.set(other.getBodyFrameToContactFrame());
       contactNormalInWorldFrame.set(other.getContactNormalInWorldFrame());
    }
 
@@ -53,7 +53,7 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
    {
       load = message.getLoad();
       coefficientOfFriction = message.getCoefficientOfFriction();
-      contactPointInBodyFrame.set(message.getContactPointInBodyFrame());
+      bodyFrameToContactFrame.set(message.getBodyFrameToContactFrame());
       contactNormalInWorldFrame.set(message.getContactNormalInWorldFrame());
    }
 
@@ -62,7 +62,7 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
    {
       load = false;
       coefficientOfFriction = 0.0;
-      contactPointInBodyFrame.setToZero();
+      bodyFrameToContactFrame.setToZero();
       contactNormalInWorldFrame.setToZero();
    }
 
@@ -71,7 +71,7 @@ public abstract class AbstractLoadBearingCommand <T extends AbstractLoadBearingC
    {
       if (coefficientOfFriction <= 0.0)
          return false;
-      if (contactPointInBodyFrame.containsNaN())
+      if (bodyFrameToContactFrame.containsNaN())
          return false;
       if (contactNormalInWorldFrame.containsNaN())
          return false;

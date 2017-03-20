@@ -253,7 +253,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       for (RobotSide robotSide : RobotSide.values)
          contactablePlaneBodies.add(feet.get(robotSide));
       contactablePlaneBodies.addAll(addidionalContacts);
-      managerFactory.setContactableBodies(contactablePlaneBodies);
 
       double gravityZ = Math.abs(gravity);
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
@@ -270,7 +269,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder,
-            wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
+            wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry,
+            jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)

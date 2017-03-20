@@ -5,8 +5,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -24,7 +24,7 @@ public class ContactableBodiesFactory
 
    private final ArrayList<String> rigidBodyNames = new ArrayList<>();
    private final ArrayList<String> contactNames = new ArrayList<>();
-   private final ArrayList<Point3D> contactPointsInBodyFrame = new ArrayList<>();
+   private final ArrayList<RigidBodyTransform> contactPointFrameTransforms = new ArrayList<>();
 
    public void addFootContactParameters(SideDependentList<? extends List<Point2D>> footContactPoints, SideDependentList<? extends Point2D> toeContactPoints)
    {
@@ -52,7 +52,7 @@ public class ContactableBodiesFactory
       return footContactableBodies;
    }
 
-   public void addAdditionalContactPoint(String bodyName, String contactName, Point3D contactPointInBodyFrame)
+   public void addAdditionalContactPoint(String bodyName, String contactName, RigidBodyTransform transformFromParentLinkToPoint)
    {
       // TODO: fix this.
       if (rigidBodyNames.contains(bodyName))
@@ -60,7 +60,7 @@ public class ContactableBodiesFactory
 
       rigidBodyNames.add(bodyName);
       contactNames.add(contactName);
-      contactPointsInBodyFrame.add(contactPointInBodyFrame);
+      contactPointFrameTransforms.add(transformFromParentLinkToPoint);
    }
 
    public List<ContactablePlaneBody> createAdditionalContactPoints(FullHumanoidRobotModel fullRobotModel)
@@ -72,7 +72,7 @@ public class ContactableBodiesFactory
       {
          String bodyName = rigidBodyNames.get(pointIdx);
          String contactName = contactNames.get(pointIdx);
-         Point3D contactPointInBodyFrame = contactPointsInBodyFrame.get(pointIdx);
+         RigidBodyTransform contactPointInBodyFrame = contactPointFrameTransforms.get(pointIdx);
 
          RigidBody[] rigidBodies = ScrewTools.findRigidBodiesWithNames(bodies, bodyName);
 
