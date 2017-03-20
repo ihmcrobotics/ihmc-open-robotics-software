@@ -31,7 +31,7 @@ public class View3DFactory
    public enum SceneType
    {
       MAIN_SCENE, SUB_SCENE
-   };
+   }
 
    private final Group root = new Group();
    private final Scene scene;
