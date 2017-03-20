@@ -169,7 +169,7 @@ public class BalanceManager
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
-      dynamicReachabilityValidator = new DynamicReachabilityValidator(icpPlanner, fullRobotModel, centerOfMassFrame, registry);
+      dynamicReachabilityValidator = new DynamicReachabilityValidator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -266,6 +266,7 @@ public class BalanceManager
    public void setNextFootstep(Footstep nextFootstep)
    {
       momentumRecoveryControlModule.setNextFootstep(nextFootstep);
+      dynamicReachabilityValidator.setUpcomingFootstep(nextFootstep);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -477,6 +478,8 @@ public class BalanceManager
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+
+      dynamicReachabilityValidator.checkReachabilityOfStep();
    }
 
    public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
