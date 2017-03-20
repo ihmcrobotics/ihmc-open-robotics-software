@@ -10,28 +10,27 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPacket;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder.Shape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SphereDetectionBehavior extends AbstractBehavior
 {
@@ -55,7 +54,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
    private final HumanoidReferenceFrames humanoidReferenceFrames;
 
    // temp vars
-   private final Point3d chestPosition = new Point3d();
+   private final Point3D chestPosition = new Point3D();
 
    public SphereDetectionBehavior(CommunicationBridgeInterface outgoingCommunicationBridge, HumanoidReferenceFrames referenceFrames)
    {
@@ -81,9 +80,9 @@ public class SphereDetectionBehavior extends AbstractBehavior
       return ballRadius.getValueAsDouble();
    }
 
-   public Point3d getBallLocation()
+   public Point3D getBallLocation()
    {
-      return new Point3d(ballX.getDoubleValue(), ballY.getDoubleValue(), ballZ.getDoubleValue());
+      return new Point3D(ballX.getDoubleValue(), ballY.getDoubleValue(), ballZ.getDoubleValue());
    }
 
    @Override
@@ -95,7 +94,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       }
    }
 
-   protected void findBallsAndSaveResult(Point3f[] points)
+   protected void findBallsAndSaveResult(Point3D32[] points)
    {
       ArrayList<Sphere3D_F64> balls = detectBalls(points);
 
@@ -131,26 +130,26 @@ public class SphereDetectionBehavior extends AbstractBehavior
       PointCloudWorldPacket pointCloudWorldPacket = new PointCloudWorldPacket();
       pointCloudWorldPacket.setDestination(PacketDestination.UI);
       pointCloudWorldPacket.setTimestamp(System.nanoTime());
-      Point3d[] points3d = new Point3d[points.length];
+      Point3D[] points3d = new Point3D[points.length];
       for (int i = 0; i < points.length; i++)
       {
-         points3d[i] = new Point3d(points[i]);
+         points3d[i] = new Point3D(points[i]);
       }
       pointCloudWorldPacket.setDecayingWorldScan(points3d);
-      Point3d[] groundQuadTree = new Point3d[1];
-      groundQuadTree[0] = new Point3d();
+      Point3D[] groundQuadTree = new Point3D[1];
+      groundQuadTree[0] = new Point3D();
       pointCloudWorldPacket.setGroundQuadTreeSupport(groundQuadTree);
 
       sendPacket(pointCloudWorldPacket);
    }
 
-   public ArrayList<Sphere3D_F64> detectBalls(Point3f[] fullPoints)
+   public ArrayList<Sphere3D_F64> detectBalls(Point3D32[] fullPoints)
    {
 
       ArrayList<Sphere3D_F64> foundBalls = new ArrayList<Sphere3D_F64>();
       // filter points
       ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
-      for (Point3f tmpPoint : fullPoints)
+      for (Point3D32 tmpPoint : fullPoints)
       {
          pointsNearBy.add(new Point3D_F64(tmpPoint.getX(), tmpPoint.getY(), tmpPoint.getZ()));
       }

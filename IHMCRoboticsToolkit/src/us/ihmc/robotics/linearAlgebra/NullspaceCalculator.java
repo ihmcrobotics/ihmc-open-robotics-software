@@ -5,6 +5,7 @@ import org.ejml.factory.DecompositionFactory;
 import org.ejml.interfaces.decomposition.SingularValueDecomposition;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.SingularOps;
+
 import us.ihmc.robotics.MathTools;
 
 public class NullspaceCalculator
@@ -24,7 +25,7 @@ public class NullspaceCalculator
 
    public NullspaceCalculator(int matrixSize, boolean makeLargestComponentPositive)
    {
-      MathTools.checkIfInRange(matrixSize, 1, Integer.MAX_VALUE);
+      MathTools.checkIntervalContains(matrixSize, 1, Integer.MAX_VALUE);
 
       iMinusNNT = new DenseMatrix64F(matrixSize, matrixSize);
       double singularValueLimit = 0.5; // because the singular values of I - N * N^T will be either 0 or 1.

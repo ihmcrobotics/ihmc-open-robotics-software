@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.bambooTools;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -11,8 +11,8 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 
 public class BambooToolsTest
 {

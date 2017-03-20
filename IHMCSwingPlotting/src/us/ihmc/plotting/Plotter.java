@@ -1,11 +1,13 @@
 package us.ihmc.plotting;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.Toolkit;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -19,10 +21,12 @@ import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
 
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
 import us.ihmc.graphicsDescription.plotting.PlotterColors;
@@ -39,10 +43,8 @@ import us.ihmc.graphicsDescription.plotting.frames.PlotterSpaceConverter;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.PlotterInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * TODO Deprecate archaic methods
@@ -65,6 +67,8 @@ public class Plotter implements PlotterInterface
    private boolean xyZoomEnabled = ENABLE_XY_ZOOM_BY_DEFAULT;
    private boolean rotationEnabled = ENABLE_ROTATION_BY_DEFAULT;
    
+   private final PlotterColors plotterColors;
+   
    private final JPanel panel;
    
    private final PlotterMouseAdapter mouseAdapter;
@@ -72,8 +76,10 @@ public class Plotter implements PlotterInterface
    
    private final Plotter2DAdapter plotter2dAdapter;
    private final Graphics2DAdapter graphics2dAdapter;
+   private final Stroke normalStroke;
+   private final Stroke dashedStroke;
    
-   private final Vector2d metersToPixels = new Vector2d(50.0, 50.0);
+   private final Vector2D metersToPixels = new Vector2D(50.0, 50.0);
    private final Rectangle visibleRectangle = new Rectangle();
    private final Dimension preferredSize = new Dimension(500, 500);
    private final PlotterVector2d gridSize;
@@ -85,7 +91,7 @@ public class Plotter implements PlotterInterface
    private final MetersReferenceFrame metersFrame;
    
    private double screenRotation = 0.0;
-   private final Vector3d tempTranslation = new Vector3d();
+   private final Vector3D tempTranslation = new Vector3D();
    private final Line2d tempGridLine = new Line2d();
    private final PlotterPoint2d screenPosition;
    private final PlotterPoint2d upperLeftCorner;
@@ -106,6 +112,13 @@ public class Plotter implements PlotterInterface
    
    public Plotter()
    {
+      this(PlotterColors.simulationConstructionSetStyle(), false);
+   }
+   
+   public Plotter(PlotterColors plotterColors, boolean highQuality)
+   {
+      this.plotterColors = plotterColors;
+      
       panel = new JPanel()
       {
          @Override
@@ -132,10 +145,10 @@ public class Plotter implements PlotterInterface
       
       spaceConverter = new PlotterSpaceConverter()
       {
-         private Vector2d scaleVector = new Vector2d();
+         private Vector2D scaleVector = new Vector2D();
          
          @Override
-         public Vector2d getConversionToSpace(PlotterFrameSpace plotterFrameType)
+         public Vector2D getConversionToSpace(PlotterFrameSpace plotterFrameType)
          {
             if (plotterFrameType == PlotterFrameSpace.METERS)
             {
@@ -160,15 +173,18 @@ public class Plotter implements PlotterInterface
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
+            //this fixes a threading issue. Generating garbage on purpose.
+            RigidBodyTransform tempTransform = new RigidBodyTransform();
             screenPosition.changeFrame(pixelsFrame);
-            transformToParent.setIdentity();
+            tempTransform.setIdentity();
             tempTranslation.set(screenPosition.getX() + getPlotterWidthPixels() / 2.0, screenPosition.getY() - getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.applyTranslation(tempTranslation);
-            transformToParent.applyRotationZ(screenRotation);
+            tempTransform.appendTranslation(tempTranslation);
+            tempTransform.appendYawRotation(screenRotation);
             tempTranslation.set(-getPlotterWidthPixels() / 2.0, getPlotterHeightPixels() / 2.0, 0.0);
-            transformToParent.applyTranslation(tempTranslation);
-            transformToParent.applyRotationY(Math.PI);
-            transformToParent.applyRotationZ(Math.PI);
+            tempTransform.appendTranslation(tempTranslation);
+            tempTransform.appendPitchRotation(Math.PI);
+            tempTransform.appendYawRotation(Math.PI);
+            transformToParent.set(tempTransform);
          }
       };
       metersFrame = new MetersReferenceFrame("metersFrame", ReferenceFrame.getWorldFrame(), spaceConverter)
@@ -198,11 +214,20 @@ public class Plotter implements PlotterInterface
       
       updateFrames();
       
+      normalStroke = new BasicStroke(1.0f);
+      if (highQuality)
+      {
+         dashedStroke = new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1.0f, new float[] {3.0f}, 0.0f);
+      }
+      else
+      {
+         dashedStroke = new BasicStroke(1.0f);
+      }
       plotter2dAdapter = new Plotter2DAdapter(metersFrame, screenFrame, pixelsFrame);
       graphics2dAdapter = new Graphics2DAdapter(plotter2dAdapter);
       
       panel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(), BorderFactory.createLoweredBevelBorder()));
-      panel.setBackground(PlotterColors.BACKGROUND);
+      panel.setBackground(plotterColors.getBackgroundColor());
       
       mouseAdapter = new PlotterMouseAdapter();
       componentAdapter = new PlotterComponentAdapter();
@@ -303,7 +328,7 @@ public class Plotter implements PlotterInterface
             {
                nthGridLineFromOrigin++;
             }
-            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+            applyParametersForGridline(graphics2d, nthGridLineFromOrigin);
    
             gridLinePencil.changeFrame(pixelsFrame);
             gridSize.changeFrame(pixelsFrame);
@@ -312,7 +337,7 @@ public class Plotter implements PlotterInterface
             
             if (showLabels)
             {
-               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               graphics2d.setColor(plotterColors.getLabelColor());
                gridLinePencil.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getX(), 2);
                gridLinePencil.changeFrame(pixelsFrame);
@@ -349,7 +374,7 @@ public class Plotter implements PlotterInterface
             {
                nthGridLineFromOrigin++;
             }
-            applyColorForGridline(graphics2d, nthGridLineFromOrigin);
+            applyParametersForGridline(graphics2d, nthGridLineFromOrigin);
    
             gridLinePencil.changeFrame(pixelsFrame);
             gridSize.changeFrame(pixelsFrame);
@@ -358,7 +383,7 @@ public class Plotter implements PlotterInterface
             
             if (showLabels)
             {
-               graphics2d.setColor(PlotterColors.LABEL_COLOR);
+               graphics2d.setColor(plotterColors.getLabelColor());
                gridLinePencil.changeFrame(metersFrame);
                String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getY(), 2);
                gridLinePencil.changeFrame(pixelsFrame);
@@ -384,7 +409,8 @@ public class Plotter implements PlotterInterface
       
       // paint grid centerline
       origin.changeFrame(pixelsFrame);
-      graphics2d.setColor(PlotterColors.GRID_AXIS);
+      graphics2d.setStroke(normalStroke);
+      graphics2d.setColor(plotterColors.getGridAxisColor());
       tempGridLine.set(origin.getX(), origin.getY(), 1.0, 0.0);
       graphics2d.drawLine(pixelsFrame, tempGridLine);
       tempGridLine.set(origin.getX(), origin.getY(), 0.0, 1.0);
@@ -424,7 +450,7 @@ public class Plotter implements PlotterInterface
       if (showSelection)
       {
          selected.changeFrame(screenFrame);
-         graphics2d.setColor(PlotterColors.SELECTION);
+         graphics2d.setColor(plotterColors.getSelectionColor());
          double crossSize = 8.0;
          graphics2d.drawLineSegment(screenFrame, selected.getX() - crossSize,
                                                  selected.getY() - crossSize,
@@ -439,7 +465,7 @@ public class Plotter implements PlotterInterface
       // paint selected area
       if (showSelection)
       {
-         graphics2d.setColor(PlotterColors.SELECTION);
+         graphics2d.setColor(plotterColors.getSelectionColor());
          double Xmin, Xmax, Ymin, Ymax;
          if (selectionAreaStart.getX() > selectionAreaEnd.getX())
          {
@@ -493,19 +519,22 @@ public class Plotter implements PlotterInterface
       return gridSizePixels;
    }
 
-   private void applyColorForGridline(final Plotter2DAdapter graphics2d, int nthGridLineFromOrigin)
+   private void applyParametersForGridline(final Plotter2DAdapter graphics2d, int nthGridLineFromOrigin)
    {
       if (nthGridLineFromOrigin % 10 == 0)
       {
-         graphics2d.setColor(PlotterColors.GRID_EVERY_10);
+         graphics2d.setStroke(normalStroke);
+         graphics2d.setColor(plotterColors.getGridEveryTenColor());
       }
       else if (nthGridLineFromOrigin % 5 == 0)
       {
-         graphics2d.setColor(PlotterColors.GRID_EVERY_5);
+         graphics2d.setStroke(dashedStroke);
+         graphics2d.setColor(plotterColors.getGridEveryFiveColor());
       }
       else
       {
-         graphics2d.setColor(PlotterColors.GRID_EVERY_1);
+         graphics2d.setStroke(dashedStroke);
+         graphics2d.setColor(plotterColors.getGridEveryOneColor());
       }
    }
    
@@ -695,6 +724,16 @@ public class Plotter implements PlotterInterface
       setScale(getPlotterWidthPixels() / viewRangeInX, getPlotterHeightPixels() / viewRangeInY);
    }
    
+   public void setViewRangeX(double viewRangeInX)
+   {
+      setScale(getPlotterWidthPixels() / viewRangeInX, metersToPixels.getY());
+   }
+   
+   public void setViewRangeY(double viewRangeInY)
+   {
+      setScale(metersToPixels.getX(), getPlotterHeightPixels() / viewRangeInY);
+   }
+   
    public void setViewRange(double minimumViewRange)
    {
       double smallestDimension;
@@ -772,6 +811,16 @@ public class Plotter implements PlotterInterface
       {
          return metersToPixels.getY() * getPlotterHeightPixels();
       }
+   }
+
+   public double getViewRangeX()
+   {
+      return metersToPixels.getX() * getPlotterWidthPixels();
+   }
+
+   public double getViewRangeY()
+   {
+      return metersToPixels.getY() * getPlotterWidthPixels();
    }
 
    public void setDrawHistory(boolean drawHistory)
@@ -863,7 +912,7 @@ public class Plotter implements PlotterInterface
       return lineArtifact;
    }
 
-   public PointListArtifact createAndAddPointArtifact(String name, Point2d point, Color color)
+   public PointListArtifact createAndAddPointArtifact(String name, Point2D point, Color color)
    {
       PointListArtifact pointArtifact = new PointListArtifact(name, point);
       pointArtifact.setColor(color);

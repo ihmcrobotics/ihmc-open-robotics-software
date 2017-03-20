@@ -24,9 +24,9 @@ import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceSearchPanel;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.RegistrySelectedListener;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableSearchPanel;
-import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 
 public class YoVariableExplorerTabbedPane extends JTabbedPane implements RegistrySelectedListener
 {

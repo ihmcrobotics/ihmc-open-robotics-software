@@ -44,6 +44,8 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
 
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCRobotDescription")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")

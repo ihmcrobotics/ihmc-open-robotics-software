@@ -2,24 +2,23 @@ package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 
 /**
  * Created by agrabertilton on 2/12/15.
  */
 public class QuadTreeHeightMapGeneratorTools
 {
-   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution)
+   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2D testingRange, double resolution)
    {
       double heightThreshold = 0.002;
       return createHeightMap(inputHeightMap, testingRange, resolution, heightThreshold);
    }
 
-   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold)
+   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2D testingRange, double resolution, double heightThreshold)
    {
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
       int maxSameHeightPointsPerNode = 20;
@@ -30,7 +29,7 @@ public class QuadTreeHeightMapGeneratorTools
 
 
 
-   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public static QuadTreeForGroundHeightMap createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2D testingRange, double resolution, double heightThreshold,
                                double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
                                double maxAllowableXYDistanceForAPointToBeConsideredClose, int maxNodes)
    {
@@ -39,14 +38,14 @@ public class QuadTreeHeightMapGeneratorTools
       double minY = testingRange.getMinPoint().getY();
       double maxY = testingRange.getMaxPoint().getY();
 
-      ArrayList<Point3d> listOfPoints = new ArrayList<Point3d>();
+      ArrayList<Point3D> listOfPoints = new ArrayList<Point3D>();
 
       for (double x = minX; x < maxX; x = x + resolution)
       {
          for (double y = minY; y < maxY; y = y + resolution)
          {
             double z = inputHeightMap.heightAt(x, y, 0.0);
-            listOfPoints.add(new Point3d(x, y, z));
+            listOfPoints.add(new Point3D(x, y, z));
          }
       }
 
@@ -55,7 +54,7 @@ public class QuadTreeHeightMapGeneratorTools
    }
 
 
-   public static QuadTreeForGroundHeightMap createHeightMap(ArrayList<Point3d> listOfPoints, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public static QuadTreeForGroundHeightMap createHeightMap(ArrayList<Point3D> listOfPoints, BoundingBox2D testingRange, double resolution, double heightThreshold,
                                double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
                                double maxAllowableXYDistanceForAPointToBeConsideredClose, int maxNodes)
    {
@@ -71,7 +70,7 @@ public class QuadTreeHeightMapGeneratorTools
 
       QuadTreeForGroundHeightMap heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
 
-      for (Point3d point : listOfPoints)
+      for (Point3D point : listOfPoints)
       {
          heightMap.addPoint(point.getX(), point.getY(), point.getZ());
       }

@@ -1,19 +1,21 @@
 package us.ihmc.quadrupedRobotics.estimator;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -25,11 +27,7 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class GroundPlaneEstimatorTest
@@ -43,7 +41,6 @@ public class GroundPlaneEstimatorTest
    @After
    public void destroySimulationAndRecycleMemory()
    {
-      GlobalTimer.clearTimers();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
    
@@ -62,7 +59,7 @@ public class GroundPlaneEstimatorTest
       
       groundPlaneEstimator.compute(pointListA);
       groundPlaneEstimator.getPlane(plane3dA);
-      Vector3d normalA = plane3dA.getNormalCopy();
+      Vector3D normalA = plane3dA.getNormalCopy();
       
       List<FramePoint> pointListB = new ArrayList<FramePoint>();
       Plane3d plane3dB = new Plane3d();
@@ -73,7 +70,7 @@ public class GroundPlaneEstimatorTest
       
       groundPlaneEstimator.compute(pointListB);
       groundPlaneEstimator.getPlane(plane3dB);
-      Vector3d normalB = plane3dB.getNormalCopy();
+      Vector3D normalB = plane3dB.getNormalCopy();
       
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }

@@ -1,7 +1,7 @@
 <GraphGroup>
 	<Cols>1</Cols>
 	<Graph>
-		<Variables>root.BaseRobot.t</Variables>
+		<Variables>root.GroundAsABoxRobot.t</Variables>
 		<GraphConfiguration>
 			<Name>config1</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -12,8 +12,50 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
+	<Graph>
+		<Variables></Variables>
+		<GraphConfiguration>
+			<Name>config2</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.RandomRobot4.qd_object4_wz</Variables>
+		<GraphConfiguration>
+			<Name>config3</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.RandomRobot4.qd_object4_wx</Variables>
+		<GraphConfiguration>
+			<Name>config4</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
 </GraphGroup>
 <Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes>root.HybridImpulseSpringDamperCollisionHandler.kpCollision,root.HybridImpulseSpringDamperCollisionHandler.kdCollision,root.HybridImpulseSpringDamperCollisionHandler.kdRotationalDamping,root.HybridImpulseSpringDamperCollisionHandler.rotationalCoefficientOfFrictionBeta,root.HybridImpulseSpringDamperCollisionHandler.coefficientOfFriction,root.HybridImpulseSpringDamperCollisionHandler.coefficientOfRestitution</Entry Boxes>
+</EntryBoxTab>
 </Entry Boxes Tab Pane>
 
 <Number of ViewPorts>1</Number of ViewPorts>
@@ -31,9 +73,9 @@
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>0.491276055899441</Camera X>
- <Camera Y>-2.3150148410252966</Camera Y>
- <Camera Z>0.7019325892863304</Camera Z>
+ <Camera X>2.5130695205445672</Camera X>
+ <Camera Y>0.3225793801129957</Camera Y>
+ <Camera Z>0.7458567119945109</Camera Z>
  <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
@@ -57,8 +99,8 @@
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>0.3299074593633562</Fix X>
-<Fix Y>0.4358567545130012</Fix Y>
-<Fix Z>0.09875155553843618</Fix Z>
+<Fix X>1.4719305038452148</Fix X>
+<Fix Y>-0.5331234931945801</Fix Y>
+<Fix Z>0.3520021438598633</Fix Z>
 </Fix Position>
 </Canvas 1>

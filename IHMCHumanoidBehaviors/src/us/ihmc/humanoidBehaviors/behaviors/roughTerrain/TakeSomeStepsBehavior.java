@@ -1,10 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.roughTerrain;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.SimpleFootstep;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -26,7 +25,7 @@ import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.YoTimer;
+import us.ihmc.robotics.time.YoStopwatch;
 
 public class TakeSomeStepsBehavior extends AbstractBehavior
 {
@@ -56,9 +55,9 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private final FramePose rightFootPose = new FramePose();
    private final FramePose tempStanceFootPose = new FramePose();
    private final FramePose tempFirstFootstepPose = new FramePose();
-   private final Point3d tempFootstepPosePosition = new Point3d();
-   private final Quat4d tempFirstFootstepPoseOrientation = new Quat4d();
-   private final YoTimer footstepSentTimer;
+   private final Point3D tempFootstepPosePosition = new Point3D();
+   private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
+   private final YoStopwatch footstepSentTimer;
 
    public TakeSomeStepsBehavior(DoubleYoVariable yoTime, CommunicationBridge behaviorCommunicationBridge, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames)
    {
@@ -74,7 +73,7 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
       currentlySwingingFoot = new EnumYoVariable<>("currentlySwingingFoot", registry, RobotSide.class, true);
 
-      footstepSentTimer = new YoTimer(yoTime);
+      footstepSentTimer = new YoStopwatch(yoTime);
       footstepSentTimer.start();
 
       footstepPlannerGoalPose = new YoFramePose(prefix + "FootstepGoalPose", ReferenceFrame.getWorldFrame(), registry);
@@ -191,14 +190,14 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
          FootstepStatus status = latestFootstepStatus.get(side);
          if (status != null)
          {
-            Point3d desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();
-            Quat4d desiredFootOrientationInWorld = status.getDesiredFootOrientationInWorld();
+            Point3D desiredFootPositionInWorld = status.getDesiredFootPositionInWorld();
+            Quaternion desiredFootOrientationInWorld = status.getDesiredFootOrientationInWorld();
 
             desiredFootStatusPoses.get(side).setPosition(desiredFootPositionInWorld);
             desiredFootStatusPoses.get(side).setOrientation(desiredFootOrientationInWorld);
 
-            Point3d actualFootPositionInWorld = status.getActualFootPositionInWorld();
-            Quat4d actualFootOrientationInWorld = status.getActualFootOrientationInWorld();
+            Point3D actualFootPositionInWorld = status.getActualFootPositionInWorld();
+            Quaternion actualFootOrientationInWorld = status.getActualFootOrientationInWorld();
 
             actualFootStatusPoses.get(side).setPosition(actualFootPositionInWorld);
             actualFootStatusPoses.get(side).setOrientation(actualFootOrientationInWorld);
@@ -219,8 +218,8 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
    private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int maxNumberOfStepsToTake)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      footstepDataListMessage.setDefaultSwingTime(0.5);
-      footstepDataListMessage.setDefaultTransferTime(0.1);
+      footstepDataListMessage.setDefaultSwingDuration(0.5);
+      footstepDataListMessage.setDefaultTransferDuration(0.1);
       int lastStepIndex = Math.min(maxNumberOfStepsToTake + 1, plan.getNumberOfSteps());
       for (int i = 1; i < lastStepIndex; i++)
       {
@@ -231,8 +230,8 @@ public class TakeSomeStepsBehavior extends AbstractBehavior
 
          //         sendTextToSpeechPacket("Sending footstep " + footstep.getRobotSide() + " " + tempFootstepPosePosition + " " + tempFirstFootstepPoseOrientation);
 
-         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3d(tempFootstepPosePosition),
-               new Quat4d(tempFirstFootstepPoseOrientation));
+         FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition),
+               new Quaternion(tempFirstFootstepPoseOrientation));
          firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          footstepDataListMessage.add(firstFootstepMessage);

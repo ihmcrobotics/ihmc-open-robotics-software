@@ -24,7 +24,7 @@
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-          <w>1.0</w>
+          <s>1.0</s>
         </orientation>
         <predictedContactPoints>
           <javax.vecmath.Point2d>
@@ -61,7 +61,7 @@
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-          <w>1.0</w>
+          <s>1.0</s>
         </orientation>
         <predictedContactPoints>
           <javax.vecmath.Point2d>
@@ -98,7 +98,7 @@
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-          <w>1.0</w>
+          <s>1.0</s>
         </orientation>
         <predictedContactPoints>
           <javax.vecmath.Point2d>
@@ -135,7 +135,7 @@
           <x>0.0</x>
           <y>0.0</y>
           <z>0.0</z>
-          <w>1.0</w>
+          <s>1.0</s>
         </orientation>
         <predictedContactPoints>
           <javax.vecmath.Point2d>

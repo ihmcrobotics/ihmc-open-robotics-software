@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.util.ground.RepeatingHeightMap;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.simulationconstructionset.util.ground.RepeatingHeightMap;
 
 public class RepeatingGroundProfile implements GroundProfile3D
 {
@@ -16,7 +15,7 @@ public class RepeatingGroundProfile implements GroundProfile3D
    private final GroundProfile3D groundProfile;
    private final RepeatingHeightMap heightMap;
 
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    public RepeatingGroundProfile(GroundProfile3D groundProfile, double xMin, double xMax, double yMin, double yMax)
    {
@@ -31,9 +30,9 @@ public class RepeatingGroundProfile implements GroundProfile3D
 
       this.groundProfile = groundProfile;
 
-      double zMin = groundProfile.getBoundingBox().getZMin();
-      double zMax = groundProfile.getBoundingBox().getZMax();
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      double zMin = groundProfile.getBoundingBox().getMinZ();
+      double zMax = groundProfile.getBoundingBox().getMaxZ();
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
 
       this.heightMap = new RepeatingHeightMap(groundProfile.getHeightMapIfAvailable(), xMin, xMax, yMin, yMax);
    }
@@ -55,13 +54,13 @@ public class RepeatingGroundProfile implements GroundProfile3D
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       double localX = xLocal(x);
       double localY = yLocal(y);

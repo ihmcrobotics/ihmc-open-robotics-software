@@ -1,15 +1,13 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
  * <p>Title: </p>
@@ -49,7 +47,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!endPoint.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
       }
    }
 
@@ -91,7 +89,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
       //    computeRotationTranslation();
    }
 
-   protected void computeRotationTranslation(Transform3d transform3D)
+   protected void computeRotationTranslation(AffineTransform transform3D)
    {
       if (vectorX == null)
       {
@@ -123,7 +121,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
       return new double[] { scaleFactor };
    }
 
-   public void setStartAndEnd(Point3d startPoint, Point3d endPoint)
+   public void setStartAndEnd(Point3D startPoint, Point3D endPoint)
    {
       this.startX.set(startPoint.getX());
       this.startY.set(startPoint.getY());

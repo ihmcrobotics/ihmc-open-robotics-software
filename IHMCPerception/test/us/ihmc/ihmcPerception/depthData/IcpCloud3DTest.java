@@ -1,5 +1,16 @@
 package us.ihmc.ihmcPerception.depthData;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.ddogleg.nn.FactoryNearestNeighbor;
+import org.ddogleg.nn.NearestNeighbor;
+import org.junit.Test;
+
 import georegression.fitting.MotionTransformPoint;
 import georegression.fitting.se.MotionSe3PointSVD_F64;
 import georegression.geometry.ConvertRotation3D_F64;
@@ -7,17 +18,7 @@ import georegression.struct.EulerType;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.se.Se3_F64;
 import georegression.transform.se.SePointOps_F64;
-import org.ddogleg.nn.FactoryNearestNeighbor;
-import org.ddogleg.nn.NearestNeighbor;
-import org.junit.Test;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 /**
  * @author Peter Abeles

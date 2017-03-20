@@ -1,14 +1,15 @@
 package us.ihmc.avatar.ros;
 
-import org.reflections.Reflections;
-import us.ihmc.communication.ros.generators.RosCustomGenerator;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.utilities.ros.ROSMessageFileCreator;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.reflections.Reflections;
+
+import us.ihmc.communication.ros.generators.RosCustomGenerator;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.utilities.ros.ROSMessageFileCreator;
 
 public class DRCROSMessageGenerator
 {

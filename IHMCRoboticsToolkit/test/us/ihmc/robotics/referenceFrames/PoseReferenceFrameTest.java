@@ -1,16 +1,18 @@
 package us.ihmc.robotics.referenceFrames;
 
-import org.junit.Test;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import javax.vecmath.Point3d;
-import java.util.Random;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Random;
+
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 
 public class PoseReferenceFrameTest
 {
@@ -105,7 +107,7 @@ public class PoseReferenceFrameTest
       
       PoseReferenceFrame[] referenceFrames = new PoseReferenceFrame[]{poseFrame0, poseFrame00, poseFrame01, poseFrame010, poseFrame000, poseFrame001, poseFrame1, poseFrame10, poseFrame100, poseFrame101};
       
-      Point3d position = new Point3d(1.0, 2.2, 3.4);
+      Point3D position = new Point3D(1.0, 2.2, 3.4);
       FramePoint framePoint = new FramePoint(poseFrame010, position);
       
       updateAllFrames(referenceFrames);
@@ -141,7 +143,7 @@ public class PoseReferenceFrameTest
    
    private void doRandomPoseChangeAndUpdate(PoseReferenceFrame poseReferenceFrame, Random random)
    {
-      RigidBodyTransform transform = RigidBodyTransform.generateRandomTransform(random);
+      RigidBodyTransform transform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       FramePose framePose = new FramePose(poseReferenceFrame.getParent(), transform);
       poseReferenceFrame.setPoseAndUpdate(framePose);
    }

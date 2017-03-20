@@ -1,13 +1,17 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -25,7 +29,7 @@ public class CenterOfPressureVisualizer
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final Map<RigidBody, YoFramePoint> footRawCoPPositionsInWorld = new HashMap();
+   private final Map<RigidBody, YoFramePoint> footRawCoPPositionsInWorld = new HashMap<>();
    private final YoFramePoint overallRawCoPPositionInWorld;
    private final FramePoint2d tempRawCoP2d = new FramePoint2d();
    private final FramePoint tempRawCoP = new FramePoint();
@@ -48,16 +52,16 @@ public class CenterOfPressureVisualizer
          YoFramePoint rawCoPPositionInWorld = new YoFramePoint("raw" + rigidBodyName + "CoPPositionsInWorld", worldFrame, registry);
          footRawCoPPositionsInWorld.put(rigidBody, rawCoPPositionInWorld);
 
-         YoGraphicPosition copDynamicGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
-         YoArtifactPosition copArtifact = copDynamicGraphic.createArtifact();
+         YoGraphicPosition copYoGraphic = new YoGraphicPosition("Meas " + rigidBodyName + "CoP", rawCoPPositionInWorld, 0.008, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+         YoArtifactPosition copArtifact = copYoGraphic.createArtifact();
          yoGraphicsListRegistry.registerArtifact("StateEstimator", copArtifact);
 
          footList.add(rigidBody);
       }
 
       overallRawCoPPositionInWorld = new YoFramePoint("overallRawCoPPositionInWorld", worldFrame, registry);
-      YoGraphicPosition overallRawCoPDynamicGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
-      YoArtifactPosition overallRawCoPArtifact = overallRawCoPDynamicGraphic.createArtifact();
+      YoGraphicPosition overallRawCoPYoGraphic = new YoGraphicPosition("Meas CoP", overallRawCoPPositionInWorld, 0.015, YoAppearance.DarkRed(), GraphicType.DIAMOND);
+      YoArtifactPosition overallRawCoPArtifact = overallRawCoPYoGraphic.createArtifact();
       overallRawCoPArtifact.setVisible(false);
       yoGraphicsListRegistry.registerArtifact("StateEstimator", overallRawCoPArtifact);
 

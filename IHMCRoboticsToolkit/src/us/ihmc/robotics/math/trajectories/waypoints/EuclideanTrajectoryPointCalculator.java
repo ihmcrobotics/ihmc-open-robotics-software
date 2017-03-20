@@ -2,12 +2,11 @@ package us.ihmc.robotics.math.trajectories.waypoints;
 
 import java.util.EnumMap;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.StringUtils;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.Direction;
@@ -68,7 +67,7 @@ public class EuclideanTrajectoryPointCalculator
       trajectoryPoints.add().set(trajectoryPoint);
    }
 
-   public void appendTrajectoryPoint(Point3d position)
+   public void appendTrajectoryPoint(Point3D position)
    {
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = trajectoryPoints.add();
       newTrajectoryPoint.setToZero(referenceFrame);
@@ -77,7 +76,7 @@ public class EuclideanTrajectoryPointCalculator
       newTrajectoryPoint.setLinearVelocityToNaN();
    }
 
-   public void appendTrajectoryPoint(double time, Point3d position)
+   public void appendTrajectoryPoint(double time, Point3D position)
    {
       FrameEuclideanTrajectoryPoint newTrajectoryPoint = trajectoryPoints.add();
       newTrajectoryPoint.setToZero(referenceFrame);
@@ -86,15 +85,15 @@ public class EuclideanTrajectoryPointCalculator
       newTrajectoryPoint.setLinearVelocityToNaN();
    }
 
-   public void appendTrajectoryPoint(double time, Point3d position, Vector3d linearVelocity)
+   public void appendTrajectoryPoint(double time, Point3D position, Vector3D linearVelocity)
    {
       trajectoryPoints.add().setIncludingFrame(referenceFrame, time, position, linearVelocity);
    }
 
    public void enableWeightMethod(double maxWeight, double minWeight)
    {
-      MathTools.checkIfInRange(minWeight, 1.0-3, 100.0);
-      MathTools.checkIfInRange(maxWeight, 1.0-3, 100.0);
+      MathTools.checkIntervalContains(minWeight, 1.0-3, 100.0);
+      MathTools.checkIntervalContains(maxWeight, 1.0-3, 100.0);
 
       this.useWeightMethod = true;
       double weightRatio = maxWeight / minWeight;

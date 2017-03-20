@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point2d;
-
 import org.junit.Assert;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ConvexPolygonToolsTest
 {
@@ -226,7 +226,7 @@ public class ConvexPolygonToolsTest
          {
             double x = random.nextDouble();
             double y = random.nextDouble();
-            polygon.addVertex(new Point2d(x, y));
+            polygon.addVertex(new Point2D(x, y));
          }
          polygon.update();
 
@@ -463,8 +463,8 @@ public class ConvexPolygonToolsTest
 
       ConvexPolygon2d polygon1 = getPolygon(p1);
       ConvexPolygon2d polygon2 = getPolygon(p2);
-      Point2d[] closestPoints = ConvexPolygonTools.computeMinimumDistancePoints(polygon1, polygon2);
-      Point2d[] closestPointsReversed = ConvexPolygonTools.computeMinimumDistancePoints(polygon2, polygon1);
+      Point2DReadOnly[] closestPoints = ConvexPolygonTools.computeMinimumDistancePoints(polygon1, polygon2);
+      Point2DReadOnly[] closestPointsReversed = ConvexPolygonTools.computeMinimumDistancePoints(polygon2, polygon1);
       assertEquals(closestPoints[0].distance(closestPoints[1]), closestPointsReversed[0].distance(closestPointsReversed[1]), epsilon);
       assertEquals(expectedSolution[0], closestPoints[0].getX(), epsilon);
       assertEquals(expectedSolution[1], closestPoints[0].getY(), epsilon);
@@ -479,10 +479,10 @@ public class ConvexPolygonToolsTest
          throw new RuntimeException("Invalid input.");
       }
 
-      List<Point2d> list = new ArrayList<Point2d>();
+      List<Point2D> list = new ArrayList<Point2D>();
       for (int i = 0; i < polygon.length; i += 2)
       {
-         list.add(new Point2d(polygon[i], polygon[i + 1]));
+         list.add(new Point2D(polygon[i], polygon[i + 1]));
       }
 
       return new ConvexPolygon2d(list);

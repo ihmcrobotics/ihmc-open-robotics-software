@@ -1,9 +1,8 @@
 package us.ihmc.simulationconstructionset.util;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class StepDownsGroundprofile extends GroundProfileFromHeightMap
@@ -11,7 +10,7 @@ public class StepDownsGroundprofile extends GroundProfileFromHeightMap
    private static final double xMinDefault = -20.0, xMaxDefault = 20.0, yMinDefault = -20.0, yMaxDefault = 20.0;
    private static final double amplitudeDefault = 0.1, frequencyDefault = 0.3, offsetDefault = 0.0, heightOffsetDefault = 0.0;
 
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    private final double amplitude, frequency, offset, heightOffset;
 
@@ -39,11 +38,11 @@ public class StepDownsGroundprofile extends GroundProfileFromHeightMap
       
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Double.POSITIVE_INFINITY;
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -56,7 +55,7 @@ public class StepDownsGroundprofile extends GroundProfileFromHeightMap
    {
       double height = heightOffset;
 
-      if (boundingBox.isXYInside(x, y))
+      if (boundingBox.isXYInsideInclusive(x, y))
          height = amplitude * Math.sin(2.0 * Math.PI * frequency * (x + offset));
 
       if (height > amplitude * 0.8)
@@ -70,7 +69,7 @@ public class StepDownsGroundprofile extends GroundProfileFromHeightMap
    }
 
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       double dzdx = 0.0;
       normal.setX(-dzdx);
@@ -81,7 +80,7 @@ public class StepDownsGroundprofile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

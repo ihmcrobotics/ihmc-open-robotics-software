@@ -3,53 +3,52 @@ package us.ihmc.communication.packets;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point2f;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class PlanarRegionMessageConverter
 {
    public static PlanarRegionMessage convertToPlanarRegionMessage(PlanarRegion planarRegion)
    {
       int regionId = planarRegion.getRegionId();
-      Point3f regionOrigin = new Point3f();
-      Vector3f regionNormal = new Vector3f();
+      Point3D32 regionOrigin = new Point3D32();
+      Vector3D32 regionNormal = new Vector3D32();
 
       planarRegion.getPointInRegion(regionOrigin);
       planarRegion.getNormal(regionNormal);
 
-      List<Point2f[]> concaveHullsVertices = new ArrayList<>();
+      List<Point2D32[]> concaveHullsVertices = new ArrayList<>();
 
       for (int hullIndex = 0; hullIndex < planarRegion.getNumberOfConcaveHulls(); hullIndex++)
       {
-         Point2d[] hullVertices = planarRegion.getConcaveHull(hullIndex);
-         Point2f[] messageHullVertices = new Point2f[hullVertices.length];
+         Point2D[] hullVertices = planarRegion.getConcaveHull(hullIndex);
+         Point2D32[] messageHullVertices = new Point2D32[hullVertices.length];
 
          for (int vertexIndex = 0; vertexIndex < hullVertices.length; vertexIndex++)
          {
-            messageHullVertices[vertexIndex] = new Point2f(hullVertices[vertexIndex]);
+            messageHullVertices[vertexIndex] = new Point2D32(hullVertices[vertexIndex]);
          }
          concaveHullsVertices.add(messageHullVertices);
       }
 
-      List<Point2f[]> convexPolygonsVertices = new ArrayList<>();
+      List<Point2D32[]> convexPolygonsVertices = new ArrayList<>();
 
       for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
       {
          ConvexPolygon2d convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
-         Point2f[] vertices = new Point2f[convexPolygon.getNumberOfVertices()];
+         Point2D32[] vertices = new Point2D32[convexPolygon.getNumberOfVertices()];
          for (int vertexIndex = 0; vertexIndex < convexPolygon.getNumberOfVertices(); vertexIndex++)
          {
-            vertices[vertexIndex] = new Point2f(convexPolygon.getVertex(vertexIndex));
+            vertices[vertexIndex] = new Point2D32(convexPolygon.getVertex(vertexIndex));
          }
          convexPolygonsVertices.add(vertices);
       }
@@ -63,26 +62,26 @@ public class PlanarRegionMessageConverter
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-      Vector3d regionOrigin = new Vector3d(planarRegionMessage.getRegionOrigin());
-      Vector3d regionNormal = new Vector3d(planarRegionMessage.getRegionNormal());
-      AxisAngle4d regionOrientation = GeometryTools.getAxisAngleFromZUpToVector(regionNormal);
+      Vector3D regionOrigin = new Vector3D(planarRegionMessage.getRegionOrigin());
+      Vector3D regionNormal = new Vector3D(planarRegionMessage.getRegionNormal());
+      AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(regionNormal);
       transformToWorld.set(regionOrientation, regionOrigin);
 
-      List<Point2f[]> messageHullsVertices = planarRegionMessage.getConcaveHullsVertices();
-      List<Point2d[]> concaveHullsVertices = new ArrayList<>();
+      List<Point2D32[]> messageHullsVertices = planarRegionMessage.getConcaveHullsVertices();
+      List<Point2D[]> concaveHullsVertices = new ArrayList<>();
       for (int hullIndex = 0; hullIndex < messageHullsVertices.size(); hullIndex++)
       {
-         Point2f[] messageHullVertices = messageHullsVertices.get(hullIndex);
-         Point2d[] hullVertices = new Point2d[messageHullVertices.length];
+         Point2D32[] messageHullVertices = messageHullsVertices.get(hullIndex);
+         Point2D[] hullVertices = new Point2D[messageHullVertices.length];
          for (int vertexIndex = 0; vertexIndex < messageHullVertices.length; vertexIndex++)
          {
-            hullVertices[vertexIndex] = new Point2d(messageHullVertices[vertexIndex]);
+            hullVertices[vertexIndex] = new Point2D(messageHullVertices[vertexIndex]);
          }
          concaveHullsVertices.add(hullVertices);
       }
 
       List<ConvexPolygon2d> planarRegionConvexPolygons = new ArrayList<>();
-      List<Point2f[]> convexPolygonsVertices = planarRegionMessage.getConvexPolygonsVertices();
+      List<Point2D32[]> convexPolygonsVertices = planarRegionMessage.getConvexPolygonsVertices();
       for (int polygonIndex = 0; polygonIndex < convexPolygonsVertices.size(); polygonIndex++)
       {
          ConvexPolygon2d convexPolygon = new ConvexPolygon2d(convexPolygonsVertices.get(polygonIndex));

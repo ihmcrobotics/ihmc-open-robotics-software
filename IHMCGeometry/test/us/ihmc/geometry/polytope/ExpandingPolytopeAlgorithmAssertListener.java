@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ExpandingPolytopeAlgorithmAssertListener implements ExpandingPolytopeAlgorithmListener
 {
@@ -21,7 +21,7 @@ public class ExpandingPolytopeAlgorithmAssertListener implements ExpandingPolyto
    }
 
    @Override
-   public void computedSupportingVertices(Point3d supportingVertexA, Point3d supportingVertexB, Vector3d w)
+   public void computedSupportingVertices(Point3D supportingVertexA, Point3D supportingVertexB, Vector3D w)
    {      
    }
 
@@ -36,7 +36,7 @@ public class ExpandingPolytopeAlgorithmAssertListener implements ExpandingPolyto
    }
 
    @Override
-   public void foundMinimumPenetrationVector(Vector3d minimumPenetrationVector, Point3d closestPointOnA, Point3d closestPointOnB)
+   public void foundMinimumPenetrationVector(Vector3D minimumPenetrationVector, Point3D closestPointOnA, Point3D closestPointOnB)
    {      
    }
 

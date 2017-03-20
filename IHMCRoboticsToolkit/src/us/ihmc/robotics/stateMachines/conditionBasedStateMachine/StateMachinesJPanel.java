@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import javax.swing.JPanel;
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector2d;
 
 import org.jgraph.JGraph;
 import org.jgraph.graph.DefaultCellViewFactory;
@@ -27,6 +25,9 @@ import org.jgraph.graph.GraphLayoutCache;
 
 import com.jgraph.layout.JGraphFacade;
 import com.jgraph.layout.tree.JGraphTreeLayout;
+
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 /**
  * <p>Title: SimulationConstructionSet</p>
@@ -191,7 +192,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
       return false;
    }
 
-   private DefaultGraphCell createCell(String name, Point2d placement, int index)
+   private DefaultGraphCell createCell(String name, Point2D placement, int index)
    {
 //      System.out.println(name + " " + placement + " " + index);
       stateCells[index] = new DefaultGraphCell(new String(name));
@@ -328,7 +329,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
 
             if (!doesCellAlreadyExist(state))
             {
-               stateCells[stateCellIndex] = createCell(state, new Point2d(0, 0), stateCellIndex);
+               stateCells[stateCellIndex] = createCell(state, new Point2D(0, 0), stateCellIndex);
                createArrow(indexOfStateInStateCells(parent), stateCellIndex);
                stateCellIndex++;
 
@@ -347,7 +348,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
 
                         if (!doesCellAlreadyExist(checkState.getStateEnum().toString()))
                         {
-                           stateCells[stateCellIndex] = createCell(checkState.getStateEnum().toString(), new Point2d(0, 0), stateCellIndex);
+                           stateCells[stateCellIndex] = createCell(checkState.getStateEnum().toString(), new Point2D(0, 0), stateCellIndex);
                            createArrow(stateCellIndex - 1, stateCellIndex);
                            stateCellIndex++;
                         }
@@ -361,7 +362,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
 
                         if (!doesCellAlreadyExist(checkState.getStateEnum().toString()))
                         {
-                           stateCells[stateCellIndex] = createCell(checkState.getStateEnum().toString(), new Point2d(0, 0), stateCellIndex);
+                           stateCells[stateCellIndex] = createCell(checkState.getStateEnum().toString(), new Point2D(0, 0), stateCellIndex);
                            createArrow(stateCellIndex - 1, stateCellIndex);
                            stateCellIndex++;
                         }
@@ -436,7 +437,7 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
 
       State<E> parent = getParentState();
 
-      stateCells[stateCellIndex] = createCell(parent.getStateEnum().toString(), new Point2d(0, 0), stateCellIndex);
+      stateCells[stateCellIndex] = createCell(parent.getStateEnum().toString(), new Point2D(0, 0), stateCellIndex);
       stateCellIndex++;
 
       createStateMachineDiagram(parent);
@@ -455,8 +456,8 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
       createArrowsForStateTransitions();
    }
 
-   private Point2d[] stateCenters;
-   private Vector2d tempVector2d = new Vector2d();
+   private Point2D[] stateCenters;
+   private Vector2D tempVector2d = new Vector2D();
 
    private Dimension dimension = new Dimension();
    final static BasicStroke wideStroke = new BasicStroke(3.0f);
@@ -465,11 +466,11 @@ public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements St
    {
       if (stateCenters == null)
       {
-         stateCenters = new Point2d[numberOfStates];
+         stateCenters = new Point2D[numberOfStates];
 
          for (int i = 0; i < numberOfStates; i++)
          {
-            stateCenters[i] = new Point2d();
+            stateCenters[i] = new Point2D();
          }
       }
 

@@ -34,12 +34,12 @@ import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.BookmarkedVariablesPanel;
-import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 import us.ihmc.simulationconstructionset.gui.DoubleClickListener;
 import us.ihmc.simulationconstructionset.gui.EntryBoxArrayTabbedPanel;
 import us.ihmc.simulationconstructionset.gui.GraphArrayPanel;
 import us.ihmc.simulationconstructionset.gui.RegularExpression;
 import us.ihmc.simulationconstructionset.gui.YoEntryBox;
+import us.ihmc.simulationconstructionset.gui.YoVariableExplorerTabbedPane;
 
 public class YoVariableSearchPanel extends JPanel implements ChangeListener
 {

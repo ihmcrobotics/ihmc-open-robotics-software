@@ -52,9 +52,9 @@ public class DiagnosticsWhenHangingControllerFactory implements HighLevelBehavio
    }
 
    @Override
-   public HighLevelBehavior createHighLevelBehavior(HighLevelControlManagerFactory variousWalkingManagers, HighLevelHumanoidControllerToolbox momentumBasedController)
+   public HighLevelBehavior createHighLevelBehavior(HighLevelControlManagerFactory variousWalkingManagers, HighLevelHumanoidControllerToolbox controllerToolbox)
    {
-      controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, useArms, robotIsHanging, momentumBasedController, this.torqueOffsetPrinter);
+      controller = new DiagnosticsWhenHangingController(humanoidJointPoseList, useArms, robotIsHanging, controllerToolbox, this.torqueOffsetPrinter);
 
       controller.addUpdatables(updatables);
 

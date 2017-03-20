@@ -1,9 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.assertTrue;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,6 +10,8 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -46,8 +45,8 @@ public abstract class AvatarSwingTimingsTest implements MultiRobotTestInterface
       {
          RobotSide side = stepIndex % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double y = side == RobotSide.LEFT ? 0.15 : -0.15;
-         Point3d location = new Point3d(0.3 * (stepIndex + 1), y, 0.0);
-         Quat4d orientation = new Quat4d(0.0, 0.0, 0.0, 1.0);
+         Point3D location = new Point3D(0.3 * (stepIndex + 1), y, 0.0);
+         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, orientation);
          footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 

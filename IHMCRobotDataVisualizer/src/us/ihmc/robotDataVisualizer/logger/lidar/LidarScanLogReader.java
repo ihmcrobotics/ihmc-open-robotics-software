@@ -13,17 +13,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.vecmath.Point3f;
-import javax.vecmath.Quat4f;
-
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.RequestLidarScanMessage;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class LidarScanLogReader
@@ -214,16 +213,17 @@ public class LidarScanLogReader
          LidarScanMessage lidarScanMessage = new LidarScanMessage();
          lidarScanMessage.robotTimestamp = logDataInputStream.readLong();
 
-         lidarScanMessage.lidarPosition = new Point3f();
-         lidarScanMessage.lidarPosition.x = logDataInputStream.readFloat();
-         lidarScanMessage.lidarPosition.y = logDataInputStream.readFloat();
-         lidarScanMessage.lidarPosition.z = logDataInputStream.readFloat();
+         lidarScanMessage.lidarPosition = new Point3D32();
+         lidarScanMessage.lidarPosition.setX(logDataInputStream.readFloat());
+         lidarScanMessage.lidarPosition.setY(logDataInputStream.readFloat());
+         lidarScanMessage.lidarPosition.setZ(logDataInputStream.readFloat());
 
-         lidarScanMessage.lidarOrientation = new Quat4f();
-         lidarScanMessage.lidarOrientation.x = logDataInputStream.readFloat();
-         lidarScanMessage.lidarOrientation.y = logDataInputStream.readFloat();
-         lidarScanMessage.lidarOrientation.z = logDataInputStream.readFloat();
-         lidarScanMessage.lidarOrientation.w = logDataInputStream.readFloat();
+         lidarScanMessage.lidarOrientation = new Quaternion32();
+         double x = logDataInputStream.readFloat();
+         double y = logDataInputStream.readFloat();
+         double z = logDataInputStream.readFloat();
+         double w = logDataInputStream.readFloat();
+         lidarScanMessage.lidarOrientation.set(x, y, z, w);
 
          int scanLength = logDataInputStream.readInt();
          lidarScanMessage.scan = new float[scanLength];

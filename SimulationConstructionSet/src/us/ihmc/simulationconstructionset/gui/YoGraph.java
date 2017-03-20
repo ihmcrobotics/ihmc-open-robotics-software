@@ -1,5 +1,35 @@
 package us.ihmc.simulationconstructionset.gui;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
+import java.awt.dnd.DropTarget;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import javax.swing.JFrame;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.TransferHandler;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
+
 import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
 import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
@@ -10,17 +40,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.dialogs.GraphPropertiesDialog;
 import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
-
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.SoftBevelBorder;
-import java.awt.*;
-import java.awt.dnd.DropTarget;
-import java.awt.event.*;
-import java.text.FieldPosition;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class YoGraph extends JPanel implements MouseListener, MouseMotionListener, KeyListener, FocusListener
 {

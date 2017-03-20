@@ -7,13 +7,11 @@ import javax.xml.bind.JAXBException;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.acsell.CostOfTransportCalculator;
 import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -30,6 +28,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.tools.io.logging.LogTools;
@@ -57,7 +56,7 @@ public class WandererControllerFactory
    private final PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
    private final PriorityParameters loggerPriority = new PriorityParameters(40);
    private final PriorityParameters poseCommunicatorPriority = new PriorityParameters(45);
-   
+
    public WandererControllerFactory() throws IOException, JAXBException
    {
 
@@ -79,10 +78,10 @@ public class WandererControllerFactory
       /*
        * Create cost of transport calculator
        */
-      
+
       double mass = 91.100;
       CostOfTransportCalculator costOfTransportCalculator = new CostOfTransportCalculator(mass, gravity, 10.0, robotModel.getEstimatorDT(), yoVariableServer);
-      
+
       /*
        * Create controllers
        */
@@ -102,7 +101,7 @@ public class WandererControllerFactory
       controllerFactory.attachControllerStateChangedListener(wandererOutputWriter);
       controllerFactory.attachControllerFailureListener(wandererOutputWriter);
       DRCOutputWriter drcOutputWriter = wandererOutputWriter;
-      
+
       boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
@@ -112,7 +111,7 @@ public class WandererControllerFactory
          wandererOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
          wandererOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
          wandererOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
-         
+
          drcOutputWriter = wandererOutputWriterWithAccelerationIntegration;
       }
       /*
@@ -162,10 +161,10 @@ public class WandererControllerFactory
       robotController.start();
       WandererRunner runner = new WandererRunner(estimatorPriority, sensorReaderFactory, robotController);
       runner.start();
-      
+
       ThreadTools.sleep(2000);
       yoVariableServer.start();
-      
+
       runner.join();
 
       System.exit(0);
@@ -178,7 +177,6 @@ public class WandererControllerFactory
 
       final HighLevelState initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
-      ArmControllerParameters armControllerParamaters = robotModel.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
 
@@ -186,21 +184,21 @@ public class WandererControllerFactory
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames , walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
+            feetContactSensorNames, wristForceSensorNames , walkingControllerParamaters, capturePointPlannerParameters, initialBehavior);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();
-      
+
       boolean useArms = false;
       boolean robotIsHanging = true;
-      
+
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       // Configure the MomentumBasedControllerFactory so we start with the diagnostic controller
       diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
       controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), packetCommunicator);
-      
+
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator();
 

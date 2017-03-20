@@ -1,29 +1,25 @@
 package us.ihmc.simulationconstructionset.util.simulationTesting;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-
-import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.Axis;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.util.simulationTesting.AllYoVariablesSimulationComparer;
-import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class AllYoVariablesSimulationComparerTest 
 {
@@ -79,7 +75,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint1 = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Axis.Y);
+		PinJoint joint1 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis.Y);
 		Link link1 = link1();
 		joint1.setLink(link1);
 		robot.addRootJoint(joint1);
@@ -93,7 +89,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint2 = new PinJoint("joint", new Vector3d(0.0, 0.0, 0.0), robot, Axis.Y);
+		PinJoint joint2 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis.Y);
 		Link link2 = link2();
 		joint2.setLink(link2);
 		robot.addRootJoint(joint2);

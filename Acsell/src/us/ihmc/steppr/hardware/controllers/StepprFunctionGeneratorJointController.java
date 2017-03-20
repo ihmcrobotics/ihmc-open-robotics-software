@@ -1,11 +1,11 @@
 package us.ihmc.steppr.hardware.controllers;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.steppr.hardware.StepprJoint;
 
 public class StepprFunctionGeneratorJointController extends StepprPDJointController
@@ -61,7 +61,7 @@ public class StepprFunctionGeneratorJointController extends StepprPDJointControl
          OneDoFJoint joint = joints.get(i);
          if(joint.getName().equals(funcGenJoint.getEnumValue().getSdfName()))
          {
-            joint.setTau(funcGen.getValue(TimeTools.nanoSecondstoSeconds(timestamp))+joint.getTau());
+            joint.setTau(funcGen.getValue(Conversions.nanosecondsToSeconds(timestamp))+joint.getTau());
          }
       } 
    }

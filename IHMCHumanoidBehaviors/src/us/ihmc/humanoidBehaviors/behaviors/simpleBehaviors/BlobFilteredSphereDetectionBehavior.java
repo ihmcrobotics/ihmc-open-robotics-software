@@ -4,11 +4,12 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3f;
-
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.ColoredCircularBlobDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateCommand;
@@ -17,9 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.PointCloudWorldPac
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
@@ -63,16 +62,16 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       if (pointCloudQueue.isNewPacketAvailable())
       {
          PointCloudWorldPacket latestPointCloudWorldPacket = pointCloudQueue.getLatestPacket();
-         Point3f[] fullPointCloud = latestPointCloudWorldPacket.getDecayingWorldScan();
+         Point3D32[] fullPointCloud = latestPointCloudWorldPacket.getDecayingWorldScan();
 
-         Point3f[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
+         Point3D32[] filteredPointCloud = filterPointsNearBall(fullPointCloud);
 
          
          findBallsAndSaveResult(filteredPointCloud);
       }
    }
 
-   private Point3f[] filterPointsNearBall(Point3f[] fullPointCloud)
+   private Point3D32[] filterPointsNearBall(Point3D32[] fullPointCloud)
    {
       if (fullPointCloud.length == 0)
       {
@@ -82,11 +81,11 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
          
          ThreadTools.sleep(100);
          
-         return new Point3f[0];
+         return new Point3D32[0];
       }
       
 
-      List<Point3f> filteredPoints = new ArrayList<Point3f>();
+      List<Point3D32> filteredPoints = new ArrayList<Point3D32>();
       RigidBodyTransform worldToCameraTransform = headFrame.getTransformToWorldFrame();
       worldToCameraTransform.invert();
 
@@ -98,7 +97,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
          
          synchronized (coloredCircularBlobDetectorBehaviorService.getBallListConch())
          {
-            for (Point2d latestBallPosition2d : coloredCircularBlobDetectorBehaviorService.getLatestBallPositionSet())
+            for (Point2D latestBallPosition2d : coloredCircularBlobDetectorBehaviorService.getLatestBallPositionSet())
             {
                double ballCenterX = latestBallPosition2d.getX() - latestCameraImage.getMinX();
                double ballCenterY = latestBallPosition2d.getY() - latestCameraImage.getMinY();
@@ -106,7 +105,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
                double desiredRayAngleX = MULTISENSE_VERTICAL_FOV * (-ballCenterY / cameraPixelHeight + 0.5);
                double desiredRayAngleY = MUTLISENSE_HORIZONTAL_FOV * (ballCenterX / cameraPixelWidth - 0.5);
 
-               Point3f candidateLidarPoint = new Point3f();
+               Point3D32 candidateLidarPoint = new Point3D32();
 
                for (int i = 0; i < fullPointCloud.length; i++)
                {
@@ -128,7 +127,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
             }
          }
    
-         Point3f[] filteredPointArray = new Point3f[filteredPoints.size()];
+         Point3D32[] filteredPointArray = new Point3D32[filteredPoints.size()];
          filteredPoints.toArray(filteredPointArray);
 
          return filteredPointArray;
@@ -136,7 +135,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       else
       {
          PrintTools.debug(this, "LatestCameraImage is null. Returning empty");
-         return new Point3f[0];
+         return new Point3D32[0];
       }
    }
 
@@ -179,7 +178,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
       coloredCircularBlobDetectorBehaviorService.run();
    }
 
-   public Point2d getLatestBallPosition()
+   public Point2D getLatestBallPosition()
    {
       return coloredCircularBlobDetectorBehaviorService.getLatestBallPosition2d();
    }

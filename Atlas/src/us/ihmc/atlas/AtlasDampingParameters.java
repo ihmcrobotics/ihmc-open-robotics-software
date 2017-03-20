@@ -1,10 +1,10 @@
 package us.ihmc.atlas;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.atlas.ros.ROSSandiaJointMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 

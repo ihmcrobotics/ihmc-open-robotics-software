@@ -1,20 +1,18 @@
 package us.ihmc.geometry.polytope;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ExpandingPolytopeAlgorithmTest
 {
@@ -34,7 +32,7 @@ public class ExpandingPolytopeAlgorithmTest
       double halfHeightZ = 0.5;
 
       ConvexPolytope polytopeOne = ConvexPolytopeConstructor.constructBoxWithCenterAtZero(halfLengthX, halfWidthY, halfHeightZ);
-      ConvexPolytope polytopeTwo = ConvexPolytopeConstructor.constructSinglePointPolytope(new Point3d());
+      ConvexPolytope polytopeTwo = ConvexPolytopeConstructor.constructSinglePointPolytope(new Point3D());
 
       RigidBodyTransform transformOne = new RigidBodyTransform();
       RigidBodyTransform transformTwo = new RigidBodyTransform();
@@ -51,8 +49,8 @@ public class ExpandingPolytopeAlgorithmTest
       GilbertJohnsonKeerthiCollisionDetectorAssertListener listener = new GilbertJohnsonKeerthiCollisionDetectorAssertListener();
       detector.setGilbertJohnsonKeerthiCollisionDetectorListener(listener);
 
-      Point3d closestPointOnA = new Point3d();
-      Point3d closestPointOnB = new Point3d();
+      Point3D closestPointOnA = new Point3D();
+      Point3D closestPointOnB = new Point3D();
 
       boolean areColliding = detector.arePolytopesColliding(polytopeOne, polytopeTwo, closestPointOnA, closestPointOnB);
       assertTrue(areColliding);
@@ -62,12 +60,12 @@ public class ExpandingPolytopeAlgorithmTest
       assertEquals(4, numberOfPointsOnSimplex);
 
       expandingPolytopeAlgorithm.setPolytopes(simplex, polytopeOne, polytopeTwo);
-      Vector3d separatingDistanceVector = new Vector3d();
+      Vector3D separatingDistanceVector = new Vector3D();
       expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, -0.2), separatingDistanceVector, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, -0.15), closestPointOnA, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(0.0, 0.0, 0.05), closestPointOnB, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, -0.2), separatingDistanceVector, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, -0.15), closestPointOnA, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(0.0, 0.0, 0.05), closestPointOnB, 1e-7);
    }
 
    @Test
@@ -85,11 +83,11 @@ public class ExpandingPolytopeAlgorithmTest
       ConvexPolytope cubeOne = ConvexPolytopeConstructor.constructUnitCube();
       ConvexPolytope cubeTwo = ConvexPolytopeConstructor.constructUnitCube();
 
-      translateObject(cubeOne, new Vector3d(1.4, 2.5, 3.8));
-      translateObject(cubeTwo, new Vector3d(1.0, 2.0, 3.0));
+      translateObject(cubeOne, new Vector3D(1.4, 2.5, 3.8));
+      translateObject(cubeTwo, new Vector3D(1.0, 2.0, 3.0));
 
-      Point3d closestPointOnA = new Point3d();
-      Point3d closestPointOnB = new Point3d();
+      Point3D closestPointOnA = new Point3D();
+      Point3D closestPointOnB = new Point3D();
 
       boolean areColliding = detector.arePolytopesColliding(cubeOne, cubeTwo, closestPointOnA, closestPointOnB);
       assertTrue(areColliding);
@@ -99,12 +97,12 @@ public class ExpandingPolytopeAlgorithmTest
       assertEquals(4, numberOfPointsOnSimplex);
 
       expandingPolytopeAlgorithm.setPolytopes(simplex, cubeOne, cubeTwo);
-      Vector3d separatingDistanceVector = new Vector3d();
+      Vector3D separatingDistanceVector = new Vector3D();
       expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
-      JUnitTools.assertTuple3dEquals(new Vector3d(0.0, 0.0, -0.2), separatingDistanceVector, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(1.7, 2.75, 3.8), closestPointOnA, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(1.7, 2.75, 4.0), closestPointOnB, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(0.0, 0.0, -0.2), separatingDistanceVector, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.7, 2.75, 3.8), closestPointOnA, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.7, 2.75, 4.0), closestPointOnB, 1e-7);
    }
 
    @Test
@@ -129,16 +127,16 @@ public class ExpandingPolytopeAlgorithmTest
          ConvexPolytope cubeOne = generateRandomCube(random);
          ConvexPolytope cubeTwo = generateRandomCube(random);
 
-         rotateObject(cubeOne, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
-         rotateObject(cubeTwo, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
+         rotateObject(cubeOne, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
+         rotateObject(cubeTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
 
-         translateObject(cubeOne, RandomTools.generateRandomVector(random, new Vector3d(5.0, -7.0, 10.0), new Vector3d(7.0, -5.0, 12.0)));
-         translateObject(cubeTwo, RandomTools.generateRandomVector(random, new Vector3d(5.0, -7.0, 10.0), new Vector3d(7.0, -5.0, 12.0)));
+         translateObject(cubeOne, RandomGeometry.nextVector3D(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
+         translateObject(cubeTwo, RandomGeometry.nextVector3D(random, new Vector3D(5.0, -7.0, 10.0), new Vector3D(7.0, -5.0, 12.0)));
 
-         Point3d closestPointOnA = new Point3d();
-         Point3d closestPointOnB = new Point3d();
+         Point3D closestPointOnA = new Point3D();
+         Point3D closestPointOnB = new Point3D();
 
          boolean areColliding = detector.arePolytopesColliding(cubeOne, cubeTwo, closestPointOnA, closestPointOnB);
 
@@ -158,7 +156,7 @@ public class ExpandingPolytopeAlgorithmTest
             {
                numberOfCollisions++;
                expandingPolytopeAlgorithm.setPolytopes(simplex, cubeOne, cubeTwo);
-               Vector3d separatingDistanceVector = new Vector3d();
+               Vector3D separatingDistanceVector = new Vector3D();
                expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
                assertEquals(separatingDistanceVector.length(), closestPointOnA.distance(closestPointOnB), 1e-7);
@@ -190,25 +188,25 @@ public class ExpandingPolytopeAlgorithmTest
       {
          double xyzBoundary = 0.0;
 
-         double radiusOne = RandomTools.generateRandomDouble(random, 0.5, 2.0);
-         double radiusTwo = RandomTools.generateRandomDouble(random, 0.5, 2.0);
+         double radiusOne = RandomNumbers.nextDouble(random, 0.5, 2.0);
+         double radiusTwo = RandomNumbers.nextDouble(random, 0.5, 2.0);
 
-         int numberOfPointsOne = RandomTools.generateRandomInt(random, 4, 20);
-         int numberOfPointsTwo = RandomTools.generateRandomInt(random, 4, 20);
+         int numberOfPointsOne = RandomNumbers.nextInt(random, 4, 20);
+         int numberOfPointsTwo = RandomNumbers.nextInt(random, 4, 20);
 
          ConvexPolytope polytopeOne = ConvexPolytopeConstructor.constructRandomSphereOutlinedPolytope(random, numberOfPointsOne, radiusOne, xyzBoundary);
          ConvexPolytope polytopeTwo = ConvexPolytopeConstructor.constructRandomSphereOutlinedPolytope(random, numberOfPointsTwo, radiusTwo, xyzBoundary);
 
-         rotateObject(polytopeOne, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
-         rotateObject(polytopeTwo, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
+         rotateObject(polytopeOne, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
+         rotateObject(polytopeTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
 
-         translateObject(polytopeOne, RandomTools.generateRandomVector(random, new Vector3d(4.5, -10.0, 8.5), new Vector3d(6.5, -7.0, 11.5)));
-         translateObject(polytopeTwo, RandomTools.generateRandomVector(random, new Vector3d(4.5, -10.0, 8.5), new Vector3d(6.5, -7.0, 11.5)));
+         translateObject(polytopeOne, RandomGeometry.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
+         translateObject(polytopeTwo, RandomGeometry.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
 
-         Point3d closestPointOnA = new Point3d();
-         Point3d closestPointOnB = new Point3d();
+         Point3D closestPointOnA = new Point3D();
+         Point3D closestPointOnB = new Point3D();
 
          boolean areColliding = detector.arePolytopesColliding(polytopeOne, polytopeTwo, closestPointOnA, closestPointOnB);
 
@@ -227,7 +225,7 @@ public class ExpandingPolytopeAlgorithmTest
             {
                numberOfCollisions++;
                expandingPolytopeAlgorithm.setPolytopes(simplex, polytopeOne, polytopeTwo);
-               Vector3d separatingDistanceVector = new Vector3d();
+               Vector3D separatingDistanceVector = new Vector3D();
                expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
                assertEquals(separatingDistanceVector.length(), closestPointOnA.distance(closestPointOnB), 1e-7);
@@ -235,7 +233,7 @@ public class ExpandingPolytopeAlgorithmTest
                //             Move halfway in the separating distance direction and make sure they are not colliding...
 
                RigidBodyTransform moveInSeparatingDirection = new RigidBodyTransform();
-               Vector3d separatingDistanceVectorPlusSome = new Vector3d(separatingDistanceVector);
+               Vector3D separatingDistanceVectorPlusSome = new Vector3D(separatingDistanceVector);
                separatingDistanceVectorPlusSome.scale(0.5);
                moveInSeparatingDirection.setTranslation(separatingDistanceVectorPlusSome);
                polytopeTwo.applyTransform(moveInSeparatingDirection);
@@ -249,7 +247,7 @@ public class ExpandingPolytopeAlgorithmTest
                if (separatingDistanceVector.length() > 0.001)
                {
                   moveInSeparatingDirection = new RigidBodyTransform();
-                  separatingDistanceVectorPlusSome = new Vector3d(separatingDistanceVector);
+                  separatingDistanceVectorPlusSome = new Vector3D(separatingDistanceVector);
                   separatingDistanceVectorPlusSome.scale(0.6);
                   moveInSeparatingDirection.setTranslation(separatingDistanceVectorPlusSome);
                   polytopeTwo.applyTransform(moveInSeparatingDirection);
@@ -287,25 +285,25 @@ public class ExpandingPolytopeAlgorithmTest
       {
          double xyzBoundary = 0.0;
 
-         double radiusOne = RandomTools.generateRandomDouble(random, 0.5, 2.0);
-         double radiusTwo = RandomTools.generateRandomDouble(random, 0.5, 2.0);
-         double heightTwo = RandomTools.generateRandomDouble(random, 0.5, 2.0);
+         double radiusOne = RandomNumbers.nextDouble(random, 0.5, 2.0);
+         double radiusTwo = RandomNumbers.nextDouble(random, 0.5, 2.0);
+         double heightTwo = RandomNumbers.nextDouble(random, 0.5, 2.0);
 
-         int numberOfPointsOne = RandomTools.generateRandomInt(random, 4, 20);
+         int numberOfPointsOne = RandomNumbers.nextInt(random, 4, 20);
 
          ConvexPolytope polytopeOne = ConvexPolytopeConstructor.constructRandomSphereOutlinedPolytope(random, numberOfPointsOne, radiusOne, xyzBoundary);
          CylinderSupportingVertexHolder cylinderTwo = new CylinderSupportingVertexHolder(radiusTwo, heightTwo);
 
-         rotateObject(polytopeOne, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
-         rotateObject(cylinderTwo, RandomTools.generateRandomDouble(random, Math.PI), RandomTools.generateRandomDouble(random, Math.PI),
-               RandomTools.generateRandomDouble(random, Math.PI));
+         rotateObject(polytopeOne, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
+         rotateObject(cylinderTwo, RandomNumbers.nextDouble(random, Math.PI), RandomNumbers.nextDouble(random, Math.PI),
+               RandomNumbers.nextDouble(random, Math.PI));
 
-         translateObject(polytopeOne, RandomTools.generateRandomVector(random, new Vector3d(4.5, -10.0, 8.5), new Vector3d(6.5, -7.0, 11.5)));
-         translateObject(cylinderTwo, RandomTools.generateRandomVector(random, new Vector3d(4.5, -10.0, 8.5), new Vector3d(6.5, -7.0, 11.5)));
+         translateObject(polytopeOne, RandomGeometry.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
+         translateObject(cylinderTwo, RandomGeometry.nextVector3D(random, new Vector3D(4.5, -10.0, 8.5), new Vector3D(6.5, -7.0, 11.5)));
 
-         Point3d closestPointOnA = new Point3d();
-         Point3d closestPointOnB = new Point3d();
+         Point3D closestPointOnA = new Point3D();
+         Point3D closestPointOnB = new Point3D();
 
          boolean areColliding = detector.arePolytopesColliding(polytopeOne, cylinderTwo, closestPointOnA, closestPointOnB);
 
@@ -328,7 +326,7 @@ public class ExpandingPolytopeAlgorithmTest
             {
                numberOfCollisions++;
                expandingPolytopeAlgorithm.setPolytopes(simplex, polytopeOne, cylinderTwo);
-               Vector3d separatingDistanceVector = new Vector3d();
+               Vector3D separatingDistanceVector = new Vector3D();
                expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
                assertEquals(separatingDistanceVector.length(), closestPointOnA.distance(closestPointOnB), 1e-7);
@@ -336,7 +334,7 @@ public class ExpandingPolytopeAlgorithmTest
                //             Move halfway in the separating distance direction and make sure they are not colliding...
 
                RigidBodyTransform moveInSeparatingDirection = new RigidBodyTransform();
-               Vector3d separatingDistanceVectorPlusSome = new Vector3d(separatingDistanceVector);
+               Vector3D separatingDistanceVectorPlusSome = new Vector3D(separatingDistanceVector);
                separatingDistanceVectorPlusSome.scale(0.5);
                moveInSeparatingDirection.setTranslation(separatingDistanceVectorPlusSome);
                cylinderTwo.applyTransform(moveInSeparatingDirection);
@@ -350,7 +348,7 @@ public class ExpandingPolytopeAlgorithmTest
                if (separatingDistanceVector.length() > 0.003)
                {
                   moveInSeparatingDirection = new RigidBodyTransform();
-                  separatingDistanceVectorPlusSome = new Vector3d(separatingDistanceVector);
+                  separatingDistanceVectorPlusSome = new Vector3D(separatingDistanceVector);
                   separatingDistanceVectorPlusSome.scale(0.6);
                   moveInSeparatingDirection.setTranslation(separatingDistanceVectorPlusSome);
                   cylinderTwo.applyTransform(moveInSeparatingDirection);
@@ -391,8 +389,8 @@ public class ExpandingPolytopeAlgorithmTest
       ConvexPolytope cubeOne = ConvexPolytopeConstructor.constructFromVertices(cubeOneVertices);
       ConvexPolytope cubeTwo = ConvexPolytopeConstructor.constructFromVertices(cubeTwoVertices);
 
-      Point3d closestPointOnA = new Point3d();
-      Point3d closestPointOnB = new Point3d();
+      Point3D closestPointOnA = new Point3D();
+      Point3D closestPointOnB = new Point3D();
 
       boolean areColliding = detector.arePolytopesColliding(cubeOne, cubeTwo, closestPointOnA, closestPointOnB);
       assertTrue(areColliding);
@@ -402,12 +400,12 @@ public class ExpandingPolytopeAlgorithmTest
       assertEquals(4, numberOfPointsOnSimplex);
 
       expandingPolytopeAlgorithm.setPolytopes(simplex, cubeOne, cubeTwo);
-      Vector3d separatingDistanceVector = new Vector3d();
+      Vector3D separatingDistanceVector = new Vector3D();
       expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
 
       assertEquals(1.469517381122009E-5, separatingDistanceVector.length(), 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(-0.6654362950758336, 0.0120271553579471, 0.00498530482618878), closestPointOnA, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(-0.6654362950758336, 0.0120271553579471, 0.005), closestPointOnB, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-0.6654362950758336, 0.0120271553579471, 0.00498530482618878), closestPointOnA, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-0.6654362950758336, 0.0120271553579471, 0.005), closestPointOnB, 1e-7);
    }
 
    @Test
@@ -439,8 +437,8 @@ public class ExpandingPolytopeAlgorithmTest
       RigidBodyTransform transform = new RigidBodyTransform(matrix);
       cylinder.setTransform(transform);
 
-      Point3d closestPointOnA = new Point3d();
-      Point3d closestPointOnB = new Point3d();
+      Point3D closestPointOnA = new Point3D();
+      Point3D closestPointOnB = new Point3D();
 
       boolean areColliding = detector.arePolytopesColliding(polytope, cylinder, closestPointOnA, closestPointOnB);
       assertTrue(areColliding);
@@ -450,20 +448,20 @@ public class ExpandingPolytopeAlgorithmTest
       assertEquals(4, numberOfPointsOnSimplex);
 
       expandingPolytopeAlgorithm.setPolytopes(simplex, polytope, cylinder);
-      Vector3d separatingDistanceVector = new Vector3d();
+      Vector3D separatingDistanceVector = new Vector3D();
       expandingPolytopeAlgorithm.computeExpandedPolytope(separatingDistanceVector, closestPointOnA, closestPointOnB);
   
      
       assertEquals(0.38364002935502967, separatingDistanceVector.length(), 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(6.0695755857656915, -8.794237570890989, 10.907854463926327), closestPointOnA, 1e-7);
-      JUnitTools.assertTuple3dEquals(new Point3d(5.770928840941696, -8.650471584361217, 11.101041251897659), closestPointOnB, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(6.0695755857656915, -8.794237570890989, 10.907854463926327), closestPointOnA, 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(5.770928840941696, -8.650471584361217, 11.101041251897659), closestPointOnB, 1e-7);
       
       assertEquals(separatingDistanceVector.length(), closestPointOnA.distance(closestPointOnB), 1e-7);
 
       // Move halfway in the separating distance direction and make sure they are not colliding...
 
       RigidBodyTransform moveInSeparatingDirection = new RigidBodyTransform();
-      Vector3d separatingDistanceVectorPlusSome = new Vector3d(separatingDistanceVector);
+      Vector3D separatingDistanceVectorPlusSome = new Vector3D(separatingDistanceVector);
       separatingDistanceVectorPlusSome.scale(0.5);
       moveInSeparatingDirection.setTranslation(separatingDistanceVectorPlusSome);
       cylinder.applyTransform(moveInSeparatingDirection);
@@ -477,7 +475,7 @@ public class ExpandingPolytopeAlgorithmTest
       if (separatingDistanceVector.length() > 0.003)
       {
          moveInSeparatingDirection = new RigidBodyTransform();
-         separatingDistanceVectorPlusSome = new Vector3d(separatingDistanceVector);
+         separatingDistanceVectorPlusSome = new Vector3D(separatingDistanceVector);
          separatingDistanceVectorPlusSome.scale(0.6);
          moveInSeparatingDirection.setTranslation(separatingDistanceVectorPlusSome);
          cylinder.applyTransform(moveInSeparatingDirection);
@@ -491,21 +489,21 @@ public class ExpandingPolytopeAlgorithmTest
 
    private ConvexPolytope generateRandomCube(Random random)
    {
-      double halfLengthX = RandomTools.generateRandomDouble(random, 0.10, 2.0);
-      double halfWidthY = RandomTools.generateRandomDouble(random, 0.10, 0.5);
-      double halfHeightZ = RandomTools.generateRandomDouble(random, 0.10, 1.0);
+      double halfLengthX = RandomNumbers.nextDouble(random, 0.10, 2.0);
+      double halfWidthY = RandomNumbers.nextDouble(random, 0.10, 0.5);
+      double halfHeightZ = RandomNumbers.nextDouble(random, 0.10, 1.0);
 
       return ConvexPolytopeConstructor.constructBoxWithCenterAtZero(halfLengthX, halfWidthY, halfHeightZ);
    }
 
-   private void translateObject(ConvexPolytope polytope, Vector3d translation)
+   private void translateObject(ConvexPolytope polytope, Vector3D translation)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(translation);
       polytope.applyTransform(transform);
    }
 
-   private void translateObject(CylinderSupportingVertexHolder cylinder, Vector3d translation)
+   private void translateObject(CylinderSupportingVertexHolder cylinder, Vector3D translation)
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setTranslation(translation);

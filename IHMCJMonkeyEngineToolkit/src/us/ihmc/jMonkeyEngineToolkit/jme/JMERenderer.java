@@ -26,7 +26,6 @@ import java.util.logging.Logger;
 
 import javax.swing.JComponent;
 import javax.swing.RepaintManager;
-import javax.vecmath.Color3f;
 
 import org.jmonkeyengine.scene.plugins.ogre.MaterialLoader;
 
@@ -35,6 +34,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetConfig;
 import com.jme3.asset.AssetManager;
+import com.jme3.asset.TextureKey;
 import com.jme3.audio.AudioContext;
 import com.jme3.input.InputManager;
 import com.jme3.light.AmbientLight;
@@ -53,6 +53,7 @@ import com.jme3.system.JmeSystem;
 import com.jme3.system.NativeLibraryLoader;
 import com.jme3.system.awt.AwtPanelsContext;
 import com.jme3.system.lwjgl.LwjglContext;
+import com.jme3.texture.Texture;
 import com.jme3.texture.plugins.AWTLoader;
 import com.jme3.util.SkyFactory;
 import com.jme3.util.SkyFactory.EnvMapType;
@@ -60,7 +61,12 @@ import com.jme3.util.SkyFactory.EnvMapType;
 import jme3dae.ColladaLoader;
 import jme3dae.collada14.ColladaDocumentV14;
 import jme3dae.materials.FXBumpMaterialGenerator;
-import us.ihmc.graphicsDescription.*;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -82,8 +88,9 @@ import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMENodeTools;
 import us.ihmc.jMonkeyEngineToolkit.stlLoader.STLLoader;
+import us.ihmc.robotics.MathTools;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.tools.FormattingTools;
 import us.ihmc.tools.inputDevices.keyboard.KeyListener;
 import us.ihmc.tools.inputDevices.keyboard.KeyListenerHolder;
 import us.ihmc.tools.inputDevices.mouse.MouseListener;
@@ -91,11 +98,8 @@ import us.ihmc.tools.inputDevices.mouse.MouseListenerHolder;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DJoystick;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListener;
 import us.ihmc.tools.inputDevices.mouse3DJoystick.Mouse3DListenerHolder;
-import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
-import us.ihmc.tools.time.Timer;
 
 public class JMERenderer extends SimpleApplication implements Graphics3DAdapter, PBOAwtPanelListener
 {
@@ -112,6 +116,13 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       CANVAS, AWTPANELS
    }
+   
+   public enum SkyboxToUse
+   {
+      JME_MOUNTAINS, BLUE_SKY, DUSK_SKY;
+   }
+   
+   public static final SkyboxToUse skyboxToUse = SkyboxToUse.BLUE_SKY;
 
    public final static boolean USE_PBO = true;
    public final static boolean USE_GPU_LIDAR_PARALLEL_SCENE = false; // Disable: this is super slow
@@ -125,9 +136,9 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
 
    static
    {
-      Path scsCachePath = FileTools.getTemporaryDirectoryPath().resolve("SCSCache");
+      Path scsCachePath = PathTools.systemTemporaryDirectory().resolve("SCSCache");
 
-      FileTools.ensureDirectoryExists(scsCachePath);
+      FileTools.ensureDirectoryExists(scsCachePath, DefaultExceptionHandler.PRINT_STACKTRACE);
 
       System.setProperty("java.library.path", System.getProperty("java.library.path") + File.pathSeparator + scsCachePath.toString());
       NativeLibraryLoader.setCustomExtractionFolder(scsCachePath.toString());
@@ -506,7 +517,32 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       try
       {
-         Spatial sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
+         Spatial sky = null;
+         if (skyboxToUse == SkyboxToUse.BLUE_SKY)
+         {
+            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0005.bmp", true));
+            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0002.bmp", true));
+            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0001.bmp", true));
+            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0004.bmp", true));
+            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0003.bmp", true));
+            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun25degtest/skyrender0007.bmp", true));
+            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+         }
+         else if (skyboxToUse == SkyboxToUse.DUSK_SKY)
+         {
+            Texture west = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0005.bmp", true));
+            Texture east = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0002.bmp", true));
+            Texture north = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0001.bmp", true));
+            Texture south = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0004.bmp", true));
+            Texture up = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0003.bmp", true));
+            Texture down = assetManager.loadTexture(new TextureKey("Textures/Sky/Bright/skyboxsun45deg/skyrender0006.bmp", true));
+            sky = SkyFactory.createSky(assetManager, west, east, north, south, up, down);
+         }
+         else if (skyboxToUse == SkyboxToUse.JME_MOUNTAINS)
+         {
+            sky = SkyFactory.createSky(assetManager, "Textures/Sky/Bright/BrightSky.dds", EnvMapType.CubeMap);
+         }
+
          sky.setLocalScale(1000);
          rootNode.attachChild(sky);
          notifyRepaint();
@@ -962,7 +998,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       if (!pboAwtPanels.isEmpty())
       {
-         Timer timer = new Timer().start();
+         Stopwatch timer = new Stopwatch().start();
 
          for (JMEGPULidar gpuLidar : gpuLidars)
          {
@@ -970,7 +1006,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
          }
 
          notifyRepaint();
-         PrintTools.info(this, "GPULidar scene updated. Took " + FormattingTools.roundToSignificantFigures(timer.totalElapsed(), 2) + " s");
+         PrintTools.info(this, "GPULidar scene updated. Took " + MathTools.roundToSignificantFigures(timer.totalElapsed(), 2) + " s");
       }
    }
 
@@ -1167,7 +1203,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    }
 
    @Override
-   public void setBackgroundColor(final Color3f color)
+   public void setBackgroundColor(final MutableColor color)
    {
       //      enqueue(new Callable<Object>()
       //      {
@@ -1452,6 +1488,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       enqueue(new Callable<Object>()
       {
+         @Override
          public Object call() throws Exception
          {
             updatables.add(updatable);
@@ -1465,6 +1502,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    {
       enqueue(new Callable<Object>()
       {
+         @Override
          public Object call() throws Exception
          {
             updatables.remove(updatable);

@@ -15,8 +15,8 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -145,8 +145,6 @@ public class LogVisualizer
       }
 
       boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
 
       RobotDescription robotDescription;
       
@@ -154,7 +152,7 @@ public class LogVisualizer
       if(generalizedSDFRobotModel != null)
       {
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-         robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);         
+         robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes);         
       }
       else
       {
@@ -172,7 +170,7 @@ public class LogVisualizer
       scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = parser.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = parser.getYoGraphicsListRegistry();
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, false);
       scs.attachPlaybackListener(createYoGraphicsUpdater(yoGraphicsListRegistry));
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();

@@ -1,27 +1,29 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.random.RandomTools;
+import static java.lang.Math.abs;
+import static java.lang.Math.acos;
+import static java.lang.Math.atan2;
+import static java.lang.Math.pow;
+import static java.lang.Math.sqrt;
+import static us.ihmc.robotics.MathTools.checkIntervalContains;
+import static us.ihmc.robotics.MathTools.cube;
+import static us.ihmc.robotics.MathTools.square;
 
 import java.util.Random;
 
-import static java.lang.Math.*;
-import static java.lang.Math.abs;
-import static java.lang.Math.atan2;
-import static us.ihmc.robotics.MathTools.checkIfInRange;
-import static us.ihmc.robotics.MathTools.cube;
-import static us.ihmc.robotics.MathTools.square;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.MathTools;
 
 public class FourbarCalculatorTools
 {
    public static double getCosineAngleWithCosineLaw(double l_neighbour1, double l_neighbour2, double l_opposite)
    {
-      checkIfInRange(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
       double cosAngle = MathTools
-            .clipToMinMax((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0, 1.0);
+            .clamp((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0, 1.0);
 
       return cosAngle;
    }
@@ -29,9 +31,9 @@ public class FourbarCalculatorTools
    public static double getCosineAngleDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double l_opposite,
          double lDot_opposite)
    {
-      checkIfInRange(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
       double cosAngleDot = (square(l_neighbour2) * lDot_neighbour2 - 2.0 * l_neighbour2 * l_opposite * lDot_opposite - lDot_neighbour2 * square(l_neighbour1)
             + lDot_neighbour2 * square(l_opposite)) / (2.0 * square(l_neighbour2) * l_neighbour1);
@@ -42,9 +44,9 @@ public class FourbarCalculatorTools
    public static double getCosineAngleDDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double lDDot_neighbour2,
          double l_opposite, double lDot_opposite, double lDDot_opposite)
    {
-      checkIfInRange(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
       double cosAngleDDot =
             (cube(l_neighbour2) * lDDot_neighbour2 - 2 * square(l_neighbour2 * lDot_opposite) - 2 * square(l_neighbour2) * l_opposite * lDDot_opposite
@@ -64,9 +66,9 @@ public class FourbarCalculatorTools
 
    public static double getAngleDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double l_opposite, double lDot_opposite)
    {
-      checkIfInRange(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
       double cosAngle = getCosineAngleWithCosineLaw(l_neighbour1, l_neighbour2, l_opposite);
       double cosAngleDot = getCosineAngleDotWithCosineLaw(l_neighbour1, l_neighbour2, lDot_neighbour2, l_opposite, lDot_opposite);
@@ -78,9 +80,9 @@ public class FourbarCalculatorTools
    public static double getAngleDDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double lDDot_neighbour2, double l_opposite,
          double lDot_opposite, double lDDot_opposite)
    {
-      checkIfInRange(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIfInRange(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
+      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
 
       double cosAngle = getCosineAngleWithCosineLaw(l_neighbour1, l_neighbour2, l_opposite);
       double cosAngleDot = getCosineAngleDotWithCosineLaw(l_neighbour1, l_neighbour2, lDot_neighbour2, l_opposite, lDot_opposite);
@@ -100,7 +102,7 @@ public class FourbarCalculatorTools
     */
    public static void generateRandomFourBar(Random random, double[] sideLengths, double[] validInitialAngles, double minSideLength, double maxSideLength)
    {
-      double e = RandomTools.generateRandomDouble(random, minSideLength, maxSideLength);
+      double e = RandomNumbers.nextDouble(random, minSideLength, maxSideLength);
       double k1 = random.nextDouble();
       double k2 = random.nextDouble();
       double d1 = e * abs(random.nextGaussian());

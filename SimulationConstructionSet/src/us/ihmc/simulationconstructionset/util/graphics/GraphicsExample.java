@@ -1,8 +1,5 @@
 package us.ihmc.simulationconstructionset.util.graphics;
 
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -13,6 +10,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
 
 
 public class GraphicsExample
@@ -39,7 +39,7 @@ public class GraphicsExample
       DoubleYoVariable roll = new DoubleYoVariable("roll", registry);
 
       YoGraphicCoordinateSystem worldCoordinateSystem = new YoGraphicCoordinateSystem("Example", worldOrigin.getYoX(), worldOrigin.getYoY(),
-                                                                worldOrigin.getYoZ(), yaw, pitch, roll, 1.0);
+                                                                worldOrigin.getYoZ(), yaw, pitch, roll, 2.0);
 
       // setup slider board
       setupEvolution(scs, testPoint);
@@ -48,11 +48,11 @@ public class GraphicsExample
       zero.set(0.0);
 
       // create graphics vector
-      YoGraphicVector dynamicGraphicVector = new YoGraphicVector("Example", zero, zero, zero, testPoint.getYoX(), testPoint.getYoY(), testPoint.getYoZ(), 1.0,
+      YoGraphicVector yoGraphicVector = new YoGraphicVector("Example", zero, zero, zero, testPoint.getYoX(), testPoint.getYoY(), testPoint.getYoZ(), 1.0,
                                                      YoAppearance.Black());
 
       // add graphic objects to list
-      yoGraphicsList.add(dynamicGraphicVector);
+      yoGraphicsList.add(yoGraphicVector);
 
       yoGraphicsList.add(new YoGraphicPosition("Example", testPoint, 0.01, YoAppearance.Red()));
       yoGraphicsList.add(new YoGraphicPosition("Example", testPoint2, 0.01, YoAppearance.Black()));

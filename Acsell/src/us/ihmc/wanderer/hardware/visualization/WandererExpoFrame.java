@@ -12,6 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.simulationconstructionset.PlaybackListener;
 
 public class WandererExpoFrame extends JFrame implements PlaybackListener
@@ -291,7 +291,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private void manageWalkChanged(boolean nowWalking)
    {
       if(nowWalking)
-         lastStartWalkTime = TimeTools.nanoSecondstoSeconds(nanosecondstime.getLongValue());
+         lastStartWalkTime = Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue());
       else
          internalPriorWalkingDuration = walking_time.getDoubleValue();      
    }
@@ -315,12 +315,12 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    {
       if(!init_complete)
       {
-         initTime = TimeTools.nanoSecondstoSeconds(nanosecondstime.getLongValue());
+         initTime = Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue());
          init_complete = true;
       }
       if(expo_isWalking.getBooleanValue())
-         walking_time.set(TimeTools.nanoSecondstoSeconds(nanosecondstime.getLongValue())-lastStartWalkTime+internalPriorWalkingDuration);
-      total_time.set(TimeTools.nanoSecondstoSeconds(nanosecondstime.getLongValue())-initTime+startTime.getDoubleValue());
+         walking_time.set(Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue())-lastStartWalkTime+internalPriorWalkingDuration);
+      total_time.set(Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue())-initTime+startTime.getDoubleValue());
 
       walking_time_value.setText(displayTime((int)walking_time.getDoubleValue()+(int)priorWalkingDuration.getDoubleValue()));
       operating_time_value.setText(displayTime((int)total_time.getDoubleValue()));

@@ -23,7 +23,7 @@ public enum HumanoidBehaviorType
    WALK_OVER_TERRAIN_TO_VALVE,
    DEBUG_PARTIAL_FOOTHOLDS,
    WALK_TO_GOAL_ANYTIME_PLANNER,
-   TEST_VARIABLE_SWING_TIME;
+   TEST_ICP_OPTIMIZATION;
 
    public static final HumanoidBehaviorType[] values = values();
 }

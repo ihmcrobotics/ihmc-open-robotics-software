@@ -2,12 +2,11 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
-import javax.vecmath.Vector2d;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.MathTools;
@@ -32,7 +31,7 @@ public class ExplorationHelper
 
    private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
    private final DoubleYoVariable copCommandWeight;
-   private final Vector2d commandWeight = new Vector2d();
+   private final Vector2D commandWeight = new Vector2D();
    private final CenterOfPressureCommand centerOfPressureCommand = new CenterOfPressureCommand();
 
    private final DoubleYoVariable startTime;
@@ -65,7 +64,7 @@ public class ExplorationHelper
       soleFrame = footControlHelper.getContactableFoot().getSoleFrame();
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
 
-      YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry graphicObjectsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
       if (graphicObjectsListRegistry != null)
       {
          yoDesiredCop = new YoFramePoint2d(prefix + "DesiredExplorationCop", ReferenceFrame.getWorldFrame(), registry);
@@ -139,13 +138,13 @@ public class ExplorationHelper
 
       currentCorner.changeFrame(soleFrame);
       centroid.changeFrame(soleFrame);
-      desiredCenterOfPressure.changeFrame(soleFrame);
+      desiredCenterOfPressure.setToZero(soleFrame);
 
       double timeExploringCurrentCorner = timeExploring - (double)currentCornerIdx * timeToExploreCorner;
       if (timeExploringCurrentCorner <= timeToGoToCorner)
       {
          double percent = timeExploringCurrentCorner / timeToGoToCorner;
-         percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+         percent = MathTools.clamp(percent, 0.0, 1.0);
          desiredCenterOfPressure.interpolate(centroid, currentCorner, percent);
       }
       else

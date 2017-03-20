@@ -41,11 +41,17 @@ dependencies {
    compile group: 'com.ibm.watson.developer_cloud', name: 'java-sdk', version: '2.10.0'
    compile group: 'us.ihmc.thirdparty.org.kc7bfi', name: 'jflac', version: '1.4.0'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
+    
+    testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
 	compile ihmc.getProjectDependency(":IHMCCommunication")
 	compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-   testCompile ihmc.getProjectDependency(":IHMCUnitTesting")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
+	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
+	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 }
 
 jar {

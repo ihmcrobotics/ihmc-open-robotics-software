@@ -5,12 +5,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.robotController.RobotControllerExecutor;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.robotController.RobotControllerExecutor;
 
 public class MultiThreadedRobotControllerExecutor implements RobotControllerExecutor
 {
@@ -62,7 +62,7 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
                   robotControlElement.write(System.nanoTime());
                   if(registry!=null)
                           registry.updateMirror();
-                  updateDynamicGraphicObjectListRegistry();
+                  updateYoGraphicsListRegistry();
                }
                else
                {
@@ -129,18 +129,18 @@ public class MultiThreadedRobotControllerExecutor implements RobotControllerExec
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    @Override
-   public void updateDynamicGraphicObjectListRegistry()
+   public void updateYoGraphicsListRegistry()
    {
-      if(robotControlElement.getDynamicGraphicObjectsListRegistry() != null)
+      if(robotControlElement.getYoGraphicsListRegistry() != null)
       {
     	  if(registry!=null)
                  registry.updateChangedValues();
          if (simulatedRobot != null)
          {
             simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
-            robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+            robotControlElement.getYoGraphicsListRegistry().setSimulationTransformToWorld(transformToWorld);
          }
-         robotControlElement.getDynamicGraphicObjectsListRegistry().update();
+         robotControlElement.getYoGraphicsListRegistry().update();
       }
    }
 

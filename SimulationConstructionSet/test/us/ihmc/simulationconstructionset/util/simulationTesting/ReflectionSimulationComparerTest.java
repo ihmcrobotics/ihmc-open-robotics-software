@@ -1,19 +1,17 @@
 package us.ihmc.simulationconstructionset.util.simulationTesting;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-
-import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -24,11 +22,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.simulationTesting.ReflectionSimulationComparer;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimpleRewindabilityComparisonScript;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationComparisonScript;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class ReflectionSimulationComparerTest
 {
@@ -128,7 +122,7 @@ public class ReflectionSimulationComparerTest
    private Robot createSimpleRobot()
    {
       Robot robot0 = new Robot("robot");
-      FloatingJoint floatingJoint0 = new FloatingJoint("floatingJoint", new Vector3d(), robot0);
+      FloatingJoint floatingJoint0 = new FloatingJoint("floatingJoint", new Vector3D(), robot0);
       Link link0 = new Link("body");
       link0.setMass(1.0);
       link0.setMomentOfInertia(0.1, 0.1, 0.1);

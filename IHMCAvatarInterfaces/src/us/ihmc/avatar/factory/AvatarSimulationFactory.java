@@ -3,9 +3,6 @@ package us.ihmc.avatar.factory;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.avatar.DRCEstimatorThread;
@@ -17,6 +14,9 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.sensors.DRCSimulatedIMUPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.StampedPosePacket;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
@@ -51,7 +51,6 @@ import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironme
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCControllerThread;
@@ -268,10 +267,10 @@ public class AvatarSimulationFactory
             throw new RuntimeException("UnreasonableAccelerationException");
          }
 
-         Point3d initialCoMPosition = new Point3d();
+         Point3D initialCoMPosition = new Point3D();
          humanoidFloatingRootJointRobot.computeCenterOfMass(initialCoMPosition);
 
-         Quat4d initialEstimationLinkOrientation = new Quat4d();
+         Quaternion initialEstimationLinkOrientation = new Quaternion();
          humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D().getRotation(initialEstimationLinkOrientation);
 
          stateEstimationThread.initializeEstimatorToActual(initialCoMPosition, initialEstimationLinkOrientation);
@@ -310,6 +309,9 @@ public class AvatarSimulationFactory
             JointRole jointRole = robotModel.get().getJointMap().getJointRole(positionControlledJointName);
             boolean isUpperBodyJoint = ((jointRole != JointRole.LEG) && (jointRole != JointRole.SPINE));
             boolean isBackJoint = jointRole == JointRole.SPINE;
+
+            if (simulatedJoint == null || controllerJoint == null)
+               continue;
 
             JointLowLevelPositionControlSimulator positionControlSimulator = new JointLowLevelPositionControlSimulator(simulatedJoint, controllerJoint,
                                                                                                                        isUpperBodyJoint, isBackJoint, false,
@@ -368,8 +370,8 @@ public class AvatarSimulationFactory
          SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = simulationConstructionSet.createSimulationOverheadPlotterFactory();
          simulationOverheadPlotterFactory.setShowOnStart(guiInitialSetup.get().isShowOverheadView());
          simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
-         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getDynamicGraphicObjectsListRegistry());
-         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(stateEstimationThread.getDynamicGraphicObjectsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getYoGraphicsListRegistry());
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(stateEstimationThread.getYoGraphicsListRegistry());
          simulationOverheadPlotterFactory.addYoGraphicsListRegistries(actualCMPComputer.getYoGraphicsListRegistry());
          simulationOverheadPlotterFactory.createOverheadPlotter();
          guiInitialSetup.get().initializeGUI(simulationConstructionSet, humanoidFloatingRootJointRobot, robotModel.get());

@@ -1,17 +1,15 @@
 package us.ihmc.simulationconstructionset.dataBuffer;
 
+import static org.junit.Assert.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 
 public class MirroredYoVariableRegistryTest

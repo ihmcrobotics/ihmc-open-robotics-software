@@ -121,11 +121,11 @@ public class JerkLimitedYoVariable extends DoubleYoVariable
       double accelerationError = inputAcceleration - smoothedAcceleration.getDoubleValue();
       double jerk = accelerationGain.getDoubleValue() * accelerationError + velocityGain.getDoubleValue() * velocityError + positionGain.getDoubleValue()
             * positionError;
-      jerk = MathTools.clipToMinMax(jerk, -maximumJerk.getDoubleValue(), maximumJerk.getDoubleValue());
+      jerk = MathTools.clamp(jerk, -maximumJerk.getDoubleValue(), maximumJerk.getDoubleValue());
 
       smoothedJerk.set(jerk);
       smoothedAcceleration.add(smoothedJerk.getDoubleValue() * dt);
-      smoothedAcceleration.set(MathTools.clipToMinMax(smoothedAcceleration.getDoubleValue(), maximumJerk.getDoubleValue()));
+      smoothedAcceleration.set(MathTools.clamp(smoothedAcceleration.getDoubleValue(), maximumJerk.getDoubleValue()));
       smoothedRate.add(smoothedAcceleration.getDoubleValue() * dt);
       this.add(smoothedRate.getDoubleValue() * dt);
    }

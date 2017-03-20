@@ -2,27 +2,26 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.shapes.Box3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNormals
 {
-   private BoundingBox3d boundingBox = null;
+   private BoundingBox3D boundingBox = null;
 
    private ArrayList<TerrainObject3D> terrainObjects = new ArrayList<TerrainObject3D>();
    private Graphics3DObject linkGraphics;
 
    private final String name;
 
-   private final Point3d tempPointToCheck = new Point3d();
+   private final Point3D tempPointToCheck = new Point3D();
 
    public CombinedTerrainObject3D(String name)
    {
@@ -133,11 +132,11 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
       if (boundingBox == null)
       {
-         boundingBox = new BoundingBox3d(object.getBoundingBox());
+         boundingBox = new BoundingBox3D(object.getBoundingBox());
       }
       else
       {
-         boundingBox = BoundingBox3d.union(boundingBox, object.getBoundingBox());
+         boundingBox = BoundingBox3D.union(boundingBox, object.getBoundingBox());
       }
    }
 
@@ -157,11 +156,11 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       return this.linkGraphics;
    }
 
-   private final Point3d localIntersection = new Point3d();
-   private final Vector3d localNormal = new Vector3d();
+   private final Point3D localIntersection = new Point3D();
+   private final Vector3D localNormal = new Vector3D();
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       double smallestDistance = Double.MAX_VALUE;
       boolean isInside = false;
@@ -201,11 +200,11 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       if (boundingBox == null)
          return false;
 
-      return boundingBox.isInside(x, y, z);
+      return boundingBox.isInsideInclusive(x, y, z);
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }
@@ -234,15 +233,15 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    public void addBoundingBoxVisualizerToLinkGraphics(Graphics3DObject linkGraphics, AppearanceDefinition appearance)
    {
       linkGraphics.identity();
-      double centerX = (boundingBox.getXMin() + boundingBox.getXMax()) / 2.0;
-      double centerY = (boundingBox.getYMin() + boundingBox.getYMax()) / 2.0;
-      double centerZ = boundingBox.getZMin();
+      double centerX = (boundingBox.getMinX() + boundingBox.getMaxX()) / 2.0;
+      double centerY = (boundingBox.getMinY() + boundingBox.getMaxY()) / 2.0;
+      double centerZ = boundingBox.getMinZ();
 
       linkGraphics.translate(centerX, centerY, centerZ);
 
-      double xLength = boundingBox.getXMax() - boundingBox.getXMin();
-      double yLength = boundingBox.getYMax() - boundingBox.getYMin();
-      double zLength = boundingBox.getZMax() - boundingBox.getZMin();
+      double xLength = boundingBox.getMaxX() - boundingBox.getMinX();
+      double yLength = boundingBox.getMaxY() - boundingBox.getMinY();
+      double zLength = boundingBox.getMaxZ() - boundingBox.getMinZ();
 
       linkGraphics.addCube(xLength, yLength, zLength, appearance);
    }
@@ -301,7 +300,7 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = Double.NEGATIVE_INFINITY;
 
@@ -328,22 +327,22 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
    public double getXMin()
    {
-      return boundingBox.getXMin();
+      return boundingBox.getMinX();
    }
 
    public double getXMax()
    {
-      return boundingBox.getXMax();
+      return boundingBox.getMaxX();
    }
 
    public double getYMin()
    {
-      return boundingBox.getYMin();
+      return boundingBox.getMinY();
    }
 
    public double getYMax()
    {
-      return boundingBox.getYMax();
+      return boundingBox.getMaxY();
    }
 
 }

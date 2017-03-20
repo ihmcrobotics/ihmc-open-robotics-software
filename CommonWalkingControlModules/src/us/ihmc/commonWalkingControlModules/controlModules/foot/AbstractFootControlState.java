@@ -30,6 +30,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
 
    protected final RobotSide robotSide;
    protected final RigidBody rootBody;
+   protected final RigidBody pelvis;
    protected final ContactableFoot contactableFoot;
 
    protected final FramePoint desiredPosition = new FramePoint(worldFrame);
@@ -40,7 +41,7 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
    protected final FrameVector desiredAngularAcceleration = new FrameVector(worldFrame);
    protected final SpatialAccelerationVector footAcceleration = new SpatialAccelerationVector();
 
-   protected final HighLevelHumanoidControllerToolbox momentumBasedController;
+   protected final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    protected boolean attemptToStraightenLegs;
 
@@ -51,22 +52,20 @@ public abstract class AbstractFootControlState extends FinishableState<Constrain
       this.footControlHelper = footControlHelper;
       this.contactableFoot = footControlHelper.getContactableFoot();
 
-      this.momentumBasedController = footControlHelper.getMomentumBasedController();
+      this.controllerToolbox = footControlHelper.getHighLevelHumanoidControllerToolbox();
 
       this.robotSide = footControlHelper.getRobotSide();
 
-      rootBody = momentumBasedController.getTwistCalculator().getRootBody();
+      rootBody = controllerToolbox.getTwistCalculator().getRootBody();
 
-      FullHumanoidRobotModel fullRobotModel = footControlHelper.getMomentumBasedController().getFullRobotModel();
-      RigidBody pelvis = fullRobotModel.getPelvis();
+      FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
+      pelvis = fullRobotModel.getPelvis();
       RigidBody foot = fullRobotModel.getFoot(robotSide);
       OneDoFJoint kneeJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 
       straightLegsPrivilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_ZERO);
-      straightLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
 
       bentLegsPrivilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
-      bentLegsPrivilegedConfigurationCommand.applyPrivilegedConfigurationToSubChain(pelvis, foot);
    }
 
    public abstract void doSpecificAction();

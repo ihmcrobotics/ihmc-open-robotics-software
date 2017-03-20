@@ -1,8 +1,5 @@
 package us.ihmc.communication.configuration;
 
-import org.apache.commons.lang3.StringUtils;
-import us.ihmc.tools.io.printing.PrintTools;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -11,6 +8,10 @@ import java.net.URISyntaxException;
 import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Properties;
+
+import org.apache.commons.lang3.StringUtils;
+
+import us.ihmc.commons.PrintTools;
 
 public class NetworkParameters
 {

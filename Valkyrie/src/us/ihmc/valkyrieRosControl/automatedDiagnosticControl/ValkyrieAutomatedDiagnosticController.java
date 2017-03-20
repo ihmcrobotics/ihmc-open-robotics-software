@@ -1,30 +1,49 @@
 package us.ihmc.valkyrieRosControl.automatedDiagnosticControl;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqueSensorModelNames;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
+import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readIMUs;
+
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import us.ihmc.avatar.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
+import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.robotics.sensors.*;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.ContactSensorHolder;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.*;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
+import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.JointStateHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.model.DesiredJointDataHolder;
@@ -50,14 +69,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
-
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.*;
 
 public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControlJavaBridge
 {
@@ -222,7 +233,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       estimatorDesiredJointDataHolder.updateFromModel();
       sensorReader.writeCommandsToRobot();
       
-      diagnosticControllerTime.set(TimeTools.nanoSecondstoSeconds(time - startTime.getLongValue()));
+      diagnosticControllerTime.set(Conversions.nanosecondsToSeconds(time - startTime.getLongValue()));
 
       yoVariableServer.update(time);
 

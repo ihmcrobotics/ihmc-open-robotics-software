@@ -2,16 +2,15 @@ package us.ihmc.simulationconstructionset.util.ground.steppingStones;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
 {
    private final SteppingStones steppingStones;
 
-   private final BoundingBox3d boundingBox = new BoundingBox3d(-10.0, -10.0, -10.0, 10.0, 10.0, 10.0);
+   private final BoundingBox3D boundingBox = new BoundingBox3D(-10.0, -10.0, -10.0, 10.0, 10.0, 10.0);
    
    public SteppingStonesGroundProfile(SteppingStones steppingStones)
    {
@@ -26,7 +25,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
    private final ArrayList<SteppingStone> tempStonesIntersectingLocation = new ArrayList<SteppingStone>();
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -56,7 +55,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
       return maxHeight;
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       normal.setX(0.0);
       normal.setY(0.0);
@@ -64,7 +63,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
    }
    
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

@@ -3,9 +3,8 @@ package us.ihmc.utilities.ros.subscriber;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 
@@ -39,9 +38,9 @@ public abstract class  RosImuSubscriber extends AbstractRosTopicSubscriber<senso
    private int seq_id;
    private String frameId;
 
-   private final Quat4d orientationEstimate = new Quat4d();
-   private final Vector3d angularVelocity = new Vector3d();
-   private final Vector3d linearAcceleration = new Vector3d();
+   private final us.ihmc.euclid.tuple4D.Quaternion orientationEstimate = new us.ihmc.euclid.tuple4D.Quaternion();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Vector3D linearAcceleration = new Vector3D();
    
    public RosImuSubscriber()
    {
@@ -66,7 +65,7 @@ public abstract class  RosImuSubscriber extends AbstractRosTopicSubscriber<senso
    }
    
 
-   protected abstract void onNewMessage(long timeStamp, int seqId, Quat4d orientation, Vector3d angularVelocity, Vector3d linearAcceleration);
+   protected abstract void onNewMessage(long timeStamp, int seqId, Quaternion orientation, Vector3D angularVelocity, Vector3D linearAcceleration);
    
    public static void main(String[] arg) throws URISyntaxException
    {
@@ -75,7 +74,7 @@ public abstract class  RosImuSubscriber extends AbstractRosTopicSubscriber<senso
       {
          
          @Override
-         protected void onNewMessage(long timeStamp, int seqId, Quat4d orientation, Vector3d angularVelocity, Vector3d linearAcceleration)
+         protected void onNewMessage(long timeStamp, int seqId, Quaternion orientation, Vector3D angularVelocity, Vector3D linearAcceleration)
          {
             System.out.println("Gravity:"+ linearAcceleration);
          }

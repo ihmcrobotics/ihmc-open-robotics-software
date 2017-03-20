@@ -1,18 +1,26 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
+import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
@@ -134,6 +142,82 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
+   /**
+    * The map returned contains all controller gains for tracking jointspace trajectories. The key of
+    * the map is the joint name as defined in the robot joint map. If a joint is not contained in the
+    * map, jointspace control is not supported for that joint.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing jointspace PID gains by joint name
+    */
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoPIDGains>();
+   }
+
+   /**
+    * The map returned contains all controller gains for tracking taskspace orientation trajectories
+    * (or the orientation part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * orientation or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace orientation PID gains by rigid body name
+    */
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoOrientationPIDGainsInterface>();
+   }
+
+   /**
+    * The map returned contains all controller gains for tracking taskspace position trajectories
+    * (or the position part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * position or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace position PID gains by rigid body name
+    */
+   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoPositionPIDGainsInterface>();
+   }
+
+   /**
+    * The map returned contains the default home joint angles. The key of the map is the joint name
+    * as defined in the robot joint map.
+    *
+    * @return map containing home joint angles by joint name
+    */
+   public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
+   {
+      return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * The list of strings returned contains all joint names that are position controlled. The names
+    * of the joints are defined in the robots joint map.
+    *
+    * @return list of position controlled joint names
+    */
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      return new ArrayList<String>();
+   }
+
+   /**
+    * The map returned contains the integration settings for position controlled joints. The settings
+    * define how the controller core integrated desired accelerations to find desired joint positions
+    * and velocities. The key of the map is the joint name as defined in the robot joint map. If a
+    * joint is not contained in the map, position control is not supported for that joint.
+    *
+    * @return map containing acceleration integration settings by joint name
+    */
+   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   {
+      return new HashMap<String, JointAccelerationIntegrationSettings>();
+   }
+
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
 
    public abstract YoSE3PIDGainsInterface createHoldPositionFootControlGains(YoVariableRegistry registry);
@@ -144,13 +228,84 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract double getSwingHeightMaxForPushRecoveryTrajectory();
 
+   /**
+    * Specifies if the arm controller should be switching
+    * to chest frame or jointspace only if necessary.
+    * This is particularly useful when manipulation was performed
+    * with respect to world during standing to prevent "leaving a hand behind"
+    * when the robot starts walking.
+    *
+    * @return whether the manipulation control should get prepared
+    *  for walking.
+    */
    public abstract boolean doPrepareManipulationForLocomotion();
+
+   /**
+    * Specifies if the pelvis orientation controller should
+    * be initialized before starting to walk.
+    * When the controller is initialized, the pelvis will
+    * smoothly cancel out the user orientation offset on
+    * the first transfer of a walking sequence.
+    *
+    * @return whether the pelvis orientation control should get prepared
+    *  for walking.
+    */
+   public boolean doPreparePelvisForLocomotion()
+   {
+      return true;
+   }
+
+   /**
+    * Specifies whether upper-body motion is allowed when the robot is walking
+    * or during any exchange support.
+    *
+    * @return whether the upper-body can be moved during walking or not.
+    */
+   public boolean allowUpperBodyMotionDuringLocomotion()
+   {
+      return false;
+   }
 
    public abstract boolean controlHeadAndHandsWithSliders();
 
+   /**
+    * The default transfer time used in the walking controller. This is the time interval spent in double support shifting
+    * the weight from one foot to the other while walking.
+    */
    public abstract double getDefaultTransferTime();
 
+   /**
+    * The default swing time used in the walking controller. This is the time interval spent in single support moving the
+    * swing foot to the next foothold.
+    */
    public abstract double getDefaultSwingTime();
+
+   /**
+    * This is the default transfer time used in the walking controller to shift the weight back to the center of the feet
+    * after executing a footstep plan.
+    */
+   public double getDefaultFinalTransferTime()
+   {
+      return getDefaultTransferTime();
+   }
+
+   /**
+    * This is the default transfer time used in the walking controller to shift the weight to the initial stance foot
+    * when starting to execute a footstep plan.
+    */
+   public double getDefaultInitialTransferTime()
+   {
+      return 1.0;
+   }
+
+   /**
+    * This is the minimum transfer time that the controller will allow when adjusting transfer times to achieve certain step
+    * times in footstep plans.
+    */
+   public double getMinimumTransferTime()
+   {
+      return 0.1;
+   }
 
    /** Used by the UI to limit motion range of the spine yaw. It doesn't have to be equal to the actual joint limit */
    public abstract double getSpineYawLimit();
@@ -366,11 +521,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * In transfer, this is the maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * In transfer, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * This distance is determined by finding the stance length, and multiplying it by the returned variable.
     * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
-    * @return ICP proximity in meters
+    * @return percent of stance length for proximity
     */
-   public double getICPProximityToLeadingFootForToeOff()
+   public double getICPPercentOfStanceForDSToeOff()
    {
       return 0.0;
    }
@@ -412,5 +568,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getMinHeightDifferenceForStepUpOrDown()
    {
       return 0.04;
+   }
+
+   /**
+    * Sets an interpolation ratio for determining the toe off contact point. A ray is cast forward from the center
+    * of the foot through this point, and where the ray intersects with the foot polygon is where the toe off contact is set.
+    * This interpolation allows biasing between the ideal ICP plan by choosing only the exit CMP and the feedback CMP location.
+    * @return interpolation ratio (0.0 = all exit cmp, 1.0 = all desired CoP)
+    */
+   public double getToeOffContactInterpolation()
+   {
+      return 0.0;
    }
 }

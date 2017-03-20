@@ -2,17 +2,14 @@ package us.ihmc.robotics.geometry;
 
 import java.io.Serializable;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple2d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Tuple3f;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -22,7 +19,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * @author Learning Locomotion Team
  * @version 2.0
  */
-public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d & GeometryObject<T>> extends AbstractFrameObject<S, T> implements Serializable
+public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBasics & GeometryObject<T>> extends AbstractFrameObject<S, T> implements Serializable
 {
    private static final long serialVersionUID = 3894861900288076730L;
 
@@ -71,6 +68,36 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       set(x, y, z);
    }
 
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startIndex, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startIndex, tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleDenseMatrix);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, tupleDenseMatrix);
+   }
+   
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, int column, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, column, tupleDenseMatrix);
+   }
+
    public final void set(FrameTuple<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
@@ -78,24 +105,24 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    }
 
    @Override
-   public final void set(Tuple3d tuple)
+   public final void set(Tuple3DBasics tuple)
    {
       this.tuple.set(tuple);
    }
 
-   public final void set(Tuple3f tuple)
+   public final void set(Tuple3DReadOnly tuple)
    {
       this.tuple.set(tuple);
    }
 
    @Override
-   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3d tuple)
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3DBasics tuple)
    {
       this.referenceFrame = referenceFrame;
       set(tuple);
    }
 
-   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3f tuple)
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, Tuple3DReadOnly tuple)
    {
       this.referenceFrame = referenceFrame;
       set(tuple);
@@ -105,7 +132,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
     * @param tuple2d
     */
-   public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2d tuple)
+   public final void setXYIncludingFrame(ReferenceFrame referenceFrame, Tuple2DReadOnly tuple)
    {
       this.referenceFrame = referenceFrame;
       setXY(tuple);
@@ -144,14 +171,14 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final void set(Direction direction, double value)
    {
-      MathTools.set(tuple, direction, value);
+      Direction.set(tuple, direction, value);
    }
 
    /**
     * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
     * @param tuple2d
     */
-   public void setXY(Tuple2d tuple2d)
+   public void setXY(Tuple2DReadOnly tuple2d)
    {
       this.tuple.setX(tuple2d.getX());
       this.tuple.setY(tuple2d.getY());
@@ -171,7 +198,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final double get(Direction direction)
    {
-      return MathTools.get(tuple, direction);
+      return Direction.get(tuple, direction);
    }
 
    public final void scale(double scaleFactor)
@@ -207,13 +234,13 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    }
 
    /**
-    * Returns a Point3d copy of the tuple in this FrameTuple.
+    * Returns a Point3D copy of the tuple in this FrameTuple.
     *
-    * @return Point3d
+    * @return Point3D
     */
-   public final Point3d getPointCopy()
+   public final Point3D getPointCopy()
    {
-      return new Point3d(tuple);
+      return new Point3D(tuple);
    }
 
    /**
@@ -221,26 +248,21 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     *
     * @return Vector3d
     */
-   public final Vector3d getVectorCopy()
+   public final Vector3D getVectorCopy()
    {
-      return new Vector3d(this.tuple);
+      return new Vector3D(this.tuple);
    }
 
    @Override
-   public final void get(Tuple3d tuple3dToPack)
+   public final void get(Tuple3DBasics tuple3dToPack)
    {
       tuple3dToPack.set(tuple);
-   }
-
-   public final void get(Tuple3f tuple3fToPack)
-   {
-      tuple3fToPack.set(tuple);
    }
 
    @Override
    public final void setToZero()
    {
-      tuple.set(0.0, 0.0, 0.0);
+      tuple.setToZero();
    }
 
    @Override
@@ -250,26 +272,16 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
       this.referenceFrame = referenceFrame;
    }
 
-   /**
-    * Sets this tuple to the location of the origin of passed in referenceFrame.
-    */
-   protected void setFromReferenceFrame(ReferenceFrame referenceFrame)
-   {
-      ReferenceFrame thisReferenceFrame = getReferenceFrame();
-      setToZero(referenceFrame);
-      changeFrame(thisReferenceFrame);
-   }
-
    @Override
    public final void setToNaN()
    {
-      this.tuple.set(Double.NaN, Double.NaN, Double.NaN);
+      this.tuple.setToNaN();
    }
 
    @Override
    public final void setToNaN(ReferenceFrame referenceFrame)
    {
-      this.tuple.set(Double.NaN, Double.NaN, Double.NaN);
+      this.tuple.setToNaN();
       this.referenceFrame = referenceFrame;
    }
 
@@ -282,7 +294,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    @Override
    public final boolean containsNaN()
    {
-      return Double.isNaN(tuple.getX()) || Double.isNaN(tuple.getY()) || Double.isNaN(tuple.getZ());
+      return tuple.containsNaN();
    }
 
    public final boolean containsInfinity()
@@ -296,9 +308,9 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param scaleFactor double
     * @param tuple1 Tuple3d
     */
-   public final void scale(double scaleFactor, Tuple3d tuple1)
+   public final void setAndScale(double scaleFactor, Tuple3DReadOnly tuple1)
    {
-      tuple.scale(scaleFactor, tuple1);
+      tuple.setAndScale(scaleFactor, tuple1);
    }
 
    /**
@@ -308,7 +320,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param tuple1 Tuple3d
     * @param tuple2 Tuple3d
     */
-   public final void scaleAdd(double scaleFactor, Tuple3d tuple1, Tuple3d tuple2)
+   public final void scaleAdd(double scaleFactor, Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       tuple.scaleAdd(scaleFactor, tuple1, tuple2);
    }
@@ -321,7 +333,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param scaleFactor2 double
     * @param frameTuple2 Tuple3d
     */
-   public final void scaleAdd(double scaleFactor1, Tuple3d tuple1, double scaleFactor2, Tuple3d tuple2)
+   public final void scaleAdd(double scaleFactor1, Tuple3DReadOnly tuple1, double scaleFactor2, Tuple3DReadOnly tuple2)
    {
       tuple.setX(scaleFactor1 * tuple1.getX() + scaleFactor2 * tuple2.getX());
       tuple.setY(scaleFactor1 * tuple1.getY() + scaleFactor2 * tuple2.getY());
@@ -335,7 +347,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param scaleFactor double
     * @param tuple1 Tuple3d
     */
-   public final void scaleAdd(double scaleFactor, Tuple3d tuple1)
+   public final void scaleAdd(double scaleFactor, Tuple3DReadOnly tuple1)
    {
       tuple.scaleAdd(scaleFactor, tuple1);
    }
@@ -351,7 +363,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
    public final void scale(double scaleFactor, FrameTuple<?, ?> frameTuple1)
    {
       checkReferenceFrameMatch(frameTuple1);
-      scale(scaleFactor, frameTuple1.tuple);
+      setAndScale(scaleFactor, frameTuple1.tuple);
    }
 
    /**
@@ -407,7 +419,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * Sets the value of this tuple to the sum of itself and tuple1.
     * @param tuple1 the other Tuple3d
     */
-   public final void add(Tuple3d tuple1)
+   public final void add(Tuple3DReadOnly tuple1)
    {
       tuple.add(tuple1);
    }
@@ -428,7 +440,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param tuple1 the first Tuple3d
     * @param tuple2 the second Tuple3d
     */
-   public final void add(Tuple3d tuple1, Tuple3d tuple2)
+   public final void add(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       tuple.add(tuple1, tuple2);
    }
@@ -473,7 +485,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * Sets the value of this tuple to the difference of itself and tuple1 (this -= tuple1).
     * @param tuple1 the other Tuple3d
     */
-   public final void sub(Tuple3d tuple1)
+   public final void sub(Tuple3DReadOnly tuple1)
    {
       tuple.sub(tuple1);
    }
@@ -483,7 +495,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param tuple1 the first Tuple3d
     * @param tuple2 the second Tuple3d
     */
-   public final void sub(Tuple3d tuple1, Tuple3d tuple2)
+   public final void sub(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       tuple.sub(tuple1, tuple2);
    }
@@ -519,7 +531,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param tuple1 Tuple3d
     * @param tuple2 Tuple3d
     */
-   public final void subAndScale(double scaleFactor, Tuple3d tuple1, Tuple3d tuple2)
+   public final void subAndScale(double scaleFactor, Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2)
    {
       sub(tuple1, tuple2);
       scale(scaleFactor);
@@ -546,7 +558,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
      *  @param t2  the second tuple  
      *  @param alpha  the alpha interpolation parameter  
     */
-   public final void interpolate(Tuple3d tuple1, Tuple3d tuple2, double alpha)
+   public final void interpolate(Tuple3DReadOnly tuple1, Tuple3DReadOnly tuple2, double alpha)
    {
       tuple.interpolate(tuple1, tuple2, alpha);
    }
@@ -568,12 +580,12 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
 
    public final void getInMatrixColumn(DenseMatrix64F matrix, int startRow)
    {
-      MatrixTools.setDenseMatrixFromTuple3d(matrix, tuple, startRow, 0);
+      tuple.get(startRow, matrix);
    }
 
    public final void clipToMinMax(double minValue, double maxValue)
    {
-      this.tuple.clamp(minValue, maxValue);
+      this.tuple.clipToMinMax(minValue, maxValue);
    }
 
    public final void negate()
@@ -592,7 +604,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param tuple1 Tuple3d
     * @param threshold double
     */
-   public final boolean epsilonEquals(Tuple3d tuple1, double threshold)
+   public final boolean epsilonEquals(Tuple3DReadOnly tuple1, double threshold)
    {
       if (tuple1 == null)
       {
@@ -627,7 +639,7 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3d &
     * @param tuple1 Tuple3d
     * @param threshold double
     */
-   public final boolean epsilonEquals(Tuple2d tuple1, double threshold)
+   public final boolean epsilonEquals(Tuple2DReadOnly tuple1, double threshold)
    {
       if (tuple1 == null)
       {

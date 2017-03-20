@@ -2,16 +2,14 @@ package us.ihmc.simulationconstructionset.util.environments;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
@@ -22,11 +20,14 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
+import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
 
 public class ContactableValveRobot extends ContactablePinJointRobot implements SelectableObject, SelectedListener
 {
@@ -48,7 +49,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    private final DoubleYoVariable valveClosePercentage;
    
    private double valveMass;
-   private Matrix3d inertiaMatrix;
+   private Matrix3D inertiaMatrix;
 
    private FrameTorus3d valveTorus;
    protected ArrayList<FrameCylinder3d> spokesCylinders = new ArrayList<FrameCylinder3d>();
@@ -77,7 +78,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    }
 
    public ContactableValveRobot(String name, double valveRadius, double valveOffsetFromWall, double valveThickness, int numberOfSpokes, double spokesThickness,
-         Point3d valvePosition, Quat4d valveOrientation, double valveNumberOfPossibleTurns, double valveMass)
+         Point3D valvePosition, Quaternion valveOrientation, double valveNumberOfPossibleTurns, double valveMass)
    {
       this(name, valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, new FramePose(ReferenceFrame.getWorldFrame(),
             valvePosition, valveOrientation), valveNumberOfPossibleTurns, valveMass);
@@ -112,19 +113,19 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       valveFrame.getPose(originalValvePose);
 
       //creating the pinJoint 
-      Vector3d jointAxisVector = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D jointAxisVector = new Vector3D(1.0, 0.0, 0.0);
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveFrame.getTransformToDesiredFrame(valveTransformToWorld, ReferenceFrame.getWorldFrame());
       valveTransformToWorld.transform(jointAxisVector);
             
-      Vector3d valvePositionInWorld = new Vector3d();
+      Vector3D valvePositionInWorld = new Vector3D();
       valvePoseInWorld.getPosition(valvePositionInWorld);
       valvePinJoint = new PinJoint("valvePinJoint", valvePositionInWorld, this, jointAxisVector);
       valvePinJoint.setLimitStops(0.0, valveNumberOfPossibleTurns * 2 * Math.PI, 1000, 100);
       valvePinJoint.setDamping(valveDamping.getDoubleValue());
       
       //put the graphics frame in the proper orientation
-      Matrix3d rotationMatrix = new Matrix3d();
+      RotationMatrix rotationMatrix = new RotationMatrix();
       valvePoseInWorld.getOrientation(rotationMatrix);
       valveLinkGraphics.rotate(rotationMatrix);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
@@ -133,7 +134,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       //Creating the physical link for the simulation
       valveLink = new Link("valveLink");
       valveLink.setMass(valveMass);
-      valveLink.setComOffset(new Vector3d(0.0, 0.0, 0.0));
+      valveLink.setComOffset(new Vector3D(0.0, 0.0, 0.0));
 
       inertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfTorus(valveMass, valveRadius, valveThickness);
       valveLink.setMomentOfInertia(inertiaMatrix);
@@ -143,9 +144,9 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       //torus and offsetCylinder
       RigidBodyTransform transform = new RigidBodyTransform();
       RigidBodyTransform invertTransform = new RigidBodyTransform();
-      Quat4d quat = new Quat4d();
+      Quaternion quat = new Quaternion();
 
-      RotationTools.convertYawPitchRollToQuaternion(0.0, Math.PI / 2.0, 0.0, quat);
+      quat.setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
       transform.setRotation(quat);
       invertTransform.set(transform);
       invertTransform.invert();
@@ -159,13 +160,13 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       //spokes
       for (int i = 0; i < numberOfSpokes; i++)
       {
-         RotationTools.convertYawPitchRollToQuaternion(0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes, quat);
+         quat.setYawPitchRoll(0.0, 0.0, i * 2.0 * Math.PI / numberOfSpokes);
          transform.setRotation(quat);
          invertTransform.set(transform);
          invertTransform.invert();
 
-         RigidBodyTransform yoGraphicTransform = new RigidBodyTransform();
-         yoGraphicTransform.multiply(rotationTransform, transform);
+         RigidBodyTransform yoGraphicTransform = new RigidBodyTransform(rotationTransform);
+         yoGraphicTransform.multiply(transform);
 
          FrameCylinder3d spokeCylinder = new FrameCylinder3d(valveFrame, transform, valveRadius - spokesThickness / 2.0, spokesThickness / 2.0);
          spokesCylinders.add(spokeCylinder);
@@ -197,7 +198,8 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       RigidBodyTransform pinJointTransform = new RigidBodyTransform();
       RigidBodyTransform newValvePose = new RigidBodyTransform();
       pinJointTransform.setRotationRollAndZeroTranslation(valvePinJoint.getQYoVariable().getDoubleValue());
-      newValvePose.multiply(originalValvePose, pinJointTransform);
+      newValvePose.set(originalValvePose);
+      newValvePose.multiply(pinJointTransform);
       valveFrame.setPoseAndUpdate(newValvePose);
 
       super.updateAllGroundContactPointVelocities();
@@ -205,7 +207,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
 
    private final FramePoint pointToCheck = new FramePoint();
    @Override
-   public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+   public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
       pointToCheck.setIncludingFrame(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(valveFrame);
@@ -221,13 +223,13 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    }
 
    @Override
-   public boolean isClose(Point3d pointInWorldToCheck)
+   public boolean isClose(Point3D pointInWorldToCheck)
    {
       return isPointOnOrInside(pointInWorldToCheck);
    }
 
    @Override
-   public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+   public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
       FramePoint pointToCheck = new FramePoint(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
       pointToCheck.changeFrame(valveFrame);
@@ -242,8 +244,8 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    }
 
    @Override
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3d location, Point3d cameraLocation,
-         Quat4d cameraRotation)
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+         QuaternionReadOnly cameraRotation)
    {
       // TODO Auto-generated method stub
 
@@ -322,7 +324,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       this.valvePoseInWorld.setPose(valvePoseInWorld);
    }
 
-   public void setPoseInWorld(Point3d position, Quat4d orientation)
+   public void setPoseInWorld(Point3D position, Quaternion orientation)
    {
       this.valvePoseInWorld.setPose(position, orientation);
    }

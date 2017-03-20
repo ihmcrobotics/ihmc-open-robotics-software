@@ -7,10 +7,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.math.Transform;
 
-import us.ihmc.SdfLoader.DRCRobotSDFLoader;
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.acsell.initialSetup.BonoInitialSetup;
 import us.ihmc.acsell.network.AcsellSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -21,24 +17,25 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.NoArmsArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.streamingData.HumanoidGlobalDataProducer;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.FootstepPlanningParameterization;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
+import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFLogModelProvider;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -48,7 +45,6 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.physics.ScsCollisionConfigure;
 import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
@@ -72,10 +68,8 @@ public class BonoRobotModel implements DRCRobotModel
    private final JaxbSDFLoader loader;
    private final BonoJointMap jointMap = new BonoJointMap();
    private final DRCRobotSensorInformation sensorInformation;
-   private final NoArmsArmControllerParameters armControlParameters;
    private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
-   private final BonoWalkingControllerParameters multiContactControllerParameters;
 
    private boolean enableJointDamping = true;
 
@@ -94,21 +88,17 @@ public class BonoRobotModel implements DRCRobotModel
       }
 
       capturePointPlannerParameters = new BonoCapturePointPlannerParameters(runningOnRealRobot);
-      armControlParameters = new NoArmsArmControllerParameters();
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
-      multiContactControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
       robotDescription = createRobotDescription();
    }
 
    private RobotDescription createRobotDescription()
    {
       boolean useCollisionMeshes = false;
-      boolean enableTorqueVelocityLimits = true;
-      boolean enableJointDamping = true;
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
       return robotDescription;
    }
 
@@ -116,12 +106,6 @@ public class BonoRobotModel implements DRCRobotModel
    public RobotDescription getRobotDescription()
    {
       return robotDescription;
-   }
-
-   @Override
-   public ArmControllerParameters getArmControllerParameters()
-   {
-      return armControlParameters;
    }
 
    @Override
@@ -228,12 +212,9 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes)
    {
-      boolean useCollisionMeshes = false;
       boolean enableTorqueVelocityLimits = false;
-      HumanoidJointNameMap jointMap = getJointMap();
       boolean enableJointDamping = getEnableJointDamping();
-      RobotDescription robotDescription = loader.createRobotDescription(jointMap, useCollisionMeshes, enableTorqueVelocityLimits, enableJointDamping);
-      return new HumanoidFloatingRootJointRobot(robotDescription, jointMap);
+      return new HumanoidFloatingRootJointRobot(robotDescription, jointMap, enableJointDamping, enableTorqueVelocityLimits);
    }
 
    @Override

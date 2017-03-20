@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
@@ -16,15 +17,13 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.KDTree;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 
 //Ground file must be a point cloud with 1 cm resolution
 public class GroundProfileFromFile extends GroundProfileFromHeightMap
 {
    private KDTree kdTree;
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    public static enum VariableType {X, Y, Z}
 
@@ -88,7 +87,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
             zMax = rawPoints[i][2];
       }
 
-      boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
       
       System.out.println(BDITerrainFilePath + ": " + "(" + xMin + ", " + yMin + ", " + zMin + ") (" + xMax + ", " + yMax + ", " + zMax + ")");
 
@@ -141,7 +140,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
     */
    public static double[][] loadPoints3D(BufferedReader bufferedReader, RigidBodyTransform transform3D, VariableType[] variableOrder)
    {
-      Point3d point3d = new Point3d();
+      Point3D point3d = new Point3D();
       double[] values = new double[3];
 
       try
@@ -224,7 +223,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -237,7 +236,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
    @Override
    public double heightAt(double x, double y, double z)
    {
-      if (!boundingBox.isXYInside(x, y)) return 0.0;
+      if (!boundingBox.isXYInsideInclusive(x, y)) return 0.0;
 
       // double[] query = new double[]{x, y};
       query[0] = x;
@@ -260,7 +259,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
     */
 
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d vector3d)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D vector3d)
    {
       vector3d.set(0.0, 0.0, 1.0);
    }
@@ -281,11 +280,11 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
               VariableType.Y});
 
       // TerrainFromGroundProfile terrain = new TerrainFromGroundProfile(groundProfile, unitScale, xOffset, yOffset);
-      BoundingBox3d boundingBox = groundProfile.getBoundingBox();
+      BoundingBox3D boundingBox = groundProfile.getBoundingBox();
 
-      System.out.println("xMin: " + boundingBox.getXMin() + ", xMax: " + boundingBox.getXMax());
-      System.out.println("yMin: " + boundingBox.getYMin() + ", yMax: " + boundingBox.getYMax());
-      System.out.println("zMin: " + boundingBox.getZMin() + ", zMax: " + boundingBox.getZMax());
+      System.out.println("xMin: " + boundingBox.getMinX() + ", xMax: " + boundingBox.getMaxX());
+      System.out.println("yMin: " + boundingBox.getMinY() + ", yMax: " + boundingBox.getMaxY());
+      System.out.println("zMin: " + boundingBox.getMinZ() + ", zMax: " + boundingBox.getMaxZ());
 
       Robot rob = new Robot("")
       {
@@ -332,7 +331,7 @@ public class GroundProfileFromFile extends GroundProfileFromHeightMap
    }
    
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

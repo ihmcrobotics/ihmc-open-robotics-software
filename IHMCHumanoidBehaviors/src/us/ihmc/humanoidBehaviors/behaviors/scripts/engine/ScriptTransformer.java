@@ -13,8 +13,8 @@ import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.io.StreamException;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public abstract class ScriptTransformer
 {

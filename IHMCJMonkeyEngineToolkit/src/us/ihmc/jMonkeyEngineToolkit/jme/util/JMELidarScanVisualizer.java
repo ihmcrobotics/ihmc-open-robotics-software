@@ -2,10 +2,11 @@ package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
 import java.util.concurrent.Callable;
 
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public class JMELidarScanVisualizer extends JMEPointCloudVisualizer
 {
@@ -28,6 +29,20 @@ public class JMELidarScanVisualizer extends JMEPointCloudVisualizer
    }
 
    public void updateLidarNodeTransform(final RigidBodyTransform lidarNodeTransform)
+   {
+      getGraphics3DAdapter().getRenderer().enqueue(new Callable<Object>()
+      {
+         @Override
+         public Object call() throws Exception
+         {
+            lidarNode.setTransform(lidarNodeTransform);
+            
+            return null;
+         }
+      });
+   }
+
+   public void updateLidarNodeTransform(final AffineTransform lidarNodeTransform)
    {
       getGraphics3DAdapter().getRenderer().enqueue(new Callable<Object>()
       {

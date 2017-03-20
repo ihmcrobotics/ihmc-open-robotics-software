@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 import java.io.IOException;
 
 public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
@@ -35,7 +35,7 @@ public class LogVisualizerListenerDemo implements YoVariableLogPlaybackListener
    {
       System.out.print(timestamp + ": ");
 
-      Point3d position = new Point3d();
+      Point3D position = new Point3D();
       origin.getPosition(position);
       System.out.println("pos: " + position.getX() + " " + position.getY() + " " + position.getZ() + " - {");
       for(OneDegreeOfFreedomJoint joint : joints)

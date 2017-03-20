@@ -1,14 +1,13 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ShipCorridorGroundProfileTest 
 {
@@ -27,11 +26,11 @@ public class ShipCorridorGroundProfileTest
    public void testSurfaceNormalAlongYAxis()
    {
       int nSteps = 1000;
-      BoundingBox3d boundingBox = groundProfile.getBoundingBox();
+      BoundingBox3D boundingBox = groundProfile.getBoundingBox();
       
-      double yStep = (boundingBox.getYMax() - boundingBox.getYMin()) / nSteps;
+      double yStep = (boundingBox.getMaxY() - boundingBox.getMinY()) / nSteps;
       double dy = 1e-8;
-      double x = (boundingBox.getXMax() - boundingBox.getXMin()) / 2.0;
+      double x = (boundingBox.getMaxX() - boundingBox.getMinX()) / 2.0;
       double z = 0.0;
       double y = -2.5; //Start on the left side and move to the right side
 
@@ -50,12 +49,12 @@ public class ShipCorridorGroundProfileTest
             double dzdy = (groundProfile.heightAt(x, y + yStep, z) - groundProfile.heightAt(x, y, z)) / yStep;
 
             //Numerical Surface normal
-            Vector3d numericalSurfaceNormal = new Vector3d(0.0, -dzdy, 1.0);
+            Vector3D numericalSurfaceNormal = new Vector3D(0.0, -dzdy, 1.0);
             numericalSurfaceNormal.normalize();
 
             //Other Surface normal
-            Vector3d surfaceNormalFromGroundProfile = new Vector3d();
-            Point3d intersection = new Point3d();
+            Vector3D surfaceNormalFromGroundProfile = new Vector3D();
+            Point3D intersection = new Point3D();
             groundProfile.closestIntersectionAndNormalAt(x, y, z, intersection, surfaceNormalFromGroundProfile);
             
             if(((initialHeight == 3.0)&&(finalHeight != 3.0)) || ((initialHeight != 3.0)&&(finalHeight == 3.0)) || ((initialHeight != 0.0)&&(finalHeight == 0.0)) || ((initialHeight == 0.0)&&(finalHeight != 0.0)))
@@ -79,7 +78,7 @@ public class ShipCorridorGroundProfileTest
                System.out.println("\n\n");
             }
   
-            JUnitTools.assertTuple3dEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
+            EuclidCoreTestTools.assertTuple3DEquals(numericalSurfaceNormal, surfaceNormalFromGroundProfile, epsilon);
          }
       }
    }

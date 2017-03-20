@@ -2,10 +2,11 @@ package us.ihmc.humanoidBehaviors.utilities;
 
 import java.util.List;
 
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollisionDetectedPacket;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -24,7 +25,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.sensorData.ForceSensorDistalMassCompensator;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class WristForceSensorFilteredUpdatable implements Updatable
 {
@@ -214,7 +214,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       yoForceLimitExceeded.set(yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue() > yoImpactForceThreshold_N.getDoubleValue());
 
       double forceToForceLimitRatio = yoWristSensorForceMagnitudeBandPassFiltered.getDoubleValue() / yoImpactForceThreshold_N.getDoubleValue();
-      yoCollisionSeverityLevelOneToThree.set(MathTools.clipToMinMax((int) Math.round(forceToForceLimitRatio), 1, 3));
+      yoCollisionSeverityLevelOneToThree.set(MathTools.clamp((int) Math.round(forceToForceLimitRatio), 1, 3));
 
       //            yoForceLimitExceeded.set( taskspaceStiffnessCalc.getForceAlongDirectionOfMotion() > yoImpactForceThreshold_N.getDoubleValue() );
       //      yoStiffnessLimitExceeded.set(taskspaceStiffnessCalc.getStiffnessAlongDirectionOfMotion() > yoImpactStiffnessThreshold_NperM.getDoubleValue());

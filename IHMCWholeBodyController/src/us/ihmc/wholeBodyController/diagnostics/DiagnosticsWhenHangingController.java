@@ -6,11 +6,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -24,6 +19,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -33,6 +30,9 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoMinimumJerkTrajectory;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -105,7 +105,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
 
    private final HumanoidJointPoseList humanoidJointPoseList;
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
 
@@ -113,18 +113,18 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
    public DiagnosticsWhenHangingController(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging,
-         HighLevelHumanoidControllerToolbox momentumBasedController, TorqueOffsetPrinter torqueOffsetPrinter)
+         HighLevelHumanoidControllerToolbox controllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter)
    {
       super(HighLevelState.DIAGNOSTICS);
 
       this.humanoidJointPoseList = humanoidJointPoseList;
-      this.bipedSupportPolygons = momentumBasedController.getBipedSupportPolygons();
+      this.bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       for (RobotSide robotSide : RobotSide.values)
       {
-         ContactablePlaneBody contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-         footContactStates.put(robotSide, momentumBasedController.getContactState(contactableFoot));
+         ContactablePlaneBody contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
+         footContactStates.put(robotSide, controllerToolbox.getContactState(contactableFoot));
       }
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       humanoidJointPoseList.setParentRegistry(registry);
 
       splineDuration.set(3.0);
@@ -143,8 +143,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       adaptTorqueOffset.set(false);
       transferTorqueOffsets.set(false);
 
-      this.yoTime = momentumBasedController.getYoTime();
-      this.fullRobotModel = momentumBasedController.getFullRobotModel();
+      this.yoTime = controllerToolbox.getYoTime();
+      this.fullRobotModel = controllerToolbox.getFullRobotModel();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);
 
       OneDoFJoint[] jointArray = fullRobotModel.getOneDoFJoints();
@@ -215,8 +215,8 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       stateMachine.addState(finishedState);
 
       // Foot force sensors tarring stuff
-      footSwitches = momentumBasedController.getFootSwitches();
-      alphaFootForce.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, momentumBasedController.getControlDT()));
+      footSwitches = controllerToolbox.getFootSwitches();
+      alphaFootForce.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.1, controllerToolbox.getControlDT()));
       updateFootForceSensorOffsets.set(true);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -330,7 +330,7 @@ public class DiagnosticsWhenHangingController extends HighLevelBehavior implemen
       }
 
       bipedSupportPolygons.updateUsingContactStates(footContactStates);
-      momentumBasedController.update();
+      controllerToolbox.update();
    }
 
    public void updateDiagnosticsWhenHangingHelpers()

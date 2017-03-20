@@ -2,15 +2,14 @@ package us.ihmc.humanoidRobotics.communication.packets.behaviors.script;
 
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.RandomStringUtils;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class ScriptBehaviorInputPacket extends Packet<ScriptBehaviorInputPacket>
 {
@@ -58,11 +57,11 @@ public class ScriptBehaviorInputPacket extends Packet<ScriptBehaviorInputPacket>
       double xMax = 0.90 * Math.min(Math.abs(XYZ_MAX[0]), Math.abs(XYZ_MIN[0]));
       double yMax = 0.90 * Math.min(Math.abs(XYZ_MAX[1]), Math.abs(XYZ_MIN[1]));
       double zMax = 0.90 * Math.min(Math.abs(XYZ_MAX[2]), Math.abs(XYZ_MIN[2]));
-      Point3d position = RandomTools.generateRandomPoint(random, xMax, yMax, zMax);
-      Vector3d translation = new Vector3d(position);
-      Quat4d orientation = new Quat4d();
+      Point3D position = RandomGeometry.nextPoint3D(random, xMax, yMax, zMax);
+      Vector3D translation = new Vector3D(position);
+      Quaternion orientation = new Quaternion();
 
-      orientation.set(RandomTools.generateRandomRotation(random));
+      orientation.set(RandomGeometry.nextAxisAngle(random));
 
       this.scriptName = RandomStringUtils.random(length, true, true);
       this.referenceTransform = new RigidBodyTransform(orientation, translation);

@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.util.graphics;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -13,9 +12,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
@@ -24,6 +20,9 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class DynamicGraphicObjectEvaluation
 {
@@ -64,14 +63,14 @@ public class DynamicGraphicObjectEvaluation
       final YoFrameConvexPolygon2d yoPolygon = new YoFrameConvexPolygon2d("PolyPoints", "", worldFrame, maxNumberOfVertices, registry);
       yoPolygon.setConvexPolygon2d(polygon);
       YoFramePose yoPolyOrigin = new YoFramePose("PolyOrigin", worldFrame, registry);
-      YoGraphicPolygon dynamicGraphicPolygon = new YoGraphicPolygon("Polygon", yoPolygon, yoPolyOrigin, 3.0, appearance);
+      YoGraphicPolygon yoGraphicPolygon = new YoGraphicPolygon("Polygon", yoPolygon, yoPolyOrigin, 3.0, appearance);
       yoPolyOrigin.setXYZ(0.1, 0.2, 1.0);
       yoPolyOrigin.setYawPitchRoll(-0.1, -0.4, -0.3);
 
       // 3D Text:
-      final YoGraphicText3D dynamicGraphicText = new YoGraphicText3D("Text", "Hello", "text", "", registry, 0.2, YoAppearance.Blue());
-      dynamicGraphicText.setPosition(1.0, 0.0, 0.2);
-      dynamicGraphicText.setYawPitchRoll(0.3, 0.0, 0.0);
+      final YoGraphicText3D yoGraphicText = new YoGraphicText3D("Text", "Hello", "text", "", registry, 0.2, YoAppearance.Blue());
+      yoGraphicText.setPosition(1.0, 0.0, 0.2);
+      yoGraphicText.setYawPitchRoll(0.3, 0.0, 0.0);
 
       // Vector:
       YoFramePoint yoFramePoint = new YoFramePoint("position", "", worldFrame, registry);
@@ -80,7 +79,7 @@ public class DynamicGraphicObjectEvaluation
       yoFramePoint.set(0.3, 0.4, 0.2);
       yoFrameVector.set(1.0, 2.0, 3.0);
 
-      final YoGraphicVector dynamicGraphicVector = new YoGraphicVector("Vector", yoFramePoint, yoFrameVector, 1.0, YoAppearance.Yellow());
+      final YoGraphicVector yoGraphicVector = new YoGraphicVector("Vector", yoFramePoint, yoFrameVector, 1.0, YoAppearance.Yellow());
 
       // YoFrameConvexPolygon2d:
       final YoFrameConvexPolygon2d yoFramePolygon = new YoFrameConvexPolygon2d("yoPolygon", "", worldFrame, 10, registry);
@@ -88,7 +87,7 @@ public class DynamicGraphicObjectEvaluation
       yoFramePolygonPosition.set(2.0, 1.0, 0.3);
       final YoFrameOrientation yoFramePolygonOrientation = new YoFrameOrientation("yoPolygonOrientation", "", worldFrame, registry);
       yoFramePolygonOrientation.setYawPitchRoll(1.2, 0.1, 0.4);
-      final YoGraphicPolygon dynamicGraphicYoFramePolygon = new YoGraphicPolygon("YoFramePolygon", yoFramePolygon,
+      final YoGraphicPolygon yoGraphicYoFramePolygon = new YoGraphicPolygon("YoFramePolygon", yoFramePolygon,
                                                                            yoFramePolygonPosition, yoFramePolygonOrientation, 1.0, YoAppearance.DarkBlue());
 
       // Box Ghost:
@@ -102,19 +101,19 @@ public class DynamicGraphicObjectEvaluation
       double boxSize = 0.3;
       boxPosition.set(boxSize / 2.0, boxSize / 2.0, boxSize / 2.0);
       YoFrameOrientation boxOrientation = new YoFrameOrientation("boxOrientation", worldFrame, registry);
-      YoGraphicShape dynamicGraphicBoxGhost = new YoGraphicShape("boxGhost", boxGhostGraphics, boxPosition, boxOrientation, boxSize);
+      YoGraphicShape yoGraphicBoxGhost = new YoGraphicShape("boxGhost", boxGhostGraphics, boxPosition, boxOrientation, boxSize);
 
       YoGraphicsList yoGraphicsList = new YoGraphicsList("Polygon");
-      yoGraphicsList.add(dynamicGraphicPolygon);
-      yoGraphicsList.add(dynamicGraphicText);
-      yoGraphicsList.add(dynamicGraphicVector);
-      yoGraphicsList.add(dynamicGraphicYoFramePolygon);
-      yoGraphicsList.add(dynamicGraphicBoxGhost);
+      yoGraphicsList.add(yoGraphicPolygon);
+      yoGraphicsList.add(yoGraphicText);
+      yoGraphicsList.add(yoGraphicVector);
+      yoGraphicsList.add(yoGraphicYoFramePolygon);
+      yoGraphicsList.add(yoGraphicBoxGhost);
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
 
-      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicPolygon);
-      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(dynamicGraphicYoFramePolygon);
+      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(yoGraphicPolygon);
+      yoGraphicsListRegistry.registerGraphicsUpdatableToUpdateInAPlaybackListener(yoGraphicYoFramePolygon);
 
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       scs.addYoVariableRegistry(registry);
@@ -147,28 +146,28 @@ public class DynamicGraphicObjectEvaluation
 
                ConvexPolygon2d newYoPolygon = new ConvexPolygon2d(pointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
-               dynamicGraphicYoFramePolygon.update();
+               yoGraphicYoFramePolygon.update();
 
-               Vector3d eulerAngles = new Vector3d();
+               Vector3D eulerAngles = new Vector3D();
                yoFramePolygonOrientation.getEulerAngles(eulerAngles);
                eulerAngles.setY(eulerAngles.getY() + 0.1);
                yoFramePolygonOrientation.setEulerAngles(eulerAngles);
 
-               dynamicGraphicText.setText("Hello");
-               dynamicGraphicText.update();
+               yoGraphicText.setText("Hello");
+               yoGraphicText.update();
 
                scs.tickAndUpdate();
 
                quickPause();
                newPolygon = new ConvexPolygon2d(pointList);
                yoPolygon.setConvexPolygon2d(newPolygon);
-               dynamicGraphicYoFramePolygon.update();
+               yoGraphicYoFramePolygon.update();
 
                newYoPolygon = new ConvexPolygon2d(secondPointList);
                yoFramePolygon.setConvexPolygon2d(newYoPolygon);
 
-               dynamicGraphicText.setText("GoodBye");
-               dynamicGraphicText.update();
+               yoGraphicText.setText("GoodBye");
+               yoGraphicText.update();
 
                scs.tickAndUpdate();
 

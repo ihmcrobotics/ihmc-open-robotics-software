@@ -2,6 +2,7 @@ package us.ihmc.wanderer.hardware.controllers;
 
 import java.util.EnumMap;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.maps.EnumDoubleMap;
 import us.ihmc.wanderer.hardware.WandererJoint;
 
@@ -109,7 +109,7 @@ public class WandererStandPrep implements WandererController
          break;
 
       case INITIALIZE:
-         initialTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+         initialTime.set(Conversions.nanosecondsToSeconds(timestamp));
          trajectory.setCubic(0.0, trajectoryTime, 0.0, 0.0, 1.0, 0.0);
 
          for (WandererJoint joint : WandererJoint.values)
@@ -121,7 +121,7 @@ public class WandererStandPrep implements WandererController
          break;
 
       case EXECUTE:
-         double timeInTrajectory = MathTools.clipToMinMax(TimeTools.nanoSecondstoSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
+         double timeInTrajectory = MathTools.clamp(Conversions.nanosecondsToSeconds(timestamp) - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
 
@@ -159,7 +159,7 @@ public class WandererStandPrep implements WandererController
                   qDesired -= 0.5 * crouch.getDoubleValue();
                   break;
                case HIP_X:
-                  qDesired += springCalibrationScript(TimeTools.nanoSecondstoSeconds(timestamp));
+                  qDesired += springCalibrationScript(Conversions.nanosecondsToSeconds(timestamp));
                default:
                   break;
                }

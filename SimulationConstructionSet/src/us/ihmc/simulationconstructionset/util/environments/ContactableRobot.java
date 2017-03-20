@@ -1,15 +1,14 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 
 public abstract class ContactableRobot extends Robot implements Contactable
 {
@@ -38,19 +37,19 @@ public abstract class ContactableRobot extends Robot implements Contactable
       }
 
       @Override
-      public boolean isClose(Point3d pointInWorldToCheck)
+      public boolean isClose(Point3D pointInWorldToCheck)
       {
          return contactableRobot.isClose(pointInWorldToCheck);
       }
 
       @Override
-      public boolean isPointOnOrInside(Point3d pointInWorldToCheck)
+      public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
       {
          return contactableRobot.isPointOnOrInside(pointInWorldToCheck);
       }
 
       @Override
-      public void closestIntersectionAndNormalAt(Point3d intersectionToPack, Vector3d normalToPack, Point3d pointInWorldToCheck)
+      public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
       {
          contactableRobot.closestIntersectionAndNormalAt(intersectionToPack, normalToPack, pointInWorldToCheck);
       }
@@ -63,10 +62,10 @@ public abstract class ContactableRobot extends Robot implements Contactable
    }
 
    public void createAvailableContactPoints(int groupIdentifier, int totalContactPointsAvailable, double forceVectorScale,
-         boolean addDynamicGraphicForceVectorsForceVectors)
+         boolean addYoGraphicForceVectorsForceVectors)
    {
       articulatedContactable.createAvailableContactPoints(groupIdentifier, totalContactPointsAvailable, forceVectorScale,
-            addDynamicGraphicForceVectorsForceVectors);
+            addYoGraphicForceVectorsForceVectors);
    }
 
    @Override
@@ -103,7 +102,7 @@ public abstract class ContactableRobot extends Robot implements Contactable
       getFloatingJoint().setPosition(position[0], position[1], position[2]);
    }
 
-   public void setPosition(Tuple3d position)
+   public void setPosition(Tuple3DBasics position)
    {
       getFloatingJoint().setPosition(position);
    }
@@ -118,7 +117,7 @@ public abstract class ContactableRobot extends Robot implements Contactable
       getFloatingJoint().setVelocity(xd, yd, zd);
    }
 
-   public void setVelocity(Tuple3d velocity)
+   public void setVelocity(Tuple3DBasics velocity)
    {
       getFloatingJoint().setVelocity(velocity);
    }
@@ -128,12 +127,12 @@ public abstract class ContactableRobot extends Robot implements Contactable
       getFloatingJoint().setPositionAndVelocity(x, y, z, dx, dy, dz);
    }
 
-   public void setPositionAndVelocity(Point3d position, Vector3d velocity)
+   public void setPositionAndVelocity(Point3D position, Vector3D velocity)
    {
       getFloatingJoint().setPositionAndVelocity(position, velocity);
    }
 
-   public void setAngularVelocityInBody(Vector3d velocity)
+   public void setAngularVelocityInBody(Vector3D velocity)
    {
       getFloatingJoint().setAngularVelocityInBody(velocity);
    }
@@ -143,12 +142,12 @@ public abstract class ContactableRobot extends Robot implements Contactable
       getFloatingJoint().getTransformToWorld(transformToWorld);
    }
 
-   public void getVelocity(Tuple3d velocityToPack)
+   public void getVelocity(Tuple3DBasics velocityToPack)
    {
       getFloatingJoint().getVelocity(velocityToPack);
    }
 
-   public void getPosition(Tuple3d positionToPack)
+   public void getPosition(Tuple3DBasics positionToPack)
    {
       getFloatingJoint().getPosition(positionToPack);
    }

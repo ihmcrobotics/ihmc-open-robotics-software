@@ -20,12 +20,12 @@ int64 unique_id
 
 # This message utilizes "enums". Enum value information for this message follows.
 
+# "robot_side" enum values:
+uint8 LEFT=0 # refers to the LEFT side of a robot
+uint8 RIGHT=1 # refers to the RIGHT side of a robot
+
 # "body_part" enum values:
 uint8 ARM=0 # Request the chest to go back to a straight up configuration.
 uint8 CHEST=1 # Request the arm to go to a preconfigured home configuration that is elbow lightly flexed, forearm pointing forward, and upper pointing downward.
 uint8 PELVIS=2 # Request the pelvis to go back to between the feet, zero pitch and roll, and headed in the same direction as the feet.
-
-# "robot_side" enum values:
-uint8 LEFT=0 # refers to the LEFT side of a robot
-uint8 RIGHT=1 # refers to the RIGHT side of a robot
 

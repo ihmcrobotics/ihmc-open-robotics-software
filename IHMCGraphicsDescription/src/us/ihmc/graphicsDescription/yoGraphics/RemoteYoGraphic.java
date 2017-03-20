@@ -4,10 +4,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 /**
- * This interface is applied to DynamicGraphicObjects and Artifacts which support
+ * This interface is applied to YoGraphics and Artifacts which support
  * being packed into YoVariables and sent from simulation to viewer.
  *
- * See DynamicGraphicFactory and YoVariableHandshakeServer
+ * See YoGraphicFactory and YoVariableHandshakeServer
  *
  * @author Alex Lesman
  *

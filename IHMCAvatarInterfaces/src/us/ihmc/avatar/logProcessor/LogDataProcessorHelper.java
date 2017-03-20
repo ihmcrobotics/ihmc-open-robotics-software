@@ -1,17 +1,9 @@
 package us.ihmc.avatar.logProcessor;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createXName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createYName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
 
 import java.util.ArrayList;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -25,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwi
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -42,6 +35,7 @@ import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 
@@ -66,7 +60,7 @@ public class LogDataProcessorHelper
 
    private final SimulationConstructionSet scs;
 
-   private final UpdatableHighLevelHumanoidControllerToolbox momentumBasedController;
+   private final UpdatableHighLevelHumanoidControllerToolbox controllerToolbox;
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final DoubleYoVariable yoTime;
 
@@ -128,7 +122,7 @@ public class LogDataProcessorHelper
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
       yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
-      momentumBasedController = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames,
+      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames,
             stateEstimatorFootSwitches, null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, null, controllerDT,
             updatables, null);
 
@@ -216,7 +210,7 @@ public class LogDataProcessorHelper
    {
       sensorReader.read();
       twistCalculator.compute();
-      momentumBasedController.update();
+      controllerToolbox.update();
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
@@ -284,9 +278,9 @@ public class LogDataProcessorHelper
       return scs;
    }
 
-   public HighLevelHumanoidControllerToolbox getMomentumBasedController()
+   public HighLevelHumanoidControllerToolbox getHighLevelHumanoidControllerToolbox()
    {
-      return momentumBasedController;
+      return controllerToolbox;
    }
 
    public YoFramePoint findYoFramePoint(String pointPrefix, ReferenceFrame pointFrame)

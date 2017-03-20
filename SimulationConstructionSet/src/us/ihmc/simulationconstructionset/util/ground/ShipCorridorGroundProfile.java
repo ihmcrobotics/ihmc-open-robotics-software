@@ -1,16 +1,15 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWithNormals
 {
-	private final BoundingBox3d boundingBox;
+	private final BoundingBox3D boundingBox;
 
 	private final double zGroundPosition;
 	private final double yMaxCorridor;
@@ -29,7 +28,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Double.POSITIVE_INFINITY;
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
 	}
 
 	public ShipCorridorGroundProfile(double xMax, double xMin, double yMax, double yMin, double yMaxCorridor, double yMinCorridor, double zGroundPosition, double maxWallHeight, double wallInclination)
@@ -42,11 +41,11 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Double.POSITIVE_INFINITY;
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
 	}
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double heightAt = heightAt(x, y, z);
       surfaceNormalAt(x, y, heightAt, normalToPack);
@@ -96,7 +95,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		return true;
 	}
 
-	public void closestIntersectionTo(double x, double y, double z, Point3d intersection)
+	public void closestIntersectionTo(double x, double y, double z, Point3D intersection)
 	{
 		/* there are three areas (triangles):
 		 * 1. left wall (positive y)
@@ -154,7 +153,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		return y;
 	}
 	
-	public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+	public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       double height;
       height = this.heightAt(x, y, z);
@@ -202,11 +201,11 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
       normal.normalize();
    }
 	
-   private Vector3d tempVector = new Vector3d();
-   private Vector3d tempVectorTwo = new Vector3d();
+   private Vector3D tempVector = new Vector3D();
+   private Vector3D tempVectorTwo = new Vector3D();
 	
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       closestIntersectionTo(x, y, z, intersectionToPack);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -223,7 +222,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
       return (dotProduct < 0.0);
    }
    
-	public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersection, Vector3d normal)
+	public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersection, Vector3D normal)
 	{
 		closestIntersectionTo(x,y,z,intersection);
 		surfaceNormalAt(x, y, z, normal);
@@ -245,7 +244,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 	}
 	
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

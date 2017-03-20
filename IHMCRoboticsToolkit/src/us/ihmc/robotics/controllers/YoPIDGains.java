@@ -38,7 +38,7 @@ public class YoPIDGains extends YoPDGains
 
    public void setIntegralLeakRatio(double integralLeakRatio)
    {
-      this.integralLeakRatio.set(MathTools.clipToMinMax(integralLeakRatio, 0.0, 1.0));
+      this.integralLeakRatio.set(MathTools.clamp(integralLeakRatio, 0.0, 1.0));
    }
 
    public DoubleYoVariable getYoKi()
@@ -54,5 +54,13 @@ public class YoPIDGains extends YoPDGains
    public DoubleYoVariable getYoIntegralLeakRatio()
    {
       return integralLeakRatio;
+   }
+
+   public void set(YoPIDGains other)
+   {
+      super.set(other);
+      ki.set(other.ki.getDoubleValue());
+      maxIntegralError.set(other.maxIntegralError.getDoubleValue());
+      integralLeakRatio.set(other.integralLeakRatio.getDoubleValue());
    }
 }

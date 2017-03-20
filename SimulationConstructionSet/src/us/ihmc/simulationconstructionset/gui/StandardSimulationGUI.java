@@ -44,9 +44,8 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
-import javax.vecmath.Color3f;
-import javax.vecmath.Tuple3d;
 
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -69,13 +68,18 @@ import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferVideoServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+<<<<<<< HEAD
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
+=======
+import us.ihmc.robotics.dataStructures.MutableColor;
+>>>>>>> refs/heads/develop
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
+import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.ExitActionListener;
 import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
@@ -216,7 +220,9 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
    
    private List<String> panelsSelectedEarly = new ArrayList<>();
    private boolean scsWindowOpened = false;
-   
+
+   private final SettableDoubleProvider yoGraphicsGlobalScaleProvider = new SettableDoubleProvider(1.0);
+
    public StandardSimulationGUI(Graphics3DAdapter graphics3dAdapter, SimulationSynchronizer simulationSynchronizer, AllCommandsExecutor allCommandsExecutor,
          AllDialogConstructorsHolder allDialogConstructorsHolder, SimulationConstructionSet sim, YoVariableHolder yoVariableHolder, Robot[] robots,
          DataBuffer buffer, VarGroupList varGroupList, JApplet jApplet, YoVariableRegistry rootRegistry)
@@ -294,9 +300,33 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return viewportPanel;
    }
 
+   public void addRobot(Robot robot)
+   {
+      boolean wereAlreadySet = (this.robots != null);
+
+      if (!wereAlreadySet)
+      {
+         setRobots(new Robot[]{robot});
+         return;
+      }
+      
+      Robot[] newRobots = new Robot[robots.length + 1];
+      for (int i=0; i<robots.length; i++)
+      {
+         newRobots[i] = robots[i];
+      }
+      newRobots[newRobots.length-1] = robot;
+      this.robots = newRobots;
+      
+      robot.getCameraMountList(cameraMountList);
+      createGraphicsRobot(robot);
+   }
+
    public void setRobots(Robot[] robots)
    {
-      if (this.robots != null)
+      boolean wereAlreadySet = (this.robots != null);
+      
+      if (wereAlreadySet)
       {
          throw new RuntimeException("robots != null. Can only setRobots once!");
       }
@@ -838,12 +868,17 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       {
          for (Robot robot : robots)
          {
-            GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
-            graphicsUpdatables.add(graphicsRobot);
-            graphicsRobots.put(robot, graphicsRobot);
-            graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
+            createGraphicsRobot(robot);
          }
       }
+   }
+
+   private void createGraphicsRobot(Robot robot)
+   {
+      GraphicsRobot graphicsRobot = new GraphicsRobot(robot);
+      graphicsUpdatables.add(graphicsRobot);
+      graphicsRobots.put(robot, graphicsRobot);
+      graphics3dAdapter.addRootNode(graphicsRobot.getRootNode());
    }
 
    public ViewportPanel createViewportPanel()
@@ -1065,7 +1100,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       viewportPanel.setFieldOfView(fieldOfView);
    }
 
-   public void setBackgroundColor(Color3f color)
+   public void setBackgroundColor(MutableColor color)
    {
       graphics3dAdapter.setBackgroundColor(color);
    }
@@ -1447,7 +1482,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       viewportPanel.setCameraFix(fixX, fixY, fixZ);
    }
 
-   public void setCameraFix(Tuple3d cameraFix)
+   public void setCameraFix(Tuple3DBasics cameraFix)
    {
       viewportPanel.setCameraFix(cameraFix);
    }
@@ -1457,7 +1492,7 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       viewportPanel.setCameraPosition(posX, posY, posZ);
    }
 
-   public void setCameraPosition(Tuple3d cameraPosition)
+   public void setCameraPosition(Tuple3DBasics cameraPosition)
    {
       viewportPanel.setCameraPosition(cameraPosition);      
    }
@@ -2801,6 +2836,21 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       }
    }
 
+   public void setYoGraphicsGlobalScale(double globalScale)
+   {
+      this.yoGraphicsGlobalScaleProvider.setValue(globalScale);
+   }
+
+   public double getYoGraphicsGlobalScale()
+   {
+      return yoGraphicsGlobalScaleProvider.getValue();
+   }
+
+   public SettableDoubleProvider getYoGraphicsGlobalScaleProvider()
+   {
+      return yoGraphicsGlobalScaleProvider;
+   }
+
    public void addYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry, boolean updateFromSimulationThread)
    {
       if (!updateFromSimulationThread && graphics3dAdapter != null)
@@ -2818,6 +2868,8 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
 
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(updateFromSimulationThread);
       yoGraphicsListRegistry.setYoGraphicsRegistered();
+      
+      yoGraphicsListRegistry.setGlobalScaleProvider(yoGraphicsGlobalScaleProvider);
    }
 
    public GraphGroupList getGraphGroupList()
@@ -3166,7 +3218,6 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
                graphicsUpdatable.update();
             }
          }
-
       }
    }
    

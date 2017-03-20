@@ -6,8 +6,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 import us.ihmc.valkyrie.kinematics.YoValkyrieJointWriter;
@@ -44,8 +44,8 @@ public class InefficientPushRodTransmissionTest
       {
          for (double roll = -Math.PI / 3.0; roll < Math.PI / 3.0; roll = roll + increment)
          {
-            double actuatorForce0 = RandomTools.generateRandomDouble(random, -100.0, 100.0);
-            double actuatorForce1 = RandomTools.generateRandomDouble(random, -100.0, 100.0);
+            double actuatorForce0 = RandomNumbers.nextDouble(random, -100.0, 100.0);
+            double actuatorForce1 = RandomNumbers.nextDouble(random, -100.0, 100.0);
 
             actuatorData[0].setEffortCommand(actuatorForce0);
             actuatorData[1].setEffortCommand(actuatorForce1);

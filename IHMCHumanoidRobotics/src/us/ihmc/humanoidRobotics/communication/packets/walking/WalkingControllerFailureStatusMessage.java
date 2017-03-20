@@ -1,34 +1,33 @@
 package us.ihmc.humanoidRobotics.communication.packets.walking;
 
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector2f;
-
 import us.ihmc.communication.packets.StatusPacket;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.Vector2D32;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class WalkingControllerFailureStatusMessage extends StatusPacket<WalkingControllerFailureStatusMessage>
 {
-   public Vector2f fallingDirection;
+   public Vector2D32 fallingDirection;
 
    public WalkingControllerFailureStatusMessage()
    {
    }
 
-   public WalkingControllerFailureStatusMessage(Vector2d fallingDirection)
+   public WalkingControllerFailureStatusMessage(Vector2D fallingDirection)
    {
-      this.fallingDirection = new Vector2f(fallingDirection);
+      this.fallingDirection = new Vector2D32(fallingDirection);
    }
 
-   public void setFallingDirection(Vector2f fallingDirection)
+   public void setFallingDirection(Vector2D32 fallingDirection)
    {
       this.fallingDirection = fallingDirection;
    }
 
-   public void setFallingDirection(Vector2d fallingDirection)
+   public void setFallingDirection(Vector2D fallingDirection)
    {
       if (this.fallingDirection == null)
-         this.fallingDirection = new Vector2f();
+         this.fallingDirection = new Vector2D32();
       this.fallingDirection.set(fallingDirection);
    }
    
@@ -36,11 +35,11 @@ public class WalkingControllerFailureStatusMessage extends StatusPacket<WalkingC
    {
       fallingDirection.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       if (this.fallingDirection == null)
-         this.fallingDirection = new Vector2f();
+         this.fallingDirection = new Vector2D32();
       this.fallingDirection.set(fallingDirection.getVector());
    }
 
-   public Vector2f getFallingDirection()
+   public Vector2D32 getFallingDirection()
    {
       return fallingDirection;
    }
@@ -51,7 +50,7 @@ public class WalkingControllerFailureStatusMessage extends StatusPacket<WalkingC
       if (other.fallingDirection != null)
       {
          if (fallingDirection == null)
-            fallingDirection = new Vector2f();
+            fallingDirection = new Vector2D32();
          fallingDirection.set(other.fallingDirection);
       }
    }

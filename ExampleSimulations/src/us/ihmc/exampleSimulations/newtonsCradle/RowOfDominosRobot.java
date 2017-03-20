@@ -2,13 +2,12 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 
 import java.util.Random;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -18,7 +17,7 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class RowOfDominosRobot extends Robot
 {
-   public RowOfDominosRobot()
+   public RowOfDominosRobot(int numberOfDominos, boolean firstDominoFalling)
    {
       super("RowOfDominosRobot");
 
@@ -29,23 +28,21 @@ public class RowOfDominosRobot extends Robot
       final DoubleYoVariable kineticEnergy = new DoubleYoVariable("kineticEnergy", this.getRobotsYoVariableRegistry());
       final DoubleYoVariable totalEnergy = new DoubleYoVariable("totalEnergy", this.getRobotsYoVariableRegistry());
 
-      int numberOfDominos = 30;
-
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;
       double dominoHeight = 0.048;
 
       double dominoMass = 0.2;
       RigidBodyTransform nextDominoTransform = new RigidBodyTransform();
-      nextDominoTransform.setTranslation(new Vector3d(0.0, 0.0, dominoHeight/2.0 + 0.001));
+      nextDominoTransform.setTranslation(new Vector3D(0.0, 0.0, dominoHeight/2.0 + 0.001));
 
-      Vector3d dominoTranslation = new Vector3d(dominoHeight * 0.6, 0.0, 0.0);
+      Vector3D dominoTranslation = new Vector3D(dominoHeight * 0.6, 0.0, 0.0);
       RigidBodyTransform tempTransform = new RigidBodyTransform();
       RigidBodyTransform tempTransform2 = new RigidBodyTransform();
 
       for (int i = 0; i < numberOfDominos; i++)
       {
-         Vector3d offset = new Vector3d(0.0, 0.0, 0.0);
+         Vector3D offset = new Vector3D(0.0, 0.0, 0.0);
          FloatingJoint floatingJoint = new FloatingJoint("domino" + i, "domino" + i, offset, this);
 
          Link link = new Link("domino" + i);
@@ -60,7 +57,9 @@ public class RowOfDominosRobot extends Robot
 
          CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
          collisionMeshDescription.addCubeReferencedAtCenter(dominoDepth, dominoWidth, dominoHeight);
-         link.setCollisionMesh(collisionMeshDescription);
+         collisionMeshDescription.setCollisionGroup(0xff);
+         collisionMeshDescription.setCollisionMask(0xff);
+         link.addCollisionMesh(collisionMeshDescription);
 
          floatingJoint.setLink(link);
          this.addRootJoint(floatingJoint);
@@ -72,12 +71,13 @@ public class RowOfDominosRobot extends Robot
          tempTransform.setTranslation(dominoTranslation);
 
          tempTransform2.setIdentity();
-         tempTransform2.multiply(tempTransform, nextDominoTransform);
+         tempTransform2.set(tempTransform);
+         tempTransform2.multiply(nextDominoTransform);
          nextDominoTransform.set(tempTransform2);
 
-         if (i==0)
+         if ((firstDominoFalling) && (i==0))
          {
-            floatingJoint.setAngularVelocityInBody(new Vector3d(0.0, 10.0, 0.0));
+            floatingJoint.setAngularVelocityInBody(new Vector3D(0.0, 10.0, 0.0));
          }
       }
 
@@ -86,7 +86,7 @@ public class RowOfDominosRobot extends Robot
          @Override
          public double[] computeDerivativeVector()
          {
-            Vector3d linearMomentum = new Vector3d();
+            Vector3D linearMomentum = new Vector3D();
             computeLinearMomentum(linearMomentum);
             kineticEnergy.set(computeTranslationalKineticEnergy());
             potentialEnergy.set(computeGravitationalPotentialEnergy());

@@ -1,8 +1,8 @@
 package us.ihmc.graphicsDescription.appearance;
 
-import javax.vecmath.Color3f;
-
 import org.apache.commons.lang3.NotImplementedException;
+
+import us.ihmc.robotics.dataStructures.MutableColor;
 
 public abstract class YoAppearanceTransparency implements AppearanceDefinition
 {
@@ -18,7 +18,7 @@ public abstract class YoAppearanceTransparency implements AppearanceDefinition
       this.transparency = transparency;
    }
 
-   public Color3f getColor()
+   public MutableColor getColor()
    {
       throw new NotImplementedException("getColor() is not implemented");
    }

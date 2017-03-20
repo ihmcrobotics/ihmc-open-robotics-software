@@ -1,6 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.lidar;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -8,15 +8,15 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 
-import us.ihmc.robotics.lidar.LidarScanTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidar120FovTest;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidar360FovTest;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidar60FovTest;
 import us.ihmc.jMonkeyEngineToolkit.jme.lidar.manual.JMELidarSphere270FovTest;
 import us.ihmc.robotics.lidar.LidarScan;
+import us.ihmc.robotics.lidar.LidarScanTest;
 
 @ContinuousIntegrationPlan(categories={IntegrationCategory.UI})
 public class JMEGPULidarTest implements LidarTestListener

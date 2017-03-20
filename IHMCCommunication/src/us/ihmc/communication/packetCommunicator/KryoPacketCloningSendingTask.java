@@ -5,11 +5,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.esotericsoftware.kryo.Kryo;
+
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.Packet;
-
-import com.esotericsoftware.kryo.Kryo;
 
 public class KryoPacketCloningSendingTask implements Callable<Void>
 {

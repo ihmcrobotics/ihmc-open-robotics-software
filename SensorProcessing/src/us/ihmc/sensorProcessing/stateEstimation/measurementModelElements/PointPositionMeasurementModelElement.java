@@ -1,21 +1,20 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 
 public class PointPositionMeasurementModelElement extends AbstractMeasurementModelElement
 {
@@ -30,11 +29,11 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
 
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
-   private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
+   private final RotationMatrix rotationFromEstimationToWorld = new RotationMatrix();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final Matrix3d tempMatrix = new Matrix3d();
+   private final Matrix3D tempMatrix = new Matrix3D();
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
-   private final Vector3d residualVector = new Vector3d();
+   private final Vector3D residualVector = new Vector3D();
 
    private final AfterJointReferenceFrameNameMap referenceFrameMap;
 
@@ -93,9 +92,9 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       tempFramePoint.sub(tempCenterOfMassPosition);
       tempFramePoint.scale(-1.0);
 
-      MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
-      tempMatrix.mul(rotationFromEstimationToWorld, tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(orientationPort));
+      tempMatrix.setToTildeForm(tempFramePoint.getPoint());
+      tempMatrix.preMultiply(rotationFromEstimationToWorld);
+      tempMatrix.get(getOutputMatrixBlock(orientationPort));
    }
 
    public DenseMatrix64F computeResidual()
@@ -108,7 +107,7 @@ public class PointPositionMeasurementModelElement extends AbstractMeasurementMod
       residualVector.set(data.getMeasurementPointInWorldFrame());
       residualVector.sub(tempFramePoint.getPoint());
 
-      MatrixTools.insertTuple3dIntoEJMLVector(residualVector, residual, 0);
+      residualVector.get(residual);
 
       return residual;
    }

@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import boofcv.struct.calib.IntrinsicParameters;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
@@ -31,8 +30,8 @@ public class CameraDataReceiver extends Thread
    private final FullRobotModel fullRobotModel;
    private ReferenceFrame cameraFrame;
 
-   private final Point3d cameraPosition = new Point3d();
-   private final Quat4d cameraOrientation = new Quat4d();
+   private final Point3D cameraPosition = new Point3D();
+   private final Quaternion cameraOrientation = new Quaternion();
 
    private final PPSTimestampOffsetProvider ppsTimestampOffsetProvider;
 

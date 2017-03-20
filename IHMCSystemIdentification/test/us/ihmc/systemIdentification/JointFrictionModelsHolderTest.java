@@ -5,15 +5,14 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.systemIdentification.JointFrictionModelsHolder;
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.AsymmetricCoulombViscousStribeckFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.FrictionState;
 import us.ihmc.systemIdentification.frictionId.frictionModels.JointFrictionModel;
 import us.ihmc.systemIdentification.frictionId.frictionModels.NoCompensationFrictionModel;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class JointFrictionModelsHolderTest
 {

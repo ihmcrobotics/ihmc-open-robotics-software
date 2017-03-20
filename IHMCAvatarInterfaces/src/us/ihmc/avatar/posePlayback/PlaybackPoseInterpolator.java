@@ -1,10 +1,10 @@
 package us.ihmc.avatar.posePlayback;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.time.TimeTools;
 
 
 public class PlaybackPoseInterpolator
@@ -98,7 +98,7 @@ public class PlaybackPoseInterpolator
    private double transitionTime(PlaybackPose poseToTransitionInto)
    {
       return poseMorphDuration.getDoubleValue() + timeDelayAfterPose.getDoubleValue()
-            + TimeTools.milliSecondsToSeconds((long) poseToTransitionInto.getPlayBackDelayBeforePose());
+            + Conversions.millisecondsToSeconds((long) poseToTransitionInto.getPlayBackDelayBeforePose());
    }
    
    public double getTransitionTimeDelay()

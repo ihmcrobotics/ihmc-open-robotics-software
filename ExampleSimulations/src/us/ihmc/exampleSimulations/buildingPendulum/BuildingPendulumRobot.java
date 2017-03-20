@@ -1,14 +1,13 @@
 package us.ihmc.exampleSimulations.buildingPendulum;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.NullJoint;
+import us.ihmc.simulationconstructionset.RigidJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 
@@ -28,7 +27,7 @@ public class BuildingPendulumRobot extends Robot
    {
       super("BuildingPendulumRobot");
 
-      NullJoint rootJoint = new NullJoint("CeilingJoint", new Vector3d(), this);
+      RigidJoint rootJoint = new RigidJoint("CeilingJoint", new Vector3D(), this);
 
 
 
@@ -39,8 +38,8 @@ public class BuildingPendulumRobot extends Robot
       ceiling.setLinkGraphics(linkGraphics);
       rootJoint.setLink(ceiling);
 
-      PinJoint pendulumJoint1 = new PinJoint("jointLeft", new Vector3d(-distance/2.0, 0.0, 0.0), this, Axis.Y);
-      PinJoint pendulumJoint2 = new PinJoint("jointRight", new Vector3d(distance/2.0, 0.0, 0.0), this, Axis.Y);
+      PinJoint pendulumJoint1 = new PinJoint("jointLeft", new Vector3D(-distance/2.0, 0.0, 0.0), this, Axis.Y);
+      PinJoint pendulumJoint2 = new PinJoint("jointRight", new Vector3D(distance/2.0, 0.0, 0.0), this, Axis.Y);
 
       pendulumJoint1.setLink(createLink("pendulum1"));
       rootJoint.addJoint(pendulumJoint1);

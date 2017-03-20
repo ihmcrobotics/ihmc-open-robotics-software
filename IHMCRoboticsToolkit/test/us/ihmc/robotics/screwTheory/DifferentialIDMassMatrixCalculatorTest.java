@@ -1,11 +1,11 @@
 package us.ihmc.robotics.screwTheory;
 
+import static org.junit.Assert.assertEquals;
+
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
-import static org.junit.Assert.assertEquals;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DifferentialIDMassMatrixCalculatorTest extends MassMatrixCalculatorTest
 {

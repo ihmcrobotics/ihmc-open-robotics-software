@@ -8,13 +8,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -29,10 +28,11 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
-   private final String chestName = "torso";
-   private final String pelvisName = "pelvis";
-   private final String fullPelvisNameInSdf = pelvisName;
-   private final String headName = "upperNeckPitchLink";
+   private static final String chestName = "torso";
+   private static final String pelvisName = "pelvis";
+   private static final String fullPelvisNameInSdf = pelvisName;
+   private static final String headName = "upperNeckPitchLink";
+   private static final SideDependentList<String> handNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "Palm", getRobotSidePrefix(RobotSide.RIGHT) + "Palm");
 
    private final LegJointName[] legJoints = { LegJointName.HIP_YAW, LegJointName.HIP_ROLL, LegJointName.HIP_PITCH, LegJointName.KNEE_PITCH, LegJointName.ANKLE_PITCH, LegJointName.ANKLE_ROLL };
    private final ArmJointName[] armJoints;
@@ -155,7 +155,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
    }
 
-   private String getRobotSidePrefix(RobotSide robotSide)
+   private static String getRobotSidePrefix(RobotSide robotSide)
    {
       return robotSide.getCamelCaseNameForStartOfExpression();// "Left" or "Right"
    }
@@ -232,6 +232,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
       return headName;
    }
 
+   public String getHandName(RobotSide robotSide)
+   {
+      return handNames.get(robotSide);
+   }
+
    @Override
    public LegJointName[] getLegJointNames()
    {
@@ -275,7 +280,7 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    }
 
    @Override
-   public List<ImmutablePair<String, Vector3d>> getJointNameGroundContactPointMap()
+   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
    {
       return contactPointParameters.getJointNameGroundContactPointMap();
    }

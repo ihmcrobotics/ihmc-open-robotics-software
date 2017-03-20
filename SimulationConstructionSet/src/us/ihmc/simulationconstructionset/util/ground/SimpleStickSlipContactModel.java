@@ -3,8 +3,7 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -19,7 +18,7 @@ public class SimpleStickSlipContactModel
    private final ArrayList<IntegerYoVariable> contactPointAContactingContactableIndices = new ArrayList<IntegerYoVariable>();
    private final ArrayList<IntegerYoVariable> contactPointAContactingGroundContactIndices = new ArrayList<IntegerYoVariable>();
 
-   private final Point3d contactATempPosition = new Point3d();
+   private final Point3D contactATempPosition = new Point3D();
 
 
    private final DoubleYoVariable kContact, bContact;

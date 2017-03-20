@@ -6,9 +6,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 
-import javax.vecmath.Color3f;
-
 import org.apache.commons.lang3.SystemUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.jme3.material.Material;
 import com.jme3.material.MaterialList;
@@ -20,22 +19,20 @@ import com.jme3.texture.Texture.WrapMode;
 import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
 
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend;
+import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend.TextureDefinition;
 import us.ihmc.graphicsDescription.appearance.SDFAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend.TextureDefinition;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
-
-import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.tools.ClassLoaderTools;
-import us.ihmc.tools.io.files.FileTools;
 
 public class JMEAppearanceMaterial
 {
@@ -74,12 +71,12 @@ public class JMEAppearanceMaterial
       }
 
       HeightMap heightMap = appearanceDefinition.getHeightMap();
-      BoundingBox3d boundingBox = heightMap.getBoundingBox();
+      BoundingBox3D boundingBox = heightMap.getBoundingBox();
 
-      double xMin = boundingBox.getXMin();
-      double xStep = (boundingBox.getXMax() - boundingBox.getXMin()) / ((double) alphaMapSize);
-      double yMin = boundingBox.getYMin();
-      double yStep = (boundingBox.getYMax() - boundingBox.getYMin()) / ((double) alphaMapSize);
+      double xMin = boundingBox.getMinX();
+      double xStep = (boundingBox.getMaxX() - boundingBox.getMinX()) / ((double) alphaMapSize);
+      double yMin = boundingBox.getMinY();
+      double yStep = (boundingBox.getMaxY() - boundingBox.getMinY()) / ((double) alphaMapSize);
 
       BufferedImage alphaMap = new BufferedImage(alphaMapSize, alphaMapSize, BufferedImage.TYPE_INT_ARGB);
       for (int x = 0; x < alphaMapSize; x++)
@@ -257,7 +254,7 @@ public class JMEAppearanceMaterial
       }
       else
       {
-         Path temporaryDirectoryPath = FileTools.getTemporaryDirectoryPath();
+         Path temporaryDirectoryPath = PathTools.systemTemporaryDirectory();
         
          printIfDebug("temporaryDirectoryPathName = " + temporaryDirectoryPath);
          
@@ -336,7 +333,7 @@ public class JMEAppearanceMaterial
 
    public static Material createMaterialFromYoAppearanceRGBColor(JMEAssetLocator contentMan, YoAppearanceRGBColor appearanceDefinition)
    {
-      Color3f rgb = appearanceDefinition.getColor();
+      MutableColor rgb = appearanceDefinition.getColor();
 
       return createMaterialFromProperties(contentMan, rgb, rgb, rgb, 0.0, appearanceDefinition.getTransparency());
    }
@@ -347,7 +344,7 @@ public class JMEAppearanceMaterial
             appearanceMaterial.getSpecularColor(), appearanceMaterial.getShininess(), appearanceMaterial.getTransparency());
    }
 
-   public static Material createMaterialFromProperties(JMEAssetLocator contentMan, Color3f diffuse, Color3f ambient, Color3f specular, double shininess,
+   public static Material createMaterialFromProperties(JMEAssetLocator contentMan, MutableColor diffuse, MutableColor ambient, MutableColor specular, double shininess,
          double transparancy)
    {
       Material material = new Material(contentMan.getAssetManager(), PHONG_ILLUMINATED_JME_MAT);

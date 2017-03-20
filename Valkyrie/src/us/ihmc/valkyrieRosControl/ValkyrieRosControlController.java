@@ -1,15 +1,20 @@
 package us.ihmc.valkyrieRosControl;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+
 import us.ihmc.affinity.Affinity;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -25,11 +30,14 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.rosControl.EffortJointHandle;
-import us.ihmc.rosControl.wholeRobot.*;
+import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
+import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
+import us.ihmc.rosControl.wholeRobot.IMUHandle;
+import us.ihmc.rosControl.wholeRobot.JointStateHandle;
+import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.tools.SettableTimestampProvider;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.util.PeriodicRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
@@ -38,16 +46,11 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.DRCOutputWriter;
 import us.ihmc.wholeBodyController.DRCOutputWriterWithTorqueOffsets;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRealTimeRobotController;
 import us.ihmc.wholeBodyController.concurrent.MultiThreadedRobotControlElementCoordinator;
+import us.ihmc.wholeBodyController.concurrent.SynchronousMultiThreadedRobotController;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorControllerFactory;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridge
 {
@@ -123,7 +126,6 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       final HighLevelState initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
-      ArmControllerParameters armControllerParamaters = robotModel.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
 
@@ -131,7 +133,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParamaters, capturePointPlannerParameters, initialBehavior);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       ValkyrieTorqueOffsetPrinter valkyrieTorqueOffsetPrinter = new ValkyrieTorqueOffsetPrinter();

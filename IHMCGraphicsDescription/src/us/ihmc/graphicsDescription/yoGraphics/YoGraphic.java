@@ -1,9 +1,10 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.Transform3d;
+import us.ihmc.robotics.trajectories.providers.DoubleProvider;
 
 public abstract class YoGraphic
 {
@@ -13,10 +14,12 @@ public abstract class YoGraphic
 
    private boolean showGraphicObject = true;
    private final RigidBodyTransform rootTransform = new RigidBodyTransform();
-   private final Transform3d objectTransform;
-   private final Transform3d transform = new Transform3d();
+   private final AffineTransform objectTransform;
+   private final AffineTransform transform = new AffineTransform();
 
-   protected abstract void computeRotationTranslation(Transform3d transform3D);
+   protected DoubleProvider globalScaleProvider;
+
+   protected abstract void computeRotationTranslation(AffineTransform transform3D);
 
    protected abstract boolean containsNaN();
 
@@ -27,7 +30,12 @@ public abstract class YoGraphic
    public YoGraphic(String name)
    {
       this.name = name;
-      objectTransform = new Transform3d();
+      objectTransform = new AffineTransform();
+   }
+
+   public void setGlobalScaleProvider(DoubleProvider globalScaleProvider)
+   {
+      this.globalScaleProvider = globalScaleProvider;
    }
 
    public void showGraphicObject()
@@ -60,7 +68,7 @@ public abstract class YoGraphic
       rootTransform.set(transform);
    }
 
-   public final Transform3d getTransform()
+   public final AffineTransform getTransform()
    {
       if (showGraphicObject && !containsNaN())
       {
@@ -70,7 +78,8 @@ public abstract class YoGraphic
          {
             // This is a buggy attempt to make the graphic objects go where the robot is, rather than the estimated robot.
             // It works when simulating, but not when rewinding.
-            transform.multiply(rootTransform, objectTransform);
+            transform.set(objectTransform);
+            transform.preMultiply(rootTransform);
          }
          else
          {

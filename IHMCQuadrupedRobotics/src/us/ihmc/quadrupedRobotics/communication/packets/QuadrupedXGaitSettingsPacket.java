@@ -3,7 +3,7 @@ package us.ihmc.quadrupedRobotics.communication.packets;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedXGaitSettings;
 
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsPacket>
 {

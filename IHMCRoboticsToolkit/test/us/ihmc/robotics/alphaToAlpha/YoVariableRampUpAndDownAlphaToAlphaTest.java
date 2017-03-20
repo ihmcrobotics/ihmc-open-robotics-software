@@ -1,11 +1,12 @@
 package us.ihmc.robotics.alphaToAlpha;
 
+import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-
-import static org.junit.Assert.*;
 
 /**
  * Created by Peter on 9/9/2016.
@@ -13,7 +14,7 @@ import static org.junit.Assert.*;
 public class YoVariableRampUpAndDownAlphaToAlphaTest
 {
    private double EPSILON = 1e-6;
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testInvalidYoVariables()
    {
@@ -46,7 +47,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
 
 
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testValidYoVariables()
    {
@@ -115,7 +116,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
       assertEquals(value, 0.0, EPSILON);
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testOneQuaterOfTheWay()
    {
@@ -165,7 +166,7 @@ public class YoVariableRampUpAndDownAlphaToAlphaTest
    }
 
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
    @Test(timeout = 30000)
    public void testSmallDifferences()
    {

@@ -2,6 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
+
 /**
  * <p>Title: </p>
  *
@@ -18,7 +20,7 @@ public class ConvexPolygon2dIntersectionSetCalculator
 {
    private BoundingBoxKDTree2D kdTree;
    private final ArrayList<ConvexPolygon2d> convexPolygon2dsToSearchForIntersection = new ArrayList<ConvexPolygon2d>();
-   private final ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
+   private final ArrayList<BoundingBox2D> boundingBoxes = new ArrayList<>();
 
    public ConvexPolygon2dIntersectionSetCalculator(ArrayList<ConvexPolygon2d> convexPolygon2d)
    {

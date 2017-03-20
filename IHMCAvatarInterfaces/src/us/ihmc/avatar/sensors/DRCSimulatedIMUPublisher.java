@@ -72,7 +72,7 @@ public class DRCSimulatedIMUPublisher implements MultiThreadedRobotControlElemen
    }
 
    @Override
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return null;
    }

@@ -35,22 +35,26 @@ public class DatagramOutputStream extends OutputStream
       byteArrayOutputStream = new ByteArrayOutputStream(DatagramInputStream.BUFFER_SIZE);
    }
 
+   @Override
    public void write(int b) throws IOException
    {
       byteArrayOutputStream.write(b);
    }
 
+   @Override
    public void write(byte b[]) throws IOException
    {
       byteArrayOutputStream.write(b);
    }
 
+   @Override
    public void write(byte[] b, int offset, int length)
    {
       byteArrayOutputStream.write(b, offset, length);
    }
 
    byte sendIndex = 0;
+   @Override
    public void flush()
    {
       byteArrayOutputStream.write(sendIndex); // Add a send index to the end of the datagram before it is sent. Just a single byte that rolls over...
@@ -77,6 +81,7 @@ public class DatagramOutputStream extends OutputStream
       byteArrayOutputStream.reset();
    }
    
+   @Override
    public void close()
    {
       if (datagramSocketToWriteTo != null)

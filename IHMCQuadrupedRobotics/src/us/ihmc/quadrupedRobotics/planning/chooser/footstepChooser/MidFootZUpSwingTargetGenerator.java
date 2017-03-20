@@ -1,8 +1,6 @@
 package us.ihmc.quadrupedRobotics.planning.chooser.footstepChooser;
 
-import javax.vecmath.Vector2d;
-
-import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.quadrupedRobotics.estimator.referenceFrames.CommonQuadrupedReferenceFrames;
 import us.ihmc.quadrupedRobotics.geometry.supportPolygon.QuadrupedSupportPolygon;
 import us.ihmc.quadrupedRobotics.mechanics.inverseKinematics.QuadrupedLinkLengths;
@@ -14,6 +12,7 @@ import us.ihmc.robotics.geometry.FrameOrientation2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -21,7 +20,7 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotEnd;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.time.GlobalTimer;
+import us.ihmc.robotics.time.ExecutionTimer;
 
 public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
 {
@@ -52,7 +51,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    
    private final FrameOrientation2d tempOppositeSideOrientation = new FrameOrientation2d();
    
-   private final GlobalTimer getSwingTargetTimer = new GlobalTimer("getSwingTargetTimer", registry);
+   private final ExecutionTimer getSwingTargetTimer = new ExecutionTimer("getSwingTargetTimer", registry);
 
    private final FramePoint swingLegHipPitchPoint = new FramePoint();
    private final FrameOrientation swingLegHipRollOrientation = new FrameOrientation();
@@ -61,7 +60,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    private final FramePoint desiredSwingFootPositionFromOppositeSideFoot = new FramePoint();
 
    private final FrameVector footDesiredVector= new FrameVector();
-   private final Vector2d footDesiredVector2d= new Vector2d();
+   private final Vector2D footDesiredVector2d= new Vector2D();
    
    private final QuadrupedLinkLengths linkLengths;
 
@@ -115,7 +114,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
    public void getSwingTarget(RobotQuadrant swingLeg, ReferenceFrame swingLegAttachmentFrame, FrameVector desiredBodyVelocity, double swingDuration, FramePoint swingTargetToPack,
          double desiredYawRate)
    {
-      getSwingTargetTimer.startTimer();
+      getSwingTargetTimer.startMeasurement();
       
       getSwingTarget(swingLeg, desiredBodyVelocity, swingTargetToPack, desiredYawRate);
       
@@ -155,7 +154,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       }      
       swingTargetToPack.changeFrame(ReferenceFrame.getWorldFrame());
       
-      getSwingTargetTimer.stopTimer();
+      getSwingTargetTimer.stopMeasurement();
    }
    
    private double getMaxSwingDistanceGivenBodyVelocity(RobotQuadrant swingLeg, FramePoint swingTarget, FrameVector desiredBodyVelocity, double swingDuration)
@@ -225,7 +224,7 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
          maxStepDistance = Math.max(maxStepDistance, 0.0);
       }
 
-      double deltaYaw = MathTools.clipToMinMax(desiredYawRate, maxYawPerStep.getDoubleValue());
+      double deltaYaw = MathTools.clamp(desiredYawRate, maxYawPerStep.getDoubleValue());
 
       RobotQuadrant sameSideQuadrant = swingLeg.getSameSideQuadrant();
       RobotQuadrant sameEndQuadrant = swingLeg.getAcrossBodyQuadrant();
@@ -265,19 +264,19 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       //handle forward backward placement
       desiredSwingFootPositionFromHalfStride.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
-      double clippedSkew = MathTools.clipToMinMax(maxForwardSkew.getDoubleValue(), 0.0, halfStrideLength);
-      double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double clippedSkew = MathTools.clamp(maxForwardSkew.getDoubleValue(), 0.0, halfStrideLength);
+      double clippedSkewScalar = MathTools.clamp(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double amountToSkew = clippedSkewScalar * clippedSkew;
-      amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
+      amountToSkew = MathTools.clamp(amountToSkew, maxStepDistance);
       double newY = robotEnd.negateIfFrontEnd(halfStrideLength) - amountToSkew;
       desiredSwingFootPositionFromHalfStride.setY(newY);
 
       //handle left right placement
       double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
-      double lateralClippedSkew = MathTools.clipToMinMax(maxLateralSkew.getDoubleValue(), 0.0, halfStanceWidth);
-      double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double lateralClippedSkew = MathTools.clamp(maxLateralSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkewScalar = MathTools.clamp(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
-      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
+      lateralAmountToSkew = MathTools.clamp(lateralAmountToSkew, maxStepDistance);
       double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
       desiredSwingFootPositionFromHalfStride.setX(newX);
       
@@ -316,10 +315,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       desiredSwingFootPositionFromOppositeSideFoot.setToZero(oppositeSideZUpFrame);
       double halfStrideLength = 0.5 * strideLength.getDoubleValue();
-      double clippedSkew = MathTools.clipToMinMax(maxForwardSkew.getDoubleValue(), 0.0, halfStrideLength);
-      double clippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double clippedSkew = MathTools.clamp(maxForwardSkew.getDoubleValue(), 0.0, halfStrideLength);
+      double clippedSkewScalar = MathTools.clamp(desiredBodyVelocity.getX() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double amountToSkew = clippedSkewScalar * clippedSkew;
-      amountToSkew = MathTools.clipToMinMax(amountToSkew, maxStepDistance);
+      amountToSkew = MathTools.clamp(amountToSkew, maxStepDistance);
       
       footPositionOppositeSideSameEnd.changeFrame(oppositeSideZUpFrame);      
       
@@ -334,10 +333,10 @@ public class MidFootZUpSwingTargetGenerator implements SwingTargetGenerator
       
       //handle left right placement
       double halfStanceWidth = 0.5 * stanceWidth.getDoubleValue();
-      double lateralClippedSkew = MathTools.clipToMinMax(maxLateralSkew.getDoubleValue(), 0.0, halfStanceWidth);
-      double lateralClippedSkewScalar = MathTools.clipToMinMax(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
+      double lateralClippedSkew = MathTools.clamp(maxLateralSkew.getDoubleValue(), 0.0, halfStanceWidth);
+      double lateralClippedSkewScalar = MathTools.clamp(desiredBodyVelocity.getY() / minimumVelocityForFullSkew.getDoubleValue(), 1.0);
       double lateralAmountToSkew = lateralClippedSkewScalar * lateralClippedSkew;
-      lateralAmountToSkew = MathTools.clipToMinMax(lateralAmountToSkew, maxStepDistance);
+      lateralAmountToSkew = MathTools.clamp(lateralAmountToSkew, maxStepDistance);
       
       double newX = swingSide.negateIfRightSide(stanceWidth.getDoubleValue()) + lateralAmountToSkew;
       desiredSwingFootPositionFromOppositeSideFoot.setX(newX);

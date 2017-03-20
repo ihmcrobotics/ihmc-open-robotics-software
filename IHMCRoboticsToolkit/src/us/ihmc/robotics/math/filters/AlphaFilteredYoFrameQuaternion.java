@@ -1,7 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -13,9 +12,9 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
    private final YoFrameQuaternion unfilteredQuaternion;
    private final DoubleYoVariable alpha;
    private final BooleanYoVariable hasBeenCalled;
-   private final Quat4d qMeasured = new Quat4d();
-   private final Quat4d qPreviousFiltered = new Quat4d();
-   private final Quat4d qNewFiltered = new Quat4d();
+   private final Quaternion qMeasured = new Quaternion();
+   private final Quaternion qPreviousFiltered = new Quaternion();
+   private final Quaternion qNewFiltered = new Quaternion();
 
    public AlphaFilteredYoFrameQuaternion(String namePrefix, String nameSuffix, YoFrameQuaternion unfilteredQuaternion, double alpha,
          YoVariableRegistry registry)
@@ -58,7 +57,7 @@ public class AlphaFilteredYoFrameQuaternion extends YoFrameQuaternion implements
       update(qMeasured);
    }
 
-   public void update(Quat4d qMeasured)
+   public void update(Quaternion qMeasured)
    {
       if (hasBeenCalled.getBooleanValue())
       {

@@ -2,11 +2,10 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -18,15 +17,14 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private RobotSide robotSide;
    private FootstepOrigin origin;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   private final RecyclingArrayList<Point3d> trajectoryWaypoints = new RecyclingArrayList<>(2, Point3d.class);
+   private final RecyclingArrayList<Point3D> trajectoryWaypoints = new RecyclingArrayList<>(2, Point3D.class);
    private double swingHeight = 0.0;
-   private final Point3d position = new Point3d();
-   private final Quat4d orientation = new Quat4d();
-   private final RecyclingArrayList<Point2d> predictedContactPoints = new RecyclingArrayList<>(4, Point2d.class);
+   private final Point3D position = new Point3D();
+   private final Quaternion orientation = new Quaternion();
+   private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
-   private boolean hasTimings = false;
-   private double swingTime = Double.NaN;
-   private double transferTime = Double.NaN;
+   private double swingDuration = Double.NaN;
+   private double transferDuration = Double.NaN;
 
    public FootstepDataCommand()
    {
@@ -45,9 +43,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       predictedContactPoints.clear();
       trajectoryWaypoints.clear();
 
-      hasTimings = false;
-      swingTime = Double.NaN;
-      transferTime = Double.NaN;
+      swingDuration = Double.NaN;
+      transferDuration = Double.NaN;
    }
 
    @Override
@@ -56,7 +53,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = message.getRobotSide();
       origin = message.getOrigin();
       trajectoryType = message.getTrajectoryType();
-      Point3d[] originalWaypointList = message.getTrajectoryWaypoints();
+      Point3D[] originalWaypointList = message.getTrajectoryWaypoints();
       trajectoryWaypoints.clear();
       if (originalWaypointList != null)
       {
@@ -66,7 +63,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       swingHeight = message.getSwingHeight();
       position.set(message.getLocation());
       orientation.set(message.getOrientation());
-      ArrayList<Point2d> originalPredictedContactPoints = message.getPredictedContactPoints();
+      ArrayList<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
       {
@@ -74,9 +71,8 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
             predictedContactPoints.add().set(originalPredictedContactPoints.get(i));
       }
 
-      hasTimings = message.hasTimings;
-      swingTime = message.swingTime;
-      transferTime = message.transferTime;
+      swingDuration = message.swingDuration;
+      transferDuration = message.transferDuration;
    }
 
    @Override
@@ -85,21 +81,20 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = other.robotSide;
       origin = other.origin;
       trajectoryType = other.trajectoryType;
-      RecyclingArrayList<Point3d> otherWaypointList = other.trajectoryWaypoints;
+      RecyclingArrayList<Point3D> otherWaypointList = other.trajectoryWaypoints;
       trajectoryWaypoints.clear();
       for (int i = 0; i < otherWaypointList.size(); i++)
          trajectoryWaypoints.add().set(otherWaypointList.get(i));
       swingHeight = other.swingHeight;
       position.set(other.position);
       orientation.set(other.orientation);
-      RecyclingArrayList<Point2d> otherPredictedContactPoints = other.predictedContactPoints;
+      RecyclingArrayList<Point2D> otherPredictedContactPoints = other.predictedContactPoints;
       predictedContactPoints.clear();
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
          predictedContactPoints.add().set(otherPredictedContactPoints.get(i));
 
-      hasTimings = other.hasTimings;
-      swingTime = other.swingTime;
-      transferTime = other.transferTime;
+      swingDuration = other.swingDuration;
+      transferDuration = other.transferDuration;
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -107,7 +102,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       this.robotSide = robotSide;
    }
 
-   public void setPose(Point3d position, Quat4d orientation)
+   public void setPose(Point3D position, Quaternion orientation)
    {
       this.position.set(position);
       this.orientation.set(orientation);
@@ -128,7 +123,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       this.trajectoryType = trajectoryType;
    }
 
-   public void setPredictedContactPoints(RecyclingArrayList<Point2d> predictedContactPoints)
+   public void setPredictedContactPoints(RecyclingArrayList<Point2D> predictedContactPoints)
    {
       this.predictedContactPoints.clear();
       for(int i = 0; i < predictedContactPoints.size(); i++)
@@ -150,7 +145,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return trajectoryType;
    }
 
-   public RecyclingArrayList<Point3d> getTrajectoryWaypoints()
+   public RecyclingArrayList<Point3D> getTrajectoryWaypoints()
    {
       return trajectoryWaypoints;
    }
@@ -160,34 +155,29 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return swingHeight;
    }
 
-   public Point3d getPosition()
+   public Point3D getPosition()
    {
       return position;
    }
 
-   public Quat4d getOrientation()
+   public Quaternion getOrientation()
    {
       return orientation;
    }
 
-   public RecyclingArrayList<Point2d> getPredictedContactPoints()
+   public RecyclingArrayList<Point2D> getPredictedContactPoints()
    {
       return predictedContactPoints;
    }
 
-   public boolean hasTimings()
+   public double getSwingDuration()
    {
-      return hasTimings;
+      return swingDuration;
    }
 
-   public double getSwingTime()
+   public double getTransferDuration()
    {
-      return swingTime;
-   }
-
-   public double getTransferTime()
-   {
-      return transferTime;
+      return transferDuration;
    }
 
    @Override

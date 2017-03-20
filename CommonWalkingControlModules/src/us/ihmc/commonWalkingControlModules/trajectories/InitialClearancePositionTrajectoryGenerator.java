@@ -2,9 +2,10 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -20,8 +21,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoMultipleFramesHolder;
@@ -59,7 +58,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    /** The tangential plane is the frame in which the trajectory can be expressed in 2D. It is tangential to the final direction vector. */
    private final ReferenceFrame tangentialPlane;
    private final FrameOrientation rotationPlane = new FrameOrientation();
-   private final AxisAngle4d axisAngleToWorld = new AxisAngle4d();
+   private final AxisAngle axisAngleToWorld = new AxisAngle();
 
    // For viz
    private final boolean visualize;
@@ -232,14 +231,14 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.finalPosition.set(finalPosition);
    }
 
-   private final Vector3d tempVector = new Vector3d();
+   private final Vector3D tempVector = new Vector3D();
 
    public void setInitialClearance(FrameVector initialDirection, double leaveDistance)
    {
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.initialDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.leaveDistance.set(leaveDistance);
@@ -254,7 +253,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
    public void setTrajectoryTime(double newTrajectoryTime, double leaveTime)
    {
       trajectoryTime.set(newTrajectoryTime);
-      MathTools.checkIfInRange(leaveTime, 0.0, newTrajectoryTime);
+      MathTools.checkIntervalContains(leaveTime, 0.0, newTrajectoryTime);
       this.leaveTime.set(leaveTime);
    }
 
@@ -266,7 +265,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       changeFrame(tangentialPlane, false);
 
       currentTime.set(0.0);
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       double tIntermediate = leaveTime.getDoubleValue();
       xyPolynomial.setCubic(tIntermediate, trajectoryTime.getDoubleValue(), 0.0, 0.0, 1.0, 0.0);
       double z0 = initialPosition.getZ();
@@ -292,7 +291,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       this.currentTime.set(time);
 
       double tIntermediate = leaveTime.getDoubleValue();
-      xyPolynomial.compute(MathTools.clipToMinMax(time, tIntermediate, trajectoryTime.getDoubleValue()));
+      xyPolynomial.compute(MathTools.clamp(time, tIntermediate, trajectoryTime.getDoubleValue()));
       boolean shouldBeZero = currentTime.getDoubleValue() >= tIntermediate || currentTime.getDoubleValue() < 0.0;
       double alphaDot = shouldBeZero ? 0.0 : xyPolynomial.getVelocity();
       double alphaDDot = shouldBeZero ? 0.0 : xyPolynomial.getAcceleration();
@@ -301,7 +300,7 @@ public class InitialClearancePositionTrajectoryGenerator implements PositionTraj
       currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
       currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
 
-      zPolynomial.compute(MathTools.clipToMinMax(time, 0.0, trajectoryTime.getDoubleValue()));
+      zPolynomial.compute(MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue()));
       shouldBeZero = isDone() || currentTime.getDoubleValue() < 0.0;
       alphaDot = shouldBeZero ? 0.0 : zPolynomial.getVelocity();
       alphaDDot = shouldBeZero ? 0.0 : zPolynomial.getAcceleration();

@@ -1,9 +1,9 @@
 package us.ihmc.valkyrie.visualizer;
 
-import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
-import us.ihmc.tools.io.printing.PrintTools;
-
 import java.util.HashMap;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 
 /**
  * Created by dstephen on 12/9/15.

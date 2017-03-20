@@ -1,6 +1,7 @@
 package us.ihmc.tools.processManagement;
 
 import static org.junit.Assert.fail;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,21 +10,18 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.io.files.FileTools;
-import us.ihmc.tools.io.printing.PrintTools;
-import us.ihmc.tools.processManagement.ExitListener;
-import us.ihmc.tools.processManagement.ForkedShellProcessSpawner;
-import us.ihmc.tools.processManagement.JavaProcessSpawner;
-import us.ihmc.tools.processManagement.ProcessSpawner;
-import us.ihmc.tools.processManagement.ShellScriptProcessSpawner;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
@@ -34,7 +32,7 @@ public class ProcessSpawnerTest
    private void validateFileContents(String expectedContent) throws Exception
    {
       byte[] binaryData = new byte[128];
-      DataInputStream dis = FileTools.getFileDataInputStream(testFilePath);
+      DataInputStream dis = FileTools.newFileDataInputStream(testFilePath);
       dis.readFully(binaryData, 0, dis.available());
       dis.close();
       String content = new String(binaryData).trim();
@@ -132,7 +130,7 @@ public class ProcessSpawnerTest
          return;
       }
 
-      final List<Integer> exitValues = new ArrayList(2);
+      final List<Integer> exitValues = new ArrayList<>(2);
       exitValues.clear();
       String[] arguments = {"2"};
 
@@ -188,7 +186,7 @@ public class ProcessSpawnerTest
    // this one is used for testing JavaProcessSpawner
    public static void main(String[] args) throws Exception
    {
-      DataOutputStream dos = FileTools.getFileDataOutputStream(testFilePath);
+      DataOutputStream dos = FileTools.newFileDataOutputStream(testFilePath, DefaultExceptionHandler.PRINT_STACKTRACE);
       dos.writeBytes(args[0]);
       dos.flush();
       dos.close();

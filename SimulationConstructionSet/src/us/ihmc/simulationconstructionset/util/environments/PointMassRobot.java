@@ -1,19 +1,18 @@
 package us.ihmc.simulationconstructionset.util.environments;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.Axis;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SliderJoint;
 
 public class PointMassRobot extends Robot
 {
@@ -42,15 +41,15 @@ public class PointMassRobot extends Robot
 
       this.setGravity(0.0);
 
-      xJoint = new SliderJoint("pointMassX", new Vector3d(), this, Axis.X);
+      xJoint = new SliderJoint("pointMassX", new Vector3D(), this, Axis.X);
       Link xLink = new Link("xLink");
       xJoint.setLink(xLink);
 
-      yJoint = new SliderJoint("pointMassY", new Vector3d(), this, Axis.Y);
+      yJoint = new SliderJoint("pointMassY", new Vector3D(), this, Axis.Y);
       Link yLink = new Link("yLink");
       yJoint.setLink(yLink);
 
-      zJoint = new SliderJoint("pointMassZ", new Vector3d(), this, Axis.Z);
+      zJoint = new SliderJoint("pointMassZ", new Vector3D(), this, Axis.Z);
       zLink = new Link("zLink");
       zLink.setMass(mass);
       zLink.setMomentOfInertia(0.0, 0.0, 0.0);
@@ -59,7 +58,7 @@ public class PointMassRobot extends Robot
       zLink.setLinkGraphics(zLinkLinkGraphics);
       zJoint.setLink(zLink);
 
-      externalForcePoint = new ExternalForcePoint("ef_" + name, new Vector3d(), this.getRobotsYoVariableRegistry());
+      externalForcePoint = new ExternalForcePoint("ef_" + name, new Vector3D(), this.getRobotsYoVariableRegistry());
       zJoint.addExternalForcePoint(externalForcePoint);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -69,7 +68,7 @@ public class PointMassRobot extends Robot
       yoGraphicsListRegistry.registerYoGraphic(name, contactPoint);
       yoGraphicsListRegistry.registerYoGraphic(name, pointMassForce);
 
-      this.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+      this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       addRootJoint(xJoint);
       xJoint.addJoint(yJoint);
@@ -88,7 +87,7 @@ public class PointMassRobot extends Robot
       zJoint.setQ(z);
    }
 
-   public void setPosition(Point3d point)
+   public void setPosition(Point3D point)
    {
       xJoint.setQ(point.getX());
       yJoint.setQ(point.getY());
@@ -103,7 +102,7 @@ public class PointMassRobot extends Robot
       zJoint.setQd(zd);
    }
 
-   public void setVelocity(Vector3d velocity)
+   public void setVelocity(Vector3D velocity)
    {
       xJoint.setQd(velocity.getX());
       yJoint.setQd(velocity.getY());
@@ -116,7 +115,7 @@ public class PointMassRobot extends Robot
       return externalForcePoint;
    }
 
-   public void getPosition(Tuple3d tuple3d)
+   public void getPosition(Tuple3DBasics tuple3d)
    {
       double x = xJoint.getQYoVariable().getDoubleValue();
       double y = yJoint.getQYoVariable().getDoubleValue();
@@ -125,7 +124,7 @@ public class PointMassRobot extends Robot
       tuple3d.set(x, y, z);
    }
 
-   public void getVelocity(Tuple3d tuple3d)
+   public void getVelocity(Tuple3DBasics tuple3d)
    {
       double xd = xJoint.getQDYoVariable().getDoubleValue();
       double yd = yJoint.getQDYoVariable().getDoubleValue();

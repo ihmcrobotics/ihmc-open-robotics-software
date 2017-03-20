@@ -1,22 +1,19 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -28,14 +25,10 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFrameOrientation;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 
 public class HoldPositionState extends AbstractFootControlState
@@ -64,8 +57,8 @@ public class HoldPositionState extends AbstractFootControlState
    private final FrameVector2d edgeVector2d = new FrameVector2d();
    private final FrameVector edgeVector = new FrameVector();
    private final FrameOrientation desiredOrientationCopy = new FrameOrientation();
-   private final AxisAngle4d desiredAxisAngle = new AxisAngle4d();
-   private final Vector3d desiredRotationVector = new Vector3d();
+   private final AxisAngle desiredAxisAngle = new AxisAngle();
+   private final Vector3D desiredRotationVector = new Vector3D();
 
    private final BooleanYoVariable doSmartHoldPosition;
    private final YoFrameOrientation desiredHoldOrientation;
@@ -77,8 +70,8 @@ public class HoldPositionState extends AbstractFootControlState
    private final YoFrameVector yoAngularWeight;
    private final YoFrameVector yoLinearWeight;
 
-   private final Vector3d tempAngularWeightVector = new Vector3d();
-   private final Vector3d tempLinearWeightVector = new Vector3d();
+   private final Vector3D tempAngularWeightVector = new Vector3D();
+   private final Vector3D tempLinearWeightVector = new Vector3D();
 
    private final FramePose bodyFixedControlledPose = new FramePose();
    private final ReferenceFrame soleFrame;
@@ -105,7 +98,7 @@ public class HoldPositionState extends AbstractFootControlState
       soleFrame = contactableFoot.getSoleFrame();
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       this.partialFootholdControlModule = partialFootholdControlModule;
-      footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
       footPolygon.setIncludingFrameAndUpdate(contactableFoot.getContactPoints2d());
       String namePrefix = contactableFoot.getName();
       desiredHoldOrientation = new YoFrameOrientation(namePrefix + "DesiredHoldOrientation", worldFrame, registry);
@@ -128,6 +121,7 @@ public class HoldPositionState extends AbstractFootControlState
       doHoldFootFlatOrientation.set(false);
 
       spatialFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
       bodyFixedControlledPose.setToZero(soleFrame);
       bodyFixedControlledPose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
@@ -136,8 +130,8 @@ public class HoldPositionState extends AbstractFootControlState
       {
          private static final long serialVersionUID = -6502583726296859305L;
 
-         private final Quat4d localQuaternion = new Quat4d();
-         private final Vector3d localTranslation = new Vector3d();
+         private final Quaternion localQuaternion = new Quaternion();
+         private final Vector3D localTranslation = new Vector3D();
 
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -150,10 +144,10 @@ public class HoldPositionState extends AbstractFootControlState
 
       if (VISUALIZE)
       {
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry YoGraphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
          YoGraphicPosition desiredPositionViz = new YoGraphicPosition(namePrefix + "DesiredHoldPosition", desiredHoldPosition, 0.005, YoAppearance.DarkGray(), GraphicType.CROSS);
-         dynamicGraphicObjectsListRegistry.registerYoGraphic("HoldPosition", desiredPositionViz);
-         dynamicGraphicObjectsListRegistry.registerArtifact("HoldPosition", desiredPositionViz.createArtifact());
+         YoGraphicsListRegistry.registerYoGraphic("HoldPosition", desiredPositionViz);
+         YoGraphicsListRegistry.registerArtifact("HoldPosition", desiredPositionViz.createArtifact());
       }
    }
 
@@ -165,7 +159,7 @@ public class HoldPositionState extends AbstractFootControlState
       yoLinearWeight.scale(weight);
    }
 
-   public void setWeights(Vector3d angular, Vector3d linear)
+   public void setWeights(Vector3D angular, Vector3D linear)
    {
       yoAngularWeight.set(angular);
       yoLinearWeight.set(linear);
@@ -188,7 +182,7 @@ public class HoldPositionState extends AbstractFootControlState
       // Remember the previous contact normal, in case the foot leaves the ground and rotates
       holdPositionNormalContactVector.setIncludingFrame(fullyConstrainedNormalContactVector);
       holdPositionNormalContactVector.changeFrame(worldFrame);
-      momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, holdPositionNormalContactVector);
+      controllerToolbox.setPlaneContactStateNormalContactVector(contactableFoot, holdPositionNormalContactVector);
 
       desiredSolePosition.setToZero(soleFrame);
       desiredSolePosition.changeFrame(worldFrame);
@@ -220,7 +214,7 @@ public class HoldPositionState extends AbstractFootControlState
    public void doSpecificAction()
    {
       footSwitch.computeAndPackCoP(cop);
-      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
       if (desiredCoP.containsNaN())
       {
@@ -249,7 +243,7 @@ public class HoldPositionState extends AbstractFootControlState
 
          if (doFootholdAdjustments.getBooleanValue())
          {
-            YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+            YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
             boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
             if (contactStateHasChanged)
                contactState.notifyContactStateHasChanged();

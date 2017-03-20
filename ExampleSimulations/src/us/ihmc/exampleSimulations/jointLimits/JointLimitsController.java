@@ -84,7 +84,7 @@ public class JointLimitsController extends SimpleRobotController
 
          double qDotMin = -Math.pow(distance, 2) * slope.getDoubleValue();
          double qDDotMin = (qDotMin - robot.getQd()) / timeHorizon;
-         qDDotMin = MathTools.clipToMinMax(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
+         qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
 
          lowerLimitFiltered.update(qDDotMin);
          qddMin.set(lowerLimitFiltered.getDoubleValue());
@@ -97,14 +97,14 @@ public class JointLimitsController extends SimpleRobotController
 
          double qDotMax = Math.pow(distance, 2) * slope.getDoubleValue();
          double qDDotMax = (qDotMax - robot.getQd()) / timeHorizon;
-         qDDotMax = MathTools.clipToMinMax(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
+         qDDotMax = MathTools.clamp(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
 
          upperLimitFiltered.update(qDDotMax);
          qddMax.set(upperLimitFiltered.getDoubleValue());
       }
       // ---
 
-      double qddLimited = MathTools.clipToMinMax(qddDesired.getDoubleValue(), qddMin.getDoubleValue(), qddMax.getDoubleValue());
+      double qddLimited = MathTools.clamp(qddDesired.getDoubleValue(), qddMin.getDoubleValue(), qddMax.getDoubleValue());
       qddDesiredLimited.set(qddLimited);
    }
 }

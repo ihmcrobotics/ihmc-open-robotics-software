@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.packets.wholebody;
 
+import java.util.Random;
+
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
-import us.ihmc.robotics.random.RandomTools;
-
-import java.util.Random;
 
 public class MultiJointAnglePacket extends Packet<MultiJointAnglePacket> implements VisualizablePacket
 {
@@ -21,8 +21,8 @@ public class MultiJointAnglePacket extends Packet<MultiJointAnglePacket> impleme
 
       for (int i = 0; i < randomLength; i++)
       {
-         singleJointAnglePackets[i] = new SingleJointAnglePacket("testJoint" + i, RandomTools.generateRandomDouble(random, -5.0, 5.0),
-               RandomTools.generateRandomDouble(random, 0.0, 10.0), Double.NaN);
+         singleJointAnglePackets[i] = new SingleJointAnglePacket("testJoint" + i, RandomNumbers.nextDouble(random, -5.0, 5.0),
+               RandomNumbers.nextDouble(random, 0.0, 10.0), Double.NaN);
       }
    }
 

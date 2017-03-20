@@ -5,7 +5,6 @@ import java.awt.Font;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
-import javax.vecmath.Point2d;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -20,6 +19,8 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+
+import us.ihmc.euclid.tuple2D.Point2D;
 
 /**
  * @author mjohnson
@@ -289,12 +290,12 @@ public class GraphingUtility
       jFrame.setVisible(true);
    }
 
-   public static XYSeries createXYSeries(String seriesName, ArrayList<Point2d> data)
+   public static XYSeries createXYSeries(String seriesName, ArrayList<Point2D> data)
    {
       final XYSeries series1 = new XYSeries(seriesName);
       for (int i = 0; i < data.size(); i++)
       {
-         Point2d point2d = data.get(i);
+         Point2D point2d = data.get(i);
          series1.add(point2d.getX(), point2d.getY());
       }
 

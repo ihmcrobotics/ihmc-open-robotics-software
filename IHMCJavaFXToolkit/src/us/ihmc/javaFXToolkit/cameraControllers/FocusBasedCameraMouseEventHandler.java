@@ -2,9 +2,6 @@ package us.ihmc.javaFXToolkit.cameraControllers;
 
 import java.util.function.Predicate;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -12,7 +9,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.geometry.Point3D;
 import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.SubScene;
@@ -27,6 +23,9 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Translate;
+import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.robotics.MathTools;
 
@@ -60,11 +59,11 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
    private final EventHandler<KeyEvent> translationEventHandler;
 
    public FocusBasedCameraMouseEventHandler(ReadOnlyDoubleProperty sceneWidthProperty, ReadOnlyDoubleProperty sceneHeightProperty, PerspectiveCamera camera,
-                                            Vector3d up, Vector3d forward)
+                                            Vector3D up, Vector3D forward)
    {
-      Vector3d left = new Vector3d();
+      Vector3D left = new Vector3D();
       left.cross(up, forward);
-      if (!MathTools.epsilonEquals(left.length(), 1.0, 1.0 - 5))
+      if (!MathTools.epsilonEquals(left.length(), 1.0, Epsilons.ONE_HUNDRED_THOUSANDTH))
          throw new RuntimeException("The vectors up and forward must be orthogonal. Received: up = " + up + ", forward = " + forward);
 
       zoomCalculator.zoomProperty().bindBidirectional(offsetFromFocusPoint.zProperty());
@@ -88,7 +87,7 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
 
       camera.getTransforms().addAll(focusPointTranslation, cameraOrientation, offsetFromFocusPoint);
 
-      Point3d cameraPosition = new Point3d();
+      Point3D cameraPosition = new Point3D();
       JavaFXTools.applyTranform(camera.getLocalToSceneTransform(), cameraPosition);
 
       focusPointViz = new Sphere(0.01);
@@ -111,8 +110,8 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
 
    public void changeCameraPosition(double x, double y, double z)
    {
-      Point3d desiredCameraPosition = new Point3d(x, y, z);
-      Point3d desiredFocusPoint = new Point3d(focusPointTranslation.getX(), focusPointTranslation.getY(), focusPointTranslation.getZ());
+      Point3D desiredCameraPosition = new Point3D(x, y, z);
+      Point3D desiredFocusPoint = new Point3D(focusPointTranslation.getX(), focusPointTranslation.getY(), focusPointTranslation.getZ());
 
       double distanceFromFocusPoint = desiredCameraPosition.distance(desiredFocusPoint);
       offsetFromFocusPoint.setZ(-distanceFromFocusPoint);
@@ -159,8 +158,8 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
                Node intersectedNode = pickResult.getIntersectedNode();
                if (intersectedNode == null || intersectedNode instanceof SubScene)
                   return;
-               Point3D localPoint = pickResult.getIntersectedPoint();
-               Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
+               javafx.geometry.Point3D localPoint = pickResult.getIntersectedPoint();
+               javafx.geometry.Point3D scenePoint = intersectedNode.getLocalToSceneTransform().transform(localPoint);
                focusPointTranslation.setX(scenePoint.getX());
                focusPointTranslation.setY(scenePoint.getY());
                focusPointTranslation.setZ(scenePoint.getZ());

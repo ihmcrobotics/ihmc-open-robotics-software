@@ -2,8 +2,8 @@ package us.ihmc.sensorProcessing.combined;
 
 import java.util.LinkedHashMap;
 
-import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
 import us.ihmc.robotics.MathTools;
+import us.ihmc.sensorProcessing.ProcessedVelocitySensor;
 
 public class WeightedSubtractionVelocitySensor extends LinearCombinationVelocitySensor
 {
@@ -21,8 +21,8 @@ public class WeightedSubtractionVelocitySensor extends LinearCombinationVelocity
 
    private static LinkedHashMap<ProcessedVelocitySensor, Double> createSensorsAndCoefficientsMap(ProcessedVelocitySensor sensor1, ProcessedVelocitySensor sensor2, double weight1, double weight2)
    {
-      MathTools.checkIfInRange(weight1, 0.0, Double.POSITIVE_INFINITY);
-      MathTools.checkIfInRange(weight2, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(weight1, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(weight2, 0.0, Double.POSITIVE_INFINITY);
       
       LinkedHashMap<ProcessedVelocitySensor, Double> ret = new LinkedHashMap<ProcessedVelocitySensor, Double>();
       ret.put(sensor1, weight1);

@@ -7,13 +7,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -32,8 +32,8 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.CenterOfMassJacobian;
-import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -133,7 +133,7 @@ public class PelvisLinearStateUpdater
    private final FrameVector rootJointVelocity = new FrameVector(worldFrame);
    private final FramePoint centerOfMassPosition = new FramePoint(worldFrame);
    private final FrameVector centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector(worldFrame);
-   private final Vector3d tempRootJointTranslation = new Vector3d();
+   private final Vector3D tempRootJointTranslation = new Vector3D();
    private final FrameVector tempFrameVector = new FrameVector();
    private final FramePoint tempCenterOfMassPosition = new FramePoint();
    private final FramePoint footPositionInWorld = new FramePoint();
@@ -658,7 +658,7 @@ public class PelvisLinearStateUpdater
       }
    }
 
-   public void initializeCoMPositionToActual(Tuple3d initialCoMPosition)
+   public void initializeCoMPositionToActual(Tuple3DReadOnly initialCoMPosition)
    {
       initializeToActual = true;
       centerOfMassPosition.setIncludingFrame(worldFrame, initialCoMPosition);

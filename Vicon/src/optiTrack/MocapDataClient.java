@@ -112,8 +112,8 @@ public class MocapDataClient
             }
             catch (IOException e)
             {
-               System.err
-                     .println("**MOCAP WARNING** - Socket Timeout - No Rigibodies are being transmitted from MOCAP SERVER. Make sure streaming is enabled!");
+//               System.err
+//                     .println("**MOCAP WARNING** - Socket Timeout - No Rigibodies are being transmitted from MOCAP SERVER. Make sure streaming is enabled!");
             }
          }
       }

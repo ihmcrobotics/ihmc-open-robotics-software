@@ -1,13 +1,16 @@
 package us.ihmc.robotics.geometry.interfaces;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends GeometryObject<T>
 {
-   public abstract void setOrientation(Quat4d orientation);
+   public abstract void setOrientation(QuaternionReadOnly orientation);
 
-   public abstract void setAngularVelocity(Vector3d angularVelocity);
+   public abstract void setAngularVelocity(Vector3DReadOnly angularVelocity);
 
    public abstract void setOrientationToZero();
 
@@ -17,7 +20,7 @@ public interface SO3WaypointInterface<T extends SO3WaypointInterface<T>> extends
 
    public abstract void setAngularVelocityToNaN();
 
-   public abstract void getOrientation(Quat4d orientationToPack);
+   public abstract void getOrientation(QuaternionBasics orientationToPack);
 
-   public abstract void getAngularVelocity(Vector3d angularVelocityToPack);
+   public abstract void getAngularVelocity(Vector3DBasics angularVelocityToPack);
 }
