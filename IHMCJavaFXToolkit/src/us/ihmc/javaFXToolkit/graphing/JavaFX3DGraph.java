@@ -1,11 +1,11 @@
 package us.ihmc.javaFXToolkit.graphing;
 
-import javax.vecmath.AxisAngle4d;
-
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Box;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
 import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
@@ -13,7 +13,6 @@ import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory.SceneType;
 import us.ihmc.javaFXToolkit.text.Text3D;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
 
 public class JavaFX3DGraph
 {
@@ -63,24 +62,24 @@ public class JavaFX3DGraph
       xLabel.setFontThickness(fontThickness);
       xLabel.setFontHeight(fontHeight);
       xLabel.setFontColor(Color.BLACK);
-      xLabel.setOrientation(new AxisAngle4d(1.0, -1.0, 0.0, 180.0));
-      xLabel.setPosition(new TransformablePoint3d(1.0, -fontHeight / 2.0, 0.0));
+      xLabel.setOrientation(new AxisAngle(1.0, -1.0, 0.0, 180.0));
+      xLabel.setPosition(new Point3D(1.0, -fontHeight / 2.0, 0.0));
       view3dFactory.addNodeToView(xLabel.getNode());
       
       Text3D yLabel = new Text3D("Y");
       yLabel.setFontThickness(fontThickness);
       yLabel.setFontHeight(fontHeight);
       yLabel.setFontColor(Color.BLACK);
-      yLabel.setOrientation(new AxisAngle4d(1.0, 0.0, 0.0, 180.0));
-      yLabel.setPosition(new TransformablePoint3d(fontHeight / 2.0, 1.0, 0.0));
+      yLabel.setOrientation(new AxisAngle(1.0, 0.0, 0.0, 180.0));
+      yLabel.setPosition(new Point3D(fontHeight / 2.0, 1.0, 0.0));
       view3dFactory.addNodeToView(yLabel.getNode());
       
       Text3D zLabel = new Text3D("Z");
       zLabel.setFontThickness(fontThickness);
       zLabel.setFontHeight(fontHeight);
       zLabel.setFontColor(Color.BLACK);
-      zLabel.setOrientation(new AxisAngle4d(1.0, 0.0, 0.0, -90.0));
-      zLabel.setPosition(new TransformablePoint3d(fontHeight / 2.0, 0.0, 1.0));
+      zLabel.setOrientation(new AxisAngle(1.0, 0.0, 0.0, -90.0));
+      zLabel.setPosition(new Point3D(fontHeight / 2.0, 0.0, 1.0));
       view3dFactory.addNodeToView(zLabel.getNode());
 
       javaFXPanel.setScene(view3dFactory.getScene());

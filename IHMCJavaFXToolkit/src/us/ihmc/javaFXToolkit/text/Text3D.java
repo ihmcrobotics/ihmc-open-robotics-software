@@ -5,14 +5,10 @@ import org.fxyz3d.shapes.primitives.Text3DMesh;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
-<<<<<<< HEAD
 import javafx.scene.paint.Color;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-=======
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
->>>>>>> refs/heads/develop
 
 public class Text3D
 {
