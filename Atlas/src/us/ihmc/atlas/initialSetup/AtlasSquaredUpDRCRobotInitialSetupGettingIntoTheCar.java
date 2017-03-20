@@ -3,19 +3,18 @@ package us.ihmc.atlas.initialSetup;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -101,7 +100,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       
       robot.update();
       
-      robot.setPositionInWorld(new Vector3d(pelvisInitialPose.getX(), pelvisInitialPose.getY(), groundZ + pelvisInitialPose.getZ()));
+      robot.setPositionInWorld(new Vector3D(pelvisInitialPose.getX(), pelvisInitialPose.getY(), groundZ + pelvisInitialPose.getZ()));
       robot.setOrientation(pelvisInitialPose.getYaw(), pelvisInitialPose.getPitch(), pelvisInitialPose.getRoll());
    }
 
@@ -386,7 +385,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
    }
 
    @Override
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
    }
 
@@ -414,7 +413,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
    }
 
    @Override
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
       
    }

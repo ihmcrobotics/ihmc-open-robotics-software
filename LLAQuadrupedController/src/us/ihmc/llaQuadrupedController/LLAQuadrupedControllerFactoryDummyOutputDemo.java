@@ -2,6 +2,7 @@ package us.ihmc.llaQuadrupedController;
 
 import java.io.IOException;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -33,7 +34,6 @@ import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
@@ -190,7 +190,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
          {
             long itStart = System.nanoTime();
             simulationStateEstimator.doControl();
-            robotTimestamp.add(TimeTools.milliSecondsToSeconds(1));
+            robotTimestamp.add(Conversions.millisecondsToSeconds(1));
             stateImpl.process();
             
             long itTime = System.nanoTime() - itStart;
@@ -209,7 +209,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
          stateImpl.onExit();
          
          
-         System.out.println(state + ": " + TimeTools.nanoSecondstoSeconds(endTime/TEST_ITERATIONS) + "s/it. Min: " + TimeTools.nanoSecondstoSeconds(min) + "s ; max: " + TimeTools.nanoSecondstoSeconds(max) + "s") ;
+         System.out.println(state + ": " + Conversions.nanosecondsToSeconds(endTime/TEST_ITERATIONS) + "s/it. Min: " + Conversions.nanosecondsToSeconds(min) + "s ; max: " + Conversions.nanosecondsToSeconds(max) + "s") ;
          
       }
       robotTimestamp.set(robotTimeBeforeWarmUp);

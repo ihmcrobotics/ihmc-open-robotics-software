@@ -9,11 +9,11 @@ import org.ddogleg.optimization.functions.FunctionNtoM;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationToolkit.visualizers.FullRobotModelVisualizer;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
@@ -45,7 +45,7 @@ public class AtlasKinematicCalibrator
    }
 
    /**
-    * ido not override, use addDynamicGraphicObjects
+    * ido not override, use addYoGraphics
     */
    protected void createDisplay()
    {
@@ -60,7 +60,7 @@ public class AtlasKinematicCalibrator
       visualizer = new FullRobotModelVisualizer(scs, fullRobotModel, 0.01); //100hz sample rate
       
       scs.setGroundVisible(false);
-      setupDynamicGraphicObjects();
+      setupYoGraphics();
 
       scs.startOnAThread();
       scs.maximizeMainWindow();
@@ -69,22 +69,22 @@ public class AtlasKinematicCalibrator
    }
 
 
-   protected void setupDynamicGraphicObjects()
+   protected void setupYoGraphics()
    {
 
    }
 
    /**
-    * do not override, use updateDynamicGraphicObjects
+    * do not override, use updateYoGraphics
     */
    protected void displayUpdate(int index)
    {
       yoIndex.set(index);    
-      updateDynamicGraphicsObjects(index);
+      updateYoGraphics(index);
       visualizer.update(1);
    }
 
-   protected void updateDynamicGraphicsObjects(int index)
+   protected void updateYoGraphics(int index)
    {
 
    }

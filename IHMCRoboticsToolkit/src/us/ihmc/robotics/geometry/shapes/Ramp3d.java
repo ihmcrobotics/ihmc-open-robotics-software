@@ -1,12 +1,15 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.Epsilons;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 /**
  * Ramp where the center of ramp start side is origin.
@@ -22,28 +25,43 @@ public class Ramp3d extends Shape3d<Ramp3d>
    private double angleOfRampIncline;
    private final Plane3d rampPlane;
 
-   private final Point3d temporaryPoint;
+   private final Point3D temporaryPoint;
 
    public Ramp3d(Ramp3d ramp3d)
    {
-      this(ramp3d.getTransformUnsafe(), ramp3d.getWidth(), ramp3d.getLength(), ramp3d.getHeight());
+      setPose(ramp3d);
+      size = new Size3d(ramp3d.getLength(), ramp3d.getWidth(), ramp3d.getHeight());
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
    }
 
    public Ramp3d(double width, double length, double height)
    {
       size = new Size3d(length, width, height);
       rampPlane = new Plane3d();
-      temporaryPoint = new Point3d();
+      temporaryPoint = new Point3D();
 
       updateRamp();
    }
 
    public Ramp3d(RigidBodyTransform transform, double width, double length, double height)
    {
-      setTransform(transform);
+      setPose(transform);
       size = new Size3d(length, width, height);
       rampPlane = new Plane3d();
-      temporaryPoint = new Point3d();
+      temporaryPoint = new Point3D();
+
+      updateRamp();
+   }
+
+   public Ramp3d(Pose pose, double width, double length, double height)
+   {
+      setPose(pose);
+      size = new Size3d(length, width, height);
+      rampPlane = new Plane3d();
+      temporaryPoint = new Point3D();
 
       updateRamp();
    }
@@ -53,7 +71,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    {
       if (this != ramp3d)
       {
-         setTransform(ramp3d.getTransformUnsafe());
+         setPose(ramp3d);
          size.set(ramp3d.size);
 
          updateRamp();
@@ -108,10 +126,10 @@ public class Ramp3d extends Shape3d<Ramp3d>
       return rampLength;
    }
 
-   public void getSurfaceNormal(Vector3d surfaceNormalToPack)
+   public void getSurfaceNormal(Vector3DBasics surfaceNormalToPack)
    {
       surfaceNormalToPack.set(rampPlane.getNormal());
-      transformFromShapeFrame(surfaceNormalToPack);
+      transformToWorld(surfaceNormalToPack);
    }
 
    public double getRampIncline()
@@ -120,14 +138,14 @@ public class Ramp3d extends Shape3d<Ramp3d>
    }
    
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
-      super.applyTransform(transform);
+      applyTransformToPose(transform);
       updateRamp();
    }
 
    @Override
-   protected boolean checkIfInsideShapeFrame(Point3d pointInWorldToCheck, Point3d closestPointToPack, Vector3d normalToPack)
+   protected boolean checkIfInsideShapeFrame(Point3DReadOnly pointInWorldToCheck, Point3DBasics closestPointToPack, Vector3DBasics normalToPack)
    {
       boolean isInsideOrOnSurface = isInsideOrOnSurfaceShapeFrame(pointInWorldToCheck, 0.0);
       
@@ -143,7 +161,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
       return isInsideOrOnSurface;
    }
    
-   private void findClosestSurfaceNormal(Point3d point, Vector3d normalToPack)
+   private void findClosestSurfaceNormal(Point3DReadOnly point, Vector3DBasics normalToPack)
    {
       double distanceToNegativeYSide = Math.abs(size.getY() / 2.0 + point.getY());
       double distanceToPositiveYSide = Math.abs(size.getY() / 2.0 - point.getY());
@@ -179,16 +197,16 @@ public class Ramp3d extends Shape3d<Ramp3d>
    }
 
    @Override
-   protected boolean isInsideOrOnSurfaceShapeFrame(Point3d pointToCheck, double epsilon)
+   protected boolean isInsideOrOnSurfaceShapeFrame(Point3DReadOnly pointToCheck, double epsilon)
    {
-      return MathTools.isPreciselyBoundedByInclusive(0.0, size.getX(), pointToCheck.getX(), epsilon * 2.0)
-          && MathTools.isPreciselyBoundedByInclusive(-size.getY() / 2.0, size.getY() / 2.0, pointToCheck.getY(), epsilon * 2.0)
-          && MathTools.isPreciselyBoundedByInclusive(0.0, size.getZ(), pointToCheck.getZ(), epsilon * 2.0)
+      return MathTools.intervalContains(pointToCheck.getX(), 0.0, size.getX(), epsilon * 2.0)
+          && MathTools.intervalContains(pointToCheck.getY(), -size.getY() / 2.0, size.getY() / 2.0, epsilon * 2.0)
+          && MathTools.intervalContains(pointToCheck.getZ(), 0.0, size.getZ(), epsilon * 2.0)
           && rampPlane.isOnOrBelow(pointToCheck, epsilon);
    }
 
    @Override
-   protected double distanceShapeFrame(Point3d point)
+   protected double distanceShapeFrame(Point3DReadOnly point)
    {
       temporaryPoint.set(point);
       orthogonalProjectionShapeFrame(temporaryPoint);
@@ -196,7 +214,7 @@ public class Ramp3d extends Shape3d<Ramp3d>
    }
 
    @Override
-   protected void orthogonalProjectionShapeFrame(Point3d pointToCheckAndPack)
+   protected void orthogonalProjectionShapeFrame(Point3DBasics pointToCheckAndPack)
    {
       if (!isInsideOrOnSurfaceShapeFrame(pointToCheckAndPack, Epsilons.ONE_BILLIONTH))
       {
@@ -265,6 +283,6 @@ public class Ramp3d extends Shape3d<Ramp3d>
    @Override
    public String toString()
    {
-      return "size = " + size + ", + transform = " + getTransformUnsafe().toString(8) + "\n";
+      return "size = " + size + ", + transform = " + getPoseString() + "\n";
    }
 }

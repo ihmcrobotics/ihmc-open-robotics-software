@@ -2,12 +2,6 @@ package us.ihmc.javaFXToolkit.cameraControllers;
 
 import java.util.function.Predicate;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -21,10 +15,15 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Rotate;
+import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.JavaFXTools;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.GeometryTools;
 
 /**
  * This class provides the tools necessary to build a simple controller for computing the orientation of a JavaFX {@link PerspectiveCamera}.
@@ -94,9 +93,9 @@ public class CameraRotationCalculator
    /** Maximum latitude of the camera. Only used when {@link #restrictLatitude} is set to true. */
    private final DoubleProperty maxLatitude = new SimpleDoubleProperty(this, "maxLatitude", Math.PI / 2.0 - 0.2);
 
-   private final Vector3d up = new Vector3d();
-   private final Vector3d down = new Vector3d();
-   private final Vector3d forward = new Vector3d();
+   private final Vector3D up = new Vector3D();
+   private final Vector3D down = new Vector3D();
+   private final Vector3D forward = new Vector3D();
 
    /**
     * Creates a calculator for the camera rotation.
@@ -104,30 +103,28 @@ public class CameraRotationCalculator
     * @param forward indicates which is forward.
     * @throws RuntimeException if {@code up} and {@code forward} are not orthogonal.
     */
-   public CameraRotationCalculator(Vector3d up, Vector3d forward)
+   public CameraRotationCalculator(Vector3D up, Vector3D forward)
    {
-      Vector3d left = new Vector3d();
+      Vector3D left = new Vector3D();
       left.cross(up, forward);
-      if (!MathTools.epsilonEquals(left.length(), 1.0, 1.0 - 5))
+      if (!MathTools.epsilonEquals(left.length(), 1.0, Epsilons.ONE_HUNDRED_THOUSANDTH))
          throw new RuntimeException("The vectors up and forward must be orthogonal. Received: up = " + up + ", forward = " + forward);
 
       this.up.set(up);
       this.forward.set(forward);
-      down.negate(up);
+      down.setAndNegate(up);
 
       computeOffset();
    }
 
    private void computeOffset()
    {
-      Vector3d cameraZAxis = new Vector3d(forward);
-      Vector3d cameraYAxis = new Vector3d(down);
-      Vector3d cameraXAxis = new Vector3d();
+      Vector3D cameraZAxis = new Vector3D(forward);
+      Vector3D cameraYAxis = new Vector3D(down);
+      Vector3D cameraXAxis = new Vector3D();
       cameraXAxis.cross(cameraYAxis, cameraZAxis);
-      Matrix3d rotationOffset = new Matrix3d();
-      rotationOffset.setColumn(0, cameraXAxis);
-      rotationOffset.setColumn(1, cameraYAxis);
-      rotationOffset.setColumn(2, cameraZAxis);
+      RotationMatrix rotationOffset = new RotationMatrix();
+      rotationOffset.setColumns(cameraXAxis, cameraYAxis, cameraZAxis);
       JavaFXTools.convertRotationMatrixToAffine(rotationOffset, offset);
    }
 
@@ -141,7 +138,7 @@ public class CameraRotationCalculator
    {
       return new EventHandler<MouseEvent>()
       {
-         private final Point2d oldMouseLocation = new Point2d();
+         private final Point2D oldMouseLocation = new Point2D();
 
          @Override
          public void handle(MouseEvent event)
@@ -162,8 +159,8 @@ public class CameraRotationCalculator
             if (event.getEventType() != MouseEvent.MOUSE_DRAGGED)
                return;
 
-            Point2d centerLocation = new Point2d();
-            Point2d newMouseLocation = new Point2d();
+            Point2D centerLocation = new Point2D();
+            Point2D newMouseLocation = new Point2D();
             // Acquire the new mouse coordinates from the recent event
             centerLocation.set(sceneWidthProperty.get() / 2.0, sceneHeightProperty.get() / 2.0);
             newMouseLocation.set(event.getSceneX(), event.getSceneY());
@@ -174,12 +171,12 @@ public class CameraRotationCalculator
             else
                modifier = fastModifier.get();
 
-            Vector2d drag = new Vector2d();
+            Vector2D drag = new Vector2D();
             drag.sub(newMouseLocation, oldMouseLocation);
 
-            Vector2d centerToMouseLocation = new Vector2d();
+            Vector2D centerToMouseLocation = new Vector2D();
             centerToMouseLocation.sub(newMouseLocation, centerLocation);
-            double rollShift = 0.0 * modifier * rollModifier.get() * GeometryTools.cross(drag, centerToMouseLocation);
+            double rollShift = 0.0 * modifier * rollModifier.get() * drag.cross(centerToMouseLocation);
 
             drag.scale(modifier);
             updateRotation(drag.getY(), -drag.getX(), rollShift);
@@ -199,9 +196,9 @@ public class CameraRotationCalculator
    {
       double newLatitude = latitude.get() + deltaLatitude;
       if (restrictLatitude.get())
-         newLatitude = MathTools.clipToMinMax(newLatitude, minLatitude.get(), maxLatitude.get());
+         newLatitude = MathTools.clamp(newLatitude, minLatitude.get(), maxLatitude.get());
       else
-         newLatitude = MathTools.clipToMinMax(newLatitude, Math.PI);
+         newLatitude = MathTools.clamp(newLatitude, Math.PI);
       latitude.set(newLatitude);
       double newLongitude = longitude.get() + deltaLongitude;
       newLongitude = AngleTools.trimAngleMinusPiToPi(newLongitude);
@@ -227,20 +224,20 @@ public class CameraRotationCalculator
     * @param focusPoint desired focus position. Not modified.
     * @param cameraRoll desired camera roll.
     */
-   public void setRotationFromCameraAndFocusPositions(Point3d cameraPosition, Point3d focusPoint, double cameraRoll)
+   public void setRotationFromCameraAndFocusPositions(Point3D cameraPosition, Point3D focusPoint, double cameraRoll)
    {
-      Vector3d fromFocusToCamera = new Vector3d();
+      Vector3D fromFocusToCamera = new Vector3D();
       fromFocusToCamera.sub(cameraPosition, focusPoint);
       fromFocusToCamera.normalize();
-      Vector3d fromCameraToFocus = new Vector3d();
-      fromCameraToFocus.negate(fromFocusToCamera);
+      Vector3D fromCameraToFocus = new Vector3D();
+      fromCameraToFocus.setAndNegate(fromFocusToCamera);
       // We remove the component along up to be able to compute the longitude
       fromCameraToFocus.scaleAdd(-fromCameraToFocus.dot(up), up, fromCameraToFocus);
 
       double newLatitude = Math.PI / 2.0 - fromFocusToCamera.angle(up);
       double newLongitude = fromCameraToFocus.angle(forward);
 
-      Vector3d cross = new Vector3d();
+      Vector3D cross = new Vector3D();
       cross.cross(fromCameraToFocus, forward);
 
       if (cross.dot(up) > 0.0)
@@ -261,9 +258,9 @@ public class CameraRotationCalculator
    public void setRotation(double latitude, double longitude, double roll)
    {
       if (restrictLatitude.get())
-         this.latitude.set(MathTools.clipToMinMax(latitude, minLatitude.get(), maxLatitude.get()));
+         this.latitude.set(MathTools.clamp(latitude, minLatitude.get(), maxLatitude.get()));
       else
-         this.latitude.set(MathTools.clipToMinMax(latitude, Math.PI / 2.0));
+         this.latitude.set(MathTools.clamp(latitude, Math.PI / 2.0));
 
       this.longitude.set(AngleTools.trimAngleMinusPiToPi(longitude));
       this.roll.set(AngleTools.trimAngleMinusPiToPi(roll));

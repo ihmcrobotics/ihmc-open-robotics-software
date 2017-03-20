@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset.robotController;
 
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotController.RobotControllerExecutor;
+import us.ihmc.simulationconstructionset.Robot;
 
 class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
 {
@@ -32,9 +32,9 @@ class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
          {
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             simulatedRobot.getRootJoints().get(0).getTransformToWorld(transformToWorld);
-            if (robotControlElement.getDynamicGraphicObjectsListRegistry() != null)
+            if (robotControlElement.getYoGraphicsListRegistry() != null)
             {
-               robotControlElement.getDynamicGraphicObjectsListRegistry().setSimulationTransformToWorld(transformToWorld);
+               robotControlElement.getYoGraphicsListRegistry().setSimulationTransformToWorld(transformToWorld);
             }
          }
       }
@@ -77,7 +77,7 @@ class SingleThreadedRobotControllerExecutor implements RobotControllerExecutor
    }
 
    @Override
-   public void updateDynamicGraphicObjectListRegistry()
+   public void updateYoGraphicsListRegistry()
    {
    }
    

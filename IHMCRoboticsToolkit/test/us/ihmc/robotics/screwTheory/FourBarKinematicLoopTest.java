@@ -6,20 +6,20 @@ import static org.junit.Assert.fail;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FourBarKinematicLoopTest
 {
@@ -41,12 +41,12 @@ public class FourBarKinematicLoopTest
    public void testPlanarSquareWithParallelReferenceFrames()
    {
       // initialize to a square of unit length
-      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(0.0, 1.0, 0.0);
-      Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d jointCtoD = new Vector3d(0.0, -1.0, 0.0);
-      Vector3d jointAtoD = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(0.0, 1.0, 0.0);
+      Vector3D jointBtoC = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D jointCtoD = new Vector3D(0.0, -1.0, 0.0);
+      Vector3D jointAtoD = new Vector3D(1.0, 0.0, 0.0);
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = false;
 
@@ -75,7 +75,7 @@ public class FourBarKinematicLoopTest
       testPlanarSquare(recomputeJointLimits, jointAtoD.getVector());
    }
 
-   private void testPlanarSquare(boolean recomputeJointLimits, Vector3d jointAtoD)
+   private void testPlanarSquare(boolean recomputeJointLimits, Vector3D jointAtoD)
    {
       masterJointA.setQ(0.0);
       passiveJointB.setQ(0.0);
@@ -168,12 +168,12 @@ public class FourBarKinematicLoopTest
       double bToCOffsetZ = random.nextDouble();
       double cToDOffsetZ = random.nextDouble();
 
-      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, aToBOffsetZ);
-      Vector3d jointBtoC = new Vector3d(Math.sqrt(0.5), Math.sqrt(0.5), bToCOffsetZ);
-      Vector3d jointCtoD = new Vector3d(0.0, 1.0, cToDOffsetZ);
-      Vector3d jointAtoD = new Vector3d(0.0, 1.0, aToBOffsetZ + bToCOffsetZ + cToDOffsetZ);
+      Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(1.0, 0.0, aToBOffsetZ);
+      Vector3D jointBtoC = new Vector3D(Math.sqrt(0.5), Math.sqrt(0.5), bToCOffsetZ);
+      Vector3D jointCtoD = new Vector3D(0.0, 1.0, cToDOffsetZ);
+      Vector3D jointAtoD = new Vector3D(0.0, 1.0, aToBOffsetZ + bToCOffsetZ + cToDOffsetZ);
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = false;
 
@@ -214,12 +214,12 @@ public class FourBarKinematicLoopTest
    public void testRectangleWithJointOutOfPlane()
    {
       // initialize to rectangle of side lengths 1.0 and 2.0
-      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d jointBtoC = new Vector3d(0.0, 2.0, 0.2);
-      Vector3d jointCtoD = new Vector3d(-1.0, 0.0, -0.2);
-      Vector3d jointAtoD = new Vector3d(0.0, 2.0, 0.0);
+      Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D jointBtoC = new Vector3D(0.0, 2.0, 0.2);
+      Vector3D jointCtoD = new Vector3D(-1.0, 0.0, -0.2);
+      Vector3D jointAtoD = new Vector3D(0.0, 2.0, 0.0);
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = false;
       initializeJointLimits(-0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, -0.5 * Math.PI, 0.5 * Math.PI, 0.0, Math.PI);
@@ -270,9 +270,9 @@ public class FourBarKinematicLoopTest
       // unit length square, and two slightly different rotation axes
       double epsilonAngle = 1e-3;
       double sideLength = 1.0;
-      Vector3d zAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d epsilonRotatedZAxis = new Vector3d(0.0, Math.sin(epsilonAngle), Math.cos(epsilonAngle));
-      Vector3d jointAtoD = new Vector3d(0.0, 1.0, 0.0);
+      Vector3D zAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D epsilonRotatedZAxis = new Vector3D(0.0, Math.sin(epsilonAngle), Math.cos(epsilonAngle));
+      Vector3D jointAtoD = new Vector3D(0.0, 1.0, 0.0);
       boolean recomputeJointLimits = true;
 
       // try making a four bar with non-parallel axes
@@ -321,7 +321,7 @@ public class FourBarKinematicLoopTest
       }
 
       // make a four bar with joint axes facing in opposite directions
-      Vector3d negatedZAxis = new Vector3d(0.0, 0.0, -1.0);
+      Vector3D negatedZAxis = new Vector3D(0.0, 0.0, -1.0);
 
       try
       {
@@ -389,12 +389,12 @@ public class FourBarKinematicLoopTest
    public void testRecomputingJointLimits_NoLimitsAreSet_UnitSquare()
    {
       // initialize to a square of unit length
-      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, random.nextDouble());
-      Vector3d jointBtoC = new Vector3d(0.0, 1.0, random.nextDouble());
-      Vector3d jointCtoD = new Vector3d(-1.0, 0.0, random.nextDouble());
-      Vector3d jointAtoD = new Vector3d(0.0, 1.0, random.nextDouble());
+      Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(1.0, 0.0, random.nextDouble());
+      Vector3D jointBtoC = new Vector3D(0.0, 1.0, random.nextDouble());
+      Vector3D jointCtoD = new Vector3D(-1.0, 0.0, random.nextDouble());
+      Vector3D jointAtoD = new Vector3D(0.0, 1.0, random.nextDouble());
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
       boolean recomputeJointLimits = true;
 
@@ -415,13 +415,13 @@ public class FourBarKinematicLoopTest
       for(int i = 0; i < 100; i++)
       {
          // generate random quadrilateral with joint axes along z and random joint offsets along z
-         Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-         Vector3d elevatorToJointA = RandomTools.generateRandomVector(random);
+         Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+         Vector3D elevatorToJointA = RandomGeometry.nextVector3D(random);
          double[] sideLengths = generateRandomQuadrilateralSideLengths(random, 0.05, 2.0);
-         Vector3d jointAtoB = new Vector3d(sideLengths[0], 0.0, random.nextDouble());
-         Vector3d jointBtoC = new Vector3d(Math.sqrt(0.5) * sideLengths[1], Math.sqrt(0.5) * sideLengths[1], random.nextDouble());
-         Vector3d jointCtoD = new Vector3d(0.0, sideLengths[2], random.nextDouble());
-         Vector3d jointAtoD = new Vector3d(0.0, sideLengths[3], random.nextDouble());
+         Vector3D jointAtoB = new Vector3D(sideLengths[0], 0.0, random.nextDouble());
+         Vector3D jointBtoC = new Vector3D(Math.sqrt(0.5) * sideLengths[1], Math.sqrt(0.5) * sideLengths[1], random.nextDouble());
+         Vector3D jointCtoD = new Vector3D(0.0, sideLengths[2], random.nextDouble());
+         Vector3D jointAtoD = new Vector3D(0.0, sideLengths[3], random.nextDouble());
          initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
          boolean recomputeJointLimits = true;
 
@@ -459,12 +459,12 @@ public class FourBarKinematicLoopTest
    public void testRecomputingJointLimits_UserSetRestrictiveJointLimits_UnitSquare()
    {
       // initialize to a square of unit length
-      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, random.nextDouble());
-      Vector3d jointBtoC = new Vector3d(0.0, 1.0, random.nextDouble());
-      Vector3d jointCtoD = new Vector3d(-1.0, 0.0, random.nextDouble());
-      Vector3d jointAtoD = new Vector3d(0.0, 1.0, random.nextDouble());
+      Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(1.0, 0.0, random.nextDouble());
+      Vector3D jointBtoC = new Vector3D(0.0, 1.0, random.nextDouble());
+      Vector3D jointCtoD = new Vector3D(-1.0, 0.0, random.nextDouble());
+      Vector3D jointAtoD = new Vector3D(0.0, 1.0, random.nextDouble());
       boolean recomputeJointLimits = true;
 
       // joint limits for b are [-eps, eps]
@@ -519,12 +519,12 @@ public class FourBarKinematicLoopTest
    public void testRecomputingJointLimits_UserSetLimitsNearFourBarConstraints_UnitSquare()
    {
       // initialize to a square of unit length and random offsets out of plane
-      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, random.nextDouble());
-      Vector3d jointBtoC = new Vector3d(0.0, 1.0, random.nextDouble());
-      Vector3d jointCtoD = new Vector3d(-1.0, 0.0, random.nextDouble());
-      Vector3d jointAtoD = new Vector3d(0.0, 1.0, random.nextDouble());
+      Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(1.0, 0.0, random.nextDouble());
+      Vector3D jointBtoC = new Vector3D(0.0, 1.0, random.nextDouble());
+      Vector3D jointCtoD = new Vector3D(-1.0, 0.0, random.nextDouble());
+      Vector3D jointAtoD = new Vector3D(0.0, 1.0, random.nextDouble());
       boolean recomputeJointLimits = true;
       double angleEpsilon = 1e-4;
 
@@ -631,12 +631,12 @@ public class FourBarKinematicLoopTest
    public void testJointOrderIsChecked_PlanarSquare()
    {
       // initialize to a square of unit length and random offsets out of plane
-      Vector3d jointAxis = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, random.nextDouble());
-      Vector3d jointBtoC = new Vector3d(1.0, 0.0, random.nextDouble());
-      Vector3d jointCtoD = new Vector3d(1.0, 0.0, random.nextDouble());
-      Vector3d jointDtoA = new Vector3d(1.0, 0.0, random.nextDouble());
+      Vector3D jointAxis = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(1.0, 0.0, random.nextDouble());
+      Vector3D jointBtoC = new Vector3D(1.0, 0.0, random.nextDouble());
+      Vector3D jointCtoD = new Vector3D(1.0, 0.0, random.nextDouble());
+      Vector3D jointDtoA = new Vector3D(1.0, 0.0, random.nextDouble());
       boolean recomputeJointLimits = true;
 
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, 1);
@@ -654,13 +654,13 @@ public class FourBarKinematicLoopTest
    public void testAntiParallelJointAxesWithoutRecomputingJointLimits_UnitSquare()
    {
       // initialize to a square of unit length
-      Vector3d jointAxisUp = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d jointAxisDown = new Vector3d(0.0, 0.0, -1.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d jointBtoC = new Vector3d(0.0, 1.0, 0.0);
-      Vector3d jointCtoD = new Vector3d(-1.0, 0.0, 0.0);
-      Vector3d jointAtoD = new Vector3d(0.0, 1.0, 0.0);
+      Vector3D jointAxisUp = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D jointAxisDown = new Vector3D(0.0, 0.0, -1.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D jointBtoC = new Vector3D(0.0, 1.0, 0.0);
+      Vector3D jointCtoD = new Vector3D(-1.0, 0.0, 0.0);
+      Vector3D jointAtoD = new Vector3D(0.0, 1.0, 0.0);
       boolean recomputeJointLimits = true;
 
       double angleEpsilon0 = 1e-4;
@@ -694,12 +694,12 @@ public class FourBarKinematicLoopTest
    public void testOutputJoint()
    {
       // initialize to a square of unit length
-      Vector3d jointAxis = new Vector3d(0.0, 1.0, 0.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(0.0, 0.0, -1.0);
-      Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d jointCtoD = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d jointAtoD = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D jointAxis = new Vector3D(0.0, 1.0, 0.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(0.0, 0.0, -1.0);
+      Vector3D jointBtoC = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D jointCtoD = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D jointAtoD = new Vector3D(1.0, 0.0, 0.0);
       boolean recomputeJointLimits = true;
 
       int outputJointIndex = 1;
@@ -726,13 +726,13 @@ public class FourBarKinematicLoopTest
    public void testJacobian_UnitSquare()
    {
       // initialize to a square of unit length
-      Vector3d posY = new Vector3d(0.0, 1.0, 0.0);
-      Vector3d negY = new Vector3d(0.0, - 1.0, 0.0);
-      Vector3d elevatorToJointA = new Vector3d();
-      Vector3d jointAtoB = new Vector3d(0.0, 0.0, -1.0);
-      Vector3d jointBtoC = new Vector3d(1.0, 0.0, 0.0);
-      Vector3d jointCtoD = new Vector3d(0.0, 0.0, 1.0);
-      Vector3d jointAtoD = new Vector3d(1.0, 0.0, 0.0);
+      Vector3D posY = new Vector3D(0.0, 1.0, 0.0);
+      Vector3D negY = new Vector3D(0.0, - 1.0, 0.0);
+      Vector3D elevatorToJointA = new Vector3D();
+      Vector3D jointAtoB = new Vector3D(0.0, 0.0, -1.0);
+      Vector3D jointBtoC = new Vector3D(1.0, 0.0, 0.0);
+      Vector3D jointCtoD = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D jointAtoD = new Vector3D(1.0, 0.0, 0.0);
       boolean recomputeJointLimits = true;
 
       // test jacobian with joint axes aligned
@@ -786,8 +786,8 @@ public class FourBarKinematicLoopTest
 
       for(int i = 0; i < numTests; i++)
       {
-         double qMaster = RandomTools.generateRandomDouble(random, - 0.5 * Math.PI + 0.01, 0.5 * Math.PI - 0.01);
-         double qdMaster = RandomTools.generateRandomDouble(random, -2.0, 2.0);
+         double qMaster = RandomNumbers.nextDouble(random, - 0.5 * Math.PI + 0.01, 0.5 * Math.PI - 0.01);
+         double qdMaster = RandomNumbers.nextDouble(random, -2.0, 2.0);
 
          masterJointA.setQ(qMaster);
          masterJointA.setQd(qdMaster);
@@ -840,7 +840,7 @@ public class FourBarKinematicLoopTest
    }
 
    private static void failIfFourBarConstructsWithoutAnException(RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB,
-         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3d closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
+         PassiveRevoluteJoint passiveJointC, PassiveRevoluteJoint passiveJointD, Vector3D closurePointFromLastPassiveJoint, boolean recomputeJointLimits)
    {
       try
       {
@@ -852,21 +852,21 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxis,
+   private void initializeFourBar(Vector3D elevatorToJointA, Vector3D jointAtoB, Vector3D jointBtoC, Vector3D jointCtoD, Vector3D jointAxis,
          int outputJointIndex)
    {
       initializeFourBar(elevatorToJointA, jointAtoB, jointBtoC, jointCtoD, jointAxis, jointAxis, jointAxis, jointAxis, outputJointIndex);
    }
 
-   private void initializeSquareFourBarInXYPlane(double sideLength, Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD,
+   private void initializeSquareFourBarInXYPlane(double sideLength, Vector3D jointAxisA, Vector3D jointAxisB, Vector3D jointAxisC, Vector3D jointAxisD,
          int outputJointIndex)
    {
-      initializeFourBar(new Vector3d(), new Vector3d(sideLength, 0.0, 0.0), new Vector3d(0.0, sideLength, 0.0), new Vector3d(-sideLength, 0.0, 0.0), jointAxisA,
+      initializeFourBar(new Vector3D(), new Vector3D(sideLength, 0.0, 0.0), new Vector3D(0.0, sideLength, 0.0), new Vector3D(-sideLength, 0.0, 0.0), jointAxisA,
             jointAxisB, jointAxisC, jointAxisD, outputJointIndex);
    }
 
-   private void initializeFourBar(Vector3d elevatorToJointA, Vector3d jointAtoB, Vector3d jointBtoC, Vector3d jointCtoD, Vector3d jointAxisA,
-         Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD, int outputJointIndex)
+   private void initializeFourBar(Vector3D elevatorToJointA, Vector3D jointAtoB, Vector3D jointBtoC, Vector3D jointCtoD, Vector3D jointAxisA,
+         Vector3D jointAxisB, Vector3D jointAxisC, Vector3D jointAxisD, int outputJointIndex)
    {
       masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, elevatorToJointA, jointAxisA);
       rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
@@ -893,7 +893,7 @@ public class FourBarKinematicLoopTest
          throw new RuntimeException("Invalid output joint index: " + outputJointIndex);
       }
 
-      RevoluteJoint outputChildJoint = ScrewTools.addRevoluteJoint("outputChildJoint", outputBody, new Vector3d(), jointAxisA);
+      RevoluteJoint outputChildJoint = ScrewTools.addRevoluteJoint("outputChildJoint", outputBody, new Vector3D(), jointAxisA);
       createAndAttachCylinderRB("outputChild_RB", outputChildJoint);
 
       masterJointA.setQ(random.nextDouble());
@@ -903,7 +903,7 @@ public class FourBarKinematicLoopTest
    }
 
    private void initializeFourBar(RigidBodyTransform jointAtoElevator, RigidBodyTransform jointBtoA, RigidBodyTransform jointCtoB, RigidBodyTransform jointDtoC,
-         Vector3d jointAxisA, Vector3d jointAxisB, Vector3d jointAxisC, Vector3d jointAxisD)
+         Vector3D jointAxisA, Vector3D jointAxisB, Vector3D jointAxisC, Vector3D jointAxisD)
    {
       masterJointA = ScrewTools.addRevoluteJoint("jointA", elevator, jointAtoElevator, jointAxisA);
       rigidBodyAB = createAndAttachCylinderRB("rigidBodyAB", masterJointA);
@@ -923,15 +923,15 @@ public class FourBarKinematicLoopTest
    private void initializeFourBarWithRandomlyRotatedJointFrames(FramePoint jointAPosition, FramePoint jointBPosition, FramePoint jointCPosition, FramePoint jointDPosition,
          FrameVector jointAxisA, FrameVector jointAxisB, FrameVector jointAxisC, FrameVector jointAxisD)
    {
-      ReferenceFrame jointAFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
-      ReferenceFrame jointBFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
-      ReferenceFrame jointCFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
-      ReferenceFrame jointDFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector(worldFrame, RandomTools.generateRandomVector(random, 1.0)));
+      ReferenceFrame jointAFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointBFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointCFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointDFrame = ReferenceFrame.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
 
-      Vector3d jointAxisAFrameA = new Vector3d();
-      Vector3d jointAxisBFrameB = new Vector3d();
-      Vector3d jointAxisCFrameC = new Vector3d();
-      Vector3d jointAxisDFrameD = new Vector3d();
+      Vector3D jointAxisAFrameA = new Vector3D();
+      Vector3D jointAxisBFrameB = new Vector3D();
+      Vector3D jointAxisCFrameC = new Vector3D();
+      Vector3D jointAxisDFrameD = new Vector3D();
 
       jointAxisA.changeFrame(jointAFrame);
       jointAxisA.get(jointAxisAFrameA);
@@ -953,8 +953,8 @@ public class FourBarKinematicLoopTest
    // the RigidBodies are independent of the calculations done by FourBarKinematicLoop, so this suffices to make all the RigidBodies
    private static RigidBody createAndAttachCylinderRB(String name, RevoluteJoint parentJoint)
    {
-      Matrix3d inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
-      return ScrewTools.addRigidBody(name, parentJoint, inertiaCylinder, 1.0, new Vector3d());
+      Matrix3D inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
+      return ScrewTools.addRigidBody(name, parentJoint, inertiaCylinder, 1.0, new Vector3D());
    }
 
    private void initializeAllJointsToSameLimits(double lowerLimit, double upperLimit)

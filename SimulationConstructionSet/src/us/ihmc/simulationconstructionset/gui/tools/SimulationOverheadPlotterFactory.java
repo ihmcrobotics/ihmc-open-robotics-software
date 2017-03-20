@@ -61,7 +61,6 @@ public class SimulationOverheadPlotterFactory
          JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
          overheadWindow.add(splitPane);
 
-
          splitPane.add(plotterPanel);
          splitPane.add(scrollPane);
 
@@ -80,7 +79,7 @@ public class SimulationOverheadPlotterFactory
                {
                   for (Artifact artifact : artifactList.getArtifacts())
                   {
-                     if (artifact.getID() == variableNameToTrack.get())
+                     if (artifact.getID().equals(variableNameToTrack.get()))
                      {
                         simulationOverheadPlotter.setXVariableToTrack(((YoArtifactPosition) artifact).getYoX());
                         simulationOverheadPlotter.setYVariableToTrack(((YoArtifactPosition) artifact).getYoY());
@@ -114,19 +113,19 @@ public class SimulationOverheadPlotterFactory
          if (variableNameToTrack.hasValue() && !variableNameToTrack.get().isEmpty())
          {
             YoVariable<?> trackingVariable;
-            if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack + "X")) != null
+            if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "X")) != null
                   && trackingVariable instanceof DoubleYoVariable)
             {
                simulationOverheadPlotter.setXVariableToTrack((DoubleYoVariable) trackingVariable);
             }
-            if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack + "Y")) != null
+            if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "Y")) != null
                   && trackingVariable instanceof DoubleYoVariable)
             {
                simulationOverheadPlotter.setYVariableToTrack((DoubleYoVariable) trackingVariable);
             }
             if (TRACK_YAW)
             {
-               if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack + "Yaw")) != null
+               if ((trackingVariable = simulationConstructionSet.get().getVariable(variableNameToTrack.get() + "Yaw")) != null
                      && trackingVariable instanceof DoubleYoVariable)
                {
                   simulationOverheadPlotter.setYawVariableToTrack((DoubleYoVariable) trackingVariable);

@@ -5,10 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -23,7 +23,6 @@ import us.ihmc.robotics.trajectories.providers.PositionProvider;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParameters;
 import us.ihmc.robotics.trajectories.providers.TrajectoryParametersProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class PushRecoveryTrajectoryGeneratorTest
 {
@@ -46,9 +45,9 @@ public class PushRecoveryTrajectoryGeneratorTest
       PositionProvider initialPositionProvider = new ConstantPositionProvider(new FramePoint(worldFrame, new double[] {-0.1, 2.3, 0.0}));
       VectorProvider initialVelocityProvider = new ConstantVectorProvider(new FrameVector(worldFrame, new double[] {0.2, 0.0, -0.05}));
 
-      Point3d firstIntermediatePosition = new Point3d(new double[] {0.12, 2.4, 0.2});
-      Point3d secondIntermediatePosition = new Point3d(new double[] {0.16, 2.3, 0.15});
-      ArrayList<Point3d> waypoints = new ArrayList<Point3d>();
+      Point3D firstIntermediatePosition = new Point3D(new double[] {0.12, 2.4, 0.2});
+      Point3D secondIntermediatePosition = new Point3D(new double[] {0.16, 2.3, 0.15});
+      ArrayList<Point3D> waypoints = new ArrayList<Point3D>();
       waypoints.add(firstIntermediatePosition);
       waypoints.add(secondIntermediatePosition);
 
@@ -64,7 +63,7 @@ public class PushRecoveryTrajectoryGeneratorTest
             initialVelocityProvider, null, finalPositionProvider, finalVelocityProvider, trajectoryParametersProvider, new YoVariableRegistry(""), null, 0.0,
             false);
 
-      List<Point3d> points = new ArrayList<Point3d>();
+      List<Point3D> points = new ArrayList<Point3D>();
       points.add(firstIntermediatePosition);
       points.add(secondIntermediatePosition);
       trajectory.initialize();

@@ -18,6 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import org.ddogleg.fitting.modelset.ransac.RansacMulti;
+import org.ddogleg.struct.FastQueue;
+
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Box3D_F64;
@@ -25,13 +32,6 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.CheckShapeAcceptAll;
 import us.ihmc.sensorProcessing.bubo.construct.ConstructOctreeNumPoints_F64;
 import us.ihmc.sensorProcessing.bubo.construct.Octree;
 import us.ihmc.sensorProcessing.bubo.construct.Octree_F64;
-
-import org.ddogleg.fitting.modelset.ransac.RansacMulti;
-import org.ddogleg.struct.FastQueue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 /**
  * Finds shapes inside a point cloud by partitioning the space using an Octree and performing a modified version

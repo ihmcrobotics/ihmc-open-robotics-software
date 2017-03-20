@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ExpandingPolytopeEntryFromSimpleMeshGeneratorTest
 {
@@ -16,10 +16,10 @@ public class ExpandingPolytopeEntryFromSimpleMeshGeneratorTest
    {
       SimpleTriangleMesh tetrahedron = new SimpleTriangleMesh();
 
-      tetrahedron.positions.add(new Point3d(0.0, 0.0, 0.0));
-      tetrahedron.positions.add(new Point3d(0.0, 2.0, 0.0));
-      tetrahedron.positions.add(new Point3d(1.0, 2.0, 0.0));
-      tetrahedron.positions.add(new Point3d(1.0, 1.0, 1.0));
+      tetrahedron.positions.add(new Point3D(0.0, 0.0, 0.0));
+      tetrahedron.positions.add(new Point3D(0.0, 2.0, 0.0));
+      tetrahedron.positions.add(new Point3D(1.0, 2.0, 0.0));
+      tetrahedron.positions.add(new Point3D(1.0, 1.0, 1.0));
 
       tetrahedron.triangleIndices.add(0);
       tetrahedron.triangleIndices.add(1);
@@ -56,10 +56,10 @@ public class ExpandingPolytopeEntryFromSimpleMeshGeneratorTest
    {
       SimpleTriangleMesh tetrahedron = new SimpleTriangleMesh();
 
-      tetrahedron.positions.add(new Point3d(0.0, 0.0, 0.0));
-      tetrahedron.positions.add(new Point3d(0.0, 2.0, 0.0));
-      tetrahedron.positions.add(new Point3d(1.0, 2.0, 0.0));
-      tetrahedron.positions.add(new Point3d(1.0, 1.0, 1.0));
+      tetrahedron.positions.add(new Point3D(0.0, 0.0, 0.0));
+      tetrahedron.positions.add(new Point3D(0.0, 2.0, 0.0));
+      tetrahedron.positions.add(new Point3D(1.0, 2.0, 0.0));
+      tetrahedron.positions.add(new Point3D(1.0, 1.0, 1.0));
 
       tetrahedron.triangleIndices.add(0);
       tetrahedron.triangleIndices.add(1);

@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.camera;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import sensor_msgs.CameraInfo;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraInfo>

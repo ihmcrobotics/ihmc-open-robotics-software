@@ -36,12 +36,12 @@ def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 dependencies {
-	compile group: 'javax.vecmath', name: 'vecmath', version: '1.5.2'
+	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
     compile group: 'commons-net', name: 'commons-net', version: '3.3'
 	compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
-    compile group: 'org.ejml', name: 'core', version: '0.28'
-    compile group: 'org.ejml', name: 'dense64', version: '0.28'
+    compile group: 'org.ejml', name: 'core', version: '0.30'
+    compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
     compile group: 'org.apache.commons', name: 'commons-math3', version: '3.5'
@@ -55,6 +55,8 @@ dependencies {
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
+    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
 	compile ihmc.getProjectDependency(":IHMCRobotModels")
 	compile ihmc.getProjectDependency(":IHMCGraphicsDescription")

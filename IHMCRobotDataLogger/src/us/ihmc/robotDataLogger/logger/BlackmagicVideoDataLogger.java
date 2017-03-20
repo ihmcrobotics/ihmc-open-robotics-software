@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.javadecklink.Capture;
 import us.ihmc.javadecklink.CaptureHandler;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.maps.CircularLongMap;
 
 public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implements CaptureHandler
@@ -123,7 +123,7 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
       {
          if(frame % 60 == 0)
          {
-            System.out.println("[Decklink " + decklink + "] Received frame " + frame + " at time " + hardwareTime + "ns, delay: " + TimeTools.nanoSecondstoSeconds(circularLongMap.getLatestKey() - hardwareTime) + "s. pts: " + pts);
+            System.out.println("[Decklink " + decklink + "] Received frame " + frame + " at time " + hardwareTime + "ns, delay: " + Conversions.nanosecondsToSeconds(circularLongMap.getLatestKey() - hardwareTime) + "s. pts: " + pts);
          }
 
          

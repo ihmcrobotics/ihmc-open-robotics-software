@@ -2,24 +2,23 @@ package us.ihmc.simulationToolkit.visualizers;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundLeaf;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundNode;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeHeightMapInterface;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class QuadTreeHeightMapVisualizer
 {
    
-   public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, BoundingBox2d rangeOfPointsToDraw, double resolution)
+   public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, BoundingBox2D rangeOfPointsToDraw, double resolution)
    {
       double minX = rangeOfPointsToDraw.getMinPoint().getX();
       double minY = rangeOfPointsToDraw.getMinPoint().getY();
@@ -63,7 +62,7 @@ public class QuadTreeHeightMapVisualizer
    {
       if (heightMap instanceof QuadTreeForGroundHeightMap)
       {
-         ArrayList<Point3d> points = new ArrayList<Point3d>();
+         ArrayList<Point3D> points = new ArrayList<Point3D>();
          ((QuadTreeForGroundHeightMap) heightMap).getStoredPoints(points);
 
          return drawPoints(scs, points, resolution, appearance);
@@ -71,11 +70,11 @@ public class QuadTreeHeightMapVisualizer
       return null;
    }
 
-   public static Graphics3DNode drawPoints(SimulationConstructionSet scs, ArrayList<Point3d> points, double resolution, AppearanceDefinition appearance)
+   public static Graphics3DNode drawPoints(SimulationConstructionSet scs, ArrayList<Point3D> points, double resolution, AppearanceDefinition appearance)
    {
       Graphics3DObject pointsInQuadTreeGraphic = new Graphics3DObject();
 
-      for (Point3d point : points)
+      for (Point3D point : points)
       {
          pointsInQuadTreeGraphic.identity();
          pointsInQuadTreeGraphic.translate(point);
@@ -115,7 +114,7 @@ public class QuadTreeHeightMapVisualizer
          QuadTreeForGroundLeaf leaf = node.getLeaf();
          if (leaf != null)
          {
-            Point3d averagePoint = leaf.getAveragePoint();
+            Point3D averagePoint = leaf.getAveragePoint();
             nodeBoundsGraphic.translate(bounds.centreX, bounds.centreY, averagePoint.getZ());
             nodeBoundsGraphic.addCube(0.9 * (bounds.maxX - bounds.minX), 0.9 * (bounds.maxY - bounds.minY), 0.002, YoAppearance.Black());
          }

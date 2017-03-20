@@ -1,6 +1,6 @@
 package us.ihmc.avatar.drcRobot;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public interface NewRobotPhysicalProperties extends DRCRobotPhysicalProperties

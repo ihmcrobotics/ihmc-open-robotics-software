@@ -1,13 +1,17 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.screwTheory.*;
-import us.ihmc.tools.io.printing.PrintTools;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.Wrench;
 
 public class VirtualModelControlDataHandler
 {

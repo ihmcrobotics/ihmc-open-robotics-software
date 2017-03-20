@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -30,7 +29,7 @@ public class NewtonsCradleRobot extends Robot
 
       for (int i = 0; i < numberOfBalls; i++)
       {
-         Vector3d offset = new Vector3d(i * pinJointSeparation, 1.0, pinJointHeight);
+         Vector3D offset = new Vector3D(i * pinJointSeparation, 1.0, pinJointHeight);
          PinJoint pinJoint = new PinJoint("pin" + i, offset, this, Axis.Y);
 
          Link link = new Link("ball" + i);
@@ -48,7 +47,9 @@ public class NewtonsCradleRobot extends Robot
          CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
          collisionMeshDescription.translate(0.0, 0.0, -stringLength);
          collisionMeshDescription.addSphere(ballRadius);
-         link.setCollisionMesh(collisionMeshDescription);
+         collisionMeshDescription.setCollisionGroup(0xff);
+         collisionMeshDescription.setCollisionMask(0xff);
+         link.addCollisionMesh(collisionMeshDescription);
 
          pinJoint.setLink(link);
          this.addRootJoint(pinJoint);

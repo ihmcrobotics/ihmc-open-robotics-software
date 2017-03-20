@@ -1,12 +1,11 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class DoubleStepGroundProfile extends GroundProfileFromHeightMap
 {
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    private final double initialGroundXStep, finalGroundXStep, initialGroundZStep, finalGroundZStep;
 
@@ -23,11 +22,11 @@ public class DoubleStepGroundProfile extends GroundProfileFromHeightMap
 
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Math.max(0.0, Math.max(initialGroundZStep, finalGroundZStep)) + 0.01;
-      boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       double height = heightAt(x, y, z);
       surfaceNormalAt(x, y, z, normalToPack);
@@ -47,13 +46,13 @@ public class DoubleStepGroundProfile extends GroundProfileFromHeightMap
 
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normal)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normal)
    {
       normal.set(0.0, 0.0, 1.0);
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.dataExporter;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -9,23 +9,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
 public class DataExporterGraphCreatorTest
 {
 
-    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1.0)
+    @ContinuousIntegrationTest(estimatedDuration = 1.0)
     @Test(timeout = 30000)
     public void testDataExporterGraphCreator() throws IOException
     {
@@ -61,7 +60,7 @@ public class DataExporterGraphCreatorTest
     {
         Robot robot = new Robot("RandomRobot");
 
-        PinJoint pinJoint = new PinJoint("TestPinJoint", new Vector3d(), robot, new Vector3d(0, 0, 1));
+        PinJoint pinJoint = new PinJoint("TestPinJoint", new Vector3D(), robot, new Vector3D(0, 0, 1));
         robot.addRootJoint(pinJoint);
 
         return robot;

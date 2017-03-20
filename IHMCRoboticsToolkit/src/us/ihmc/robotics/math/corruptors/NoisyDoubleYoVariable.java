@@ -273,7 +273,7 @@ public class NoisyDoubleYoVariable extends DoubleYoVariable
       if (useBias.getBooleanValue())
       {
          double biasWalk = biasDelta.getDoubleValue() * ((2.0 * rand.nextDouble()) - 1.0);
-         bias.set(MathTools.clipToMinMax(bias.getDoubleValue() + biasWalk, biasMin.getDoubleValue(), biasMax.getDoubleValue()));
+         bias.set(MathTools.clamp(bias.getDoubleValue() + biasWalk, biasMin.getDoubleValue(), biasMax.getDoubleValue()));
 
          return bias.getDoubleValue();
       }

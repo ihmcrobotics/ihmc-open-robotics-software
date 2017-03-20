@@ -133,7 +133,7 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
    private void updateRampUpState()
    {
       double timeInRampUp = yoTime.getDoubleValue() - rampStartTime.getDoubleValue();
-      ramp.set(MathTools.clipToMinMax(timeInRampUp / rampUpTime.getDoubleValue(), 0.0, 1.0));
+      ramp.set(MathTools.clamp(timeInRampUp / rampUpTime.getDoubleValue(), 0.0, 1.0));
       
       double tau_off_hyst = ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue();
       tau_off_hyst *= hysteresisSign.getDoubleValue();
@@ -180,7 +180,7 @@ public class TorqueHysteresisCompensatorYoVariable extends DoubleYoVariable
    private void updateRampDownState()
    {
       double timeInRampDown = yoTime.getDoubleValue() - rampStartTime.getDoubleValue();
-      ramp.set(MathTools.clipToMinMax(1.0 - timeInRampDown / rampDownTime.getDoubleValue(), 0.0, 1.0));
+      ramp.set(MathTools.clamp(1.0 - timeInRampDown / rampDownTime.getDoubleValue(), 0.0, 1.0));
 
       double tau_off_hyst = ramp.getDoubleValue() * torqueHysteresisAmplitude.getDoubleValue();
       tau_off_hyst *= hysteresisSign.getDoubleValue();

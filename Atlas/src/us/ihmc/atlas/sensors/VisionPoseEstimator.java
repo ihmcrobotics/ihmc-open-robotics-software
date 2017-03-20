@@ -11,20 +11,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.vecmath.Point3f;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.humanoidRobotics.communication.packets.DetectedObjectPacket;
 import us.ihmc.ihmcPerception.chessboardDetection.OpenCVChessboardPoseEstimator;
 import us.ihmc.ihmcPerception.depthData.PointCloudDataReceiver;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
@@ -34,7 +34,6 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class VisionPoseEstimator implements DRCStereoListener
 {
@@ -130,18 +129,18 @@ public class VisionPoseEstimator implements DRCStereoListener
             while (true)
             {
 
-               Point3f[] fullPoints = pointCloudDataReceiver.getDecayingPointCloudPoints();
+               Point3D32[] fullPoints = pointCloudDataReceiver.getDecayingPointCloudPoints();
 
                //get head
                robotConfigurationDataBuffer.updateFullRobotModelWithNewestData(fullRobotModel, null);
                RigidBodyTransform headToWorld = fullRobotModel.getHead().getBodyFixedFrame().getTransformToWorldFrame();
-               Point3f head = new Point3f();
+               Point3D32 head = new Point3D32();
                headToWorld.transform(head);
 
                //filter points
                ArrayList<Point3D_F64> pointsNearBy = new ArrayList<Point3D_F64>();
                int counter = 0;
-               for (Point3f tmpPoint : fullPoints)
+               for (Point3D32 tmpPoint : fullPoints)
                {
                   if (!Double.isNaN(tmpPoint.getZ()) & counter % pointDropFactor == 0 && tmpPoint.distance(head) < searchRadius)
                      pointsNearBy.add(new Point3D_F64(tmpPoint.getX(), tmpPoint.getY(), tmpPoint.getZ()));
@@ -234,7 +233,8 @@ public class VisionPoseEstimator implements DRCStereoListener
                      opticalFrameToCameraFrame.setRotationEulerAndZeroTranslation(-Math.PI / 2.0, 0.0, -Math.PI / 2);
                      RigidBodyTransform targetToWorld = new RigidBodyTransform();
 
-                     targetToWorld.multiply(cameraToWorld, opticalFrameToCameraFrame);
+                     targetToWorld.set(cameraToWorld);
+                     targetToWorld.multiply(opticalFrameToCameraFrame);
                      targetToWorld.multiply(targetToCameraOpticalFrame);
 
                      communicator.send(new DetectedObjectPacket(targetToWorld, targerId));

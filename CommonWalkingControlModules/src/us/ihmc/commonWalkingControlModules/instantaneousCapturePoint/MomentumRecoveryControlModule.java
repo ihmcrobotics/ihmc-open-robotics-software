@@ -1,9 +1,11 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import java.awt.Color;
+import java.util.List;
 
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
@@ -197,8 +199,12 @@ public class MomentumRecoveryControlModule
 
       if (nextFootstep != null)
       {
-         // TODO: check if the next footstep has expected contact points and use them instead of the default polygon
-         tempPolygon1.setIncludingFrameAndUpdate(defaultFootPolygons.get(nextFootstep.getRobotSide()));
+         List<Point2D> predictedContactPoints = nextFootstep.getPredictedContactPoints();
+         if (predictedContactPoints != null && !predictedContactPoints.isEmpty())
+            tempPolygon1.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), predictedContactPoints);
+         else
+            tempPolygon1.setIncludingFrameAndUpdate(defaultFootPolygons.get(nextFootstep.getRobotSide()));
+
          tempPolygon2.setIncludingFrameAndUpdate(nextFootstep.getSoleReferenceFrame(), tempPolygon1.getConvexPolygon2d());
          tempPolygon2.changeFrameAndProjectToXYPlane(safeArea.getReferenceFrame());
          polygonShrinker.shrinkConstantDistanceInto(tempPolygon2, -distanceToExtendUpcomingFoothold.getDoubleValue(), tempPolygon1);

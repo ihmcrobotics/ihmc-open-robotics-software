@@ -1,18 +1,17 @@
 package us.ihmc.robotics.robotDescription;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 
 public class SpringPinJointDescription extends OneDoFJointDescription
 {
 
-   public SpringPinJointDescription(String name, Vector3d offsetFromParentJoint, Axis jointAxis)
+   public SpringPinJointDescription(String name, Vector3D offsetFromParentJoint, Axis jointAxis)
    {
       super(name, offsetFromParentJoint, jointAxis);
    }
 
-   public SpringPinJointDescription(String name, Vector3d offset, Vector3d jointAxis)
+   public SpringPinJointDescription(String name, Vector3D offset, Vector3D jointAxis)
    {
       super(name, offset, jointAxis);
    }

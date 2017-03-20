@@ -2,20 +2,20 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 
 /**
  * Created by agrabertilton on 1/15/15.
  */
-public class BasicFootstepMask implements InclusionFunction<Point3d>
+public class BasicFootstepMask implements InclusionFunction<Point3D>
 {
-   private Point2d position = new Point2d();
+   private Point2D position = new Point2D();
    private double yaw;
    private double safetyBuffer;
    private boolean initialized = false;
@@ -34,13 +34,13 @@ public class BasicFootstepMask implements InclusionFunction<Point3d>
       footShapeWithBufferPolygon.update();
    }
 
-   public BasicFootstepMask(List<Point2d> footstepShape, double maskBufferSize)
+   public BasicFootstepMask(List<Point2D> footstepShape, double maskBufferSize)
    {
       this.safetyBuffer = maskBufferSize;
 
       footShapeWithBufferPolygon.clear();
 
-      for (Point2d vertex : footstepShape)
+      for (Point2D vertex : footstepShape)
       {
          footShapeWithBufferPolygon.addVertex(inflate(vertex.getX()), inflate(vertex.getY()));
       }
@@ -50,7 +50,7 @@ public class BasicFootstepMask implements InclusionFunction<Point3d>
    public BasicFootstepMask(ConvexPolygon2d footstepShape, double maskBufferSize)
    {
       int numVertices = footstepShape.getNumberOfVertices();
-      Point2d vertex;
+      Point2DReadOnly vertex;
       for (int i = 0; i < numVertices; i++)
       {
          vertex = footstepShape.getVertex(i);
@@ -64,7 +64,7 @@ public class BasicFootstepMask implements InclusionFunction<Point3d>
       return dimension + Math.signum(dimension) * safetyBuffer;
    }
 
-   public void setPositionAndYaw(Point2d position, double yaw)
+   public void setPositionAndYaw(Point2D position, double yaw)
    {
       this.position.set(position.getX(), position.getY());
       this.yaw = yaw;
@@ -84,7 +84,7 @@ public class BasicFootstepMask implements InclusionFunction<Point3d>
    }
 
    @Override
-   public boolean isIncluded(Point3d inputPoint)
+   public boolean isIncluded(Point3D inputPoint)
    {
       if (!initialized)
          return false;

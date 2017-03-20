@@ -2,15 +2,14 @@ package us.ihmc.jMonkeyEngineToolkit;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class CombinedHeightMapWithNormals implements HeightMapWithNormals
 {
    private final ArrayList<HeightMapWithNormals> heightMaps = new ArrayList<HeightMapWithNormals>();
-   private BoundingBox3d boundingBox = null;
+   private BoundingBox3D boundingBox = null;
 
    public void addHeightMap(HeightMapWithNormals heightMap)
    {
@@ -19,11 +18,11 @@ public class CombinedHeightMapWithNormals implements HeightMapWithNormals
       if (boundingBox == null)
          boundingBox = heightMap.getBoundingBox();
       else
-         boundingBox = BoundingBox3d.union(boundingBox, heightMap.getBoundingBox());
+         boundingBox = BoundingBox3D.union(boundingBox, heightMap.getBoundingBox());
    }
 
 
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       Double heightAt = Double.NEGATIVE_INFINITY;
       normalToPack.set(0.0, 0.0, 1.0);
@@ -31,7 +30,7 @@ public class CombinedHeightMapWithNormals implements HeightMapWithNormals
       for (int i = 0; i < heightMaps.size(); i++)
       {
          HeightMapWithNormals heightMap = heightMaps.get(i);
-         if (heightMap.getBoundingBox().isXYInside(x, y))
+         if (heightMap.getBoundingBox().isXYInsideInclusive(x, y))
          {
             double localHeightAt = heightMap.heightAt(x, y, z);
             if (localHeightAt > heightAt)
@@ -52,7 +51,7 @@ public class CombinedHeightMapWithNormals implements HeightMapWithNormals
       for (int i = 0; i < heightMaps.size(); i++)
       {
          HeightMap heightMap = heightMaps.get(i);
-         if (heightMap.getBoundingBox().isXYInside(x, y))
+         if (heightMap.getBoundingBox().isXYInsideInclusive(x, y))
          {
             double localHeightAt = heightMap.heightAt(x, y, z);
             if (localHeightAt > heightAt)
@@ -63,7 +62,7 @@ public class CombinedHeightMapWithNormals implements HeightMapWithNormals
       return heightAt;
    }
 
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

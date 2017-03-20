@@ -1,8 +1,7 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 
 public class BumpyGroundProfile extends GroundProfileFromHeightMap
@@ -11,7 +10,7 @@ public class BumpyGroundProfile extends GroundProfileFromHeightMap
    private static final double xAmp1Default = 0.2, xFreq1Default = 0.1, xAmp2Default = 0.1, xFreq2Default = 0.5;
    private static final double yAmp1Default = 0.1, yFreq1Default = 0.07, yAmp2Default = 0.05, yFreq2Default = 0.37;
    
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    
    private final double xAmp1, xFreq1, xAmp2, xFreq2;
    private final double yAmp1, yFreq1, yAmp2, yFreq2;
@@ -59,11 +58,11 @@ public class BumpyGroundProfile extends GroundProfileFromHeightMap
       double zMax = Math.abs(xAmp1) + Math.abs(xAmp2) + Math.abs(yAmp1) + Math.abs(yAmp2);
       double zMin = -zMax;
       
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       if (Math.abs(x) < flatgroundBoxWidthAtZero / 2.0 && Math.abs(y) < flatgroundBoxWidthAtZero / 2.0)
       {
@@ -104,7 +103,7 @@ public class BumpyGroundProfile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

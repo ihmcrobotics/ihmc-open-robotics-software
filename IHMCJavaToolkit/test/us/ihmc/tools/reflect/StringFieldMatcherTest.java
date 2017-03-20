@@ -7,8 +7,7 @@ import java.lang.reflect.Field;
 
 import org.junit.Test;
 
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.reflect.StringFieldMatcher;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class StringFieldMatcherTest
 {
@@ -82,6 +81,7 @@ public class StringFieldMatcherTest
          this.value = value;
       }
       
+      @Override
       public String toString()
       {
          return "name = " + name + ", occupation = " + occupation + ", value = " + value;

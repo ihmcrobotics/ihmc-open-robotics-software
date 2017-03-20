@@ -42,7 +42,7 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
 
       this.yoTime = yoTime;
 
-      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       icpOptimizationController = new ICPOptimizationController(icpPlannerParameters, icpOptimizationParameters, walkingControllerParameters,
             bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);

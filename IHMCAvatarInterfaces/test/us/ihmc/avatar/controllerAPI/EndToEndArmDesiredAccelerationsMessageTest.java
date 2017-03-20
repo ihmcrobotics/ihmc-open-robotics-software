@@ -1,8 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -10,16 +8,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.states.HandUserControlModeState;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -28,7 +26,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class EndToEndArmDesiredAccelerationsMessageTest implements MultiRobotTestInterface
@@ -37,8 +34,8 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 18.1)
-   @Test(timeout = 90000)
+   @ContinuousIntegrationTest(estimatedDuration = 20.0)
+   @Test(timeout = 40000)
    public void testSimpleCommands() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -59,46 +56,29 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       {
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
+         String handName = fullRobotModel.getHand(robotSide).getName();
+
          OneDoFJoint[] armJoints = ScrewTools.createOneDoFJointPath(chest, hand);
-         double[] armDesiredJointAccelerations = RandomTools.generateRandomDoubleArray(random, armJoints.length, 0.1);
-         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.USER_CONTROL_MODE, armDesiredJointAccelerations);
+         double[] armDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, armJoints.length, 0.1);
+         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-         assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
-
-         drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
-
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
-         assertTrue(success);
-
-         assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
-         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(robotSide, armJoints, scs);
-         assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
-         double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
-         assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
-
-         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.IHMC_CONTROL_MODE, null);
-
-         drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
-
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05);
-         assertTrue(success);
-
-         assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
-
-         armDesiredAccelerationsMessage = new ArmDesiredAccelerationsMessage(robotSide, ArmControlMode.USER_CONTROL_MODE, armDesiredJointAccelerations);
-
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));
          drcSimulationTestHelper.send(armDesiredAccelerationsMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(HandUserControlModeState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
-         assertEquals(HandControlMode.USER_CONTROL_MODE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(RigidBodyControlMode.USER, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));
+         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(hand.getName(), robotSide, armJoints, scs);
+         assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
+         double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
+         assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
          assertTrue(success);
 
-         assertEquals(HandControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(robotSide, scs));
+         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndArmTrajectoryMessageTest.findControllerState(handName, scs));
       }
    }
 
@@ -112,14 +92,15 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       return qdd_ds;
    }
 
-   public static double[] findControllerDesiredJointAccelerations(RobotSide robotSide, OneDoFJoint[] armJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredJointAccelerations(String bodyName, RobotSide robotSide, OneDoFJoint[] armJoints, SimulationConstructionSet scs)
    {
       double[] qdd_ds = new double[armJoints.length];
-      String nameSpace = robotSide.getCamelCaseNameForStartOfExpression() + "Hand" + HandUserControlModeState.class.getSimpleName();
+      String nameSpace = bodyName + "UserControlModule";
 
       for (int i = 0; i < armJoints.length; i++)
       {
-         qdd_ds[i] = scs.getVariable(nameSpace, "qdd_d_user_" + armJoints[i].getName()).getValueAsDouble();
+         String variable = bodyName + "UserMode_" + armJoints[i].getName() + "_qdd_d";
+         qdd_ds[i] = scs.getVariable(nameSpace, variable).getValueAsDouble();
       }
       return qdd_ds;
    }

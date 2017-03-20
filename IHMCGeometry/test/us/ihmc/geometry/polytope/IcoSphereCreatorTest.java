@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class IcoSphereCreatorTest
 {
@@ -19,7 +19,7 @@ public class IcoSphereCreatorTest
       int recursionLevel = 0;
       SimpleTriangleMesh icoSphere = icoSphereCreator.createIcoSphere(recursionLevel);
 
-      ArrayList<Point3d> positions = icoSphere.positions;
+      ArrayList<Point3D> positions = icoSphere.positions;
       ArrayList<Integer> triangleIndices = icoSphere.triangleIndices;
 
       assertEquals(12, positions.size());

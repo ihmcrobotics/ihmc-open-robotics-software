@@ -2,14 +2,18 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class ConvexPolytope implements SupportingVertexHolder
 {
    private final ArrayList<PolytopeVertex> vertices = new ArrayList<>();
+
+   private boolean boundingBoxNeedsUpdating = false;
+   private final BoundingBox3D boundingBox = new BoundingBox3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+                                                               Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public ConvexPolytope()
    {
@@ -21,6 +25,54 @@ public class ConvexPolytope implements SupportingVertexHolder
       {
          this.vertices.add(new PolytopeVertex(vertex));
       }
+
+      boundingBoxNeedsUpdating = true;
+   }
+
+   public void getBoundingBox(BoundingBox3D boundingBoxToPack)
+   {
+      if (boundingBoxNeedsUpdating)
+      {
+         updateBoundingBox();
+         boundingBoxNeedsUpdating = false;
+      }
+
+      boundingBoxToPack.set(boundingBox);
+   }
+
+   private void updateBoundingBox()
+   {
+      double xMin = Double.POSITIVE_INFINITY;
+      double yMin = Double.POSITIVE_INFINITY;
+      double zMin = Double.POSITIVE_INFINITY;
+
+      double xMax = Double.NEGATIVE_INFINITY;
+      double yMax = Double.NEGATIVE_INFINITY;
+      double zMax = Double.NEGATIVE_INFINITY;
+
+      for (int i = 0; i < vertices.size(); i++)
+      {
+         PolytopeVertex polytopeVertex = vertices.get(i);
+         double x = polytopeVertex.getX();
+         double y = polytopeVertex.getY();
+         double z = polytopeVertex.getZ();
+
+         if (x < xMin)
+            xMin = x;
+         if (y < yMin)
+            yMin = y;
+         if (z < zMin)
+            zMin = z;
+
+         if (x > xMax)
+            xMax = x;
+         if (y > yMax)
+            yMax = y;
+         if (z > zMax)
+            zMax = z;
+      }
+
+      boundingBox.set(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    public void copyVerticesFrom(ConvexPolytope polytope)
@@ -36,6 +88,8 @@ public class ConvexPolytope implements SupportingVertexHolder
       {
          this.vertices.get(i).setPosition(polytope.vertices.get(i));
       }
+
+      boundingBoxNeedsUpdating = true;
    }
 
    public ArrayList<PolytopeVertex> getVertices()
@@ -43,18 +97,21 @@ public class ConvexPolytope implements SupportingVertexHolder
       return vertices;
    }
 
-   public void addVertices(Point3d[] polytopePoints)
+   public void addVertices(Point3D[] polytopePoints)
    {
       for (int i = 0; i < polytopePoints.length; i++)
       {
          addVertex(polytopePoints[i]);
       }
+
+      boundingBoxNeedsUpdating = true;
    }
 
-   public PolytopeVertex addVertex(Point3d position)
+   public PolytopeVertex addVertex(Point3D position)
    {
       PolytopeVertex vertex = new PolytopeVertex(position);
       vertices.add(vertex);
+      boundingBoxNeedsUpdating = true;
       return vertex;
    }
 
@@ -62,6 +119,7 @@ public class ConvexPolytope implements SupportingVertexHolder
    {
       PolytopeVertex vertex = new PolytopeVertex(x, y, z);
       vertices.add(vertex);
+      boundingBoxNeedsUpdating = true;
       return vertex;
    }
 
@@ -69,6 +127,7 @@ public class ConvexPolytope implements SupportingVertexHolder
    {
       PolytopeVertex vertex = new PolytopeVertex(xyzValues[0], xyzValues[1], xyzValues[2]);
       vertices.add(vertex);
+      boundingBoxNeedsUpdating = true;
       return vertex;
    }
 
@@ -146,12 +205,15 @@ public class ConvexPolytope implements SupportingVertexHolder
          PolytopeVertex polytopeVertex = vertices.get(i);
          polytopeVertex.applyTransform(transform);
       }
+
+      boundingBoxNeedsUpdating = true;
    }
 
    @Override
-   public Point3d getSupportingVertex(Vector3d supportDirection)
+   public Point3D getSupportingVertex(Vector3D supportDirection)
    {
       // Naive implementation. Just search through all of them.
+      // TODO: Smart downhill march along edges. But will require always having the edges...
 
       double maxDotSquared = Double.NEGATIVE_INFINITY;
       PolytopeVertex bestVertex = null;

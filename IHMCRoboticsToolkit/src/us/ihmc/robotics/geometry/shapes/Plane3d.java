@@ -1,32 +1,33 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.interfaces.GeometryObject;
-import us.ihmc.robotics.geometry.transformables.TransformablePoint3d;
-import us.ihmc.robotics.geometry.transformables.TransformableVector3d;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class Plane3d implements GeometryObject<Plane3d>
 {
-   private TransformablePoint3d point = new TransformablePoint3d();
-   private TransformableVector3d normal = new TransformableVector3d(0.0, 0.0, 1.0);
-   private TransformableVector3d temporaryVector = new TransformableVector3d();
+   private Point3D point = new Point3D();
+   private Vector3D normal = new Vector3D(0.0, 0.0, 1.0);
+   private Vector3D temporaryVector = new Vector3D();
 
    public Plane3d()
    {
    }
 
-   public Plane3d(Point3d point, Vector3d normal)
+   public Plane3d(Point3DReadOnly point, Vector3DReadOnly normal)
    {
       this.point.set(point);
       this.normal.set(normal);
       this.normal.normalize();
    }
    
-   public Plane3d(Point3d pointA, Point3d pointB, Point3d pointC)
+   public Plane3d(Point3DReadOnly pointA, Point3DReadOnly pointB, Point3DReadOnly pointC)
    {
       point.set(pointA);
       double v1_x = pointB.getX() - pointA.getX();
@@ -51,24 +52,24 @@ public class Plane3d implements GeometryObject<Plane3d>
       this.normal.set(plane.normal);
    }
 
-   public void getPoint(Point3d pointToPack)
+   public void getPoint(Point3DBasics pointToPack)
    {
       pointToPack.set(this.point);
    }
    
-   public Point3d getPointCopy()
+   public Point3D getPointCopy()
    {
-      Point3d pointToReturn = new Point3d();
+      Point3D pointToReturn = new Point3D();
       this.getPoint(pointToReturn);
       return pointToReturn;
    }
    
-   public Point3d getPoint()
+   public Point3D getPoint()
    {
       return point;
    }
    
-   public void setPoint(Point3d point)
+   public void setPoint(Point3DReadOnly point)
    {
       this.point.set(point);
    }
@@ -78,7 +79,7 @@ public class Plane3d implements GeometryObject<Plane3d>
       point.set(x, y, z); 
    }
 
-   public void setPoints(Point3d pointA, Point3d pointB, Point3d pointC)
+   public void setPoints(Point3DReadOnly pointA, Point3DReadOnly pointB, Point3DReadOnly pointC)
    {
       point.set(pointA);
       double v1_x = pointB.getX() - pointA.getX();
@@ -97,19 +98,19 @@ public class Plane3d implements GeometryObject<Plane3d>
       this.normal.normalize();
    }
    
-   public void getNormal(Vector3d normalToPack)
+   public void getNormal(Vector3DBasics normalToPack)
    {
       normalToPack.set(normal);
    }
    
-   public Vector3d getNormalCopy()
+   public Vector3D getNormalCopy()
    {
-      Vector3d normalToReturn = new Vector3d();
+      Vector3D normalToReturn = new Vector3D();
       this.getNormal(normalToReturn);
       return normalToReturn;
    }
    
-   public Vector3d getNormal()
+   public Vector3D getNormal()
    {
       return normal;
    }
@@ -127,7 +128,7 @@ public class Plane3d implements GeometryObject<Plane3d>
       this.point.set(plane3d.point);
    }
 
-   public void setNormal(Vector3d normal)
+   public void setNormal(Vector3DReadOnly normal)
    {
       this.normal.set(normal);
    }
@@ -138,12 +139,12 @@ public class Plane3d implements GeometryObject<Plane3d>
       return ((plane.normal.epsilonEquals(normal, epsilon)) && (plane.point.epsilonEquals(point, epsilon)));
    }
 
-   public boolean isOnOrAbove(Point3d pointToTest)
+   public boolean isOnOrAbove(Point3DReadOnly pointToTest)
    {
       return isOnOrAbove(pointToTest, 0.0);
    }
 
-   public boolean isOnOrAbove(Point3d pointToTest, double epsilon)
+   public boolean isOnOrAbove(Point3DReadOnly pointToTest, double epsilon)
    {
       temporaryVector.set(pointToTest);
       temporaryVector.sub(this.point);
@@ -151,12 +152,12 @@ public class Plane3d implements GeometryObject<Plane3d>
       return (temporaryVector.dot(this.normal) >= -epsilon);  
    }
 
-   public boolean isOnOrBelow(Point3d pointToTest)
+   public boolean isOnOrBelow(Point3DReadOnly pointToTest)
    {
       return isOnOrBelow(pointToTest, 0.0);
    }
 
-   public boolean isOnOrBelow(Point3d pointToTest, double epsilon)
+   public boolean isOnOrBelow(Point3DReadOnly pointToTest, double epsilon)
    {
       return isOnOrBelow(pointToTest.getX(), pointToTest.getY(), pointToTest.getZ(), epsilon);
    }
@@ -186,7 +187,7 @@ public class Plane3d implements GeometryObject<Plane3d>
     */
    public boolean isParallel(Plane3d otherPlane, double angleEpsilon)
    {
-      return GeometryTools.areVectorsCollinear(normal, otherPlane.normal, angleEpsilon);
+      return EuclidGeometryTools.areVector3DsParallel(normal, otherPlane.normal, angleEpsilon);
    }
 
    /**
@@ -209,18 +210,18 @@ public class Plane3d implements GeometryObject<Plane3d>
     */
    public boolean isCoincident(Plane3d otherPlane, double angleEpsilon, double distanceEpsilon)
    {
-      return GeometryTools.arePlanesCoincident(point, normal, otherPlane.point, otherPlane.normal, angleEpsilon, distanceEpsilon);
+      return EuclidGeometryTools.arePlane3DsCoincident(point, normal, otherPlane.point, otherPlane.normal, angleEpsilon, distanceEpsilon);
    }
    
-   public Point3d orthogonalProjectionCopy(Point3d point)
+   public Point3D orthogonalProjectionCopy(Point3DReadOnly point)
    {
-      Point3d returnPoint = new Point3d(point);
+      Point3D returnPoint = new Point3D(point);
       orthogonalProjection(returnPoint);
       return returnPoint;
    }
    
    // this method was not tested. Use it at your own risk.
-   public void orthogonalProjection(Vector3d vectorToProject)
+   public void orthogonalProjection(Vector3DBasics vectorToProject)
    {
       temporaryVector.set( 0.0, 0.0, 0.0);
       temporaryVector.sub(this.point);
@@ -235,7 +236,7 @@ public class Plane3d implements GeometryObject<Plane3d>
       vectorToProject.sub( temporaryVector );
    }
    
-   public void orthogonalProjection(Point3d pointToProject)
+   public void orthogonalProjection(Point3DBasics pointToProject)
    {
       temporaryVector.set(pointToProject);
       temporaryVector.sub(this.point);
@@ -254,7 +255,7 @@ public class Plane3d implements GeometryObject<Plane3d>
      return z;
    }
 
-   public double distance(Point3d point)
+   public double distance(Point3DReadOnly point)
    {
       temporaryVector.set(point);
       temporaryVector.sub(this.point);
@@ -263,7 +264,7 @@ public class Plane3d implements GeometryObject<Plane3d>
       return Math.abs(temporaryDouble);
    }
 
-   public double signedDistance(Point3d point)
+   public double signedDistance(Point3DReadOnly point)
    {
       temporaryVector.set(point);
       temporaryVector.sub(this.point);
@@ -274,7 +275,7 @@ public class Plane3d implements GeometryObject<Plane3d>
 
 
 
-   public Plane3d applyTransformCopy(RigidBodyTransform transformation)
+   public Plane3d applyTransformCopy(Transform transformation)
    {
       Plane3d returnPlane = new Plane3d(this);
       returnPlane.applyTransform(transformation);
@@ -283,13 +284,13 @@ public class Plane3d implements GeometryObject<Plane3d>
    }
    
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
       point.applyTransform(transform);
       normal.applyTransform(transform);
    }
 
-   public void getIntersectionWithLine(Point3d intersectionToPack, Point3d lineStart, Vector3d lineVector)
+   public void getIntersectionWithLine(Point3DBasics intersectionToPack, Point3DReadOnly lineStart, Vector3DReadOnly lineVector)
    {
       // po = line start, p1 = line end
       // v0 = point on plane
@@ -297,7 +298,7 @@ public class Plane3d implements GeometryObject<Plane3d>
       // intersection point is p(s) = p0 + s*(p1 - p0)
       // scalar s = (n dot (v0 - p0))/(n dot (p1 - p0)
 
-      Vector3d fromP0toV0 = new Vector3d(point);
+      Vector3D fromP0toV0 = new Vector3D(point);
       fromP0toV0.sub(lineStart);
 
       double scaleFactor = normal.dot(fromP0toV0) / normal.dot(lineVector);

@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
@@ -22,7 +21,7 @@ public class GeometricJacobianHolder
 {
    public static final long NULL_JACOBIAN_ID = NameBasedHashCodeTools.NULL_HASHCODE;
 
-   private final Map<Long, GeometricJacobian> nameBasedHashCodeToJacobianMap = new HashMap<>();
+   private final TLongObjectHashMap<GeometricJacobian> nameBasedHashCodeToJacobianMap = new TLongObjectHashMap<GeometricJacobian>();
    private final List<GeometricJacobian> geometricJacobians = new ArrayList<GeometricJacobian>();
    private final InverseDynamicsJoint[] temporaryToStoreJointPath = new InverseDynamicsJoint[30];
 
@@ -35,7 +34,7 @@ public class GeometricJacobianHolder
    }
 
    /**
-    * Find or create a Jacobian and register it in the MomentumBasedController.
+    * Find or create a Jacobian and register it in the {@link HighLevelHumanoidControllerToolbox}.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
     * @param ancestor
     * @param descendant
@@ -49,7 +48,7 @@ public class GeometricJacobianHolder
    }
 
    /**
-    * Find or create a Jacobian and register it in the MomentumBasedController.
+    * Find or create a Jacobian and register it in the {@link HighLevelHumanoidControllerToolbox}.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
     * If the array of joints is empty, it returns -1.
     * @param joints

@@ -6,7 +6,6 @@ import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
@@ -18,7 +17,6 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -29,19 +27,17 @@ public class DRCFlatGroundWalkingTrack
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
 
    private final AvatarSimulation avatarSimulation;
-   
+
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
-      this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model, 
+      this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model,
             WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters()); // should always be committed as VELOCITY_HEADING_COMPONENT
    }
 
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
          boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
-      ArmControllerParameters armControllerParameters = model.getArmControllerParameters();
-
       //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
 
       double dt = scsInitialSetup.getDT();
@@ -61,19 +57,18 @@ public class DRCFlatGroundWalkingTrack
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
-             HighLevelState.WALKING);
+            feetContactSensorNames, wristForceSensorNames, walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
-      
 
-      
+
+
       HeightMap heightMapForFootstepZ = null;
       if (cheatWithGroundHeightAtForFootstep)
       {
          heightMapForFootstepZ = scsInitialSetup.getHeightMap();
       }
-      
+
       controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
@@ -85,8 +80,16 @@ public class DRCFlatGroundWalkingTrack
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(null);
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
-
+      initialize();
       avatarSimulation.start();
+   }
+
+   /**
+    * used to inject anything you need into scs before the sim starts
+    */
+   public void initialize()
+   {
+
    }
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
@@ -110,6 +113,5 @@ public class DRCFlatGroundWalkingTrack
       {
          avatarSimulation.dispose();
       }
-      GlobalTimer.clearTimers();
    }
 }

@@ -12,11 +12,10 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 
 public class QuadTreeForGroundReaderAndWriter
 {
@@ -87,9 +86,9 @@ public class QuadTreeForGroundReaderAndWriter
    {
       QuadTreeForGroundHeightMap quadTreeToReturn = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
 
-      ArrayList<Point3d> points = readPointsFromBufferedReader(bufferedReader, skipPoints, maxNumberOfPoints, bounds, maxZ);
+      ArrayList<Point3D> points = readPointsFromBufferedReader(bufferedReader, skipPoints, maxNumberOfPoints, bounds, maxZ);
 
-      for (Point3d point : points)
+      for (Point3D point : points)
       {
          quadTreeToReturn.addToQuadtree(point.getX(), point.getY(), point.getZ());
       }
@@ -98,33 +97,33 @@ public class QuadTreeForGroundReaderAndWriter
    }
 
 
-   public ArrayList<Point3d> readPointsFromFile(String filename, int skipPoints, int maxNumberOfPoints, Box bounds, double maxZ) throws IOException
+   public ArrayList<Point3D> readPointsFromFile(String filename, int skipPoints, int maxNumberOfPoints, Box bounds, double maxZ) throws IOException
    {
       FileInputStream inputStream = new FileInputStream(filename);
       return readPointsFromInputStream(inputStream, skipPoints, maxNumberOfPoints, bounds, maxZ);
    }
    
-   public ArrayList<Point3d> readPointsFromInputStream(InputStream inputStream, int skipPoints, int maxNumberOfPoints, Box bounds, double maxZ) throws IOException
+   public ArrayList<Point3D> readPointsFromInputStream(InputStream inputStream, int skipPoints, int maxNumberOfPoints, Box bounds, double maxZ) throws IOException
    {
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
       return readPointsFromBufferedReader(bufferedReader, skipPoints, maxNumberOfPoints, bounds, maxZ);
    }
 
 
-   public ArrayList<Point3d> readPointsFromBufferedReader(BufferedReader bufferedReader, int skipPoints, int maxNumberOfPoints, Box bounds, double maxZ) throws IOException
+   public ArrayList<Point3D> readPointsFromBufferedReader(BufferedReader bufferedReader, int skipPoints, int maxNumberOfPoints, Box bounds, double maxZ) throws IOException
    {
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
 
       String inputString;
       int numPoints = 0;
       while (((inputString = bufferedReader.readLine()) != null) && (numPoints < maxNumberOfPoints))
       {
-         Point3d point = parsePoint3d(inputString);
+         Point3D point = parsePoint3d(inputString);
          if ((point != null) && (bounds.containsOrEquals(point.getX(), point.getY())) && (point.getZ() < maxZ))
          {
             if (noiseAmplitudeForReading > 0.0)
             {
-               point.add(RandomTools.generateRandomPoint(random, noiseAmplitudeForReading, noiseAmplitudeForReading, noiseAmplitudeForReading));
+               point.add(RandomGeometry.nextPoint3D(random, noiseAmplitudeForReading, noiseAmplitudeForReading, noiseAmplitudeForReading));
             }
 
             points.add(point);
@@ -137,7 +136,7 @@ public class QuadTreeForGroundReaderAndWriter
       return points;
    }
 
-   private static Point3d parsePoint3d(String inputString)
+   private static Point3D parsePoint3d(String inputString)
    {
       StringTokenizer tokenizer = new StringTokenizer(inputString, "(,) ");
 
@@ -165,7 +164,7 @@ public class QuadTreeForGroundReaderAndWriter
       double y = Double.parseDouble(tokenY);
       double z = Double.parseDouble(tokenZ);
 
-      Point3d point = new Point3d(x, y, z);
+      Point3D point = new Point3D(x, y, z);
 
       return point;
    }

@@ -1,8 +1,8 @@
 package us.ihmc.robotics.quadTree;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
-public class QuadTreeForGroundPoint extends Point3d
+public class QuadTreeForGroundPoint extends Point3D
 {
    private static final long serialVersionUID = 8682882199962837728L;
    

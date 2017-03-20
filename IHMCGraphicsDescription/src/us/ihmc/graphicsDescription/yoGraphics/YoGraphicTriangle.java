@@ -2,8 +2,8 @@ package us.ihmc.graphicsDescription.yoGraphics;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.vecmath.Point3d;
-
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -14,7 +14,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.gui.GraphicsUpdatable;
@@ -86,7 +85,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       {
          if ((!pointOne.containsNaN()) && (!pointTwo.containsNaN()) && (!pointThree.containsNaN()))
          {
-            instruction.setMesh(MeshDataGenerator.Polygon(new Point3d[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
+            instruction.setMesh(MeshDataGenerator.Polygon(new Point3D[] { pointOne.getPoint3dCopy(), pointTwo.getPoint3dCopy(), pointThree.getPoint3dCopy() }));
          }
          else
          {
@@ -113,7 +112,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
       update();
    }
 
-   public void updatePoints(Point3d pointOne, Point3d pointTwo, Point3d pointThree)
+   public void updatePoints(Point3D pointOne, Point3D pointTwo, Point3D pointThree)
    {
       this.pointOne.set(pointOne);
       this.pointTwo.set(pointTwo);
@@ -163,7 +162,7 @@ public class YoGraphicTriangle extends YoGraphic implements RemoteYoGraphic, Gra
    }
 
    @Override
-   protected void computeRotationTranslation(Transform3d transform3d)
+   protected void computeRotationTranslation(AffineTransform transform3d)
    {
       transform3d.setIdentity();
    }

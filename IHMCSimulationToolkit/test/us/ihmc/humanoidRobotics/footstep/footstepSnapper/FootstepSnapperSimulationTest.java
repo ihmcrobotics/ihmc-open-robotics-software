@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,12 +11,16 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -32,14 +35,12 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.InsufficientDataException;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
@@ -48,7 +49,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
@@ -60,8 +60,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class FootstepSnapperSimulationTest
@@ -85,12 +83,12 @@ public class FootstepSnapperSimulationTest
       FootSpoof spoof = new FootSpoof("basicSpoof");
       FramePose2d desiredPose = new FramePose2d(ReferenceFrame.getWorldFrame());
 
-      List<Point3d> listOfPoints = new ArrayList<>();
+      List<Point3D> listOfPoints = new ArrayList<>();
       while (dataReader.hasAnotherFootstepAndPoints())
       {
          listOfPoints = dataReader.getNextSetPointsAndFootstep(footstepData);
          desiredPose.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), footstepData.getLocation().getX(), footstepData.getLocation().getY(),
-                                           RotationTools.computeYaw(footstepData.getOrientation()));
+                                           footstepData.getOrientation().getYaw());
          Footstep footstep = footstepSnapper.generateFootstepUsingHeightMap(desiredPose, spoof.getRigidBody(), spoof.getSoleFrame(),
                                 footstepData.getRobotSide(), listOfPoints, 0.0);
 
@@ -129,7 +127,7 @@ public class FootstepSnapperSimulationTest
       int maxNumberOfPoints = 2000000;
 
       QuadTreeForGroundReaderAndWriter quadTreeForGroundReaderAndWriter = new QuadTreeForGroundReaderAndWriter();
-      ArrayList<Point3d> points = quadTreeForGroundReaderAndWriter.readPointsFromInputStream(resourceAsStream, skipPoints, maxNumberOfPoints, bounds, maxZ);
+      ArrayList<Point3D> points = quadTreeForGroundReaderAndWriter.readPointsFromInputStream(resourceAsStream, skipPoints, maxNumberOfPoints, bounds, maxZ);
 
 //    SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
       FootstepSnappingParameters snappingParameters = new AtlasFootstepSnappingParameters();
@@ -138,7 +136,7 @@ public class FootstepSnapperSimulationTest
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(minX, minY, maxX, maxY);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(minX, minY, maxX, maxY);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("List of Points", footstepSnapper, new Graphics3DObject(), visualizeAndKeepUp);
 
 
@@ -193,7 +191,7 @@ public class FootstepSnapperSimulationTest
 
       int maxNumberOfPoints = 400000;
       QuadTreeForGroundReaderAndWriter quadTreeForGroundReaderAndWriter = new QuadTreeForGroundReaderAndWriter();
-      ArrayList<Point3d> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, 0, maxNumberOfPoints, bounds, Double.POSITIVE_INFINITY);
+      ArrayList<Point3D> points = quadTreeForGroundReaderAndWriter.readPointsFromFile(filename, 0, maxNumberOfPoints, bounds, Double.POSITIVE_INFINITY);
 
 //    SimpleFootstepSnapper footstepSnapper = createSimpleFootstepSnapper();
       ConvexHullFootstepSnapper footstepSnapper = createConvexHullFootstepSnapper();
@@ -201,7 +199,7 @@ public class FootstepSnapperSimulationTest
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(minX, minY, maxX, maxY);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(minX, minY, maxX, maxY);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("List of Points", footstepSnapper, new Graphics3DObject(), visualizeAndKeepUp);
 
 
@@ -248,7 +246,7 @@ public class FootstepSnapperSimulationTest
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(-1.0, -1.0, 1.0, 1.0);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(-1.0, -1.0, 1.0, 1.0);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Simple Bumpy Ground", footstepSnapper, null, visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -292,7 +290,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 3.5;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -335,7 +333,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 3.5;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -378,7 +376,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 0;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -422,7 +420,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 0;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -523,14 +521,14 @@ public class FootstepSnapperSimulationTest
          return false;
       }
 
-      public List<Point3d> getNextSetPointsAndFootstep(FootstepDataMessage footstepData) throws IOException
+      public List<Point3D> getNextSetPointsAndFootstep(FootstepDataMessage footstepData) throws IOException
       {
          if (hasAnotherFootstepAndPoints())
          {
             String inputLine;
-            List<Point3d> listOfPoints = new ArrayList<Point3d>();
-            Point3d position = new Point3d();
-            Quat4d orientation = new Quat4d();
+            List<Point3D> listOfPoints = new ArrayList<Point3D>();
+            Point3D position = new Point3D();
+            Quaternion orientation = new Quaternion();
             double yaw;
 
             nextLineRead = false;
@@ -551,7 +549,7 @@ public class FootstepSnapperSimulationTest
                   double x = Double.parseDouble(tokenizer.nextToken());
                   double y = Double.parseDouble(tokenizer.nextToken());
                   double z = Double.parseDouble(tokenizer.nextToken());
-                  listOfPoints.add(new Point3d(x, y, z));
+                  listOfPoints.add(new Point3D(x, y, z));
                }
 
                if (numberOfTokens == 12)
@@ -582,8 +580,8 @@ public class FootstepSnapperSimulationTest
                {
                   tokenizer.nextToken();
                   yaw = Double.parseDouble(tokenizer.nextToken());
-                  RotationTools.computeQuaternionFromYawAndZNormal(yaw, new Vector3d(0.0, 0.0, 1.0), orientation);
-                  footstepData.orientation = (orientation);
+                  RotationTools.computeQuaternionFromYawAndZNormal(yaw, new Vector3D(0.0, 0.0, 1.0), orientation);
+                  footstepData.setOrientation(orientation);
                }
             }
 
@@ -670,7 +668,7 @@ public class FootstepSnapperSimulationTest
 
 
 
-      public void createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
+      public void createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2D testingRange, double resolution, double heightThreshold,
                                   double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
                                   double maxAllowableXYDistanceForAPointToBeConsideredClose, int maxNodes)
       {
@@ -679,19 +677,19 @@ public class FootstepSnapperSimulationTest
          double minY = testingRange.getMinPoint().getY();
          double maxY = testingRange.getMaxPoint().getY();
 
-         ArrayList<Point3d> listOfPoints = new ArrayList<Point3d>();
+         ArrayList<Point3D> listOfPoints = new ArrayList<Point3D>();
 
          for (double x = minX; x < maxX; x = x + resolution)
          {
             for (double y = minY; y < maxY; y = y + resolution)
             {
                double z = inputHeightMap.heightAt(x, y, 0.0);
-               listOfPoints.add(new Point3d(x, y, z));
+               listOfPoints.add(new Point3D(x, y, z));
 
                if (visualize)
                {
                   Graphics3DObject staticLinkGraphics = new Graphics3DObject();
-                  staticLinkGraphics.translate(new Vector3d(x, y, z + 0.001));
+                  staticLinkGraphics.translate(new Vector3D(x, y, z + 0.001));
                   staticLinkGraphics.addCube(0.002, 0.002, 0.002, YoAppearance.Blue());
                   scs.addStaticLinkGraphics(staticLinkGraphics);
                }
@@ -703,7 +701,7 @@ public class FootstepSnapperSimulationTest
       }
 
 
-      public void createHeightMap(ArrayList<Point3d> listOfPoints, BoundingBox2d testingRange, double resolution, double heightThreshold,
+      public void createHeightMap(ArrayList<Point3D> listOfPoints, BoundingBox2D testingRange, double resolution, double heightThreshold,
                                   double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
                                   double maxAllowableXYDistanceForAPointToBeConsideredClose, int maxNodes)
       {
@@ -718,13 +716,13 @@ public class FootstepSnapperSimulationTest
                                                              maxAllowableXYDistanceForAPointToBeConsideredClose, -1);
          heightMap = new QuadTreeForGroundHeightMap(bounds, quadTreeParameters);
 
-         for (Point3d point : listOfPoints)
+         for (Point3D point : listOfPoints)
          {
             heightMap.addPoint(point.getX(), point.getY(), point.getZ());
          }
       }
 
-      public Graphics3DNode drawPoints(ArrayList<Point3d> points, double resolution, AppearanceDefinition appearance)
+      public Graphics3DNode drawPoints(ArrayList<Point3D> points, double resolution, AppearanceDefinition appearance)
       {
          return QuadTreeHeightMapVisualizer.drawPoints(scs, points, resolution, appearance);
       }
@@ -764,7 +762,7 @@ public class FootstepSnapperSimulationTest
          testAPoint(assertPositionConditions, assertPointConditions, footstepBody);
       }
 
-      private void testRandomPoints(int numberOfPointsToTest, BoundingBox2d rangeOfPointsToTest, boolean assertPositionConditions,
+      private void testRandomPoints(int numberOfPointsToTest, BoundingBox2D rangeOfPointsToTest, boolean assertPositionConditions,
                                     boolean assertPointConditions)
               throws InsufficientDataException
       {
@@ -776,9 +774,9 @@ public class FootstepSnapperSimulationTest
 
          for (int i = 0; i < numberOfPointsToTest; i++)
          {
-            soleX.set(RandomTools.generateRandomDouble(random, minX, maxX));
-            soleY.set(RandomTools.generateRandomDouble(random, minY, maxY));
-            soleYaw.set(RandomTools.generateRandomDouble(random, Math.PI));
+            soleX.set(RandomNumbers.nextDouble(random, minX, maxX));
+            soleY.set(RandomNumbers.nextDouble(random, minY, maxY));
+            soleYaw.set(RandomNumbers.nextDouble(random, Math.PI));
 
             testAPoint(assertPositionConditions, assertPointConditions);
          }
@@ -816,12 +814,12 @@ public class FootstepSnapperSimulationTest
 
          soleZ.set(solePosition.getZ());
 
-         Point3d planePosition = solePosition.getPointCopy();
-         Vector3d planeNormal = soleNormal.getVectorCopy();
+         Point3D planePosition = solePosition.getPointCopy();
+         Vector3D planeNormal = soleNormal.getVectorCopy();
 
          planePose.setPosition(planePosition);
 
-         Quat4d planeOrientation = new Quat4d();
+         Quaternion planeOrientation = new Quaternion();
          RotationTools.computeQuaternionFromYawAndZNormal(soleYaw.getDoubleValue(), planeNormal, planeOrientation);
          planePose.setOrientation(planeOrientation);
 
@@ -842,8 +840,8 @@ public class FootstepSnapperSimulationTest
          {
             pointListBalls.reset();
 
-            List<Point3d> pointList = footstepSnapper.getPointList();
-            for (Point3d point : pointList)
+            List<Point3D> pointList = footstepSnapper.getPointList();
+            for (Point3D point : pointList)
             {
                double heightMapZ = heightMap.getHeightAtPoint(point.getX(), point.getY());
                pointListBalls.setBall(new FramePoint(worldFrame, point.getX(), point.getY(), point.getZ()));
@@ -859,9 +857,9 @@ public class FootstepSnapperSimulationTest
    }
 
 
-   private boolean pointsBelowPlane(List<Point3d> point3ds, Plane3d plane, double tolerance)
+   private boolean pointsBelowPlane(List<Point3D> point3ds, Plane3d plane, double tolerance)
    {
-      for (Point3d point3d : point3ds)
+      for (Point3D point3d : point3ds)
       {
          if (!pointBelowPlane(point3d, plane, tolerance))
          {
@@ -872,7 +870,7 @@ public class FootstepSnapperSimulationTest
       return true;
    }
 
-   private boolean pointBelowPlane(Point3d point, Plane3d plane, double tolerance)
+   private boolean pointBelowPlane(Point3D point, Plane3d plane, double tolerance)
    {
       double distanceAlongNormal = plane.signedDistance(point);
       if (distanceAlongNormal > tolerance)
@@ -965,7 +963,7 @@ public class FootstepSnapperSimulationTest
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3d(x, y, height / 2));
+      location.setTranslation(new Vector3D(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3d(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }

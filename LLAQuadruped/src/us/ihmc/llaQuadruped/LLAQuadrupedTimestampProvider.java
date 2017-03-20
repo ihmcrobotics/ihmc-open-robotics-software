@@ -1,7 +1,7 @@
 package us.ihmc.llaQuadruped;
 
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.commons.Conversions;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 
 public class LLAQuadrupedTimestampProvider implements SensorTimestampHolder
@@ -16,7 +16,7 @@ public class LLAQuadrupedTimestampProvider implements SensorTimestampHolder
    @Override
    public long getTimestamp()
    {
-      return TimeTools.secondsToNanoSeconds(sdfRobot.getYoTime().getDoubleValue());
+      return Conversions.secondsToNanoseconds(sdfRobot.getYoTime().getDoubleValue());
    }
 
    @Override

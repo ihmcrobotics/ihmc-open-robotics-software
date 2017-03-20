@@ -14,11 +14,13 @@ public class GhostMouseKeyReleasePlaybackEvent implements GhostMousePlaybackEven
       this(GhostMouseStringToChar.convertStringToKeycode(keyReleaseString));
    }
    
+   @Override
    public void playback(java.awt.Robot awtRobot, double playbackSpeed)
    {
       awtRobot.keyRelease(keyCode);
    }
 
+   @Override
    public String toString()
    {
       String keyPressString = GhostMouseStringToChar.convertKeycodeToString(keyCode);

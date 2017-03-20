@@ -4,6 +4,7 @@ import us.ihmc.exampleSimulations.skippy.SkippyRobot.RobotType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -11,6 +12,7 @@ import us.ihmc.tools.thread.ThreadTools;
 
 public class SkippySimulation
 {
+   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    public static final double DT = 0.0001;
    public static final double controlDT = 0.0001;
    public static final double TIME = 20.0;
@@ -33,7 +35,7 @@ public class SkippySimulation
       RobotType robotType = RobotType.SKIPPY;
       skippy = new SkippyRobot(robotType);
 
-      sim = new SimulationConstructionSet(skippy);
+      sim = new SimulationConstructionSet(skippy, simulationTestingParameters);
       sim.setGroundVisible(true);
       sim.setDT(DT, recordFrequency);
       sim.setMaxBufferSize(64000);
@@ -94,8 +96,8 @@ public class SkippySimulation
     */
    public static void main(String[] args) throws SimulationExceededMaximumTimeException
    {
-      SkippySimulation skippySimulation = new SkippySimulation(SkippyControllerMode.ICP_BASED);
-      skippySimulation.run(TIME);
+      SkippySimulation skippySimulation = new SkippySimulation(SkippyControllerMode.STATE_FEEDBACK);
+//      skippySimulation.run(TIME);
       ThreadTools.sleepForever();
    }
 

@@ -2,14 +2,13 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -23,6 +22,8 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
+import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameLineSegment2d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -43,7 +44,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry;
 
-   private static final Vector3d zero = new Vector3d(0.0, 0.0, 0.0);
+   private static final Vector3D zero = new Vector3D(0.0, 0.0, 0.0);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final ReferenceFrame soleFrame;
@@ -54,6 +55,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final FrameLine2d lineOfRotationInSoleFrame = new FrameLine2d();
    private final FrameLine2d lineOfRotationInWorldFrame = new FrameLine2d();
    private final FrameConvexPolygon2d footPolygonInWorld = new FrameConvexPolygon2d();
+   private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
    private final FramePoint cop = new FramePoint();
    private final DoubleYoVariable copAlpha;
@@ -123,17 +125,18 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       }
    }
 
-   private final Point3d planePoint = new Point3d();
-   private final Vector3d normal = new Vector3d();
+   private final Point3D planePoint = new Point3D();
+   private final Vector3D normal = new Vector3D();
 
-   private final Vector3d lineOfContactVector = new Vector3d();
+   private final Vector3D lineOfContactVector = new Vector3D();
    private final FrameVector lineOfContact = new FrameVector();
    private final FrameVector footNormal = new FrameVector();
-   private final Vector3d footNormalVector = new Vector3d();
+   private final Vector3D footNormalVector = new Vector3D();
 
    private final FramePoint2d centerOfRotation2d = new FramePoint2d();
    private final FrameVector2d lineOfRotation2d = new FrameVector2d();
 
+   @Override
    public void compute(FramePoint2d desiredCoP, FramePoint2d centerOfPressure)
    {
       centerOfPressure.checkReferenceFrameMatch(soleFrame);
@@ -180,14 +183,19 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
          footPolygonInWorld.setIncludingFrameAndUpdate(defaultFootPolygon);
          footPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
-         FramePoint2d[] intersections = footPolygonInWorld.intersectionWith(lineOfRotationInWorldFrame);
-         if (intersections == null || intersections.length == 1 || intersections[0].epsilonEquals(intersections[1], 1.0e-3))
+         
+         frameConvexPolygonWithLineIntersector2d.intersectWithLine(footPolygonInWorld, lineOfRotationInWorldFrame);
+         if (frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.NO_INTERSECTION
+               || frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.POINT_INTERSECTION
+               || frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne()
+                                                         .epsilonEquals(frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo(), 1e-3))
          {
             yoLineOfRotation.setToNaN();
          }
          else
          {
-            lineSegmentOfRotation.setIncludingFrame(intersections);
+            lineSegmentOfRotation.setIncludingFrame(frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne(),
+                                                    frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo());
             yoLineOfRotation.setFrameLineSegment2d(lineSegmentOfRotation);
          }
       }
@@ -203,6 +211,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       }
    }
 
+   @Override
    public void reset()
    {
       copFiltered.reset();
@@ -222,14 +231,15 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
       }
    }
 
+   @Override
    public boolean isFootRotating()
    {
       return footRotating.getBooleanValue();
    }
 
+   @Override
    public void getLineOfRotation(FrameLine2d lineOfRotationToPack)
    {
       lineOfRotationToPack.setIncludingFrame(lineOfRotationInSoleFrame);
    }
-
 }

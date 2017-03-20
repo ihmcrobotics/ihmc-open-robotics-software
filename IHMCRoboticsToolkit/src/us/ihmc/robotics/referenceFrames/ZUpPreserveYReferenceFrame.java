@@ -1,16 +1,15 @@
 package us.ihmc.robotics.referenceFrames;
 
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
 
 public class ZUpPreserveYReferenceFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = -1454797908129819243L;
-   private final Vector3d translation = new Vector3d();
+   private final Vector3D translation = new Vector3D();
    private final ReferenceFrame worldFrame;
    private final FramePoint origin;
 
@@ -28,14 +27,14 @@ public class ZUpPreserveYReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   private final Matrix3d nonZUpToWorldRotation = new Matrix3d();
-   private final Matrix3d zUpToWorldRotation = new Matrix3d();
-   private final Point3d originPoint3d = new Point3d();
+   private final RotationMatrix nonZUpToWorldRotation = new RotationMatrix();
+   private final RotationMatrix zUpToWorldRotation = new RotationMatrix();
+   private final Point3D originPoint3d = new Point3D();
    private final RigidBodyTransform nonZUpToWorld = new RigidBodyTransform();
    
-   private final Vector3d xAxis = new Vector3d();
-   private final Vector3d yAxis = new Vector3d();
-   private final Vector3d zAxis = new Vector3d();
+   private final Vector3D xAxis = new Vector3D();
+   private final Vector3D yAxis = new Vector3D();
+   private final Vector3D zAxis = new Vector3D();
    
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -52,9 +51,7 @@ public class ZUpPreserveYReferenceFrame extends ReferenceFrame
       zAxis.set(0.0, 0.0, 1.0);
       xAxis.cross(yAxis, zAxis);
       
-      zUpToWorldRotation.setColumn(0, xAxis);
-      zUpToWorldRotation.setColumn(1, yAxis);
-      zUpToWorldRotation.setColumn(2, zAxis);
+      zUpToWorldRotation.setColumns(xAxis, yAxis, zAxis);
      
       transformToParent.setRotation(zUpToWorldRotation);
 

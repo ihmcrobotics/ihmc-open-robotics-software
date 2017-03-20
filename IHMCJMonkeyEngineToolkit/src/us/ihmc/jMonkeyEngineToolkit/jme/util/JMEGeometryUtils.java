@@ -1,14 +1,13 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
 import com.jme3.math.Matrix3f;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
+
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class JMEGeometryUtils
 {
@@ -34,8 +33,8 @@ public class JMEGeometryUtils
       return new Quaternion(yUpToZup);
    }
 
-   private final static RigidBodyTransform zUpToYupTransform = new RigidBodyTransform(JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(zUpToYup), new Vector3d());
-   private final static RigidBodyTransform yUpToZupTransform = new RigidBodyTransform(JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(yUpToZup), new Vector3d());
+   private final static RigidBodyTransform zUpToYupTransform = new RigidBodyTransform(JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(zUpToYup), new Vector3D());
+   private final static RigidBodyTransform yUpToZupTransform = new RigidBodyTransform(JMEDataTypeUtils.jMEQuaternionToVecMathQuat4d(yUpToZup), new Vector3D());
 
    /*
     * Be careful with the multLocal and mult functions. The documentation is not always correct in what arguments are safe to pass
@@ -147,11 +146,11 @@ public class JMEGeometryUtils
    /// under no circumstances change this to public. This method is dangerous and misleading.
    private static Transform j3dTransform3DToJMETransform(RigidBodyTransform transform3D)
    {
-      javax.vecmath.Quat4f   quat   = new javax.vecmath.Quat4f();
-      javax.vecmath.Vector3f vector = new javax.vecmath.Vector3f();
+      us.ihmc.euclid.tuple4D.Quaternion32   quat   = new us.ihmc.euclid.tuple4D.Quaternion32();
+      us.ihmc.euclid.tuple3D.Vector3D32 vector = new us.ihmc.euclid.tuple3D.Vector3D32();
       transform3D.get(quat, vector);
-      Vector3f jmeVector = new Vector3f(vector.getX(), vector.getY(), vector.getZ());
-      Quaternion jmeQuat = new Quaternion(quat.getX(), quat.getY(), quat.getZ(), quat.getW());
+      Vector3f jmeVector = new Vector3f(vector.getX32(), vector.getY32(), vector.getZ32());
+      Quaternion jmeQuat = new Quaternion(quat.getX32(), quat.getY32(), quat.getZ32(), quat.getS32());
       Transform ret = new Transform(jmeVector, jmeQuat, new Vector3f(1.0f, 1.0f, 1.0f));
 
       return ret;
@@ -162,8 +161,8 @@ public class JMEGeometryUtils
    {
       Quaternion jmeQuat = jmeTransform.getRotation();
       Vector3f jmeVect = jmeTransform.getTranslation();
-      javax.vecmath.Quat4d quat = new  javax.vecmath.Quat4d(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
-      Vector3d vect = new Vector3d(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
+      us.ihmc.euclid.tuple4D.Quaternion quat = new  us.ihmc.euclid.tuple4D.Quaternion(jmeQuat.getX(), jmeQuat.getY(), jmeQuat.getZ(), jmeQuat.getW());
+      Vector3D vect = new Vector3D(jmeVect.getX(), jmeVect.getY(), jmeVect.getZ());
       RigidBodyTransform ret = new RigidBodyTransform(quat, vect);
       return ret;
    }

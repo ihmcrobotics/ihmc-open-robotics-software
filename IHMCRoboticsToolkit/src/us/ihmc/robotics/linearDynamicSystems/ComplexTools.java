@@ -2,6 +2,7 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import org.ejml.data.CDenseMatrix64F;
 import org.ejml.data.Complex64F;
+
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 public class ComplexTools

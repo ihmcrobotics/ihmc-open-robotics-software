@@ -2,9 +2,9 @@ package us.ihmc.geometry.polytope;
 
 import static org.junit.Assert.*;
 
-import javax.vecmath.Point3d;
-
 import org.junit.Test;
+
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class ExpandingPolytopeEntryTest
 {
@@ -12,10 +12,10 @@ public class ExpandingPolytopeEntryTest
    @Test
    public void testManuallyAssembledTetrahedron()
    {
-      Point3d pointOne = new Point3d(0.0, 0.0, 0.0);
-      Point3d pointTwo = new Point3d(2.0, 0.0, 0.0);
-      Point3d pointThree = new Point3d(1.0, 2.0, 0.0);
-      Point3d pointFour = new Point3d(1.0, 1.0, 1.0);
+      Point3D pointOne = new Point3D(0.0, 0.0, 0.0);
+      Point3D pointTwo = new Point3D(2.0, 0.0, 0.0);
+      Point3D pointThree = new Point3D(1.0, 2.0, 0.0);
+      Point3D pointFour = new Point3D(1.0, 1.0, 1.0);
 
       ExpandingPolytopeEntry entry123 = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
       ExpandingPolytopeEntry entry324 = new ExpandingPolytopeEntry(pointThree, pointTwo, pointFour);
@@ -71,10 +71,10 @@ public class ExpandingPolytopeEntryTest
    @Test
    public void testAutomaticallyAssembledTetrahedron()
    {
-      Point3d pointOne = new Point3d(0.0, 0.0, 0.0);
-      Point3d pointTwo = new Point3d(2.0, 0.0, 0.0);
-      Point3d pointThree = new Point3d(1.0, 2.0, 0.0);
-      Point3d pointFour = new Point3d(1.0, 1.0, 1.0);
+      Point3D pointOne = new Point3D(0.0, 0.0, 0.0);
+      Point3D pointTwo = new Point3D(2.0, 0.0, 0.0);
+      Point3D pointThree = new Point3D(1.0, 2.0, 0.0);
+      Point3D pointFour = new Point3D(1.0, 1.0, 1.0);
 
       ExpandingPolytopeEntry entry123 = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
       ExpandingPolytopeEntry entry324 = new ExpandingPolytopeEntry(pointThree, pointTwo, pointFour);
@@ -133,10 +133,10 @@ public class ExpandingPolytopeEntryTest
    @Test
    public void testTroublesomeTetrahedron()
    {         
-      Point3d pointOne = new Point3d(-0.9490913237594096, 0.30106983928716424, 3.560641277995469);
-      Point3d pointTwo = new Point3d(-0.9895570462032808, -0.7156529059809014, -1.2414394231490622);
-      Point3d pointThree = new Point3d(1.3112536912820332, 1.1824049227088569, 1.3675055136001983);
-      Point3d pointFour = new Point3d(-0.799289825570983, -2.2676996322425795, 0.9981915411767837);
+      Point3D pointOne = new Point3D(-0.9490913237594096, 0.30106983928716424, 3.560641277995469);
+      Point3D pointTwo = new Point3D(-0.9895570462032808, -0.7156529059809014, -1.2414394231490622);
+      Point3D pointThree = new Point3D(1.3112536912820332, 1.1824049227088569, 1.3675055136001983);
+      Point3D pointFour = new Point3D(-0.799289825570983, -2.2676996322425795, 0.9981915411767837);
 
       ExpandingPolytopeEntry entry123 = new ExpandingPolytopeEntry(pointOne, pointTwo, pointThree);
       ExpandingPolytopeEntry entry324 = new ExpandingPolytopeEntry(pointThree, pointTwo, pointFour);

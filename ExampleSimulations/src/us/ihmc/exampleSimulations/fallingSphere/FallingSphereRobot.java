@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.fallingSphere;
 
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -51,7 +50,7 @@ public class FallingSphereRobot extends Robot
 
       // Base:
 
-      floatingJoint = new FloatingJoint("base", new Vector3d(0.0, 0.0, 0.0), this);
+      floatingJoint = new FloatingJoint("base", new Vector3D(0.0, 0.0, 0.0), this);
 
       Link link1 = ball();
       floatingJoint.setLink(link1);
@@ -78,21 +77,21 @@ public class FallingSphereRobot extends Robot
 
             // System.out.println("x,y,z: " + x + ", " + y + ", " + z);
             String gcName = "gc" + i + "_" + j;
-            GroundContactPoint gc = new GroundContactPoint(gcName, new Vector3d(x, y, z), this);
+            GroundContactPoint gc = new GroundContactPoint(gcName, new Vector3D(x, y, z), this);
             floatingJoint.addGroundContactPoint(gc);
             
-            YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition(gcName + "Position", gc.getYoPosition(), 0.01, YoAppearance.Red());
-            yoGraphicsListRegistry.registerYoGraphic("FallingSphereGCPoints", dynamicGraphicPosition);
+            YoGraphicPosition yoGraphicPosition = new YoGraphicPosition(gcName + "Position", gc.getYoPosition(), 0.01, YoAppearance.Red());
+            yoGraphicsListRegistry.registerYoGraphic("FallingSphereGCPoints", yoGraphicPosition);
 
             if (useImpulseGroundModel)
             {
-               YoGraphicVector dynamicGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoImpulse(), 10.0, YoAppearance.Pink());
-               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", dynamicGraphicVector);
+               YoGraphicVector yoGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoImpulse(), 10.0, YoAppearance.Pink());
+               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", yoGraphicVector);
             }
             else
             {
-               YoGraphicVector dynamicGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoForce(), 1.0/50.0);
-               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", dynamicGraphicVector);
+               YoGraphicVector yoGraphicVector = new YoGraphicVector(gcName + "Force", gc.getYoPosition(), gc.getYoForce(), 1.0/50.0);
+               yoGraphicsListRegistry.registerYoGraphic("FallingSphereForces", yoGraphicVector);
             }
          }
       }
@@ -122,7 +121,7 @@ public class FallingSphereRobot extends Robot
       initRobot();
       
       this.getRobotsYoVariableRegistry().addChild(registry);
-      this.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+      this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
    }
 
    private Link ball()

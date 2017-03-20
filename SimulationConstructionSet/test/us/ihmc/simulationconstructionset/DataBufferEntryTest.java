@@ -1,16 +1,14 @@
 package us.ihmc.simulationconstructionset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class DataBufferEntryTest
 {
@@ -70,7 +68,7 @@ public class DataBufferEntryTest
       double total = 0.0;
       for (int i = 0; i < nPoints; i++)
       {
-         double data = RandomTools.generateRandomDoubleInRange(random, -100.0, 100.0);
+         double data = RandomNumbers.nextDouble(random, -100.0, 100.0);
          doubleYoVariable.set(data);
          total = total + data;
          dataBufferEntry.setDataAtIndexToYoVariableValue(i);

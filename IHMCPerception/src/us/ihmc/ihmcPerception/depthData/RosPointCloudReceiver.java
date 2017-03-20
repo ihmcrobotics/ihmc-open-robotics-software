@@ -1,23 +1,22 @@
 package us.ihmc.ihmcPerception.depthData;
 
-import sensor_msgs.PointCloud2;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.sensorProcessing.parameters.DRCRobotPointCloudParameters;
-import us.ihmc.tools.time.Timer;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-
-import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import sensor_msgs.PointCloud2;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 
 public class RosPointCloudReceiver extends RosPointCloudSubscriber
 {
    private final boolean DEBUG = false;
-   private Timer timer;
+   private Stopwatch timer;
    {
       if(DEBUG)
-         timer = new Timer().start();
+         timer = new Stopwatch().start();
    }
 
    private final String rosTopic;
@@ -48,8 +47,8 @@ public class RosPointCloudReceiver extends RosPointCloudSubscriber
       }
 
       UnpackedPointCloud pointCloudData = unpackPointsAndIntensities(pointCloud);
-		Point3d[] points = pointCloudData.getPoints();
-		ArrayList<Point3d> pointsAsArrayList = new ArrayList<Point3d>(Arrays.asList(points));
+		Point3D[] points = pointCloudData.getPoints();
+		ArrayList<Point3D> pointsAsArrayList = new ArrayList<Point3D>(Arrays.asList(points));
 	   long[] timestamps = new long[points.length];
 	   long time = pointCloud.getHeader().getStamp().totalNsecs();
 	   Arrays.fill(timestamps, time);

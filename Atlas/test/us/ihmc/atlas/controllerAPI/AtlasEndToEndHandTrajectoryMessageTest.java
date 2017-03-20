@@ -1,21 +1,21 @@
 package us.ihmc.atlas.controllerAPI;
 
-import static org.junit.Assert.*;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.geometry.FramePose;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajectoryMessageTest
@@ -33,10 +32,10 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
    /*
     * Test revealing a bug that was preventing the trajectory from flipping the sign of the final orientation (necessary to prevent an extra rotation).
-    * This bug was due to limiting the angle described by a TransformableQuat4d to be in [-Pi; Pi].
+    * This bug was due to limiting the angle described by a Quaternion to be in [-Pi; Pi].
     */
-   @ContinuousIntegrationTest(estimatedDuration = 23.2)
-   @Test(timeout = 120000)
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 60000)
    public void testBugFromActualSimDataWithTwoTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -66,15 +65,15 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       waypoint0.changeFrame(ReferenceFrame.getWorldFrame());
       waypoint1.changeFrame(ReferenceFrame.getWorldFrame());
 
-      Point3d waypointPosition0 = new Point3d();
-      Quat4d waypointOrientation0 = new Quat4d();
-      Point3d waypointPosition1 = new Point3d();
-      Quat4d waypointOrientation1 = new Quat4d();
+      Point3D waypointPosition0 = new Point3D();
+      Quaternion waypointOrientation0 = new Quaternion();
+      Point3D waypointPosition1 = new Point3D();
+      Quaternion waypointOrientation1 = new Quaternion();
       waypoint0.getPose(waypointPosition0, waypointOrientation0);
       waypoint1.getPose(waypointPosition1, waypointOrientation1);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, BaseForControl.CHEST, 2);
-      handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3d(), new Vector3d());
-      handTrajectoryMessage.setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3d(), new Vector3d());
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
+      handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, waypointPosition0, waypointOrientation0, new Vector3D(), new Vector3D());
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0 * trajectoryTime, waypointPosition1, waypointOrientation1, new Vector3D(), new Vector3D());
 
       drcSimulationTestHelper.send(handTrajectoryMessage);
 
@@ -85,14 +84,14 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
       String handName = fullRobotModel.getHand(robotSide).getName();
       String nameSpace = handName + AxisAngleOrientationController.class.getSimpleName();
       String varname = handName + "RotationErrorInBody";
-      Vector3d rotationError = findVector3d(nameSpace, varname, scs);
+      Vector3D rotationError = findVector3d(nameSpace, varname, scs);
 
       /*
        * Checking the tracking error should be enough.
        * As went the bug is present, the error magnitude goes up to [-0.31, 0.002, -0.027] (as rotation vector) against [-0.03, -0.01, -0.01] without the bug.
        */
       assertTrue(rotationError.length() < 0.05);
-   }   
+   }
 
    @Override
    public DRCRobotModel getRobotModel()
@@ -105,4 +104,12 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
    {
       return BambooTools.getSimpleRobotNameFor(BambooTools.SimpleRobotNameKeys.ATLAS);
    }
+
+   @Override
+   public double getLegLength()
+   {
+      AtlasPhysicalProperties physicalProperties = new AtlasPhysicalProperties();
+      return physicalProperties.getShinLength() + physicalProperties.getThighLength();
+   }
+
 }

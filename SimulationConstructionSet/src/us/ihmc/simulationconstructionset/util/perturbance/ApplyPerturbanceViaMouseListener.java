@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.util.perturbance;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,13 +28,13 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
    private final DirectedPerturbance directedPerturbance;
 
    private boolean mouseClicked = false;
-   private Point3d intersectionPosition = new Point3d();
-   private Point3d cameraPosition = new Point3d();
-   
-   private Point3d tempPoint = new Point3d();
+   private Point3D intersectionPosition = new Point3D();
+   private Point3D cameraPosition = new Point3D();
+
+   private Point3D tempPoint = new Point3D();
 
    public ApplyPerturbanceViaMouseListener(Robot launchedBallsRobot, YoFramePoint ballTarget, YoFrameVector ballTargetVelocity,
-           DirectedPerturbance directedPerturbance, int numberOfBallsAvailable)
+                                           DirectedPerturbance directedPerturbance, int numberOfBallsAvailable)
    {
       this.ballTarget = ballTarget;
       this.ballTargetVelocity = ballTargetVelocity;
@@ -72,13 +72,13 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
       }
    }
 
-   public void handleClick(Point3d intersectionPosition, Point3d cameraPosition)
+   public void handleClick(Point3D intersectionPosition, Point3D cameraPosition)
    {
       LaunchedBall nextBall = poolOfBalls.get(nextBallIndex);
       final double ballVelocityMagnitude = directedPerturbance.getBallVelocityMagnitude();
       tempPoint.set(ballTarget.getX(), ballTarget.getY(), ballTarget.getZ());
-      Point3d initialPosition = computeInitialPosition(intersectionPosition, ballTarget.getZ());
-      final Point3d finalPosition = computeFinalPosition(initialPosition, ballVelocityMagnitude);
+      Point3D initialPosition = computeInitialPosition(intersectionPosition, ballTarget.getZ());
+      final Point3D finalPosition = computeFinalPosition(initialPosition, ballVelocityMagnitude);
       nextBall.launch(initialPosition, finalPosition, directedPerturbance.getBallMass(), ballVelocityMagnitude);
       nextBallIndex++;
 
@@ -88,37 +88,37 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
       }
    }
 
-   private Point3d computeFinalPosition(Point3d initialPosition, double ballVelocityMagnitude)
+   private Point3D computeFinalPosition(Point3D initialPosition, double ballVelocityMagnitude)
    {
       tempPoint.set(ballTarget.getX(), ballTarget.getY(), ballTarget.getZ());
       double distance = initialPosition.distance(tempPoint);
       double estimatedCollisionTime = distance / ballVelocityMagnitude;
-      
-      Point3d ret = new Point3d(ballTargetVelocity.getFrameVectorCopy().getVector());
+
+      Point3D ret = new Point3D(ballTargetVelocity.getFrameVectorCopy().getVector());
       ret.scale(estimatedCollisionTime);
       ret.add(tempPoint);
       return ret;
    }
 
-   private Point3d computeInitialPosition(Point3d intersectionPosition, double height)
+   private Point3D computeInitialPosition(Point3D intersectionPosition, double height)
    {
-      Point3d ret = new Point3d(intersectionPosition);
+      Point3D ret = new Point3D(intersectionPosition);
       ret.setZ(height);
 
       return ret;
    }
 
    @Override
-   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3d location, Point3d cameraLocation, Quat4d cameraRotation)
+   public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyHolder, Point3DReadOnly location, Point3DReadOnly cameraLocation,
+                        QuaternionReadOnly cameraRotation)
    {
-      
+
       if (mouseClicked)
          return;
 
-      
-      if(!modifierKeyHolder.isKeyPressed(Key.CTRL))
+      if (!modifierKeyHolder.isKeyPressed(Key.CTRL))
          return;
-      
+
       System.out.println("Applying perturbance");
 
       this.intersectionPosition.set(location);
@@ -138,10 +138,10 @@ public class ApplyPerturbanceViaMouseListener implements RobotController, Select
    {
       return name;
    }
-   
+
    @Override
    public void initialize()
-   {      
+   {
    }
 
    @Override

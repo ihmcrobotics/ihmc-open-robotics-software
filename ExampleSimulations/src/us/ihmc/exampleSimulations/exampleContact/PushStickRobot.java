@@ -1,8 +1,7 @@
 package us.ihmc.exampleSimulations.exampleContact;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -42,15 +41,15 @@ public class PushStickRobot extends Robot
       
       this.setGravity(0.0);
       
-      xJoint = new SliderJoint("pushStickX", new Vector3d(), this, Axis.X);
+      xJoint = new SliderJoint("pushStickX", new Vector3D(), this, Axis.X);
       Link xLink = new Link("xLink");
       xJoint.setLink(xLink);
       
-      yJoint = new SliderJoint("pushStickY", new Vector3d(), this, Axis.Y);
+      yJoint = new SliderJoint("pushStickY", new Vector3D(), this, Axis.Y);
       Link yLink = new Link("yLink");
       yJoint.setLink(yLink);
 
-      zJoint = new SliderJoint("pushStickZ", new Vector3d(), this, Axis.Z);
+      zJoint = new SliderJoint("pushStickZ", new Vector3D(), this, Axis.Z);
       Link zLink = new Link("zLink");
       zLink.setMass(100.0);
       zLink.setMomentOfInertia(10.0, 10.0, 10.0);
@@ -59,20 +58,20 @@ public class PushStickRobot extends Robot
       zLink.setLinkGraphics(zLinkLinkGraphics);
       zJoint.setLink(zLink);
       
-      yawJoint = new PinJoint("pushStickYaw", new Vector3d(), this, Axis.Z);
+      yawJoint = new PinJoint("pushStickYaw", new Vector3D(), this, Axis.Z);
       Link yawLink = new Link("yawLink");
       yawJoint.setLink(yawLink);
       
-      pitchJoint = new PinJoint("pushStickPitch", new Vector3d(), this, Axis.Y);
+      pitchJoint = new PinJoint("pushStickPitch", new Vector3D(), this, Axis.Y);
       Link pitchLink = new Link("pitchLink");
       pitchJoint.setLink(pitchLink);
       
-      pushJoint = new SliderJoint("pushStickPush", new Vector3d(), this, Axis.X);
+      pushJoint = new SliderJoint("pushStickPush", new Vector3D(), this, Axis.X);
       
       Link link = new Link("pushStick");
       
       link.setMass(MASS);
-      link.setComOffset(new Vector3d(-LENGTH/2.0, 0.0, 0.0));
+      link.setComOffset(new Vector3D(-LENGTH/2.0, 0.0, 0.0));
       link.setMomentOfInertia(Ixx, Iyy, Izz);
             
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -85,9 +84,9 @@ public class PushStickRobot extends Robot
 
       pushJoint.setLink(link);
       
-      ef_PushStickTip = new ExternalForcePoint("ef_PushStickTip", new Vector3d(), this);
+      ef_PushStickTip = new ExternalForcePoint("ef_PushStickTip", new Vector3D(), this);
       pushJoint.addExternalForcePoint(ef_PushStickTip);
-      kp_PushStickBackEnd = new ExternalForcePoint("kp_PushStickBackEnd", new Vector3d(-LENGTH/2.0, 0.0, 0.0), this);
+      kp_PushStickBackEnd = new ExternalForcePoint("kp_PushStickBackEnd", new Vector3D(-LENGTH/2.0, 0.0, 0.0), this);
       pushJoint.addKinematicPoint(kp_PushStickBackEnd);
       
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -99,7 +98,7 @@ public class PushStickRobot extends Robot
       yoGraphicsListRegistry.registerYoGraphic("PushStickRobot", pushStickForceVector);
       yoGraphicsListRegistry.registerYoGraphic("PushStickRobot", pushStickBackEndGraphicPosition);
       
-      this.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry);
+      this.addYoGraphicsListRegistry(yoGraphicsListRegistry);
       
       addRootJoint(xJoint);
       xJoint.addJoint(yJoint);
@@ -117,8 +116,8 @@ public class PushStickRobot extends Robot
    }
 
    
-   Point3d tempPoint3d = new Point3d();
-   public void getPushStickUnitDirectionInWorld(Vector3d directionInWorldToPack)
+   Point3D tempPoint3d = new Point3D();
+   public void getPushStickUnitDirectionInWorld(Vector3D directionInWorldToPack)
    {
       ef_PushStickTip.getPosition(directionInWorldToPack);
       kp_PushStickBackEnd.getPosition(tempPoint3d);

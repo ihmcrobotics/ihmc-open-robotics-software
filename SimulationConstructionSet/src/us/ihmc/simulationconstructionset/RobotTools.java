@@ -4,15 +4,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Plane;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.screwTheory.*;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.robotics.screwTheory.PlanarJoint;
+import us.ihmc.robotics.screwTheory.RevoluteJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.robotics.screwTheory.ScrewTools;
+import us.ihmc.robotics.screwTheory.SixDoFJoint;
+import us.ihmc.robotics.screwTheory.Twist;
 
 public class RobotTools
 {
@@ -208,7 +216,7 @@ public class RobotTools
       Joint scsJoint;
       String jointName = idJoint.getName();
       RigidBodyTransform offsetTransform = idJoint.getOffsetTransform3D();
-      Vector3d offsetVector = new Vector3d();
+      Vector3D offsetVector = new Vector3D();
       offsetTransform.getTranslation(offsetVector);
 
       if (idJoint instanceof SixDoFJoint)
@@ -230,7 +238,7 @@ public class RobotTools
       else if (idJoint instanceof RevoluteJoint)
       {
          RevoluteJoint idRevoluteJoint = (RevoluteJoint) idJoint;
-         Vector3d axis = new Vector3d();
+         Vector3D axis = new Vector3D();
          idRevoluteJoint.getJointAxis().get(axis);
          PinJoint scsRevoluteJoint = new PinJoint(jointName, offsetVector, scsRobot, axis);
          scsJoint = scsRevoluteJoint;
@@ -244,12 +252,12 @@ public class RobotTools
       RigidBodyInertia idInertia = idRigidBody.getInertia();
 
       String bodyName = idRigidBody.getName();
-      Vector3d comOffset = new Vector3d();
+      Vector3D comOffset = new Vector3D();
       FramePoint centerOfMassOffset = idInertia.getCenterOfMassOffset();
       centerOfMassOffset.changeFrame(idJoint.getFrameAfterJoint());
       centerOfMassOffset.get(comOffset);
       double mass = idInertia.getMass();
-      Matrix3d momentOfInertia = idInertia.getMassMomentOfInertiaPartCopy();
+      Matrix3D momentOfInertia = idInertia.getMassMomentOfInertiaPartCopy();
 
       Link scsRigidBody = new Link(bodyName);
       scsRigidBody.setComOffset(comOffset);

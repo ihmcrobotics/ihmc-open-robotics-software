@@ -1,10 +1,9 @@
 package us.ihmc.robotics.kinematics;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,12 +14,12 @@ import javax.vecmath.Vector3d;
  */
 public class TransformInterpolationCalculator
 {
-   private final Vector3d transform1Translation = new Vector3d();
-   private final Vector3d transform2Translation = new Vector3d();
-   private final Quat4d transform1Quaternion = new Quat4d();
-   private final Quat4d transform2Quaternion = new Quat4d();
-   private final Vector3d interpolatedTranslation = new Vector3d();
-   private final Quat4d interpolatedQuaternion = new Quat4d();
+   private final Vector3D transform1Translation = new Vector3D();
+   private final Vector3D transform2Translation = new Vector3D();
+   private final Quaternion transform1Quaternion = new Quaternion();
+   private final Quaternion transform2Quaternion = new Quaternion();
+   private final Vector3D interpolatedTranslation = new Vector3D();
+   private final Quaternion interpolatedQuaternion = new Quaternion();
    
    /**
     *        Computes the interpolation between the two transforms using the alpha parameter to control the blend.
@@ -32,7 +31,7 @@ public class TransformInterpolationCalculator
     */
    public void computeInterpolation(RigidBodyTransform transform1, RigidBodyTransform transform2, RigidBodyTransform result, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       
       transform1.get(transform1Quaternion, transform1Translation);
       transform2.get(transform2Quaternion, transform2Translation);
@@ -49,7 +48,7 @@ public class TransformInterpolationCalculator
       long timeStamp1 = timeStampedTransform1.getTimeStamp();
       long timeStamp2 = timeStampedTransform2.getTimeStamp();
 
-      MathTools.checkIfInRange(timeStamp, timeStamp1, timeStamp2);
+      MathTools.checkIntervalContains(timeStamp, timeStamp1, timeStamp2);
 
       RigidBodyTransform transform1 = timeStampedTransform1.getTransform3D();
       RigidBodyTransform transform2 = timeStampedTransform2.getTransform3D();

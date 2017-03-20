@@ -1,6 +1,10 @@
 package us.ihmc.avatar.simulationStarter;
 
-import com.github.quickhull3d.Point3d;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 import us.ihmc.avatar.DRCLidar;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,9 +17,9 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.avatar.sensors.DRCRenderedSceneVideoHandler;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
@@ -26,6 +30,8 @@ import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HighLevelStateMessage;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
@@ -50,12 +56,6 @@ import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-
-import javax.vecmath.Vector3d;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class DRCSimulationStarter implements SimulationStarterInterface
 {
@@ -83,6 +83,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean cheatWithGroundHeightAtForFootstep = false;
 
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber;
+   private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters;
 
    /**
     * The PacketCommunicator used as input of the controller is either equal to the output PacketCommunicator of the network processor or the behavior module if any.
@@ -96,13 +97,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean setupControllerNetworkSubscriber = true;
 
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ArmControllerParameters armControllerParameters;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
    private final RobotContactPointParameters contactPointParameters;
 
-   private final Point3d scsCameraPosition = new Point3d(6.0, -2.0, 4.5);
-   private final Point3d scsCameraFix = new Point3d(-0.44, -0.17, 0.75);
+   private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
+   private final Point3D scsCameraFix = new Point3D(-0.44, -0.17, 0.75);
 
    private final List<HighLevelBehaviorFactory> highLevelBehaviorFactories = new ArrayList<>();
    private DRCNetworkProcessor networkProcessor;
@@ -111,7 +111,17 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
+   public DRCSimulationStarter(DRCRobotModel robotModel, DRCSCSInitialSetup scsInitialSetup)
+   {
+      this(robotModel, null, scsInitialSetup);
+   }
+
    public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
+   {
+      this(robotModel, environment, null);
+   }
+
+   public DRCSimulationStarter(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment, DRCSCSInitialSetup scsInitialSetup)
    {
       this.robotModel = robotModel;
       this.environment = environment;
@@ -121,13 +131,19 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       this.createSCSSimulatedSensors = true;
 
-      scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
-      scsInitialSetup.setInitializeEstimatorToActual(false);
-      scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
-      scsInitialSetup.setRunMultiThreaded(true);
+      if (scsInitialSetup == null)
+      {
+         this.scsInitialSetup = new DRCSCSInitialSetup(environment, robotModel.getSimulateDT());
+         this.scsInitialSetup.setInitializeEstimatorToActual(false);
+         this.scsInitialSetup.setTimePerRecordTick(robotModel.getControllerDT());
+         this.scsInitialSetup.setRunMultiThreaded(true);
+      }
+      else
+      {
+         this.scsInitialSetup = scsInitialSetup;
+      }
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      this.armControllerParameters = robotModel.getArmControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       this.icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
@@ -249,6 +265,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    /**
     * Set a specific starting location. By default, the robot will start at (0, 0) in world with no yaw.
     */
+   @Override
    public void setStartingLocation(DRCStartingLocation startingLocation)
    {
       setStartingLocationOffset(startingLocation.getStartingLocationOffset());
@@ -267,7 +284,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    /**
     * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with no yaw.
     */
-   public void setStartingLocationOffset(Vector3d robotInitialPosition, double yaw)
+   public void setStartingLocationOffset(Vector3D robotInitialPosition, double yaw)
    {
       setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(robotInitialPosition, yaw));
    }
@@ -294,11 +311,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       scsCameraFix.set(fixX, fixY, fixZ);
    }
 
-//   /** Make the controller use a specific PacketCommunicator instead of the default. If you don't know what you're doing, forget about that method. */
-//   public void setControllerPacketCommunicator(PacketCommunicator controllerInputPacketCommunicator)
-//   {
-//      this.controllerPacketCommunicator = controllerInputPacketCommunicator;
-//   }
+   //   /** Make the controller use a specific PacketCommunicator instead of the default. If you don't know what you're doing, forget about that method. */
+   //   public void setControllerPacketCommunicator(PacketCommunicator controllerInputPacketCommunicator)
+   //   {
+   //      this.controllerPacketCommunicator = controllerInputPacketCommunicator;
+   //   }
 
    /**
     * Creates a default output PacketCommunicator for the network processor.
@@ -313,8 +330,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       networkParameters.enableLocalControllerCommunicator(true);
 
-      IHMCCommunicationKryoNetClassList netClassList = new IHMCCommunicationKryoNetClassList();
-      controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT, netClassList);
+      controllerPacketCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
+                                                                                             new IHMCCommunicationKryoNetClassList());
       try
       {
          controllerPacketCommunicator.connect();
@@ -323,10 +340,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       {
          throw new RuntimeException(e);
       }
-
    }
-
-
 
    /**
     * Starts the SCS visualizer for the behavior module.
@@ -377,6 +391,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       return scriptBasedControllerCommandGenerator;
    }
 
+   public void setFlatGroundWalkingScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   {
+      this.walkingScriptParameters = walkingScriptParameters;
+   }
+
    private AvatarSimulation createAvatarSimulation()
    {
       HumanoidGlobalDataProducer dataProducer = null;
@@ -392,11 +411,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
-            walkingControllerParameters, armControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
+            walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       if (setupControllerNetworkSubscriber)
-         controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"), controllerPacketCommunicator);
+         controllerFactory.createControllerNetworkSubscriber(new PeriodicNonRealtimeThreadScheduler("CapturabilityBasedStatusProducer"),
+                                                             controllerPacketCommunicator);
 
       for (int i = 0; i < highLevelBehaviorFactories.size(); i++)
          controllerFactory.addHighLevelBehaviorFactory(highLevelBehaviorFactories.get(i));
@@ -407,6 +427,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
       scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
+      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap());
@@ -429,8 +450,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       simulationConstructionSet = avatarSimulation.getSimulationConstructionSet();
       sdfRobot = avatarSimulation.getHumanoidFloatingRootJointRobot();
 
-      simulationConstructionSet.setCameraPosition(scsCameraPosition.x, scsCameraPosition.y, scsCameraPosition.z);
-      simulationConstructionSet.setCameraFix(scsCameraFix.x, scsCameraFix.y, scsCameraFix.z);
+      simulationConstructionSet.setCameraPosition(scsCameraPosition.getX(), scsCameraPosition.getY(), scsCameraPosition.getZ());
+      simulationConstructionSet.setCameraFix(scsCameraFix.getX(), scsCameraFix.getY(), scsCameraFix.getZ());
 
       PlaybackListener playbackListener = new SCSPlaybackListener(dataProducer);
       simulationConstructionSet.attachPlaybackListener(playbackListener);
@@ -468,7 +489,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
             int framesPerSecond = 25;
             DRCRenderedSceneVideoHandler drcRenderedSceneVideoHandler = new DRCRenderedSceneVideoHandler(scsSensorOutputPacketCommunicator);
-            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, drcRenderedSceneVideoHandler, timeStampProvider, framesPerSecond);
+            simulationConstructionSet.startStreamingVideoData(cameraConfiguration, width, height, drcRenderedSceneVideoHandler, timeStampProvider,
+                                                              framesPerSecond);
          }
 
          for (DRCRobotLidarParameters lidarParams : sensorInformation.getLidarParameters())
@@ -482,7 +504,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private void printIfDebug(String string)
    {
-      if (DEBUG) System.out.println(string);
+      if (DEBUG)
+         System.out.println(string);
    }
 
    /**
@@ -493,7 +516,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     */
    private void startNetworkProcessor(DRCNetworkModuleParameters networkModuleParams)
    {
-      if(networkModuleParams.isRosModuleEnabled() || networkModuleParams.isSensorModuleEnabled())
+      if (networkModuleParams.isRosModuleEnabled() || networkModuleParams.isSensorModuleEnabled())
       {
          LocalObjectCommunicator simulatedSensorCommunicator = createSimulatedSensorsPacketCommunicator();
          networkModuleParams.setSimulatedSensorCommunicator(simulatedSensorCommunicator);
@@ -524,7 +547,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    public LocalObjectCommunicator getSimulatedSensorsPacketCommunicator()
    {
-      if(scsSensorOutputPacketCommunicator == null)
+      if (scsSensorOutputPacketCommunicator == null)
       {
          createSimulatedSensorsPacketCommunicator();
       }
@@ -534,7 +557,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    @Override
    public void close()
    {
-      if(controllerPacketCommunicator != null)
+      if (controllerPacketCommunicator != null)
       {
          controllerPacketCommunicator.close();
       }

@@ -1,9 +1,9 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
@@ -11,7 +11,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.Transform3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 
@@ -33,7 +32,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicCylinder. startPoint = " + startPoint + ", frameVector = "
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicCylinder. startPoint = " + startPoint + ", frameVector = "
                + frameVector);
       }
    }
@@ -59,7 +58,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       this.appearance = appearance;
    }
 
-   public void getBasePosition(Point3d point3d)
+   public void getBasePosition(Point3D point3d)
    {
       point3d.setX(this.baseX.getDoubleValue());
       point3d.setY(this.baseY.getDoubleValue());
@@ -73,7 +72,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       framePoint.setZ(this.baseZ.getDoubleValue());
    }
 
-   public void getVector(Vector3d vector3d)
+   public void getVector(Vector3D vector3d)
    {
       vector3d.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
    }
@@ -83,11 +82,11 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       frameVector.set(x.getDoubleValue(), y.getDoubleValue(), z.getDoubleValue());
    }
 
-   private Vector3d translationVector = new Vector3d();
-   private Vector3d z_rot = new Vector3d(), y_rot = new Vector3d(), x_rot = new Vector3d();
-   private Matrix3d rotMatrix = new Matrix3d();
+   private Vector3D translationVector = new Vector3D();
+   private Vector3D z_rot = new Vector3D(), y_rot = new Vector3D(), x_rot = new Vector3D();
+   private RotationMatrix rotMatrix = new RotationMatrix();
 
-   protected void computeRotationTranslation(Transform3d transform3D)
+   protected void computeRotationTranslation(AffineTransform transform3D)
    {
       transform3D.setIdentity();
 
@@ -109,9 +108,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
       x_rot.cross(y_rot, z_rot);
       x_rot.normalize();
 
-      rotMatrix.setColumn(0, x_rot);
-      rotMatrix.setColumn(1, y_rot);
-      rotMatrix.setColumn(2, z_rot);
+      rotMatrix.setColumns(x_rot, y_rot, z_rot);
 
       translationVector.set(baseX.getDoubleValue(), baseY.getDoubleValue(), baseZ.getDoubleValue());
 

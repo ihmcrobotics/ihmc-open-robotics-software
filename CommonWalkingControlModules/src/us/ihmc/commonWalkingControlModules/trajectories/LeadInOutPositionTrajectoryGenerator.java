@@ -1,8 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -19,8 +20,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
@@ -183,8 +182,8 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       }
    }
 
-   private final Vector3d tempVector = new Vector3d();
-   private final AxisAngle4d tempAxisAngle = new AxisAngle4d();
+   private final Vector3D tempVector = new Vector3D();
+   private final AxisAngle tempAxisAngle = new AxisAngle();
 
    public void setInitialLeadOut(FramePoint initialPosition, FrameVector initialDirection, double leaveDistance)
    {
@@ -192,7 +191,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.initialDirection.set(initialDirection);
       this.initialDirection.normalize();
       this.initialDirection.get(tempVector);
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, tempAxisAngle);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 
       initialDistortionPose.setToZero(this.initialPosition.getReferenceFrame());
       initialDistortionPose.setPosition(initialPosition);
@@ -208,7 +207,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       this.finalDirection.normalize();
       this.finalDirection.get(tempVector);
       tempVector.negate();
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, tempAxisAngle);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, tempAxisAngle);
 
       finalDistortionPose.setToZero(this.finalPosition.getReferenceFrame());
       finalDistortionPose.setPosition(finalPosition);
@@ -227,7 +226,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    public void setTrajectoryTime(double newTrajectoryTime, double leaveTime, double approachTime)
    {
       trajectoryTime.set(newTrajectoryTime);
-      MathTools.checkIfInRange(approachTime, 0.0, newTrajectoryTime - leaveTime);
+      MathTools.checkIntervalContains(approachTime, 0.0, newTrajectoryTime - leaveTime);
       this.approachTime.set(approachTime);
       this.leaveTime.set(leaveTime);
    }
@@ -242,7 +241,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
    {
       currentTrajectoryFrame = initialPosition.getReferenceFrame();
 
-      MathTools.checkIfInRange(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(trajectoryTime.getDoubleValue(), 0.0, Double.POSITIVE_INFINITY);
       double t1 = leaveTime.getDoubleValue();
       double t2 = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
       double tf = trajectoryTime.getDoubleValue();
@@ -287,7 +286,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       double t2 = trajectoryTime.getDoubleValue() - approachTime.getDoubleValue();
       double tf = trajectoryTime.getDoubleValue();
 
-      xyPolynomial.compute(MathTools.clipToMinMax(time, t1, t2));
+      xyPolynomial.compute(MathTools.clamp(time, t1, t2));
 
       currentDistortionPose.interpolate(initialDistortionPose, finalDistortionPose, xyPolynomial.getPosition());
       distortedPlanePose.setAndMatchFrame(currentDistortionPose);
@@ -302,7 +301,7 @@ public class LeadInOutPositionTrajectoryGenerator extends PositionTrajectoryGene
       currentVelocity.subAndScale(alphaDot, finalPosition, initialPosition);
       currentAcceleration.subAndScale(alphaDDot, finalPosition, initialPosition);
 
-      zPolynomial.compute(MathTools.clipToMinMax(time, 0.0, tf));
+      zPolynomial.compute(MathTools.clamp(time, 0.0, tf));
 
       currentPosition.setZ(zPolynomial.getPosition());
       currentVelocity.setZ(zPolynomial.getVelocity());

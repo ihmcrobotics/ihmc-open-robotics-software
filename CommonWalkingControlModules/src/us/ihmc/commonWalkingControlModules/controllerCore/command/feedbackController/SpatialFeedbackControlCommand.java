@@ -1,13 +1,14 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.controllers.SE3PIDGains;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -21,16 +22,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final Point3d controlFrameOriginInEndEffectorFrame = new Point3d();
-   private final Quat4d controlFrameOrientationInEndEffectorFrame = new Quat4d();
+   private final Point3D controlFrameOriginInEndEffectorFrame = new Point3D();
+   private final Quaternion controlFrameOrientationInEndEffectorFrame = new Quaternion();
 
-   private final Point3d desiredPositionInWorld = new Point3d();
-   private final Vector3d desiredLinearVelocityInWorld = new Vector3d();
-   private final Vector3d feedForwardLinearAccelerationInWorld = new Vector3d();
+   private final Point3D desiredPositionInWorld = new Point3D();
+   private final Vector3D desiredLinearVelocityInWorld = new Vector3D();
+   private final Vector3D feedForwardLinearAccelerationInWorld = new Vector3D();
 
-   private final Quat4d desiredOrientationInWorld = new Quat4d();
-   private final Vector3d desiredAngularVelocityInWorld = new Vector3d();
-   private final Vector3d feedForwardAngularAccelerationInWorld = new Vector3d();
+   private final Quaternion desiredOrientationInWorld = new Quaternion();
+   private final Vector3D desiredAngularVelocityInWorld = new Vector3D();
+   private final Vector3D feedForwardAngularAccelerationInWorld = new Vector3D();
 
    private final SE3PIDGains gains = new SE3PIDGains();
 
@@ -71,6 +72,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setGains(SE3PIDGainsInterface gains)
    {
       this.gains.set(gains);
+   }
+
+   public void setGains(OrientationPIDGainsInterface orientationGains)
+   {
+      this.gains.set(orientationGains);
+   }
+
+   public void setGains(PositionPIDGainsInterface positionGains)
+   {
+      this.gains.set(positionGains);
    }
 
    public void set(FramePoint desiredPosition, FrameVector desiredLinearVelocity, FrameVector feedForwardLinearAcceleration)
@@ -170,7 +181,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       spatialAccelerationCommand.setWeight(weight);
    }
 
-   public void setWeightsForSolver(Vector3d angular, Vector3d linear)
+   public void setWeightsForSolver(Vector3D angular, Vector3D linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
    }

@@ -14,21 +14,18 @@ import java.awt.image.BufferedImage;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
-import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEAppearanceMaterial;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEAssetLocator;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMERenderer;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JME3DLoaderUtils;
-import us.ihmc.jMonkeyEngineToolkit.utils.GraphicsDemoTools.PanBackAndForthTrackingAndDollyPositionHolder;
-
 import com.jme3.math.FastMath;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.system.AppSettings;
 import com.jme3.system.awt.AwtPanelsContext;
+
+import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
+import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JME3DLoaderUtils;
+import us.ihmc.jMonkeyEngineToolkit.utils.GraphicsDemoTools.PanBackAndForthTrackingAndDollyPositionHolder;
 
 public class JMEBufferedImageAppearanceTester extends JMERenderer
 {

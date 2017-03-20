@@ -1,8 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.robotics.geometry.AbstractFrameObject;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -58,7 +57,7 @@ public abstract class FrameShape3d<F extends FrameShape3d<F, G>, G extends Shape
     * @param normalToPack
     * @return true if the point is inside, false otherwise.
     */
-   public final boolean checkIfInside(Point3d pointToCheck, Point3d closestPointOnSurfaceToPack, Vector3d normalToPack)
+   public final boolean checkIfInside(Point3DBasics pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalToPack)
    {
       return getGeometryObject().checkIfInside(pointToCheck, closestPointOnSurfaceToPack, normalToPack);
    }

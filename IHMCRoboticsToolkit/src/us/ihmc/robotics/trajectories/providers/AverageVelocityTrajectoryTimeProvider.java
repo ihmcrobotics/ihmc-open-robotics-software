@@ -37,7 +37,7 @@ public class AverageVelocityTrajectoryTimeProvider implements  DoubleProvider
 
       double time = distance / averageVelocityProvider.getValue();
 
-      time = MathTools.clipToMinMax(time, minimumTime, Double.POSITIVE_INFINITY);
+      time = MathTools.clamp(time, minimumTime, Double.POSITIVE_INFINITY);
 
       return time;
    }

@@ -2,6 +2,7 @@ package us.ihmc.exampleSimulations.lidar;
 
 import java.util.Random;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -12,7 +13,6 @@ import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -52,8 +52,8 @@ public class ExampleLidarController implements RobotController
       this.scs = scs;
       this.lidarScanParameters = robot.getLidarScanParameters();
 
-      YoGraphicPosition dynamicGraphicPosition = new YoGraphicPosition("point", point, 0.01, YoAppearance.Purple());
-      yoGraphicsListRegistry.registerYoGraphic("test", dynamicGraphicPosition);
+      YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("point", point, 0.01, YoAppearance.Purple());
+      yoGraphicsListRegistry.registerYoGraphic("test", yoGraphicPosition);
 
       bagOfBalls = new BagOfBalls(lidarScanParameters.getPointsPerSweep(), 0.005, YoAppearance.AliceBlue(), registry, yoGraphicsListRegistry);
 

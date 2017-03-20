@@ -4,16 +4,10 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
@@ -23,6 +17,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -32,11 +27,13 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -46,6 +43,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader;
 import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
@@ -115,7 +113,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
    private boolean symmetricMode = false;
    private RobotSide symmetricControlSide;
    private final DoubleYoVariable q_qs, q_qx, q_qy, q_qz, q_x, q_y, q_z;
-   private Quat4d qprev;
+   private Quaternion qprev;
 
    //   private final DoubleYoVariable BaseControlPoint = new DoubleYoVariable("BaseControlPoint", registry);
    private final YoFramePoint[] baseControlPoints = new YoFramePoint[4];
@@ -433,13 +431,13 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setupSymmetricModeListeners()
    {
-      final Matrix3d oppositeSignForYawAndRollOnly = new Matrix3d();
+      final Matrix3D oppositeSignForYawAndRollOnly = new Matrix3D();
       oppositeSignForYawAndRollOnly.setIdentity();
       oppositeSignForYawAndRollOnly.setM00(-1.0);
       oppositeSignForYawAndRollOnly.setM22(-1.0);
       
-      final Vector3d unitVectorThisSide = new Vector3d();
-      final Vector3d unitVectorOtherSide = new Vector3d();
+      final Vector3D unitVectorThisSide = new Vector3D();
+      final Vector3D unitVectorOtherSide = new Vector3D();
       
       //main joints
       for (RobotSide robotSide : RobotSide.values)
@@ -615,7 +613,7 @@ public class DRCRobotMidiSliderBoardPositionManipulation
       sliderBoard.setSlider(sliderChannel++, "q_z", scs, pelvisPosition.getZ() - zRange / 2.0, pelvisPosition.getZ() + zRange / 2.0);
 
       //reset yaw pitch and roll so that it can be based off current 'global' yaw pitch and roll.
-      qprev = new Quat4d(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue());
+      qprev = new Quaternion(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue());
       q_yaw.set(0.0);
       q_pitch.set(0.0);
       q_roll.set(0.0);
@@ -988,16 +986,16 @@ public class DRCRobotMidiSliderBoardPositionManipulation
 
    private void setYawPitchRoll()
    {
-      Quat4d q = new Quat4d();
+      Quaternion q = new Quaternion();
 
       //This code has a singularity when yaw and roll line up (e.g. pitch is 90, can't rotate in one direction any more).
-      RotationTools.convertYawPitchRollToQuaternion(q_yaw.getDoubleValue(), q_pitch.getDoubleValue(), q_roll.getDoubleValue(), q);
+      q.setYawPitchRoll(q_yaw.getDoubleValue(), q_pitch.getDoubleValue(), q_roll.getDoubleValue());
 
       //This code compounds the rotations so that on subsequent frames the ability to rotate in lost rotation directions is regained
       //This affectively uses global yaw pitch and roll each time.
-      q.mul(qprev);
+      q.multiply(qprev);
 
-      q_qs.set(q.getW());
+      q_qs.set(q.getS());
       q_qx.set(q.getX());
       q_qy.set(q.getY());
       q_qz.set(q.getZ());
@@ -1031,10 +1029,10 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          
          for (int j = i + 1; j < basePoints.length; j++)
          {
-            YoGraphicLineSegment dynamicGraphicLineSegment = new YoGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
+            YoGraphicLineSegment yoGraphicLineSegment = new YoGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
                   1.0, appearance, false);
-            yoGraphicsList.add(dynamicGraphicLineSegment);
-            linesList.add(dynamicGraphicLineSegment);
+            yoGraphicsList.add(yoGraphicLineSegment);
+            linesList.add(yoGraphicLineSegment);
          }
       }
 

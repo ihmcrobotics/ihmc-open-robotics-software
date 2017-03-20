@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -80,10 +79,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
 
    private final WalkingControllerParameters walkingControllerParameters;
+   private final CapturePointPlannerParameters capturePointPlannerParameters;
 
    private final HighLevelState initialBehavior;
 
-   private HighLevelHumanoidControllerToolbox momentumBasedController = null;
+   private HighLevelHumanoidControllerToolbox controllerToolbox = null;
 
    private boolean isListeningToHighLevelStatePackets = true;
    private HighLevelHumanoidControllerManager highLevelHumanoidControllerManager = null;
@@ -111,7 +111,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public MomentumBasedControllerFactory(ContactableBodiesFactory contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
          SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames, WalkingControllerParameters walkingControllerParameters,
-         ArmControllerParameters armControllerParameters, CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
+         CapturePointPlannerParameters capturePointPlannerParameters, HighLevelState initialBehavior)
    {
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
@@ -120,16 +120,16 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       this.initialBehavior = initialBehavior;
 
       this.walkingControllerParameters = walkingControllerParameters;
+      this.capturePointPlannerParameters = capturePointPlannerParameters;
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
       managerFactory = new HighLevelControlManagerFactory(statusOutputManager, registry);
-      managerFactory.setArmControlParameters(armControllerParameters);
       managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
    }
-   
+
    public void setHeadingAndVelocityEvaluationScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       headingAndVelocityEvaluationScriptParameters = walkingScriptParameters;
@@ -142,7 +142,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public void setInverseDynamicsCalculatorListener(InverseDynamicsCalculatorListener inverseDynamicsCalculatorListener)
    {
-      momentumBasedController.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
+      controllerToolbox.setInverseDynamicsCalculatorListener(inverseDynamicsCalculatorListener);
    }
 
    public void createControllerNetworkSubscriber(PeriodicThreadScheduler scheduler, PacketCommunicator packetCommunicator)
@@ -169,14 +169,14 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       if (footstepGenerator != null)
          return;
 
-      if (momentumBasedController != null)
+      if (controllerToolbox != null)
       {
-         SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
-         CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-         double controlDT = momentumBasedController.getControlDT();
+         SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
+         CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+         double controlDT = controllerToolbox.getControlDT();
          ComponentBasedFootstepDataMessageGenerator footstepGenerator = new ComponentBasedFootstepDataMessageGenerator(commandInputManager, statusOutputManager,
                walkingControllerParameters, headingAndVelocityEvaluationScriptParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, heightMapForFootstepZ, registry);
-         momentumBasedController.addUpdatable(footstepGenerator);
+         controllerToolbox.addUpdatable(footstepGenerator);
       }
       else
       {
@@ -193,17 +193,17 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       if (queuedControllerCommandGenerator != null)
          return;
 
-      if (momentumBasedController != null)
+      if (controllerToolbox != null)
       {
          System.out.println("In createdQueuedControllerCommandGenerator");
 
-         SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
-         CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-         double controlDT = momentumBasedController.getControlDT();
+         SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
+         CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+         double controlDT = controllerToolbox.getControlDT();
          queuedControllerCommandGenerator = new QueuedControllerCommandGenerator(controllerCommands, commandInputManager, statusOutputManager,
                walkingControllerParameters, referenceFrames, contactableFeet, controlDT, useHeadingAndVelocityScript, registry);
 
-         momentumBasedController.addUpdatables(queuedControllerCommandGenerator.getModulesToUpdate());
+         controllerToolbox.addUpdatables(queuedControllerCommandGenerator.getModulesToUpdate());
       }
       else
       {
@@ -219,12 +219,12 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       if (userDesiredControllerCommandGenerators != null)
          return;
 
-      if (momentumBasedController != null)
+      if (controllerToolbox != null)
       {
          double defaultTrajectoryTime = 1.0;
-         SideDependentList<ContactableFoot> contactableFeet = momentumBasedController.getContactableFeet();
-         userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager, momentumBasedController.getFullRobotModel(),
-               momentumBasedController.getReferenceFrames(),
+         SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
+         userDesiredControllerCommandGenerators = new UserDesiredControllerCommandGenerators(commandInputManager, controllerToolbox.getFullRobotModel(),
+               controllerToolbox.getReferenceFrames(),
                contactableFeet, walkingControllerParameters, defaultTrajectoryTime, registry);
       }
       else
@@ -264,15 +264,15 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the MomentumBasedController ////////////////////////////////////////////////////////
+      // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
-      momentumBasedController = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, 
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches,
             centerOfMassDataHolder, wristForceSensors, yoTime,
             gravityZ, omega0, twistCalculator, feet, handContactableBodies, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
-      momentumBasedController.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
+      controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
          createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, heightMapForFootstepZ);
@@ -282,25 +282,25 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
 
-      managerFactory.setMomentumBasedController(momentumBasedController);
+      managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
       walkingBehavior = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-            momentumBasedController);
+            capturePointPlannerParameters, controllerToolbox);
       highLevelBehaviors.add(walkingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the DoNothingController ////////////////////////////////////////////////////////////
       // Useful as a transition state on the real robot
-      DoNothingBehavior doNothingBehavior = new DoNothingBehavior(momentumBasedController);
+      DoNothingBehavior doNothingBehavior = new DoNothingBehavior(controllerToolbox);
       highLevelBehaviors.add(doNothingBehavior);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
       RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      List<? extends ContactablePlaneBody> contactablePlaneBodies = momentumBasedController.getContactablePlaneBodyList();
+      List<? extends ContactablePlaneBody> contactablePlaneBodies = controllerToolbox.getContactablePlaneBodyList();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, controlledBodies, jointsToOptimizeFor, momentumOptimizationSettings,
             jointPrivilegedConfigurationParameters, referenceFrames, controlDT, gravityZ, geometricJacobianHolder, twistCalculator, contactablePlaneBodies,
             yoGraphicsListRegistry, registry);
@@ -313,7 +313,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       // This is the "highest level" controller that enables switching between
       // the different controllers (walking, multi-contact, driving, etc.)
       highLevelHumanoidControllerManager = new HighLevelHumanoidControllerManager(commandInputManager, statusOutputManager, controllerCore, initialBehavior,
-            highLevelBehaviors, momentumBasedController, centerOfPressureDataHolderForEstimator, controllerCoreOutput);
+            highLevelBehaviors, controllerToolbox, centerOfPressureDataHolderForEstimator, controllerCoreOutput);
       highLevelHumanoidControllerManager.setFallbackControllerForFailure(HighLevelState.DO_NOTHING_BEHAVIOR);
       highLevelHumanoidControllerManager.addYoVariableRegistry(registry);
       highLevelHumanoidControllerManager.setListenToHighLevelStatePackets(isListeningToHighLevelStatePackets);
@@ -388,7 +388,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       for (int i = 0; i < highLevelBehaviorFactories.size(); i++)
       {
          HighLevelBehaviorFactory highLevelBehaviorFactory = highLevelBehaviorFactories.get(i);
-         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(managerFactory, momentumBasedController);
+         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(managerFactory, controllerToolbox);
          boolean transitionRequested = highLevelBehaviorFactory.isTransitionToBehaviorRequested();
          highLevelHumanoidControllerManager.addHighLevelBehavior(highLevelBehavior, transitionRequested);
       }
@@ -407,7 +407,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
          if (managerFactory != null)
          {
-            managerFactory.getOrCreateManipulationControlModule().initializeDesiredToCurrent();
             managerFactory.getOrCreatePelvisOrientationManager().setToHoldCurrentInWorldFrame();
          }
       }
@@ -423,13 +422,13 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public void addHighLevelBehaviorFactory(HighLevelBehaviorFactory highLevelBehaviorFactory)
    {
-      if (momentumBasedController == null)
+      if (controllerToolbox == null)
       {
          highLevelBehaviorFactories.add(highLevelBehaviorFactory);
       }
       else
       {
-         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(managerFactory, momentumBasedController);
+         HighLevelBehavior highLevelBehavior = highLevelBehaviorFactory.createHighLevelBehavior(managerFactory, controllerToolbox);
          boolean transitionToBehaviorRequested = highLevelBehaviorFactory.isTransitionToBehaviorRequested();
          highLevelHumanoidControllerManager.addHighLevelBehavior(highLevelBehavior, transitionToBehaviorRequested);
       }
@@ -443,8 +442,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public void attachControllerFailureListener(ControllerFailureListener listener)
    {
-      if (momentumBasedController != null)
-         momentumBasedController.attachControllerFailureListener(listener);
+      if (controllerToolbox != null)
+         controllerToolbox.attachControllerFailureListener(listener);
       else
          controllerFailureListenersToAttach.add(listener);
    }
@@ -457,15 +456,15 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
    public void attachControllerStateChangedListener(ControllerStateChangedListener listener)
    {
-      if (momentumBasedController != null)
-         momentumBasedController.attachControllerStateChangedListener(listener);
+      if (controllerToolbox != null)
+         controllerToolbox.attachControllerStateChangedListener(listener);
       else
          controllerStateChangedListenersToAttach.add(listener);
    }
 
    public void attachRobotMotionStatusChangedListener(RobotMotionStatusChangedListener listener)
    {
-      momentumBasedController.attachRobotMotionStatusChangedListener(listener);
+      controllerToolbox.attachRobotMotionStatusChangedListener(listener);
    }
 
    public void setFallbackControllerForFailure(HighLevelState fallbackController)
@@ -493,11 +492,21 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       return statusOutputManager;
    }
 
-   public HighLevelHumanoidControllerToolbox getMomentumBasedController()
+   public HighLevelHumanoidControllerToolbox getHighLevelHumanoidControllerToolbox()
    {
-      if (momentumBasedController == null)
-         throw new RuntimeException("momentumBasedController was not created yet.");
+      if (controllerToolbox == null)
+         throw new RuntimeException(HighLevelHumanoidControllerToolbox.class.getSimpleName() + " has not been created yet.");
 
-      return momentumBasedController;
+      return controllerToolbox;
+   }
+   
+   /**
+    * Warms up the walking controller by running it a number of iterations
+    * 
+    * @param iterations
+    */
+   public void warmupWalkingController(int iterations)
+   {
+      highLevelHumanoidControllerManager.warmup(iterations, walkingBehavior);
    }
 }

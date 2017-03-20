@@ -18,9 +18,8 @@ import static us.ihmc.atlas.ros.AtlasOrderedJointMap.r_leg_kny;
 
 import java.util.EnumMap;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -82,12 +81,12 @@ public class MultiContactDRCRobotInitialSetup implements DRCRobotInitialSetup<Hu
    }
    
    @Override
-   public void getOffset(Vector3d offsetToPack)
+   public void getOffset(Vector3D offsetToPack)
    {
    }
 
    @Override
-   public void setOffset(Vector3d offset)
+   public void setOffset(Vector3D offset)
    {
    }
 

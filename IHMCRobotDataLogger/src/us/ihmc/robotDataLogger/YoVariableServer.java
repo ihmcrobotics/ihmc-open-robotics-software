@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
@@ -27,7 +28,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 
@@ -45,7 +45,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    // Data to send
    private List<RigidBody> mainBodies = new ArrayList<>();
    private YoVariableRegistry mainRegistry;
-   private YoGraphicsListRegistry mainDynamicGraphicObjectsListRegistry;
+   private YoGraphicsListRegistry mainYoGraphicsListRegistry;
    private final ArrayList<ImmutablePair<YoVariableRegistry, YoGraphicsListRegistry>> variableData = new ArrayList<>();
    
    // Variable data
@@ -133,9 +133,9 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
       int mainOffset = controlServer.getHandshakeBuilder().addRegistry(mainRegistry, variables);
-      if(mainDynamicGraphicObjectsListRegistry != null)
+      if(mainYoGraphicsListRegistry != null)
       {
-         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(mainDynamicGraphicObjectsListRegistry);
+         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(mainYoGraphicsListRegistry);
       }
       FullStateBuffer.Builder builder = new FullStateBuffer.Builder(mainOffset, variables, jointHolders);
       mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
@@ -169,7 +169,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    @Override
    public void tickAndUpdate(double timeToSetInSeconds)
    {
-      this.update(TimeTools.secondsToNanoSeconds(timeToSetInSeconds));   
+      this.update(Conversions.secondsToNanoseconds(timeToSetInSeconds));   
    }
 
    /**
@@ -279,7 +279,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
          mainBodies.add(fullRobotModel.getElevator());
       }
       mainRegistry = registry;
-      mainDynamicGraphicObjectsListRegistry = yoGraphicsListRegistry;
+      mainYoGraphicsListRegistry = yoGraphicsListRegistry;
       
    }
    

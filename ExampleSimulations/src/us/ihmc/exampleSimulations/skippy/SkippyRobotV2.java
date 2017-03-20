@@ -2,18 +2,15 @@ package us.ihmc.exampleSimulations.skippy;
 
 import java.util.EnumMap;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -37,15 +34,14 @@ public class SkippyRobotV2 extends Robot
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame footReferenceFrame;
-
-   private final DoubleYoVariable kCapture = new DoubleYoVariable("kCapture", yoVariableRegistry);
-   private final DoubleYoVariable totalMass = new DoubleYoVariable("totalMass", yoVariableRegistry);
+   private final ReferenceFrame leftShoulderFrame;
+   private final ReferenceFrame rightShoulderFrame;
 
    private final RigidBody elevator;
    private final SixDoFJoint rootJoint;
 
    private static final boolean SHOW_MASS_ELIPSOIDS = false;
-   private static final boolean SHOW_COORDINATE_SYSTEMS = false;
+   private static final boolean SHOW_COORDINATE_SYSTEMS = true;
 
    private static final AppearanceDefinition SHOULDER_COLOR = YoAppearance.Red();
    private static final AppearanceDefinition TORSO_COLOR = YoAppearance.Blue();
@@ -66,10 +62,14 @@ public class SkippyRobotV2 extends Robot
    public static final double SHOULDER_RADIUS = 0.05;
 
    private final GroundContactPoint footContactPoint;
+   private ExternalForcePoint rootJointForce;
+
 
    private enum SkippyJoint
    {
       HIP_PITCH, SHOULDER_ROLL;
+      public static SkippyJoint[] values = {HIP_PITCH, SHOULDER_ROLL};
+
    }
 
    private enum SkippyBody
@@ -92,13 +92,13 @@ public class SkippyRobotV2 extends Robot
       bodyMap.put(SkippyBody.ELEVATOR, elevator);
 
       rootJoint = new SixDoFJoint("rootJoint", elevator, elevatorFrame);
-      Matrix3d inertiaTorso = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis.Z);
-      RigidBody torso = ScrewTools.addRigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3d(0.0, 0.0, 0.0));
+      Matrix3D inertiaTorso = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(TORSO_MASS, TORSO_RADIUS, TORSO_LENGTH, Axis.Z);
+      RigidBody torso = ScrewTools.addRigidBody("torso", rootJoint, inertiaTorso, TORSO_MASS, new Vector3D(0.0, 0.0, 0.0));
       bodyMap.put(SkippyBody.TORSO, torso);
 
-      RevoluteJoint idHipJoint = ScrewTools.addRevoluteJoint("idHipJoint", torso, new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), new Vector3d(1.0, 0.0, 0.0));
-      Matrix3d inertiaLeg = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis.Z);
-      RigidBody leg = ScrewTools.addRigidBody("leg", idHipJoint, inertiaLeg, LEG_MASS, new Vector3d(0.0, 0.0, -LEG_LENGTH / 2.0));
+      RevoluteJoint idHipJoint = ScrewTools.addRevoluteJoint("idHipJoint", torso, new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), new Vector3D(1.0, 0.0, 0.0));
+      Matrix3D inertiaLeg = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(LEG_MASS, LEG_RADIUS, LEG_LENGTH, Axis.Z);
+      RigidBody leg = ScrewTools.addRigidBody("leg", idHipJoint, inertiaLeg, LEG_MASS, new Vector3D(0.0, 0.0, -LEG_LENGTH / 2.0));
       bodyMap.put(SkippyBody.LEG, leg);
       jointMap.put(SkippyJoint.HIP_PITCH, idHipJoint);
 
@@ -106,39 +106,48 @@ public class SkippyRobotV2 extends Robot
       legToFoot.setTranslation(0.0, 0.0, -LEG_LENGTH / 2.0);
       footReferenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("footFrame", leg.getBodyFixedFrame(), legToFoot);
 
-      RevoluteJoint idShoulderJoint = ScrewTools.addRevoluteJoint("idShoulderJoint", torso, new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0),
-                                                                  new Vector3d(0.0, 1.0, 0.0));
-      Matrix3d inertiaShoulder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis.X);
-      RigidBody shoulder = ScrewTools.addRigidBody("shoulder", idShoulderJoint, inertiaShoulder, SHOULDER_MASS, new Vector3d(0.0, 0.0, 0.0));
+      RevoluteJoint idShoulderJoint = ScrewTools.addRevoluteJoint("idShoulderJoint", torso, new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0),
+                                                                  new Vector3D(0.0, 1.0, 0.0));
+      Matrix3D inertiaShoulder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(SHOULDER_MASS, SHOULDER_RADIUS, SHOULDER_LENGTH, Axis.X);
+      RigidBody shoulder = ScrewTools.addRigidBody("shoulder", idShoulderJoint, inertiaShoulder, SHOULDER_MASS, new Vector3D(0.0, 0.0, 0.0));
       jointMap.put(SkippyJoint.SHOULDER_ROLL, idShoulderJoint);
       bodyMap.put(SkippyBody.SHOULDER, shoulder);
 
+      //One end effector at each shoulder extremity
+      RigidBodyTransform leftShoulder = new RigidBodyTransform();
+      leftShoulder.setTranslation(-SHOULDER_LENGTH / 2.0, 0.0, 0.0);
+      leftShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("leftShoulderFrame", shoulder.getBodyFixedFrame(), leftShoulder);
+
+      RigidBodyTransform rightShoulder = new RigidBodyTransform();
+      rightShoulder.setTranslation(SHOULDER_LENGTH / 2.0, 0.0, 0.0);
+      rightShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("rightShoulderFrame", shoulder.getBodyFixedFrame(), rightShoulder);
+
       // --- scs robot ---
-      scsRootJoint = new FloatingJoint("rootJoint", new Vector3d(), this);
+      scsRootJoint = new FloatingJoint("rootJoint", new Vector3D(), this);
       scsRootJoint.setLink(createTorsoSkippy());
       scsRootJoint.setPosition(0.0, 0.0, LEG_LENGTH + TORSO_LENGTH / 2.0);
+      rootJointForce = new ExternalForcePoint("rootJointForce", new Vector3D(0.0, 0.0, LEG_LENGTH + TORSO_LENGTH / 2.0), this);
+
       this.addRootJoint(scsRootJoint);
 
-      PinJoint shoulderJoint = new PinJoint("shoulderJoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0), this, Axis.Y);
+      PinJoint shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0), this, Axis.Y);
       shoulderJoint.setLink(createArm());
       scsRootJoint.addJoint(shoulderJoint);
       scsJointMap.put(SkippyJoint.SHOULDER_ROLL, shoulderJoint);
 
-      PinJoint hipJoint = new PinJoint("hip", new Vector3d(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
+      PinJoint hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
       hipJoint.setLink(createLeg());
       scsRootJoint.addJoint(hipJoint);
       scsJointMap.put(SkippyJoint.HIP_PITCH, hipJoint);
 
-      totalMass.set(computeCenterOfMass(new Point3d()));
-
       // add ground contact points
-      footContactPoint = new GroundContactPoint("gc_foot", new Vector3d(0.0, 0.0, -LEG_LENGTH), this);
+      footContactPoint = new GroundContactPoint("gc_foot", new Vector3D(0.0, 0.0, -LEG_LENGTH), this);
       hipJoint.addGroundContactPoint(footContactPoint);
-      GroundContactPoint hipContactPoint = new GroundContactPoint("gc_hip", new Vector3d(0.0, 0.0, 0.0), this);
+      GroundContactPoint hipContactPoint = new GroundContactPoint("gc_hip", new Vector3D(0.0, 0.0, 0.0), this);
       hipJoint.addGroundContactPoint(hipContactPoint);
-      GroundContactPoint arm1ContactPoint = new GroundContactPoint("gc_arm1", new Vector3d(SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
+      GroundContactPoint arm1ContactPoint = new GroundContactPoint("gc_arm1", new Vector3D(SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
       shoulderJoint.addGroundContactPoint(arm1ContactPoint);
-      GroundContactPoint arm2ContactPoint = new GroundContactPoint("gc_arm2", new Vector3d(-SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
+      GroundContactPoint arm2ContactPoint = new GroundContactPoint("gc_arm2", new Vector3D(-SHOULDER_LENGTH / 2.0, 0.0, 0.0), this);
       shoulderJoint.addGroundContactPoint(arm2ContactPoint);
 
       // add ground contact model
@@ -151,7 +160,7 @@ public class SkippyRobotV2 extends Robot
       this.setGroundContactModel(ground);
 
       // add an external force point to easily push the robot in simulation
-      ExternalForcePoint forcePoint = new ExternalForcePoint("forcePoint", new Vector3d(0.0, 0.0, TORSO_LENGTH / 2.0), this);
+      ExternalForcePoint forcePoint = new ExternalForcePoint("forcePoint", new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0), this);
       scsRootJoint.addExternalForcePoint(forcePoint);
    }
 
@@ -231,7 +240,7 @@ public class SkippyRobotV2 extends Robot
    public void updateInverseDynamicsStructureFromSimulation()
    {
       // update joint angles and velocities
-      for (SkippyJoint joint : SkippyJoint.values())
+      for (SkippyJoint joint : SkippyJoint.values)
       {
          OneDoFJoint idJoint = jointMap.get(joint);
          OneDegreeOfFreedomJoint scsJoint = scsJointMap.get(joint);
@@ -270,7 +279,7 @@ public class SkippyRobotV2 extends Robot
       }
    }
 
-   public Point3d getFootLocation()
+   public Point3D getFootLocation()
    {
       return footContactPoint.getPositionPoint();
    }
@@ -280,26 +289,7 @@ public class SkippyRobotV2 extends Robot
       return bodyMap.get(SkippyBody.LEG);
    }
 
-   private final Point3d tempCOMPosition = new Point3d();
-   private final Vector3d tempLinearMomentum = new Vector3d();
-   private final Vector3d tempAngularMomentum = new Vector3d();
-
-   public void computeComAndICP(FramePoint comToPack, FrameVector comVelocityToPack, FramePoint icpToPack, FrameVector angularMomentumToPack)
-   {
-      totalMass.set(computeCOMMomentum(tempCOMPosition, tempLinearMomentum, tempAngularMomentum));
-      angularMomentumToPack.set(tempAngularMomentum);
-
-      comToPack.set(tempCOMPosition);
-      tempLinearMomentum.scale(1.0 / totalMass.getDoubleValue());
-      comVelocityToPack.set(tempLinearMomentum);
-
-      double omega0 = Math.sqrt(comToPack.getZ() / Math.abs(getGravityZ()));
-
-      icpToPack.scaleAdd(omega0, comVelocityToPack, comToPack);
-      icpToPack.setZ(0.0);
-   }
-
-   public Point3d computeFootLocation()
+   public Point3D computeFootLocation()
    {
       return footContactPoint.getPositionPoint();
    }
@@ -309,17 +299,9 @@ public class SkippyRobotV2 extends Robot
       return footContactPoint.isInContact();
    }
 
-   public void computeFootContactForce(Vector3d tempForce)
+   public void computeFootContactForce(Vector3D actualReaction)
    {
-      footContactPoint.getForce(tempForce);
-   }
-
-   public void cmpFromIcpDynamics(FramePoint icp, FramePoint footLocation, FramePoint desiredCMPToPack)
-   {
-      FrameVector icpToFoot = new FrameVector();
-      icpToFoot.sub(icp, footLocation);
-      desiredCMPToPack.scaleAdd(kCapture.getDoubleValue(), icpToFoot, icp);
-      desiredCMPToPack.setZ(0.0);
+      footContactPoint.getForce(actualReaction);
    }
 
    public double getGravity()
@@ -327,19 +309,19 @@ public class SkippyRobotV2 extends Robot
       return this.getGravityZ();
    }
 
-   public double getMass()
-   {
-      return totalMass.getDoubleValue();
-   }
-
-   public ReferenceFrame getEndEffectorFrame()
+   public ReferenceFrame getFootFrame()
    {
       return footReferenceFrame;
    }
 
-   public RigidBody getEndEffectorBody()
+   public RigidBody getLegBody()
    {
       return bodyMap.get(SkippyBody.LEG);
+   }
+
+   public RigidBody getShoulderBody()
+   {
+      return bodyMap.get(SkippyBody.SHOULDER);
    }
 
    public RigidBody getElevator()
@@ -350,6 +332,30 @@ public class SkippyRobotV2 extends Robot
    public RigidBody getTorso()
    {
       return bodyMap.get(SkippyBody.TORSO);
+   }
+
+   public ReferenceFrame getLeftShoulderFrame()
+   {
+      return leftShoulderFrame;
+   }
+
+   public ReferenceFrame getRightShoulderFrame()
+   {
+      return rightShoulderFrame;
+   }
+
+   public void setQ_hip(double hipAngle)
+   {
+    scsJointMap.get(SkippyJoint.HIP_PITCH).setQ(hipAngle);
+   }
+   public void setRootJointForce(double x, double y, double z)
+   {
+      rootJointForce.setForce(x, y, z);
+   }
+
+   public void setQ_shoulder(double shoulderAngle)
+   {
+      scsJointMap.get(SkippyJoint.SHOULDER_ROLL).setQ(shoulderAngle);
    }
 
 }

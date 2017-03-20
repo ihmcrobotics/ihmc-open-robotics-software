@@ -1,9 +1,9 @@
 package us.ihmc.simulationconstructionset.graphics;
 
+import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -26,10 +26,10 @@ public class GraphicsDynamicGraphicsObject extends Graphics3DNode implements Gra
    @Override
    public void update()
    {
-      // IMPORTANT: can't do this here because it causes threading issues. Each thread is responsible for updating its own DynamicGraphicObjects!
+      // IMPORTANT: can't do this here because it causes threading issues. Each thread is responsible for updating its own YoGraphics!
 //      yoGraphic.update();
       
-      RigidBodyTransform j3dTransform = yoGraphic.getTransform();
+      AffineTransform j3dTransform = yoGraphic.getTransform();
       setTransform(j3dTransform);
    }
 

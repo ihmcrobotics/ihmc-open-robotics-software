@@ -1,9 +1,10 @@
 package us.ihmc.robotics.dataStructures;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.robotics.MathTools;
-
 import static org.ejml.ops.CommonOps.solve;
+
+import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.robotics.MathTools;
 
 /**
  * <p>Polynomial </p>
@@ -374,7 +375,7 @@ public class Polynomial
    
    public void setQuintic(double x0, double x1, double y0, double yd0, double ydd0, double y1, double yd1, double ydd1)
    {
-	   MathTools.checkIfEqual(coefficients.length, 6);
+	   MathTools.checkEquals(coefficients.length, 6);
 	   constraintMatrix = new DenseMatrix64F(new double[6][6]);
 	   constraintVector = new DenseMatrix64F(new double[6][1]);
 	   coefficientVector = new DenseMatrix64F(new double[6][1]);
@@ -393,7 +394,7 @@ public class Polynomial
    
    public void setCubic(double x0, double x1, double y0, double yd0, double y1, double yd1)
    {
-	   MathTools.checkIfEqual(coefficients.length, 4);
+	   MathTools.checkEquals(coefficients.length, 4);
 	   constraintMatrix = new DenseMatrix64F(new double[4][4]);
 	   constraintVector = new DenseMatrix64F(new double[4][1]);
 	   coefficientVector = new DenseMatrix64F(new double[4][1]);

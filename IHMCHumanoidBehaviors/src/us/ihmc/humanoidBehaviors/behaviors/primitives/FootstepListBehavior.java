@@ -2,27 +2,26 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import java.util.ArrayList;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
+import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class FootstepListBehavior extends AbstractBehavior
 {
@@ -74,8 +73,8 @@ public class FootstepListBehavior extends AbstractBehavior
       for (int i = 0; i < footsteps.size(); i++)
       {
          Footstep footstep = footsteps.get(i);
-         Point3d location = new Point3d(footstep.getX(), footstep.getY(), footstep.getZ());
-         Quat4d orientation = new Quat4d();
+         Point3D location = new Point3D(footstep.getX(), footstep.getY(), footstep.getZ());
+         Quaternion orientation = new Quaternion();
          footstep.getOrientation(orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
@@ -223,6 +222,7 @@ public class FootstepListBehavior extends AbstractBehavior
       sendPacketToController(new PauseWalkingMessage(false));
       isPaused.set(false);
       isStopped.set(false);
+      isRobotDoneWalking.set(false);
       if (DEBUG)
          PrintTools.debug(this, "Resuming Behavior");
    }
@@ -230,7 +230,8 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      boolean ret = isRobotDoneWalking.getBooleanValue() && hasLastStepBeenReached.getBooleanValue() && !isPaused.getBooleanValue();
+//      System.out.println("isDone "+isRobotDoneWalking.getBooleanValue() + " " +isPaused.getBooleanValue());
+      boolean ret = isRobotDoneWalking.getBooleanValue() && !isPaused.getBooleanValue();
       if (!isDone.getBooleanValue() && ret)
       {
          if (DEBUG)
@@ -240,6 +241,7 @@ public class FootstepListBehavior extends AbstractBehavior
       return ret;
    }
 
+   
 
    public boolean hasInputBeenSet()
    {
@@ -255,9 +257,9 @@ public class FootstepListBehavior extends AbstractBehavior
    }
 
    private final ArrayList<FootstepDataMessage> footstepDataList = new ArrayList<FootstepDataMessage>();
-   private final Vector3d firstSingleSupportFootTranslationFromWorld = new Vector3d();
-   private final Point3d previousFootStepLocation = new Point3d();
-   private final Point3d nextFootStepLocation = new Point3d();
+   private final Vector3D firstSingleSupportFootTranslationFromWorld = new Vector3D();
+   private final Point3D previousFootStepLocation = new Point3D();
+   private final Point3D nextFootStepLocation = new Point3D();
 
    public ArrayList<Double> getFootstepLengths(FootstepDataListMessage footStepList, FullHumanoidRobotModel fullRobotModel,
          WalkingControllerParameters walkingControllerParameters)

@@ -1,9 +1,8 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
-import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class RampsGroundProfile extends GroundProfileFromHeightMap
 {
@@ -11,7 +10,7 @@ public class RampsGroundProfile extends GroundProfileFromHeightMap
    private final double rampLength;
    private final double flatgroundLengthAtZero;
    
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    
    public RampsGroundProfile(double rampSlope, double rampLength, double flatgroundLengthAtZero)
    {
@@ -19,11 +18,11 @@ public class RampsGroundProfile extends GroundProfileFromHeightMap
       this.rampLength = rampLength;
       this.flatgroundLengthAtZero = flatgroundLengthAtZero;
       
-      boundingBox = new BoundingBox3d(new Point3d(-20.0, -20.0, Double.NEGATIVE_INFINITY), new Point3d(20.0, 20.0, Double.POSITIVE_INFINITY));
+      boundingBox = new BoundingBox3D(new Point3D(-20.0, -20.0, Double.NEGATIVE_INFINITY), new Point3D(20.0, 20.0, Double.POSITIVE_INFINITY));
    }
    
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       if (Math.abs(x) < flatgroundLengthAtZero / 2.0)
       {
@@ -76,7 +75,7 @@ public class RampsGroundProfile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

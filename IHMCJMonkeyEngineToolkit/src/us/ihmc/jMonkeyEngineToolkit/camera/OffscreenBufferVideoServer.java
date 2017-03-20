@@ -2,15 +2,14 @@ package us.ihmc.jMonkeyEngineToolkit.camera;
 
 import java.awt.image.BufferedImage;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
 import boofcv.struct.calib.IntrinsicParameters;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.jMonkeyEngineToolkit.CameraAdapter;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class OffscreenBufferVideoServer
 {
@@ -49,7 +48,7 @@ public class OffscreenBufferVideoServer
    private class CameraUpdater implements CameraStreamer
    {
 
-      public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3d cameraPosition, Quat4d cameraOrientation, double fov)
+      public void updateImage(BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition, QuaternionReadOnly cameraOrientation, double fov)
       {
          double f = bufferedImage.getWidth() / 2 / Math.tan(fov / 2);
          IntrinsicParameters intrinsicParameters = new IntrinsicParameters(f, f, 0, (bufferedImage.getWidth() - 1) / 2f, (bufferedImage.getHeight() - 1) / 2f, bufferedImage.getWidth(), bufferedImage.getHeight());
@@ -57,12 +56,12 @@ public class OffscreenBufferVideoServer
          videoDataServer.updateImage(RobotSide.LEFT, bufferedImage, timeStamp, cameraPosition, cameraOrientation, intrinsicParameters);
       }
 
-      public Point3d getCameraPosition()
+      public Point3DReadOnly getCameraPosition()
       {
          return camera.getCameraPosition();
       }
 
-      public Quat4d getCameraOrientation()
+      public QuaternionReadOnly getCameraOrientation()
       {
          return camera.getCameraRotation();
       }

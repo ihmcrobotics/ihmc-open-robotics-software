@@ -1,10 +1,11 @@
 package us.ihmc.robotics.geometry;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 
 public class LineSegment1d
@@ -70,12 +71,12 @@ public class LineSegment1d
 
    public boolean isBetweenEndpointsInclusive(double point)
    {
-      return MathTools.isInsideBoundsInclusive(point, getMinPoint(), getMaxPoint());
+      return MathTools.intervalContains(point, getMinPoint(), getMaxPoint());
    }
 
    public boolean isBetweenEndpointsExclusive(double point)
    {
-      return MathTools.isInsideBoundsExclusive(point, getMinPoint(), getMaxPoint());
+      return MathTools.intervalContains(point, getMinPoint(), getMaxPoint(), false, false);
    }
 
    public boolean isBetweenEndpoints(double point, double epsilon)
@@ -223,9 +224,9 @@ public class LineSegment1d
     * @param line3d the 3D line used as reference to compute the 3D line segment.
     * @return the 3D equivalent of this line segment.
     */
-   public LineSegment3d toLineSegment3d(Line3d line3d)
+   public LineSegment3D toLineSegment3d(Line3D line3d)
    {
-      return toLineSegment3d(line3d.getPoint(), line3d.getNormalizedVector());
+      return toLineSegment3d(line3d.getPoint(), line3d.getDirection());
    }
 
    /**
@@ -236,11 +237,11 @@ public class LineSegment1d
     * @param direction3d direction toward greater values of {@code endPoint1d}.
     * @return the 3D equivalent of this line segment.
     */
-   public LineSegment3d toLineSegment3d(Point3d zero3d, Vector3d direction3d)
+   public LineSegment3D toLineSegment3d(Point3DReadOnly zero3d, Vector3DReadOnly direction3d)
    {
-      LineSegment3d lineSegment3d = new LineSegment3d();
-      lineSegment3d.getPointA().scaleAdd(endpoint1, direction3d, zero3d);
-      lineSegment3d.getPointB().scaleAdd(endpoint2, direction3d, zero3d);
+      LineSegment3D lineSegment3d = new LineSegment3D();
+      lineSegment3d.getFirstEndpoint().scaleAdd(endpoint1, direction3d, zero3d);
+      lineSegment3d.getSecondEndpoint().scaleAdd(endpoint2, direction3d, zero3d);
       return lineSegment3d;
    }
 
@@ -252,12 +253,18 @@ public class LineSegment1d
     * @param direction2d direction toward greater values of {@code endPoint1d}.
     * @return the 2D equivalent of this line segment.
     */
-   public LineSegment2d toLineSegment2d(Point2d zero2d, Vector2d direction2d)
+   public LineSegment2d toLineSegment2d(Point2DReadOnly zero2d, Vector2DReadOnly direction2d)
    {
       LineSegment2d lineSegment2d = new LineSegment2d();
       lineSegment2d.getFirstEndpoint().scaleAdd(endpoint1, direction2d, zero2d);
       lineSegment2d.getSecondEndpoint().scaleAdd(endpoint2, direction2d, zero2d);
       return lineSegment2d;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "(" + endpoint1 + ")-(" + endpoint2 + ")";
    }
 
    private void updateDirection()

@@ -1,13 +1,13 @@
 package us.ihmc.simulationconstructionset.util.inputdevices;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.random.RandomTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class SliderBoardUtilsTest
 {
@@ -104,9 +104,9 @@ public class SliderBoardUtilsTest
       Random random = new Random(1776L);
       
       int sliderBoardMax = random.nextInt(1000); 
-      double max = RandomTools.generateRandomDouble(random, 0.5, 10.0);
-      double min = RandomTools.generateRandomDouble(random, -10.0, 0.4);
-      double exponent = RandomTools.generateRandomDouble(random, 0.1, 10.0);
+      double max = RandomNumbers.nextDouble(random, 0.5, 10.0);
+      double min = RandomNumbers.nextDouble(random, -10.0, 0.4);
+      double exponent = RandomNumbers.nextDouble(random, 0.1, 10.0);
       
       
       for (int sliderValue=0; sliderValue<sliderBoardMax; sliderValue++)
@@ -124,10 +124,10 @@ public class SliderBoardUtilsTest
       Random random = new Random(1776L);
       
       int sliderBoardMax = random.nextInt(1000); 
-      double max = RandomTools.generateRandomDouble(random, 0.5, 10.0);
-      double min = RandomTools.generateRandomDouble(random, -10.0, 0.4);
-      double exponent = RandomTools.generateRandomDouble(random, 0.1, 10.0);
-      double hires = RandomTools.generateRandomDouble(random, min, max);
+      double max = RandomNumbers.nextDouble(random, 0.5, 10.0);
+      double min = RandomNumbers.nextDouble(random, -10.0, 0.4);
+      double exponent = RandomNumbers.nextDouble(random, 0.1, 10.0);
+      double hires = RandomNumbers.nextDouble(random, min, max);
       
       for (int sliderValue=0; sliderValue<sliderBoardMax; sliderValue++)
       {

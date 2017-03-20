@@ -2,6 +2,7 @@ package us.ihmc.steppr.hardware.controllers;
 
 import java.util.EnumMap;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDController;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.steppr.hardware.StepprJoint;
 import us.ihmc.tools.maps.EnumDoubleMap;
 
@@ -91,7 +91,7 @@ public class StepprAirwalk implements StepprController
    @Override
    public void doControl(long timestamp)
    {
-      double time = TimeTools.nanoSecondstoSeconds(timestamp);
+      double time = Conversions.nanosecondsToSeconds(timestamp);
       switch (airwalkState.getEnumValue())
       {
       case WAIT:
@@ -114,7 +114,7 @@ public class StepprAirwalk implements StepprController
          break;
 
       case GOTO_ZERO:
-         double timeInTrajectory = MathTools.clipToMinMax(time - initialTime.getDoubleValue(), 0, trajectoryTime);
+         double timeInTrajectory = MathTools.clamp(time - initialTime.getDoubleValue(), 0, trajectoryTime);
          trajectory.compute(timeInTrajectory);
          double positionScale = trajectory.getPosition();
 

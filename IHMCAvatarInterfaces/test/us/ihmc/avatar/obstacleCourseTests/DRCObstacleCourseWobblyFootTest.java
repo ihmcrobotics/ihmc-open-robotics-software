@@ -1,9 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
+import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,9 +10,13 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
@@ -24,8 +25,6 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestInterface
@@ -84,9 +83,9 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
-      Vector3d plusMinusVector = new Vector3d(0.2, 0.2, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      Point3D center = new Point3D(-8.956281888358388E-4, -3.722237566790175E-7, 0.8882009563211146);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -121,9 +120,9 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
       assertTrue(success);
 
-      Point3d center = new Point3d(3.281440097950577, 0.08837997229569997, 0.7855496116044516);
-      Vector3d plusMinusVector = new Vector3d(0.3, 0.3, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      Point3D center = new Point3D(3.281440097950577, 0.08837997229569997, 0.7855496116044516);
+      Vector3D plusMinusVector = new Vector3D(0.3, 0.3, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -175,9 +174,9 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
       assertTrue(success);
 
-      Point3d center = new Point3d(-0.09807959403314585, 0.002501752329158081, 0.7867972043876718);
-      Vector3d plusMinusVector = new Vector3d(0.3, 0.3, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      Point3D center = new Point3D(-0.09807959403314585, 0.002501752329158081, 0.7867972043876718);
+      Vector3D plusMinusVector = new Vector3D(0.3, 0.3, 0.5);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -186,8 +185,8 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
    private void setupCameraForWalkingUpToRamp()
    {
-      Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
-      Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
+      Point3D cameraFix = new Point3D(1.8375, -0.16, 0.89);
+      Point3D cameraPosition = new Point3D(1.10, 8.30, 1.37);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
@@ -195,8 +194,8 @@ public abstract class DRCObstacleCourseWobblyFootTest implements MultiRobotTestI
 
    private void setupCameraForTurningInPlaceAndPassingPI()
    {
-      Point3d cameraFix = new Point3d(0.036, 0.0, 0.89);
-      Point3d cameraPosition = new Point3d(-7, -0.3575, 1.276);
+      Point3D cameraFix = new Point3D(0.036, 0.0, 0.89);
+      Point3D cameraPosition = new Point3D(-7, -0.3575, 1.276);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }

@@ -3,8 +3,10 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 public class PlanarRegionsList
 {
@@ -90,15 +92,15 @@ public class PlanarRegionsList
     */
    private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2d lineSegmentInWorld)
    {
-	   BoundingBox3d boundingBox = candidateRegion.getBoundingBox3dInWorld();
+	   BoundingBox3D boundingBox = candidateRegion.getBoundingBox3dInWorld();
 
-       double xMin = boundingBox.getXMin();
-       double yMin = boundingBox.getYMin();
-       double xMax = boundingBox.getXMax();
-       double yMax = boundingBox.getYMax();
+       double xMin = boundingBox.getMinX();
+       double yMin = boundingBox.getMinY();
+       double xMax = boundingBox.getMaxX();
+       double yMax = boundingBox.getMaxY();
 
-       Point2d firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
-       Point2d secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
+       Point2D firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
+       Point2D secondEndpoint = lineSegmentInWorld.getSecondEndpoint();
 
        if ((firstEndpoint.getX() < xMin) && (secondEndpoint.getX() < xMin)) return true;
        if ((firstEndpoint.getX() > xMax) && (secondEndpoint.getX() > xMax)) return true;
@@ -114,7 +116,7 @@ public class PlanarRegionsList
     * @param maximumOrthogonalDistance tolerance expressed as maximum orthogonal distance from the region.
     * @return the list of planar regions containing the query. Returns null when no region contains the query.
     */
-   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3d point, double maximumOrthogonalDistance)
+   public List<PlanarRegion> findPlanarRegionsContainingPoint(Point3D point, double maximumOrthogonalDistance)
    {
       List<PlanarRegion> containers = null;
 
@@ -138,7 +140,7 @@ public class PlanarRegionsList
     * @param point the query coordinates.
     * @return the list of planar regions containing the query. Returns null when no region contains the query.
     */
-   public List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(Point2d point)
+   public List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(Point2D point)
    {
       return findPlanarRegionsContainingPointByProjectionOntoXYPlane(point.getX(), point.getY());
    }
@@ -227,5 +229,17 @@ public class PlanarRegionsList
          planarRegionsCopy.add(regions.get(i).copy());
 
       return new PlanarRegionsList(planarRegionsCopy);
+   }
+   
+   /**
+    * Transforms the planar regions list
+    * @param rigidBodyTransform transform from current frame to desired frame
+    */
+   public void transform(RigidBodyTransform rigidBodyTransform)
+   {
+      for(int i = 0; i < regions.size(); i++)
+      {
+         regions.get(i).transform(rigidBodyTransform);
+      }
    }
 }

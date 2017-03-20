@@ -1,35 +1,34 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
-
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandstepPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.BigStepUpWithHandPlatformEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTestInterface
@@ -91,9 +90,9 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
       for (Handstep handstep : handsteps)
       {
-    	  Point3d location = new Point3d();
-    	  Quat4d orientation = new Quat4d();
-    	  Vector3d surfaceNormal = new Vector3d();
+    	  Point3D location = new Point3D();
+    	  Quaternion orientation = new Quaternion();
+    	  Vector3D surfaceNormal = new Vector3D();
     	  handstep.getPose(location, orientation);
           handstep.getSurfaceNormal(surfaceNormal);
     	  
@@ -133,8 +132,8 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
 
    private void setupCameraForBigStepUpWithHandPlatform()
    {
-      Point3d cameraFix = new Point3d(1.8375, -0.16, 0.89);
-      Point3d cameraPosition = new Point3d(1.10, 8.30, 1.37);
+      Point3D cameraFix = new Point3D(1.8375, -0.16, 0.89);
+      Point3D cameraPosition = new Point3D(1.10, 8.30, 1.37);
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
@@ -146,8 +145,8 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       double height = 0.9;
       
       RobotSide robotSide = RobotSide.LEFT;
-      Tuple3d position = new Point3d(0.5, leftHandstepY, height);
-      Vector3d surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      Tuple3DBasics position = new Point3D(0.5, leftHandstepY, height);
+      Vector3D surfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       double rotationAngleAboutNormal = -0.3;
       double swingTrajectoryTime = 1.0;
 
@@ -155,8 +154,8 @@ public abstract class DRCBigStepUpWithHandPlatformTest implements MultiRobotTest
       ret.add(handstep);
       
       robotSide = RobotSide.RIGHT;
-      position = new Point3d(0.5, rightHandstepY, height);
-      surfaceNormal = new Vector3d(0.0, 0.0, 1.0);
+      position = new Point3D(0.5, rightHandstepY, height);
+      surfaceNormal = new Vector3D(0.0, 0.0, 1.0);
       rotationAngleAboutNormal = -rotationAngleAboutNormal;
 
       handstep = scriptedHandstepGenerator.createHandstep(robotSide, position, surfaceNormal, rotationAngleAboutNormal, swingTrajectoryTime);

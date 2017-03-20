@@ -31,20 +31,11 @@ package us.ihmc.jMonkeyEngineToolkit.jme;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import static org.lwjgl.opengl.EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_BYTE;
-import static org.lwjgl.opengl.GL11.glReadBuffer;
-import static org.lwjgl.opengl.GL11.glReadPixels;
-import static org.lwjgl.opengl.GL12.GL_BGRA;
-import static org.lwjgl.opengl.GL15.GL_READ_ONLY;
-import static org.lwjgl.opengl.GL15.GL_STATIC_READ;
-import static org.lwjgl.opengl.GL15.glBindBuffer;
-import static org.lwjgl.opengl.GL15.glBufferData;
-import static org.lwjgl.opengl.GL15.glGenBuffers;
-import static org.lwjgl.opengl.GL15.glMapBuffer;
-import static org.lwjgl.opengl.GL15.glUnmapBuffer;
-import static org.lwjgl.opengl.GL21.GL_PIXEL_PACK_BUFFER;
+import static org.lwjgl.opengl.EXTFramebufferObject.*;
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL12.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL21.*;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -58,12 +49,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-
-import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
-import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
-import us.ihmc.tools.thread.ThreadTools;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
@@ -77,6 +62,14 @@ import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.texture.FrameBuffer;
 import com.jme3.texture.FrameBuffer.RenderBuffer;
 import com.jme3.util.BufferUtils;
+
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.jMonkeyEngineToolkit.camera.CameraStreamer;
+import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
+import us.ihmc.tools.thread.ThreadTools;
 
 /**
  * Transfer data from GPU to CPU quickly by using two Pixel Buffer Objects (PBO's).
@@ -274,8 +267,8 @@ public class JMEFastCaptureDevice extends AbstractAppState implements SceneProce
    private class GraphicsUpdater implements Runnable
    {
       public long timeStamp = 0;
-      public Point3d position = new Point3d();
-      public Quat4d orientation = new Quat4d();
+      public Point3DReadOnly position = new Point3D();
+      public QuaternionReadOnly orientation = new Quaternion();
       public double fov = Math.PI / 2.0;
 
       public void run()

@@ -4,13 +4,12 @@ package us.ihmc.exampleSimulations.exampleContact;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -69,10 +68,10 @@ public class ExampleContactSimulationWithMultipleObjects
 
       for (int i = 0; i < numberOfToroids; i++)
       {
-         Vector3d toroidPosition = new Vector3d(randomDouble(random, 0.0, 5.0), randomDouble(random, 0.0, 5.0), randomDouble(random, 0.2, 0.6));
+         Vector3D toroidPosition = new Vector3D(randomDouble(random, 0.0, 5.0), randomDouble(random, 0.0, 5.0), randomDouble(random, 0.2, 0.6));
          RigidBodyTransform transform3d = new RigidBodyTransform();
          
-         AxisAngle4d randomRotation = RandomTools.generateRandomRotation(random);
+         AxisAngle randomRotation = RandomGeometry.nextAxisAngle(random);
          transform3d.setTranslation(toroidPosition);
          transform3d.setRotation(randomRotation);
 
@@ -93,10 +92,10 @@ public class ExampleContactSimulationWithMultipleObjects
       
       for (int i = 0; i < numberOfCylinders; i++)
       {
-         Vector3d cylinderPosition = new Vector3d(randomDouble(random, 0.0, 5.0), randomDouble(random, 0.0, 5.0), randomDouble(random, -1.2, 0));
+         Vector3D cylinderPosition = new Vector3D(randomDouble(random, 0.0, 5.0), randomDouble(random, 0.0, 5.0), randomDouble(random, -1.2, 0));
          RigidBodyTransform transform3d = new RigidBodyTransform();
          
-         AxisAngle4d randomRotation = RandomTools.generateRandomRotation(random);
+         AxisAngle randomRotation = RandomGeometry.nextAxisAngle(random);
          transform3d.setTranslation(cylinderPosition);
          transform3d.setRotation(randomRotation);
 

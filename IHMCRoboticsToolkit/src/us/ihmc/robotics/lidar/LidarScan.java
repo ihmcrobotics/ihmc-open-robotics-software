@@ -3,17 +3,16 @@ package us.ihmc.robotics.lidar;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.esotericsoftware.kryo.serializers.FieldSerializer.Optional;
 
-import us.ihmc.robotics.geometry.LineSegment3d;
+import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.Ray3d;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 
 public class LidarScan
@@ -58,9 +57,9 @@ public class LidarScan
       this.sensorId = 0;
    }
 
-   public ArrayList<Point3d> getAllPoints()
+   public ArrayList<Point3D> getAllPoints()
    {
-      ArrayList<Point3d> points = new ArrayList<Point3d>();
+      ArrayList<Point3D> points = new ArrayList<Point3D>();
       for (int i = 0; i < ranges.length; i++)
       {
          points.add(getPoint(i, ranges[i]));
@@ -69,9 +68,9 @@ public class LidarScan
       return points;
    }
 
-   public ArrayList<Point3f> getAllPoints3f()
+   public ArrayList<Point3D32> getAllPoints3f()
    {
-      ArrayList<Point3f> points = new ArrayList<Point3f>();
+      ArrayList<Point3D32> points = new ArrayList<Point3D32>();
       for (int i = 0; i < ranges.length; i++)
       {
          points.add(getPoint3f(i, ranges[i]));
@@ -85,17 +84,17 @@ public class LidarScan
       return ranges.length;
    }
 
-   public Point3d getPoint(int index)
+   public Point3D getPoint(int index)
    {
       return getPoint(index, ranges[index]);
    }
 
-   public Point3f getPoint3f(int index)
+   public Point3D32 getPoint3f(int index)
    {
       return getPoint3f(index, ranges[index]);
    }
 
-   public LineSegment3d getLineSegment(int index)
+   public LineSegment3D getLineSegment(int index)
    {
       return getLineSegment(index, ranges[index]);
    }
@@ -171,16 +170,16 @@ public class LidarScan
 
    public Ray3d getRay(int index)
    {
-      LineSegment3d unitSegment = getLineSegment(index, 1.0f);
+      LineSegment3D unitSegment = getLineSegment(index, 1.0f);
 
-      return new Ray3d(unitSegment.getPointA(), unitSegment.getDirection());
+      return new Ray3d(unitSegment.getFirstEndpoint(), unitSegment.getDirection(true));
    }
 
 
    /* PRIVATE/PROTECTED FUNCTIONS */
-   protected Point3d getPoint(int index, float range)
+   protected Point3D getPoint(int index, float range)
    {
-      Point3d p = new Point3d(range, 0.0, 0.0);
+      Point3D p = new Point3D(range, 0.0, 0.0);
       RigidBodyTransform transform = new RigidBodyTransform();
       getInterpolatedTransform(index, transform);
       transform.multiply(getSweepTransform(index));
@@ -189,9 +188,9 @@ public class LidarScan
       return p;
    }
 
-   protected Point3f getPoint3f(int index, float range)
+   protected Point3D32 getPoint3f(int index, float range)
    {
-      Point3f p = new Point3f(range, 0.0f, 0.0f);
+      Point3D32 p = new Point3D32(range, 0.0f, 0.0f);
       RigidBodyTransform transform = new RigidBodyTransform();
       getInterpolatedTransform(index, transform);
       transform.multiply(getSweepTransform(index));
@@ -200,14 +199,14 @@ public class LidarScan
       return p;
    }
 
-   protected LineSegment3d getLineSegment(int index, float range)
+   protected LineSegment3D getLineSegment(int index, float range)
    {
-      Vector3d origin = new Vector3d();
+      Vector3D origin = new Vector3D();
       RigidBodyTransform transform = new RigidBodyTransform();
       getInterpolatedTransform(index, transform);
       transform.getTranslation(origin);
 
-      return new LineSegment3d(new Point3d(origin), getPoint(index, range));
+      return new LineSegment3D(new Point3D(origin), getPoint(index, range));
    }
 
    public void getInterpolatedTransform(int index, RigidBodyTransform target)

@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -13,9 +15,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableType;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
-import us.ihmc.tools.time.Timer;
 
 
 public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
@@ -26,7 +26,7 @@ public abstract class DataStreamYoWhiteBoard extends YoWhiteBoard
    private static final double CONNECTION_TIME_LIMIT = 5.0;
    
    private final Object connectionConch = new Object();
-   private final Timer connectionTimeoutTimer = new Timer();
+   private final Stopwatch connectionTimeoutTimer = new Stopwatch();
 
    private DataInputStream dataInputStream = null;
    private DataOutputStream dataOutputStream = null;

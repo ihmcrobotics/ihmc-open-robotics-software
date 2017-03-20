@@ -1,9 +1,5 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.terrain;
 
-import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.Vector2f;
@@ -12,6 +8,10 @@ import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.graphicsDescription.HeightMap;
+import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEGeometryUtils;
 
 public class JMEHeightMapTerrain
 {
@@ -49,13 +49,13 @@ public class JMEHeightMapTerrain
    public JMEHeightMapTerrain(HeightMap heightMap, AssetManager assetManager, Material material)
    {
       this.heightMap = heightMap;
-      BoundingBox3d boundingBox = heightMap.getBoundingBox();
+      BoundingBox3D boundingBox = heightMap.getBoundingBox();
       
-      xMin = (float) boundingBox.getXMin();
-      xMax = (float) boundingBox.getXMax();
+      xMin = (float) boundingBox.getMinX();
+      xMax = (float) boundingBox.getMaxX();
                             
-      yMin = (float) boundingBox.getYMin();
-      yMax = (float) boundingBox.getYMax();
+      yMin = (float) boundingBox.getMinY();
+      yMax = (float) boundingBox.getMaxY();
       
       width = xMax - xMin;
       length = yMax - yMin;

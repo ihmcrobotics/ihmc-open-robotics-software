@@ -5,17 +5,17 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.github.quickhull3d.Point3d;
-
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.avatar.DRCSimulationOutputWriter;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitch;
+import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -32,7 +32,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
@@ -70,8 +69,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private AutomatedDiagnosticAnalysisController automatedDiagnosticAnalysisController;
    private DRCOutputWriter outputWriter;
 
-   private final Point3d scsCameraPosition = new Point3d(0.0, -8.0, 1.8);
-   private final Point3d scsCameraFix = new Point3d(0.0, 0.0, 1.35);
+   private final Point3D scsCameraPosition = new Point3D(0.0, -8.0, 1.8);
+   private final Point3D scsCameraFix = new Point3D(0.0, 0.0, 1.35);
 
    private AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration;
    private HumanoidFloatingRootJointRobot simulatedRobot;
@@ -88,8 +87,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       SimulationConstructionSetParameters simulationParameters = new SimulationConstructionSetParameters(true, 16000);
       SimulationConstructionSet scs = new SimulationConstructionSet(simulatedRobot, simulationParameters);
       scs.setDT(robotModel.getSimulateDT(), 10);
-      scs.setCameraPosition(scsCameraPosition.x, scsCameraPosition.y, scsCameraPosition.z);
-      scs.setCameraFix(scsCameraFix.x, scsCameraFix.y, scsCameraFix.z);
+      scs.setCameraPosition(scsCameraPosition.getX(), scsCameraPosition.getY(), scsCameraPosition.getZ());
+      scs.setCameraFix(scsCameraFix.getX(), scsCameraFix.getY(), scsCameraFix.getZ());
       scs.startOnAThread();
    }
 
@@ -268,7 +267,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       outputWriter.writeAfterController(0);
       long endTime = System.nanoTime();
-      controllerTime.set(TimeTools.nanoSecondstoSeconds(endTime - startTime));
+      controllerTime.set(Conversions.nanosecondsToSeconds(endTime - startTime));
       averageControllerTime.update();
    }
 

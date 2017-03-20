@@ -4,20 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.SdfLoader.JaxbSDFLoader;
-import us.ihmc.SdfLoader.SDFConversionsHelper;
-import us.ihmc.SdfLoader.SDFJointHolder;
-import us.ihmc.SdfLoader.SDFLinkHolder;
-import us.ihmc.SdfLoader.xmlDescription.Collision;
-import us.ihmc.SdfLoader.xmlDescription.SDFGeometry;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionBox;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionCylinder;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionSphere;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
+import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
+import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 
 public class SDFCollisionBoxProvider implements CollisionBoxProvider
 {
@@ -51,7 +51,7 @@ public class SDFCollisionBoxProvider implements CollisionBoxProvider
       for (Collision collision : holder.getCollisions())
       {
          SDFGeometry collisionGeometry = collision.getGeometry();
-         RigidBodyTransform visualPose = SDFConversionsHelper.poseToTransform(collision.getPose());
+         RigidBodyTransform visualPose = ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose());
 
          CollisionShape mesh;
          if (collisionGeometry.getBox() != null)

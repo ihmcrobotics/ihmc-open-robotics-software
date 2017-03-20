@@ -1,21 +1,20 @@
 package us.ihmc.robotics.math.interpolators;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.tools.testing.JUnitTools;
 
 public class OrientationInterpolationCalculatorTest
 {
@@ -50,24 +49,24 @@ public class OrientationInterpolationCalculatorTest
          FrameOrientation interpolatedOrientationDt = new FrameOrientation(startOrientation.getReferenceFrame());
          interpolatedOrientationDt.interpolate(startOrientation, endOrientation, alphaNew);
 
-         Matrix3d interpolatedOrientationMatrixDot = new Matrix3d();
+         Matrix3D interpolatedOrientationMatrixDot = new Matrix3D();
          RigidBodyTransform transformationAtDt = new RigidBodyTransform();
          interpolatedOrientationDt.getTransform3D(transformationAtDt);
          transformationAtDt.getRotation(interpolatedOrientationMatrixDot);
-         Matrix3d interpolatedOrientation0Matrix = new Matrix3d();
+         RotationMatrix interpolatedOrientation0Matrix = new RotationMatrix();
          RigidBodyTransform transformationAt0 = new RigidBodyTransform();
          interpolatedOrientation0.getTransform3D(transformationAt0);
          transformationAt0.getRotation(interpolatedOrientation0Matrix);
          interpolatedOrientationMatrixDot.sub(interpolatedOrientation0Matrix);
-         interpolatedOrientationMatrixDot.mul(1.0 / dt);
+         interpolatedOrientationMatrixDot.scale(1.0 / dt);
 
-         Matrix3d orientationTranspose = new Matrix3d(interpolatedOrientation0Matrix);
+         RotationMatrix orientationTranspose = new RotationMatrix(interpolatedOrientation0Matrix);
          orientationTranspose.transpose();
-         Matrix3d omegaTilde = new Matrix3d(interpolatedOrientationMatrixDot);
-         omegaTilde.mul(orientationTranspose);
-         JUnitTools.assertSkewSymmetric(omegaTilde, 1e-3);
+         Matrix3D omegaTilde = new Matrix3D(interpolatedOrientationMatrixDot);
+         omegaTilde.multiply(orientationTranspose);
+         assertTrue(omegaTilde.isMatrixSkewSymmetric(1.0e-3));
 
-         Vector3d angularVelocity = new Vector3d(-omegaTilde.getM12(), omegaTilde.getM02(), -omegaTilde.getM01()); // in world frame
+         Vector3D angularVelocity = new Vector3D(-omegaTilde.getM12(), omegaTilde.getM02(), -omegaTilde.getM01()); // in world frame
 
          // compute angular velocity using OrientationInterpolationAngularVelocityCalculator
          OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();

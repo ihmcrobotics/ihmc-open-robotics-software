@@ -1,26 +1,25 @@
 package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
-import javax.vecmath.Matrix3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.sensorProcessing.stateEstimation.evaluation.RigidBodyToIndexMap;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointVelocityDataObject;
 
 public class PointVelocityMeasurementModelElement extends AbstractMeasurementModelElement
 {
@@ -40,9 +39,9 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
    private final DenseMatrix64F residual = new DenseMatrix64F(SIZE, 1);
 
-   private final Matrix3d rotationFromEstimationToWorld = new Matrix3d();
+   private final RotationMatrix rotationFromEstimationToWorld = new RotationMatrix();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final Matrix3d tempMatrix = new Matrix3d();
+   private final Matrix3D tempMatrix = new Matrix3D();
    private final FramePoint tempFramePoint = new FramePoint(ReferenceFrame.getWorldFrame());
    private final Twist tempTwist = new Twist();
    private final FrameVector tempFrameVector = new FrameVector(ReferenceFrame.getWorldFrame());
@@ -109,7 +108,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
    }
 
    private final FramePoint tempCenterOfMassPosition = new FramePoint();
-   private void computeAngularVelocityStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
+   private void computeAngularVelocityStateOutputBlock(RotationMatrix rotationFromPelvisToWorld)
    {
       tempCenterOfMassPosition.setIncludingFrame(centerOfMassPositionPort.getData());
       tempCenterOfMassPosition.changeFrame(estimationFrame);
@@ -121,13 +120,13 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       tempFramePoint.sub(tempCenterOfMassPosition);
       tempFramePoint.scale(-1.0);
 
-      MatrixTools.toTildeForm(tempMatrix, tempFramePoint.getPoint());
-      tempMatrix.mul(rotationFromPelvisToWorld, tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(angularVelocityPort));
+      tempMatrix.setToTildeForm(tempFramePoint.getPoint());
+      tempMatrix.preMultiply(rotationFromPelvisToWorld);
+      tempMatrix.get(getOutputMatrixBlock(angularVelocityPort));
    }
 
    private final FrameVector tempCenterOfMassVelocity = new FrameVector();
-   private void computeOrientationStateOutputBlock(Matrix3d rotationFromPelvisToWorld)
+   private void computeOrientationStateOutputBlock(RotationMatrix rotationFromPelvisToWorld)
    {
       computeVelocityOfStationaryPoint(tempFrameVector);
       tempFrameVector.changeFrame(estimationFrame);
@@ -137,9 +136,9 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       tempFrameVector.sub(tempCenterOfMassVelocity);
       tempFrameVector.scale(-1.0);
 
-      MatrixTools.toTildeForm(tempMatrix, tempFrameVector.getVector());
-      tempMatrix.mul(rotationFromPelvisToWorld, tempMatrix);
-      MatrixTools.setDenseMatrixFromMatrix3d(0, 0, tempMatrix, getOutputMatrixBlock(orientationPort));
+      tempMatrix.setToTildeForm(tempFrameVector.getVector());
+      tempMatrix.preMultiply(rotationFromPelvisToWorld);
+      tempMatrix.get(getOutputMatrixBlock(orientationPort));
    }
 
    public DenseMatrix64F computeResidual()
@@ -151,8 +150,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
       residualVector.setIncludingFrame(tempFrameVector2);
       residualVector.sub(tempFrameVector);
 
-      MatrixTools.insertTuple3dIntoEJMLVector(residualVector.getVector(), residual, 0);
-
+      residualVector.getVector().get(residual);
       return residual;
    }
 

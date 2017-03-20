@@ -1,9 +1,10 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public class FrameOrientation2d extends AbstractReferenceFrameHolder implements FrameObject<FrameOrientation2d>
 {
@@ -41,7 +42,7 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
 
    public void interpolate(FrameOrientation2d orientationOne, FrameOrientation2d orientationTwo, double alpha)
    {
-      alpha = MathTools.clipToMinMax(alpha, 0.0, 1.0);
+      alpha = MathTools.clamp(alpha, 0.0, 1.0);
       extrapolate(orientationOne, orientationTwo, alpha);
    }
 
@@ -137,17 +138,16 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
    }
    
    @Override
-   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, RigidBodyTransform transformToNewFrame)
+   public void changeFrameUsingTransform(ReferenceFrame desiredFrame, Transform transformToNewFrame)
    {
       this.referenceFrame = desiredFrame;
       applyTransform(transformToNewFrame);
    }
 
    @Override
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(Transform transform)
    {
-      checkIsTransformationInPlane(transform);
-      Vector3d xVector = new Vector3d(1.0, 0.0, 0.0);
+      Vector2D xVector = new Vector2D(1.0, 0.0);
       transform.transform(xVector);
       double deltaYaw = Math.atan2(xVector.getY(), xVector.getX());
       if (Double.isNaN(deltaYaw) || Double.isInfinite(deltaYaw))
@@ -161,14 +161,6 @@ public class FrameOrientation2d extends AbstractReferenceFrameHolder implements 
       checkReferenceFrameMatch(orientation);
 
       return (Math.abs(this.yaw - orientation.yaw) < epsilon);
-   }
-
-   private void checkIsTransformationInPlane(RigidBodyTransform transform)
-   {
-      if (!ReferenceFrame.isTransformationInPlane(transform))
-      {
-         throw new RuntimeException("Cannot transform FramePoint2d to a plane with a different surface normal");
-      }
    }
 
    public double sub(FrameOrientation2d orientationToSubtract)

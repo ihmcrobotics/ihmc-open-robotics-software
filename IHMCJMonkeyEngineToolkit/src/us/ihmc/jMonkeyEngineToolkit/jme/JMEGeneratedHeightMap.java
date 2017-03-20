@@ -5,18 +5,17 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 import com.jme3.system.JmeSystem;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.SimpleLRUCache;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMEGeneratedHeightMap implements HeightMap
@@ -31,7 +30,7 @@ public class JMEGeneratedHeightMap implements HeightMap
 
 //   private final double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0; 
    private final double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0; // Disable rendering heightmap
-   private final BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   private final BoundingBox3D boundingBox = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
    private final JMERayCollisionAdapter jmeRayCollisionAdapter;
    private final Node rootNode = new Node("jmeGeneratedHeightMapRootNode");
@@ -51,7 +50,7 @@ public class JMEGeneratedHeightMap implements HeightMap
       @Override
       protected Ray3d initialValue()
       {
-         return new Ray3d(new Point3d(), new Vector3d(0.0, 0.0, -1.0));
+         return new Ray3d(new Point3D(), new Vector3D(0.0, 0.0, -1.0));
       }
    };
 
@@ -118,8 +117,8 @@ public class JMEGeneratedHeightMap implements HeightMap
       Ray3d ray = tempRay.get();
       ray.getPoint().set(x, y, measurementHeight);
       jmeRayCollisionAdapter.setPickingGeometry(ray);
-      Vector3d normal = new Vector3d();
-      Point3d closestPoint = new Point3d();
+      Vector3D normal = new Vector3D();
+      Point3D closestPoint = new Point3D();
       double distance = jmeRayCollisionAdapter.getPickDistance(rootNode, normal, closestPoint);
 
       point = new GroundPoint(x, y, measurementHeight - distance, normal, closestPoint);
@@ -155,19 +154,19 @@ public class JMEGeneratedHeightMap implements HeightMap
       return true;
    }
 
-   public void closestIntersectionTo(double x, double y, double z, Point3d intersectionToPack)
+   public void closestIntersectionTo(double x, double y, double z, Point3D intersectionToPack)
    {
       GroundPoint groundPoint = getGroundPoint(x, y, z);
       intersectionToPack.set(groundPoint.getClosestIntersection());
    }
 
-   public void surfaceNormalAt(double x, double y, double z, Vector3d normalToPack)
+   public void surfaceNormalAt(double x, double y, double z, Vector3D normalToPack)
    {
       GroundPoint groundPoint = getGroundPoint(x, y, z);
       normalToPack.set(groundPoint.getNormal());
    }
 
-   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3d intersectionToPack, Vector3d normalToPack)
+   public void closestIntersectionAndNormalAt(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
    {
       GroundPoint groundPoint = getGroundPoint(x, y, z);
       normalToPack.set(groundPoint.getNormal());
@@ -177,10 +176,10 @@ public class JMEGeneratedHeightMap implements HeightMap
    private class GroundPoint
    {
       private final double x, y, z;
-      private final Vector3d normal;
-      private final Point3d closestIntersection;
+      private final Vector3D normal;
+      private final Point3D closestIntersection;
 
-      public GroundPoint(double x, double y, double z, Vector3d normal, Point3d closestIntersection)
+      public GroundPoint(double x, double y, double z, Vector3D normal, Point3D closestIntersection)
       {
          this.x = x;
          this.y = y;
@@ -194,12 +193,12 @@ public class JMEGeneratedHeightMap implements HeightMap
          return z;
       }
 
-      public Vector3d getNormal()
+      public Vector3D getNormal()
       {
          return normal;
       }
 
-      public Point3d getClosestIntersection()
+      public Point3D getClosestIntersection()
       {
          return closestIntersection;
       }
@@ -216,7 +215,7 @@ public class JMEGeneratedHeightMap implements HeightMap
 
    }
    
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

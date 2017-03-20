@@ -4,23 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
 import javafx.application.Application;
-import javafx.event.Event;
-import javafx.scene.Group;
-import javafx.scene.PerspectiveCamera;
-import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.MeshView;
 import javafx.stage.Stage;
-import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.robotics.random.RandomTools;
 
 public class MultiColorMeshBuilderVisualizer extends Application
 {
@@ -72,7 +65,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
 
    private void addMultiLine(JavaFXMultiColorMeshBuilder meshBuilder)
    {
-      List<Point3d> points = new ArrayList<>();
+      List<Point3D> points = new ArrayList<>();
       double radius = 0.4;
       Random random = new Random();
 
@@ -81,15 +74,15 @@ public class MultiColorMeshBuilderVisualizer extends Application
          double x = radius * random.nextDouble() * Math.cos(angle);
          double y = radius * Math.sin(angle);
          double z = 0.1 * random.nextDouble();
-         points.add(new Point3d(x, y, z));
+         points.add(new Point3D(x, y, z));
       }
       meshBuilder.addMultiLine(points, 0.01, Color.YELLOWGREEN, true);
    }
 
    private void addLine(JavaFXMultiColorMeshBuilder meshBuilder)
    {
-      Point3d start = new Point3d(0.3, 0.0, -0.);
-      Point3d end = new Point3d(0.0, 0.3, 0.0);
+      Point3D start = new Point3D(0.3, 0.0, -0.);
+      Point3D end = new Point3D(0.0, 0.3, 0.0);
       double lineWidth = 0.01;
       Color color = Color.RED;
       meshBuilder.addLine(start, end, lineWidth, color);
@@ -109,7 +102,7 @@ public class MultiColorMeshBuilderVisualizer extends Application
             {
                Color color = colors[count%colors.length];
 //               Color color = Color.hsb(360.0 * random.nextDouble(), random.nextDouble(), random.nextDouble()); 
-               Vector3f pointsOffset = new Vector3f(x, y, 0 * RandomTools.generateRandomFloatInRange(random, -5.0f, 5.0f));
+               Vector3D32 pointsOffset = new Vector3D32(x, y, 0 * RandomNumbers.nextFloat(random, -5.0f, 5.0f));
                meshBuilder.addCube(0.05f, pointsOffset, color);
                Box box = new Box(0.025f, 0.025f, 0.025f);
                box.setTranslateX(pointsOffset.getX());

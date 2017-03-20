@@ -1,0 +1,43 @@
+# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
+# File Created: 25.01.2017 14:44:35
+
+newmtl oeil
+	Ns 49.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0000 0.0000 0.0000
+	Kd 0.0000 0.0000 0.0000
+	Ks 0.8190 0.8190 0.8190
+	Ke 0.0000 0.0000 0.0000
+	map_refl Map__4_Raytrace.tga
+
+newmtl tete
+	Ns 63.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0196 0.0000 0.0039
+	Kd 0.0196 0.0000 0.0039
+	Ks 1.2330 1.2330 1.2330
+	Ke 0.0000 0.0000 0.0000
+	map_refl Map__4_Raytrace.tga
+
+newmtl skin
+	Ns 49.0000
+	Ni 1.5000
+	d 1.0000
+	Tr 0.0000
+	Tf 1.0000 1.0000 1.0000 
+	illum 2
+	Ka 0.0471 0.0000 0.0118
+	Kd 0.0471 0.0000 0.0118
+	Ks 0.8190 0.8190 0.8190
+	Ke 0.0000 0.0000 0.0000
+	map_bump /Users/steel/OneDrive - Georgia Institute of Technology/ihmc/WDI/beetle/john fixed/bump.jpg
+	bump /Users/steel/OneDrive - Georgia Institute of Technology/ihmc/WDI/beetle/john fixed/bump.jpg
+	map_refl Map__4_Raytrace.tga

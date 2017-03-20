@@ -1,12 +1,15 @@
 package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DenseMatrix64F;
+
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Vector3d;
 
 public abstract class SpatialMotionVector
 {
@@ -14,8 +17,8 @@ public abstract class SpatialMotionVector
    protected ReferenceFrame bodyFrame;
    protected ReferenceFrame baseFrame;
    protected ReferenceFrame expressedInFrame;
-   protected Vector3d linearPart;
-   protected Vector3d angularPart;
+   protected Vector3D linearPart;
+   protected Vector3D angularPart;
 
 
    public SpatialMotionVector()
@@ -34,8 +37,8 @@ public abstract class SpatialMotionVector
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
-      this.angularPart = new Vector3d();
-      this.linearPart = new Vector3d();
+      this.angularPart = new Vector3D();
+      this.linearPart = new Vector3D();
    }
 
    /**
@@ -45,11 +48,27 @@ public abstract class SpatialMotionVector
     * @param linearPart linear part of the spatial motion vector
     * @param angularPart angular part of the spatial motion vector
     */
-   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3d linearPart, Vector3d angularPart)
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
    {
-      this.angularPart = new Vector3d();
-      this.linearPart = new Vector3d();
+      this.angularPart = new Vector3D();
+      this.linearPart = new Vector3D();
       set(bodyFrame, baseFrame, expressedInFrame, linearPart, angularPart);
+   }
+
+   /**
+    * @param bodyFrame what we're specifying the motion of
+    * @param baseFrame with respect to what we're specifying the motion
+    * @param linearPart linear part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @param angularPart angular part of the spatial motion vector expressed in the {@code expressedInFrame} to use.
+    * @throws ReferenceFrameMismatchException if the linear and angular parts are not expressed in the same reference frame.
+    */
+   public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector linearPart, FrameVector angularPart)
+   {
+      linearPart.checkReferenceFrameMatch(angularPart);
+
+      this.angularPart = new Vector3D();
+      this.linearPart = new Vector3D();
+      set(bodyFrame, baseFrame, linearPart.getReferenceFrame(), linearPart, angularPart);
    }
 
    /**
@@ -58,8 +77,8 @@ public abstract class SpatialMotionVector
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
       MatrixTools.checkMatrixDimensions(matrix, SIZE, 1);
-      this.angularPart = new Vector3d();
-      this.linearPart = new Vector3d();
+      this.angularPart = new Vector3D();
+      this.linearPart = new Vector3D();
       set(bodyFrame, baseFrame, expressedInFrame, matrix, 0);
    }
 
@@ -68,12 +87,12 @@ public abstract class SpatialMotionVector
     */
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] array)
    {
-      MathTools.checkIfEqual(SIZE, array.length);
+      MathTools.checkEquals(SIZE, array.length);
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
-      this.angularPart = new Vector3d(array[0], array[1], array[2]);
-      this.linearPart = new Vector3d(array[3], array[4], array[5]);
+      this.angularPart = new Vector3D(array[0], array[1], array[2]);
+      this.linearPart = new Vector3D(array[3], array[4], array[5]);
    }
 
    /**
@@ -111,7 +130,7 @@ public abstract class SpatialMotionVector
    /**
     * Sets the angular velocity part of the spatial motion vector
     */
-   public void setAngularPart(Vector3d newAngularVelocity)
+   public void setAngularPart(Vector3DReadOnly newAngularVelocity)
    {
       angularPart.set(newAngularVelocity);
    }
@@ -184,7 +203,7 @@ public abstract class SpatialMotionVector
    /**
     * Sets the linear velocity part of the spatial motion vector
     */
-   public void setLinearPart(Vector3d newLinearVelocity)
+   public void setLinearPart(Vector3DReadOnly newLinearVelocity)
    {
       linearPart.set(newLinearVelocity);
    }
@@ -231,7 +250,7 @@ public abstract class SpatialMotionVector
    /**
     * Sets this spatial motion vector based
     */
-   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3d linearPart, Vector3d angularPart)
+   public void set(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
    {
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
@@ -276,7 +295,7 @@ public abstract class SpatialMotionVector
    /**
     * @return the angular part. For efficiency.
     */
-   protected Vector3d getAngularPart()
+   protected Vector3DReadOnly getAngularPart()
    {
       return angularPart;
    }
@@ -284,7 +303,7 @@ public abstract class SpatialMotionVector
    /**
     * @return the linear part. For efficiency.
     */
-   protected Vector3d getLinearPart()
+   protected Vector3DReadOnly getLinearPart()
    {
       return linearPart;
    }
@@ -340,17 +359,17 @@ public abstract class SpatialMotionVector
    /**
     * @return a copy of the angular part
     */
-   public Vector3d getAngularPartCopy()
+   public Vector3D getAngularPartCopy()
    {
-      return new Vector3d(angularPart);
+      return new Vector3D(angularPart);
    }
 
    /**
     * @return a copy of the linear part
     */
-   public Vector3d getLinearPartCopy()
+   public Vector3D getLinearPartCopy()
    {
-      return new Vector3d(linearPart);
+      return new Vector3D(linearPart);
    }
    
    /**
@@ -392,7 +411,7 @@ public abstract class SpatialMotionVector
    /**
     * Packs an existing Vector3d with the angular velocity part
     */
-   public void getAngularPart(Vector3d vectorToPack)
+   public void getAngularPart(Vector3DBasics vectorToPack)
    {
       vectorToPack.set(this.angularPart);
    }
@@ -400,7 +419,7 @@ public abstract class SpatialMotionVector
    /**
     * Packs an existing Vector3d with the linear velocity part
     */
-   public void getLinearPart(Vector3d vectorToPack)
+   public void getLinearPart(Vector3DBasics vectorToPack)
    {
       vectorToPack.set(this.linearPart);
    }
@@ -516,7 +535,7 @@ public abstract class SpatialMotionVector
     * @param epsilon  the threshold value  
     * @return true or false
     */
-   public boolean epsilonEquals(SpatialAccelerationVector spatialMotionVector, double epsilon)
+   public boolean epsilonEquals(SpatialMotionVector spatialMotionVector, double epsilon)
    {
       checkReferenceFramesMatch(spatialMotionVector);
       
@@ -526,16 +545,29 @@ public abstract class SpatialMotionVector
       return true;
    }
 
-   public void checkReferenceFramesMatch(SpatialAccelerationVector spatialMotionVector)
+   public void checkReferenceFramesMatch(SpatialMotionVector spatialMotionVector)
    {
       checkReferenceFramesMatch(spatialMotionVector.bodyFrame, spatialMotionVector.baseFrame, spatialMotionVector.expressedInFrame);
    }
    
    public void checkReferenceFramesMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
-      if (this.bodyFrame != bodyFrame) throw new RuntimeException("this.bodyFrame != bodyFrame");
-      if (this.baseFrame != baseFrame) throw new RuntimeException("this.baseFrame != baseFrame");
-      if (this.expressedInFrame != expressedInFrame) throw new RuntimeException("this.expressedInFrame != expressedInFrame");
+      if (this.bodyFrame != bodyFrame) throw new ReferenceFrameMismatchException("this.bodyFrame != bodyFrame");
+      if (this.baseFrame != baseFrame) throw new ReferenceFrameMismatchException("this.baseFrame != baseFrame");
+      if (this.expressedInFrame != expressedInFrame) throw new ReferenceFrameMismatchException("this.expressedInFrame != expressedInFrame");
+   }
+
+   public boolean containsNaN(SpatialMotionVector spatialMotionVector)
+   {
+      if (Double.isNaN(getLinearPartX())) return true;
+      if (Double.isNaN(getLinearPartY())) return true;
+      if (Double.isNaN(getLinearPartZ())) return true;
+      
+      if (Double.isNaN(getAngularPartX())) return true;
+      if (Double.isNaN(getAngularPartY())) return true;
+      if (Double.isNaN(getAngularPartZ())) return true;
+
+      return false;
    }
 
    ///CLOVER:OFF

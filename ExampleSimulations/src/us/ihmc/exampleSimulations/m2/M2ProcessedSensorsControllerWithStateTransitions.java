@@ -478,7 +478,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
          leftCopPercentFromHeel.set((processedSensors.getGroundContactPointForces(RobotSide.LEFT, ContactPointName.TOE_IN).getZ()
                                        + processedSensors.getGroundContactPointForces(RobotSide.LEFT,
                                           ContactPointName.TOE_OUT).getZ()) / leftFootForceFiltered.getDoubleValue());
-         leftCopPercentFromHeel.set(MathTools.clipToMinMax(leftCopPercentFromHeel.getDoubleValue(), 0.0, 1.0));
+         leftCopPercentFromHeel.set(MathTools.clamp(leftCopPercentFromHeel.getDoubleValue(), 0.0, 1.0));
       }
       else
          leftCopPercentFromHeel.set(0.5);
@@ -497,7 +497,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
          rightCopPercentFromHeel.set((processedSensors.getGroundContactPointForces(RobotSide.RIGHT, ContactPointName.TOE_IN).getZ()
                                         + processedSensors.getGroundContactPointForces(RobotSide.RIGHT,
                                            ContactPointName.TOE_OUT).getZ()) / rightFootForceFiltered.getDoubleValue());
-         rightCopPercentFromHeel.set(MathTools.clipToMinMax(rightCopPercentFromHeel.getDoubleValue(), 0.0, 1.0));
+         rightCopPercentFromHeel.set(MathTools.clamp(rightCopPercentFromHeel.getDoubleValue(), 0.0, 1.0));
       }
       else
          rightCopPercentFromHeel.set(0.5);

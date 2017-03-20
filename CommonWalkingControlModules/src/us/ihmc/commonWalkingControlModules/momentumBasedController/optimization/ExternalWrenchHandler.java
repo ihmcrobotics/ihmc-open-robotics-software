@@ -28,6 +28,8 @@ public class ExternalWrenchHandler
    private final DenseMatrix64F gravitationalWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final DenseMatrix64F wrenchEquationRightHandSide = new DenseMatrix64F(Wrench.SIZE, 1);
    private final Map<RigidBody, Wrench> externalWrenchesToCompensateFor = new LinkedHashMap<RigidBody, Wrench>();
+   /** For garbage free iteration */
+   private final List<Wrench> externalWrenchesToCompensateForList = new ArrayList<Wrench>();
    private final SpatialForceVector totalWrenchAlreadyApplied; // gravity plus external wrenches to compensate for
    private final DenseMatrix64F totalWrenchAlreadyAppliedMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
    private final List<? extends ContactablePlaneBody> contactablePlaneBodies;
@@ -41,7 +43,7 @@ public class ExternalWrenchHandler
          List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       this.centerOfMassFrame = centerOfMassFrame;
-      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
@@ -80,9 +82,9 @@ public class ExternalWrenchHandler
    public final DenseMatrix64F computeWrenchEquationRightHandSide(DenseMatrix64F momentumConvectiveTerm, DenseMatrix64F b, DenseMatrix64F bHat)
    {
       totalWrenchAlreadyApplied.set(gravitationalWrench);
-      for (Wrench externalWrenchToCompensateFor : externalWrenchesToCompensateFor.values())
+      for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
       {
-         tempWrench.set(externalWrenchToCompensateFor);
+         tempWrench.set(externalWrenchesToCompensateForList.get(i));
          tempWrench.changeFrame(gravitationalWrench.getExpressedInFrame());
          totalWrenchAlreadyApplied.add(tempWrench);
       }
@@ -99,9 +101,9 @@ public class ExternalWrenchHandler
    {
       totalWrenchAlreadyApplied.setToZero(centerOfMassFrame);
 
-      for (Wrench externalWrenchToCompensateFor : externalWrenchesToCompensateFor.values())
+      for (int i = 0; i < externalWrenchesToCompensateForList.size(); i++)
       {
-         tempWrench.set(externalWrenchToCompensateFor);
+         tempWrench.set(externalWrenchesToCompensateForList.get(i));
          tempWrench.changeFrame(centerOfMassFrame);
          totalWrenchAlreadyApplied.add(tempWrench);
       }
@@ -117,6 +119,7 @@ public class ExternalWrenchHandler
       {
          externalWrenches.put(rigidBody, new Wrench(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame()));
          externalWrenchesToCompensateFor.put(rigidBody, new Wrench(rigidBody.getBodyFixedFrame(), rigidBody.getBodyFixedFrame()));
+         externalWrenchesToCompensateForList.add(externalWrenchesToCompensateFor.get(rigidBody));
          rigidBodiesWithWrenchToCompensateFor.add(rigidBody);
       }
       ReferenceFrame bodyFixedFrame = rigidBody.getBodyFixedFrame();

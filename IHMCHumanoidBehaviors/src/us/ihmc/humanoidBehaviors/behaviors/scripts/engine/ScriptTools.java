@@ -7,11 +7,11 @@ import java.util.Collections;
 
 import com.thoughtworks.xstream.io.StreamException;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * Created with IntelliJ IDEA.
@@ -138,7 +138,7 @@ public class ScriptTools
       ScriptFileLoader loader = null;
       try
       {
-         loader = new ScriptFileLoader(file.getAbsolutePath());
+         loader = new ScriptFileLoader(file);
       }
       catch (StreamException | IOException e)
       {

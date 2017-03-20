@@ -3,14 +3,14 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.trajectories.PushRecoveryTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
@@ -119,7 +118,7 @@ public class SwingState extends AbstractUnconstrainedState
    {
       super(ConstraintType.SWING, footControlHelper, gains, registry);
 
-      controlDT = footControlHelper.getMomentumBasedController().getControlDT();
+      controlDT = footControlHelper.getHighLevelHumanoidControllerToolbox().getControlDT();
 
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "Foot";
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
@@ -143,21 +142,21 @@ public class SwingState extends AbstractUnconstrainedState
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
 
-      soleFrame = footControlHelper.getMomentumBasedController().getReferenceFrames().getSoleFrame(robotSide);
+      soleFrame = footControlHelper.getHighLevelHumanoidControllerToolbox().getReferenceFrames().getSoleFrame(robotSide);
       ReferenceFrame footFrame = contactableFoot.getFrameAfterParentJoint();
       ReferenceFrame toeFrame = createToeFrame(robotSide);
       controlFrame = walkingControllerParameters.controlToeDuringSwing() ? toeFrame : footFrame;
       controlFrame.getTransformToDesiredFrame(soleToControlFrameTransform, soleFrame);
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
-      TwistCalculator twistCalculator = momentumBasedController.getTwistCalculator();
+      TwistCalculator twistCalculator = controllerToolbox.getTwistCalculator();
       RigidBody rigidBody = contactableFoot.getRigidBody();
 
-      stanceConfigurationProvider = new CurrentConfigurationProvider(momentumBasedController.getReferenceFrames().getFootFrame(robotSide.getOppositeSide()));
+      stanceConfigurationProvider = new CurrentConfigurationProvider(controllerToolbox.getReferenceFrames().getFootFrame(robotSide.getOppositeSide()));
       initialConfigurationProvider = new CurrentConfigurationProvider(soleFrame);
       initialVelocityProvider = new CurrentLinearVelocityProvider(soleFrame, rigidBody, twistCalculator);
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       PositionTrajectoryGenerator touchdownTrajectoryGenerator = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame,
             finalConfigurationProvider, touchdownVelocityProvider, touchdownAccelerationProvider, swingTimeProvider, registry);
@@ -182,8 +181,7 @@ public class SwingState extends AbstractUnconstrainedState
          swingTrajectoryGenerator = null;
 
          positionTrajectoryGenerators.add(swingTrajectoryGeneratorNew);
-         pushRecoveryPositionTrajectoryGenerator = setupPushRecoveryTrajectoryGenerator(swingTimeProvider, registry, namePrefix,
-               pushRecoveryPositionTrajectoryGenerators, yoGraphicsListRegistry, swingTrajectoryGeneratorNew, touchdownTrajectoryGenerator);
+         pushRecoveryPositionTrajectoryGenerator = swingTrajectoryGeneratorNew;
       }
       else
       {
@@ -221,8 +219,8 @@ public class SwingState extends AbstractUnconstrainedState
 
    private ReferenceFrame createToeFrame(RobotSide robotSide)
    {
-      ContactableFoot contactableFoot = momentumBasedController.getContactableFeet().get(robotSide);
-      ReferenceFrame footFrame = momentumBasedController.getReferenceFrames().getFootFrame(robotSide);
+      ContactableFoot contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
+      ReferenceFrame footFrame = controllerToolbox.getReferenceFrames().getFootFrame(robotSide);
       FramePoint2d toeContactPoint2d = new FramePoint2d();
       contactableFoot.getToeOffContactPoint(toeContactPoint2d);
       FramePoint toeContactPoint = new FramePoint();
@@ -317,6 +315,12 @@ public class SwingState extends AbstractUnconstrainedState
       {
          if (!doContinuousReplanning.getBooleanValue())
          {
+            if (useNewSwingTrajectoyOptimization)
+            {
+               finalConfigurationProvider.getPosition(finalPosition);
+               touchdownVelocityProvider.get(finalVelocity);
+               swingTrajectoryGeneratorNew.setFinalConditions(finalPosition, finalVelocity);
+            }
             pushRecoveryPositionTrajectoryGenerator.initialize();
             this.replanTrajectory.set(false);
             trajectoryWasReplanned = true;
@@ -443,7 +447,7 @@ public class SwingState extends AbstractUnconstrainedState
       this.swingWaypointsForSole.clear();
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         List<Point3d> swingWaypoints = footstep.getSwingWaypoints();
+         List<Point3D> swingWaypoints = footstep.getSwingWaypoints();
          for (int i = 0; i < swingWaypoints.size(); i++)
             this.swingWaypointsForSole.add().setIncludingFrame(worldFrame, swingWaypoints.get(i));
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
@@ -480,9 +484,14 @@ public class SwingState extends AbstractUnconstrainedState
    private void computeSwingTimeRemaining()
    {
       if (!currentTimeWithSwingSpeedUp.isNaN())
-         this.swingTimeRemaining.set(swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue());
+      {
+         double swingTimeRemaining = (swingTimeProvider.getValue() - currentTimeWithSwingSpeedUp.getDoubleValue()) / swingTimeSpeedUpFactor.getDoubleValue();
+         this.swingTimeRemaining.set(swingTimeRemaining);
+      }
       else
+      {
          this.swingTimeRemaining.set(swingTimeProvider.getValue() - getTimeInCurrentState());
+      }
    }
 
    private void updatePrivilegedConfiguration()
@@ -502,7 +511,7 @@ public class SwingState extends AbstractUnconstrainedState
    {
       if (isSwingSpeedUpEnabled.getBooleanValue() && (speedUpFactor > 1.1 && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
       {
-         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
+         speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
 
          //         speedUpFactor = MathTools.clipToMinMax(speedUpFactor, 0.7, maxSwingTimeSpeedUpFactor.getDoubleValue());
          //         if (speedUpFactor < 1.0) speedUpFactor = 1.0 - 0.5 * (1.0 - speedUpFactor);

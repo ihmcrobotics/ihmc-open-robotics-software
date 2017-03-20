@@ -1,21 +1,20 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import javax.vecmath.Tuple3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.controlFlow.ControlFlowOutputPort;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.simulationconstructionset.IMUMount;
 
-public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<Tuple3d>
+public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<Tuple3DBasics>
 {
    private final IMUMount imuMount;
 
-   private final Vector3d linearAcceleration = new Vector3d();
+   private final Vector3D linearAcceleration = new Vector3D();
    private final YoFrameVector yoFrameVectorPerfect, yoFrameVectorNoisy;
 
-   private final ControlFlowOutputPort<Vector3d> linearAccelerationOutputPort = createOutputPort();
+   private final ControlFlowOutputPort<Vector3D> linearAccelerationOutputPort = createOutputPort();
 
    public SimulatedLinearAccelerationSensorFromRobot(String name, IMUMount imuMount, YoVariableRegistry registry)
    {
@@ -41,7 +40,7 @@ public class SimulatedLinearAccelerationSensorFromRobot extends SimulatedSensor<
       // empty
    }
 
-   public ControlFlowOutputPort<Vector3d> getLinearAccelerationOutputPort()
+   public ControlFlowOutputPort<Vector3D> getLinearAccelerationOutputPort()
    {
       return linearAccelerationOutputPort;
    }

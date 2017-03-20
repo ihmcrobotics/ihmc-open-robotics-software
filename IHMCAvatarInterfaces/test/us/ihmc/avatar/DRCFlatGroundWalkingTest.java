@@ -1,7 +1,6 @@
 package us.ihmc.avatar;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
@@ -14,13 +13,13 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.time.GlobalTimer;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
@@ -81,7 +80,6 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       }
 
       simulationTestingParameters = null;
-      GlobalTimer.clearTimers();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -93,7 +91,8 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, robotModel.getSimpleRobotName() + "FlatGroundWalking", selectedLocation,
-            simulationTestingParameters, getRobotModel(), true, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep);
+            simulationTestingParameters, getRobotModel(), true, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, getWalkingScriptParameters());
+      
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       setupCameraForUnitTest(scs);
       simulateAndAssertGoodWalking(drcSimulationTestHelper, doPelvisWarmup);
@@ -248,7 +247,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    {
       if (simulationTestingParameters.getCreateSCSVideos())
       {
-         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 3);
+         BambooTools.createVideoAndDataWithDateTimeClassMethodAndShareOnSharedDriveIfAvailable(getSimpleRobotName(), scs, 2);
       }
    }
 
@@ -311,5 +310,10 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
    public SimulationTestingParameters getSimulationTestingParameters()
    {
       return simulationTestingParameters;
+   }
+   
+   public HeadingAndVelocityEvaluationScriptParameters getWalkingScriptParameters()
+   {
+      return null;
    }
 }

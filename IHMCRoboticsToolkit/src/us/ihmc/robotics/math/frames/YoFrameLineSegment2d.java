@@ -1,10 +1,15 @@
 package us.ihmc.robotics.math.frames;
 
-import javax.vecmath.Point2d;
-
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
+import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
+import us.ihmc.robotics.geometry.FrameLine2d;
+import us.ihmc.robotics.geometry.FrameLineSegment2d;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -160,14 +165,14 @@ public class YoFrameLineSegment2d extends AbstractReferenceFrameHolder
       frameLineSegment.getSecondEndpoint(secondEndpointToPack);
    }
 
-   public void getFirstEndPoint(Point2d firstEndpointToPack)
+   public void getFirstEndPoint(Point2D firstEndpointToPack)
    {
       putYoValuesIntoFrameLineSegment();
       
       frameLineSegment.getFirstEndpoint(firstEndpointToPack);
    }
 
-   public void getSecondEndPoint(Point2d secondEndpointToPack)
+   public void getSecondEndPoint(Point2D secondEndpointToPack)
    {
       putYoValuesIntoFrameLineSegment();
 

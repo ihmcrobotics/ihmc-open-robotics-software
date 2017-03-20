@@ -1,8 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point3d;
-
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElement.PickUpBallBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.coactiveElements.PickUpBallBehaviorCoactiveElementBehaviorSide;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SearchFarForSphereBehavior.SearchFarState;
@@ -142,7 +141,7 @@ public class SearchFarForSphereBehavior extends StateMachineBehavior<SearchFarSt
    }
 
   
-   public Point3d getBallLocation()
+   public Point3D getBallLocation()
    {
       return initialSphereDetectionBehavior.getBallLocation();
    }

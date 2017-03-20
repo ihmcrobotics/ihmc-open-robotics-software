@@ -2,18 +2,17 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.FOOT_SWING_WEIGHT;
 
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -76,7 +75,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.set(FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT, FOOT_SWING_WEIGHT);
 
       if (USE_ALL_LEG_JOINT_SWING_CORRECTOR)
-         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, momentumBasedController, robotSide);
+         legJointLimitAvoidanceControlModule = new LegJointLimitAvoidanceControlModule(namePrefix, registry, controllerToolbox, robotSide);
       else
          legJointLimitAvoidanceControlModule = null;
 
@@ -84,7 +83,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
 
       spatialFeedbackControlCommand.set(rootBody, foot);
-      spatialFeedbackControlCommand.setPrimaryBase(footControlHelper.getMomentumBasedController().getFullRobotModel().getPelvis());
+      spatialFeedbackControlCommand.setPrimaryBase(pelvis);
       spatialFeedbackControlCommand.setGains(gains);
       FramePose anklePoseInFoot = new FramePose(ankleFrame);
       anklePoseInFoot.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -106,7 +105,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.scale(weight);
    }
 
-   public void setWeights(Vector3d angularWeight, Vector3d linearWeight)
+   public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
    {
       this.angularWeight.set(angularWeight);
       this.linearWeight.set(linearWeight);
@@ -135,8 +134,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       initializeTrajectory();
    }
 
-   private final Vector3d tempAngularWeightVector = new Vector3d();
-   private final Vector3d tempLinearWeightVector = new Vector3d();
+   private final Vector3D tempAngularWeightVector = new Vector3D();
+   private final Vector3D tempLinearWeightVector = new Vector3D();
    private final FramePoint desiredAnklePosition = new FramePoint();
    private final FramePose desiredPose = new FramePose();
 
@@ -192,7 +191,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
       framePoseToModify.getPose(oldBodyFrameDesiredTransform);
       newBodyFrame.getTransformToDesiredFrame(transformFromNewBodyFrameToOldBodyFrame, oldBodyFrame);
-      newBodyFrameDesiredTransform.multiply(oldBodyFrameDesiredTransform, transformFromNewBodyFrameToOldBodyFrame);
+      newBodyFrameDesiredTransform.set(oldBodyFrameDesiredTransform);
+      newBodyFrameDesiredTransform.multiply(transformFromNewBodyFrameToOldBodyFrame);
       framePoseToModify.setPose(newBodyFrameDesiredTransform);
    }
 

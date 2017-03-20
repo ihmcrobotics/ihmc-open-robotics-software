@@ -2,33 +2,33 @@ package us.ihmc.wholeBodyController;
 
 import java.util.ArrayList;
 
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.packets.ControllerCrashNotificationPacket.CrashLocation;
 import us.ihmc.communication.streamingData.GlobalDataProducer;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotController.OutputProcessor;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ContactSensorHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -109,8 +109,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputWriter = outputWriter;
       this.robotVisualizer = robotVisualizer;
-      this.controlDTInNS = TimeTools.secondsToNanoSeconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = TimeTools.secondsToNanoSeconds(estimatorDT);
+      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
+      this.estimatorDTInNS = Conversions.secondsToNanoseconds(estimatorDT);
       this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
       this.controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
       this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
@@ -143,23 +143,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       outputWriter.setFullRobotModel(controllerFullRobotModel, threadDataSynchronizer.getControllerRawJointSensorDataHolderMap());
       outputWriter.setForceSensorDataHolderForController(forceSensorDataHolderForController);
 
-      ArrayList<InverseDynamicsJoint> listOfJointsToIgnore = new ArrayList<>();
-
-      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
-      if (lidarParameters != null)
-      {
-         listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName()));
-      }
-
-      String[] additionalJointsToIgnore = robotModel.getWalkingControllerParameters().getJointsToIgnoreInController();
-      if (additionalJointsToIgnore != null)
-      {
-         for (String jointToIgnore : additionalJointsToIgnore)
-         {
-            listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(jointToIgnore));
-         }
-      }
-      InverseDynamicsJoint[] arrayOfJointsToIgnore = listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {});
+      InverseDynamicsJoint[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
       robotController = createMomentumBasedController(controllerFullRobotModel, outputProcessor,
             controllerFactory, controllerTime, robotModel.getControllerDT(), gravity, forceSensorDataHolderForController, centerOfMassDataHolderForController,
@@ -179,6 +163,28 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          robotVisualizer.addRegistry(registry, yoGraphicsListRegistry);
       }
+   }
+
+   public static InverseDynamicsJoint[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel, WholeBodyControllerParameters robotModel, DRCRobotSensorInformation sensorInformation)
+   {
+      ArrayList<InverseDynamicsJoint> listOfJointsToIgnore = new ArrayList<>();
+
+      DRCRobotLidarParameters lidarParameters = sensorInformation.getLidarParameters(0);
+      if (lidarParameters != null)
+      {
+         listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(lidarParameters.getLidarSpindleJointName()));
+      }
+
+      String[] additionalJointsToIgnore = robotModel.getWalkingControllerParameters().getJointsToIgnoreInController();
+      if (additionalJointsToIgnore != null)
+      {
+         for (String jointToIgnore : additionalJointsToIgnore)
+         {
+            listOfJointsToIgnore.add(controllerFullRobotModel.getOneDoFJointByName(jointToIgnore));
+         }
+      }
+      InverseDynamicsJoint[] arrayOfJointsToIgnore = listOfJointsToIgnore.toArray(new InverseDynamicsJoint[] {});
+      return arrayOfJointsToIgnore;
    }
 
    private void createControllerRobotMotionStatusUpdater(MomentumBasedControllerFactory controllerFactory,
@@ -296,7 +302,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
             {
                long estimatorStartTime = threadDataSynchronizer.getEstimatorClockStartTime();
                long timestamp = threadDataSynchronizer.getTimestamp();
-               controllerTime.set(TimeTools.nanoSecondstoSeconds(timestamp));
+               controllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
                actualControlDT.set(currentClockTime - controllerStartTime.getLongValue());
 
                if (expectedEstimatorTick.getLongValue() != threadDataSynchronizer.getEstimatorTick())
@@ -368,13 +374,13 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       {
          if (runController.getBooleanValue())
          {
-            outputWriter.writeAfterController(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()));
+            outputWriter.writeAfterController(Conversions.secondsToNanoseconds(controllerTime.getDoubleValue()));
             totalDelay.set(timestamp - lastEstimatorStartTime.getLongValue());
 
             threadDataSynchronizer.publishControllerData();
             if (robotVisualizer != null)
             {
-               robotVisualizer.update(TimeTools.secondsToNanoSeconds(controllerTime.getDoubleValue()), registry);
+               robotVisualizer.update(Conversions.secondsToNanoseconds(controllerTime.getDoubleValue()), registry);
             }
 
             rootFrame.getTransformToDesiredFrame(rootToWorldTransform, ReferenceFrame.getWorldFrame());
@@ -403,7 +409,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    @Override
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
    }

@@ -1,13 +1,17 @@
 package us.ihmc.simulationconstructionset.physics.collision.gdx;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import java.util.Random;
 
 import org.junit.Test;
 
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-
 import com.badlogic.gdx.math.Matrix4;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 /**
  * @author Peter Abeles
@@ -19,10 +23,12 @@ public class GdxUtilTest
 	@Test(timeout=300000)
 	public void convert_t2m()
 	{
+      Random random = new Random(234234L);
+      RotationMatrix randomRotation = EuclidCoreRandomTools.generateRandomRotationMatrix(random);
 		float[] m = new float[]{
-				1, 2, 3, 4,
-				5, 6, 7, 8,
-				9, 10, 11, 12,
+				(float) randomRotation.getM00(), (float) randomRotation.getM01(), (float) randomRotation.getM02(), 4,
+				(float) randomRotation.getM10(), (float) randomRotation.getM11(), (float) randomRotation.getM12(), 8,
+				(float) randomRotation.getM20(), (float) randomRotation.getM21(), (float) randomRotation.getM22(), 12,
 				0, 0, 0, 1};
 
 		RigidBodyTransform src = new RigidBodyTransform();
@@ -50,10 +56,12 @@ public class GdxUtilTest
 	@Test(timeout=300000)
 	public void convert_m2t()
 	{
+	   Random random = new Random(234234L);
+      RotationMatrix randomRotation = EuclidCoreRandomTools.generateRandomRotationMatrix(random);
 		float[] m = new float[]{
-				1, 2, 3, 0,
-				5, 6, 7, 0,
-				9, 10, 11, 0,
+		      (float) randomRotation.getM00(), (float) randomRotation.getM01(), (float) randomRotation.getM02(), 0,
+		      (float) randomRotation.getM10(), (float) randomRotation.getM11(), (float) randomRotation.getM12(), 0,
+		      (float) randomRotation.getM20(), (float) randomRotation.getM21(), (float) randomRotation.getM22(), 0,
 				13, 14, 15, 1};
 
 		Matrix4 src = new Matrix4();

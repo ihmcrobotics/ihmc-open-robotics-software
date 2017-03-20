@@ -6,15 +6,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
@@ -22,14 +18,21 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -39,9 +42,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.continuousIntegration.IntegrationCategory;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
@@ -293,10 +293,12 @@ public class DesiredFootstepTest
       netClassList.registerPacketClass(PauseWalkingMessage.class);
       netClassList.registerPacketClass(FootstepStatus.class);
       netClassList.registerPacketClass(ExecutionMode.class);
+      netClassList.registerPacketClass(ExecutionTiming.class);
 
       netClassList.registerPacketField(ArrayList.class);
-      netClassList.registerPacketField(Point3d.class);
-      netClassList.registerPacketField(Quat4d.class);
+      netClassList.registerPacketField(Point3D.class);
+      netClassList.registerPacketField(Point3D[].class);
+      netClassList.registerPacketField(Quaternion.class);
       netClassList.registerPacketField(FootstepDataMessage.FootstepOrigin.class);
       netClassList.registerPacketField(PacketDestination.class);
       netClassList.registerPacketField(FootstepStatus.Status.class);
@@ -333,8 +335,8 @@ public class DesiredFootstepTest
          RigidBody endEffector = createRigidBody(robotSide);
          ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createRandomContactablePlaneBodyForTests(random, endEffector);
 
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3d(footstepNumber, 0.0, 0.0),
-               new Quat4d(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
+         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(footstepNumber, 0.0, 0.0),
+               new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
          PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
@@ -442,7 +444,7 @@ public class DesiredFootstepTest
    {
       RigidBody elevator = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       SixDoFJoint joint = new SixDoFJoint("joint", elevator, elevator.getBodyFixedFrame());
-      return ScrewTools.addRigidBody(name, joint, new Matrix3d(), 0.0, new Vector3d());
+      return ScrewTools.addRigidBody(name, joint, new Matrix3D(), 0.0, new Vector3D());
    }
 
    private class PauseConsumer implements PacketConsumer<PauseWalkingMessage>

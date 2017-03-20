@@ -51,13 +51,13 @@ public class TypicalTorqueSpeedCurve implements TorqueSpeedCurve
 
       if (absoluteSpeed < maxSpeedAtMaxTorque)
       {
-         return MathTools.clipToMinMax(torque, -maxTorque, maxTorque);
+         return MathTools.clamp(torque, -maxTorque, maxTorque);
       }
 
       double percent = 1.0 - (absoluteSpeed - maxSpeedAtMaxTorque) / (maxSpeed - maxSpeedAtMaxTorque);
       double maxScaledTorque = percent * maxTorque;
 
-      return MathTools.clipToMinMax(torque, -maxScaledTorque, maxScaledTorque);
+      return MathTools.clamp(torque, -maxScaledTorque, maxScaledTorque);
    }
 
 }

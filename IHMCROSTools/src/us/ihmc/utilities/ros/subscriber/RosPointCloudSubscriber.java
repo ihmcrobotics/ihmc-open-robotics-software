@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.vecmath.Point3d;
+import us.ihmc.euclid.tuple3D.Point3D;
 
 import sensor_msgs.PointCloud2;
 import us.ihmc.utilities.ros.types.PointType;
@@ -51,7 +51,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
    
    public static class UnpackedPointCloud
    {
-      Point3d[] points = null;
+      Point3D[] points = null;
       float[] intensities = null;
       Color[] pointColors = null;
       PointType pointType = null;
@@ -63,7 +63,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
          
       }
       
-      public UnpackedPointCloud(int width, int height, PointType pointType, Point3d[] points, Color[] pointColors)
+      public UnpackedPointCloud(int width, int height, PointType pointType, Point3D[] points, Color[] pointColors)
       {
          this.pointColors=pointColors;
          this.points = points;
@@ -84,7 +84,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
          return height;
       }
 
-      public Point3d[] getPoints()
+      public Point3D[] getPoints()
       {
          return points;
       }
@@ -125,7 +125,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
 
       UnpackedPointCloud packet = new UnpackedPointCloud();
       int numberOfPoints = pointCloud.getWidth() * pointCloud.getHeight();
-      packet.points = new Point3d[numberOfPoints];
+      packet.points = new Point3D[numberOfPoints];
       packet.pointType = PointType.fromFromFieldNames(pointCloud.getFields());
       packet.width = pointCloud.getWidth();
       packet.height = pointCloud.getHeight();
@@ -163,7 +163,7 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
          float y = byteBuffer.getFloat();
          float z = byteBuffer.getFloat();
 
-         packet.points[i] = new Point3d(x, y, z);
+         packet.points[i] = new Point3D(x, y, z);
 
          switch (packet.pointType)
          {

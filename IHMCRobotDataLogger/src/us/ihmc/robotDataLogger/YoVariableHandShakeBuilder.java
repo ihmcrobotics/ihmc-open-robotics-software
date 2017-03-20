@@ -54,7 +54,7 @@ public class YoVariableHandShakeBuilder
    public void addDynamicGraphicObjects(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       ArrayList<YoGraphicsList> yoGraphicsLists = new ArrayList<YoGraphicsList>();
-      yoGraphicsListRegistry.getRegisteredDynamicGraphicObjectsLists(yoGraphicsLists);
+      yoGraphicsListRegistry.getRegisteredYoGraphicsLists(yoGraphicsLists);
       DynamicGraphicMessage.Builder msg;
       for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
       {

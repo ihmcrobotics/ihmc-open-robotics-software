@@ -1,19 +1,18 @@
 package us.ihmc.sensorProcessing.controlFlowPorts;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.random.RandomTools;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class YoFrameQuaternionControlFlowOutputPortTest
 {
@@ -38,7 +37,7 @@ public class YoFrameQuaternionControlFlowOutputPortTest
       
       for (int i = 0; i < 1000; i++)
       {
-         FrameOrientation dataIn = new FrameOrientation(frame, RandomTools.generateRandomQuaternion(rand));
+         FrameOrientation dataIn = new FrameOrientation(frame, RandomGeometry.nextQuaternion(rand));
          controlFlowOutputPort.setData(dataIn);
          FrameOrientation dataOut = controlFlowOutputPort.getData();
 

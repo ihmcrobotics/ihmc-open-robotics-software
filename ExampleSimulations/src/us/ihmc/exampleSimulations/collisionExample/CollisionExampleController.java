@@ -1,12 +1,12 @@
 package us.ihmc.exampleSimulations.collisionExample;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.simulationconstructionset.CollisionIntegrator;
+import us.ihmc.simulationconstructionset.physics.engine.featherstone.CollisionIntegrator;
 
 
 public class CollisionExampleController implements RobotController
@@ -88,63 +88,53 @@ public class CollisionExampleController implements RobotController
 
 
 
-   Vector3d x1_world = new Vector3d(), x2_world = new Vector3d();
-   Vector3d u1_world = new Vector3d(), u2_world = new Vector3d();
+   Vector3D x1_world = new Vector3D(), x2_world = new Vector3D();
+   Vector3D u1_world = new Vector3D(), u2_world = new Vector3D();
 
    // Vector3d u1_world = new Vector3d(1.0,2.0,3.0), u2_world = new Vector3d(0.0,0.0,0.0);
    // double xRotation = Math.PI/2.0;
 
-   Matrix3d R_world_collision = new Matrix3d(), R_collision_world = new Matrix3d();
+   RotationMatrix R_world_collision = new RotationMatrix(), R_collision_world = new RotationMatrix();
 
-   Matrix3d I1_world = new Matrix3d(), I2_world = new Matrix3d(), I1_world_inv = new Matrix3d(), I2_world_inv = new Matrix3d();
+   Matrix3D I1_world = new Matrix3D(), I2_world = new Matrix3D(), I1_world_inv = new Matrix3D(), I2_world_inv = new Matrix3D();
 
-   Matrix3d I1 = new Matrix3d(), I2 = new Matrix3d(), I1_inv = new Matrix3d(), I2_inv = new Matrix3d();
-   Vector3d r1 = new Vector3d(), r2 = new Vector3d();
-   Vector3d u1 = new Vector3d(), u2 = new Vector3d(), u = new Vector3d();
+   Matrix3D I1 = new Matrix3D(), I2 = new Matrix3D(), I1_inv = new Matrix3D(), I2_inv = new Matrix3D();
+   Vector3D r1 = new Vector3D(), r2 = new Vector3D();
+   Vector3D u1 = new Vector3D(), u2 = new Vector3D(), u = new Vector3D();
 
-   Vector3d e_world = new Vector3d(), r1_world = new Vector3d(), r2_world = new Vector3d();
+   Vector3D e_world = new Vector3D(), r1_world = new Vector3D(), r2_world = new Vector3D();
 
-   Matrix3d r1_twidle = new Matrix3d(), r2_twidle = new Matrix3d(), t1 = new Matrix3d(), t2 = new Matrix3d(), K = new Matrix3d(), K_inverse = new Matrix3d();
+   Matrix3D r1_twidle = new Matrix3D(), r2_twidle = new Matrix3D(), t1 = new Matrix3D(), t2 = new Matrix3D(), K = new Matrix3D(), K_inverse = new Matrix3D();
 
-   Vector3d u_final = new Vector3d(), impulse = new Vector3d();
+   Vector3D u_final = new Vector3D(), impulse = new Vector3D();
 
-   Vector3d impulse_world = new Vector3d();
-   Vector3d delta_u = new Vector3d(), delta_u_world = new Vector3d(), delta_u1_world = new Vector3d(), delta_w1_world = new Vector3d();
-   Vector3d delta_u2_world = new Vector3d(), delta_w2_world = new Vector3d();
+   Vector3D impulse_world = new Vector3D();
+   Vector3D delta_u = new Vector3D(), delta_u_world = new Vector3D(), delta_u1_world = new Vector3D(), delta_w1_world = new Vector3D();
+   Vector3D delta_u2_world = new Vector3D(), delta_w2_world = new Vector3D();
 
-   Vector3d temp = new Vector3d(), momentum_world_before = new Vector3d(), momentum_world_after = new Vector3d();
+   Vector3D temp = new Vector3D(), momentum_world_before = new Vector3D(), momentum_world_after = new Vector3D();
 
 
 
-   private void computeRotation(Matrix3d rot, Vector3d vec)
+   private void computeRotation(RotationMatrix rot, Vector3D vec)
    {
       // Z axis points in opposite direction of vec...
-      Vector3d zAxis = new Vector3d(-vec.getX(), -vec.getY(), -vec.getZ());
+      Vector3D zAxis = new Vector3D(-vec.getX(), -vec.getY(), -vec.getZ());
       zAxis.normalize();
 
-      Vector3d yAxis = new Vector3d(0.0, 0.0, 1.0);
+      Vector3D yAxis = new Vector3D(0.0, 0.0, 1.0);
 
       if (yAxis.equals(zAxis))
       {
-         yAxis = new Vector3d(0.0, 1.0, 0.0);
+         yAxis = new Vector3D(0.0, 1.0, 0.0);
       }
 
-      Vector3d xAxis = new Vector3d();
+      Vector3D xAxis = new Vector3D();
       xAxis.cross(yAxis, zAxis);
       xAxis.normalize();
 
       yAxis.cross(zAxis, xAxis);
-
-      rot.setM00(xAxis.getX());
-      rot.setM01(yAxis.getX());
-      rot.setM02(zAxis.getX());
-      rot.setM10(xAxis.getY());
-      rot.setM11(yAxis.getY());
-      rot.setM12(zAxis.getY());
-      rot.setM20(xAxis.getZ());
-      rot.setM21(yAxis.getZ());
-      rot.setM22(zAxis.getZ());
-
+      rot.setColumns(xAxis, yAxis, zAxis);
    }
 
 
@@ -184,9 +174,9 @@ public class CollisionExampleController implements RobotController
       computeRotation(R_world_collision, e_world);
 
 
-      // R_world_collision.rotX(Math.PI/2.0);
+      // R_world_collision.setToRollMatrix(Math.PI/2.0);
 
-      Vector3d offset_world = new Vector3d(0.0, 0.0, CollisionExampleRobot.R1 + CollisionExampleRobot.R2);
+      Vector3D offset_world = new Vector3D(0.0, 0.0, CollisionExampleRobot.R1 + CollisionExampleRobot.R2);
       R_world_collision.transform(offset_world);
 
       // Vector3d x1_world = new Vector3d();
@@ -208,11 +198,13 @@ public class CollisionExampleController implements RobotController
       R_collision_world.set(R_world_collision);
       R_collision_world.transpose();
 
-      I1.mul(R_collision_world, I1_world);
-      I1.mul(R_world_collision);
+      I1.set(R_collision_world);
+      I1.multiply(I1_world);
+      I1.multiply(R_world_collision);
 
-      I2.mul(R_collision_world, I2_world);
-      I2.mul(R_world_collision);
+      I2.set(R_collision_world);
+      I2.multiply(I2_world);
+      I2.multiply(R_world_collision);
 
       u1.set(u1_world);
       R_collision_world.transform(u1);
@@ -249,17 +241,17 @@ public class CollisionExampleController implements RobotController
       I2_inv.invert();
 
       t1.set(r1_twidle);
-      t1.mul(I1_inv);
-      t1.mul(r1_twidle);
+      t1.multiply(I1_inv);
+      t1.multiply(r1_twidle);
       t2.set(r2_twidle);
-      t2.mul(I2_inv);
-      t2.mul(r2_twidle);
+      t2.multiply(I2_inv);
+      t2.multiply(r2_twidle);
 
       K.set(new double[]
       {
          1, 0, 0, 0, 1, 0, 0, 0, 1
       });
-      K.mul(1.0 / CollisionExampleRobot.M1 + 1.0 / CollisionExampleRobot.M2);
+      K.scale(1.0 / CollisionExampleRobot.M1 + 1.0 / CollisionExampleRobot.M2);
       K.sub(t1);
       K.sub(t2);
 
@@ -288,58 +280,58 @@ public class CollisionExampleController implements RobotController
       collisionIntegrator.setup(K, u, epsilon, mu);
 
 //    double[] output = new double[4];
-      Vector3d output = new Vector3d();
+      Vector3D output = new Vector3D();
 
       // System.out.println("Integrating the collision...");
       collisionIntegrator.integrate(output);
 
       // System.out.println("Done Integrating the collision...");
 
-      u_final = new Vector3d(output);
+      u_final = new Vector3D(output);
 
 
       // System.out.println("u_final:");System.out.println(u_final);
 
       // Compute the impulse:
 
-      delta_u = new Vector3d(u);
+      delta_u = new Vector3D(u);
       delta_u.sub(u_final);
 
       // System.out.println("delta_u:");System.out.println(delta_u);
 
-      delta_u_world = new Vector3d(delta_u);
+      delta_u_world = new Vector3D(delta_u);
       R_world_collision.transform(delta_u_world);
 
       // System.out.println("delta_u_world:");System.out.println(delta_u_world);
 
-      impulse = new Vector3d(delta_u);
+      impulse = new Vector3D(delta_u);
       K_inverse.transform(impulse);
 
       // System.out.println("impulse:");System.out.println(impulse);
 
       // Transform the impulse into world coordinates:
 
-      impulse_world = new Vector3d(impulse);
+      impulse_world = new Vector3D(impulse);
       R_world_collision.transform(impulse_world);
 
       // System.out.println("impulse_world:");System.out.println(impulse_world);
 
       // Figure out the change in velocities of the masses:
 
-      delta_u1_world = new Vector3d(impulse_world);
+      delta_u1_world = new Vector3D(impulse_world);
       delta_u1_world.scale(1.0 / CollisionExampleRobot.M1);
       u1_world.sub(delta_u1_world);
 
-      delta_w1_world = new Vector3d();
+      delta_w1_world = new Vector3D();
       delta_w1_world.cross(r1_world, impulse_world);
       I1_world_inv.transform(delta_w1_world);
 
 
-      delta_u2_world = new Vector3d(impulse_world);
+      delta_u2_world = new Vector3D(impulse_world);
       delta_u2_world.scale(-1.0 / CollisionExampleRobot.M2);
       u2_world.sub(delta_u2_world);
 
-      delta_w2_world = new Vector3d();
+      delta_w2_world = new Vector3D();
       delta_w2_world.cross(r2_world, impulse_world);
       I2_world_inv.transform(delta_w2_world);
       delta_w2_world.scale(-1.0);
@@ -358,9 +350,9 @@ public class CollisionExampleController implements RobotController
       // System.out.println("delta_w1_world, delta_w2_world after collision:  "); System.out.println(delta_w1_world); System.out.println(delta_w2_world);
 
 
-      momentum_world_after = new Vector3d(u1_world);
+      momentum_world_after = new Vector3D(u1_world);
       momentum_world_after.scale(CollisionExampleRobot.M1);
-      temp = new Vector3d(u2_world);
+      temp = new Vector3D(u2_world);
       temp.scale(CollisionExampleRobot.M2);
       momentum_world_after.add(temp);
 

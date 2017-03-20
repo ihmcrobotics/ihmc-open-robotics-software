@@ -15,13 +15,14 @@ import javax.sound.sampled.TargetDataLine;
 import javax.swing.JLabel;
 
 import org.jtransforms.fft.DoubleFFT_1D;
+
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DrillDetectionPacket;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
-import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
 
 /**
  * 
@@ -299,7 +300,7 @@ public class SoundDetector implements Runnable
 
             double[][] fftData = computeFreqMagPhase(time, input);
             double[] frequency = fftData[0];
-            double[] magnitude = BodeUnitsConverter.convertMagnitudeToDecibels(fftData[1]);
+            double[] magnitude = Conversions.convertMagnitudeToDecibels(fftData[1]);
             //            double[] phase = fftData[2];
 
             if (!runningTheRealSchebang)

@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static junit.framework.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,16 +8,17 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.controlFlow.ControlFlowElement;
 import us.ihmc.controlFlow.NullControlFlowElement;
-import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.screwTheory.AfterJointReferenceFrameNameMap;
+import us.ihmc.sensorProcessing.stateEstimation.sensorConfiguration.PointPositionDataObject;
 
 /**
  * @author twan
@@ -39,7 +39,7 @@ public class YoPointPositionDataObjectListOutputPortTest
       int nFrames = 10;
       for (int i = 0; i < nFrames; i++)
       {
-         RigidBodyTransform transformToParent = RigidBodyTransform.generateRandomTransform(random);
+         RigidBodyTransform transformToParent = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
          ReferenceFrame frame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent("frame" + i, ReferenceFrame.getWorldFrame(), transformToParent);
          frame.update();
          frames.add(frame);
@@ -72,8 +72,8 @@ public class YoPointPositionDataObjectListOutputPortTest
          PointPositionDataObject pointPositionDataObject = new PointPositionDataObject();
          int referenceFrameIndex = random.nextInt(frames.size());
          ReferenceFrame frame = frames.get(referenceFrameIndex);
-         FramePoint measurementPointInBodyFrame = new FramePoint(frame, RandomTools.generateRandomVector(random));
-         FramePoint measurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame(), RandomTools.generateRandomVector(random));
+         FramePoint measurementPointInBodyFrame = new FramePoint(frame, RandomGeometry.nextVector3D(random));
+         FramePoint measurementPointInWorldFrame = new FramePoint(ReferenceFrame.getWorldFrame(), RandomGeometry.nextVector3D(random));
          boolean isPointPositionValid = true;
          pointPositionDataObject.set(measurementPointInBodyFrame, measurementPointInWorldFrame, isPointPositionValid);
 

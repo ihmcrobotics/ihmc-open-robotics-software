@@ -174,4 +174,9 @@ public class BipedalStepAdjustmentCostCalculator implements BipedalStepCostCalcu
          vectorToPack.setWithoutChecks(frameTuple2d);
       }
    }
+
+   public double getStepBaseCost()
+   {
+      return footstepBaseCost.getDoubleValue();
+   }
 }

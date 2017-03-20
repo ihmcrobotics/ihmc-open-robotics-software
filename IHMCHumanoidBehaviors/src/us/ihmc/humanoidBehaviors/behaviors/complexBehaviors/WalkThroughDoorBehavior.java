@@ -1,10 +1,10 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3f;
-
 import us.ihmc.communication.packets.TextToSpeechPacket;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior.WalkThroughDoorBehaviorState;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,8 +49,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    private final boolean setUpArms = true;
 
-   private Vector3f doorOffsetPoint1 = new Vector3f(0.5f, 0.9f, 0f);
-   private Vector3f doorOffsetPoint2 = new Vector3f(0.5f, 0.7f, 0f);
+   private Vector3D32 doorOffsetPoint1 = new Vector3D32(0.5f, 0.9f, 0f);
+   private Vector3D32 doorOffsetPoint2 = new Vector3D32(0.5f, 0.7f, 0f);
 
    private final SearchForDoorBehavior searchForDoorBehavior;
    private final WalkToInteractableObjectBehavior walkToInteractableObjectBehavior;
@@ -239,13 +238,13 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    }
 
-   private FramePoint offsetPointFromDoor(Vector3f point)
+   private FramePoint offsetPointFromDoor(Vector3D32 point)
    {
 
       PoseReferenceFrame doorPose = new PoseReferenceFrame("doorFrame", ReferenceFrame.getWorldFrame());
       doorPose.setPoseAndUpdate(new RigidBodyTransform(searchForDoorBehavior.getLocation()));
 
-      FramePoint point1 = new FramePoint(doorPose, point.x, point.y, point.z);
+      FramePoint point1 = new FramePoint(doorPose, point);
       return point1;
    }
 
@@ -260,19 +259,19 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       FootstepDataListMessage message = new FootstepDataListMessage(atlasPrimitiveActions.footstepListBehavior.getDefaultSwingTime(),
             atlasPrimitiveActions.footstepListBehavior.getDefaultTranferTime());
 
-      FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep, new Point3d(0.5864031335585762, 0.592160790421584, 0.11833316262205451),
-            new Quat4d(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+      FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5864031335585762, 0.592160790421584, 0.11833316262205451),
+            new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
 
       FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep.getOppositeSide(),
-            new Point3d(0.4053278408799188, 0.23597592988662308, 0.11830896252372711),
-            new Quat4d(-1.5943418991263463E-13, 2.75059506574629E-13, -0.7043243641759355, 0.7098782924052293));
-      FootstepDataMessage fs3 = createRelativeFootStep(doorPose, startStep, new Point3d(0.5924372369454293, -0.26851462759487155, 0.11830896252392731),
-            new Quat4d(-3.236982396751798E-13, 3.899712427026468E-14, -0.7043243760613419, 0.7098782806128114));
+            new Point3D(0.4053278408799188, 0.23597592988662308, 0.11830896252372711),
+            new Quaternion(-1.5943418991263463E-13, 2.75059506574629E-13, -0.7043243641759355, 0.7098782924052293));
+      FootstepDataMessage fs3 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5924372369454293, -0.26851462759487155, 0.11830896252392731),
+            new Quaternion(-3.236982396751798E-13, 3.899712427026468E-14, -0.7043243760613419, 0.7098782806128114));
       FootstepDataMessage fs4 = createRelativeFootStep(doorPose, startStep.getOppositeSide(),
-            new Point3d(0.36887783182356804, -0.7234607322382425, 0.118308962523932),
-            new Quat4d(1.7351711631778928E-14, -1.6924263791365571E-13, -0.7043243760613419, 0.7098782806128114));
-      FootstepDataMessage fs5 = createRelativeFootStep(doorPose, startStep, new Point3d(0.5896714303877739, -0.7199905519593679, 0.11830896252393555),
-            new Quat4d(2.5501844493298926E-13, -3.0463423083022023E-13, -0.7043243760613419, 0.7098782806128114));
+            new Point3D(0.36887783182356804, -0.7234607322382425, 0.118308962523932),
+            new Quaternion(1.7351711631778928E-14, -1.6924263791365571E-13, -0.7043243760613419, 0.7098782806128114));
+      FootstepDataMessage fs5 = createRelativeFootStep(doorPose, startStep, new Point3D(0.5896714303877739, -0.7199905519593679, 0.11830896252393555),
+            new Quaternion(2.5501844493298926E-13, -3.0463423083022023E-13, -0.7043243760613419, 0.7098782806128114));
 
       message.add(fs1);
       message.add(fs2);
@@ -284,7 +283,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    }
 
-   private FootstepDataMessage createRelativeFootStep(PoseReferenceFrame frame, RobotSide side, Point3d location, Quat4d orientation)
+   private FootstepDataMessage createRelativeFootStep(PoseReferenceFrame frame, RobotSide side, Point3D location, Quaternion orientation)
    {
 
       FramePose pose = offsetPointFromFrameInWorldFrame(frame, location, orientation);
@@ -292,7 +291,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       return message;
    }
 
-   private FramePose offsetPointFromFrameInWorldFrame(PoseReferenceFrame frame, Point3d point3d, Quat4d quat4d)
+   private FramePose offsetPointFromFrameInWorldFrame(PoseReferenceFrame frame, Point3D point3d, Quaternion quat4d)
    {
       FramePoint point1 = new FramePoint(frame, point3d);
       point1.changeFrame(ReferenceFrame.getWorldFrame());

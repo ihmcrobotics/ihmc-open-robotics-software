@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotDataLogger.LogIndex;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class SpecificLogVariableUpdater
@@ -136,7 +136,7 @@ public class SpecificLogVariableUpdater
          }
 
          timestamp.set(logLongArray.get());
-         robotTime.set(TimeTools.nanoSecondstoSeconds(timestamp.getLongValue() - initialTimestamp));
+         robotTime.set(Conversions.nanosecondsToSeconds(timestamp.getLongValue() - initialTimestamp));
 
          for (int i = 0; i < variablesToUpdate.length; i++)
          {

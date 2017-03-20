@@ -1,10 +1,13 @@
 package us.ihmc.robotics.geometry.algorithms;
 
-import javax.vecmath.Point2d;
-import javax.vecmath.Vector3d;
-
 import org.apache.commons.math3.util.Pair;
 
+import us.ihmc.commons.Epsilons;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
@@ -13,11 +16,9 @@ import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.math.Epsilons;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
@@ -36,9 +37,9 @@ public class FrameConvexPolygon2dIntersector
    private final Pair<FramePoint2d, FramePoint2d> lineIntersectionOnPolygonPlane;
    private final Pair<FramePoint, FramePoint> intersectionWithPolygonOne;
    private final Pair<FramePoint, FramePoint> intersectionWithPolygonTwo;
-   private final Vector3d point2Vector;
-   private final Vector3d point3Vector;
-   private final Vector3d point4Vector;
+   private final Vector3D point2Vector;
+   private final Vector3D point3Vector;
+   private final Vector3D point4Vector;
    private boolean noIntersection;
 
    public FrameConvexPolygon2dIntersector()
@@ -50,9 +51,9 @@ public class FrameConvexPolygon2dIntersector
       lineIntersectionOnPolygonPlane = new Pair<FramePoint2d, FramePoint2d>(new FramePoint2d(), new FramePoint2d());
       intersectionWithPolygonOne = new Pair<FramePoint, FramePoint>(new FramePoint(), new FramePoint());
       intersectionWithPolygonTwo = new Pair<FramePoint, FramePoint>(new FramePoint(), new FramePoint());
-      point2Vector = new Vector3d();
-      point3Vector = new Vector3d();
-      point4Vector = new Vector3d();
+      point2Vector = new Vector3D();
+      point3Vector = new Vector3D();
+      point4Vector = new Vector3D();
       noIntersection = false;
    }
 
@@ -125,30 +126,30 @@ public class FrameConvexPolygon2dIntersector
          // finding minimum
          if (point3Percentage > point1Percentage && point4Percentage > point1Percentage)
          {
-            intersectionToPack.setStartPoint(point3Percentage < point4Percentage ? point3 : point4);
+            intersectionToPack.setFirstEndpoint(point3Percentage < point4Percentage ? point3 : point4);
          }
          else if (point3Percentage >= point1Percentage || point4Percentage >= point1Percentage)
          {
-            intersectionToPack.setStartPoint(point1);
+            intersectionToPack.setFirstEndpoint(point1);
          }
 
          // finding maximum
          if (point3Percentage < point2Percentage && point4Percentage < point2Percentage)
          {
-            intersectionToPack.setEndPoint(point3Percentage > point4Percentage ? point3 : point4);
+            intersectionToPack.setSecondEndpoint(point3Percentage > point4Percentage ? point3 : point4);
          }
          else if (point3Percentage <= point2Percentage || point4Percentage <= point2Percentage)
          {
-            intersectionToPack.setEndPoint(point2);
+            intersectionToPack.setSecondEndpoint(point2);
          }
 
-         if (intersectionToPack.getStartPointUnsafe().containsNaN() && !intersectionToPack.getEndPointUnsafe().containsNaN())
+         if (intersectionToPack.firstEndpointContainsNaN() && !intersectionToPack.secondEndpointContainsNaN())
          {
-            intersectionToPack.setStartPointWithoutChecks(intersectionToPack.getEndPointUnsafe());
+            intersectionToPack.setFirstEndpoint(intersectionToPack.getSecondEndpoint());
          }
-         else if (!intersectionToPack.getStartPointUnsafe().containsNaN() && intersectionToPack.getEndPointUnsafe().containsNaN())
+         else if (!intersectionToPack.firstEndpointContainsNaN() && intersectionToPack.secondEndpointContainsNaN())
          {
-            intersectionToPack.setEndPointWithoutChecks(intersectionToPack.getStartPointUnsafe());
+            intersectionToPack.setSecondEndpoint(intersectionToPack.getFirstEndpoint());
          }
 
          if (!intersectionToPack.containsNaN())
@@ -161,8 +162,8 @@ public class FrameConvexPolygon2dIntersector
          intersectionToPack.set(point1, point2);
          if (intersectionToPack.isBetweenEndpoints(point3, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setStartPoint(point3);
-            intersectionToPack.setEndPoint(point3);
+            intersectionToPack.setFirstEndpoint(point3);
+            intersectionToPack.setSecondEndpoint(point3);
             return;
          }
       }
@@ -171,8 +172,8 @@ public class FrameConvexPolygon2dIntersector
          intersectionToPack.set(point3, point3);
          if (intersectionToPack.isBetweenEndpoints(point1, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setStartPoint(point1);
-            intersectionToPack.setEndPoint(point1);
+            intersectionToPack.setFirstEndpoint(point1);
+            intersectionToPack.setSecondEndpoint(point1);
             return;
          }
       }
@@ -180,8 +181,8 @@ public class FrameConvexPolygon2dIntersector
       {
          if (point1.epsilonEquals(point3, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setStartPoint(point1);
-            intersectionToPack.setEndPoint(point3);
+            intersectionToPack.setFirstEndpoint(point1);
+            intersectionToPack.setSecondEndpoint(point3);
             return;
          }
       }
@@ -233,7 +234,7 @@ public class FrameConvexPolygon2dIntersector
     * Gets the closest point to a filled polygon. If inside, packs that point.
     * If outside, the closest vertex or point along edge.
     */
-   public static void getClosestPoint(Point2d point, ConvexPolygon2d polygon, Point2d closestPointToPack)
+   public static void getClosestPoint(Point2D point, ConvexPolygon2d polygon, Point2D closestPointToPack)
    {
       if (ConvexPolygon2dCalculator.isPointInside(point, polygon))
       {
@@ -244,11 +245,11 @@ public class FrameConvexPolygon2dIntersector
       double closestDistance = Double.POSITIVE_INFINITY;
       for (int index = 0; index < polygon.getNumberOfVertices(); index++)
       {
-         Point2d pointOne = polygon.getVertex(index);
-         Point2d pointTwo = polygon.getNextVertex(index);
+         Point2DReadOnly pointOne = polygon.getVertex(index);
+         Point2DReadOnly pointTwo = polygon.getNextVertex(index);
 
-         boolean insideOne = GeometryTools.dotProduct(pointOne, pointTwo, pointOne, point) > 0.0;
-         boolean insideTwo = GeometryTools.dotProduct(pointTwo, pointOne, pointTwo, point) > 0.0;
+         boolean insideOne = EuclidGeometryTools.dotProduct(pointOne, pointTwo, pointOne, point) > 0.0;
+         boolean insideTwo = EuclidGeometryTools.dotProduct(pointTwo, pointOne, pointTwo, point) > 0.0;
 
          if (insideOne && insideTwo)
          {
@@ -266,7 +267,7 @@ public class FrameConvexPolygon2dIntersector
             double x = pointOne.getX() + alpha * vx1;
             double y = pointOne.getY() + alpha * vy1;
 
-            double distance = GeometryTools.distanceBetweenPoints(point.x, point.y, x, y);
+            double distance = EuclidGeometryTools.distanceBetweenPoint2Ds(point.getX(), point.getY(), x, y);
             if (distance < closestDistance)
             {
                closestPointToPack.set(x, y);
@@ -334,6 +335,14 @@ public class FrameConvexPolygon2dIntersector
          return new Line2d();
       }
    };
+   private static final ThreadLocal<Quaternion> tempQuaternion = new ThreadLocal<Quaternion>()
+   {
+      @Override
+      public Quaternion initialValue()
+      {
+         return new Quaternion();
+      }
+   };
 
    // TODO check out GeometryTools.getIntersectionBetweenTwoPlanes => no thread local and tested.
    public static void intersectTwoPlanes(FramePlane3d planeOne, FramePlane3d planeTwo, FrameLine intersectionToPack)
@@ -348,19 +357,21 @@ public class FrameConvexPolygon2dIntersector
       else
       {
          intersectionToPack.setToZero(planeOne.getReferenceFrame());
-         Vector3d intersectPlaneNormal = intersectionToPack.getNormalizedVector();
+         Vector3D intersectPlaneNormal = intersectionToPack.getNormalizedVector();
          intersectPlaneNormal.cross(planeOne.getNormal(), planeTwo.getNormal());
          intersectionToPack.setVectorWithoutChecks(intersectPlaneNormal);
 
+         tempIntersectPlaneReferenceFrame.get().getOrientation(tempQuaternion.get());
          RotationTools.computeQuaternionFromYawAndZNormal(0.0, intersectionToPack.getNormalizedVector(),
-                                                          tempIntersectPlaneReferenceFrame.get().getOrientationUnsafe());
+                                                          tempQuaternion.get());
+         tempIntersectPlaneReferenceFrame.get().setOrientationAndUpdate(tempQuaternion.get());
          tempIntersectPlaneReferenceFrame.get().setPositionWithoutChecksAndUpdate(planeOne.getPoint());
 
          tempIntersectFrameLineOne.get().setPointWithoutChecks(planeOne.getPoint());
          tempIntersectFrameLineTwo.get().setPointWithoutChecks(planeTwo.getPoint());
 
-         Vector3d intersectVectorOne = tempIntersectFrameLineOne.get().getNormalizedVector();
-         Vector3d intersectVectorTwo = tempIntersectFrameLineTwo.get().getNormalizedVector();
+         Vector3D intersectVectorOne = tempIntersectFrameLineOne.get().getNormalizedVector();
+         Vector3D intersectVectorTwo = tempIntersectFrameLineTwo.get().getNormalizedVector();
          intersectVectorOne.cross(planeOne.getNormal(), intersectionToPack.getNormalizedVector());
          intersectVectorTwo.cross(planeTwo.getNormal(), intersectionToPack.getNormalizedVector());
          tempIntersectFrameLineOne.get().setVectorWithoutChecks(intersectVectorOne);

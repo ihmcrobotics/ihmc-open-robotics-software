@@ -1,13 +1,13 @@
 package us.ihmc.robotics.statistics;
 
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
-import org.junit.Test;
-
-import us.ihmc.tools.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.junit.Test;
+
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class CovarianceDerivationTest
 {

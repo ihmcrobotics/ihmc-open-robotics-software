@@ -1,21 +1,18 @@
 package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
-import javax.vecmath.Point3d;
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
+import java.util.Random;
 
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
-import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.ros.generators.RosExportedField;
+import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
-import us.ihmc.robotics.random.RandomTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.Random;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -26,20 +23,8 @@ import java.util.Random;
       topic = "/control/hand_trajectory")
 public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTrajectoryMessage> implements VisualizablePacket
 {
-   public enum BaseForControl
-   {
-      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the chest. In other words, the controlled hand moves along with the chest.")
-      CHEST,
-      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the estimated world. In other words, the controlled hand will remain fixed in world even if the robot starts moving.")
-      WORLD,
-      @RosEnumValueDocumentation(documentation = "The hand is controlled with respect to the middle of the feet. In other words, the controlled hand moves along with the robot when walking but is not affected by swaying.")
-      WALKING_PATH
-   }
-
    @RosExportedField(documentation = "Specifies which hand will execute the trajectory.")
    public RobotSide robotSide;
-   @RosExportedField(documentation = "Specifies whether the pose should be held with respect to the world or the chest. Note that in any case the desired hand pose must be expressed in world frame.")
-   public BaseForControl baseForControl;
 
    /**
     * Empty constructor for serialization.
@@ -48,15 +33,12 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandTrajectoryMessage(Random random)
    {
       super(random);
-      robotSide = RandomTools.generateRandomEnum(random, RobotSide.class);
-      baseForControl = RandomTools.generateRandomEnum(random, BaseForControl.class);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
    }
 
    /**
@@ -66,10 +48,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public HandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessage)
    {
       super(handTrajectoryMessage);
-      setUniqueId(handTrajectoryMessage.getUniqueId());
-      setDestination(handTrajectoryMessage.getDestination());
       robotSide = handTrajectoryMessage.robotSide;
-      baseForControl = handTrajectoryMessage.baseForControl;
    }
 
    /**
@@ -80,9 +59,10 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
+   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
-      this(robotSide, BaseForControl.CHEST, trajectoryTime, desiredPosition, desiredOrientation);
+      super(trajectoryTime, desiredPosition, desiredOrientation);
+      this.robotSide = robotSide;
    }
 
    /**
@@ -94,17 +74,17 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, double trajectoryTime, Point3d desiredPosition, Quat4d desiredOrientation)
+   public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
+   // TODO: nuke this constructor once BaseForControl is no more.
+
       super(trajectoryTime, desiredPosition, desiredOrientation);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      this.baseForControl = base;
    }
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3d, Quat4d, Vector3d, Vector3d)} for each trajectory point afterwards.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
     * @param base define with respect to what base the hand is controlled.
@@ -112,10 +92,23 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     */
    public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, int numberOfTrajectoryPoints)
    {
+      // TODO: nuke this constructor once BaseForControl is no more.
+
       super(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      this.baseForControl = base;
+   }
+
+   /**
+    * Use this constructor to build a message with more than one trajectory point.
+    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param robotSide is used to define which hand is performing the trajectory.
+    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
+    */
+   public HandTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
+   {
+      super(numberOfTrajectoryPoints);
+      this.robotSide = robotSide;
    }
 
    @Override
@@ -123,8 +116,6 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    {
       super.set(other);
       robotSide = other.robotSide;
-      baseForControl = other.baseForControl;
-      executionMode = other.executionMode;
    }
 
    public RobotSide getRobotSide()
@@ -132,28 +123,13 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       return robotSide;
    }
 
-   public BaseForControl getBase()
-   {
-      return baseForControl;
-   }
-
    @Override
    public boolean epsilonEquals(HandTrajectoryMessage other, double epsilon)
    {
       if (robotSide != other.robotSide)
          return false;
-      if (baseForControl != other.baseForControl)
-         return false;
 
       return super.epsilonEquals(other, epsilon);
-   }
-
-   @Override
-   public HandTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      HandTrajectoryMessage transformedHandTrajectoryMessage = new HandTrajectoryMessage(this);
-      transformedHandTrajectoryMessage.applyTransform(transform);
-      return transformedHandTrajectoryMessage;
    }
 
    @Override
@@ -165,7 +141,7 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
       else
          ret = "Hand SE3 trajectory: no SE3 trajectory points";
 
-      return ret + ", robotSide = " + robotSide + ", base for control = " + baseForControl;
+      return ret + ", robotSide = " + robotSide;
    }
 
    /** {@inheritDoc} */
@@ -173,5 +149,12 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public String validateMessage()
    {
       return PacketValidityChecker.validateHandTrajectoryMessage(this);
+   }
+
+   public BaseForControl getBase()
+   {
+      // TODO: nuke this once BaseForControl is no more.
+
+      return BaseForControl.WORLD;
    }
 }

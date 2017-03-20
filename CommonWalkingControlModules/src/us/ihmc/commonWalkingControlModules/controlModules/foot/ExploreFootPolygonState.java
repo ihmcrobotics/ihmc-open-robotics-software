@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import javax.vecmath.Vector2d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
@@ -82,7 +81,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       explorationMethod = new EnumYoVariable<ExplorationMethod>(footName + "ExplorationMethod", registry, ExplorationMethod.class);
       explorationMethod.set(ExplorationMethod.LINES);
 
-      dt = momentumBasedController.getControlDT();
+      dt = controllerToolbox.getControlDT();
       ExplorationParameters explorationParameters =
             footControlHelper.getWalkingControllerParameters().getOrCreateExplorationParameters(registry);
 
@@ -93,7 +92,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       internalHoldPositionState.doFootholdAdjustments(false);
 
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
-      footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
 
       centerOfPressureCommand.setContactingRigidBody(contactableFoot.getRigidBody());
 
@@ -139,7 +138,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       internalHoldPositionState.setWeight(weight);
    }
 
-   public void setWeights(Vector3d angular, Vector3d linear)
+   public void setWeights(Vector3D angular, Vector3D linear)
    {
       internalHoldPositionState.setWeights(angular, linear);
    }
@@ -164,7 +163,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       yoCurrentCorner.set(0);
    }
 
-   private final Vector2d tempVector2d = new Vector2d();
+   private final Vector2D tempVector2d = new Vector2D();
    private final FramePoint2d shrunkPolygonCentroid = new FramePoint2d();
    private final FramePoint2d desiredCenterOfPressure = new FramePoint2d();
    private final FramePoint2d currentCorner = new FramePoint2d();
@@ -177,7 +176,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       double timeInState = getTimeInCurrentState();
 
       footSwitch.computeAndPackCoP(cop);
-      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
       partialFootholdControlModule.compute(desiredCoP, cop);
 
       if (timeInState < timeBeforeExploring.getDoubleValue())
@@ -188,7 +187,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       boolean contactStateHasChanged = false;
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+         YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
          {
@@ -209,7 +208,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             double settleDuration = 0.1;
 
             double percentRampOut = (timeInState - lastShrunkTime.getDoubleValue() - settleDuration) / rampOutDuration;
-            rampOutDuration = MathTools.clipToMinMax(rampOutDuration, 0.0, 1.0);
+            rampOutDuration = MathTools.clamp(rampOutDuration, 0.0, 1.0);
 
             boolean doSpiral = timeInState - lastShrunkTime.getDoubleValue() - settleDuration > rampOutDuration;
 
@@ -265,7 +264,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
             if (timeExploringCurrentCorner <= timeToGoToCorner)
             {
                double percent = timeExploringCurrentCorner / timeToGoToCorner;
-               percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+               percent = MathTools.clamp(percent, 0.0, 1.0);
                desiredCenterOfPressure.interpolate(centroid, currentCorner, percent);
             }
             else

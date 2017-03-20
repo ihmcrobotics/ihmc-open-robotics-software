@@ -2,14 +2,12 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-import javax.vecmath.Vector3d;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
@@ -94,7 +92,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
    public LinearMomentumRateOfChangeControlModule(String namePrefix, ReferenceFrames referenceFrames, double gravityZ, 
          double totalMass, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry, boolean use2DProjection)
    {
-      MathTools.checkIfInRange(gravityZ, 0.0, Double.POSITIVE_INFINITY);
+      MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
       this.totalMass = totalMass;
       this.gravityZ = gravityZ;
@@ -163,23 +161,23 @@ public abstract class LinearMomentumRateOfChangeControlModule
    }
 
 
-   public void setMomentumWeight(Vector3d angularWeight, Vector3d linearWeight)
+   public void setMomentumWeight(Vector3D angularWeight, Vector3D linearWeight)
    {
       defaultLinearMomentumRateWeight.set(linearWeight);
       defaultAngularMomentumRateWeight.set(angularWeight);
    }
 
-   public void setMomentumWeight(Vector3d linearWeight)
+   public void setMomentumWeight(Vector3D linearWeight)
    {
       defaultLinearMomentumRateWeight.set(linearWeight);
    }
 
-   public void setAngularMomentumWeight(Vector3d angularWeight)
+   public void setAngularMomentumWeight(Vector3D angularWeight)
    {
       defaultAngularMomentumRateWeight.set(angularWeight);
    }
 
-   public void setHighMomentumWeightForRecovery(Vector3d highLinearWeight)
+   public void setHighMomentumWeightForRecovery(Vector3D highLinearWeight)
    {
       highLinearMomentumRateWeight.set(highLinearWeight);
    }

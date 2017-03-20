@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
-
 import com.jme3.app.Application;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
@@ -22,20 +19,33 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 import jme3tools.optimize.GeometryBatchFactory;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.instructions.ArcTorusGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CapsuleGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ConeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.CubeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.EllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.ExtrudedPolygonGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddExtrusionInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddHeightMapInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddMeshDataInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.HemiEllipsoidGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PolygonGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.PrimitiveGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.PyramidCubeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.SphereGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.TruncatedConeGraphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.WedgeGraphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.listeners.AppearanceChangedListener;
 import us.ihmc.graphicsDescription.instructions.listeners.ExtrusionChangedListener;
 import us.ihmc.graphicsDescription.instructions.listeners.MeshChangedListener;
@@ -47,7 +57,6 @@ import us.ihmc.jMonkeyEngineToolkit.graphics.Graphics3DInstructionExecutor;
 import us.ihmc.jMonkeyEngineToolkit.jme.terrain.JMEHeightMapTerrain;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.jMonkeyEngineToolkit.tralala.ShapeUtilities;
-import us.ihmc.robotics.geometry.RotationTools;
 
 public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 {
@@ -218,8 +227,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    @Override
    protected void doRotateInstruction(Graphics3DRotateInstruction graphics3dObjectRotateMatrix)
    {
-      Quat4d quat4d = new Quat4d();
-      RotationTools.convertMatrixToQuaternion(graphics3dObjectRotateMatrix.getRotationMatrix(), quat4d);
+      QuaternionBasics quat4d = new us.ihmc.euclid.tuple4D.Quaternion(graphics3dObjectRotateMatrix.getRotationMatrix());
 
       // DON'T USE THIS: the method in Quat4d is flawed and doesn't work for some rotation matrices!
       //      quat4d.set(graphics3dObjectRotateMatrix.getRotationMatrix());
@@ -234,7 +242,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
    protected void doScaleInstruction(Graphics3DScaleInstruction graphics3dObjectScale)
    {
       Node scale = new Node();
-      Vector3d scaleFactor = graphics3dObjectScale.getScaleFactor();
+      Vector3D scaleFactor = graphics3dObjectScale.getScaleFactor();
       scale.setLocalScale((float) scaleFactor.getX(), (float) scaleFactor.getY(), (float) scaleFactor.getZ());
 
       currentNode.attachChild(scale);
@@ -248,7 +256,7 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
       graphics3dObjectScale.addChangeScaleListener(new ScaleChangedListener()
       {
 
-         public void setScale(final Vector3d scaleFactor)
+         public void setScale(final Vector3D scaleFactor)
          {
             checkIfNotImmutable();
             application.enqueue(new Callable<Object>()
@@ -505,11 +513,108 @@ public class JMEGraphicsObject extends Graphics3DInstructionExecutor
 
          doAddMeshDataInstruction(meshDataInstruction);
       }
+      else if(primitiveInstruction instanceof WedgeGraphics3DInstruction)
+      {
+         WedgeGraphics3DInstruction wedgeInstruction = (WedgeGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator.Wedge(wedgeInstruction.getLengthX(), wedgeInstruction.getWidthY(), wedgeInstruction.getHeightZ());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, wedgeInstruction.getAppearance());
+
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if (primitiveInstruction instanceof CapsuleGraphics3DInstruction)
+      {
+         CapsuleGraphics3DInstruction capsuleInstruction = (CapsuleGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator
+               .Capsule(capsuleInstruction.getHeight(), capsuleInstruction.getXRadius(), capsuleInstruction.getYRadius(), capsuleInstruction.getZRadius(),
+                        capsuleInstruction.getResolution(), capsuleInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, capsuleInstruction.getAppearance());
+
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if (primitiveInstruction instanceof EllipsoidGraphics3DInstruction)
+      {
+         EllipsoidGraphics3DInstruction ellipsoidInstruction = (EllipsoidGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator
+               .Ellipsoid(ellipsoidInstruction.getXRadius(), ellipsoidInstruction.getYRadius(), ellipsoidInstruction.getZRadius(),
+                          ellipsoidInstruction.getResolution(), ellipsoidInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, ellipsoidInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if(primitiveInstruction instanceof CylinderGraphics3DInstruction)
+      {
+         CylinderGraphics3DInstruction cylinderInstruction = (CylinderGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator
+               .Cylinder(cylinderInstruction.getRadius(), cylinderInstruction.getHeight(), cylinderInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, cylinderInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if (primitiveInstruction instanceof ConeGraphics3DInstruction)
+      {
+         ConeGraphics3DInstruction coneInstruction = (ConeGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator.Cone(coneInstruction.getHeight(), coneInstruction.getRadius(), coneInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, coneInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if (primitiveInstruction instanceof TruncatedConeGraphics3DInstruction)
+      {
+         TruncatedConeGraphics3DInstruction truncatedConeInstruction = (TruncatedConeGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator
+               .GenTruncatedCone(truncatedConeInstruction.getHeight(), truncatedConeInstruction.getXBaseRadius(), truncatedConeInstruction.getYBaseRadius(),
+                                 truncatedConeInstruction.getXTopRadius(), truncatedConeInstruction.getYTopRadius(), truncatedConeInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, truncatedConeInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if (primitiveInstruction instanceof HemiEllipsoidGraphics3DInstruction)
+      {
+         HemiEllipsoidGraphics3DInstruction hemiEllipsoidInstruction = (HemiEllipsoidGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator
+               .HemiEllipsoid(hemiEllipsoidInstruction.getXRadius(), hemiEllipsoidInstruction.getYRadius(), hemiEllipsoidInstruction.getZRadius(),
+                              hemiEllipsoidInstruction.getResolution(), hemiEllipsoidInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, hemiEllipsoidInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if(primitiveInstruction instanceof ArcTorusGraphics3DInstruction)
+      {
+         ArcTorusGraphics3DInstruction arcTorusInstruction = (ArcTorusGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator.ArcTorus(arcTorusInstruction.getStartAngle(), arcTorusInstruction.getEndAngle(), arcTorusInstruction.getMajorRadius(), arcTorusInstruction.getMinorRadius(), arcTorusInstruction.getResolution());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, arcTorusInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if(primitiveInstruction instanceof PyramidCubeGraphics3DInstruction)
+      {
+         PyramidCubeGraphics3DInstruction pyramidInstruction = (PyramidCubeGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator.PyramidCube(pyramidInstruction.getLengthX(), pyramidInstruction.getWidthY(), pyramidInstruction.getHeightZ(), pyramidInstruction.getPyramidHeight());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, pyramidInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if(primitiveInstruction instanceof PolygonGraphics3DInstruction)
+      {
+         PolygonGraphics3DInstruction polygonInstruction = (PolygonGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator.Polygon(polygonInstruction.getPolygonPoints());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, polygonInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
+      else if(primitiveInstruction instanceof ExtrudedPolygonGraphics3DInstruction)
+      {
+         ExtrudedPolygonGraphics3DInstruction extrudedPolygonInstruction = (ExtrudedPolygonGraphics3DInstruction) primitiveInstruction;
+
+         MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(extrudedPolygonInstruction.getPolygonPoints(), extrudedPolygonInstruction.getExtrusionHeight());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, extrudedPolygonInstruction.getAppearance());
+         doAddMeshDataInstruction(meshDataInstruction);
+      }
       else
       {
          throw new RuntimeException("Need to support that primitive type! primitiveInstruction = " + primitiveInstruction);
       }
-      
-      
    }
 }

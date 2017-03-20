@@ -1,24 +1,21 @@
 package us.ihmc.utilities.ros.publisher;
 
-import geometry_msgs.Quaternion;
-import geometry_msgs.Transform;
-import geometry_msgs.TransformStamped;
-import geometry_msgs.Vector3;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.vecmath.Quat4d;
-import javax.vecmath.Vector3d;
 
 import org.ros.internal.message.definition.MessageDefinitionReflectionProvider;
 import org.ros.internal.message.topic.TopicMessageFactory;
 import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.Time;
 
+import geometry_msgs.Quaternion;
+import geometry_msgs.Transform;
+import geometry_msgs.TransformStamped;
+import geometry_msgs.Vector3;
 import std_msgs.Header;
 import tf.tfMessage;
-import us.ihmc.robotics.geometry.RigidBodyTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class RosTf1Publisher extends RosTopicPublisher<tf.tfMessage> implements RosTfPublisherInterface
 {
@@ -42,11 +39,11 @@ public class RosTf1Publisher extends RosTopicPublisher<tf.tfMessage> implements 
       Quaternion rot = topicMessageFactory.newFromType(Quaternion._TYPE);
       Vector3 trans = topicMessageFactory.newFromType(Vector3._TYPE);
       
-      Quat4d quat4d = new Quat4d();
-      Vector3d vector3d = new Vector3d();
+      us.ihmc.euclid.tuple4D.Quaternion quat4d = new us.ihmc.euclid.tuple4D.Quaternion();
+      Vector3D vector3d = new Vector3D();
       transform3d.get(quat4d, vector3d);
       
-      rot.setW(quat4d.getW());
+      rot.setW(quat4d.getS());
       rot.setX(quat4d.getX());
       rot.setY(quat4d.getY());
       rot.setZ(quat4d.getZ());

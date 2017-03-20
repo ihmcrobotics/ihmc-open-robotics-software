@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.vecmath.Matrix3d;
-import javax.vecmath.Vector3d;
-
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -130,7 +130,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
 
       if (inertia != null)
       {
-         Matrix3d inertiaMatrix = inertia.getMassMomentOfInertiaPartCopy();
+         Matrix3D inertiaMatrix = inertia.getMassMomentOfInertiaPartCopy();
          double mass = inertia.getMass();
 
          //         Vector3d principalMomentsOfInertia = new Vector3d(inertiaMatrix.m00, inertiaMatrix.m11, inertiaMatrix.m22);
@@ -146,7 +146,7 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
          AppearanceDefinition appearance = YoAppearance.Color(getColor(currentRigidBody.getInertia().getMass()));
          appearance.setTransparency(0.6);
 
-         //            new DynamicGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
+         //            new YoGraphicShape(rigidBodyName, linkGraphics, framePose, scale)
          YoGraphicShape comViz = new YoGraphicShape(rigidBodyName + "CoMEllipsoid", createEllipsoid(inertiaMatrix, mass, appearance), comPosition,
                comOrientation, 1.0);
          yoGraphics.add(comViz);
@@ -216,10 +216,10 @@ public class CommonInertiaEllipsoidsVisualizer implements Updatable, RobotContro
       update();
    }
 
-   private Graphics3DObject createEllipsoid(Matrix3d inertia, double mass, AppearanceDefinition appearance)
+   private Graphics3DObject createEllipsoid(Matrix3D inertia, double mass, AppearanceDefinition appearance)
    {
-      Matrix3d rotationMatrix3d = new Matrix3d();
-      Vector3d principalMomentsOfInertiaToPack = new Vector3d();
+      RotationMatrix rotationMatrix3d = new RotationMatrix();
+      Vector3D principalMomentsOfInertiaToPack = new Vector3D();
       InertiaTools.computePrincipalMomentsOfInertia(inertia, rotationMatrix3d, principalMomentsOfInertiaToPack);
 
       double a = 5.0 * principalMomentsOfInertiaToPack.getX() / mass;

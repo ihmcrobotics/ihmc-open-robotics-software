@@ -179,7 +179,7 @@ public class RevisedBacklashCompensatingVelocityYoVariable extends DoubleYoVaria
       double difference = currentPosition - lastPosition.getDoubleValue();
 
       double percent = timeSinceSloppy.getDoubleValue() / slopTime.getDoubleValue();
-      percent = MathTools.clipToMinMax(percent, 0.0, 1.0);
+      percent = MathTools.clamp(percent, 0.0, 1.0);
       if (Double.isNaN(percent))
          percent = 1.0;
 

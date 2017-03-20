@@ -40,7 +40,7 @@ public class SimpleCameraMouseEventHandler implements EventHandler<MouseEvent>
          {
             // Calculate the rotation change of the camera pitch
             double pitchRotate = xRotate.getAngle() + (mouseNewY - mouseOldY) / rotateModifier;
-            pitchRotate = MathTools.clipToMinMax(pitchRotate, cameraLimitY);
+            pitchRotate = MathTools.clamp(pitchRotate, cameraLimitY);
 
             xRotate.setAngle(pitchRotate);
 

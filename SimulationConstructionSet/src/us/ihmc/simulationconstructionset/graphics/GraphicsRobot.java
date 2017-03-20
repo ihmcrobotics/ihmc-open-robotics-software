@@ -108,7 +108,7 @@ public class GraphicsRobot implements GraphicsUpdatable
       Graphics3DObject graphics3DObject;
       if(useCollisionMeshes)
       {
-         graphics3DObject = generateGraphics3DObjectFromCollisionMesh(graphicsObjectsHolder.getCollisionObject(inverseDynamicsJoint.getName()));
+         graphics3DObject = generateGraphics3DObjectFromCollisionMeshes(graphicsObjectsHolder.getCollisionObjects(inverseDynamicsJoint.getName()));
       }
       else
       {
@@ -123,7 +123,7 @@ public class GraphicsRobot implements GraphicsUpdatable
       return graphicsJoint;
    }
 
-   private Graphics3DObject generateGraphics3DObjectFromCollisionMesh(CollisionMeshDescription collisionObject)
+   private Graphics3DObject generateGraphics3DObjectFromCollisionMeshes(ArrayList<CollisionMeshDescription> collisionObjects)
    {
       System.err.println("Need to implement " + getClass().getSimpleName() + ".generateGraphics3DObjectFromCollisionMesh()!");
       return null;

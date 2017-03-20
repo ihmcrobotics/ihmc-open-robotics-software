@@ -1,9 +1,8 @@
 package us.ihmc.humanoidRobotics.footstep.footstepGenerator;
 
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-
-import javax.vecmath.Point2d;
 
 /**
  * Created by agrabertilton on 2/20/15.
@@ -33,7 +32,7 @@ public class InterpolatedFootstepOverheadPath extends FootstepOverheadPath
       double x = (1-interpolationValue) * startPose.getX() + (interpolationValue) * endPose.getX();
       double y = (1-interpolationValue) * startPose.getY() + (interpolationValue) * endPose.getY();
       double yaw = (1-interpolationValue) * startPose.getYaw() + (interpolationValue) * endPose.getYaw();
-      return new FramePose2d(startPose.getReferenceFrame(), new Point2d(x,y), yaw);
+      return new FramePose2d(startPose.getReferenceFrame(), new Point2D(x,y), yaw);
    }
 
    @Override
