@@ -127,6 +127,8 @@ public class RigidBodyControlManager
       jointspaceControlState.setWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       userControlState.setWeights(userModeWeights);
+      if (loadBearingControlState != null)
+         loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
    public void setGains(Map<String, YoPIDGains> jointspaceGains, YoOrientationPIDGainsInterface taskspaceOrientationGains,
@@ -134,6 +136,8 @@ public class RigidBodyControlManager
    {
       jointspaceControlState.setGains(jointspaceGains);
       taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
+      if (loadBearingControlState != null)
+         loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
    public void initialize()

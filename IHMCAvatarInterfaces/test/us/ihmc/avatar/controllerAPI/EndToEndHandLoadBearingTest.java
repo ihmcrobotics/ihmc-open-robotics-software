@@ -22,9 +22,12 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
@@ -49,9 +52,15 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       String testName = getClass().getSimpleName();
       TestingEnvironment testingEnvironment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(testingEnvironment, testName, selectedLocation, simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraPosition(0.2, -10.0, 1.0);
-      drcSimulationTestHelper.getSimulationConstructionSet().setCameraFix(0.2, 0.0, 1.0);
+      double totalMass = fullRobotModel.getTotalMass();
+      PushRobotController pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      scs.setCameraPosition(0.2, -10.0, 1.0);
+      scs.setCameraFix(0.2, 0.0, 1.0);
+      scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -69,12 +78,12 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendPitchRotation(Math.PI / 2.0);
 
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.6, 0.3, 0.625), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D());
       drcSimulationTestHelper.send(handTrajectoryMessage1);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.6, 0.3, 0.525), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D());
       drcSimulationTestHelper.send(handTrajectoryMessage2);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
 
@@ -89,7 +98,16 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       loadBearingMessage.setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
       loadBearingMessage.setBodyFrameToContactFrame(transformToContactFrame);
       drcSimulationTestHelper.send(loadBearingMessage);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      // Now push the robot
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      double percentWeight = 0.1;
+      double magnitude = percentWeight * totalMass * 9.81;
+      double duration = 2.0;
+      pushRobotController.applyForce(forceDirection, magnitude, duration);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
