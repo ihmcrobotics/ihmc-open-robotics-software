@@ -129,7 +129,7 @@ public class LogDataProcessorHelper
       yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
       controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames, stateEstimatorFootSwitches,
-            null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, controllerDT, updatables, null);
+            null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, controllerDT, updatables, null, null);
 
    }
 

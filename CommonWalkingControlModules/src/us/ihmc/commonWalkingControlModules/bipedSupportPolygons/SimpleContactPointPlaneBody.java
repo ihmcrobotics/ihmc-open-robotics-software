@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -21,19 +21,18 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
 {
    private final String name;
    private final RigidBody rigidBody;
-   private final ReferenceFrame contactFrame;
+   private final PoseReferenceFrame contactFrame;
 
    private final List<FramePoint2d> contactPoints = new ArrayList<>();
 
-   public SimpleContactPointPlaneBody(String name, RigidBody rigidBody, Point3D contactPointInBodyFrame)
+   public SimpleContactPointPlaneBody(String name, RigidBody rigidBody, RigidBodyTransform contactPointInBodyFrame)
    {
       this.name = name;
       this.rigidBody = rigidBody;
 
-      RigidBodyTransform bodyToContact = new RigidBodyTransform();
-      bodyToContact.setTranslation(contactPointInBodyFrame);
-      contactFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent(name + "Frame", rigidBody.getBodyFixedFrame(), bodyToContact);
-
+      ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
+      contactFrame = new PoseReferenceFrame(name + "Frame", frameAfterJoint);
+      contactFrame.setPoseAndUpdate(contactPointInBodyFrame);
       contactPoints.add(new FramePoint2d(contactFrame));
    }
 
@@ -79,6 +78,12 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
    public List<FramePoint2d> getContactPoints2d()
    {
       return contactPoints;
+   }
+
+   @Override
+   public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
+   {
+      contactFrame.setPoseAndUpdate(transform);
    }
 
 }

@@ -4,7 +4,7 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
 
@@ -16,8 +16,8 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
    /** Sets the coefficient of friction that the controller will use for the contact point. */
    public double coefficientOfFriction = 0.0;
 
-   /** Sets the position of the contact point in the frame of the end effector body. */
-   public Point3D contactPointInBodyFrame = new Point3D();
+   /** Sets the transform of the contact frame in the frame of the end effector body. */
+   public RigidBodyTransform bodyFrameToContactFrame = new RigidBodyTransform();
 
    /** Sets the contact normal used by the controller to load the contact point. */
    public Vector3D contactNormalInWorldFrame = new Vector3D();
@@ -32,7 +32,7 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       load = random.nextBoolean();
       coefficientOfFriction = random.nextDouble();
-      contactPointInBodyFrame = EuclidCoreRandomTools.generateRandomPoint3D(random);
+      bodyFrameToContactFrame = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
       contactNormalInWorldFrame = EuclidCoreRandomTools.generateRandomVector3D(random);
    }
 
@@ -46,9 +46,9 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
-   public void setContactPointInBodyFrame(Point3D contactPointInBodyFrame)
+   public void setBodyFrameToContactFrame(RigidBodyTransform bodyFrameToContactFrame)
    {
-      this.contactPointInBodyFrame.set(contactPointInBodyFrame);
+      this.bodyFrameToContactFrame.set(bodyFrameToContactFrame);
    }
 
    public void setContactNormalInWorldFrame(Vector3D contactNormalInWorldFrame)
@@ -66,9 +66,9 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
       return coefficientOfFriction;
    }
 
-   public Point3D getContactPointInBodyFrame()
+   public RigidBodyTransform getBodyFrameToContactFrame()
    {
-      return contactPointInBodyFrame;
+      return bodyFrameToContactFrame;
    }
 
    public Vector3D getContactNormalInWorldFrame()
@@ -83,7 +83,7 @@ public class AbstractLoadBearingMessage <T extends AbstractLoadBearingMessage<T>
          return false;
       if (!(MathTools.epsilonEquals(coefficientOfFriction, other.coefficientOfFriction, epsilon)))
          return false;
-      if (!contactPointInBodyFrame.epsilonEquals(other.contactPointInBodyFrame, epsilon))
+      if (!bodyFrameToContactFrame.epsilonEquals(other.bodyFrameToContactFrame, epsilon))
          return false;
       if (!contactNormalInWorldFrame.epsilonEquals(other.contactNormalInWorldFrame, epsilon))
          return false;
