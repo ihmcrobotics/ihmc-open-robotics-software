@@ -260,8 +260,11 @@ public class WalkingCommandConsumer
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBodyControlManager handManager = handManagers.get(robotSide);
-            handManager.holdInJointspace();
-            handManager.resetJointIntegrators();
+            if (handManager != null && !handManager.isLoadBearing())
+            {
+               handManager.holdInJointspace();
+               handManager.resetJointIntegrators();
+            }
          }
 
          timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
