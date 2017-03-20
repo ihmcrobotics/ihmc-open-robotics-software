@@ -68,6 +68,8 @@ import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferVideoServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
+import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
+import us.ihmc.javaFXToolkit.graphing.YoJavaFXHeatmapGraph;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
@@ -1973,6 +1975,22 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
             standardGUIActions.setupExtraPanelsMenu(extraPanelConfigurationList, getStandardSimulationGUI());
          }
       });
+   }
+   
+   public JavaFX3DGraph addJavaFX3DGraph(String name)
+   {
+      JavaFX3DGraph javaFX3DGraph = new JavaFX3DGraph(myGraphArrayPanel, selectedVariableHolder, myDataBuffer, myDataBuffer);
+      setupExtraPanels(new ExtraPanelConfiguration(name, javaFX3DGraph.getPanel(), true));
+      selectPanel(name);
+      return javaFX3DGraph;
+   }
+   
+   public YoJavaFXHeatmapGraph addHeatmapGraph(String name)
+   {
+      YoJavaFXHeatmapGraph histogramGraph = new YoJavaFXHeatmapGraph(rootRegistry, myGraphArrayPanel, selectedVariableHolder, myDataBuffer, myDataBuffer);
+      setupExtraPanels(new ExtraPanelConfiguration(name, histogramGraph.getPanel(), true));
+      selectPanel(name);
+      return histogramGraph;
    }
 
    @Override
