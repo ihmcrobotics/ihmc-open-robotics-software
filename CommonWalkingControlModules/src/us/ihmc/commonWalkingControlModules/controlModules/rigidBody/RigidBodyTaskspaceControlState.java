@@ -284,14 +284,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       trackingOrientation.set(false);
       trackingPosition.set(false);
 
-      numberOfPointsInQueue.set(0);
-      numberOfPointsInGenerator.set(0);
-      numberOfPoints.set(0);
+      clear();
    }
 
    public void holdOrientation(FrameOrientation initialOrientation)
    {
-      overrideTrajectory();
+      clear();
       resetLastCommandId();
       queueInitialPoint(initialOrientation);
 
@@ -308,7 +306,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void holdPose(FramePose initialPose)
    {
-      overrideTrajectory();
+      clear();
       resetLastCommandId();
       queueInitialPoint(initialPose);
 
@@ -345,14 +343,14 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (override || isEmpty())
       {
-         overrideTrajectory();
+         clear();
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 0.0)
             queueInitialPoint(initialOrientation);
       }
       else if(command.getTrajectoryFrame() != trajectoryFrame)
       {
-         PrintTools.warn(warningPrefix + "Was executing in ." + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
+         PrintTools.warn(warningPrefix + "Was executing in " + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
          return false;
       }
       
@@ -392,7 +390,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (override || isEmpty())
       {
-         overrideTrajectory();
+         clear();
          trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
             queueInitialPoint(initialPose);
@@ -532,11 +530,14 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return false;
    }
 
-   private void overrideTrajectory()
+   private void clear()
    {
       orientationTrajectoryGenerator.clear();
       positionTrajectoryGenerator.clear();
       pointQueue.clear();
+      numberOfPointsInQueue.set(0);
+      numberOfPointsInGenerator.set(0);
+      numberOfPoints.set(0);
    }
 
    private boolean checkPoseGainsAndWeights()
