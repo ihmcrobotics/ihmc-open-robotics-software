@@ -68,11 +68,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.OffscreenBufferVideoServer;
 import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
-<<<<<<< HEAD
-import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
-=======
 import us.ihmc.robotics.dataStructures.MutableColor;
->>>>>>> refs/heads/develop
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

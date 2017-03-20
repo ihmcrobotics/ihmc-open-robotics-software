@@ -1,8 +1,5 @@
 package us.ihmc.simulationconstructionset.gui;
 
-<<<<<<< HEAD
-import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
-=======
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
@@ -22,7 +19,7 @@ import javax.swing.TransferHandler;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
->>>>>>> refs/heads/develop
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
