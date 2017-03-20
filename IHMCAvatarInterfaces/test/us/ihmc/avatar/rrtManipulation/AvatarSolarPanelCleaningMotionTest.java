@@ -32,11 +32,15 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.forwaypoint.EuclideanTrajectoryQuaternionCalculator;
 import us.ihmc.manipulation.planning.forwaypoint.FrameEuclideanTrajectoryQuaternion;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanel;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningBehavior;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -44,6 +48,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalc
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -65,6 +70,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
       
+   private FullHumanoidRobotModel fullRobotModel;
    SolarPanel solarPanel;
    
    public class SolarPanelCleaningEnvironment implements CommonAvatarEnvironmentInterface
@@ -160,10 +166,9 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
       CommonAvatarEnvironmentInterface envrionment = new SolarPanelCleaningEnvironment();
-      //CommonAvatarEnvironmentInterface envrionment = new FlatGroundEnvironment();
 
       drcBehaviorTestHelper = new DRCBehaviorTestHelper(envrionment, getSimpleRobotName(), null, simulationTestingParameters, getRobotModel());
-
+      fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       setupKinematicsToolboxModule();
    }
    
@@ -201,24 +206,9 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
       assertTrue(success);
 
-      Quaternion controllerDesiredHandOrientationR = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(RobotSide.RIGHT, scs);
-      Quaternion desiredHandOrientationR = new Quaternion();
-      desiredHandPoseR.getOrientation(desiredHandOrientationR);
-      Quaternion controllerDesiredHandOrientationL = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(RobotSide.LEFT, scs);
-      Quaternion desiredHandOrientationL = new Quaternion();
-      desiredHandPoseL.getOrientation(desiredHandOrientationL);
-
-      Point3D controllerDesiredHandPositionR = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(RobotSide.RIGHT, scs);
-      Point3D controllerDesiredHandPositionL = EndToEndHandTrajectoryMessageTest.findControllerDesiredPosition(RobotSide.LEFT, scs);
-      Point3D rightPosition = new Point3D();
-      desiredHandPoseR.getPosition(rightPosition);
-      Point3D leftPosition = new Point3D();
-      desiredHandPoseL.getPosition(leftPosition);
-
-
    }
    
-   @Test(timeout = 160000)
+   //@Test(timeout = 160000)
    public void testHalfCircleMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -237,20 +227,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       
       drcBehaviorTestHelper.updateRobotModel();
-
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                     getRobotModel().createFullRobotModel());
-      
-      SolarPanelCleaningBehavior solarPanelCleaningBehavior = new SolarPanelCleaningBehavior(solarPanel, ik);
-      
+            
       double motionTime = 3.0;
-//      SolarPanelCleaningPose startPose = new SolarPanelCleaningPose(new Point3D(0.6,  -0.25,  1.2), 0.0, -Math.PI/0.25, 0.0);
-//      solarPanelCleaningBehavior.setIKwithGoalPose(startPose, motionTime);
-//      PrintTools.info("goto Ready");
-//      
-//      drcBehaviorTestHelper.dispatchBehavior(ik);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);0
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       HandTrajectoryMessage handTrajectoryMessageOne = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, new Point3D(0.70,  -0.5,  1.2), new Quaternion());
@@ -300,9 +278,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          scs.addStaticLinkGraphics(createXYZAxis(poseOfWayPoint));
          // ----------------------------------
          Point3D desiredPosition = new Point3D(poseOfWayPoint.getPosition());
-         Vector3D desiredLinearVelocity = new Vector3D();
          Quaternion desiredOrientation = new Quaternion(poseOfWayPoint.getOrientation());
-         Vector3D desiredAngularVelocity = new Vector3D();
          
          
          
@@ -340,7 +316,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime);
    }
    
-   //@Test(timeout = 160000)
+   @Test(timeout = 160000)
    public void testCombinedStraightLineMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -351,7 +327,69 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       // ********** Planning *** //
       
+      SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
+
       
+      
+      //solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
+      
+      // ********** Behavior *** //
+      
+      
+      
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      double motionTime = 3.0;
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+            
+      SolarPanelCleaningPose aCleaningPoseOne = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.1);
+      scs.addStaticLinkGraphics(createXYZAxis(aCleaningPoseOne.getPose()));
+                  
+      wholeBodyTrajectoryMessage.clear();
+      wholeBodyTrajectoryMessage.setHandTrajectoryMessage(aCleaningPoseOne.getHandTrajectoryMessage(motionTime));
+      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
+      RigidBody pelvis = fullRobotModel.getPelvis();
+      FramePose desiredPelvisPose = new FramePose(pelvis.getBodyFixedFrame());
+      desiredPelvisPose.setPosition(new Point3D());
+      desiredPelvisPose.setOrientation(new Quaternion());
+      desiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      Point3D desiredPosition = new Point3D(desiredPelvisPose.getPosition());
+      Quaternion desiredOrientation = new Quaternion(desiredPelvisPose.getOrientation());
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(motionTime, desiredPosition, desiredOrientation);      
+      
+      SolarPanelCleaningPose aCleaningPoseTwo = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1);
+      scs.addStaticLinkGraphics(createXYZAxis(aCleaningPoseTwo.getPose()));
+      wholeBodyTrajectoryMessage.clear();
+      wholeBodyTrajectoryMessage.setHandTrajectoryMessage(aCleaningPoseOne.getHandTrajectoryMessage(motionTime));
+      //wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
+      
+      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      
+      
+      
+      
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+   }
+   
+   
+   //@Test(timeout = 160000)
+   public void testSolarPanelMotion() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+      setupCamera(scs);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      
+      // ********** Planning *** //
+      
+
 
       
       // ********** Behavior *** //
@@ -364,45 +402,19 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
                                                                                      drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                                      getRobotModel().createFullRobotModel());
       
-      SolarPanelCleaningBehavior solarPanelCleaningBehavior = new SolarPanelCleaningBehavior(solarPanel, ik);
-      
-      double motionTime = 3.0;
-//      SolarPanelCleaningPose startPose = new SolarPanelCleaningPose(new Point3D(0.6,  -0.25,  1.2), 0.0, -Math.PI/0.25, 0.0);
-//      solarPanelCleaningBehavior.setIKwithGoalPose(startPose, motionTime);
-//      PrintTools.info("goto Ready");
-//      
-//      drcBehaviorTestHelper.dispatchBehavior(ik);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
-      
-      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      HandTrajectoryMessage handTrajectoryMessageOne = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, new Point3D(0.70,  -0.5,  1.2), new Quaternion());
-      
-      int numberOfWayPoints = 10;
-      HandTrajectoryMessage handTrajectoryMessageLine = new HandTrajectoryMessage(RobotSide.RIGHT, BaseForControl.WORLD, numberOfWayPoints);
-      
-      wholeBodyTrajectoryMessage.clear();
-      wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessageOne);
-      //setPelvis
-      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      
-      wholeBodyTrajectoryMessage.clear();
-      wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessageLine);
-      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
       
       
       
       
       
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
    }
    
    private void setUpSolarPanel()
    {
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.7, 0.05, 1.0);
+      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
       quaternionSolarPanel.appendRollRotation(0.0);
       quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
       poseSolarPanel.setOrientation(quaternionSolarPanel);

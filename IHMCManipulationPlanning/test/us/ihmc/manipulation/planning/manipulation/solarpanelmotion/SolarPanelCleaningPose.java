@@ -1,97 +1,84 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SolarPanelCleaningPose
 {
-   // Euler angle is from X-Y'-Z'' intrinsic rotation.
-   private Point3D location;
-   private double rotationX;
-   private double rotationY;
-   private double rotationZ = Double.NaN;
-
-   private Quaternion quaternion;
+   private SolarPanel solarPanel;
+   private double uCoordinate;
+   private double vCoordinate;
+   private double wCoordinate;
    private Pose pose;
-
-   public SolarPanelCleaningPose()
+   
+   public SolarPanelCleaningPose(SolarPanel solarPanel, double u, double v, double w)
    {
-      this.location = new Point3D();
-      this.rotationX = 0;
-      this.rotationY = 0;
-      this.quaternion = new Quaternion();      
+      this.solarPanel = solarPanel;
+      this.uCoordinate = u;
+      this.vCoordinate = v;
+      this.wCoordinate = w;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate);
    }
    
-   public SolarPanelCleaningPose(Point3D location, double rotationX, double rotationY)
-   {
-      this.location = location;
-      this.rotationX = rotationX;
-      this.rotationY = rotationY;
-      this.quaternion = new Quaternion();      
-   }
-   
-   public SolarPanelCleaningPose(Point3D location, double rotationX, double rotationY, double rotationZ)
-   {
-      this.location = location;
-      this.rotationX = rotationX;
-      this.rotationY = rotationY;
-      this.rotationZ = rotationZ;
-      getQuaternion();  
-   }
-
-   public Point3D getLocation()
-   {
-      return location;
-   }
-
-   public void setRotationX(double rotationX)
-   {
-      this.rotationX = rotationX;
-   }
-   
-   public void setRotationY(double rotationY)
-   {
-      this.rotationY = rotationY;
-   }
-   
-   public void setRotationZ(double rotationZ)
-   {
-      this.rotationZ = rotationZ;
-   }
-
-   public void getQuaternion()
-   {
-      if (Double.isNaN(this.rotationZ) == true)
-      {
-         PrintTools.info("please setRotationZ");
-      }
-      else
-      {
-         quaternion = new Quaternion();
-         quaternion.appendRollRotation(this.rotationX);
-         quaternion.appendPitchRotation(this.rotationY);
-         quaternion.appendYawRotation(this.rotationZ);
-      }
-   }
-   
-   public Quaternion getRotation()
-   {
-      getQuaternion();
-      return quaternion;
-   }
-
    public Pose getPose()
    {
-      this.pose = new Pose(this.location, getRotation());
+      return this.pose;
+   }
+   
+   private Pose getPose(double u, double v, double w)
+   {
+      Pose pose = new Pose();
+      
+      RigidBodyTransform poseTransform = solarPanel.getRigidBodyTransform();
+      
+      Point3D translation;
+      translation = new Point3D(solarPanel.getSizeX()/2, solarPanel.getSizeY()/2, 0);
+      poseTransform.appendTranslation(translation);
+      
+      poseTransform.appendPitchRotation(Math.PI);
+      poseTransform.appendYawRotation(-Math.PI/2);      
+      
+      Point3D uvwCoordinate;
+      uvwCoordinate = new Point3D(u, v, w);
+      poseTransform.appendTranslation(uvwCoordinate);
+      
+      pose.setPosition(poseTransform.getTranslationVector());
+      pose.setOrientation(poseTransform.getRotationMatrix());
       
       return pose;
    }
    
-   public Pose getPose(double rotationZ)
+   public void setZRotation(double zRotation)
    {
-      setRotationZ(rotationZ);
-      return getPose();
+      RigidBodyTransform appendTransform = new RigidBodyTransform();
+      appendTransform.setIdentity();
+      appendTransform.appendYawRotation(zRotation);
+            
+      pose.appendTransform(appendTransform);
+   }
+   
+   public HandTrajectoryMessage getHandTrajectoryMessage(double motionTime)
+   {      
+      RigidBodyTransform handPoseTransform = new RigidBodyTransform(this.pose.getOrientation(), this.pose.getPosition());
+      
+      handPoseTransform.appendPitchRotation(-Math.PI/2);
+      handPoseTransform.appendRollRotation(Math.PI/2);
+      
+      Point3D positionToWorld = new Point3D(this.pose.getPosition());
+      
+      Quaternion orientationToWorld = new Quaternion(handPoseTransform.getRotationMatrix());
+            
+      PrintTools.info(""+positionToWorld.getX()+" "+positionToWorld.getY()+" "+positionToWorld.getZ()+" ");
+      
+      HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld);
+      
+      
+      
+      return handMessage;
    }
 }
