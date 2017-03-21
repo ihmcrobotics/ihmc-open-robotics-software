@@ -2,13 +2,11 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -21,11 +19,8 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
-import javax.naming.Reference;
-
-public class DynamicReachabilityValidator
+public class DynamicReachabilityCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -33,6 +28,11 @@ public class DynamicReachabilityValidator
 
    private final DoubleYoVariable minimumLegLength = new DoubleYoVariable("minimumLegLength", registry);
    private final DoubleYoVariable maximumLegLength = new DoubleYoVariable("maximumLegLength", registry);
+
+   private final DoubleYoVariable stanceMaximumLengthCheck = new DoubleYoVariable("stanceMaximumLengthCheck", registry);
+   private final DoubleYoVariable stanceMinimumLengthCheck = new DoubleYoVariable("stanceMinimumLengthCheck", registry);
+   private final DoubleYoVariable swingMaximumLengthCheck = new DoubleYoVariable("swingMaximumLengthCheck", registry);
+   private final DoubleYoVariable swingMinimumLengthCheck = new DoubleYoVariable("swingMinimumLengthCheck", registry);
 
    private final DoubleYoVariable maximumDesiredKneeBend = new DoubleYoVariable("maximumDesiredKneeBend", registry);
 
@@ -73,12 +73,10 @@ public class DynamicReachabilityValidator
    private final TranslationReferenceFrame predictedPelvisFrame;
    private final SideDependentList<ReferenceFrame> predictedHipFrames = new SideDependentList<>();
 
-   private final FramePose predictedPelvisPose = new FramePose();
-
    private final FramePoint predictedCoMPosition = new FramePoint();
    private final FrameOrientation predictedPelvisOrientation = new FrameOrientation();
 
-   public DynamicReachabilityValidator(ICPPlanner icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
+   public DynamicReachabilityCalculator(ICPPlanner icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpPlanner = icpPlanner;
@@ -198,12 +196,24 @@ public class DynamicReachabilityValidator
       return isStepReachable.getBooleanValue();
    }
 
+   private final FrameOrientation stanceFootOrientation = new FrameOrientation();
+   private final FrameOrientation footstepOrientation = new FrameOrientation();
    private void updateFrames(Footstep nextFootstep)
    {
+      RobotSide stanceSide = nextFootstep.getRobotSide().getOppositeSide();
+
       icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM);
       finalCoM.setXY(tempFinalCoM);
       predictedCoMPosition.setXY(tempFinalCoM);
-      predictedPelvisOrientation.setToZero(fullRobotModel.getPelvis().getBodyFixedFrame()); // // TODO: 3/20/17  make more advanced
+
+      stanceFootOrientation.setToZero(fullRobotModel.getFoot(stanceSide).getBodyFixedFrame());
+      nextFootstep.getOrientationIncludingFrame(footstepOrientation);
+
+      ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
+      stanceFootOrientation.changeFrame(pelvisFrame);
+      footstepOrientation.changeFrame(pelvisFrame);
+      predictedPelvisOrientation.setToZero(pelvisFrame);
+      predictedPelvisOrientation.interpolate(stanceFootOrientation, footstepOrientation, 0.5);
 
       predictedCoMFrame.update();
       predictedPelvisFrame.update();
@@ -270,6 +280,9 @@ public class DynamicReachabilityValidator
       stanceLegMinimumHeight.set(minimumHeight);
       stanceLegMaximumHeight.set(maximumHeight);
       stanceHeightLine.set(minimumHeight, maximumHeight);
+
+      stanceMaximumLengthCheck.set(hipMaximumLocations.get(supportSide).distance(tempAnklePoint));
+      stanceMinimumLengthCheck.set(hipMinimumLocations.get(supportSide).distance(tempAnklePoint));
    }
 
    private void computeHeightLineFromStep(Footstep nextFootstep)
@@ -320,5 +333,8 @@ public class DynamicReachabilityValidator
       swingLegMinimumHeight.set(minimumHeight);
       swingLegMaximumHeight.set(maximumHeight);
       stepHeightLine.set(minimumHeight, maximumHeight);
+
+      swingMaximumLengthCheck.set(hipMaximumLocations.get(swingSide).distance(tempAnklePoint));
+      swingMinimumLengthCheck.set(hipMinimumLocations.get(swingSide).distance(tempAnklePoint));
    }
 }
