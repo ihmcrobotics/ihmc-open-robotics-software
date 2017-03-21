@@ -276,7 +276,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public void doTransitionOutOfAction()
    {
-      PrintTools.debug("transition out of");
       trackingOrientation.set(false);
       trackingPosition.set(false);
 
