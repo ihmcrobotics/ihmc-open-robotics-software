@@ -1,7 +1,6 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
 import java.awt.Color;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -12,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.PointCloud3DMeshGenerator;
 import us.ihmc.graphicsDescription.SegmentedLine3DMeshDataGenerator;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -21,19 +21,32 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 
 public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic, GraphicsUpdatable
 {
-   private static final int SHOW = 2;
-   private static final int HIDE = 4;
+   private final static AppearanceDefinition BLACK_APPEARANCE = YoAppearance.Black();
+
+   public enum TrajectoryGraphicType
+   {
+      HIDE, SHOW_AS_LINE, SHOW_AS_POINTS;
+      public static TrajectoryGraphicType[] values = values();
+   };
+
+   public enum TrajectoryColorType
+   {
+      BLACK, VELOCITY_BASED, ACCELERATION_BASED;
+      public static TrajectoryColorType[] values = values();
+   };
 
    private final YoGraphicJob yoGraphicJob;
 
@@ -43,25 +56,36 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
    private final Graphics3DObject graphics3dObject = new Graphics3DObject();
    private final AppearanceDefinition[] colorPalette = createColorPalette(128);
-   private final SegmentedLine3DMeshDataGenerator deformablePipeMeshCalculator;
+   private final SegmentedLine3DMeshDataGenerator segmentedLine3DMeshGenerator;
+   private final PointCloud3DMeshGenerator pointCloud3DMeshGenerator;
    private final Graphics3DAddMeshDataInstruction[] graphics3DAddMeshDataInstructions;
    private final Point3D[] intermediatePositions;
    private final Vector3D[] intermediateVelocities;
+   private final Vector3D[] intermediateAccelerations;
 
-   private final int hasPoseDefined;
+   private final boolean hasPoseDefined;
    private final YoFramePoseUsingQuaternions poseToPolynomialFrame;
 
    private final int numberOfPolynomials;
-   private final YoPolynomial[] xPolynomials;
-   private final int[] xPolynomialSizes;
-   private final YoPolynomial[] yPolynomials;
-   private final int[] yPolynomialSizes;
-   private final YoPolynomial[] zPolynomials;
-   private final int[] zPolynomialSizes;
+   private final YoPolynomial3D[] yoPolynomial3Ds;
+   /**
+    * This array is used to store the total number of YoVariables used for each
+    * {@code YoPolynomial}. It has a length equal to {@code 3 * yoPolynomial3Ds.length}, and the
+    * information is stored as follows:
+    * <p>
+    * {@code yoPolynomialSizes[3 * i + 0] = yoPolynomial3Ds[i].getYoPolynomialX().getMaximumNumberOfCoefficients() + 1;}
+    * <br>
+    * {@code yoPolynomialSizes[3 * i + 1] = yoPolynomial3Ds[i].getYoPolynomialY().getMaximumNumberOfCoefficients() + 1;}
+    * <br>
+    * {@code yoPolynomialSizes[3 * i + 2] = yoPolynomial3Ds[i].getYoPolynomialZ().getMaximumNumberOfCoefficients() + 1;}
+    * </p>
+    */
+   private final int[] yoPolynomialSizes;
    private final DoubleYoVariable[] waypointTimes;
 
    /** Notification for this YoGraphic of what task should be fulfilled see {@link CurrentTask}. */
-   private final IntegerYoVariable currentTask;
+   private final EnumYoVariable<?> currentGraphicType;
+   private final EnumYoVariable<?> currentColorType;
    /**
     * When this is created as a {@link RemoteYoGraphic}, it is consider as a READER and thus turns
     * on this flag to let the WRITER know that it has to synchronize.
@@ -70,76 +94,76 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
    private final AtomicBoolean dirtyGraphic = new AtomicBoolean(false);
 
-   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseToPolynomialFrame, YoPolynomial xPolynomial, YoPolynomial yPolynomial,
-                            YoPolynomial zPolynomial, DoubleYoVariable trajectoryTime, double radius, int resolution, int radialResolution,
-                            YoVariableRegistry registry)
+   public YoGraphicPolynomial3D(String name, List<YoPolynomial3D> yoPolynomial3Ds, List<DoubleYoVariable> waypointTimes, double radius, int resolution,
+                                int radialResolution, YoVariableRegistry registry)
    {
-      this(name, poseToPolynomialFrame, singletonArray(xPolynomial), singletonArray(yPolynomial), singletonArray(zPolynomial), singletonArray(trajectoryTime),
-           radius, resolution, radialResolution, registry);
+      this(name, null, yoPolynomial3Ds, waypointTimes, radius, resolution, radialResolution, registry);
    }
 
-   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseToPolynomialFrame, List<YoPolynomial> xPolynomials, List<YoPolynomial> yPolynomials,
-                            List<YoPolynomial> zPolynomials, List<DoubleYoVariable> waypointTimes, double radius, int resolution, int radialResolution,
-                            YoVariableRegistry registry)
+   public YoGraphicPolynomial3D(String name, YoPolynomial3D[] yoPolynomial3Ds, DoubleYoVariable[] waypointTimes, double radius, int resolution,
+                                int radialResolution, YoVariableRegistry registry)
    {
-      this(name, poseToPolynomialFrame, xPolynomials.toArray(new YoPolynomial[0]), yPolynomials.toArray(new YoPolynomial[0]),
-           zPolynomials.toArray(new YoPolynomial[0]), waypointTimes.toArray(new DoubleYoVariable[0]), radius, resolution, radialResolution, registry);
+      this(name, null, yoPolynomial3Ds, waypointTimes, radius, resolution, radialResolution, registry);
    }
 
-   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseToPolynomialFrame, YoPolynomial[] xPolynomials, YoPolynomial[] yPolynomials,
-                            YoPolynomial[] zPolynomials, DoubleYoVariable[] waypointTimes, double radius, int resolution, int radialResolution,
-                            YoVariableRegistry registry)
+   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseToPolynomialFrame, List<YoPolynomial3D> yoPolynomial3Ds,
+                                List<DoubleYoVariable> waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
+   {
+      this(name, poseToPolynomialFrame, yoPolynomial3Ds.toArray(new YoPolynomial3D[0]), toArray(waypointTimes), radius, resolution, radialResolution, registry);
+   }
+
+   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseToPolynomialFrame, YoPolynomial3D[] yoPolynomial3Ds,
+                                DoubleYoVariable[] waypointTimes, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
    {
       super(name);
 
       yoGraphicJob = YoGraphicJob.WRITER;
 
-      if (xPolynomials.length != yPolynomials.length || xPolynomials.length != zPolynomials.length || xPolynomials.length != waypointTimes.length)
-         throw new RuntimeException("Cannot handle different number of polynomial for the different axes.");
+      if (yoPolynomial3Ds.length != waypointTimes.length)
+         throw new RuntimeException("Inconsistent number of YoPolynomial3Ds ( " + yoPolynomial3Ds.length + " ) and waypoint times ( " + waypointTimes.length
+               + " ).");
 
       this.radius = radius;
       this.resolution = resolution;
       this.radialResolution = radialResolution;
-      this.xPolynomials = xPolynomials;
-      this.yPolynomials = yPolynomials;
-      this.zPolynomials = zPolynomials;
+      this.yoPolynomial3Ds = yoPolynomial3Ds;
       this.waypointTimes = waypointTimes;
 
-      hasPoseDefined = poseToPolynomialFrame != null ? 1 : 0;
+      hasPoseDefined = poseToPolynomialFrame != null;
       this.poseToPolynomialFrame = poseToPolynomialFrame;
 
-      numberOfPolynomials = xPolynomials.length;
+      numberOfPolynomials = yoPolynomial3Ds.length;
 
-      xPolynomialSizes = new int[xPolynomials.length];
-      for (int i = 0; i < xPolynomialSizes.length; i++)
-         xPolynomialSizes[i] = xPolynomials[i].getMaximumNumberOfCoefficients() + 1;
+      yoPolynomialSizes = new int[3 * numberOfPolynomials];
+      for (int i = 0; i < numberOfPolynomials; i++)
+      {
+         yoPolynomialSizes[3 * i + 0] = yoPolynomial3Ds[i].getYoPolynomialX().getMaximumNumberOfCoefficients() + 1;
+         yoPolynomialSizes[3 * i + 1] = yoPolynomial3Ds[i].getYoPolynomialY().getMaximumNumberOfCoefficients() + 1;
+         yoPolynomialSizes[3 * i + 2] = yoPolynomial3Ds[i].getYoPolynomialZ().getMaximumNumberOfCoefficients() + 1;
+      }
 
-      yPolynomialSizes = new int[yPolynomials.length];
-      for (int i = 0; i < yPolynomialSizes.length; i++)
-         yPolynomialSizes[i] = yPolynomials[i].getMaximumNumberOfCoefficients() + 1;
-
-      zPolynomialSizes = new int[zPolynomials.length];
-      for (int i = 0; i < zPolynomialSizes.length; i++)
-         zPolynomialSizes[i] = zPolynomials[i].getMaximumNumberOfCoefficients() + 1;
-
-      currentTask = new IntegerYoVariable(name, registry);
+      currentGraphicType = new EnumYoVariable<>(name + "CurrentGraphicType", registry, TrajectoryGraphicType.class, false);
+      currentColorType = new EnumYoVariable<>(name + "CurrentColorType", registry, TrajectoryColorType.class, false);
       readExists = new BooleanYoVariable(name + "ReaderExists", registry);
 
       intermediatePositions = new Point3D[resolution];
       intermediateVelocities = new Vector3D[resolution];
+      intermediateAccelerations = new Vector3D[resolution];
 
       for (int i = 0; i < resolution; i++)
       {
          intermediatePositions[i] = new Point3D();
          intermediateVelocities[i] = new Vector3D();
+         intermediateAccelerations[i] = new Vector3D();
       }
 
-      deformablePipeMeshCalculator = new SegmentedLine3DMeshDataGenerator(resolution, radialResolution, radius);
+      segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(resolution, radialResolution, radius);
+      pointCloud3DMeshGenerator = new PointCloud3DMeshGenerator(resolution, radialResolution, radius);
       graphics3DAddMeshDataInstructions = new Graphics3DAddMeshDataInstruction[resolution - 1];
 
       graphics3dObject.setChangeable(true);
       for (int i = 0; i < resolution - 1; i++)
-         graphics3DAddMeshDataInstructions[i] = graphics3dObject.addMeshData(deformablePipeMeshCalculator.getMeshDataHolders()[i], YoAppearance.AliceBlue());
+         graphics3DAddMeshDataInstructions[i] = graphics3dObject.addMeshData(segmentedLine3DMeshGenerator.getMeshDataHolders()[i], YoAppearance.AliceBlue());
 
       setupDirtyGraphicListener();
    }
@@ -169,19 +193,14 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       radius = constants[index++];
       resolution = constants[index++].intValue();
       radialResolution = constants[index++].intValue();
-      hasPoseDefined = constants[index++].intValue();
+      hasPoseDefined = constants[index++].intValue() == 1;
       numberOfPolynomials = constants[index++].intValue();
 
-      xPolynomialSizes = subArray(constants, index, numberOfPolynomials);
-      index += numberOfPolynomials;
-      yPolynomialSizes = subArray(constants, index, numberOfPolynomials);
-      index += numberOfPolynomials;
-      zPolynomialSizes = subArray(constants, index, numberOfPolynomials);
-      index += numberOfPolynomials;
+      yoPolynomialSizes = subArray(constants, index, 3 * numberOfPolynomials);
 
       index = 0;
 
-      if (hasPoseDefined == 1)
+      if (hasPoseDefined)
       {
          DoubleYoVariable xVariable = (DoubleYoVariable) yoVariables[index++];
          DoubleYoVariable yVariable = (DoubleYoVariable) yoVariables[index++];
@@ -199,50 +218,50 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          poseToPolynomialFrame = null;
       }
 
-      xPolynomials = new YoPolynomial[numberOfPolynomials];
+      yoPolynomial3Ds = new YoPolynomial3D[numberOfPolynomials];
+
       for (int i = 0; i < numberOfPolynomials; i++)
       {
-         xPolynomials[i] = new YoPolynomial(subArray((DoubleYoVariable[]) yoVariables, index + 1, xPolynomialSizes[i] - 1),
-                                            (IntegerYoVariable) yoVariables[index]);
-         index += xPolynomialSizes[i];
+         int xSize = yoPolynomialSizes[3 * i + 0];
+         int ySize = yoPolynomialSizes[3 * i + 1];
+         int zSize = yoPolynomialSizes[3 * i + 2];
+
+         YoPolynomial xPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, xSize - 1), (IntegerYoVariable) yoVariables[index]);
+         index += xSize;
+
+         YoPolynomial yPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, ySize - 1), (IntegerYoVariable) yoVariables[index]);
+         index += ySize;
+
+         YoPolynomial zPolynomial = new YoPolynomial(subArray(yoVariables, index + 1, zSize - 1), (IntegerYoVariable) yoVariables[index]);
+         index += zSize;
+
+         yoPolynomial3Ds[i] = new YoPolynomial3D(xPolynomial, yPolynomial, zPolynomial);
       }
 
-      yPolynomials = new YoPolynomial[numberOfPolynomials];
-      for (int i = 0; i < numberOfPolynomials; i++)
-      {
-         yPolynomials[i] = new YoPolynomial(subArray((DoubleYoVariable[]) yoVariables, index + 1, yPolynomialSizes[i] - 1),
-                                            (IntegerYoVariable) yoVariables[index]);
-         index += yPolynomialSizes[i];
-      }
+      waypointTimes = subArray(yoVariables, index, numberOfPolynomials);
 
-      zPolynomials = new YoPolynomial[numberOfPolynomials];
-      for (int i = 0; i < numberOfPolynomials; i++)
-      {
-         zPolynomials[i] = new YoPolynomial(subArray((DoubleYoVariable[]) yoVariables, index + 1, zPolynomialSizes[i] - 1),
-                                            (IntegerYoVariable) yoVariables[index]);
-         index += zPolynomialSizes[i];
-      }
-
-      waypointTimes = subArray((DoubleYoVariable[]) yoVariables, index, numberOfPolynomials);
-
-      currentTask = (IntegerYoVariable) yoVariables[index++];
+      currentGraphicType = (EnumYoVariable<?>) yoVariables[index++];
+      currentColorType = (EnumYoVariable<?>) yoVariables[index++];
       readExists = (BooleanYoVariable) yoVariables[index++];
 
       intermediatePositions = new Point3D[resolution];
       intermediateVelocities = new Vector3D[resolution];
+      intermediateAccelerations = new Vector3D[resolution];
 
       for (int i = 0; i < resolution; i++)
       {
          intermediatePositions[i] = new Point3D();
          intermediateVelocities[i] = new Vector3D();
+         intermediateAccelerations[i] = new Vector3D();
       }
 
-      deformablePipeMeshCalculator = new SegmentedLine3DMeshDataGenerator(resolution, radialResolution, radius);
+      segmentedLine3DMeshGenerator = new SegmentedLine3DMeshDataGenerator(resolution, radialResolution, radius);
+      pointCloud3DMeshGenerator = new PointCloud3DMeshGenerator(resolution, radialResolution);
       graphics3DAddMeshDataInstructions = new Graphics3DAddMeshDataInstruction[resolution - 1];
 
       graphics3dObject.setChangeable(true);
       for (int i = 0; i < resolution - 1; i++)
-         graphics3DAddMeshDataInstructions[i] = graphics3dObject.addMeshData(deformablePipeMeshCalculator.getMeshDataHolders()[i], YoAppearance.AliceBlue());
+         graphics3DAddMeshDataInstructions[i] = graphics3dObject.addMeshData(segmentedLine3DMeshGenerator.getMeshDataHolders()[i], YoAppearance.AliceBlue());
 
       setupDirtyGraphicListener();
    }
@@ -251,14 +270,8 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    {
       VariableChangedListener listener = v -> dirtyGraphic.set(true);
       getVariablesDefiningGraphic().forEach(variable -> variable.addVariableChangedListener(listener));
-   }
-
-   private static <T> T[] singletonArray(T object)
-   {
-      @SuppressWarnings("unchecked")
-      T[] singletonArray = (T[]) Array.newInstance(object.getClass(), 1);
-      singletonArray[0] = object;
-      return singletonArray;
+      currentGraphicType.addVariableChangedListener(listener);
+      currentColorType.addVariableChangedListener(listener);
    }
 
    private static int[] subArray(Double[] source, int start, int length)
@@ -269,10 +282,15 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       return subArray;
    }
 
-   private static DoubleYoVariable[] subArray(DoubleYoVariable[] source, int start, int length)
+   private static DoubleYoVariable[] toArray(List<DoubleYoVariable> list)
+   {
+      return list.toArray(new DoubleYoVariable[0]);
+   }
+
+   private static DoubleYoVariable[] subArray(YoVariable<?>[] source, int start, int length)
    {
       DoubleYoVariable[] subArray = new DoubleYoVariable[length];
-      System.arraycopy(source, start, subArray, 0, length);
+      System.arraycopy((DoubleYoVariable[]) source, start, subArray, 0, length);
       return subArray;
    }
 
@@ -289,16 +307,30 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       return colorPalette;
    }
 
+   public void setColorType(TrajectoryColorType colorType)
+   {
+      setCurrentColorType(colorType);
+   }
+
    public void showGraphic()
    {
-      currentTask.set(SHOW);
-      dirtyGraphic.set(true);
-      update();
+      setGraphicType(TrajectoryGraphicType.SHOW_AS_LINE);
    }
 
    public void hideGraphic()
    {
-      currentTask.set(HIDE);
+      setGraphicType(TrajectoryGraphicType.HIDE);
+   }
+
+   public void setGraphicType(TrajectoryGraphicType graphicType)
+   {
+      setCurrentGraphicType(graphicType);
+
+      if (graphicType != TrajectoryGraphicType.HIDE)
+      {
+         dirtyGraphic.set(true);
+         update();
+      }
    }
 
    @Override
@@ -310,22 +342,14 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          readExists.set(true);
       }
 
-      if (currentTask.getIntegerValue() == HIDE)
-         return;
-
       switch (yoGraphicJob)
       {
       case READER:
-         if (currentTask.getIntegerValue() == SHOW)
-         {
-            computeTrajectoryMesh();
-         }
+         computeTrajectoryMesh();
          break;
       case WRITER:
-         if (!readExists.getBooleanValue() && currentTask.getIntegerValue() == SHOW)
-         {
+         if (!readExists.getBooleanValue())
             computeTrajectoryMesh();
-         }
       default:
          break;
       }
@@ -336,11 +360,20 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       if (!dirtyGraphic.get())
          return;
 
-      for (int i = 0; i < resolution; i++)
+      if (getCurrentGraphicType() == TrajectoryGraphicType.HIDE)
       {
-         intermediatePositions[i].setToZero();
-         intermediateVelocities[i].setToZero();
+         for (Graphics3DAddMeshDataInstruction meshDataInstruction : graphics3DAddMeshDataInstructions)
+            meshDataInstruction.setMesh(null);
+         dirtyGraphic.set(false);
+         return;
       }
+
+      for (Point3D position : intermediatePositions)
+         position.setToZero();
+      for (Vector3D velocity : intermediateVelocities)
+         velocity.setToZero();
+      for (Vector3D acceleration : intermediateAccelerations)
+         acceleration.setToZero();
 
       int index = 0;
       double trajectoryTime = 0.0;
@@ -350,6 +383,9 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       int polynomialIndex = 0;
 
+      double maxVelocity = 0.0;
+      double maxAcceleration = 0.0;
+
       for (int i = 0; i < resolution; i++)
       {
          double t = i / (resolution - 1.0) * trajectoryTime;
@@ -357,34 +393,84 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          while (t > waypointTimes[polynomialIndex].getDoubleValue())
             polynomialIndex++;
 
-         YoPolynomial activeXPolynomial = xPolynomials[polynomialIndex];
-         YoPolynomial activeYPolynomial = yPolynomials[polynomialIndex];
-         YoPolynomial activeZPolynomial = zPolynomials[polynomialIndex];
-         activeXPolynomial.compute(t);
-         activeYPolynomial.compute(t);
-         activeZPolynomial.compute(t);
-         intermediatePositions[i].set(activeXPolynomial.getPosition(), activeYPolynomial.getPosition(), activeZPolynomial.getPosition());
-         intermediateVelocities[i].set(activeXPolynomial.getVelocity(), activeYPolynomial.getVelocity(), activeZPolynomial.getVelocity());
+         YoPolynomial3D activePolynomial3D = yoPolynomial3Ds[polynomialIndex];
+         activePolynomial3D.compute(t);
+         intermediatePositions[i].set(activePolynomial3D.getPosition());
+         intermediateVelocities[i].set(activePolynomial3D.getVelocity());
+         intermediateAccelerations[i].set(activePolynomial3D.getAcceleration());
+
+         maxVelocity = Math.max(maxVelocity, activePolynomial3D.getVelocity().lengthSquared());
+         maxAcceleration = Math.max(maxAcceleration, activePolynomial3D.getAcceleration().lengthSquared());
       }
 
-      deformablePipeMeshCalculator.compute(intermediatePositions, intermediateVelocities);
+      maxVelocity = Math.sqrt(maxVelocity);
+      maxAcceleration = Math.sqrt(maxAcceleration);
 
-      double maxVelocity = 0.0;
-
-      for (int i = 0; i < resolution; i++)
+      switch (getCurrentColorType())
       {
-         maxVelocity = Math.max(maxVelocity, intermediateVelocities[i].length());
+      case BLACK:
+         for (Graphics3DAddMeshDataInstruction meshDataInstruction : graphics3DAddMeshDataInstructions)
+            meshDataInstruction.setAppearance(BLACK_APPEARANCE);
+         break;
+      case VELOCITY_BASED:
+         for (int i = 0; i < resolution - 1; i++)
+         {
+            double velocity = intermediateVelocities[i].length();
+            int colorIndex = (int) Math.round((colorPalette.length - 1.0) * (velocity / maxVelocity));
+            graphics3DAddMeshDataInstructions[i].setAppearance(colorPalette[colorIndex]);
+         }
+         break;
+      case ACCELERATION_BASED:
+         for (int i = 0; i < resolution - 1; i++)
+         {
+
+            double acceleration = intermediateAccelerations[i].length();
+            int colorIndex = (int) Math.round((colorPalette.length - 1.0) * (acceleration / maxAcceleration));
+            graphics3DAddMeshDataInstructions[i].setAppearance(colorPalette[colorIndex]);
+         }
+         break;
+      default:
+         break;
       }
 
-      for (int i = 0; i < resolution - 1; i++)
+      switch (getCurrentGraphicType())
       {
-         double velocity = intermediateVelocities[i].length();
-         int colorIndex = (int) Math.round((colorPalette.length - 1.0) * (velocity / maxVelocity));
-         graphics3DAddMeshDataInstructions[i].setAppearance(colorPalette[colorIndex]);
-         graphics3DAddMeshDataInstructions[i].setMesh(deformablePipeMeshCalculator.getMeshDataHolders()[i]);
+      case SHOW_AS_LINE:
+         segmentedLine3DMeshGenerator.compute(intermediatePositions, intermediateVelocities);
+         for (int i = 0; i < resolution - 1; i++)
+            graphics3DAddMeshDataInstructions[i].setMesh(segmentedLine3DMeshGenerator.getMeshDataHolders()[i]);
+         break;
+
+      case SHOW_AS_POINTS:
+         pointCloud3DMeshGenerator.compute(intermediatePositions);
+         for (int i = 0; i < resolution - 1; i++)
+            graphics3DAddMeshDataInstructions[i].setMesh(pointCloud3DMeshGenerator.getMeshDataHolders()[i]);
+         break;
+      default:
+         throw new RuntimeException("Unexpected state: " + getCurrentGraphicType());
       }
 
       dirtyGraphic.set(false);
+   }
+
+   private void setCurrentGraphicType(TrajectoryGraphicType graphicType)
+   {
+      currentGraphicType.set(graphicType.ordinal());
+   }
+
+   private TrajectoryGraphicType getCurrentGraphicType()
+   {
+      return TrajectoryGraphicType.values[currentGraphicType.getOrdinal()];
+   }
+
+   private void setCurrentColorType(TrajectoryColorType colorType)
+   {
+      currentColorType.set(colorType.ordinal());
+   }
+
+   private TrajectoryColorType getCurrentColorType()
+   {
+      return TrajectoryColorType.values[currentColorType.getOrdinal()];
    }
 
    @Override
@@ -398,7 +484,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    {
       List<YoVariable<?>> allVariables = new ArrayList<>();
       allVariables.addAll(getVariablesDefiningGraphic());
-      allVariables.add(currentTask);
+      allVariables.add(currentGraphicType);
       allVariables.add(readExists);
 
       return allVariables.toArray(new YoVariable[0]);
@@ -419,9 +505,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          graphicVariables.add(poseToPolynomialFrame.getYoQs());
       }
 
-      addPolynomialVariablesToList(xPolynomials, numberOfPolynomials, graphicVariables);
-      addPolynomialVariablesToList(yPolynomials, numberOfPolynomials, graphicVariables);
-      addPolynomialVariablesToList(zPolynomials, numberOfPolynomials, graphicVariables);
+      addPolynomialVariablesToList(yoPolynomial3Ds, numberOfPolynomials, graphicVariables);
 
       for (DoubleYoVariable waypointTime : waypointTimes)
          graphicVariables.add(waypointTime);
@@ -429,13 +513,18 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       return graphicVariables;
    }
 
-   private static void addPolynomialVariablesToList(YoPolynomial[] yoPolynomials, int numberOfPolynomials, List<YoVariable<?>> allVariables)
+   private static void addPolynomialVariablesToList(YoPolynomial3D[] yoPolynomial3Ds, int numberOfPolynomials, List<YoVariable<?>> allVariables)
    {
       for (int i = 0; i < numberOfPolynomials; i++)
       {
-         allVariables.add(yoPolynomials[i].getYoNumberOfCoefficients());
-         for (YoVariable<?> coefficient : yoPolynomials[i].getYoCoefficients())
-            allVariables.add(coefficient);
+         for (int index = 0; index < 3; index++)
+         {
+            YoPolynomial yoPolynomial = yoPolynomial3Ds[i].getYoPolynomial(index);
+
+            allVariables.add(yoPolynomial.getYoNumberOfCoefficients());
+            for (YoVariable<?> coefficient : yoPolynomial.getYoCoefficients())
+               allVariables.add(coefficient);
+         }
       }
    }
 
@@ -447,18 +536,12 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       allConstants.add(resolution);
       allConstants.add(radialResolution);
 
-      allConstants.add(hasPoseDefined);
+      allConstants.add(hasPoseDefined ? 1 : 0);
 
       allConstants.add(numberOfPolynomials);
 
       for (int i = 0; i < numberOfPolynomials; i++)
-         allConstants.add(xPolynomialSizes[i]);
-
-      for (int i = 0; i < numberOfPolynomials; i++)
-         allConstants.add(yPolynomialSizes[i]);
-
-      for (int i = 0; i < numberOfPolynomials; i++)
-         allConstants.add(zPolynomialSizes[i]);
+         allConstants.add(yoPolynomialSizes[i]);
 
       return allConstants.toArray();
    }
@@ -481,7 +564,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    @Override
    protected void computeRotationTranslation(AffineTransform transform)
    {
-      if (currentTask.getIntegerValue() == HIDE)
+      if (getCurrentGraphicType() == TrajectoryGraphicType.HIDE)
          return;
 
       if (poseToPolynomialFrame != null)
@@ -494,13 +577,13 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          transform.setIdentity();
       }
 
-      computeTrajectoryMesh();
+      update();
    }
 
    @Override
    protected boolean containsNaN()
    { // Only used to determine if the graphics from this object is valid, and whether to display or hide.
-      return currentTask.getIntegerValue() == HIDE;
+      return getCurrentGraphicType() == TrajectoryGraphicType.HIDE;
    }
 
    @Override
