@@ -163,7 +163,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     * When this is created as a {@link RemoteYoGraphic}, it is consider as a READER and thus turns
     * on this flag to let the WRITER know that it has to synchronize.
     */
-   private final BooleanYoVariable readExists;
+   private final BooleanYoVariable readerExists;
 
    private final AtomicBoolean dirtyGraphic = new AtomicBoolean(false);
 
@@ -328,7 +328,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       currentGraphicType = new EnumYoVariable<>(name + "CurrentGraphicType", registry, TrajectoryGraphicType.class, false);
       currentColorType = new EnumYoVariable<>(name + "CurrentColorType", registry, TrajectoryColorType.class, false);
-      readExists = new BooleanYoVariable(name + "ReaderExists", registry);
+      readerExists = new BooleanYoVariable(name + "ReaderExists", registry);
 
       intermediatePositions = new Point3D[resolution];
       intermediateVelocities = new Vector3D[resolution];
@@ -427,7 +427,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       currentGraphicType = (EnumYoVariable<?>) yoVariables[index++];
       currentColorType = (EnumYoVariable<?>) yoVariables[index++];
-      readExists = (BooleanYoVariable) yoVariables[index++];
+      readerExists = (BooleanYoVariable) yoVariables[index++];
 
       intermediatePositions = new Point3D[resolution];
       intermediateVelocities = new Vector3D[resolution];
@@ -553,7 +553,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       if (yoGraphicJob == YoGraphicJob.READER)
       {
          // Notify the writer that a reader exists and the writer does not have to compute the meshes.
-         readExists.set(true);
+         readerExists.set(true);
       }
 
       switch (yoGraphicJob)
@@ -562,7 +562,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          computeTrajectoryMesh();
          break;
       case WRITER:
-         if (!readExists.getBooleanValue())
+         if (!readerExists.getBooleanValue())
             computeTrajectoryMesh();
       default:
          break;
@@ -701,7 +701,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    {
       List<YoVariable<?>> allVariables = new ArrayList<>();
       allVariables.addAll(getVariablesDefiningGraphic());
-      allVariables.add(readExists);
+      allVariables.add(readerExists);
 
       return allVariables.toArray(new YoVariable[0]);
    }
