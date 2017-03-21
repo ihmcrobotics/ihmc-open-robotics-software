@@ -36,6 +36,16 @@ public class SolarPanelStraightPath
       }
    }
    
+   public SolarPanelCleaningPose getStartPose()
+   {
+      return startPose;
+   }
+   
+   public SolarPanelCleaningPose getEndPose()
+   {
+      return endPose;
+   }
+   
    public ArrayList<SolarPanelCleaningPose> getPoses()
    {
       return poses;

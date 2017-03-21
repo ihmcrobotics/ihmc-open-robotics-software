@@ -107,7 +107,6 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          System.out.println(desiredOrientation);
       }
 
-      PrintTools.info("aaaaaaaaaaaaaaaaaaa"+desiredPosition.getX()+" "+desiredPosition.getY()+" "+desiredPosition.getZ()+" ");
       PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(trajectoryTime, desiredPosition, desiredOrientation);
 
       drcSimulationTestHelper.send(pelvisTrajectoryMessage);
