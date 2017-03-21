@@ -417,12 +417,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      drcBehaviorTestHelper.updateRobotModel();
-      desiredHandPoseLCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseRCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseL.set(desiredHandPoseLCopy);
-      desiredHandPoseR.set(desiredHandPoseRCopy);
-
       FramePose currentHandPoseR = new FramePose(handControlFrameR);
       currentHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
       double currentRollR = currentHandPoseR.getRoll();
@@ -700,10 +694,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-      desiredHandPoseCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.set(desiredHandPoseCopy);
 
       Quaternion controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
       Quaternion controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
