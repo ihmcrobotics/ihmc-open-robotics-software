@@ -6,13 +6,12 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -22,7 +21,10 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -31,6 +33,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -42,8 +45,6 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
-   @ContinuousIntegrationTest(estimatedDuration = 25.0)
-   @Test(timeout = 50000)
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -71,7 +72,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       chestOrientation.appendPitchRotation(Math.PI / 4.0);
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, chestOrientation);
       drcSimulationTestHelper.send(chestTrajectoryMessage);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      assertTrue(success);
 
       Quaternion handOrientation = new Quaternion();
       handOrientation.appendYawRotation(-Math.PI / 2.0);
@@ -80,12 +82,14 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
       handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D());
       drcSimulationTestHelper.send(handTrajectoryMessage1);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
       handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D());
       drcSimulationTestHelper.send(handTrajectoryMessage2);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      assertTrue(success);
 
       // Activate load bearing
       RigidBodyTransform transformToContactFrame = new RigidBodyTransform();
@@ -98,7 +102,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       loadBearingMessage.setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
       loadBearingMessage.setBodyFrameToContactFrame(transformToContactFrame);
       drcSimulationTestHelper.send(loadBearingMessage);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
 
       // Now push the robot
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
@@ -107,7 +112,94 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       double duration = 2.0;
       pushRobotController.applyForce(forceDirection, magnitude, duration);
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      assertTrue(success);
+   }
+
+   public void testWalkingWithCane() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      String testName = getClass().getSimpleName();
+      FlatGroundEnvironment flatGroundEnvironment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(flatGroundEnvironment, testName, selectedLocation, simulationTestingParameters, getRobotModel());
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+      scs.setCameraPosition(-1.0, -3.0, 1.3);
+      scs.setCameraFix(0.0, 0.0, 0.3);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      RobotSide robotSide = RobotSide.RIGHT;
+
+      // position the cane on the ground
+      // TODO: change this to control the end point of the cane.
+      Quaternion handOrientation = new Quaternion();
+      handOrientation.appendYawRotation(Math.PI / 4.0);
+      handOrientation.appendPitchRotation(-Math.PI / 2.0);
+      handOrientation.appendRollRotation(Math.PI / 4.0);
+
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
+      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.2, -0.15, 0.4), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.2, -0.15, 0.2), handOrientation, new Vector3D(), new Vector3D());
+      drcSimulationTestHelper.send(handTrajectoryMessage);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+
+      // Activate load bearing
+      RigidBodyTransform transformToContactFrame = new RigidBodyTransform();
+      transformToContactFrame.setTranslation(-0.307, -0.027, -0.022); // hard coded to be at the simulation contact point.
+
+      HandLoadBearingMessage loadBearingMessage = new HandLoadBearingMessage(robotSide);
+      loadBearingMessage.setLoad(true);
+      loadBearingMessage.setCoefficientOfFriction(0.8);
+      loadBearingMessage.setContactNormalInWorldFrame(new Vector3D(0.0, 0.0, 1.0));
+      loadBearingMessage.setBodyFrameToContactFrame(transformToContactFrame);
+      drcSimulationTestHelper.send(loadBearingMessage);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      // Lift a foot and move the pelvis forward
+      String namespace = PelvisICPBasedTranslationManager.class.getSimpleName();
+      DoubleYoVariable supportPolygonSafeMargin = (DoubleYoVariable) scs.getVariable(namespace, "supportPolygonSafeMargin");
+      supportPolygonSafeMargin.set(-0.1);
+
+      FootTrajectoryMessage footTrajectory = new FootTrajectoryMessage(robotSide, 1);
+      Quaternion footOrientation = new Quaternion();
+      Point3D footPosition = new Point3D(0.25, 0.05, 0.2);
+      footOrientation.appendPitchRotation(-Math.PI / 4.0);
+      footTrajectory.setTrajectoryPoint(0, 1.0, footPosition, footOrientation, new Vector3D(), new Vector3D());
+      drcSimulationTestHelper.send(footTrajectory);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
+      assertTrue(success);
+
+      PelvisTrajectoryMessage pelvisTrajectory = new PelvisTrajectoryMessage(1);
+      Point3D pelvisPosition = new Point3D(0.15, 0.0, 0.4);
+      pelvisTrajectory.setTrajectoryPoint(0, 0.75, pelvisPosition, new Quaternion(), new Vector3D(), new Vector3D());
+      drcSimulationTestHelper.send(pelvisTrajectory);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      assertTrue(success);
+
+      // Return to safe stance and lift hand
+      footOrientation.setToZero();
+      FootTrajectoryMessage putDownFoot = new FootTrajectoryMessage(robotSide, 2);
+      putDownFoot.setTrajectoryPoint(0, 1.0, new Point3D(0.0, -0.075, 0.05), footOrientation, new Vector3D(), new Vector3D());
+      putDownFoot.setTrajectoryPoint(1, 1.5, new Point3D(0.0, -0.075, -0.01), footOrientation, new Vector3D(), new Vector3D());
+      drcSimulationTestHelper.send(putDownFoot);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
+      assertTrue(success);
+
+      pelvisTrajectory.setTrajectoryPoint(0, 0.75, new Point3D(0.0, 0.0, 0.3), new Quaternion(), new Vector3D(), new Vector3D());
+      drcSimulationTestHelper.send(pelvisTrajectory);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      HandTrajectoryMessage liftHand = new HandTrajectoryMessage(robotSide, 1);
+      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), handOrientation, new Vector3D(), new Vector3D());
+      drcSimulationTestHelper.send(liftHand);
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
@@ -173,4 +265,5 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
+
 }
