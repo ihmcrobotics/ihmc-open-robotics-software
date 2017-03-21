@@ -501,4 +501,9 @@ public class AtlasJointMap implements DRCRobotJointMap
    {
       return new String[] {"hokuyo_joint"};
    }
+
+   public int getNumberOfContactableBodies()
+   {
+      return contactPointParameters.getNumberOfContactableBodies();
+   }
 }
