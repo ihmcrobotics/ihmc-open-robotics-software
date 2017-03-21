@@ -72,7 +72,7 @@ public class ContactableBodiesFactory
       {
          String bodyName = rigidBodyNames.get(pointIdx);
          String contactName = contactNames.get(pointIdx);
-         RigidBodyTransform contactPointInBodyFrame = contactPointFrameTransforms.get(pointIdx);
+         RigidBodyTransform contactFramePoseInJoint = contactPointFrameTransforms.get(pointIdx);
 
          RigidBody[] rigidBodies = ScrewTools.findRigidBodiesWithNames(bodies, bodyName);
 
@@ -82,7 +82,7 @@ public class ContactableBodiesFactory
             throw new RuntimeException("Found multiple bodies with name " + bodyName);
 
          RigidBody rigidBody = rigidBodies[0];
-         ret.add(new SimpleContactPointPlaneBody(contactName, rigidBody, contactPointInBodyFrame));
+         ret.add(new SimpleContactPointPlaneBody(contactName, rigidBody, contactFramePoseInJoint));
       }
 
       return ret;

@@ -25,14 +25,14 @@ public class SimpleContactPointPlaneBody implements ContactablePlaneBody
 
    private final List<FramePoint2d> contactPoints = new ArrayList<>();
 
-   public SimpleContactPointPlaneBody(String name, RigidBody rigidBody, RigidBodyTransform contactPointInBodyFrame)
+   public SimpleContactPointPlaneBody(String name, RigidBody rigidBody, RigidBodyTransform contactFramePoseInJointFrame)
    {
       this.name = name;
       this.rigidBody = rigidBody;
 
       ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
       contactFrame = new PoseReferenceFrame(name + "Frame", frameAfterJoint);
-      contactFrame.setPoseAndUpdate(contactPointInBodyFrame);
+      contactFrame.setPoseAndUpdate(contactFramePoseInJointFrame);
       contactPoints.add(new FramePoint2d(contactFrame));
    }
 
