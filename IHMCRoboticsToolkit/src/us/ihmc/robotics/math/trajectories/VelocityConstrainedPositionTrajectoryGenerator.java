@@ -366,6 +366,11 @@ public class VelocityConstrainedPositionTrajectoryGenerator extends PositionTraj
       return zPolynomial;
    }
 
+   public DoubleYoVariable getYoTrajectoryTime()
+   {
+      return trajectoryTime;
+   }
+
    @Override
    public void showVisualization()
    {
