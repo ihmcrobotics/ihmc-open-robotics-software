@@ -647,9 +647,6 @@ public class ICPPlanner
          isStanding.set(false);
       }
 
-      if (!isStanding.getBooleanValue())
-         computeFinalCoMPositionInTransfer();
-
       singleSupportInitialICP.changeFrame(finalFrame);
       singleSupportFinalICP.changeFrame(worldFrame);
 
@@ -658,6 +655,9 @@ public class ICPPlanner
       icpDoubleSupportTrajectoryGenerator.setFinalConditions(singleSupportInitialICP, singleSupportInitialICPVelocity, finalFrame);
       icpDoubleSupportTrajectoryGenerator.setInitialCoMPosition(desiredCoMPosition, worldFrame);
       icpDoubleSupportTrajectoryGenerator.initialize();
+
+      if (!isStanding.getBooleanValue())
+         computeFinalCoMPositionInTransfer();
    }
 
    private void computeFinalCoMPositionInTransfer()
