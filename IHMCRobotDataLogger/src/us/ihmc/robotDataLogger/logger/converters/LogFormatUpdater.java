@@ -3,8 +3,7 @@ package us.ihmc.robotDataLogger.logger.converters;
 import java.io.File;
 import java.io.IOException;
 
-import us.ihmc.robotDataLogger.logger.LogProperties;
-import us.ihmc.robotDataLogger.logger.converters.ModelAttacher.LogModels;
+import us.ihmc.robotDataLogger.LogProperties;
 
 public class LogFormatUpdater
 {
@@ -18,7 +17,7 @@ public class LogFormatUpdater
 //            ModelAttacher.addModel(directory, properties, model);
 //         }
          
-         if (properties.getCompressed() && !properties.isTimestampedIndex())
+         if (properties.getVariables().getCompressed() && !properties.getVariables().getTimestamped())
          {
             LogTimeStampedIndexGenerator.convert(directory, properties);
          }

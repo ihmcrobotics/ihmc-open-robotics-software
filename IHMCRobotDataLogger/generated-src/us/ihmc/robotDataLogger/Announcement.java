@@ -1,19 +1,7 @@
-// Copyright 2017 Florida Institute for Human And Machine Cognition (IHMC)
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
@@ -88,6 +76,16 @@ public class Announcement implements IDLStruct<Announcement>
     }
 
         
+        public void setName(String name)
+        {
+        	name_.setLength(0);
+        	name_.append(name);
+        }
+        
+        public String getNameAsString()
+        {
+        	return getName().toString();
+        }
 
     public StringBuilder getName()
     {
@@ -212,6 +210,40 @@ public class Announcement implements IDLStruct<Announcement>
 	    	cdr.read_type_d(name_);	
 
 	    	log_ = cdr.read_type_7();	
+	}
+	
+	@Override
+	public final void serialize(InterchangeSerializer ser)
+	{
+			    ser.write_type_f("guid", guid_);
+			    
+			    ser.write_type_f("dataIP", dataIP_);
+			    
+			    ser.write_type_1("dataPort", dataPort_);
+			    
+			    ser.write_type_e("cameras", cameras_);
+			    
+			    ser.write_type_d("name", name_);
+			    
+			    ser.write_type_7("log", log_);
+			    
+	}
+	
+	@Override
+	public final void deserialize(InterchangeSerializer ser)
+	{
+	    			ser.read_type_f("guid", guid_);	
+	    	    
+	    			ser.read_type_f("dataIP", dataIP_);	
+	    	    
+	    			dataPort_ = ser.read_type_1("dataPort");	
+	    	    
+	    			ser.read_type_e("cameras", cameras_);	
+	    	    
+	    			ser.read_type_d("name", name_);	
+	    	    
+	    			log_ = ser.read_type_7("log");	
+	    	    
 	}
 
     @Override

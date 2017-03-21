@@ -20,7 +20,7 @@ import javax.swing.JOptionPane;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.logger.NetworkStreamVideoDataLogger;
 
@@ -108,10 +108,7 @@ public class GUICaptureRecorder extends JFrame
          target = new File(System.getProperty("user.home") + "/robotLogs/", timestamp + "_" + settings.toString() + "_UILog");
          target.mkdirs();
 
-         LogProperties logProperties = new LogProperties()
-         {
-            private static final long serialVersionUID = 1L; 
-         };
+         LogProperties logProperties = new LogProperties();
          
          InetAddress listen = InetAddress.getByName(NetworkParameters.getHost(NetworkParameterKeys.logger)); 
          InetSocketAddress address = new InetSocketAddress(settings.getVideoStream(), LogDataProtocolSettings.UI_DATA_PORT);

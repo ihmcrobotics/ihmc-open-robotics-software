@@ -10,7 +10,6 @@ import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.EUsageType;
 import us.ihmc.codecs.generated.YUVPicture;
-import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 
 public class VideoConverter

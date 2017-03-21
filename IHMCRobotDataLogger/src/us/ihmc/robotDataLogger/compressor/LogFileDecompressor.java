@@ -16,8 +16,8 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
@@ -69,10 +69,10 @@ public class LogFileDecompressor extends YoVariableLogReader
       out.println("Found " + numberOfVariables + " variables.");
       out.println("Reading " + bufferedElements + " data points at a time");
 
-      FileOutputStream outputStream = new FileOutputStream(new File(targetFile, logProperties.getVariableDataFile()));
+      FileOutputStream outputStream = new FileOutputStream(new File(targetFile, logProperties.getVariables().getDataAsString()));
       outputChannel = outputStream.getChannel();
 
-      FileOutputStream indexStream = new FileOutputStream(new File(targetFile, logProperties.getVariablesIndexFile()));
+      FileOutputStream indexStream = new FileOutputStream(new File(targetFile, logProperties.getVariables().getDataAsString()));
       indexChannel = indexStream.getChannel();
 
       byte[] data = new byte[bufferedElements * numberOfVariables * 8];
@@ -119,13 +119,13 @@ public class LogFileDecompressor extends YoVariableLogReader
    private void checkChecksums(CompressionProperties properties) throws IOException
    {
       out.println("Validating checksums.");
-      File logdata = new File(targetFile, logProperties.getVariableDataFile());
+      File logdata = new File(targetFile, logProperties.getVariables().getDataAsString());
       if (!properties.getDataChecksum().equals(Files.hash(logdata, Hashing.sha1()).toString()))
       {
          throw new IOException("Variable data does not match with pre-compression data. Expect an unloadable data file.");
       }
 
-      File index = new File(targetFile, logProperties.getVariablesIndexFile());
+      File index = new File(targetFile, logProperties.getVariables().getIndexAsString());
       if (!properties.getTimestampChecksum().equals(Files.hash(index, Hashing.sha1()).toString()))
       {
          throw new IOException("Timestamp data does not match with pre-compression data. A bug has been found in the LogFileDecompressor and fixing it will make this data file readable again.");

@@ -17,7 +17,7 @@ import org.tukaani.xz.XZOutputStream;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
@@ -116,10 +116,10 @@ public class LogFileCompressor extends YoVariableLogReader
    private void setChecksums(CompressionProperties properties) throws IOException
    {
       out.println("Saving checksums to file");
-      File logdata = new File(logDirectory, logProperties.getVariableDataFile());
+      File logdata = new File(logDirectory, logProperties.getVariables().getDataAsString());
       properties.setDataChecksum(Files.hash(logdata, Hashing.sha1()).toString());
 
-      File index = new File(logDirectory, logProperties.getVariablesIndexFile());
+      File index = new File(logDirectory, logProperties.getVariables().getDataAsString());
       properties.setTimestampChecksum(Files.hash(index, Hashing.sha1()).toString());
       out.println("Saved checksums");
    }

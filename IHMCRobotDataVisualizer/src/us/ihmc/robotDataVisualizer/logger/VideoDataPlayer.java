@@ -19,7 +19,8 @@ import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.codecs.demuxer.MP4VideoDemuxer;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.robotDataLogger.Camera;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.converters.VideoConverter;
 import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 
@@ -46,29 +47,29 @@ public class VideoDataPlayer
 
    private final File videoFile;
 
-   public VideoDataPlayer(String name, File dataDirectory, LogProperties logProperties) throws IOException
+   public VideoDataPlayer(Camera camera, File dataDirectory, boolean hasTimeBase) throws IOException
    {
-      this.name = name;
-      this.interlaced = logProperties.getInterlaced(name);
-      this.hasTimebase = logProperties.hasTimebase();
+      this.name = camera.getNameAsString();
+      this.interlaced = camera.getInterlaced();
+      this.hasTimebase = hasTimeBase;
 
       if (!hasTimebase)
       {
          System.err.println("Video data is using timestamps instead of frame numbers. Falling back to seeking based on timestamp.");
       }
-      videoFile = new File(dataDirectory, logProperties.getVideoFile(name));
+      videoFile = new File(dataDirectory, camera.getVideoFileAsString());
       if (!videoFile.exists())
       {
          throw new IOException("Cannot find video: " + videoFile);
       }
 
-      File timestampFile = new File(dataDirectory, logProperties.getTimestampFile(name));
+      File timestampFile = new File(dataDirectory, camera.getTimestampFileAsString());
 
       parseTimestampData(timestampFile);
 
       demuxer = new MP4VideoDemuxer(videoFile);
 
-      viewer = new HideableMediaFrame(name, demuxer.getWidth(), demuxer.getHeight());
+      viewer = new HideableMediaFrame(camera.getNameAsString(), demuxer.getWidth(), demuxer.getHeight());
    }
 
    public synchronized void showVideoFrame(long timestamp)

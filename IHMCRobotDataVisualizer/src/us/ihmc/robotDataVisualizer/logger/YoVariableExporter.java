@@ -16,7 +16,7 @@ import com.jmatio.types.MLNumericArray;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;

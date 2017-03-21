@@ -1,4 +1,4 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
@@ -8,27 +8,27 @@ import us.ihmc.idl.CDR;
 
 /**
 * 
-* Topic data type of the struct "Handshake" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "YoRegistryDefinition" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
 *
 * This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class HandshakePubSubType implements TopicDataType<Handshake>
+public class YoRegistryDefinitionPubSubType implements TopicDataType<YoRegistryDefinition>
 {
-	public static final String name = "us::ihmc::robotDataLogger::Handshake";
+	public static final String name = "us::ihmc::robotDataLogger::YoRegistryDefinition";
 	private final CDR serializeCDR = new CDR();
 	private final CDR deserializeCDR = new CDR();
 	
 	
 	
-    public HandshakePubSubType()
+    public YoRegistryDefinitionPubSubType()
     {
         
     }
     
        @Override
-   public void serialize(Handshake data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(YoRegistryDefinition data, SerializedPayload serializedPayload) throws IOException
    {
       serializeCDR.serialize(serializedPayload);
       data.serialize(serializeCDR);
@@ -36,7 +36,7 @@ public class HandshakePubSubType implements TopicDataType<Handshake>
    }
 
    @Override
-   public void deserialize(SerializedPayload serializedPayload, Handshake data) throws IOException
+   public void deserialize(SerializedPayload serializedPayload, YoRegistryDefinition data) throws IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       data.deserialize(deserializeCDR);
@@ -46,7 +46,7 @@ public class HandshakePubSubType implements TopicDataType<Handshake>
    @Override
    public int getTypeSize()
    {
-      return Handshake.getMaxCdrSerializedSize();
+      return YoRegistryDefinition.getMaxCdrSerializedSize();
    }
 
    @Override
@@ -56,8 +56,8 @@ public class HandshakePubSubType implements TopicDataType<Handshake>
    }
 
    @Override
-   public Handshake createData()
+   public YoRegistryDefinition createData()
    {
-      return new Handshake();
+      return new YoRegistryDefinition();
    }
 }

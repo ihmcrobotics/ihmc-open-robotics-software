@@ -21,8 +21,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -57,7 +57,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       this.directory = directory;
 
       
-      if(properties.getCompressed())
+      if(properties.getVariables().getCompressed())
       {
          yoVariableLogCropper = new YoVariableLogCropper(player, directory, properties);         
          exporter = new YoVariableExporter(scs, directory, properties, parser.getYoVariablesList());
@@ -404,7 +404,7 @@ public class YoVariableLogVisualizerGUI extends JPanel
       timePanel.add(currentTime, BorderLayout.EAST);
 
       JPanel dataPanel = new JPanel(new GridLayout(1, 3));
-      dataPanel.add(new JLabel("Main class name: " + properties.getLogName()));
+      dataPanel.add(new JLabel("Main class name: " + properties.getNameAsString()));
       dataPanel.add(new JLabel("Record time: " + properties.getTimestamp()));
       dataPanel.add(new JLabel("Directory: " + directory));
       add(dataPanel);

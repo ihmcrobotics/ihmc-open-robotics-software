@@ -7,6 +7,7 @@ import java.io.IOException;
 import us.ihmc.commons.Conversions;
 import us.ihmc.javadecklink.Capture;
 import us.ihmc.javadecklink.CaptureHandler;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.tools.maps.CircularLongMap;
 
 public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implements CaptureHandler

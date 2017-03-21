@@ -4,13 +4,14 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+import us.ihmc.idl.serializers.extra.PropertiesSerializer;
+import us.ihmc.robotDataLogger.LogProperties;
+import us.ihmc.robotDataLogger.LogPropertiesPubSubType;
 import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -21,10 +22,10 @@ public class LogTimeStampedIndexGenerator
    
    public static void convert(File logDirectory, LogProperties logProperties) throws IOException
    {
-      File handshake = new File(logDirectory, logProperties.getHandshakeFile());
+      File handshake = new File(logDirectory, logProperties.getVariables().getHandshakeAsString());
       if (!handshake.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
       byte[] handshakeData = new byte[(int) handshake.length()];
@@ -32,16 +33,16 @@ public class LogTimeStampedIndexGenerator
       handshakeStream.close();
       int logLineLength = ProtoBufferYoVariableHandshakeParser.getNumberOfVariables(handshakeData);
 
-      File logdata = new File(logDirectory, logProperties.getVariableDataFile());
+      File logdata = new File(logDirectory, logProperties.getVariables().getDataAsString());
       if (!logdata.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getDataAsString());
       }
 
-      File index = new File(logDirectory, logProperties.getVariablesIndexFile());
+      File index = new File(logDirectory, logProperties.getVariables().getIndexAsString());
       if (!index.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getVariablesIndexFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getIndexAsString());
       }
 
       FileInputStream logInputStream = new FileInputStream(logdata);
@@ -59,7 +60,7 @@ public class LogTimeStampedIndexGenerator
       FileOutputStream indexStream = new FileOutputStream(indexFile);
       FileChannel indexChannel = indexStream.getChannel();
       
-      CustomProgressMonitor monitor = new CustomProgressMonitor("Generating timestamps for " + logProperties.getLogName(), "Adding timestamps to log index for future functionality improvements.", 0, dataOffsets.length);
+      CustomProgressMonitor monitor = new CustomProgressMonitor("Generating timestamps for " + logProperties.getNameAsString(), "Adding timestamps to log index for future functionality improvements.", 0, dataOffsets.length);
 
       ByteBuffer indexBuffer = ByteBuffer.allocate(16);
       for(int i = 0; i < dataOffsets.length; i++)
@@ -89,12 +90,13 @@ public class LogTimeStampedIndexGenerator
       logChannel.close();
       logInputStream.close();
       
-      logProperties.setTimestampedIndex(true);
-      logProperties.setVariablesIndexFile(newIndexFile);
+      logProperties.getVariables().setTimestamped(true);
+      logProperties.getVariables().setIndex(newIndexFile);
       
-      FileWriter writer = new FileWriter(new File(logDirectory, YoVariableLoggerListener.propertyFile));
-      logProperties.store(writer, "Timestamps added to index by LogTimestampedIndexGenerator");
-      writer.close();
+      File log = new File(logDirectory, YoVariableLoggerListener.propertyFile);
+      PropertiesSerializer<LogProperties> writer = new PropertiesSerializer<>(new LogPropertiesPubSubType());
+      writer.serialize(log, logProperties);
+      
       
       index.delete();
       

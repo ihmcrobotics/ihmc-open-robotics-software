@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import us.ihmc.communication.net.TimestampListener;
+import us.ihmc.robotDataLogger.Camera;
+import us.ihmc.robotDataLogger.LogProperties;
 
 public abstract class VideoDataLoggerInterface implements TimestampListener
 {
@@ -15,12 +17,14 @@ public abstract class VideoDataLoggerInterface implements TimestampListener
    
    public VideoDataLoggerInterface(File logPath, LogProperties logProperties, String description)
    {
-      logProperties.addVideoFile(description);
-      logProperties.setInterlaced(description, false);
+      Camera newCamera = logProperties.getCameras().add();
+      
+      newCamera.setVideoFile(description);
+      newCamera.setInterlaced(false);
       String videoFilename = description + videoPostfix;
-      logProperties.setVideoFile(description, videoFilename);
+      newCamera.setVideoFile(videoFilename);
       String timestampDataFilename = description + timestampDataPostfix;
-      logProperties.setTimestampFile(description, timestampDataFilename);
+      newCamera.setTimestampFile(timestampDataFilename);
       
       timestampData = logPath.getAbsolutePath() + File.separator + timestampDataFilename;
       videoFile = logPath.getAbsolutePath() + File.separator + videoFilename;

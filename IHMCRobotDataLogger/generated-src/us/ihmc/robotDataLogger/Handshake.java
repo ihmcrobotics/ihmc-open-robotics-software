@@ -1,6 +1,7 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
@@ -16,15 +17,15 @@ public class Handshake implements IDLStruct<Handshake>
 {
     public Handshake()
     {
-        	registry_ = new IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinition.class, new us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
+        	registry_ = new IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition> (1024, us.ihmc.robotDataLogger.YoRegistryDefinition.class, new us.ihmc.robotDataLogger.YoRegistryDefinitionPubSubType());
 
-        	variable_ = new IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinition> (32767, us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinition.class, new us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
+        	variable_ = new IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition> (32767, us.ihmc.robotDataLogger.YoVariableDefinition.class, new us.ihmc.robotDataLogger.YoVariableDefinitionPubSubType());
 
-        	joint_ = new IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinition> (255, us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinition.class, new us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinitionPubSubType());
+        	joint_ = new IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition> (255, us.ihmc.robotDataLogger.JointDefinition.class, new us.ihmc.robotDataLogger.JointDefinitionPubSubType());
 
-        	graphic_object_ = new IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage> (4096, us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage.class, new us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessagePubSubType());
+        	graphic_object_ = new IDLSequence.Object<us.ihmc.robotDataLogger.DynamicGraphicMessage> (4096, us.ihmc.robotDataLogger.DynamicGraphicMessage.class, new us.ihmc.robotDataLogger.DynamicGraphicMessagePubSubType());
 
-        	artifact_ = new IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage> (4096, us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage.class, new us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessagePubSubType());
+        	artifact_ = new IDLSequence.Object<us.ihmc.robotDataLogger.DynamicGraphicMessage> (4096, us.ihmc.robotDataLogger.DynamicGraphicMessage.class, new us.ihmc.robotDataLogger.DynamicGraphicMessagePubSubType());
 
 
         
@@ -49,35 +50,35 @@ public class Handshake implements IDLStruct<Handshake>
 
         
 
-    public IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinition>  getRegistry()
+    public IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  getRegistry()
     {
         return registry_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinition>  getVariable()
+    public IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  getVariable()
     {
         return variable_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinition>  getJoint()
+    public IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  getJoint()
     {
         return joint_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage>  getGraphic_object()
+    public IDLSequence.Object<us.ihmc.robotDataLogger.DynamicGraphicMessage>  getGraphic_object()
     {
         return graphic_object_;
     }
 
         
 
-    public IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage>  getArtifact()
+    public IDLSequence.Object<us.ihmc.robotDataLogger.DynamicGraphicMessage>  getArtifact()
     {
         return artifact_;
     }
@@ -99,27 +100,27 @@ public class Handshake implements IDLStruct<Handshake>
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 1024; ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinition.getMaxCdrSerializedSize(current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.YoRegistryDefinition.getMaxCdrSerializedSize(current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 32767; ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinition.getMaxCdrSerializedSize(current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.YoVariableDefinition.getMaxCdrSerializedSize(current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 255; ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinition.getMaxCdrSerializedSize(current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.JointDefinition.getMaxCdrSerializedSize(current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 4096; ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage.getMaxCdrSerializedSize(current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.DynamicGraphicMessage.getMaxCdrSerializedSize(current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 4096; ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage.getMaxCdrSerializedSize(current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.DynamicGraphicMessage.getMaxCdrSerializedSize(current_alignment);}
 
 	
 	    return current_alignment - initial_alignment;
@@ -140,27 +141,27 @@ public class Handshake implements IDLStruct<Handshake>
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getRegistry().size(); ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinition.getCdrSerializedSize(data.getRegistry().get(a), current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.YoRegistryDefinition.getCdrSerializedSize(data.getRegistry().get(a), current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getVariable().size(); ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinition.getCdrSerializedSize(data.getVariable().get(a), current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.YoVariableDefinition.getCdrSerializedSize(data.getVariable().get(a), current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getJoint().size(); ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinition.getCdrSerializedSize(data.getJoint().get(a), current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.JointDefinition.getCdrSerializedSize(data.getJoint().get(a), current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getGraphic_object().size(); ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage.getCdrSerializedSize(data.getGraphic_object().get(a), current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.DynamicGraphicMessage.getCdrSerializedSize(data.getGraphic_object().get(a), current_alignment);}
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getArtifact().size(); ++a)
 	    {
-	        current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage.getCdrSerializedSize(data.getArtifact().get(a), current_alignment);}
+	        current_alignment += us.ihmc.robotDataLogger.DynamicGraphicMessage.getCdrSerializedSize(data.getArtifact().get(a), current_alignment);}
 
 	
 	    return current_alignment - initial_alignment;
@@ -209,6 +210,40 @@ public class Handshake implements IDLStruct<Handshake>
 	    	cdr.read_type_e(graphic_object_);	
 
 	    	cdr.read_type_e(artifact_);	
+	}
+	
+	@Override
+	public final void serialize(InterchangeSerializer ser)
+	{
+			    ser.write_type_6("dt", dt_);
+			    
+			    ser.write_type_e("registry", registry_);
+			    
+			    ser.write_type_e("variable", variable_);
+			    
+			    ser.write_type_e("joint", joint_);
+			    
+			    ser.write_type_e("graphic_object", graphic_object_);
+			    
+			    ser.write_type_e("artifact", artifact_);
+			    
+	}
+	
+	@Override
+	public final void deserialize(InterchangeSerializer ser)
+	{
+	    			dt_ = ser.read_type_6("dt");	
+	    	    
+	    			ser.read_type_e("registry", registry_);	
+	    	    
+	    			ser.read_type_e("variable", variable_);	
+	    	    
+	    			ser.read_type_e("joint", joint_);	
+	    	    
+	    			ser.read_type_e("graphic_object", graphic_object_);	
+	    	    
+	    			ser.read_type_e("artifact", artifact_);	
+	    	    
 	}
 
     @Override
@@ -272,10 +307,10 @@ public class Handshake implements IDLStruct<Handshake>
     }
 
     private double dt_; 
-    private IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.YoRegistryDefinition>  registry_; 
-    private IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.YoVariableDefinition>  variable_; 
-    private IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.JointDefinition>  joint_; 
-    private IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage>  graphic_object_; 
-    private IDLSequence.Object<us.ihmc.idl.us.ihmc.robotDataLogger.DynamicGraphicMessage>  artifact_; 
+    private IDLSequence.Object<us.ihmc.robotDataLogger.YoRegistryDefinition>  registry_; 
+    private IDLSequence.Object<us.ihmc.robotDataLogger.YoVariableDefinition>  variable_; 
+    private IDLSequence.Object<us.ihmc.robotDataLogger.JointDefinition>  joint_; 
+    private IDLSequence.Object<us.ihmc.robotDataLogger.DynamicGraphicMessage>  graphic_object_; 
+    private IDLSequence.Object<us.ihmc.robotDataLogger.DynamicGraphicMessage>  artifact_; 
 
 }

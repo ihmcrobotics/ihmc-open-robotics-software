@@ -1,0 +1,15 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	struct ModelFileDescription{
+		string name;
+		sequence<string, 255> resourceDirectories;
+		
+		long modelFileSize;
+		
+		boolean hasResourceZip;
+		long resourceZipSize;
+	};
+};
+};
+};

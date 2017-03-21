@@ -1,4 +1,4 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 
@@ -8,27 +8,27 @@ import us.ihmc.idl.CDR;
 
 /**
 * 
-* Topic data type of the struct "YoRegistryDefinition" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "YoVariableDefinition" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
 *
 * This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class YoRegistryDefinitionPubSubType implements TopicDataType<YoRegistryDefinition>
+public class YoVariableDefinitionPubSubType implements TopicDataType<YoVariableDefinition>
 {
-	public static final String name = "us::ihmc::robotDataLogger::YoRegistryDefinition";
+	public static final String name = "us::ihmc::robotDataLogger::YoVariableDefinition";
 	private final CDR serializeCDR = new CDR();
 	private final CDR deserializeCDR = new CDR();
 	
 	
 	
-    public YoRegistryDefinitionPubSubType()
+    public YoVariableDefinitionPubSubType()
     {
         
     }
     
        @Override
-   public void serialize(YoRegistryDefinition data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(YoVariableDefinition data, SerializedPayload serializedPayload) throws IOException
    {
       serializeCDR.serialize(serializedPayload);
       data.serialize(serializeCDR);
@@ -36,7 +36,7 @@ public class YoRegistryDefinitionPubSubType implements TopicDataType<YoRegistryD
    }
 
    @Override
-   public void deserialize(SerializedPayload serializedPayload, YoRegistryDefinition data) throws IOException
+   public void deserialize(SerializedPayload serializedPayload, YoVariableDefinition data) throws IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       data.deserialize(deserializeCDR);
@@ -46,7 +46,7 @@ public class YoRegistryDefinitionPubSubType implements TopicDataType<YoRegistryD
    @Override
    public int getTypeSize()
    {
-      return YoRegistryDefinition.getMaxCdrSerializedSize();
+      return YoVariableDefinition.getMaxCdrSerializedSize();
    }
 
    @Override
@@ -56,8 +56,8 @@ public class YoRegistryDefinitionPubSubType implements TopicDataType<YoRegistryD
    }
 
    @Override
-   public YoRegistryDefinition createData()
+   public YoVariableDefinition createData()
    {
-      return new YoRegistryDefinition();
+      return new YoVariableDefinition();
    }
 }

@@ -1,6 +1,7 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
@@ -59,12 +60,12 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
     }
 
         
-    public void setType(us.ihmc.idl.us.ihmc.robotDataLogger.YoType type)
+    public void setType(us.ihmc.robotDataLogger.YoType type)
     {
         type_ = type;
     }
 
-    public us.ihmc.idl.us.ihmc.robotDataLogger.YoType getType()
+    public us.ihmc.robotDataLogger.YoType getType()
     {
         return type_;
     }
@@ -172,12 +173,43 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 
 	    	registry_ = cdr.read_type_2();	
 
-	    	type_ = us.ihmc.idl.us.ihmc.robotDataLogger.YoType.values[cdr.read_type_c()];
+	    	type_ = us.ihmc.robotDataLogger.YoType.values[cdr.read_type_c()];
 	    	
 
 	    	cdr.read_type_e(enumValues_);	
 
 	    	allowNullValues_ = cdr.read_type_7();	
+	}
+	
+	@Override
+	public final void serialize(InterchangeSerializer ser)
+	{
+			    ser.write_type_d("name", name_);
+			    
+			    ser.write_type_2("registry", registry_);
+			    
+			    ser.write_type_c("type", type_);
+			    
+			    ser.write_type_e("enumValues", enumValues_);
+			    
+			    ser.write_type_7("allowNullValues", allowNullValues_);
+			    
+	}
+	
+	@Override
+	public final void deserialize(InterchangeSerializer ser)
+	{
+	    			ser.read_type_d("name", name_);	
+	    	    
+	    			registry_ = ser.read_type_2("registry");	
+	    	    
+	    			type_ = (us.ihmc.robotDataLogger.YoType)ser.read_type_c("type", us.ihmc.robotDataLogger.YoType.class);
+	    	
+	    	    
+	    			ser.read_type_e("enumValues", enumValues_);	
+	    	    
+	    			allowNullValues_ = ser.read_type_7("allowNullValues");	
+	    	    
 	}
 
     @Override
@@ -238,7 +270,7 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 
     private StringBuilder name_; 
     private int registry_; 
-    private us.ihmc.idl.us.ihmc.robotDataLogger.YoType type_; 
+    private us.ihmc.robotDataLogger.YoType type_; 
     private IDLSequence.StringBuilderHolder  enumValues_; 
     private boolean allowNullValues_; 
 
