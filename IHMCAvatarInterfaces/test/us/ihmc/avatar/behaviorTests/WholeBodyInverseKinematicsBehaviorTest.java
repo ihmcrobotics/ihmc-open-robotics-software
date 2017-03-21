@@ -154,10 +154,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      drcBehaviorTestHelper.updateRobotModel();
-      desiredHandPoseCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.set(desiredHandPoseCopy);
-
       Quaternion controllerDesiredChestOrientation = EndToEndChestTrajectoryMessageTest.findControllerDesiredOrientation(scs, chest);
       Quaternion controllerDesiredPelvisOrientation = EndToEndPelvisTrajectoryMessageTest.findControllerDesiredOrientation(scs);
 
@@ -232,12 +228,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-      desiredHandPoseLCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseRCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseL.set(desiredHandPoseLCopy);
-      desiredHandPoseR.set(desiredHandPoseRCopy);
 
       String rightHandName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(RobotSide.RIGHT).getName();
       String leftHandName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(RobotSide.LEFT).getName();
@@ -326,10 +316,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-      desiredHandPoseCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.set(desiredHandPoseCopy);
 
       String handName = drcBehaviorTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
       Quaternion controllerDesiredHandOrientation = EndToEndHandTrajectoryMessageTest.findControllerDesiredOrientation(handName, scs);
@@ -523,10 +509,6 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
 
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
-
-      drcBehaviorTestHelper.updateRobotModel();
-      desiredHandPoseCopy.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.set(desiredHandPoseCopy);
 
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
 
