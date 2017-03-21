@@ -239,6 +239,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       }
 
       waypointTimes = subArray(yoVariables, index, numberOfPolynomials);
+      index += numberOfPolynomials;
 
       currentGraphicType = (EnumYoVariable<?>) yoVariables[index++];
       currentColorType = (EnumYoVariable<?>) yoVariables[index++];
@@ -290,7 +291,8 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    private static DoubleYoVariable[] subArray(YoVariable<?>[] source, int start, int length)
    {
       DoubleYoVariable[] subArray = new DoubleYoVariable[length];
-      System.arraycopy((DoubleYoVariable[]) source, start, subArray, 0, length);
+      for (int i = 0; i < length; i++)
+         subArray[i] = (DoubleYoVariable) source[i + start];
       return subArray;
    }
 
@@ -485,6 +487,7 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       List<YoVariable<?>> allVariables = new ArrayList<>();
       allVariables.addAll(getVariablesDefiningGraphic());
       allVariables.add(currentGraphicType);
+      allVariables.add(currentColorType);
       allVariables.add(readExists);
 
       return allVariables.toArray(new YoVariable[0]);
@@ -505,27 +508,22 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
          graphicVariables.add(poseToPolynomialFrame.getYoQs());
       }
 
-      addPolynomialVariablesToList(yoPolynomial3Ds, numberOfPolynomials, graphicVariables);
-
-      for (DoubleYoVariable waypointTime : waypointTimes)
-         graphicVariables.add(waypointTime);
-
-      return graphicVariables;
-   }
-
-   private static void addPolynomialVariablesToList(YoPolynomial3D[] yoPolynomial3Ds, int numberOfPolynomials, List<YoVariable<?>> allVariables)
-   {
       for (int i = 0; i < numberOfPolynomials; i++)
       {
          for (int index = 0; index < 3; index++)
          {
             YoPolynomial yoPolynomial = yoPolynomial3Ds[i].getYoPolynomial(index);
 
-            allVariables.add(yoPolynomial.getYoNumberOfCoefficients());
-            for (YoVariable<?> coefficient : yoPolynomial.getYoCoefficients())
-               allVariables.add(coefficient);
+            graphicVariables.add(yoPolynomial.getYoNumberOfCoefficients());
+            for (DoubleYoVariable coefficient : yoPolynomial.getYoCoefficients())
+               graphicVariables.add(coefficient);
          }
       }
+
+      for (DoubleYoVariable waypointTime : waypointTimes)
+         graphicVariables.add(waypointTime);
+
+      return graphicVariables;
    }
 
    @Override
@@ -540,8 +538,8 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       allConstants.add(numberOfPolynomials);
 
-      for (int i = 0; i < numberOfPolynomials; i++)
-         allConstants.add(yoPolynomialSizes[i]);
+      for (int yoPolynomialSize : yoPolynomialSizes)
+         allConstants.add(yoPolynomialSize);
 
       return allConstants.toArray();
    }
