@@ -9,14 +9,14 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicSpline3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 
 /**
  * {@code Segmented3DLineMeshDataGenerator} generates an array of {@code MeshDataHolder}s that
  * describes a segmented line 3D that goes through 3D waypoints.
  * <p>
  * It was originally implemented to enabled elegant representation of 3D trajectories, see
- * {@link YoGraphicSpline3D}.
+ * {@link YoGraphicPolynomial3D}.
  * </p>
  * <p>
  * It has been optimized using YourKit for reducing computation time while guaranteeing free
