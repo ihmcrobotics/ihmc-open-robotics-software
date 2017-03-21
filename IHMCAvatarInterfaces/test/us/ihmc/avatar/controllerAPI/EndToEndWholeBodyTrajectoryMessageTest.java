@@ -182,7 +182,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(5);
-      chestTrajectoryMessage.setExpressedInReferenceFrameId(ReferenceFrame.getWorldFrame());
+      chestTrajectoryMessage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
       chestTrajectoryMessage.setTrajectoryReferenceFrameId(pelvisZUpFrame);
       chestTrajectoryMessage.setTrajectoryPoint(0, 0.00, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());
       chestTrajectoryMessage.setTrajectoryPoint(1, 0.10, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());

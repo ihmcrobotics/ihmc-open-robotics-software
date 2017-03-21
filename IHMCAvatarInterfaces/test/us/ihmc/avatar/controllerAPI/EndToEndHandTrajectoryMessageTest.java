@@ -197,7 +197,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FrameOrientation tempOrientation = computeBestOrientationForDesiredPosition(fullRobotModel, robotSide, circleCenter, taskspaceToJointspaceCalculator, 500);
 
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
-         handTrajectoryMessage.setExpressedInReferenceFrameId(worldFrame);
+         handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
          handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
 
          EuclideanTrajectoryPointCalculator euclideanTrajectoryPointCalculator = new EuclideanTrajectoryPointCalculator();
@@ -320,7 +320,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          message.setTrajectoryReferenceFrameId(chestFrame);
-         message.setExpressedInReferenceFrameId(worldFrame);
+         message.setDataReferenceFrameId(worldFrame);
          double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
@@ -342,7 +342,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          HandTrajectoryMessage message = new HandTrajectoryMessage(robotSide, numberOfPoints);
          ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          message.setTrajectoryReferenceFrameId(chestFrame);
-         message.setExpressedInReferenceFrameId(worldFrame);
+         message.setDataReferenceFrameId(worldFrame);
          double time = 0.05;
          for (int pointIdx = 0; pointIdx < numberOfPoints; pointIdx++)
          {
@@ -429,7 +429,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
       {
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
-         handTrajectoryMessage.setExpressedInReferenceFrameId(worldFrame);
+         handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
          handTrajectoryMessage.setTrajectoryReferenceFrameId(chestBodyFixedFrame);
          handTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
@@ -614,7 +614,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          {
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
             handTrajectoryMessage.setUniqueId(id);
-            handTrajectoryMessage.setExpressedInReferenceFrameId(worldFrame);
+            handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
             handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
             if (messageIndex > 0)
             {
@@ -732,7 +732,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          {
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
             handTrajectoryMessage.setUniqueId(id);
-            handTrajectoryMessage.setExpressedInReferenceFrameId(worldFrame);
+            handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
             handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
             
             if (messageIndex > 0)

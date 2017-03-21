@@ -56,10 +56,10 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
    }
    
    @Override
-   public void set(ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame, M message)
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
    {
       this.trajectoryFrame = trajectoryFrame;
-      clear(expressedInFrame);
+      clear(dataFrame);
       set(message);
    }
 
@@ -175,7 +175,7 @@ public abstract class SO3TrajectoryControllerCommand<T extends SO3TrajectoryCont
       trajectoryPointList.changeFrame(referenceFrame);
    }
 
-   public ReferenceFrame getExpressedInFrame()
+   public ReferenceFrame getDataFrame()
    {
       return trajectoryPointList.getReferenceFrame();
    }
