@@ -61,7 +61,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
    {
       //TODO: remove this once state estimator parameters are tuned
       simulationTestingParameters.setUsePefectSensors(true);
-      simulationTestingParameters.setKeepSCSUp(true);
+      simulationTestingParameters.setKeepSCSUp(false);
    }
 
    private static final double EPSILON_FOR_DESIREDS = 1.0e-10;
