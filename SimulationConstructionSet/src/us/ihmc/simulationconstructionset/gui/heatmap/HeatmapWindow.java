@@ -1,10 +1,11 @@
 package us.ihmc.simulationconstructionset.gui.heatmap;
 
+import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -28,7 +29,6 @@ public class HeatmapWindow
    
    private final JFrame frame;
    private final JPanel rootPanel;
-   private final GridBagConstraints gbc;
    
    private final List<JFXPanel> heatmapPanels;
 
@@ -42,10 +42,12 @@ public class HeatmapWindow
       this.dataBuffer = dataBuffer;
       
       heatmapPanels = new ArrayList<>();
-      gbc = new GridBagConstraints();
       
       frame = new JFrame(name);
-      frame.add(rootPanel = new JPanel());
+      Container contentPane = frame.getContentPane();
+      rootPanel = new JPanel();
+      contentPane.add(rootPanel);
+      frame.setIconImage(new ImageIcon(getClass().getClassLoader().getResource("running-man-32x32-Sim.png")).getImage());
       frame.setVisible(true);
    }
    
@@ -53,16 +55,13 @@ public class HeatmapWindow
    {
       rootPanel.removeAll();
       
-      gbc.gridwidth = 600;
-      gbc.gridheight = 400;
+      int graphWidth = 480;
+      int graphHeight = 200;
       
       for (int i = 0; i < heatmapPanels.size(); i++)
       {
-         gbc.gridx = i % 2;
-         gbc.gridy = i / 2;
-         
-         heatmapPanels.get(i).setPreferredSize(new Dimension(gbc.gridwidth, gbc.gridheight));
-         rootPanel.add(heatmapPanels.get(i), gbc);
+         heatmapPanels.get(i).setPreferredSize(new Dimension(graphWidth, graphHeight));
+         rootPanel.add(heatmapPanels.get(i));
       }
       
       frame.pack();

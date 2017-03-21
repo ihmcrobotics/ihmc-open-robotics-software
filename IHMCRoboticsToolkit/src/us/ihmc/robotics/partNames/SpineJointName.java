@@ -33,6 +33,32 @@ public enum SpineJointName
          }
       }
    }
+   
+   public String getPascalCaseName()
+   {
+      switch (this)
+      {
+         case SPINE_PITCH :
+         {
+            return "SpinePitch";
+         }
+
+         case SPINE_YAW :
+         {
+            return "SpineYaw";
+         }
+
+         case SPINE_ROLL :
+         {
+            return "SpineRoll";
+         }
+
+         default :
+         {
+            throw new RuntimeException("Should not get to here");
+         }
+      }
+   }
 
    public String getCamelCaseNameForMiddleOfExpression()
    {
