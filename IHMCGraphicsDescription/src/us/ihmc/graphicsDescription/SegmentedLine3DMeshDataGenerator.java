@@ -183,6 +183,26 @@ public final class SegmentedLine3DMeshDataGenerator
    }
 
    /**
+    * Gets the line radius currently used by this generator.
+    * 
+    * @return the line radius.
+    */
+   public double getLineRadius()
+   {
+      return circleTemplate.radius;
+   }
+
+   /**
+    * Gets the radial resolution currently used by this generator.
+    * 
+    * @return the radial resolution.
+    */
+   public int getRadialResolution()
+   {
+      return circleTemplate.getNumberOfVertices();
+   }
+
+   /**
     * Creates the output {@code MeshDataHolder}s.
     * <p>
     * WARNING: the {@code MeshDataHolder[]} and {@code CircleMeshVertices[]} share the same
