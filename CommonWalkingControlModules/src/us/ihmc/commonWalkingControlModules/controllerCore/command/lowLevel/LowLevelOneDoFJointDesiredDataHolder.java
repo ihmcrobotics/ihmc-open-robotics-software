@@ -230,7 +230,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
 
    public void setDesiredJointCurrent(OneDoFJoint joint, double desiredCurrent)
    {
-      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
+      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
 
@@ -349,7 +349,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    @Override
    public double getDesiredJointCurrent(OneDoFJoint joint)
    {
-      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
+      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.getDesiredCurrent();
@@ -432,7 +432,7 @@ public class LowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoint
    @Override
    public boolean hasDesiredCurrentForJoint(OneDoFJoint joint)
    {
-      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.nameBasedHashCode());
+      LowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getNameBasedHashCode());
       if (lowLevelJointData == null)
          return false;
       else
