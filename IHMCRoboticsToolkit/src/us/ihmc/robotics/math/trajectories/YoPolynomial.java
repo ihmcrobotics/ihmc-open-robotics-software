@@ -10,7 +10,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 
-
 public class YoPolynomial
 {
    private final int maximumNumberOfCoefficients;
@@ -113,7 +112,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf, double zdf)
+   public void setQuinticUsingWayPoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
+                                       double zdf)
    {
       reshape(6);
       setPositionRow(0, t0, z0);
@@ -126,7 +126,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zdIntermediate, double zf)
+   public void setQuinticUsingWayPoint2(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate,
+                                        double zdIntermediate, double zf)
    {
       reshape(6);
       setPositionRow(0, t0, z0);
@@ -139,7 +140,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0, double zIntermediate1, double zf, double zdf)
+   public void setQuinticTwoWaypoints(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
+                                      double zIntermediate1, double zf, double zdf)
    {
       reshape(6);
       setPositionRow(0, t0, z0);
@@ -152,7 +154,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate, double zddIntermediate, double zFinal, double zdFinal)
+   public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate,
+                                                                  double zddIntermediate, double zFinal, double zdFinal)
    {
       reshape(6);
       setPositionRow(0, t0, z0);
@@ -165,7 +168,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0, double zIntermediate1, double zFinal, double zdIntermediate1)
+   public void setQuarticUsingOneIntermediateVelocity(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zIntermediate0,
+                                                      double zIntermediate1, double zFinal, double zdIntermediate1)
    {
       reshape(5);
       setPositionRow(0, t0, z0);
@@ -177,7 +181,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf, double zdf, double zddf)
+   public void setSexticUsingWaypoint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zIntermediate, double zf,
+                                      double zdf, double zddf)
    {
       reshape(7);
       setPositionRow(0, t0, z0);
@@ -191,8 +196,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal,
-         double z0, double zd0, double zIntermediate0, double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
+   public void setSeptic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
+                         double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
    {
       reshape(8);
       setPositionRow(0, t0, z0);
@@ -207,8 +212,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal,
-         double z0, double zd0, double zdd0, double zIntermediate0, double zIntermediate1, double zf, double zdf, double zddf)
+   public void setSepticInitialAndFinalAcceleration(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zdd0,
+                                                    double zIntermediate0, double zIntermediate1, double zf, double zdf, double zddf)
    {
       reshape(8);
       setPositionRow(0, t0, z0);
@@ -223,8 +228,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal,
-         double z0, double zd0, double zIntermediate0, double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
+   public void setNonic(double t0, double tIntermediate0, double tIntermediate1, double tFinal, double z0, double zd0, double zIntermediate0,
+                        double zdIntermediate0, double zIntermediate1, double zdIntermediate1, double zf, double zdf)
    {
       reshape(10);
       setPositionRow(0, t0, z0);
@@ -241,7 +246,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0, double zdIntermediate, double zddIntermediate, double zFinal, double zdFinal)
+   public void setSexticUsingWaypointVelocityAndAcceleration(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdd0,
+                                                             double zdIntermediate, double zddIntermediate, double zFinal, double zdFinal)
    {
       reshape(7);
       setPositionRow(0, t0, z0);
@@ -255,7 +261,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate, double zFinal, double zdFinal)
+   public void setQuarticUsingIntermediateVelocity(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zdIntermediate, double zFinal,
+                                                   double zdFinal)
    {
       reshape(5);
       setPositionRow(0, t0, z0);
@@ -320,7 +327,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zd0, double zIntermediate, double zFinal)
+   public void setCubicWithIntermediatePositionAndInitialVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zd0,
+                                                                            double zIntermediate, double zFinal)
    {
       reshape(4);
       setPositionRow(0, t0, z0);
@@ -331,7 +339,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate, double zFinal, double zdFinal)
+   public void setCubicWithIntermediatePositionAndFinalVelocityConstraint(double t0, double tIntermediate, double tFinal, double z0, double zIntermediate,
+                                                                          double zFinal, double zdFinal)
    {
       reshape(4);
       setPositionRow(0, t0, z0);
@@ -344,7 +353,8 @@ public class YoPolynomial
 
    public void setInitialPositionVelocityZeroFinalHighOrderDerivatives(double t0, double tFinal, double z0, double zd0, double zFinal, double zdFinal)
    {
-      if (maximumNumberOfCoefficients < 4) throw new RuntimeException("Need at least 4 coefficients in order to set initial and final positions and velocities");
+      if (maximumNumberOfCoefficients < 4)
+         throw new RuntimeException("Need at least 4 coefficients in order to set initial and final positions and velocities");
       reshape(maximumNumberOfCoefficients);
       setPositionRow(0, t0, z0);
       setVelocityRow(1, t0, zd0);
@@ -414,8 +424,8 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal,
-         double z0, double zIntermediate1, double zIntermediate2, double zFinal)
+   public void setCubicUsingIntermediatePoints(double t0, double tIntermediate1, double tIntermediate2, double tFinal, double z0, double zIntermediate1,
+                                               double zIntermediate2, double zFinal)
    {
       reshape(4);
       MathTools.checkIntervalContains(tIntermediate1, t0, tIntermediate1);
@@ -428,8 +438,7 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal,
-         double z0, double zd0, double zdd0, double zFinal)
+   public void setCubicThreeInitialConditionsFinalPosition(double t0, double tFinal, double z0, double zd0, double zdd0, double zFinal)
    {
       reshape(4);
 
@@ -442,8 +451,7 @@ public class YoPolynomial
       setYoVariables();
    }
 
-   public void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal,
-                                                           double z0, double zFinal, double zdFinal, double zddFinal)
+   public void setCubicInitialPositionThreeFinalConditions(double t0, double tFinal, double z0, double zFinal, double zdFinal, double zddFinal)
    {
       reshape(4);
 
@@ -507,7 +515,7 @@ public class YoPolynomial
       double integral = 0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
-         integral += (1.0 / ((double)i + 1.0)) * a[i].getDoubleValue() * (toPowers[i + 1] - fromPowers[i + 1]);
+         integral += (1.0 / ((double) i + 1.0)) * a[i].getDoubleValue() * (toPowers[i + 1] - fromPowers[i + 1]);
       }
       return integral;
    }
@@ -534,9 +542,9 @@ public class YoPolynomial
       for (int col = derivativeOrderWithPositionBeingZero; col < numberOfCoefficients.getIntegerValue(); col++)
       {
          double columnPower = 1.0;
-         for (int i=0; i<derivativeOrderWithPositionBeingZero; i++)
+         for (int i = 0; i < derivativeOrderWithPositionBeingZero; i++)
          {
-            columnPower *= (col-i);
+            columnPower *= (col - i);
          }
          constraintMatrix.set(row, col, xPower * columnPower);
          xPower *= x;
@@ -571,7 +579,8 @@ public class YoPolynomial
    public void reshape(int numberOfCoefficientsRequired)
    {
       if (numberOfCoefficientsRequired > maximumNumberOfCoefficients)
-         throw new RuntimeException("Maximum number of coefficients is: " + maximumNumberOfCoefficients + ", can't build the polynomial as it requires: " + numberOfCoefficientsRequired + " coefficients.");
+         throw new RuntimeException("Maximum number of coefficients is: " + maximumNumberOfCoefficients + ", can't build the polynomial as it requires: "
+               + numberOfCoefficientsRequired + " coefficients.");
 
       this.coefficientVector.reshape(numberOfCoefficientsRequired, 1);
       this.constraintMatrix.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
