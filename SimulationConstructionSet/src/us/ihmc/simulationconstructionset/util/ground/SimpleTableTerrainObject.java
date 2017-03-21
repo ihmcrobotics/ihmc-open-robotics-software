@@ -1,18 +1,18 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    public static final double DEFAULT_TABLE_LENGTH = 2.0;
    private double TABLE_LENGTH, TABLE_THICKNESS, TABLE_WIDTH;
 
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    private Graphics3DObject linkGraphics;
 
@@ -34,7 +34,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       Point3D minPoint = new Point3D(xMin, yMin, zMin);
       Point3D maxPoint = new Point3D(xMax, yMax, zMax);
 
-      boundingBox = new BoundingBox3d(minPoint, maxPoint);
+      boundingBox = new BoundingBox3D(minPoint, maxPoint);
 
       linkGraphics = new Graphics3DObject();
 
@@ -44,7 +44,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
 
       if (TABLE_LENGTH < TABLE_WIDTH)
          linkGraphics.rotate(Math.PI / 2, Axis.Z);
-      linkGraphics.scale(new Vector3D(1, 1, boundingBox.getZMax() / TABLE_THICKNESS));
+      linkGraphics.scale(new Vector3D(1, 1, boundingBox.getMaxZ() / TABLE_THICKNESS));
       linkGraphics.addModelFile("models/FoldingTableLegs.obj");
    }
 
@@ -74,9 +74,9 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
    @Override
    public double heightAt(double x, double y, double z)
    {
-      if ((x > boundingBox.getXMin()) && (x < boundingBox.getXMax()) && (y > boundingBox.getYMin()) && (y < boundingBox.getYMax()))
+      if ((x > boundingBox.getMinX()) && (x < boundingBox.getMaxX()) && (y > boundingBox.getMinY()) && (y < boundingBox.getMaxY()))
       {
-         return boundingBox.getZMax();
+         return boundingBox.getMaxZ();
       }
 
       return 0.0;
@@ -85,8 +85,8 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      if ((z > (boundingBox.getZMax() - TABLE_THICKNESS)) && (z < boundingBox.getZMax()))
-         return boundingBox.isInside(x, y, z);
+      if ((z > (boundingBox.getMaxZ() - TABLE_THICKNESS)) && (z < boundingBox.getMaxZ()))
+         return boundingBox.isInsideInclusive(x, y, z);
 
       return false;
    }
@@ -105,31 +105,31 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
       normal.setY(0.0);
       normal.setZ(1.0);
 
-      if (!boundingBox.isXYInside(x, y) || (z > boundingBox.getZMax() - threshhold))
+      if (!boundingBox.isXYInsideInclusive(x, y) || (z > boundingBox.getMaxZ() - threshhold))
          return;
 
-      if (Math.abs(x - boundingBox.getXMin()) < threshhold)
+      if (Math.abs(x - boundingBox.getMinX()) < threshhold)
       {
          normal.setX(-1.0);
          normal.setY(0.0);
          normal.setZ(0.0);
       }
 
-      else if (Math.abs(x - boundingBox.getXMax()) < threshhold)
+      else if (Math.abs(x - boundingBox.getMaxX()) < threshhold)
       {
          normal.setX(1.0);
          normal.setY(0.0);
          normal.setZ(0.0);
       }
 
-      else if (Math.abs(y - boundingBox.getYMin()) < threshhold)
+      else if (Math.abs(y - boundingBox.getMinY()) < threshhold)
       {
          normal.setX(0.0);
          normal.setY(-1.0);
          normal.setZ(0.0);
       }
 
-      else if (Math.abs(y - boundingBox.getYMax()) < threshhold)
+      else if (Math.abs(y - boundingBox.getMaxY()) < threshhold)
       {
          normal.setX(0.0);
          normal.setY(1.0);
@@ -160,22 +160,22 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
 
    public double getXMin()
    {
-      return boundingBox.getXMin();
+      return boundingBox.getMinX();
    }
 
    public double getXMax()
    {
-      return boundingBox.getXMax();
+      return boundingBox.getMaxX();
    }
 
    public double getYMin()
    {
-      return boundingBox.getYMin();
+      return boundingBox.getMinY();
    }
 
    public double getYMax()
    {
-      return boundingBox.getYMax();
+      return boundingBox.getMaxY();
    }
 
    @Override
@@ -185,7 +185,7 @@ public class SimpleTableTerrainObject implements TerrainObject3D, HeightMapWithN
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

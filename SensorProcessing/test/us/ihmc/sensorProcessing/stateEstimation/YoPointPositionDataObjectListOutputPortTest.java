@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
+import static junit.framework.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
