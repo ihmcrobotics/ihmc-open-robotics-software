@@ -46,7 +46,6 @@ public class DynamicReachabilityCalculator
    private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
 
    private final SideDependentList<YoFramePoint> ankleLocations = new SideDependentList<>();
-   private final SideDependentList<YoFramePoint2d> hipLocations = new SideDependentList<>();
    private final SideDependentList<YoFramePoint> hipMinimumLocations = new SideDependentList<>();
    private final SideDependentList<YoFramePoint> hipMaximumLocations = new SideDependentList<>();
 
@@ -88,25 +87,19 @@ public class DynamicReachabilityCalculator
       for (RobotSide side : RobotSide.values)
       {
          YoFramePoint ankleLocation = new YoFramePoint(side.getShortLowerCaseName() + "PredictedAnklePoint", worldFrame, registry);
-         YoFramePoint2d hipLocation = new YoFramePoint2d(side.getShortLowerCaseName() + "PredictedHipPoint", worldFrame, registry);
          YoFramePoint hipMaximumLocation = new YoFramePoint(side.getShortLowerCaseName() + "PredictedHipMaximumPoint", worldFrame, registry);
          YoFramePoint hipMinimumLocation = new YoFramePoint(side.getShortLowerCaseName() + "PredictedHipMinimumPoint", worldFrame, registry);
          ankleLocations.put(side, ankleLocation);
-         hipLocations.put(side, hipLocation);
          hipMaximumLocations.put(side, hipMaximumLocation);
          hipMinimumLocations.put(side, hipMinimumLocation);
 
          YoGraphicPosition ankleLocationViz = new YoGraphicPosition(side.getSideNameFirstLetter() + "Predicted Ankle Point", ankleLocation, 0.05, YoAppearance.AliceBlue());
-         YoGraphicPosition hipLocationViz = new YoGraphicPosition(side.getSideNameFirstLetter() + "Predicted Hip Point", hipLocation, 0.01, YoAppearance.ForestGreen());
          YoGraphicPosition hipMaximumLocationViz = new YoGraphicPosition(side.getSideNameFirstLetter() + "Predicted Maximum Hip Point", hipMaximumLocation, 0.05, YoAppearance.ForestGreen());
          YoGraphicPosition hipMinimumLocationViz = new YoGraphicPosition(side.getSideNameFirstLetter() + "Predicted Minimum Hip Point", hipMinimumLocation, 0.05, YoAppearance.Blue());
 
          yoGraphicsListRegistry.registerYoGraphic(listName, ankleLocationViz);
          yoGraphicsListRegistry.registerYoGraphic(listName, hipMaximumLocationViz);
          yoGraphicsListRegistry.registerYoGraphic(listName, hipMinimumLocationViz);
-
-         yoGraphicsListRegistry.registerArtifact(listName, ankleLocationViz.createArtifact());
-         yoGraphicsListRegistry.registerArtifact(listName, hipLocationViz.createArtifact());
       }
 
       finalCoM = new YoFramePoint("PredictedFinalCoM", worldFrame, registry);
@@ -244,9 +237,9 @@ public class DynamicReachabilityCalculator
       tempFinalCoM3D.changeFrame(worldFrame);
       tempFinalCoM.setByProjectionOntoXYPlaneIncludingFrame(tempFinalCoM3D);
 
-      hipLocations.get(supportSide).set(tempFinalCoM);
       ankleLocations.get(supportSide).set(tempAnklePoint);
 
+      tempFinalCoM.changeFrame(worldFrame);
       hipMaximumLocations.get(supportSide).setXY(tempFinalCoM);
       hipMinimumLocations.get(supportSide).setXY(tempFinalCoM);
 
@@ -301,7 +294,6 @@ public class DynamicReachabilityCalculator
 
       tempFinalCoM.changeFrame(worldFrame);
       tempAnklePoint.changeFrame(worldFrame);
-      hipLocations.get(swingSide).set(tempFinalCoM);
       ankleLocations.get(swingSide).set(tempAnklePoint);
 
       hipMaximumLocations.get(swingSide).setXY(tempFinalCoM);
