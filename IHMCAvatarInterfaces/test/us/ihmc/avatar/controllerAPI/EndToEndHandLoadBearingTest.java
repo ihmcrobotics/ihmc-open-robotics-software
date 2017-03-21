@@ -23,8 +23,10 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -44,6 +46,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    protected DRCSimulationTestHelper drcSimulationTestHelper;
+
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public void testUsingHand() throws SimulationExceededMaximumTimeException
    {
@@ -67,10 +71,14 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      ReferenceFrame chestFrame = referenceFrames.getChestFrame();
+
       // Position hand above table
       Quaternion chestOrientation = new Quaternion();
       chestOrientation.appendPitchRotation(Math.PI / 4.0);
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, chestOrientation);
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
       drcSimulationTestHelper.send(chestTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
@@ -80,13 +88,17 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendPitchRotation(Math.PI / 2.0);
 
       HandTrajectoryMessage handTrajectoryMessage1 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage1.setTrajectoryReferenceFrameId(chestFrame);
+      handTrajectoryMessage1.setDataReferenceFrameId(worldFrame);
+      handTrajectoryMessage1.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage1);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage(RobotSide.LEFT, 1);
-      handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage2.setTrajectoryReferenceFrameId(chestFrame);
+      handTrajectoryMessage2.setDataReferenceFrameId(worldFrame);
+      handTrajectoryMessage2.setTrajectoryPoint(0, 1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage2);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
       assertTrue(success);
@@ -133,6 +145,10 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getRobotModel().createFullRobotModel());
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      ReferenceFrame chestFrame = referenceFrames.getChestFrame();
+
       RobotSide robotSide = RobotSide.RIGHT;
 
       // position the cane on the ground
@@ -143,8 +159,10 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendRollRotation(Math.PI / 4.0);
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
-      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.2, -0.15, 0.4), handOrientation, new Vector3D(), new Vector3D());
-      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.2, -0.15, 0.2), handOrientation, new Vector3D(), new Vector3D());
+      handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
+      handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.2, -0.15, 0.4), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.2, -0.15, 0.2), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
@@ -197,7 +215,9 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       HandTrajectoryMessage liftHand = new HandTrajectoryMessage(robotSide, 1);
-      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), handOrientation, new Vector3D(), new Vector3D());
+      liftHand.setTrajectoryReferenceFrameId(chestFrame);
+      liftHand.setDataReferenceFrameId(worldFrame);
+      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(liftHand);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
    }
