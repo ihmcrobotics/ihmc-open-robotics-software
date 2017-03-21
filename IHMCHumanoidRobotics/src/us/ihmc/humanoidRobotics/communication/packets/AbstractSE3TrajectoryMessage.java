@@ -291,22 +291,4 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    {
       this.dataReferenceFrameId = expressedInReferenceFrame.getNameBasedHashCode();
    }
-   
-   private void checkIfTrajectoryFrameIdsMatch(long frameId, ReferenceFrame referenceFrame)
-   {
-      if(frameId != referenceFrame.getNameBasedHashCode())
-      {
-         String msg = "Argument's hashcode " + referenceFrame + " " +  referenceFrame.getNameBasedHashCode() + " does not match " + frameId;
-         throw new ReferenceFrameMismatchException(msg);
-      }
-   }
-   
-   private void checkIfFrameIdsMatch(long frameId, long otherReferenceFrameId)
-   {
-      if(frameId != otherReferenceFrameId)
-      {
-         String msg = "Argument's hashcode " + otherReferenceFrameId + " does not match " + frameId;
-         throw new ReferenceFrameMismatchException(msg);
-      }
-   }
 }
