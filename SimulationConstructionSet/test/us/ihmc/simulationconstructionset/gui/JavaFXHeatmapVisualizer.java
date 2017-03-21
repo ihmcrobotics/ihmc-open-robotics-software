@@ -4,15 +4,12 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import javafx.animation.AnimationTimer;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
-import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
-import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
+import us.ihmc.graphicsDescription.graphInterfaces.SimpleGraphIndicesHolder;
 import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 
@@ -25,10 +22,10 @@ public class JavaFXHeatmapVisualizer
          @Override
          public void run()
          {
-            int dataBufferSize = 1024;
-            
+            int dataBufferSize = 20000;
+
             YoVariableRegistry registry = new YoVariableRegistry("root");
-            
+
             DoubleYoVariable yoTime = new DoubleYoVariable("t", registry);
             DoubleYoVariable x = new DoubleYoVariable("x", registry);
             DoubleYoVariable y = new DoubleYoVariable("y", registry);
@@ -36,35 +33,17 @@ public class JavaFXHeatmapVisualizer
             DataBufferEntry tDataBufferEntry = new DataBufferEntry(yoTime, dataBufferSize);
             DataBufferEntry xDataBufferEntry = new DataBufferEntry(x, dataBufferSize);
             DataBufferEntry yDataBufferEntry = new DataBufferEntry(y, dataBufferSize);
-            
+
             DataBuffer dataBuffer = new DataBuffer(dataBufferSize);
             dataBuffer.addEntry(tDataBufferEntry);
             dataBuffer.addEntry(xDataBufferEntry);
             dataBuffer.addEntry(yDataBufferEntry);
-            
-            
-            DataEntryHolder dataEntryHolder = new DataEntryHolder()
-            {
-               @Override
-               public DataEntry getEntry(YoVariable<?> yoVariable)
-               {
-                  if (yoVariable == x)
-                  {
-                     return xDataBufferEntry;
-                  }
-                  else
-                  {
-                     return yDataBufferEntry;
-                  }
-               }
-            };
-            TimeDataHolder timeDataHolder = new MinimalTimeDataHolder(200);
+
             SelectedVariableHolder selectedVariableHolder = new SelectedVariableHolder();
-            GraphIndicesHolder graphIndicesHolder = new MinimalGraphIndicesHolder();
-            graphIndicesHolder.setIndexLater(dataBufferSize);
+            GraphIndicesHolder graphIndicesHolder = new SimpleGraphIndicesHolder(dataBufferSize);
 
             JFrame jFrame = new JFrame();
-            JavaFXHeatmapGraph heatmapGraph = new JavaFXHeatmapGraph(registry, graphIndicesHolder, selectedVariableHolder, dataEntryHolder, timeDataHolder);
+            JavaFXHeatmapGraph heatmapGraph = new JavaFXHeatmapGraph(registry, graphIndicesHolder, selectedVariableHolder, dataBuffer, dataBuffer);
             heatmapGraph.setXVariable(x);
             heatmapGraph.setYVariable(y);
             jFrame.add(heatmapGraph.getPanel());
@@ -86,9 +65,9 @@ public class JavaFXHeatmapVisualizer
 
                   x.set(t);
                   y.set(Math.sin(x.getDoubleValue()));
-                  
-                  
+
                   dataBuffer.tickAndUpdate();
+                  graphIndicesHolder.tickLater(1);
 
                   heatmapGraph.update();
                }
