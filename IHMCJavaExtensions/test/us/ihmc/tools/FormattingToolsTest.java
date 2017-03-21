@@ -3,6 +3,8 @@ package us.ihmc.tools;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -87,6 +89,27 @@ public class FormattingToolsTest
    {
       assertEquals("not equal", 100, MathTools.roundToSignificantFigures(123.45, 1), 1e-12);
       assertEquals("not equal", 120, MathTools.roundToSignificantFigures(123.45, 2), 1e-12);
+      
+      ByteArrayOutputStream byteArrayOutputStream;
+      PrintStream systemOut;
+      
+      byteArrayOutputStream = new ByteArrayOutputStream();
+      systemOut = System.out;
+      System.setOut(new PrintStream(byteArrayOutputStream));
+      System.out.println(FormattingTools.getFormattedToPrecision(0.00000000000001, 0.01, 2));
+      System.out.flush();
+      System.setOut(systemOut);
+      System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
+      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", "0\r\n", byteArrayOutputStream.toString());
+      
+      byteArrayOutputStream = new ByteArrayOutputStream();
+      systemOut = System.out;
+      System.setOut(new PrintStream(byteArrayOutputStream));
+      System.out.println(FormattingTools.getFormattedToPrecision(0.01000000000001, 0.01, 2));
+      System.out.flush();
+      System.setOut(systemOut);
+      System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
+      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", "0.01\r\n", byteArrayOutputStream.toString());
    }
 	
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
