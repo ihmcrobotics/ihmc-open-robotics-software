@@ -4,12 +4,12 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.plotting.Graphics2DAdapter;
 import us.ihmc.graphicsDescription.plotting.Plotter2DAdapter;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 
 public class PolygonArtifact extends Artifact
@@ -71,7 +71,7 @@ public class PolygonArtifact extends Artifact
       setPoints(convexPolygon2d);
    }
 
-   public PolygonArtifact(String id, boolean fill, Color color, BoundingBox2d boundingBox2d)
+   public PolygonArtifact(String id, boolean fill, Color color, BoundingBox2D boundingBox2d)
    {
       super(id);
       setLevel(2);

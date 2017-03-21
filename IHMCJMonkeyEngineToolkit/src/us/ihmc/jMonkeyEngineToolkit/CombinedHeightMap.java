@@ -2,13 +2,13 @@ package us.ihmc.jMonkeyEngineToolkit;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.graphicsDescription.HeightMap;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class CombinedHeightMap implements HeightMap
 {
    private final ArrayList<HeightMap> heightMaps = new ArrayList<HeightMap>();
-   private BoundingBox3d boundingBox = null;
+   private BoundingBox3D boundingBox = null;
 
    public void addHeightMap(HeightMap heightMap)
    {
@@ -17,7 +17,7 @@ public class CombinedHeightMap implements HeightMap
       if (boundingBox == null)
          boundingBox = heightMap.getBoundingBox();
       else
-         boundingBox = BoundingBox3d.union(boundingBox, heightMap.getBoundingBox());
+         boundingBox = BoundingBox3D.union(boundingBox, heightMap.getBoundingBox());
    }
 
    public double heightAt(double x, double y, double z)
@@ -27,7 +27,7 @@ public class CombinedHeightMap implements HeightMap
       for (int i = 0; i < heightMaps.size(); i++)
       {
          HeightMap heightMap = heightMaps.get(i);
-         if (heightMap.getBoundingBox().isXYInside(x, y))
+         if (heightMap.getBoundingBox().isXYInsideInclusive(x, y))
          {
             double localHeightAt = heightMap.heightAt(x, y, z);
             if (localHeightAt > heightAt)
@@ -38,7 +38,7 @@ public class CombinedHeightMap implements HeightMap
       return heightAt;
    }
 
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

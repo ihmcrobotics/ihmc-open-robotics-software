@@ -1,11 +1,11 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.geometry.polytope.CylinderSupportingVertexHolder;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.shapes.Cylinder3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
@@ -20,7 +20,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
 
    private final RigidBodyTransform cylinderConsistencyTransform = new RigidBodyTransform();
 
-   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private final BoundingBox3D boundingBox = new BoundingBox3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private boolean boundingBoxNeedsUpdating = true;
 
    //TODO: Get rid of this redundancy. Make cylinder definitions consistent...
@@ -115,7 +115,7 @@ public class CylinderShapeDescription<T extends CylinderShapeDescription<T>> imp
    }
 
    @Override
-   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox3D boundingBoxToPack)
    {
       if (boundingBoxNeedsUpdating)
       {

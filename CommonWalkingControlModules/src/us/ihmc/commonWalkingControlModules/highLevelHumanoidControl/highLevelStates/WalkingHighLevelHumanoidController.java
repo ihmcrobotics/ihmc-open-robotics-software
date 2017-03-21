@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -46,6 +47,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -54,6 +56,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -712,5 +715,98 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
+   }
+   
+   /**
+    * Get defined states for the walking high level humanoid controller
+    * 
+    * Inefficient, use only in construction
+    * 
+    * @param states return list of walking states
+    */
+   public void getOrderedWalkingStatesForWarmup(List<WalkingStateEnum> states)
+   {
+      
+      states.add(WalkingStateEnum.TO_STANDING);
+      states.add(WalkingStateEnum.STANDING);
+      
+      states.add(WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
+      states.add(WalkingStateEnum.WALKING_LEFT_SUPPORT);
+      
+//      states.add(WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.WALKING_RIGHT_SUPPORT);
+      
+      states.add(WalkingStateEnum.TO_FLAMINGO_LEFT_SUPPORT);
+      states.add(WalkingStateEnum.FLAMINGO_LEFT_SUPPORT);
+      
+//      states.add(WalkingStateEnum.TO_FLAMINGO_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.FLAMINGO_RIGHT_SUPPORT);
+      
+   }
+   
+   /**
+    * Run one set of doTransitionIntoAction, doAction and doTransitionOutOfAction for a given state.
+    * 
+    * The balance manager is updated, but no commands are consumed.
+    * 
+    * This can be used to warmup the JIT compiler.
+    * 
+    * 
+    * @param state
+    */
+   public void warmupStateIteration(WalkingStateEnum state)
+   {
+      controllerToolbox.update();
+
+      WalkingState currentState = stateMachine.getState(state);
+
+      balanceManager.update();
+
+      switch(state)
+      {
+      case TO_WALKING_LEFT_SUPPORT:
+      case TO_WALKING_RIGHT_SUPPORT:
+      case WALKING_LEFT_SUPPORT:
+      case WALKING_RIGHT_SUPPORT:
+         FootstepDataListCommand cmd = new FootstepDataListCommand();
+         cmd.setDefaultSwingDuration(1.0);
+         cmd.setDefaultTransferDuration(1.0);
+         cmd.setExecutionMode(ExecutionMode.OVERRIDE);
+         FootstepDataCommand footStepCommand = new FootstepDataCommand();
+         footStepCommand.setRobotSide(state.getTransferToSide() == null ? state.getSupportSide() : state.getTransferToSide());
+         footStepCommand.setTrajectoryType(TrajectoryType.DEFAULT);
+         footStepCommand.setSwingHeight(0);
+         footStepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         cmd.addFootstep(footStepCommand);
+         
+         walkingMessageHandler.handleFootstepDataListCommand(cmd);
+         break;
+         
+      case FLAMINGO_LEFT_SUPPORT:
+      case FLAMINGO_RIGHT_SUPPORT:
+         
+         ArrayList<FootTrajectoryCommand> commands = new ArrayList<>();
+         FootTrajectoryCommand trajectoryCommand = new FootTrajectoryCommand();
+         trajectoryCommand.setRobotSide(state.getSupportSide().getOppositeSide());
+         trajectoryCommand.addTrajectoryPoint(new FrameSE3TrajectoryPoint());
+         commands.add(trajectoryCommand);
+         walkingMessageHandler.handleFootTrajectoryCommand(commands);
+         break;
+      default:
+         break;
+      }
+      
+      currentState.doTransitionIntoAction();
+      
+      currentState.doAction();
+      
+      updateManagers(currentState);
+
+      submitControllerCoreCommands();
+      
+      currentState.doTransitionOutOfAction();
+      
+      walkingMessageHandler.clearFootsteps();
+      
    }
 }

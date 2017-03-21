@@ -1,8 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -120,7 +119,7 @@ public class PlanarRegionTest
       regionTransform.appendTranslation(0.0, 0.0, zLocationOfPlanarRegion);
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
 
@@ -160,7 +159,7 @@ public class PlanarRegionTest
       regionTransform.appendTranslation(0.0, 0.0, zLocationOfPlanarRegion);
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
 
@@ -198,7 +197,7 @@ public class PlanarRegionTest
       RigidBodyTransform regionTransform = new RigidBodyTransform();
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
 
@@ -244,7 +243,7 @@ public class PlanarRegionTest
       RigidBodyTransform regionTransform = new RigidBodyTransform();
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-      BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+      BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transformToWorld);
 
@@ -673,7 +672,7 @@ public class PlanarRegionTest
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.21, 1.09, convexPolygon))));
          assertTrue(planarRegion.isPolygonIntersecting(transformConvexPolygon(regionTransform, translateConvexPolygon(1.09, 1.21, convexPolygon))));
 
-         BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+         BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          planarRegion.getTransformToWorld(transformToWorld);
 
@@ -687,7 +686,7 @@ public class PlanarRegionTest
 
                assertTrue(
                      "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                           + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.getX(), vertex.getY(), planeZGivenXY));
+                           + boundingBox3dInWorld, boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, PlanarRegion.DEFAULT_BOUNDING_BOX_EPSILON));
             }
          }
       }
@@ -783,7 +782,7 @@ public class PlanarRegionTest
    }
 
    private void assertThatAllPolygonVerticesAreInBoundingBox(List<ConvexPolygon2d> regionConvexPolygons, PlanarRegion planarRegion,
-         BoundingBox3d boundingBox3dInWorld)
+         BoundingBox3D boundingBox3dInWorld)
    {
       for (ConvexPolygon2d convexPolygon2dInWorld : regionConvexPolygons)
       {
@@ -793,7 +792,7 @@ public class PlanarRegionTest
             double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
             assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                  + boundingBox3dInWorld, boundingBox3dInWorld.isInside(vertex.getX(), vertex.getY(), planeZGivenXY));
+                  + boundingBox3dInWorld, boundingBox3dInWorld.isInsideInclusive(vertex.getX(), vertex.getY(), planeZGivenXY));
          }
       }
    }

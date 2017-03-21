@@ -1,7 +1,6 @@
 package us.ihmc.geometry.polytope;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 

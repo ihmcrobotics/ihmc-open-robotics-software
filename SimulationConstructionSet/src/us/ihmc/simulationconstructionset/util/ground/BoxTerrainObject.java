@@ -1,17 +1,17 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    private Graphics3DObject linkGraphics;
 
 
@@ -29,7 +29,7 @@ public class BoxTerrainObject implements TerrainObject3D, HeightMapWithNormals
      Point3D minPoint = new Point3D(xMin, yMin, zMin);
      Point3D maxPoint = new Point3D(xMax, yMax, zMax);
      
-     boundingBox = new BoundingBox3d(minPoint, maxPoint);
+     boundingBox = new BoundingBox3D(minPoint, maxPoint);
      
      linkGraphics = new Graphics3DObject();
           
@@ -73,9 +73,9 @@ public double heightAndNormalAt(double x, double y, double z, Vector3D normalToP
  @Override
 public double heightAt(double x, double y, double z)
  {
-   if ((x > boundingBox.getXMin()) && (x < boundingBox.getXMax()) && (y > boundingBox.getYMin()) && (y < boundingBox.getYMax()))
+   if ((x > boundingBox.getMinX()) && (x < boundingBox.getMaxX()) && (y > boundingBox.getMinY()) && (y < boundingBox.getMaxY()))
    {
-     return boundingBox.getZMax();
+     return boundingBox.getMaxZ();
    }
 
    return 0.0;
@@ -89,31 +89,31 @@ public double heightAt(double x, double y, double z)
       normal.setY(0.0);
       normal.setZ(1.0);
 
-      if (!boundingBox.isXYInside(x, y) || (z > boundingBox.getZMax() - threshhold))
+      if (!boundingBox.isXYInsideInclusive(x, y) || (z > boundingBox.getMaxZ() - threshhold))
          return;
 
-      if (Math.abs(x - boundingBox.getXMin()) < threshhold)
+      if (Math.abs(x - boundingBox.getMinX()) < threshhold)
       {
          normal.setX(-1.0);
          normal.setY(0.0);
          normal.setZ(0.0);
       }
 
-      else if (Math.abs(x - boundingBox.getXMax()) < threshhold)
+      else if (Math.abs(x - boundingBox.getMaxX()) < threshhold)
       {
          normal.setX(1.0);
          normal.setY(0.0);
          normal.setZ(0.0);
       }
 
-      else if (Math.abs(y - boundingBox.getYMin()) < threshhold)
+      else if (Math.abs(y - boundingBox.getMinY()) < threshhold)
       {
          normal.setX(0.0);
          normal.setY(-1.0);
          normal.setZ(0.0);
       }
 
-      else if (Math.abs(y - boundingBox.getYMax()) < threshhold)
+      else if (Math.abs(y - boundingBox.getMaxY()) < threshhold)
       {
          normal.setX(0.0);
          normal.setY(1.0);
@@ -145,32 +145,32 @@ public double heightAt(double x, double y, double z)
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return (boundingBox.isXYInside(x, y));
+      return (boundingBox.isXYInsideInclusive(x, y));
    }
 
 
    public double getXMin()
    {
-      return boundingBox.getXMin();
+      return boundingBox.getMinX();
    }
 
    public double getYMin()
    {
-      return boundingBox.getYMin();
+      return boundingBox.getMinY();
    }
 
    public double getXMax()
    {
-      return boundingBox.getXMax();
+      return boundingBox.getMaxX();
    }
 
    public double getYMax()
    {
-      return boundingBox.getYMax();
+      return boundingBox.getMaxY();
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

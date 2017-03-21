@@ -18,6 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ddogleg.fitting.modelset.ModelFitter;
+import org.ddogleg.fitting.modelset.ModelManager;
+import org.ddogleg.fitting.modelset.ransac.RansacMulti;
+
 import georegression.fitting.cylinder.FitCylinderToPoints_F64;
 import georegression.fitting.cylinder.ModelManagerCylinder3D_F64;
 import georegression.fitting.plane.ModelManagerPlaneGeneral3D_F64;
@@ -26,14 +33,12 @@ import georegression.fitting.sphere.ModelManagerSphere3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ModelFitter_P_to_PVNN;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.*;
-
-import org.ddogleg.fitting.modelset.ModelFitter;
-import org.ddogleg.fitting.modelset.ModelManager;
-import org.ddogleg.fitting.modelset.ransac.RansacMulti;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.DistanceCylinderToPointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.DistancePlaneToPointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.DistanceSphereToPointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.GenerateCylinderPointVector;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.GeneratePlanePointVector;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.GenerateSpherePointVector;
 
 /**
  * Configures RANSAC which can match different shapes.

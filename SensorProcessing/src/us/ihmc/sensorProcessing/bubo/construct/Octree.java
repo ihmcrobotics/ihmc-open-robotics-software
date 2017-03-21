@@ -18,10 +18,11 @@
 
 package us.ihmc.sensorProcessing.bubo.construct;
 
-import georegression.struct.GeoTuple;
+import java.util.List;
+
 import org.ddogleg.struct.FastQueue;
 
-import java.util.List;
+import georegression.struct.GeoTuple;
 
 /**
  * Octree data structure which uses a point to define sub-structure inside.  Each node in the tree contains 8 children.
