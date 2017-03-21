@@ -343,10 +343,10 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
    private void readLogFile(File selectedFile, DRCRobotModel robotModel) throws IOException
    {
       LogPropertiesReader logProperties = new LogPropertiesReader(new File(selectedFile, YoVariableLoggerListener.propertyFile));
-      File handshake = new File(selectedFile, logProperties.getHandshakeFile());
+      File handshake = new File(selectedFile, logProperties.getVariables().getHandshakeAsString());
       if (!handshake.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
 
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));

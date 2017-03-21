@@ -1,4 +1,4 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
 

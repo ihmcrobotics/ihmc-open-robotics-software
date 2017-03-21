@@ -1,6 +1,7 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 

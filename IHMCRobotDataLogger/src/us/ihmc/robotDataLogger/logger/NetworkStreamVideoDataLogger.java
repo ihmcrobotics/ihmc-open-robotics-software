@@ -18,6 +18,7 @@ import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataLogger.LogDataHeader;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.gui.GUICaptureReceiver;
 
 public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements LogPacketHandler

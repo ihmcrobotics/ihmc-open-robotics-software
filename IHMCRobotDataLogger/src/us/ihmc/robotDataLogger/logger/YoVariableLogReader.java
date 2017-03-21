@@ -10,6 +10,7 @@ import java.nio.channels.FileChannel;
 import com.google.common.io.Files;
 
 import us.ihmc.robotDataLogger.LogIndex;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
 import us.ihmc.tools.compression.SnappyUtils;
 
@@ -46,37 +47,37 @@ public class YoVariableLogReader
       
       properties = new File(logDirectory, YoVariableLoggerListener.propertyFile);
 
-      if (logProperties.getModelPath() != null)
+      if (!logProperties.getModel().getPathAsString().isEmpty())
       {
-         model = new File(logDirectory, logProperties.getModelPath());
+         model = new File(logDirectory, logProperties.getModel().getPathAsString());
       }
       else
       {
          model = null;
       }
 
-      if (logProperties.getModelResourceBundlePath() != null)
+      if (!logProperties.getModel().getResourceBundleAsString().isEmpty())
       {
-         resourceBundle = new File(logDirectory, logProperties.getModelResourceBundlePath());
+         resourceBundle = new File(logDirectory, logProperties.getModel().getResourceBundleAsString());
       }
       else
       {
          resourceBundle = null;
       }
       
-      if(logProperties.getSummaryFile() != null)
+      if(!logProperties.getVariables().getSummaryAsString().isEmpty())
       {
-         summary = new File(logDirectory, logProperties.getSummaryFile());
+         summary = new File(logDirectory, logProperties.getVariables().getSummaryAsString());
       }
       else
       {
          summary = null;
       }
 
-      handshake = new File(logDirectory, logProperties.getHandshakeFile());
+      handshake = new File(logDirectory, logProperties.getVariables().getHandshakeAsString());
       if (!handshake.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
 
    }
@@ -93,16 +94,16 @@ public class YoVariableLogReader
             handshakeStream.close();
             logLineLength = ProtoBufferYoVariableHandshakeParser.getNumberOfVariables(handshakeData);
 
-            File logdata = new File(logDirectory, logProperties.getVariableDataFile());
+            File logdata = new File(logDirectory, logProperties.getVariables().getDataAsString());
             if (!logdata.exists())
             {
-               throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
+               throw new RuntimeException("Cannot find " + logProperties.getVariables().getDataAsString());
             }
 
-            File index = new File(logDirectory, logProperties.getVariablesIndexFile());
+            File index = new File(logDirectory, logProperties.getVariables().getIndexAsString());
             if (!index.exists())
             {
-               throw new RuntimeException("Cannot find " + logProperties.getVariablesIndexFile());
+               throw new RuntimeException("Cannot find " + logProperties.getVariables().getIndexAsString());
             }
 
             logInputStream = new FileInputStream(logdata);
@@ -195,23 +196,23 @@ public class YoVariableLogReader
       File propertiesDestination = new File(destination, YoVariableLoggerListener.propertyFile);
       Files.copy(properties, propertiesDestination);
    
-      File handShakeDestination = new File(destination, logProperties.getHandshakeFile());
+      File handShakeDestination = new File(destination, logProperties.getVariables().getHandshakeAsString());
       Files.copy(handshake, handShakeDestination);
    
       if (model != null)
       {
-         File modelDesitination = new File(destination, logProperties.getModelPath());
+         File modelDesitination = new File(destination, logProperties.getModel().getPathAsString());
          Files.copy(model, modelDesitination);
       }
       if (resourceBundle != null)
       {
-         File resourceDestination = new File(destination, logProperties.getModelResourceBundlePath());
+         File resourceDestination = new File(destination, logProperties.getModel().getResourceBundleAsString());
          Files.copy(resourceBundle, resourceDestination);
       }
       
       if(summary != null)
       {
-         File summaryDestination = new File(destination, logProperties.getSummaryFile());
+         File summaryDestination = new File(destination, logProperties.getVariables().getSummaryAsString());
          Files.copy(summary, summaryDestination);
       }
    }

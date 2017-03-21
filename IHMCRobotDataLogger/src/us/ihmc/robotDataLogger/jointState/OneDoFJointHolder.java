@@ -1,6 +1,6 @@
 package us.ihmc.robotDataLogger.jointState;
 
-import us.ihmc.idl.us.ihmc.robotDataLogger.JointType;
+import us.ihmc.robotDataLogger.JointType;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class OneDoFJointHolder implements JointHolder

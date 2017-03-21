@@ -1,6 +1,7 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
@@ -46,12 +47,12 @@ public class JointDefinition implements IDLStruct<JointDefinition>
     }
 
         
-    public void setType(us.ihmc.idl.us.ihmc.robotDataLogger.JointType type)
+    public void setType(us.ihmc.robotDataLogger.JointType type)
     {
         type_ = type;
     }
 
-    public us.ihmc.idl.us.ihmc.robotDataLogger.JointType getType()
+    public us.ihmc.robotDataLogger.JointType getType()
     {
         return type_;
     }
@@ -113,8 +114,27 @@ public class JointDefinition implements IDLStruct<JointDefinition>
 
 	    	cdr.read_type_d(name_);	
 
-	    	type_ = us.ihmc.idl.us.ihmc.robotDataLogger.JointType.values[cdr.read_type_c()];
+	    	type_ = us.ihmc.robotDataLogger.JointType.values[cdr.read_type_c()];
 	    	
+	}
+	
+	@Override
+	public final void serialize(InterchangeSerializer ser)
+	{
+			    ser.write_type_d("name", name_);
+			    
+			    ser.write_type_c("type", type_);
+			    
+	}
+	
+	@Override
+	public final void deserialize(InterchangeSerializer ser)
+	{
+	    			ser.read_type_d("name", name_);	
+	    	    
+	    			type_ = (us.ihmc.robotDataLogger.JointType)ser.read_type_c("type", us.ihmc.robotDataLogger.JointType.class);
+	    	
+	    	    
 	}
 
     @Override
@@ -154,6 +174,6 @@ public class JointDefinition implements IDLStruct<JointDefinition>
     }
 
     private StringBuilder name_; 
-    private us.ihmc.idl.us.ihmc.robotDataLogger.JointType type_; 
+    private us.ihmc.robotDataLogger.JointType type_; 
 
 }

@@ -1,6 +1,7 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
@@ -19,7 +20,7 @@ public class DynamicGraphicMessage implements IDLStruct<DynamicGraphicMessage>
         	name_ = new StringBuilder(255); 
         	yo_index_ = new IDLSequence.Integer (255, "type_2");
         	constants_ = new IDLSequence.Double (255, "type_6");
-        	appearance_ = new us.ihmc.idl.us.ihmc.robotDataLogger.AppearanceDefinitionMessage();list_name_ = new StringBuilder(255); 
+        	appearance_ = new us.ihmc.robotDataLogger.AppearanceDefinitionMessage();list_name_ = new StringBuilder(255); 
         
         
     }
@@ -77,7 +78,7 @@ public class DynamicGraphicMessage implements IDLStruct<DynamicGraphicMessage>
 
         
 
-    public us.ihmc.idl.us.ihmc.robotDataLogger.AppearanceDefinitionMessage getAppearance()
+    public us.ihmc.robotDataLogger.AppearanceDefinitionMessage getAppearance()
     {
         return appearance_;
     }
@@ -123,7 +124,7 @@ public class DynamicGraphicMessage implements IDLStruct<DynamicGraphicMessage>
 	    current_alignment += (255 * 8) + CDR.alignment(current_alignment, 8);
 
 
-	    current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.AppearanceDefinitionMessage.getMaxCdrSerializedSize(current_alignment);
+	    current_alignment += us.ihmc.robotDataLogger.AppearanceDefinitionMessage.getMaxCdrSerializedSize(current_alignment);
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	
@@ -152,7 +153,7 @@ public class DynamicGraphicMessage implements IDLStruct<DynamicGraphicMessage>
 	    current_alignment += (data.getConstants().size() * 8) + CDR.alignment(current_alignment, 8);
 
 
-	    current_alignment += us.ihmc.idl.us.ihmc.robotDataLogger.AppearanceDefinitionMessage.getCdrSerializedSize(data.getAppearance(), current_alignment);
+	    current_alignment += us.ihmc.robotDataLogger.AppearanceDefinitionMessage.getCdrSerializedSize(data.getAppearance(), current_alignment);
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getList_name().length() + 1;
 
 	
@@ -200,6 +201,40 @@ public class DynamicGraphicMessage implements IDLStruct<DynamicGraphicMessage>
 	    	cdr.read_type_a(appearance_);	
 
 	    	cdr.read_type_d(list_name_);	
+	}
+	
+	@Override
+	public final void serialize(InterchangeSerializer ser)
+	{
+			    ser.write_type_2("type", type_);
+			    
+			    ser.write_type_d("name", name_);
+			    
+			    ser.write_type_e("yo_index", yo_index_);
+			    
+			    ser.write_type_e("constants", constants_);
+			    
+			    ser.write_type_a("appearance", appearance_);
+			    
+			    ser.write_type_d("list_name", list_name_);
+			    
+	}
+	
+	@Override
+	public final void deserialize(InterchangeSerializer ser)
+	{
+	    			type_ = ser.read_type_2("type");	
+	    	    
+	    			ser.read_type_d("name", name_);	
+	    	    
+	    			ser.read_type_e("yo_index", yo_index_);	
+	    	    
+	    			ser.read_type_e("constants", constants_);	
+	    	    
+	    			ser.read_type_a("appearance", appearance_);	
+	    	    
+	    			ser.read_type_d("list_name", list_name_);	
+	    	    
 	}
 
     @Override
@@ -266,7 +301,7 @@ public class DynamicGraphicMessage implements IDLStruct<DynamicGraphicMessage>
     private StringBuilder name_; 
     private IDLSequence.Integer  yo_index_; 
     private IDLSequence.Double  constants_; 
-    private us.ihmc.idl.us.ihmc.robotDataLogger.AppearanceDefinitionMessage appearance_; 
+    private us.ihmc.robotDataLogger.AppearanceDefinitionMessage appearance_; 
     private StringBuilder list_name_; 
 
 }

@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
@@ -18,8 +17,10 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import us.ihmc.idl.serializers.extra.PropertiesSerializer;
+import us.ihmc.robotDataLogger.LogProperties;
+import us.ihmc.robotDataLogger.LogPropertiesPubSubType;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
-import us.ihmc.robotDataLogger.logger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -81,25 +82,25 @@ public class LogCompressor extends SimpleFileVisitor<Path>
 
    public static void compress(File directory, LogProperties properties) throws IOException
    {
-      if (!properties.getCompressed())
+      if (!properties.getVariables().getCompressed())
       {
          System.out.println("Compressing " + directory);
 
-         YoVariableHandshakeParser handshake = ConverterUtil.getHandshake(new File(directory, properties.getHandshakeFile()));
+         YoVariableHandshakeParser handshake = ConverterUtil.getHandshake(new File(directory, properties.getVariables().getHandshakeAsString()));
          int bufferSize = handshake.getBufferSize();
 
-         File logdata = new File(directory, properties.getVariableDataFile());
+         File logdata = new File(directory, properties.getVariables().getDataAsString());
          if (!logdata.exists())
          {
-            throw new RuntimeException("Cannot find " + properties.getVariableDataFile());
+            throw new RuntimeException("Cannot find " + properties.getVariables().getDataAsString());
          }
 
-         properties.setCompressed(true);
-         properties.setVariableDataFile("robotData.bsz");
-         properties.setVariablesIndexFile("robotData.dat");
-         properties.setTimestampedIndex(true);
-         File compressedData = new File(directory, properties.getVariableDataFile());
-         File indexData = new File(directory, properties.getVariablesIndexFile());
+         properties.getVariables().setCompressed(true);
+         properties.getVariables().setData("robotData.bsz");
+         properties.getVariables().setIndex("robotData.dat");
+         properties.getVariables().setTimestamped(true);
+         File compressedData = new File(directory, properties.getVariables().getDataAsString());
+         File indexData = new File(directory, properties.getVariables().getIndexAsString());
 
          ByteBuffer indexBuffer = ByteBuffer.allocate(16);
          ByteBuffer compressed = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
@@ -152,9 +153,9 @@ public class LogCompressor extends SimpleFileVisitor<Path>
          logChannel.close();
 
          File log = new File(directory, "robotData.log");
-         FileWriter writer = new FileWriter(log);
-         properties.store(writer, "Converted by LogCompressor");
-         writer.close();
+         PropertiesSerializer<LogProperties> writer = new PropertiesSerializer<>(new LogPropertiesPubSubType());
+         writer.serialize(log, properties);
+         
          logdata.delete();
          System.out.println("Compressed " + directory);
       }

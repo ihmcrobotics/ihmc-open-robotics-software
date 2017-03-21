@@ -40,10 +40,10 @@ public class YoVariableExtracter
    public YoVariableExtracter(File logFile) throws IOException
    {
       LogPropertiesReader logProperties = new LogPropertiesReader(new File(logFile, YoVariableLoggerListener.propertyFile));
-      File handshake = new File(logFile, logProperties.getHandshakeFile());
+      File handshake = new File(logFile, logProperties.getVariables().getHandshakeAsString());
       if (!handshake.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
 
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
@@ -55,10 +55,10 @@ public class YoVariableExtracter
       parser.parseFrom(handshakeData);
       YoVariableRegistry registry = parser.getRootRegistry();
 
-      File logdata = new File(logFile, logProperties.getVariableDataFile());
+      File logdata = new File(logFile, logProperties.getVariables().getDataAsString());
       if(!logdata.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getDataAsString());
       }
       @SuppressWarnings("resource")
       final FileChannel logChannel = new FileInputStream(logdata).getChannel();

@@ -73,13 +73,13 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       this.options = options;
       this.request = request;
       logProperties = new LogPropertiesWriter(new File(tempDirectory, propertyFile));
-      logProperties.setHandshakeFile(handshakeFilename);
-      logProperties.setVariableDataFile(dataFilename);
-      logProperties.setCompressed(true);
-      logProperties.setTimestampedIndex(true);
-      logProperties.setVariablesIndexFile(indexFilename);
+      logProperties.getVariables().setHandshake(handshakeFilename);
+      logProperties.getVariables().setData(dataFilename);
+      logProperties.getVariables().setCompressed(true);
+      logProperties.getVariables().setTimestamped(true);
+      logProperties.getVariables().setIndex(indexFilename);
 
-      logProperties.setLogName(request.getName());
+      logProperties.setName(request.getName());
       logProperties.setTimestamp(timestamp);
       
       if(!options.getDisableVideo())
@@ -132,11 +132,14 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
 
       if (handshake.modelLoaderClass != null)
       {
-         logProperties.setModelLoaderClass(handshake.modelLoaderClass);
-         logProperties.setModelName(handshake.modelName);
-         logProperties.setModelResourceDirectories(handshake.resourceDirectories);
-         logProperties.setModelPath(modelFilename);
-         logProperties.setModelResourceBundlePath(modelResourceBundle);
+         logProperties.getModel().setLoader(handshake.modelLoaderClass);
+         logProperties.getModel().setName(handshake.modelName);
+         for(String resourceDirectory : handshake.resourceDirectories)
+         {
+            logProperties.getModel().getResourceDirectoriesList().add(resourceDirectory);
+         }
+         logProperties.getModel().setPath(modelFilename);
+         logProperties.getModel().setResourceBundle(modelResourceBundle);
 
          File modelFile = new File(tempDirectory, modelFilename);
          File resourceFile = new File(tempDirectory, modelResourceBundle);
@@ -161,7 +164,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       if(handshake.createSummary)
       {
          yoVariableSummarizer = new YoVariableSummarizer(handshakeParser.getYoVariablesList(), handshake.summaryTriggerVariable, handshake.summarizedVariables);
-         logProperties.setSummaryFile(summaryFilename);
+         logProperties.getVariables().setSummary(summaryFilename);
       }
    }
 

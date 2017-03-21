@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
@@ -68,11 +68,11 @@ public class YoVariableLogCropper extends YoVariableLogReader
          monitor.setNote("Seeking variable data");
          monitor.setProgress(10);
 
-         File outputFile = new File(destination, logProperties.getVariableDataFile());
+         File outputFile = new File(destination, logProperties.getVariables().getDataAsString());
          FileOutputStream fileOutputStream = new FileOutputStream(outputFile);
          FileChannel outputChannel = fileOutputStream.getChannel();
 
-         File indexFile = new File(destination, logProperties.getVariablesIndexFile());
+         File indexFile = new File(destination, logProperties.getVariables().getIndexAsString());
          FileOutputStream indexStream = new FileOutputStream(indexFile);
          FileChannel indexChannel = indexStream.getChannel();
 

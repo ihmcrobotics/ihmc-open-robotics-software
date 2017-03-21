@@ -1,6 +1,7 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
@@ -143,6 +144,32 @@ public class AppearanceDefinitionMessage implements IDLStruct<AppearanceDefiniti
 	    	b_ = cdr.read_type_6();	
 
 	    	transparency_ = cdr.read_type_6();	
+	}
+	
+	@Override
+	public final void serialize(InterchangeSerializer ser)
+	{
+			    ser.write_type_6("r", r_);
+			    
+			    ser.write_type_6("g", g_);
+			    
+			    ser.write_type_6("b", b_);
+			    
+			    ser.write_type_6("transparency", transparency_);
+			    
+	}
+	
+	@Override
+	public final void deserialize(InterchangeSerializer ser)
+	{
+	    			r_ = ser.read_type_6("r");	
+	    	    
+	    			g_ = ser.read_type_6("g");	
+	    	    
+	    			b_ = ser.read_type_6("b");	
+	    	    
+	    			transparency_ = ser.read_type_6("transparency");	
+	    	    
 	}
 
     @Override

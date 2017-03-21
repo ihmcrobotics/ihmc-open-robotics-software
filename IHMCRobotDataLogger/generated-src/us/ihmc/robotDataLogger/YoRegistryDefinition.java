@@ -1,6 +1,7 @@
-package us.ihmc.idl.us.ihmc.robotDataLogger;
+package us.ihmc.robotDataLogger;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.CDR;
+import us.ihmc.idl.InterchangeSerializer;
 import us.ihmc.idl.IDLStruct;
 import java.util.Arrays;
 
@@ -113,6 +114,24 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 	    	parent_ = cdr.read_type_2();	
 
 	    	cdr.read_type_d(name_);	
+	}
+	
+	@Override
+	public final void serialize(InterchangeSerializer ser)
+	{
+			    ser.write_type_2("parent", parent_);
+			    
+			    ser.write_type_d("name", name_);
+			    
+	}
+	
+	@Override
+	public final void deserialize(InterchangeSerializer ser)
+	{
+	    			parent_ = ser.read_type_2("parent");	
+	    	    
+	    			ser.read_type_d("name", name_);	
+	    	    
 	}
 
     @Override

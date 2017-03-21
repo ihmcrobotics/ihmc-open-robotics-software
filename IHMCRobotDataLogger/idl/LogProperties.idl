@@ -1,0 +1,59 @@
+module us{
+module ihmc{
+module robotDataLogger{
+
+	enum HandshakeFileType{
+		PROTOBUFFER,
+		IDL_YAML
+	};
+	
+
+	struct Video{
+		boolean hasTimebase;	// Old option, not used anymore for new logs
+	};
+	
+	
+	struct Camera{	// Camera definition
+		string name;	// Human readable camera name
+		boolean interlaced;	// Is the input interlaced
+		string videoFile;	// Video file
+		string timestampFile;	// Timestamps for video file
+		
+	};
+	
+	struct Variables{
+		HandshakeFileType handshakeFileType;
+		string handshake; // Handshake file name
+		string data;	// Data file name
+		string summary; // Summary file name
+		string index;	// Variable index file
+		boolean timestamped;	// Does the index contain timestamps
+		boolean compressed;	// Is the data compressed
+	};
+	
+	struct Model{
+		string loader;	// Loader class
+		string path;	// Path 
+		string name;	// Model file name
+		string resourceBundle;	// Resource bundle zip file name
+		sequence<string, 255> resourceDirectoriesList; 	// List of resource directories
+	};
+	
+	struct LogProperties{
+		string version;	// Version of the properties
+		string name;	// Name of this log
+		Variables variables;
+		Model model;
+		string timestamp;	// When was this log taken
+		
+		
+		sequence<Camera, 255> cameras;
+		
+		// Backward compatibility options
+		Video video;	// Old timebase option
+		
+		
+	};
+};
+};
+};

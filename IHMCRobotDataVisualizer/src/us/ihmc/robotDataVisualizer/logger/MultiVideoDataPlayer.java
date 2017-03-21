@@ -7,7 +7,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.robotDataLogger.Camera;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
 import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
@@ -17,12 +18,12 @@ import us.ihmc.simulationconstructionset.PlaybackListener;
 public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
 {
    private final LongYoVariable timestamp;
-   private final LogProperties logProperties;
 
    
    private final ArrayList<String> videos = new ArrayList<>();
 
    
+   private final HashMap<String, Camera> cameras = new HashMap<>();
    private final HashMap<String, VideoDataPlayer> players = new HashMap<>();
 
    private VideoDataPlayer activePlayer = null;
@@ -30,15 +31,16 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
    public MultiVideoDataPlayer(File dataDirectory, LogProperties logProperties, LongYoVariable timestamp)
    {
       this.timestamp = timestamp;
-      this.logProperties = logProperties;
 
-      for (String video : logProperties.getVideoFiles())
+      for(int i = 0; i < logProperties.getCameras().size(); i++)
       {
+         Camera camera = logProperties.getCameras().get(i);
          try
          {
-            VideoDataPlayer player = new VideoDataPlayer(video, dataDirectory, logProperties);
-            players.put(video, player);
-            videos.add(video);
+            VideoDataPlayer player = new VideoDataPlayer(camera, dataDirectory, logProperties.getVideo().getHasTimebase());
+            players.put(camera.getNameAsString(), player);
+            cameras.put(camera.getNameAsString(), camera);
+            videos.add(camera.getNameAsString());
          }
          catch (IOException e)
          {
@@ -129,14 +131,15 @@ public class MultiVideoDataPlayer implements PlaybackListener, RewoundListener
       for (int i = 0; i < videos.size(); i++)
       {
          String video = videos.get(i);
+         Camera camera = cameras.get(video);
          if (monitor != null)
          {
             monitor.setNote("Cropping video " + video);
             monitor.setProgress(50 + ((int) (50.0 * ((double) i / (double) videos.size()))));
          }
 
-         File timestampFile = new File(selectedDirectory, logProperties.getTimestampFile(video));
-         File videoFile = new File(selectedDirectory, logProperties.getVideoFile(video));
+         File timestampFile = new File(selectedDirectory, camera.getTimestampFileAsString());
+         File videoFile = new File(selectedDirectory, camera.getVideoFileAsString());
          players.get(video).cropVideo(videoFile, timestampFile, startTimestamp, endTimestamp, monitor);
       }
    }
