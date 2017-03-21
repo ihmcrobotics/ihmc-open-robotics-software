@@ -34,7 +34,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 4;
-   private final int nContactableBodies = 4;
+   private final int nContactableBodies;
 
    private final double jointAccelerationWeight = 0.005;
    private final double jointJerkWeight = 0.1;
@@ -109,6 +109,8 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
          taskspaceAngularWeights.put(jointMap.getHandName(robotSide), handAngularWeight);
          taskspaceLinearWeights.put(jointMap.getHandName(robotSide), handLinearWeight);
       }
+
+      nContactableBodies = jointMap.getNumberOfContactableBodies();
    }
 
    /** @inheritDoc */

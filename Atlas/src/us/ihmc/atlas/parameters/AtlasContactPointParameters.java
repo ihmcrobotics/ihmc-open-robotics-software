@@ -16,6 +16,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasContactPointParameters extends RobotContactPointParameters
 {
+   private final int numberOfContactableBodies;
+
    private boolean handContactPointsHaveBeenCreated = false;
    private final AtlasJointMap jointMap;
    private final AtlasRobotVersion atlasVersion;
@@ -37,17 +39,20 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
             createFootContactPoints(footContactPoints);
       }
 
+      int totalContacts = 2;
       if (createAdditionalContactPoints)
-         createAdditionalHandContactPoints();
+         totalContacts += createAdditionalHandContactPoints();
+
+      numberOfContactableBodies = totalContacts;
    }
 
-   public void createAdditionalHandContactPoints()
+   public int createAdditionalHandContactPoints()
    {
       switch (atlasVersion)
       {
       case ATLAS_UNPLUGGED_V5_NO_HANDS:
          createHandKnobContactPoints();
-         break;
+         return 2;
 
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
          if (DRCHandType.ROBOTIQ.isHandSimulated())
@@ -55,10 +60,10 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
             for (RobotSide robotSide : RobotSide.values)
                createRobotiqHandContactPoints(robotSide, false);
          }
-         break;
+         return 2;
 
       default:
-         break;
+         return 0;
       }
    }
 
@@ -197,5 +202,10 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
          linearGroundContactModel.setXYStiffness(scale * 50000.0);
          linearGroundContactModel.setXYDamping(scale * 2000.0);
       }
+   }
+
+   public int getNumberOfContactableBodies()
+   {
+      return numberOfContactableBodies;
    }
 }
