@@ -27,6 +27,16 @@ public class SolarPanelCleaningPose
       this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
    }
    
+   public SolarPanelCleaningPose(SolarPanelCleaningPose cleaningPose)
+   {
+      this.solarPanel = cleaningPose.solarPanel;
+      this.uCoordinate = cleaningPose.uCoordinate;
+      this.vCoordinate = cleaningPose.vCoordinate;
+      this.wCoordinate = cleaningPose.wCoordinate;
+      this.zRotation = cleaningPose.zRotation;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   }
+   
    public SolarPanelCleaningPose(SolarPanel solarPanel, double u, double v, double w)
    {
       this.solarPanel = solarPanel;
@@ -126,6 +136,21 @@ public class SolarPanelCleaningPose
       HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld);
             
       return handMessage;
+   }
+   
+   public Point3D getDesiredHandPosition()
+   {
+      return new Point3D(this.pose.getPosition());
+   }
+   
+   public Quaternion getDesiredHandOrientation()
+   {
+      RigidBodyTransform handPoseTransform = new RigidBodyTransform(this.pose.getOrientation(), this.pose.getPosition());
+      
+      handPoseTransform.appendPitchRotation(-Math.PI/2);
+      handPoseTransform.appendRollRotation(Math.PI/2);
+      
+      return new Quaternion(handPoseTransform.getRotationMatrix());      
    }
    
    public double getU()
