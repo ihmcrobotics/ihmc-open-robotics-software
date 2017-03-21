@@ -263,7 +263,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          orientationTrajectoryGenerator.appendWaypoint(pointToAdd);
       }
 
-      lastPointAdded.changeFrame(trajectoryFrame);
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
    }
