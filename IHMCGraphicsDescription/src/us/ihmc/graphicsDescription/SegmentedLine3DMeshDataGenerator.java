@@ -48,7 +48,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * </p>
     * 
     * @param numberOfWaypoints the number of waypoints this segmented line will have to go through.
-    *           Necessary to evaluate the number of meshes necessary.
+    *           Necessary to evaluate the number of meshes needed for this generator.
     * @param radialResolution refers to the quality of the cylinder rendering of the line section. A
     *           high value will result in a smooth circle section, while a low value result in a
     *           polygonized section.
