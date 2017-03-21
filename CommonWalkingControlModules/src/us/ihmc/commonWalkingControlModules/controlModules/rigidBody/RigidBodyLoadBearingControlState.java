@@ -13,8 +13,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
@@ -56,6 +58,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
    // TODO: allow multiple contact points
    private final YoFramePoint contactPoint;
+   private final YoFramePoint contactPointInWorld;
 
    private final ReferenceFrame bodyFrame;
    private final ReferenceFrame elevatorFrame;
@@ -95,27 +98,37 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       coefficientOfFriction = new DoubleYoVariable(bodyName + "CoefficientOfFriction", registry);
       contactNormal = new YoFrameVector(bodyName + "ContactNormal", worldFrame, parentRegistry);
       contactPoint = new YoFramePoint(bodyName + "ContactPoint", contactFrame, parentRegistry);
+      contactPointInWorld = new YoFramePoint(bodyName + "ContactPointInWorld", worldFrame, parentRegistry);
       desiredContactFrame = new PoseReferenceFrame(bodyName + "DesiredContactFrame", worldFrame);
 
       planeContactStateCommand.setContactingRigidBody(bodyToControl);
       planeContactStateCommand.setId(NO_CONTACT_ID);
 
-      setupViz(graphicsListRegistry);
+      setupViz(graphicsListRegistry, bodyName);
    }
 
-   private void setupViz(YoGraphicsListRegistry graphicsListRegistry)
+   private void setupViz(YoGraphicsListRegistry graphicsListRegistry, String bodyName)
    {
       if (graphicsListRegistry == null)
          return;
 
       String listName = getClass().getSimpleName();
-      YoGraphicReferenceFrame contactFrameViz = new YoGraphicReferenceFrame(contactFrame, registry, 0.14);
-      graphicsListRegistry.registerYoGraphic(listName, contactFrameViz);
-      graphics.add(contactFrameViz);
 
-      YoGraphicReferenceFrame desiredContactFrameViz = new YoGraphicReferenceFrame(desiredContactFrame, registry, 0.07);
-      graphicsListRegistry.registerYoGraphic(listName, desiredContactFrameViz);
-      graphics.add(desiredContactFrameViz);
+//      YoGraphicReferenceFrame contactFrameViz = new YoGraphicReferenceFrame(contactFrame, registry, 0.14);
+//      graphicsListRegistry.registerYoGraphic(listName, contactFrameViz);
+//      graphics.add(contactFrameViz);
+
+//      YoGraphicReferenceFrame desiredContactFrameViz = new YoGraphicReferenceFrame(desiredContactFrame, registry, 0.07);
+//      graphicsListRegistry.registerYoGraphic(listName, desiredContactFrameViz);
+//      graphics.add(desiredContactFrameViz);
+
+      YoGraphicVector surfaceNormal = new YoGraphicVector(bodyName + "ContactNormal", contactPointInWorld, contactNormal, 0.1, YoAppearance.Black());
+      graphicsListRegistry.registerYoGraphic(listName, surfaceNormal);
+      graphics.add(surfaceNormal);
+
+      YoGraphicPosition contactPoint = new YoGraphicPosition(bodyName + "ContactPoint", contactPointInWorld, 0.01, YoAppearance.Black());
+      graphicsListRegistry.registerYoGraphic(listName, contactPoint);
+      graphics.add(contactPoint);
    }
 
    public void setWeights(Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight)
@@ -197,10 +210,11 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       desiredContactPosition.setY(currentContactPosition.getY()); // do not control y position
       desiredContactPosition.setZ(currentContactPosition.getZ()); // do not control z position
 
-      // update frame for visualization
+      // update things for visualization
       desiredContactPosition.checkReferenceFrameMatch(desiredContactFrame.getParent());
       desiredContactOrientation.checkReferenceFrameMatch(desiredContactFrame.getParent());
       desiredContactFrame.setPoseAndUpdate(desiredContactPosition, desiredContactOrientation);
+      contactPointInWorld.setAndMatchFrame(contactPoint);
 
       // assemble the selection matrices for the controller core commands
       accelerationSelectionMatrix.reshape(dofs, dofs);
@@ -283,12 +297,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
       {
          YoGraphic yoGraphic = graphics.get(graphicsIdx);
-         // TODO: would be better to add abstract hide() method to YoGraphics.
-
-         if (yoGraphic instanceof YoGraphicReferenceFrame)
-            ((YoGraphicReferenceFrame) yoGraphic).hide();
-         else
-            throw new RuntimeException("Implement hiding " + yoGraphic.getClass().getSimpleName());
+         yoGraphic.hideGraphicObject();
       }
    }
 
