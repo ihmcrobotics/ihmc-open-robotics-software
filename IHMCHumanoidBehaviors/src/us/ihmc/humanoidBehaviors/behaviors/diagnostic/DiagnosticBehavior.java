@@ -1966,7 +1966,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       FrameOrientation desiredChestOrientation = new FrameOrientation(pelvisZUpFrame, yaw, pitch, roll);
       desiredChestOrientation.changeFrame(worldFrame);
       ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior,
-            trajectoryTime.getDoubleValue());
+            trajectoryTime.getDoubleValue(), pelvisZUpFrame);
       if (parallelize)
       {
         pipeLine.submitTaskForPallelPipesStage(chestTrajectoryBehavior, chestOrientationTask);

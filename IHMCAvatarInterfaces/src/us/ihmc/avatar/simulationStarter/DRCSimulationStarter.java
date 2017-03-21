@@ -43,6 +43,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -426,7 +427,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
-      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
@@ -443,6 +443,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+
+      CommonHumanoidReferenceFrames referenceFrames = controllerFactory.getHighLevelHumanoidControllerToolbox().getReferenceFrames();
+      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands, referenceFrames);
 
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);

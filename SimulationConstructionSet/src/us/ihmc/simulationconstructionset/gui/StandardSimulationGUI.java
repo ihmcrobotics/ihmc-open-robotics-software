@@ -115,6 +115,7 @@ import us.ihmc.simulationconstructionset.gui.config.ViewportConfigurationList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.AllDialogConstructorsHolder;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.StandardAllDialogConstructorsGenerator;
+import us.ihmc.simulationconstructionset.gui.heatmap.HeatmapWindow;
 import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableListPanel;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
@@ -471,7 +472,12 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       // windowGUIActions.setupGraphGroupsMenu(graphGroupList, viewportWindow);
       return viewportWindow;
    }
-
+   
+   public HeatmapWindow createNewHeatmapWindow(String name)
+   {
+      return new HeatmapWindow(name, rootRegistry, myGraphArrayPanel, selectedVariableHolder, myDataBuffer, myDataBuffer);
+   }
+   
    public void setupMultiViews(String viewportName, ViewportPanel viewport_Panel)
    {
       if (robots == null)

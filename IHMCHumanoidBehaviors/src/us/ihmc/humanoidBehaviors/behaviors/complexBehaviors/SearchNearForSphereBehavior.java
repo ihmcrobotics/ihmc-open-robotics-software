@@ -19,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataStateComm
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -36,9 +37,10 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
    private final boolean requireUserValidation;
    private final HumanoidReferenceFrames referenceFrames;
    private final AtlasPrimitiveActions atlasPrimitiveActions;
+   private final ReferenceFrame chestCoMFrame;
 
    public SearchNearForSphereBehavior(DoubleYoVariable yoTime, PickUpBallBehaviorCoactiveElementBehaviorSide coactiveElement,
-         HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
+         HumanoidReferenceFrames referenceFrames, FullRobotModel fullRobotModel, CommunicationBridge outgoingCommunicationBridge, boolean requireUserValidation,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super("SearchForSpehereNear", SearchNearState.class, yoTime, outgoingCommunicationBridge);
@@ -51,6 +53,8 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
       waitForUserValidationBehavior = new WaitForUserValidationBehavior(outgoingCommunicationBridge, coactiveElement.validClicked,
             coactiveElement.validAcknowledged);
       setupStateMachine();
+      chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();;
+      
    }
 
    private void setupStateMachine()
@@ -72,7 +76,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
             Quaternion desiredHeadQuat = new Quaternion();
             desiredHeadQuat.set(desiredAxisAngle);
             //MESSAGE
-            HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat);
+            HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat, ReferenceFrame.getWorldFrame(), chestCoMFrame);
             atlasPrimitiveActions.headTrajectoryBehavior.setInput(message);
             //MATH
             FrameOrientation desiredChestOrientation = new FrameOrientation(referenceFrames.getPelvisZUpFrame(), Math.toRadians(30), Math.toRadians(20), 0);
@@ -80,7 +84,7 @@ public class SearchNearForSphereBehavior extends StateMachineBehavior<SearchNear
             Quaternion chestOrientation = new Quaternion();
             desiredChestOrientation.getQuaternion(chestOrientation);
             //MESSAGE
-            ChestTrajectoryMessage chestOrientationPacket = new ChestTrajectoryMessage(4.0, chestOrientation);
+            ChestTrajectoryMessage chestOrientationPacket = new ChestTrajectoryMessage(4.0, chestOrientation, ReferenceFrame.getWorldFrame(), chestCoMFrame);
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);
 
          }

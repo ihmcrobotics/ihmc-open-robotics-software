@@ -7,8 +7,9 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.color.ColorConversions;
+import us.ihmc.graphicsDescription.color.HSVValue;
 import us.ihmc.ihmcPerception.OpenCVTools;
-import us.ihmc.ihmcPerception.vision.HSVValue;
 import us.ihmc.tools.nativelibraries.NativeLibraryLoader;
 
 import javax.swing.*;
@@ -293,8 +294,8 @@ public class OpenCVColoredCircularBlobDetector
             dirty = false;
          }
 
-         final Color lowerBoundBackgroundColor = OpenCVTools.convertHSVValueToColor(lowerBound);
-         final Color upperBoundBackgroundColor = OpenCVTools.convertHSVValueToColor(upperBound);
+         final Color lowerBoundBackgroundColor = ColorConversions.hsvValueToAwt(lowerBound);
+         final Color upperBoundBackgroundColor = ColorConversions.hsvValueToAwt(upperBound);
 
          SwingUtilities.invokeLater(new Runnable()
          {

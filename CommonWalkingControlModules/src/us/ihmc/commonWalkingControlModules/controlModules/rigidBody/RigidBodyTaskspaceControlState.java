@@ -80,6 +80,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
+   private ReferenceFrame trajectoryFrame;
    private final FramePose controlFramePose = new FramePose();
 
    public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
@@ -87,6 +88,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
       this.baseFrame = baseFrame;
+      this.trajectoryFrame = baseFrame;
       this.bodyFrame = bodyToControl.getBodyFixedFrame();
 
       String bodyName = bodyToControl.getName();
@@ -206,10 +208,10 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (trajectoryStopped.getBooleanValue())
       {
-         desiredLinearVelocity.setToZero(worldFrame);
-         feedForwardLinearAcceleration.setToZero(worldFrame);
-         desiredAngularVelocity.setToZero(worldFrame);
-         feedForwardAngularAcceleration.setToZero(worldFrame);
+         desiredLinearVelocity.setToZero(baseFrame);
+         feedForwardLinearAcceleration.setToZero(baseFrame);
+         desiredAngularVelocity.setToZero(baseFrame);
+         feedForwardAngularAcceleration.setToZero(baseFrame);
       }
 
       spatialFeedbackControlCommand.changeFrameAndSet(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
@@ -233,22 +235,22 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (pointQueue.isEmpty())
       {
          trajectoryDone.set(true);
-         positionTrajectoryGenerator.changeFrame(baseFrame);
-         orientationTrajectoryGenerator.changeFrame(baseFrame);
+//         positionTrajectoryGenerator.changeFrame(trajectoryFrame);
+//         orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
          return;
       }
 
       if (!orientationTrajectoryGenerator.isEmpty())
       {
-         positionTrajectoryGenerator.clear(worldFrame);
-         orientationTrajectoryGenerator.clear(worldFrame);
-         lastPointAdded.changeFrame(worldFrame);
+         positionTrajectoryGenerator.clear(trajectoryFrame);
+         orientationTrajectoryGenerator.clear(trajectoryFrame);
+         lastPointAdded.changeFrame(trajectoryFrame);
          positionTrajectoryGenerator.appendWaypoint(lastPointAdded);
          orientationTrajectoryGenerator.appendWaypoint(lastPointAdded);
       }
 
-      positionTrajectoryGenerator.changeFrame(worldFrame);
-      orientationTrajectoryGenerator.changeFrame(worldFrame);
+      positionTrajectoryGenerator.changeFrame(trajectoryFrame);
+      orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
 
       int currentNumberOfWaypoints = orientationTrajectoryGenerator.getCurrentNumberOfWaypoints();
       int pointsToAdd = maxPointsInGenerator - currentNumberOfWaypoints;
@@ -263,9 +265,9 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          orientationTrajectoryGenerator.appendWaypoint(pointToAdd);
       }
 
-      lastPointAdded.changeFrame(baseFrame);
-      positionTrajectoryGenerator.changeFrame(baseFrame);
-      orientationTrajectoryGenerator.changeFrame(baseFrame);
+      lastPointAdded.changeFrame(trajectoryFrame);
+//      positionTrajectoryGenerator.changeFrame(trajectoryFrame);
+//      orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
    }
@@ -278,17 +280,16 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public void doTransitionOutOfAction()
    {
+      PrintTools.debug("transition out of");
       trackingOrientation.set(false);
       trackingPosition.set(false);
 
-      numberOfPointsInQueue.set(0);
-      numberOfPointsInGenerator.set(0);
-      numberOfPoints.set(0);
+      clear();
    }
 
    public void holdOrientation(FrameOrientation initialOrientation)
    {
-      overrideTrajectory();
+      clear();
       resetLastCommandId();
       queueInitialPoint(initialOrientation);
 
@@ -305,7 +306,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    public void holdPose(FramePose initialPose)
    {
-      overrideTrajectory();
+      clear();
       resetLastCommandId();
       queueInitialPoint(initialPose);
 
@@ -342,11 +343,18 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (override || isEmpty())
       {
-         overrideTrajectory();
+         clear();
+         trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 0.0)
             queueInitialPoint(initialOrientation);
       }
-
+      else if(command.getTrajectoryFrame() != trajectoryFrame)
+      {
+         PrintTools.warn(warningPrefix + "Was executing in " + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
+         return false;
+      }
+      
+      command.getTrajectoryPointList().changeFrame(trajectoryFrame);
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
          if (!checkTime(command.getTrajectoryPoint(i).getTime()))
@@ -382,11 +390,18 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (override || isEmpty())
       {
-         overrideTrajectory();
+         clear();
+         trajectoryFrame = command.getTrajectoryFrame();
          if (command.getTrajectoryPoint(0).getTime() > 1.0e-5)
             queueInitialPoint(initialPose);
       }
+      else if(command.getTrajectoryFrame() != trajectoryFrame)
+      {
+         PrintTools.warn(warningPrefix + "Was executing in ." + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
+         return false;
+      }
 
+      command.getTrajectoryPointList().changeFrame(trajectoryFrame);
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
          if (!checkTime(command.getTrajectoryPoint(i).getTime()))
@@ -472,9 +487,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (atCapacityLimit())
          return false;
 
-      FrameSE3TrajectoryPoint point = pointQueue.addLast();
+      desiredOrientation.setToNaN(trajectoryPoint.getReferenceFrame());
       trajectoryPoint.getOrientation(desiredOrientation);
+      desiredAngularVelocity.setToNaN(trajectoryPoint.getReferenceFrame());
       trajectoryPoint.getAngularVelocity(desiredAngularVelocity);
+      
+      FrameSE3TrajectoryPoint point = pointQueue.addLast();
       point.setToZero(trajectoryPoint.getReferenceFrame());
       point.setOrientation(desiredOrientation);
       point.setAngularVelocity(desiredAngularVelocity);
@@ -490,6 +508,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       initialPose.getPoseIncludingFrame(desiredPosition, desiredOrientation);
       point.setPosition(desiredPosition);
       point.setOrientation(desiredOrientation);
+      point.changeFrame(trajectoryFrame);
    }
 
    private void queueInitialPoint(FrameOrientation initialOrientation)
@@ -498,6 +517,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       point.setToZero(initialOrientation.getReferenceFrame());
       point.setTime(0.0);
       point.setOrientation(initialOrientation);
+      point.changeFrame(trajectoryFrame);
    }
 
    private boolean atCapacityLimit()
@@ -510,11 +530,14 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return false;
    }
 
-   private void overrideTrajectory()
+   private void clear()
    {
       orientationTrajectoryGenerator.clear();
       positionTrajectoryGenerator.clear();
       pointQueue.clear();
+      numberOfPointsInQueue.set(0);
+      numberOfPointsInGenerator.set(0);
+      numberOfPoints.set(0);
    }
 
    private boolean checkPoseGainsAndWeights()
