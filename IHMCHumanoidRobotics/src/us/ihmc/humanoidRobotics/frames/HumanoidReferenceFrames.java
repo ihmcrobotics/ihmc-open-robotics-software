@@ -124,9 +124,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          ZUpFrame ankleZUpFrame = new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
          
-         ZUpFrame handZUpFrame = new ZUpFrame(worldFrame, getHandFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
-         handZUpFrames.put(robotSide, handZUpFrame);
-
+         ReferenceFrame handFrame = getHandFrame(robotSide);
+         if (handFrame != null)
+         {
+            ZUpFrame handZUpFrame = new ZUpFrame(worldFrame, handFrame, robotSide.getCamelCaseNameForStartOfExpression() + "HandZUp");
+            handZUpFrames.put(robotSide, handZUpFrame);
+         }
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
          soleFrames.put(robotSide, soleFrame);
          
@@ -351,7 +354,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       for (RobotSide robotSide : RobotSide.values)
       {
          ankleZUpFrames.get(robotSide).update();
-         handZUpFrames.get(robotSide).update();
+         
+         ReferenceFrame handZUpFrame = handZUpFrames.get(robotSide);
+         if(handZUpFrame != null)
+         {
+            handZUpFrame.update();
+         }
          soleFrames.get(robotSide).update();
          soleZUpFrames.get(robotSide).update();
       }
