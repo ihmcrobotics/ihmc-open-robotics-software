@@ -43,6 +43,21 @@ public class YoPolynomial
       }
    }
 
+   public YoPolynomial(DoubleYoVariable[] coefficients, IntegerYoVariable numberOfCoefficients)
+   {
+      a = coefficients;
+      this.numberOfCoefficients = numberOfCoefficients;
+
+      this.maximumNumberOfCoefficients = coefficients.length;
+
+      solver = LinearSolverFactory.general(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+
+      constraintMatrix = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      constraintVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      coefficientVector = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
+      xPowers = new double[maximumNumberOfCoefficients];
+   }
+
    public double getPosition()
    {
       return pos;
@@ -73,6 +88,10 @@ public class YoPolynomial
       return ret;
    }
 
+   public DoubleYoVariable[] getYoCoefficients()
+   {
+      return a;
+   }
 
    public void setConstant(double z)
    {
@@ -534,6 +553,15 @@ public class YoPolynomial
       return numberOfCoefficients.getIntegerValue();
    }
 
+   public IntegerYoVariable getYoNumberOfCoefficients()
+   {
+      return numberOfCoefficients;
+   }
+
+   public int getMaximumNumberOfCoefficients()
+   {
+      return maximumNumberOfCoefficients;
+   }
 
    private void setConstraintRow(int row, double x, double desiredZDerivative, int derivativeOrderWithPositionBeingZero)
    {
