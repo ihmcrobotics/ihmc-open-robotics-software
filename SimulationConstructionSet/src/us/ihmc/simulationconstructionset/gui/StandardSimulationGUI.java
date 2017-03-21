@@ -45,6 +45,7 @@ import javax.swing.JTextField;
 import javax.swing.JWindow;
 import javax.swing.SwingUtilities;
 
+import javafx.animation.AnimationTimer;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -69,7 +70,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.RenderedSceneHandler;
 import us.ihmc.jMonkeyEngineToolkit.camera.TrackingDollyCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
-import us.ihmc.javaFXToolkit.graphing.YoJavaFXHeatmapGraph;
+import us.ihmc.javaFXToolkit.graphing.JavaFXHeatmapGraph;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
@@ -1985,12 +1986,22 @@ public class StandardSimulationGUI implements SelectGraphConfigurationCommandExe
       return javaFX3DGraph;
    }
    
-   public YoJavaFXHeatmapGraph addHeatmapGraph(String name)
+   public JavaFXHeatmapGraph addHeatmapGraph(String name)
    {
-      YoJavaFXHeatmapGraph histogramGraph = new YoJavaFXHeatmapGraph(rootRegistry, myGraphArrayPanel, selectedVariableHolder, myDataBuffer, myDataBuffer);
-      setupExtraPanels(new ExtraPanelConfiguration(name, histogramGraph.getPanel(), true));
+      JavaFXHeatmapGraph heatmapGraph = new JavaFXHeatmapGraph(rootRegistry, myGraphArrayPanel, selectedVariableHolder, myDataBuffer, myDataBuffer);
+      
+      new AnimationTimer()
+      {
+         @Override
+         public void handle(long currentNanoTime)
+         {
+            heatmapGraph.update();
+         }
+      }.start();
+      
+      setupExtraPanels(new ExtraPanelConfiguration(name, heatmapGraph.getPanel(), true));
       selectPanel(name);
-      return histogramGraph;
+      return heatmapGraph;
    }
 
    @Override
