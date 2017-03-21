@@ -16,6 +16,8 @@ public enum WalkingStateEnum
    TO_FLAMINGO_RIGHT_SUPPORT,
    FLAMINGO_LEFT_SUPPORT,
    FLAMINGO_RIGHT_SUPPORT;
+   
+   public static WalkingStateEnum[] values = values();
 
    public static WalkingStateEnum getWalkingSingleSupportState(RobotSide supportLeg)
    {

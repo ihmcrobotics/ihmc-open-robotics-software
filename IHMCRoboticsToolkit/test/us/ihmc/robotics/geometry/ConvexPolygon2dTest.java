@@ -1,10 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -14,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -138,7 +135,7 @@ public class ConvexPolygon2dTest
             {1.0, 1.0}
       };
       ConvexPolygon2d doubles = new ConvexPolygon2d(verticesArray);
-      BoundingBox2d box = doubles.getBoundingBox();
+      BoundingBox2D box = doubles.getBoundingBox();
 
       assertEquals("Bounding boxes should be equal", box.getMinPoint().getX(), 0.0, epsilon);
       assertEquals("Bounding boxes should be equal", box.getMinPoint().getX(), 0.0, epsilon);

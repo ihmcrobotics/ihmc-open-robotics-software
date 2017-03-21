@@ -497,4 +497,14 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
       return controllerToolbox;
    }
+   
+   /**
+    * Warms up the walking controller by running it a number of iterations
+    * 
+    * @param iterations
+    */
+   public void warmupWalkingController(int iterations)
+   {
+      highLevelHumanoidControllerManager.warmup(iterations, walkingBehavior);
+   }
 }

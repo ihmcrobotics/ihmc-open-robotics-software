@@ -1,15 +1,15 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWithNormals
 {
-	private final BoundingBox3d boundingBox;
+	private final BoundingBox3D boundingBox;
 
 	private final double zGroundPosition;
 	private final double yMaxCorridor;
@@ -28,7 +28,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Double.POSITIVE_INFINITY;
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
 	}
 
 	public ShipCorridorGroundProfile(double xMax, double xMin, double yMax, double yMin, double yMaxCorridor, double yMinCorridor, double zGroundPosition, double maxWallHeight, double wallInclination)
@@ -41,7 +41,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 		
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Double.POSITIVE_INFINITY;
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
 	}
 
    @Override
@@ -244,7 +244,7 @@ public class ShipCorridorGroundProfile implements GroundProfile3D, HeightMapWith
 	}
 	
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

@@ -1,7 +1,7 @@
 package us.ihmc.simulationconstructionset.physics;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.robotDescription.CollisionMaskHolder;
 
 /**
@@ -39,6 +39,6 @@ public interface CollisionShape extends CollisionMaskHolder
 
    public abstract CollisionShapeDescription<?> getTransformedCollisionShapeDescription();
 
-   public abstract void getBoundingBox(BoundingBox3d boundingBoxToPack);
+   public abstract void getBoundingBox(BoundingBox3D boundingBoxToPack);
 
 }
