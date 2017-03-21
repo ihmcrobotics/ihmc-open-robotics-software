@@ -14,7 +14,18 @@ public class SolarPanelCleaningPose
    private double uCoordinate;
    private double vCoordinate;
    private double wCoordinate;
+   private double zRotation;
    private Pose pose;
+   
+   public SolarPanelCleaningPose(SolarPanel solarPanel)
+   {
+      this.solarPanel = solarPanel;
+      this.uCoordinate = 0;
+      this.vCoordinate = 0;
+      this.wCoordinate = 0;
+      this.zRotation = 0;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   }
    
    public SolarPanelCleaningPose(SolarPanel solarPanel, double u, double v, double w)
    {
@@ -22,15 +33,52 @@ public class SolarPanelCleaningPose
       this.uCoordinate = u;
       this.vCoordinate = v;
       this.wCoordinate = w;
-      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate);
+      this.zRotation = 0;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   }   
+   
+   public SolarPanelCleaningPose(SolarPanel solarPanel, double u, double v, double w, double zRotation)
+   {
+      this.solarPanel = solarPanel;
+      this.uCoordinate = u;
+      this.vCoordinate = v;
+      this.wCoordinate = w;
+      this.zRotation = zRotation;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   } 
+   
+   public void setUcoordinate(double u)
+   {
+      this.uCoordinate = u;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   }
+   
+   public void setVcoordinate(double v)
+   {
+      this.vCoordinate = v;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   }
+   
+   public void setWcoordinate(double w)
+   {
+      this.wCoordinate = w;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   }
+   
+   public void setUVWCoordinate(double u, double v, double w)
+   {
+      this.uCoordinate = u;
+      this.vCoordinate = v;
+      this.wCoordinate = w;
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
    }
    
    public Pose getPose()
    {
       return this.pose;
    }
-   
-   private Pose getPose(double u, double v, double w)
+      
+   private Pose getPose(double u, double v, double w, double zRotation)
    {
       Pose pose = new Pose();
       
@@ -47,19 +95,19 @@ public class SolarPanelCleaningPose
       uvwCoordinate = new Point3D(u, v, w);
       poseTransform.appendTranslation(uvwCoordinate);
       
+      poseTransform.appendYawRotation(zRotation);
+      
       pose.setPosition(poseTransform.getTranslationVector());
       pose.setOrientation(poseTransform.getRotationMatrix());
       
       return pose;
    }
-   
+      
    public void setZRotation(double zRotation)
    {
-      RigidBodyTransform appendTransform = new RigidBodyTransform();
-      appendTransform.setIdentity();
-      appendTransform.appendYawRotation(zRotation);
-            
-      pose.appendTransform(appendTransform);
+      this.zRotation = zRotation;
+      
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
    }
    
    public HandTrajectoryMessage getHandTrajectoryMessage(double motionTime)
@@ -76,9 +124,27 @@ public class SolarPanelCleaningPose
       PrintTools.info(""+positionToWorld.getX()+" "+positionToWorld.getY()+" "+positionToWorld.getZ()+" ");
       
       HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld);
-      
-      
-      
+            
       return handMessage;
+   }
+   
+   public double getU()
+   {
+      return uCoordinate;
+   }
+   
+   public double getV()
+   {
+      return vCoordinate;
+   }
+   
+   public double getW()
+   {
+      return wCoordinate;
+   }
+   
+   public double getZRotation()
+   {
+      return zRotation;
    }
 }
