@@ -47,9 +47,6 @@ public class YoMultipleFramesHelperTest
       helper.getRegisteredReferenceFrames(referenceFrames);
 
       assertEquals(3, referenceFrames.size());
-      assertTrue(worldFrame == referenceFrames.get(0));
-      assertTrue(frameA == referenceFrames.get(1));
-      assertTrue(frameB == referenceFrames.get(2));
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -131,20 +128,6 @@ public class YoMultipleFramesHelperTest
       {
       }
       assertEquals(worldFrame, helper.getCurrentReferenceFrame());
-
-      try
-      {
-         for (int i=0; i<20; i++)
-         {
-            ReferenceFrame anotherFrame = new TranslationReferenceFrame("anotherFrame" + i, ReferenceFrame.getWorldFrame());
-            helper.registerReferenceFrame(anotherFrame);
-         }
-         fail("Cannot yet register lots of frames for performance reasons. If need to, then need to back them up with a HashMap for quick retrieval");
-      }
-      catch (RuntimeException e)
-      {
-      }
-
    }
 
 }

@@ -22,13 +22,13 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
-   @RosExportedField(documentation = "Define the desired 3D position to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D position to be reached at this trajectory point.")
    public Point3D position;
-   @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point.")
    public Quaternion orientation;
-   @RosExportedField(documentation = "Define the desired 3D linear velocity to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D linear velocity to be reached at this trajectory point.")
    public Vector3D linearVelocity;
-   @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point.")
    public Vector3D angularVelocity;
 
    /**
@@ -63,10 +63,10 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
    public SE3TrajectoryPointMessage(double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
    {
       this.time = time;
-      this.position = position;
-      this.orientation = orientation;
-      this.linearVelocity = linearVelocity;
-      this.angularVelocity = angularVelocity;
+      this.position = new Point3D(position);
+      this.orientation = new Quaternion(orientation);
+      this.linearVelocity = new Vector3D(linearVelocity);
+      this.angularVelocity = new Vector3D(angularVelocity);
    }
 
    //   @Override
@@ -108,7 +108,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
    public void setPosition(Point3D position)
    {
-      this.position = position;
+      this.position.set(position);
    }
 
    public void getOrientation(Quaternion orientationToPack)
@@ -118,7 +118,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
    public void setOrientation(Quaternion orientation)
    {
-      this.orientation = orientation;
+      this.orientation.set(orientation);
    }
 
    public void getLinearVelocity(Vector3D linearVelocityToPack)
@@ -128,7 +128,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
    public void setLinearVelocity(Vector3D linearVelocity)
    {
-      this.linearVelocity = linearVelocity;
+      this.linearVelocity.set(linearVelocity);
    }
 
    public void getAngularVelocity(Vector3D angularVelocityToPack)
@@ -138,7 +138,7 @@ public class SE3TrajectoryPointMessage extends Packet<SE3TrajectoryPointMessage>
 
    public void setAngularVelocity(Vector3D angularVelocity)
    {
-      this.angularVelocity = angularVelocity;
+      this.angularVelocity.set(angularVelocity);
    }
 
    @Override

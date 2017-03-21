@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.BaseForControl;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -20,6 +19,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class UserDesiredHandPoseControllerCommandGenerator
 {
+   
+   public enum BaseForControl
+   {
+      CHEST, WORLD, WALKING_PATH
+   }
+   
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final BooleanYoVariable userDoHandPose = new BooleanYoVariable("userDoHandPose", registry);
@@ -73,15 +78,15 @@ public class UserDesiredHandPoseControllerCommandGenerator
             {
                userDesiredHandPose.getFramePoseIncludingFrame(framePose);
 
-               ReferenceFrame referenceFrame = getReferenceFrameToUse();
-               framePose.setIncludingFrame(referenceFrame, framePose.getGeometryObject());
+               ReferenceFrame referenceFrameToUse = getReferenceFrameToUse();
+               framePose.setIncludingFrame(referenceFrameToUse, framePose.getGeometryObject());
 
 //               framePose.changeFrame(ReferenceFrame.getWorldFrame());
 //               System.out.println("framePose " + framePose);
 
-               HandTrajectoryCommand handTrajectoryControllerCommand = new HandTrajectoryCommand(referenceFrame, userHandPoseSide.getEnumValue(), userHandPoseBaseForControl.getEnumValue());
+               HandTrajectoryCommand handTrajectoryControllerCommand = new HandTrajectoryCommand(userHandPoseSide.getEnumValue(), referenceFrameToUse, referenceFrameToUse);
 
-               FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(referenceFrame);
+               FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint(referenceFrameToUse);
                trajectoryPoint.setTime(userDesiredHandPoseTrajectoryTime.getDoubleValue());
                trajectoryPoint.setPosition(framePose.getFramePointCopy());
                trajectoryPoint.setOrientation(framePose.getFrameOrientationCopy());

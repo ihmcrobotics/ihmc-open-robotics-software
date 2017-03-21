@@ -5,6 +5,7 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
 {
@@ -16,9 +17,9 @@ public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
       this(null, chestTrajectoryMessage, chestOrientationBehavior);
    }
 
-   public ChestOrientationTask(FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime)
+   public ChestOrientationTask(FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime, ReferenceFrame trajectoryFrame)
    {
-      this(null, desiredChestOrientation, chestOrientationBehavior, trajectoryTime);
+      this(null, desiredChestOrientation, chestOrientationBehavior, trajectoryTime, trajectoryFrame);
 
    }
 
@@ -29,14 +30,14 @@ public class ChestOrientationTask<E extends Enum<E>> extends BehaviorAction<E>
       this.chestOrientationPacket = chestTrajectoryMessage;
    }
 
-   public ChestOrientationTask(E stateEnum, FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime)
+   public ChestOrientationTask(E stateEnum, FrameOrientation desiredChestOrientation, ChestTrajectoryBehavior chestOrientationBehavior, double trajectoryTime, ReferenceFrame trajectoryFrame)
    {
 
       super(stateEnum, chestOrientationBehavior);
       this.chestOrientationBehavior = chestOrientationBehavior;
       Quaternion chestOrientation = new Quaternion();
       desiredChestOrientation.getQuaternion(chestOrientation);
-      chestOrientationPacket = new ChestTrajectoryMessage(trajectoryTime, chestOrientation);
+      chestOrientationPacket = new ChestTrajectoryMessage(trajectoryTime, chestOrientation, ReferenceFrame.getWorldFrame(), trajectoryFrame);
    }
 
    @Override

@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -373,6 +374,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private ChestTrajectoryMessage createRandomChestMessage(double trajectoryTime, Random random)
    {
+      FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(controllerFullRobotModel);
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      
       OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
       RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
@@ -380,7 +385,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       Quaternion desiredOrientation = new Quaternion();
       desiredRandomChestOrientation.getQuaternion(desiredOrientation);
-      return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
+      return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
    }
 
    private static void assertControlWasConsistent(ControllerSpy controllerSpy)

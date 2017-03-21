@@ -2410,6 +2410,12 @@ public class VirtualModelControllerTestHelper
       {
          return null;
       }
+
+      @Override
+      public ReferenceFrame getChestFrame()
+      {
+         return null;
+      }
    }
 
    private static class ForcePointController implements RobotController

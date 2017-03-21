@@ -22,6 +22,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -390,7 +392,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	{
 	   simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 	   BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
+	   
 	   DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_MEDIUM_PLATFORM;
 	   drcSimulationTestHelper = new DRCSimulationTestHelper("DRCWalkingOntoMediumPlatformToesTouchingTest", selectedLocation,  simulationTestingParameters, getRobotModel());
 
@@ -398,6 +400,10 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 	   ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
 	   setupCameraForWalkingOffOfMediumPlatform(simulationConstructionSet);
+	   
+	   FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(controllerFullRobotModel);
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
 
 	   ThreadTools.sleep(1000);
 	   boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
@@ -409,7 +415,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       desiredChestFrameOrientation.getQuaternion(desiredChestQuat);
       
       double trajectoryTime = 0.5;
-      drcSimulationTestHelper.send(new ChestTrajectoryMessage(trajectoryTime, desiredChestQuat));
+      drcSimulationTestHelper.send(new ChestTrajectoryMessage(trajectoryTime, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame));
       
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
