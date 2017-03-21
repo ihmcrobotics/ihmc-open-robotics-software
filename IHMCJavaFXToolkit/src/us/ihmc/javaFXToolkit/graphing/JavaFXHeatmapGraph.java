@@ -2,6 +2,7 @@ package us.ihmc.javaFXToolkit.graphing;
 
 import java.util.Optional;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Group;
@@ -14,13 +15,16 @@ import javafx.scene.paint.Color;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.color.ColorConversions;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
 import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.tools.color.Gradient;
 
 public class JavaFXHeatmapGraph
 {
@@ -29,10 +33,12 @@ public class JavaFXHeatmapGraph
    private final GraphIndicesHolder graphIndicesHolder;
    private final SelectedVariableHolder selectedVariableHolder;
    private final DataEntryHolder dataEntryHolder;
-   private final TimeDataHolder timeDataHolder;
-
+   private final TimeDataHolder dataBuffer;
+   
    private final Point2D focusPoint;
    private final AffineTransform transformToCanvasSpace;
+   
+   private TObjectIntHashMap<Point2D> heatmap;
 
    private DoubleYoVariable x;
    private DoubleYoVariable y;
@@ -49,14 +55,16 @@ public class JavaFXHeatmapGraph
    private Point2D viewRange;
 
    public JavaFXHeatmapGraph(YoVariableRegistry registry, GraphIndicesHolder graphIndicesHolder, SelectedVariableHolder selectedVariableHolder,
-                             DataEntryHolder dataEntryHolder, TimeDataHolder timeDataHolder)
+                             DataEntryHolder dataEntryHolder, TimeDataHolder dataBuffer)
    {
       javaFXPanel = new JFXPanel();
       this.graphIndicesHolder = graphIndicesHolder;
       this.selectedVariableHolder = selectedVariableHolder;
       this.dataEntryHolder = dataEntryHolder;
-      this.timeDataHolder = timeDataHolder;
+      this.dataBuffer = dataBuffer;
 
+      heatmap = new TObjectIntHashMap<Point2D>(dataBuffer.getTimeData().length);
+      
       adjustingViewRangeMax = Optional.empty();
       adjustingViewRangeMin = Optional.empty();
 
@@ -130,17 +138,35 @@ public class JavaFXHeatmapGraph
       DataEntry xDataEntry = dataEntryHolder.getEntry(x);
       DataEntry yDataEntry = dataEntryHolder.getEntry(y);
 
+      double discreteX = 0.09;
+      double discreteY = 0.3;
+      
       for (int i = graphIndicesHolder.getInPoint(); i < graphIndicesHolder.getIndex(); i++)
       {
-         plotPencil.set(xDataEntry.getData()[i], yDataEntry.getData()[i]);
-
+         double roundedX = MathTools.roundToPrecision(xDataEntry.getData()[i], discreteX);
+         double roundedY = MathTools.roundToPrecision(yDataEntry.getData()[i], discreteY);
+         
+         plotPencil.set(roundedX, roundedY);
+         
+         heatmap.adjustOrPutValue(plotPencil, 1, 1);
+         int heat = heatmap.get(plotPencil);
+         
          adjustViewRange(plotPencil.getX(), plotPencil.getY());
          
          transformToCanvasSpace.transform(plotPencil);
          
-         graphicsContext.setFill(Color.BLUE);
-         fillRect(plotPencil.getX(), plotPencil.getY(), 10.0, 10.0);
+         graphicsContext.setFill(getHeatColor(heat));
+         fillRect(plotPencil.getX(), plotPencil.getY(), discreteX * transformToCanvasSpace.getScaleX(), discreteY * transformToCanvasSpace.getScaleY());
       }
+      
+      heatmap.clear();
+   }
+   
+   private Color getHeatColor(int heat)
+   {
+      double maxHeat = 50.0;
+      int heatIndex = (int) MathTools.roundToPrecision(MathTools.clamp((heat / maxHeat) * 500.0, 0.0, 499.0), 1.0);
+      return ColorConversions.awtToJfx(Gradient.GRADIENT_BLUE_TO_RED[heatIndex]);
    }
 
    private void fillRect(double x, double y, double width, double height)
