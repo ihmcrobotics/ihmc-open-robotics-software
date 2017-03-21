@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityValidator;
+import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -60,7 +60,7 @@ public class BalanceManager
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithTimeFreezer icpPlanner;
    private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
-   private final DynamicReachabilityValidator dynamicReachabilityValidator;
+   private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
@@ -169,7 +169,7 @@ public class BalanceManager
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
-      dynamicReachabilityValidator = new DynamicReachabilityValidator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
+      dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -255,7 +255,7 @@ public class BalanceManager
     */
    public void setUpcomingFootstep(Footstep upcomingFootstep)
    {
-      dynamicReachabilityValidator.setUpcomingFootstep(upcomingFootstep);
+      dynamicReachabilityCalculator.setUpcomingFootstep(upcomingFootstep);
    }
 
    /**
@@ -266,7 +266,7 @@ public class BalanceManager
    public void setNextFootstep(Footstep nextFootstep)
    {
       momentumRecoveryControlModule.setNextFootstep(nextFootstep);
-      dynamicReachabilityValidator.setUpcomingFootstep(nextFootstep);
+      dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -479,7 +479,7 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      dynamicReachabilityValidator.checkReachabilityOfStep();
+      dynamicReachabilityCalculator.checkReachabilityOfStep();
    }
 
    public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
@@ -509,7 +509,7 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      dynamicReachabilityValidator.checkReachabilityOfStep();
+      dynamicReachabilityCalculator.checkReachabilityOfStep();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)

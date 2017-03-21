@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
+package us.ihmc.commonWalkingControlModules;
 
 import static org.junit.Assert.assertTrue;
 
