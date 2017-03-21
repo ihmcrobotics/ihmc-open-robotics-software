@@ -1,12 +1,13 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FrameScalableBoundingBox3d
 {
    private final ReferenceFrame frame;
-   private BoundingBox3d box;
+   private BoundingBox3D box;
    
    private final Point3D dimensions;
    private final Point3D center;
@@ -27,7 +28,7 @@ public class FrameScalableBoundingBox3d
       min.scaleAdd(-scale, center);
       max.scaleAdd(scale, center);
 
-      this.box = new BoundingBox3d(min, max);
+      this.box = new BoundingBox3D(min, max);
    }
    
    public boolean contains(double x, double y, double z) {
@@ -38,7 +39,7 @@ public class FrameScalableBoundingBox3d
       Point3D local = new Point3D(p);
       frame.getInverseTransformToRoot().transform(local);
 
-      return box.isInside(local);
+      return box.isInsideInclusive(local);
    }
    
    public boolean intersects(Point3D start, Point3D end) {
@@ -47,6 +48,6 @@ public class FrameScalableBoundingBox3d
       Point3D inFrameEnd = new Point3D(end);
       frame.getInverseTransformToRoot().transform(inFrameEnd);
       
-      return box.intersects(inFrameStart, inFrameEnd);
+      return box.doesIntersectWithLineSegment3D(start, end);
    }
 }

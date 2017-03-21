@@ -49,7 +49,7 @@ dependencies {
    testCompile group: 'junit', name: 'junit', version: '4.11'
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
 
-   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
+   compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
    compile group: 'com.martiansoftware', name: 'jsap', version: '2.1'
    compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
    compile group: 'org.ejml', name: 'core', version: '0.30'

@@ -7,6 +7,7 @@ import java.awt.Container;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -17,7 +18,6 @@ import us.ihmc.jMonkeyEngineToolkit.camera.ClassicCameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.SimpleCameraTrackingAndDollyPositionHolder;
 import us.ihmc.jMonkeyEngineToolkit.camera.ViewportAdapter;
 import us.ihmc.jMonkeyEngineToolkit.jme.JMEGraphics3DAdapter;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class JMEHeightMapExample
 {
@@ -79,14 +79,14 @@ public class JMEHeightMapExample
 
    private static class FlatHeightMap implements HeightMap
    {
-      private final BoundingBox3d boundingBox = new BoundingBox3d(-1.0, -2.0, Double.MIN_VALUE, 2.0, 5.0, 0.0);
+      private final BoundingBox3D boundingBox = new BoundingBox3D(-1.0, -2.0, Double.MIN_VALUE, 2.0, 5.0, 0.0);
 
       public double heightAt(double x, double y, double z)
       {
          return 0.0;
       }
 
-      public BoundingBox3d getBoundingBox()
+      public BoundingBox3D getBoundingBox()
       {
          return boundingBox;
       }

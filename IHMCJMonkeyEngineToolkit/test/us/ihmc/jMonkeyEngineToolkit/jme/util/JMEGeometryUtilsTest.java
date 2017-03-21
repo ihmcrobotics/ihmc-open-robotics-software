@@ -1,6 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.jme.util;
 
-import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.*;
 
 import java.util.Random;
 
