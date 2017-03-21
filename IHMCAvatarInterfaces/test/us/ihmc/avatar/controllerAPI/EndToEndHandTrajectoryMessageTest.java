@@ -80,7 +80,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       simulationTestingParameters.setUsePefectSensors(true);
    }
 
-   private static final double EPSILON_FOR_DESIREDS = 1.0e-4;
+   private static final double EPSILON_FOR_DESIREDS = 1.0e-3;
 
    protected DRCSimulationTestHelper drcSimulationTestHelper;
 
