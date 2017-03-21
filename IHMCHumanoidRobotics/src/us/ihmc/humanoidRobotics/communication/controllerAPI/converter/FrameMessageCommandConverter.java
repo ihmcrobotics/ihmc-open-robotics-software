@@ -23,6 +23,7 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
    }
    
    @SuppressWarnings("unchecked")
+   @Override
    public <C extends Command<?, M>, M extends Packet<M>> void process(C command, M message)
    {
       FrameBasedCommand<M> frameBasedCommand = (FrameBasedCommand<M>) command;
