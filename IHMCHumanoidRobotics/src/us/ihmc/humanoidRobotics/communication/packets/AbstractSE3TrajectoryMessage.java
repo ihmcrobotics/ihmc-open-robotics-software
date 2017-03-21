@@ -26,7 +26,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    public float[] selectionMatrixDiagonal;
    
    public long trajectoryReferenceFrameId;
-   public long expressedInReferenceFrameId;
+   public long dataReferenceFrameId;
 
    public AbstractSE3TrajectoryMessage()
    {
@@ -46,7 +46,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(random);
       }
       trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
-      expressedInReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
+      dataReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
    }
 
    public AbstractSE3TrajectoryMessage(T se3TrajectoryMessage)
@@ -62,11 +62,11 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       setUniqueId(se3TrajectoryMessage.getUniqueId());
       setDestination(se3TrajectoryMessage.getDestination());
       trajectoryReferenceFrameId = se3TrajectoryMessage.getTrajectoryReferenceFrameId();
-      expressedInReferenceFrameId = se3TrajectoryMessage.getExpressedInReferenceFrameId();
+      dataReferenceFrameId = se3TrajectoryMessage.getDataReferenceFrameId();
       
    }
 
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long expressedInFrameId, long trajectoryReferenceFrameId)
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long dataFrameId, long trajectoryReferenceFrameId)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -74,10 +74,10 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {
             new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
       this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
-      this.expressedInReferenceFrameId = expressedInFrameId;
+      this.dataReferenceFrameId = dataFrameId;
    }
    
-   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame expressedInFrame, ReferenceFrame trajectoryReferenceFrame)
+   public AbstractSE3TrajectoryMessage(double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame dataFrame, ReferenceFrame trajectoryReferenceFrame)
    {
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       Vector3D zeroLinearVelocity = new Vector3D();
@@ -85,7 +85,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
       taskspaceTrajectoryPoints = new SE3TrajectoryPointMessage[] {
             new SE3TrajectoryPointMessage(trajectoryTime, desiredPosition, desiredOrientation, zeroLinearVelocity, zeroAngularVelocity)};
       this.trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
-      this.expressedInReferenceFrameId = expressedInFrame.getNameBasedHashCode();
+      this.dataReferenceFrameId = dataFrame.getNameBasedHashCode();
    }
 
    public AbstractSE3TrajectoryMessage(int numberOfTrajectoryPoints)
@@ -102,12 +102,12 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
          taskspaceTrajectoryPoints[i] = new SE3TrajectoryPointMessage(other.taskspaceTrajectoryPoints[i]);
       setExecutionMode(other.getExecutionMode(), other.getPreviousMessageId());
       trajectoryReferenceFrameId = other.getTrajectoryReferenceFrameId();
-      expressedInReferenceFrameId = other.getExpressedInReferenceFrameId();
+      dataReferenceFrameId = other.getDataReferenceFrameId();
    }
 
    public void getTrajectoryPoints(FrameSE3TrajectoryPointList trajectoryPointListToPack)
    {
-      checkIfTrajectoryFrameIdsMatch(this.expressedInReferenceFrameId, trajectoryPointListToPack.getReferenceFrame());
+      checkIfTrajectoryFrameIdsMatch(this.dataReferenceFrameId, trajectoryPointListToPack.getReferenceFrame());
       SE3TrajectoryPointMessage[] trajectoryPointMessages = getTrajectoryPoints();
       int numberOfPoints = trajectoryPointMessages.length;
 
@@ -131,7 +131,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
          Vector3D angularVelocity, ReferenceFrame expressedInReferenceFrame)
    {
-      checkIfTrajectoryFrameIdsMatch(this.expressedInReferenceFrameId, expressedInReferenceFrame);
+      checkIfTrajectoryFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrame);
       rangeCheck(trajectoryPointIndex);
       taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
    }
@@ -148,7 +148,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity,
          Vector3D angularVelocity, long expressedInReferenceFrameId)
    {
-      checkIfFrameIdsMatch(this.expressedInReferenceFrameId, expressedInReferenceFrameId);
+      checkIfFrameIdsMatch(this.dataReferenceFrameId, expressedInReferenceFrameId);
       rangeCheck(trajectoryPointIndex);
       taskspaceTrajectoryPoints[trajectoryPointIndex] = new SE3TrajectoryPointMessage(time, position, orientation, linearVelocity, angularVelocity);
    }
@@ -234,7 +234,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    public boolean epsilonEquals(T other, double epsilon)
    {
       
-      if(expressedInReferenceFrameId != other.getExpressedInReferenceFrameId())
+      if(dataReferenceFrameId != other.getDataReferenceFrameId())
       {
          return false;
       }
@@ -275,21 +275,21 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    }
    
    @Override
-   public long getExpressedInReferenceFrameId()
+   public long getDataReferenceFrameId()
    {
-      return expressedInReferenceFrameId;
+      return dataReferenceFrameId;
    }
    
    @Override
-   public void setExpressedInReferenceFrameId(long expressedInReferenceFrameId)
+   public void setDataReferenceFrameId(long expressedInReferenceFrameId)
    {
-      this.expressedInReferenceFrameId = expressedInReferenceFrameId;
+      this.dataReferenceFrameId = expressedInReferenceFrameId;
    }
    
    @Override
-   public void setExpressedInReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
+   public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
    {
-      this.expressedInReferenceFrameId = expressedInReferenceFrame.getNameBasedHashCode();
+      this.dataReferenceFrameId = expressedInReferenceFrame.getNameBasedHashCode();
    }
    
    private void checkIfTrajectoryFrameIdsMatch(long frameId, ReferenceFrame referenceFrame)

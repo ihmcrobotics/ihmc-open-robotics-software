@@ -6,9 +6,9 @@ public interface FrameBasedMessage
 {
 
    long getTrajectoryReferenceFrameId();
-   long getExpressedInReferenceFrameId();
+   long getDataReferenceFrameId();
    void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId);
    void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame);
-   void setExpressedInReferenceFrameId(long expressedInReferenceFrameId);
-   void setExpressedInReferenceFrameId(ReferenceFrame expressedInReferenceFrame);
+   void setDataReferenceFrameId(long expressedInReferenceFrameId);
+   void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame);
 }

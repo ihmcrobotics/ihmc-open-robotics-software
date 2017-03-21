@@ -23,9 +23,9 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    {
    }
 
-   public SE3TrajectoryControllerCommand(ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame)
+   public SE3TrajectoryControllerCommand(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
-      clear(expressedInFrame);
+      clear(dataFrame);
       this.trajectoryFrame = trajectoryFrame;
    }
 
@@ -54,10 +54,10 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    }
    
    @Override
-   public void set(ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame, M message)
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
    {
       this.trajectoryFrame = trajectoryFrame;
-      clear(expressedInFrame);
+      clear(dataFrame);
       set(message);
    }
 
@@ -167,7 +167,7 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    /**
     * Convenience method for accessing {@link #trajectoryPointList}. To get the list use {@link #getTrajectoryPointList()}.
     */
-   public ReferenceFrame getExpressedInFrame()
+   public ReferenceFrame getDataFrame()
    {
       return trajectoryPointList.getReferenceFrame();
    }

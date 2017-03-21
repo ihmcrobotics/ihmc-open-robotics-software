@@ -90,7 +90,7 @@ public class ScriptBasedControllerCommandGenerator
       {
          FootTrajectoryMessage message = (FootTrajectoryMessage) scriptObject;
          message.setTrajectoryReferenceFrameId(worldFrame);
-         message.setExpressedInReferenceFrameId(worldFrame);
+         message.setDataReferenceFrameId(worldFrame);
          FootTrajectoryCommand command = new FootTrajectoryCommand();
          command.set(worldFrame, worldFrame, message);
          controllerCommands.add(command);
@@ -100,7 +100,7 @@ public class ScriptBasedControllerCommandGenerator
          ReferenceFrame chestFrame = referenceFrames.getChestFrame();
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
          message.setTrajectoryReferenceFrameId(chestFrame);
-         message.setExpressedInReferenceFrameId(worldFrame);
+         message.setDataReferenceFrameId(worldFrame);
          HandTrajectoryCommand command = new HandTrajectoryCommand();
          command.set(worldFrame, chestFrame, message);
          controllerCommands.add(command);

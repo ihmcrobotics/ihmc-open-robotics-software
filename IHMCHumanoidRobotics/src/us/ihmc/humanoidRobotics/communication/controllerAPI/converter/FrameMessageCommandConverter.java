@@ -31,7 +31,7 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
       long trajectoryReferenceFrameID = frameBasedMessage.getTrajectoryReferenceFrameId();
       ReferenceFrame trajectoryReferenceFrame = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(trajectoryReferenceFrameID);
       
-      long expressedInReferenceFrameID = frameBasedMessage.getExpressedInReferenceFrameId();
+      long expressedInReferenceFrameID = frameBasedMessage.getDataReferenceFrameId();
       ReferenceFrame expressedInReferenceFrame = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(expressedInReferenceFrameID);
       
       frameBasedCommand.set(expressedInReferenceFrame, trajectoryReferenceFrame, message);

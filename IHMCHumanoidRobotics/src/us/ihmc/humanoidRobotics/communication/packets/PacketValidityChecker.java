@@ -357,7 +357,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return HandTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
       
-      if(handTrajectoryMessage.getExpressedInReferenceFrameId() == 0)
+      if(handTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
@@ -451,7 +451,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return HeadTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
       
-      if(headTrajectoryMessage.getExpressedInReferenceFrameId() == 0)
+      if(headTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
@@ -573,7 +573,7 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
       
-      if(message.getExpressedInReferenceFrameId() == 0)
+      if(message.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
@@ -605,7 +605,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
       
-      if(pelvisOrientationTrajectoryMessage.getExpressedInReferenceFrameId() == 0)
+      if(pelvisOrientationTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
@@ -646,7 +646,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return PelvisTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
       
-      if(pelvisTrajectoryMessage.getExpressedInReferenceFrameId() == 0)
+      if(pelvisTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
@@ -687,7 +687,7 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return FootTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
       
-      if(footTrajectoryMessage.getExpressedInReferenceFrameId() == 0)
+      if(footTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }

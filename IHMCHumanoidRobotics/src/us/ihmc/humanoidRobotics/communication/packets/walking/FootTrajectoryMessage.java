@@ -36,7 +36,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
@@ -45,7 +45,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
       super(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
@@ -59,7 +59,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
       setUniqueId(footTrajectoryMessage.getUniqueId());
       setDestination(footTrajectoryMessage.getDestination());
       robotSide = footTrajectoryMessage.robotSide;
-      setExpressedInReferenceFrameId(footTrajectoryMessage.getExpressedInReferenceFrameId());
+      setDataReferenceFrameId(footTrajectoryMessage.getDataReferenceFrameId());
       setTrajectoryReferenceFrameId(footTrajectoryMessage.getTrajectoryReferenceFrameId());
    }
 
@@ -76,7 +76,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
       super(trajectoryTime, desiredPosition, desiredOrientation, WORLD_FRAME_HASH_CODE, WORLD_FRAME_HASH_CODE);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
    
@@ -92,7 +92,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 

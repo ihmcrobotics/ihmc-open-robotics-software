@@ -32,7 +32,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    {
       super();
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
@@ -40,7 +40,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    {
       super(random);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
@@ -53,7 +53,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
       super(pelvisTrajectoryMessage);
       setUniqueId(pelvisTrajectoryMessage.getUniqueId());
       setDestination(pelvisTrajectoryMessage.getDestination());
-      setExpressedInReferenceFrameId(pelvisTrajectoryMessage.getExpressedInReferenceFrameId());
+      setDataReferenceFrameId(pelvisTrajectoryMessage.getDataReferenceFrameId());
       setTrajectoryReferenceFrameId(pelvisTrajectoryMessage.getTrajectoryReferenceFrameId());
    }
 
@@ -68,7 +68,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    {
       super(trajectoryTime, desiredPosition, desiredOrientation, WORLD_FRAME_HASH_CODE, WORLD_FRAME_HASH_CODE);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
@@ -82,7 +82,7 @@ public class PelvisTrajectoryMessage extends AbstractSE3TrajectoryMessage<Pelvis
    {
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setExpressedInReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
       setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 

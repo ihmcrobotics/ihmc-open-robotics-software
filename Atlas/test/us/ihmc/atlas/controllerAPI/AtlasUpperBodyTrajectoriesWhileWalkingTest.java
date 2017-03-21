@@ -130,7 +130,7 @@ public class AtlasUpperBodyTrajectoriesWhileWalkingTest
          
          HandTrajectoryMessage handHoldMessage = new HandTrajectoryMessage(robotSide, 1);
          handHoldMessage.setTrajectoryReferenceFrameId(referenceFrames.getAnkleZUpFrame(robotSide.getOppositeSide()));
-         handHoldMessage.setExpressedInReferenceFrameId(worldFrame);
+         handHoldMessage.setDataReferenceFrameId(worldFrame);
          Vector3D zeroVelocity = new Vector3D();
          handHoldMessage.setTrajectoryPoint(0, 11.0, position, orientation, zeroVelocity, zeroVelocity, worldFrame);
          drcSimulationTestHelper.send(handHoldMessage);
