@@ -42,6 +42,8 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    private final ResetRobotBehavior resetRobotBehavior;
    //   private final PassPacketBehavior passPacketBehavior;
 
+   private final ReferenceFrame chestFrame;
+
 
    public GraspAndTurnValveBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge,
          AtlasPrimitiveActions atlasPrimitiveActions)
@@ -49,6 +51,8 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       super(outgoingCommunicationBridge);
       this.referenceFrames = referenceFrames;
       this.atlasPrimitiveActions = atlasPrimitiveActions;
+      
+      chestFrame = referenceFrames.getChestFrame();
 
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       //      passPacketBehavior = new PassPacketBehavior(outgoingCommunicationBridge);
@@ -177,8 +181,9 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
             sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
 
+            ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-                  point.getFrameOrientationCopy().getQuaternion());
+                  point.getFrameOrientationCopy().getQuaternion(), worldFrame, chestFrame);
 
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
          }
@@ -201,7 +206,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-            point.getFrameOrientationCopy().getQuaternion());
+            point.getFrameOrientationCopy().getQuaternion(), ReferenceFrame.getWorldFrame(), chestFrame);
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
    }
