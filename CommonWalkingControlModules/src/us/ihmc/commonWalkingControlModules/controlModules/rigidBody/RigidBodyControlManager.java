@@ -265,7 +265,7 @@ public class RigidBodyControlManager
 
       loadBearingControlState.setCoefficientOfFriction(command.getCoefficientOfFriction());
       loadBearingControlState.setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
-      loadBearingControlState.setContactFrame(command.getBodyFrameToContactFrame());
+      loadBearingControlState.setAndUpdateContactFrame(command.getBodyFrameToContactFrame());
       requestState(loadBearingControlState.getStateEnum());
    }
 
