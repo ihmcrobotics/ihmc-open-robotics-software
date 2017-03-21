@@ -86,10 +86,10 @@ public class GeometricJacobianHolder
          }
          jacobian.compute(); // Compute in case you need it right away
          geometricJacobians.add(jacobian);
-         nameBasedHashCodeToJacobianMap.put(jacobian.nameBasedHashCode(), jacobian);
+         nameBasedHashCodeToJacobianMap.put(jacobian.getNameBasedHashCode(), jacobian);
       }
 
-      return jacobian.nameBasedHashCode();
+      return jacobian.getNameBasedHashCode();
    }
 
    /**

@@ -18,6 +18,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.tools.MemoryTools;
 
 public class ReferenceFrameHashTest
@@ -39,15 +40,19 @@ public class ReferenceFrameHashTest
    public void testGetReferenceFrameFromHashCodeReturnsSameNamedFrames()
    {
       AtlasRobotModel robotModelA = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, true);
-      HumanoidReferenceFrames referenceFramesA = new HumanoidReferenceFrames(robotModelA.createFullRobotModel());
+      FullHumanoidRobotModel fullRobotModelA = robotModelA.createFullRobotModel();
+      HumanoidReferenceFrames referenceFramesA = new HumanoidReferenceFrames(fullRobotModelA);
 
       AtlasRobotModel robotModelB = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, true);
-      HumanoidReferenceFrames referenceFramesB = new HumanoidReferenceFrames(robotModelB.createFullRobotModel());
+      FullHumanoidRobotModel fullRobotModelB = robotModelB.createFullRobotModel();
+      HumanoidReferenceFrames referenceFramesB = new HumanoidReferenceFrames(fullRobotModelB);
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolverB = new ReferenceFrameHashCodeResolver(fullRobotModelB, referenceFramesB);
 
       ReferenceFrame midFeetZUpFrameA = referenceFramesA.getMidFeetZUpFrame();
-      long nameBasedHashCode = midFeetZUpFrameA.nameBasedHashCode();
+      long nameBasedHashCode = midFeetZUpFrameA.getNameBasedHashCode();
+      
 
-      ReferenceFrame midZUpFrameB = referenceFramesB.getReferenceFrameFromNameBaseHashCode(nameBasedHashCode);
+      ReferenceFrame midZUpFrameB = referenceFrameHashCodeResolverB.getReferenceFrameFromNameBaseHashCode(nameBasedHashCode);
       checkReferenceFramesMatch(midFeetZUpFrameA, midZUpFrameB);
    }
 
@@ -58,7 +63,9 @@ public class ReferenceFrameHashTest
       AtlasRobotModel robotModelA = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, true);
       FullHumanoidRobotModel fullRobotModel = robotModelA.createFullRobotModel();
       HumanoidReferenceFrames referenceFramesA = new HumanoidReferenceFrames(fullRobotModel);
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolverA = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFramesA);
 
+      System.out.println(fullRobotModel.getChest().getBodyFixedFrame().getName() + " hashCode: " + fullRobotModel.getChest().getBodyFixedFrame().getNameBasedHashCode());
       for (OneDoFJoint joint : fullRobotModel.getOneDoFJoints())
       {
          ReferenceFrame frameBeforeJoint = joint.getFrameBeforeJoint();
@@ -66,10 +73,15 @@ public class ReferenceFrameHashTest
          ReferenceFrame comLinkBefore = joint.getPredecessor().getBodyFixedFrame();
          ReferenceFrame comLinkAfter = joint.getSuccessor().getBodyFixedFrame();
 
-         ReferenceFrame otherFrameBeforeJoint = referenceFramesA.getReferenceFrameFromNameBaseHashCode(frameBeforeJoint.nameBasedHashCode());
-         ReferenceFrame otherFrameAfterJoint = referenceFramesA.getReferenceFrameFromNameBaseHashCode(frameAfterJoint.nameBasedHashCode());
-         ReferenceFrame otherCoMlinkBefore = referenceFramesA.getReferenceFrameFromNameBaseHashCode(comLinkBefore.nameBasedHashCode());
-         ReferenceFrame otherCoMLinkAfter = referenceFramesA.getReferenceFrameFromNameBaseHashCode(comLinkAfter.nameBasedHashCode());
+         System.out.println(frameBeforeJoint.getName() + " hashCode: " + frameBeforeJoint.getNameBasedHashCode());
+         System.out.println(frameAfterJoint.getName() + " hashCode: " + frameAfterJoint.getNameBasedHashCode());
+         System.out.println(comLinkBefore.getName() + " hashCode: " + comLinkBefore.getNameBasedHashCode());
+         System.out.println(comLinkAfter.getName() + " hashCode: " + comLinkAfter.getNameBasedHashCode());
+         
+         ReferenceFrame otherFrameBeforeJoint = referenceFrameHashCodeResolverA.getReferenceFrameFromNameBaseHashCode(frameBeforeJoint.getNameBasedHashCode());
+         ReferenceFrame otherFrameAfterJoint = referenceFrameHashCodeResolverA.getReferenceFrameFromNameBaseHashCode(frameAfterJoint.getNameBasedHashCode());
+         ReferenceFrame otherCoMlinkBefore = referenceFrameHashCodeResolverA.getReferenceFrameFromNameBaseHashCode(comLinkBefore.getNameBasedHashCode());
+         ReferenceFrame otherCoMLinkAfter = referenceFrameHashCodeResolverA.getReferenceFrameFromNameBaseHashCode(comLinkAfter.getNameBasedHashCode());
 
          checkReferenceFramesMatch(frameBeforeJoint, otherFrameBeforeJoint);
          checkReferenceFramesMatch(frameAfterJoint, otherFrameAfterJoint);
@@ -85,6 +97,7 @@ public class ReferenceFrameHashTest
       AtlasRobotModel robotModelA = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, true);
       FullHumanoidRobotModel fullRobotModel = robotModelA.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       Method[] declaredMethods = referenceFrames.getClass().getMethods();
       for (Method method : declaredMethods)
       {
@@ -93,8 +106,9 @@ public class ReferenceFrameHashTest
             if (method.getParameterCount() == 0)
             {
                ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(referenceFrames);
-               ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrames.getReferenceFrameFromNameBaseHashCode(referenceFrame.nameBasedHashCode());
-               assertNotNull(referenceFrame.getName() + " was not in the reference frame hash map. fix HumanoidReferenceFrames constructor!", referenceFrameFromNameBaseHashCode);
+               ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(referenceFrame.getNameBasedHashCode());
+               System.out.println(referenceFrame.getName() + " hashCode: " + referenceFrame.getNameBasedHashCode());
+               assertNotNull(referenceFrame.getName() + " was not in the reference frame hash map. fix ReferenceFrameHashCodeResolver!", referenceFrameFromNameBaseHashCode);
                checkReferenceFramesMatch(referenceFrame, referenceFrameFromNameBaseHashCode);
             }
             else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == RobotSide.class)
@@ -102,8 +116,8 @@ public class ReferenceFrameHashTest
                for(RobotSide robotSide : RobotSide.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(referenceFrames, robotSide);
-                  ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrames.getReferenceFrameFromNameBaseHashCode(referenceFrame.nameBasedHashCode());
-                  assertNotNull("called " + method.getName() + ": " + referenceFrame.getName() + " was not in the reference frame hash map. fix HumanoidReferenceFrames constructor!", referenceFrameFromNameBaseHashCode);
+                  ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(referenceFrame.getNameBasedHashCode());
+                  assertNotNull("called " + method.getName() + ": " + referenceFrame.getName() + " was not in the reference frame hash map. fix ReferenceFrameHashCodeResolver!", referenceFrameFromNameBaseHashCode);
                   checkReferenceFramesMatch(referenceFrame, referenceFrameFromNameBaseHashCode);
                }
             }
@@ -119,6 +133,7 @@ public class ReferenceFrameHashTest
       FullHumanoidRobotModel fullRobotModel = robotModelA.createFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       Method[] declaredMethods = fullRobotModel.getClass().getMethods();
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       for (Method method : declaredMethods)
       {
          if (method.getReturnType() == ReferenceFrame.class)
@@ -126,8 +141,9 @@ public class ReferenceFrameHashTest
             if (method.getParameterCount() == 0)
             {
                ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(fullRobotModel);
-               ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrames.getReferenceFrameFromNameBaseHashCode(referenceFrame.nameBasedHashCode());
-               assertNotNull(referenceFrame.getName() + " was not in the reference frame hash map. fix HumanoidReferenceFrames constructor!", referenceFrameFromNameBaseHashCode);
+               ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(referenceFrame.getNameBasedHashCode());
+               assertNotNull(referenceFrame.getName() + " was not in the reference frame hash map. fix ReferenceFrameHashCodeResolver!", referenceFrameFromNameBaseHashCode);
+               System.out.println(referenceFrame.getName() + " hashCode: " + referenceFrame.getNameBasedHashCode());
                checkReferenceFramesMatch(referenceFrame, referenceFrameFromNameBaseHashCode);
             }
             else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == RobotSide.class)
@@ -135,8 +151,8 @@ public class ReferenceFrameHashTest
                for(RobotSide robotSide : RobotSide.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(fullRobotModel, robotSide);
-                  ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrames.getReferenceFrameFromNameBaseHashCode(referenceFrame.nameBasedHashCode());
-                  assertNotNull("called " + method.getName() + ": " + referenceFrame.getName() + " was not in the reference frame hash map. fix HumanoidReferenceFrames constructor!", referenceFrameFromNameBaseHashCode);
+                  ReferenceFrame referenceFrameFromNameBaseHashCode = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(referenceFrame.getNameBasedHashCode());
+                  assertNotNull("called " + method.getName() + ": " + referenceFrame.getName() + " was not in the reference frame hash map. fix ReferenceFrameHashCodeResolver!", referenceFrameFromNameBaseHashCode);
                   checkReferenceFramesMatch(referenceFrame, referenceFrameFromNameBaseHashCode);
                }
             }
@@ -147,12 +163,12 @@ public class ReferenceFrameHashTest
    private void checkReferenceFramesMatch(ReferenceFrame referenceFrameA, ReferenceFrame referenceFrameB)
    {
       assertEquals("reference frame names didnt match", referenceFrameA.getName(), referenceFrameB.getName());
-      assertEquals("hash codes didn't match", referenceFrameA.nameBasedHashCode(), referenceFrameB.nameBasedHashCode());
+      assertEquals("hash codes didn't match", referenceFrameA.getNameBasedHashCode(), referenceFrameB.getNameBasedHashCode());
       
       if (referenceFrameA.getParent() != null || referenceFrameB.getParent() != null)
       {
          assertEquals("parent reference frame names didnt match", referenceFrameA.getParent().getName(), referenceFrameB.getParent().getName());
-         assertEquals("parent hash codes didn't match", referenceFrameA.getParent().nameBasedHashCode(), referenceFrameB.getParent().nameBasedHashCode());
+         assertEquals("parent hash codes didn't match", referenceFrameA.getParent().getNameBasedHashCode(), referenceFrameB.getParent().getNameBasedHashCode());
       }
    }
 

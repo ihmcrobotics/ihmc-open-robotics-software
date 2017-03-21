@@ -26,9 +26,9 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 {
    @RosExportedField(documentation = "Time at which the trajectory point has to be reached. The time is relative to when the trajectory starts.")
    public double time;
-   @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D orientation to be reached at this trajectory point.")
    public Quaternion orientation;
-   @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point. It is expressed in world frame.")
+   @RosExportedField(documentation = "Define the desired 3D angular velocity to be reached at this trajectory point.")
    public Vector3D angularVelocity;
 
    /**
@@ -57,8 +57,8 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
    public SO3TrajectoryPointMessage(double time, Quaternion orientation, Vector3D angularVelocity)
    {
       this.time = time;
-      this.orientation = orientation;
-      this.angularVelocity = angularVelocity;
+      this.orientation = new Quaternion(orientation);
+      this.angularVelocity = new Vector3D(angularVelocity);
    }
 
    public void set(SO3TrajectoryPointMessage other)
@@ -91,7 +91,7 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 
    public void setOrientation(Quaternion orientation)
    {
-      this.orientation = orientation;
+      this.orientation.set(orientation);
    }
 
    public void getAngularVelocity(Vector3D angularVelocityToPack)
@@ -101,7 +101,7 @@ public class SO3TrajectoryPointMessage extends Packet<SO3TrajectoryPointMessage>
 
    public void setAngularVelocity(Vector3D angularVelocity)
    {
-      this.angularVelocity = angularVelocity;
+      this.angularVelocity.set(angularVelocity);
    }
 
    public SO3TrajectoryPointMessage transform(RigidBodyTransform transform)

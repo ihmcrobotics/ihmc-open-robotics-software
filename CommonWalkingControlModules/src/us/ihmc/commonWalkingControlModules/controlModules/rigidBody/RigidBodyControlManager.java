@@ -167,7 +167,7 @@ public class RigidBodyControlManager
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
       initialOrientation.setToZero(controlFrame);
-      initialOrientation.changeFrame(command.getReferenceFrame());
+      initialOrientation.changeFrame(command.getDataFrame());
 
       if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialOrientation))
       {
@@ -183,7 +183,7 @@ public class RigidBodyControlManager
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
       initialPose.setToZero(controlFrame);
-      initialPose.changeFrame(command.getReferenceFrame());
+      initialPose.changeFrame(command.getDataFrame());
 
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
       {
