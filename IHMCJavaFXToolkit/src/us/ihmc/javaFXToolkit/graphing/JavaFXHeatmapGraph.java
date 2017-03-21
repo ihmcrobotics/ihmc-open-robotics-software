@@ -164,9 +164,9 @@ public class JavaFXHeatmapGraph
    
    private Color getHeatColor(int heat)
    {
-      double maxHeat = 50.0;
+      double maxHeat = 30.0;
       int heatIndex = (int) MathTools.roundToPrecision(MathTools.clamp((heat / maxHeat) * 500.0, 0.0, 499.0), 1.0);
-      return ColorConversions.awtToJfx(Gradient.GRADIENT_BLUE_TO_RED[heatIndex]);
+      return ColorConversions.awtToJfx(Gradient.GRADIENT_RAINBOW[heatIndex]);
    }
 
    private void fillRect(double x, double y, double width, double height)
