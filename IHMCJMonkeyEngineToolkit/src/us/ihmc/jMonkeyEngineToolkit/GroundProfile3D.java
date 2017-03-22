@@ -1,12 +1,12 @@
 package us.ihmc.jMonkeyEngineToolkit;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public interface GroundProfile3D
 {
-   public abstract BoundingBox3d getBoundingBox();
+   public abstract BoundingBox3D getBoundingBox();
 
    /**
     * <p>isClose is used as an optimization pass. This method is used to check whether or not

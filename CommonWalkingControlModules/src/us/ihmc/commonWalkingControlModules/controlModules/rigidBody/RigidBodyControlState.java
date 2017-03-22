@@ -8,7 +8,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -28,7 +27,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    private final DoubleYoVariable trajectoryStartTime;
    private final DoubleYoVariable yoTime;
 
-   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime)
+   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
       this.yoTime = yoTime;
@@ -42,6 +41,8 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       trajectoryStopped = new BooleanYoVariable(prefix + "TrajectoryStopped", registry);
       trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
       trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
+
+      parentRegistry.addChild(registry);
    }
 
    protected boolean handleCommandInternal(Command<?, ?> command)
@@ -90,11 +91,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    protected void resetLastCommandId()
    {
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
-   }
-
-   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
-   {
-      trajectoryStopped.set(command.isStopAllTrajectory());
    }
 
    public boolean abortState()

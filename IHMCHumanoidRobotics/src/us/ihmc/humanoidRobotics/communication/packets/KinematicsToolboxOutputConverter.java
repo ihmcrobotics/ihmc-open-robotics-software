@@ -7,11 +7,11 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -32,6 +32,7 @@ public class KinematicsToolboxOutputConverter
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final FullHumanoidRobotModel fullRobotModelToUseForConversion;
+   private final HumanoidReferenceFrames referenceFrames;
    private final FloatingInverseDynamicsJoint rootJoint;
    private final OneDoFJoint[] oneDoFJoints;
    private final int jointsHashCode;
@@ -42,6 +43,7 @@ public class KinematicsToolboxOutputConverter
       rootJoint = fullRobotModelToUseForConversion.getRootJoint();
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModelToUseForConversion);
       jointsHashCode = (int) NameBasedHashCodeTools.computeArrayHashCode(oneDoFJoints);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModelToUseForConversion);
    }
 
    public void updateFullRobotModel(KinematicsToolboxOutputStatus solution)
@@ -108,14 +110,14 @@ public class KinematicsToolboxOutputConverter
    {
       checkIfDataHasBeenSet();
 
-      BaseForControl baseForControl = BaseForControl.WORLD;
+      ReferenceFrame trajectoryFrame = worldFrame;
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
       ReferenceFrame handControlFrame = fullRobotModelToUseForConversion.getHandControlFrame(robotSide);
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(worldFrame);
       desiredHandPose.getPose(desiredPosition, desiredOrientation);
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, baseForControl, trajectoryTime, desiredPosition, desiredOrientation);
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation, worldFrame, trajectoryFrame);
       output.setHandTrajectoryMessage(handTrajectoryMessage);
    }
 
@@ -128,7 +130,8 @@ public class KinematicsToolboxOutputConverter
       FrameOrientation desiredOrientation = new FrameOrientation(chestFrame);
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getQuaternion(desiredQuaternion);
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredQuaternion);
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(trajectoryTime, desiredQuaternion, worldFrame, pelvisZUpFrame);
       output.setChestTrajectoryMessage(chestTrajectoryMessage);
    }
 
@@ -165,7 +168,7 @@ public class KinematicsToolboxOutputConverter
       FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage(robotSide, trajectoryTime, desiredPosition, desiredOrientation);
       output.setFootTrajectoryMessage(footTrajectoryMessage);
    }
-   
+
    private void checkIfDataHasBeenSet()
    {
       if (output == null)

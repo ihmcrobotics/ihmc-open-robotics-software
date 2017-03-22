@@ -40,7 +40,7 @@ ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
 
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-core', version: '3.1.0-internal4'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-desktop', version: '3.1.0-internal2'
     compile group: 'us.ihmc.thirdparty.jme', name: 'jme3-lwjgl', version: '3.1.0-internal2'

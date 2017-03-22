@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -33,7 +36,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingSingleSupportState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.ManipulationControlModule;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -43,7 +45,13 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -52,6 +60,7 @@ import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -64,6 +73,9 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.State;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedListener;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
@@ -77,13 +89,11 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final HighLevelControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final ManipulationControlModule manipulationControlModule;
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
-   private final RigidBodyControlManager chestManager;
-   private final RigidBodyControlManager headManager;
+   private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
 
    private final OneDoFJoint[] allOneDoFjoints;
 
@@ -143,7 +153,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       allOneDoFjoints = fullRobotModel.getOneDoFJoints();
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      this.manipulationControlModule = managerFactory.getOrCreateManipulationControlModule();
       this.feetManager = managerFactory.getOrCreateFeetManager();
 
       RigidBody head = fullRobotModel.getHead();
@@ -151,16 +160,32 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       RigidBody pelvis = fullRobotModel.getPelvis();
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
-      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+      ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
+      ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
 
-      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, pelvisZUpFrame);
-      this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, chestFrame);
+      RigidBodyControlManager chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
+      bodyManagers.add(chestManager);
+
+      RigidBodyControlManager headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
+      bodyManagers.add(headManager);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody hand = fullRobotModel.getHand(robotSide);
+         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
+         bodyManagers.add(handManager);
+      }
 
       this.walkingControllerParameters = walkingControllerParameters;
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+      FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
+      commandInputManager.registerConversionHelper(commandConversionHelper);
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
 
@@ -434,12 +459,12 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          pelvisOrientationManager.setToHoldCurrentInWorldFrame();
       }
 
-      if (manipulationControlModule != null)
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
-         manipulationControlModule.holdCurrentArmConfiguration();
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
+            bodyManager.initialize();
       }
-
-      chestManager.goToHomeFromCurrent(1.0);
 
       balanceManager.initialize();
       feetManager.initialize();
@@ -594,19 +619,24 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             isRecoveringFromPush, feetManager));
 
       feetManager.compute();
-      if (manipulationControlModule != null)
-         manipulationControlModule.doControl();
-      if (headManager != null)
-         headManager.compute();
-      if (chestManager != null)
-         chestManager.compute();
+
+      boolean bodyManagerIsLoadBearing = false;
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      {
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
+         {
+            bodyManager.compute();
+
+            if (bodyManager.isLoadBearing())
+               bodyManagerIsLoadBearing = true;
+         }
+      }
+
       if (pelvisOrientationManager != null)
          pelvisOrientationManager.compute();
 
-      boolean keepCMPInsideSupportPolygon = true;
-      if (manipulationControlModule != null && manipulationControlModule.isAtLeastOneHandLoadBearing())
-         keepCMPInsideSupportPolygon = false;
-
+      boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       balanceManager.compute(currentState.getSupportSide(), controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon);
    }
 
@@ -635,28 +665,15 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreCommand.addInverseDynamicsCommand(planeContactStateCommand);
       }
 
-      if (manipulationControlModule != null)
+      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
-         for (RobotSide robotSide : RobotSide.values)
+         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
+         if (bodyManager != null)
          {
-            controllerCoreCommand.addFeedbackControlCommand(manipulationControlModule.getFeedbackControlCommand(robotSide));
-            controllerCoreCommand.addInverseDynamicsCommand(manipulationControlModule.getInverseDynamicsCommand(robotSide));
-            controllerCoreCommand.completeLowLevelJointData(manipulationControlModule.getLowLevelJointDesiredData(robotSide));
+            controllerCoreCommand.addFeedbackControlCommand(bodyManager.getFeedbackControlCommand());
+            controllerCoreCommand.addInverseDynamicsCommand(bodyManager.getInverseDynamicsCommand());
+            controllerCoreCommand.completeLowLevelJointData(bodyManager.getLowLevelJointDesiredData());
          }
-      }
-
-      if (headManager != null)
-      {
-         controllerCoreCommand.addFeedbackControlCommand(headManager.getFeedbackControlCommand());
-         controllerCoreCommand.addInverseDynamicsCommand(headManager.getInverseDynamicsCommand());
-         controllerCoreCommand.completeLowLevelJointData(headManager.getLowLevelJointDesiredData());
-      }
-
-      if (chestManager != null)
-      {
-         controllerCoreCommand.addFeedbackControlCommand(chestManager.getFeedbackControlCommand());
-         controllerCoreCommand.addInverseDynamicsCommand(chestManager.getInverseDynamicsCommand());
-         controllerCoreCommand.completeLowLevelJointData(chestManager.getLowLevelJointDesiredData());
       }
 
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
@@ -703,5 +720,98 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
+   }
+   
+   /**
+    * Get defined states for the walking high level humanoid controller
+    * 
+    * Inefficient, use only in construction
+    * 
+    * @param states return list of walking states
+    */
+   public void getOrderedWalkingStatesForWarmup(List<WalkingStateEnum> states)
+   {
+      
+      states.add(WalkingStateEnum.TO_STANDING);
+      states.add(WalkingStateEnum.STANDING);
+      
+      states.add(WalkingStateEnum.TO_WALKING_LEFT_SUPPORT);
+      states.add(WalkingStateEnum.WALKING_LEFT_SUPPORT);
+      
+//      states.add(WalkingStateEnum.TO_WALKING_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.WALKING_RIGHT_SUPPORT);
+      
+      states.add(WalkingStateEnum.TO_FLAMINGO_LEFT_SUPPORT);
+      states.add(WalkingStateEnum.FLAMINGO_LEFT_SUPPORT);
+      
+//      states.add(WalkingStateEnum.TO_FLAMINGO_RIGHT_SUPPORT);
+//      states.add(WalkingStateEnum.FLAMINGO_RIGHT_SUPPORT);
+      
+   }
+   
+   /**
+    * Run one set of doTransitionIntoAction, doAction and doTransitionOutOfAction for a given state.
+    * 
+    * The balance manager is updated, but no commands are consumed.
+    * 
+    * This can be used to warmup the JIT compiler.
+    * 
+    * 
+    * @param state
+    */
+   public void warmupStateIteration(WalkingStateEnum state)
+   {
+      controllerToolbox.update();
+
+      WalkingState currentState = stateMachine.getState(state);
+
+      balanceManager.update();
+
+      switch(state)
+      {
+      case TO_WALKING_LEFT_SUPPORT:
+      case TO_WALKING_RIGHT_SUPPORT:
+      case WALKING_LEFT_SUPPORT:
+      case WALKING_RIGHT_SUPPORT:
+         FootstepDataListCommand cmd = new FootstepDataListCommand();
+         cmd.setDefaultSwingDuration(1.0);
+         cmd.setDefaultTransferDuration(1.0);
+         cmd.setExecutionMode(ExecutionMode.OVERRIDE);
+         FootstepDataCommand footStepCommand = new FootstepDataCommand();
+         footStepCommand.setRobotSide(state.getTransferToSide() == null ? state.getSupportSide() : state.getTransferToSide());
+         footStepCommand.setTrajectoryType(TrajectoryType.DEFAULT);
+         footStepCommand.setSwingHeight(0);
+         footStepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
+         cmd.addFootstep(footStepCommand);
+         
+         walkingMessageHandler.handleFootstepDataListCommand(cmd);
+         break;
+         
+      case FLAMINGO_LEFT_SUPPORT:
+      case FLAMINGO_RIGHT_SUPPORT:
+         
+         ArrayList<FootTrajectoryCommand> commands = new ArrayList<>();
+         FootTrajectoryCommand trajectoryCommand = new FootTrajectoryCommand();
+         trajectoryCommand.setRobotSide(state.getSupportSide().getOppositeSide());
+         trajectoryCommand.addTrajectoryPoint(new FrameSE3TrajectoryPoint());
+         commands.add(trajectoryCommand);
+         walkingMessageHandler.handleFootTrajectoryCommand(commands);
+         break;
+      default:
+         break;
+      }
+      
+      currentState.doTransitionIntoAction();
+      
+      currentState.doAction();
+      
+      updateManagers(currentState);
+
+      submitControllerCoreCommands();
+      
+      currentState.doTransitionOutOfAction();
+      
+      walkingMessageHandler.clearFootsteps();
+      
    }
 }

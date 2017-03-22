@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 

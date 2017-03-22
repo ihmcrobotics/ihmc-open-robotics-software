@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the pelvis to the desired orientation while going through the specified trajectory points."
@@ -55,7 +56,7 @@ public class PelvisOrientationTrajectoryMessage extends AbstractSO3TrajectoryMes
     */
    public PelvisOrientationTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
    {
-      super(trajectoryTime, desiredOrientation);
+      super(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 

@@ -177,7 +177,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                AppearanceDefinition app = DEFAULT_APPEARANCE;
                if(geometry.getHeightMap().getTextures() != null)
                {
-                  double width = heightMap.getBoundingBox().getXMax() - heightMap.getBoundingBox().getXMin();
+                  double width = heightMap.getBoundingBox().getMaxX() - heightMap.getBoundingBox().getMinX();
                   HeightBasedTerrainBlend sdfTerrainBlend = new HeightBasedTerrainBlend(heightMap);
                   for(Texture text : geometry.getHeightMap().getTextures())
                   {

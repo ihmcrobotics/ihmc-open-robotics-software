@@ -1,8 +1,8 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class RepeatingHeightMap implements HeightMapWithNormals
 {
@@ -10,7 +10,7 @@ public class RepeatingHeightMap implements HeightMapWithNormals
    private double xDistance, yDistance;
    
    private final HeightMapWithNormals heightMap;
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    public RepeatingHeightMap(HeightMapWithNormals heightMap, double xMin, double xMax, double yMin, double yMax)
    {
@@ -25,9 +25,9 @@ public class RepeatingHeightMap implements HeightMapWithNormals
      
      this.heightMap = heightMap;
 
-     double zMin = heightMap.getBoundingBox().getZMin();
-     double zMax = heightMap.getBoundingBox().getZMax();
-     this.boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+     double zMin = heightMap.getBoundingBox().getMinZ();
+     double zMax = heightMap.getBoundingBox().getMaxZ();
+     this.boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
    }
    
    private double xLocal(double xGlobal)
@@ -56,7 +56,7 @@ public class RepeatingHeightMap implements HeightMapWithNormals
    }
    
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

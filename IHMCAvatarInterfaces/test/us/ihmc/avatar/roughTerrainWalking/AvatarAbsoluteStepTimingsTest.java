@@ -1,6 +1,6 @@
 package us.ihmc.avatar.roughTerrainWalking;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.List;
 import java.util.Random;
@@ -149,7 +149,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      DoubleYoVariable firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferTime0", ICPPlannerWithTimeFreezer.class.getSimpleName());
+      DoubleYoVariable firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", ICPPlannerWithTimeFreezer.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 

@@ -3,7 +3,7 @@ package us.ihmc.plotting;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.LineArtifact;
 
-public class PlotterDemo
+public class PlotterVisualizer
 {
    public void showPlotter()
    {
@@ -28,7 +28,7 @@ public class PlotterDemo
    
    public static void main(String[] args)
    {
-      PlotterDemo plotterDemo = new PlotterDemo();
+      PlotterVisualizer plotterDemo = new PlotterVisualizer();
       plotterDemo.showPlotter();
    }
 }

@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootSE3Gains;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -25,6 +26,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -67,8 +69,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private ExplorationParameters explorationParameters = null;
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
+   private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private ArrayList<String> positionControlledJoints = null;
+   private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
@@ -646,6 +650,74 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return spineGains;
    }
 
+   private YoPIDGains createArmControlGains(YoVariableRegistry registry)
+   {
+      YoPIDGains armGains = new YoPIDGains("ArmJointspace", registry);
+
+      double kp = runningOnRealRobot ? 40.0 : 80.0;
+      double zeta = runningOnRealRobot ? 0.3 : 0.6;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 20.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      armGains.setKp(kp);
+      armGains.setZeta(zeta);
+      armGains.setKi(ki);
+      armGains.setMaximumIntegralError(maxIntegralError);
+      armGains.setMaximumFeedback(maxAccel);
+      armGains.setMaximumFeedbackRate(maxJerk);
+      armGains.createDerivativeGainUpdater(true);
+
+      return armGains;
+   }
+
+   private YoOrientationPIDGainsInterface createHandOrientationControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains orientationGains = new YoSymmetricSE3PIDGains("HandOrientation", registry);
+
+      double kp = runningOnRealRobot ? 40.0 :100.0;
+      // When doing position control, the damping here seems to result into some kind of spring.
+      double zeta = runningOnRealRobot ? 0.0 : 1.0;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      orientationGains.setProportionalGain(kp);
+      orientationGains.setDampingRatio(zeta);
+      orientationGains.setIntegralGain(ki);
+      orientationGains.setMaximumIntegralError(maxIntegralError);
+      orientationGains.setMaximumFeedback(maxAccel);
+      orientationGains.setMaximumFeedbackRate(maxJerk);
+      orientationGains.createDerivativeGainUpdater(true);
+
+      return orientationGains;
+   }
+
+   private YoPositionPIDGainsInterface createHandPositionControlGains(YoVariableRegistry registry)
+   {
+      YoSymmetricSE3PIDGains positionGains = new YoSymmetricSE3PIDGains("HandPosition", registry);
+
+      double kp = runningOnRealRobot ? 40.0 :100.0;
+      // When doing position control, the damping here seems to result into some kind of spring.
+      double zeta = runningOnRealRobot ? 0.0 : 1.0;
+      double ki = 0.0;
+      double maxIntegralError = 0.0;
+      double maxAccel = runningOnRealRobot ? 10.0 : Double.POSITIVE_INFINITY;
+      double maxJerk = runningOnRealRobot ? 100.0 : Double.POSITIVE_INFINITY;
+
+      positionGains.setProportionalGain(kp);
+      positionGains.setDampingRatio(zeta);
+      positionGains.setIntegralGain(ki);
+      positionGains.setMaximumIntegralError(maxIntegralError);
+      positionGains.setMaximumFeedback(maxAccel);
+      positionGains.setMaximumFeedbackRate(maxJerk);
+      positionGains.createDerivativeGainUpdater(true);
+
+      return positionGains;
+   }
+
    /** {@inheritDoc} */
    @Override
    public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
@@ -662,6 +734,13 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoPIDGains headGains = createHeadJointspaceControlGains(registry);
       for (NeckJointName name : jointMap.getNeckJointNames())
          jointspaceGains.put(jointMap.getNeckJointName(name), headGains);
+
+      YoPIDGains armGains = createArmControlGains(registry);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (ArmJointName name : jointMap.getArmJointNames())
+            jointspaceGains.put(jointMap.getArmJointName(robotSide, name), armGains);
+      }
 
       return jointspaceGains;
    }
@@ -681,7 +760,27 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoOrientationPIDGainsInterface headAngularGains = createHeadOrientationControlGains(registry);
       taskspaceAngularGains.put(jointMap.getHeadName(), headAngularGains);
 
+      YoOrientationPIDGainsInterface handAngularGains = createHandOrientationControlGains(registry);
+      for (RobotSide robotSide : RobotSide.values)
+         taskspaceAngularGains.put(jointMap.getHandName(robotSide), handAngularGains);
+
       return taskspaceAngularGains;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   {
+      if (taskspaceLinearGains != null)
+         return taskspaceLinearGains;
+
+      taskspaceLinearGains = new HashMap<>();
+
+      YoPositionPIDGainsInterface handLinearGains = createHandPositionControlGains(registry);
+      for (RobotSide robotSide : RobotSide.values)
+         taskspaceLinearGains.put(jointMap.getHandName(robotSide), handLinearGains);
+
+      return taskspaceLinearGains;
    }
 
    /** {@inheritDoc} */
@@ -735,6 +834,56 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       }
 
       return positionControlledJoints;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   {
+      if (integrationSettings != null)
+         return integrationSettings;
+
+      integrationSettings = new HashMap<String, JointAccelerationIntegrationSettings>();
+
+      JointAccelerationIntegrationSettings neckJointSettings = new JointAccelerationIntegrationSettings();
+      neckJointSettings.setAlphaPosition(0.9996);
+      neckJointSettings.setAlphaVelocity(0.95);
+      neckJointSettings.setMaxPositionError(0.2);
+      neckJointSettings.setMaxVelocity(2.0);
+
+      for (NeckJointName name : jointMap.getNeckJointNames())
+         integrationSettings.put(jointMap.getNeckJointName(name), neckJointSettings);
+
+      JointAccelerationIntegrationSettings shoulderJointSettings = new JointAccelerationIntegrationSettings();
+      shoulderJointSettings.setAlphaPosition(0.9998);
+      shoulderJointSettings.setAlphaVelocity(0.95);
+      shoulderJointSettings.setMaxPositionError(0.2);
+      shoulderJointSettings.setMaxVelocity(2.0);
+
+      JointAccelerationIntegrationSettings elbowJointSettings = new JointAccelerationIntegrationSettings();
+      elbowJointSettings.setAlphaPosition(0.9996);
+      elbowJointSettings.setAlphaVelocity(0.95);
+      elbowJointSettings.setMaxPositionError(0.2);
+      elbowJointSettings.setMaxVelocity(2.0);
+
+      JointAccelerationIntegrationSettings wristJointSettings = new JointAccelerationIntegrationSettings();
+      wristJointSettings.setAlphaPosition(0.9999);
+      wristJointSettings.setAlphaVelocity(0.95);
+      wristJointSettings.setMaxPositionError(0.2);
+      wristJointSettings.setMaxVelocity(2.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), shoulderJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), shoulderJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), elbowJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), elbowJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH), wristJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL), wristJointSettings);
+         integrationSettings.put(jointMap.getArmJointName(robotSide, ArmJointName.SECOND_WRIST_PITCH), wristJointSettings);
+      }
+
+      return integrationSettings;
    }
 
    @Override

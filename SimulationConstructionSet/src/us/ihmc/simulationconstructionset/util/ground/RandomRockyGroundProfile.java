@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
@@ -20,7 +20,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
    private float minRockHeight, maxRockHeight;
 
 
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
 
    private float[][] terrainMap;
@@ -80,7 +80,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
       double yMin = -(this.fieldLength) * resolution / 2.0;
       double yMax = (this.fieldLength) * resolution / 2.0;
 
-      this.boundingBox = new BoundingBox3d(xMin, yMin, Double.NEGATIVE_INFINITY, xMax, yMax, Double.POSITIVE_INFINITY);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, Double.NEGATIVE_INFINITY, xMax, yMax, Double.POSITIVE_INFINITY);
       
       terrainMap = new float[this.fieldLength][this.fieldLength];
 
@@ -159,10 +159,10 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
    @Override
    public double heightAt(double x_world, double y_world, double z_world)
    {
-      int xPos1 = (int) Math.floor((x_world - boundingBox.getXMin()) / resolution);
-      int yPos1 = (int) Math.floor((y_world - boundingBox.getYMin()) / resolution);
-      int xPos2 = (int) Math.ceil((x_world - boundingBox.getXMin()) / resolution);
-      int yPos2 = (int) Math.ceil((y_world - boundingBox.getYMin()) / resolution);
+      int xPos1 = (int) Math.floor((x_world - boundingBox.getMinX()) / resolution);
+      int yPos1 = (int) Math.floor((y_world - boundingBox.getMinY()) / resolution);
+      int xPos2 = (int) Math.ceil((x_world - boundingBox.getMinX()) / resolution);
+      int yPos2 = (int) Math.ceil((y_world - boundingBox.getMinY()) / resolution);
 
       if (!withinBounds(xPos1, yPos1) ||!withinBounds(xPos2, yPos2))
          return 0.0;
@@ -180,10 +180,10 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
       normal.setY(0.0);
       normal.setZ(1.0);
 
-      int xPos1 = (int) Math.floor((x_world - boundingBox.getXMin()) / resolution);
-      int yPos1 = (int) Math.floor((y_world - boundingBox.getYMin()) / resolution);
-      int xPos2 = (int) Math.ceil((x_world - boundingBox.getXMin()) / resolution);
-      int yPos2 = (int) Math.ceil((y_world - boundingBox.getYMin()) / resolution);
+      int xPos1 = (int) Math.floor((x_world - boundingBox.getMinX()) / resolution);
+      int yPos1 = (int) Math.floor((y_world - boundingBox.getMinY()) / resolution);
+      int xPos2 = (int) Math.ceil((x_world - boundingBox.getMinX()) / resolution);
+      int yPos2 = (int) Math.ceil((y_world - boundingBox.getMinY()) / resolution);
 
       if (!withinBounds(xPos1, yPos1) ||!withinBounds(xPos2, yPos2))
          return;
@@ -222,7 +222,7 @@ public class RandomRockyGroundProfile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }
