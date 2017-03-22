@@ -7,40 +7,29 @@ import java.util.Arrays;
 
 /**
 * 
-* Definition of the class "YoRegistryDefinition" defined in Handshake.idl. 
+* Definition of the class "CameraAnnouncement" defined in Announcement.idl. 
 *
-* This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit Handshake.idl instead.
+* This file was automatically generated from Announcement.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit Announcement.idl instead.
 *
 */
-public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
+public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
 {
-    public YoRegistryDefinition()
+    public CameraAnnouncement()
     {
         	name_ = new StringBuilder(255); 
         
         
     }
     @Override
-    public void set(YoRegistryDefinition other)
+    public void set(CameraAnnouncement other)
     {
-        	parent_ = other.parent_;
         	name_.setLength(0);
         	name_.append(other.name_);
+        	id_ = other.id_;
 
     }
 
-    public void setParent(short parent)
-    {
-        parent_ = parent;
-    }
-
-    public short getParent()
-    {
-        return parent_;
-    }
-
-        
         public void setName(String name)
         {
         	name_.setLength(0);
@@ -58,6 +47,17 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
     }
 
         
+    public void setId(int id)
+    {
+        id_ = id;
+    }
+
+    public int getId()
+    {
+        return id_;
+    }
+
+        
 
 
 	public static int getMaxCdrSerializedSize()
@@ -69,27 +69,27 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	
 	    return current_alignment - initial_alignment;
 	}
 
 
-	public final static int getCdrSerializedSize(YoRegistryDefinition data)
+	public final static int getCdrSerializedSize(CameraAnnouncement data)
 	{
 		return getCdrSerializedSize(data, 0);
 	}
 
-	public final static int getCdrSerializedSize(YoRegistryDefinition data, int current_alignment)
+	public final static int getCdrSerializedSize(CameraAnnouncement data, int current_alignment)
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
-
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
+
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
 	
 	    return current_alignment - initial_alignment;
@@ -100,37 +100,37 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 	{
 
 
-	    cdr.write_type_1(parent_);
-
 	    if(name_.length() <= 255)
 	    cdr.write_type_d(name_);else
 	        throw new RuntimeException("name field exceeds the maximum length");
+
+	    cdr.write_type_2(id_);
 	}
 	
 	@Override
 	public final void deserialize(CDR cdr)
 	{
 
-	    	parent_ = cdr.read_type_1();	
-
 	    	cdr.read_type_d(name_);	
+
+	    	id_ = cdr.read_type_2();	
 	}
 	
 	@Override
 	public final void serialize(InterchangeSerializer ser)
 	{
-			    ser.write_type_1("parent", parent_);
-			    
 			    ser.write_type_d("name", name_);
+			    
+			    ser.write_type_2("id", id_);
 			    
 	}
 	
 	@Override
 	public final void deserialize(InterchangeSerializer ser)
 	{
-	    			parent_ = ser.read_type_1("parent");	
-	    	    
 	    			ser.read_type_d("name", name_);	
+	    	    
+	    			id_ = ser.read_type_2("id");	
 	    	    
 	}
 
@@ -139,14 +139,14 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
     {
         if(other == null) return false;
         if(other == this) return true;
-        if(!(other instanceof YoRegistryDefinition)) return false;
-        YoRegistryDefinition otherMyClass = (YoRegistryDefinition)other;
+        if(!(other instanceof CameraAnnouncement)) return false;
+        CameraAnnouncement otherMyClass = (CameraAnnouncement)other;
         boolean returnedValue = true;
 
-        returnedValue &= this.parent_ == otherMyClass.parent_;
-
-                
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
+                
+        returnedValue &= this.id_ == otherMyClass.id_;
+
                 
 
         return returnedValue;
@@ -157,20 +157,20 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
     {
 		StringBuilder builder = new StringBuilder();
 		
-      	builder.append("YoRegistryDefinition {");
-        builder.append("parent=");
-        builder.append(this.parent_);
-
-                builder.append(", ");
+      	builder.append("CameraAnnouncement {");
         builder.append("name=");
         builder.append(this.name_);
+
+                builder.append(", ");
+        builder.append("id=");
+        builder.append(this.id_);
 
                 
         builder.append("}");
 		return builder.toString();
     }
 
-    private short parent_; 
     private StringBuilder name_; 
+    private int id_; 
 
 }

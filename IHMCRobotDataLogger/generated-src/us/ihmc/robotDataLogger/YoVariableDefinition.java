@@ -18,7 +18,7 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
     public YoVariableDefinition()
     {
         	name_ = new StringBuilder(255); 
-        	enumValues_ = new IDLSequence.StringBuilderHolder (255, "type_d");           
+        
         
     }
     @Override
@@ -26,9 +26,10 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
     {
         	name_.setLength(0);
         	name_.append(other.name_);
-        	registry_ = other.registry_;
         	type_ = other.type_;
-        	enumValues_.set(other.enumValues_);allowNullValues_ = other.allowNullValues_;
+        	registry_ = other.registry_;
+        	enumType_ = other.enumType_;
+        	allowNullValues_ = other.allowNullValues_;
 
     }
 
@@ -49,17 +50,6 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
     }
 
         
-    public void setRegistry(int registry)
-    {
-        registry_ = registry;
-    }
-
-    public int getRegistry()
-    {
-        return registry_;
-    }
-
-        
     public void setType(us.ihmc.robotDataLogger.YoType type)
     {
         type_ = type;
@@ -71,10 +61,25 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
     }
 
         
-
-    public IDLSequence.StringBuilderHolder  getEnumValues()
+    public void setRegistry(short registry)
     {
-        return enumValues_;
+        registry_ = registry;
+    }
+
+    public short getRegistry()
+    {
+        return registry_;
+    }
+
+        
+    public void setEnumType(short enumType)
+    {
+        enumType_ = enumType;
+    }
+
+    public short getEnumType()
+    {
+        return enumType_;
     }
 
         
@@ -104,13 +109,10 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 255; ++a)
-	    {
-	        current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
-	    }
+	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
+
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
 	
@@ -131,13 +133,10 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < data.getEnumValues().size(); ++a)
-	    {
-	        current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getEnumValues().get(a).length() + 1;
-	    }
+	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
+
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
 	
@@ -153,14 +152,12 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 	    cdr.write_type_d(name_);else
 	        throw new RuntimeException("name field exceeds the maximum length");
 
-	    cdr.write_type_2(registry_);
-
 	    cdr.write_type_c(type_.ordinal());
 
 
-	    if(enumValues_.size() <= 255)
-	    cdr.write_type_e(enumValues_);else
-	        throw new RuntimeException("enumValues field exceeds the maximum length");
+	    cdr.write_type_1(registry_);
+
+	    cdr.write_type_1(enumType_);
 
 	    cdr.write_type_7(allowNullValues_);
 	}
@@ -171,12 +168,12 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 
 	    	cdr.read_type_d(name_);	
 
-	    	registry_ = cdr.read_type_2();	
-
 	    	type_ = us.ihmc.robotDataLogger.YoType.values[cdr.read_type_c()];
 	    	
 
-	    	cdr.read_type_e(enumValues_);	
+	    	registry_ = cdr.read_type_1();	
+
+	    	enumType_ = cdr.read_type_1();	
 
 	    	allowNullValues_ = cdr.read_type_7();	
 	}
@@ -186,11 +183,11 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 	{
 			    ser.write_type_d("name", name_);
 			    
-			    ser.write_type_2("registry", registry_);
-			    
 			    ser.write_type_c("type", type_);
 			    
-			    ser.write_type_e("enumValues", enumValues_);
+			    ser.write_type_1("registry", registry_);
+			    
+			    ser.write_type_1("enumType", enumType_);
 			    
 			    ser.write_type_7("allowNullValues", allowNullValues_);
 			    
@@ -201,12 +198,12 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 	{
 	    			ser.read_type_d("name", name_);	
 	    	    
-	    			registry_ = ser.read_type_2("registry");	
-	    	    
 	    			type_ = (us.ihmc.robotDataLogger.YoType)ser.read_type_c("type", us.ihmc.robotDataLogger.YoType.class);
 	    	
 	    	    
-	    			ser.read_type_e("enumValues", enumValues_);	
+	    			registry_ = ser.read_type_1("registry");	
+	    	    
+	    			enumType_ = ser.read_type_1("enumType");	
 	    	    
 	    			allowNullValues_ = ser.read_type_7("allowNullValues");	
 	    	    
@@ -223,13 +220,14 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
                 
-        returnedValue &= this.registry_ == otherMyClass.registry_;
-
-                
         returnedValue &= this.type_ == otherMyClass.type_;
 
                 
-        returnedValue &= this.enumValues_.equals(otherMyClass.enumValues_);
+        returnedValue &= this.registry_ == otherMyClass.registry_;
+
+                
+        returnedValue &= this.enumType_ == otherMyClass.enumType_;
+
                 
         returnedValue &= this.allowNullValues_ == otherMyClass.allowNullValues_;
 
@@ -248,16 +246,16 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
         builder.append(this.name_);
 
                 builder.append(", ");
-        builder.append("registry=");
-        builder.append(this.registry_);
-
-                builder.append(", ");
         builder.append("type=");
         builder.append(this.type_);
 
                 builder.append(", ");
-        builder.append("enumValues=");
-        builder.append(this.enumValues_);
+        builder.append("registry=");
+        builder.append(this.registry_);
+
+                builder.append(", ");
+        builder.append("enumType=");
+        builder.append(this.enumType_);
 
                 builder.append(", ");
         builder.append("allowNullValues=");
@@ -269,9 +267,9 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
     }
 
     private StringBuilder name_; 
-    private int registry_; 
     private us.ihmc.robotDataLogger.YoType type_; 
-    private IDLSequence.StringBuilderHolder  enumValues_; 
+    private short registry_; 
+    private short enumType_; 
     private boolean allowNullValues_; 
 
 }

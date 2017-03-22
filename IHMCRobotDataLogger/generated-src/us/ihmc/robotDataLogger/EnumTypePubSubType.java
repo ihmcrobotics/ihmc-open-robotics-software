@@ -8,27 +8,27 @@ import us.ihmc.idl.CDR;
 
 /**
 * 
-* Topic data type of the struct "DynamicGraphicMessage" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "EnumType" defined in "Handshake.idl". Use this class to provide the TopicDataType to a Participant. 
 *
 * This file was automatically generated from Handshake.idl by us.ihmc.idl.generator.IDLGenerator. 
 * Do not update this file directly, edit Handshake.idl instead.
 *
 */
-public class DynamicGraphicMessagePubSubType implements TopicDataType<DynamicGraphicMessage>
+public class EnumTypePubSubType implements TopicDataType<EnumType>
 {
-	public static final String name = "us::ihmc::robotDataLogger::DynamicGraphicMessage";
+	public static final String name = "us::ihmc::robotDataLogger::EnumType";
 	private final CDR serializeCDR = new CDR();
 	private final CDR deserializeCDR = new CDR();
 	
 	
 	
-    public DynamicGraphicMessagePubSubType()
+    public EnumTypePubSubType()
     {
         
     }
     
        @Override
-   public void serialize(DynamicGraphicMessage data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(EnumType data, SerializedPayload serializedPayload) throws IOException
    {
       serializeCDR.serialize(serializedPayload);
       data.serialize(serializeCDR);
@@ -36,7 +36,7 @@ public class DynamicGraphicMessagePubSubType implements TopicDataType<DynamicGra
    }
 
    @Override
-   public void deserialize(SerializedPayload serializedPayload, DynamicGraphicMessage data) throws IOException
+   public void deserialize(SerializedPayload serializedPayload, EnumType data) throws IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       data.deserialize(deserializeCDR);
@@ -46,7 +46,7 @@ public class DynamicGraphicMessagePubSubType implements TopicDataType<DynamicGra
    @Override
    public int getTypeSize()
    {
-      return DynamicGraphicMessage.getMaxCdrSerializedSize();
+      return EnumType.getMaxCdrSerializedSize();
    }
 
    @Override
@@ -56,8 +56,8 @@ public class DynamicGraphicMessagePubSubType implements TopicDataType<DynamicGra
    }
 
    @Override
-   public DynamicGraphicMessage createData()
+   public EnumType createData()
    {
-      return new DynamicGraphicMessage();
+      return new EnumType();
    }
 }

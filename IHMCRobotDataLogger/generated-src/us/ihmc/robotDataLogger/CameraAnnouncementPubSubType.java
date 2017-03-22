@@ -8,27 +8,27 @@ import us.ihmc.idl.CDR;
 
 /**
 * 
-* Topic data type of the struct "ModelFileDescription" defined in "Announcement.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "CameraAnnouncement" defined in "Announcement.idl". Use this class to provide the TopicDataType to a Participant. 
 *
 * This file was automatically generated from Announcement.idl by us.ihmc.idl.generator.IDLGenerator. 
 * Do not update this file directly, edit Announcement.idl instead.
 *
 */
-public class ModelFileDescriptionPubSubType implements TopicDataType<ModelFileDescription>
+public class CameraAnnouncementPubSubType implements TopicDataType<CameraAnnouncement>
 {
-	public static final String name = "us::ihmc::robotDataLogger::ModelFileDescription";
+	public static final String name = "us::ihmc::robotDataLogger::CameraAnnouncement";
 	private final CDR serializeCDR = new CDR();
 	private final CDR deserializeCDR = new CDR();
 	
 	
 	
-    public ModelFileDescriptionPubSubType()
+    public CameraAnnouncementPubSubType()
     {
         
     }
     
        @Override
-   public void serialize(ModelFileDescription data, SerializedPayload serializedPayload) throws IOException
+   public void serialize(CameraAnnouncement data, SerializedPayload serializedPayload) throws IOException
    {
       serializeCDR.serialize(serializedPayload);
       data.serialize(serializeCDR);
@@ -36,7 +36,7 @@ public class ModelFileDescriptionPubSubType implements TopicDataType<ModelFileDe
    }
 
    @Override
-   public void deserialize(SerializedPayload serializedPayload, ModelFileDescription data) throws IOException
+   public void deserialize(SerializedPayload serializedPayload, CameraAnnouncement data) throws IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       data.deserialize(deserializeCDR);
@@ -46,7 +46,7 @@ public class ModelFileDescriptionPubSubType implements TopicDataType<ModelFileDe
    @Override
    public int getTypeSize()
    {
-      return ModelFileDescription.getMaxCdrSerializedSize();
+      return CameraAnnouncement.getMaxCdrSerializedSize();
    }
 
    @Override
@@ -56,8 +56,8 @@ public class ModelFileDescriptionPubSubType implements TopicDataType<ModelFileDe
    }
 
    @Override
-   public ModelFileDescription createData()
+   public CameraAnnouncement createData()
    {
-      return new ModelFileDescription();
+      return new CameraAnnouncement();
    }
 }
