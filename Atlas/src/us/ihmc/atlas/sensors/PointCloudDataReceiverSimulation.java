@@ -38,10 +38,10 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
    private long timestamp = 0;
    private final Random random = new Random(433456896807L);
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
-   
+
    private final RobotConfigurationData robotConfigurationData;
 
-   
+
    private final Kryo kryo = new Kryo();
    public PointCloudDataReceiverSimulation() throws IOException
    {
@@ -57,11 +57,11 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
       PacketCommunicator sensorSuitePacketCommunicatorClient = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER,
             new IHMCCommunicationKryoNetClassList());
       sensorSuitePacketCommunicatorClient.connect();
-      
+
       sensorSuitePacketCommunicatorClient.attachListener(PointCloudWorldPacket.class, this);
 
       pointCloudDataReceiver = new PointCloudDataReceiver(robotModel, robotModel.getCollisionBoxProvider(), ppsTimestampOffsetProvider,
-            robotModel.getJointMap(), robotConfigurationDataBuffer, sensorSuitePacketCommunicatorServer);
+            robotModel.getContactPointParameters(), robotConfigurationDataBuffer, sensorSuitePacketCommunicatorServer);
       pointCloudDataReceiver.start();
       pointCloudDataReceiver.setLidarState(LidarState.ENABLE);
       lidarFrame = fullRobotModel.getLidarBaseFrame(robotModel.getSensorInformation().getLidarParameters()[0].getSensorNameInSdf());
@@ -75,30 +75,30 @@ public class PointCloudDataReceiverSimulation implements Runnable, PacketConsume
       try
       {
          timestamp += 25000000;
-         
+
          RobotConfigurationData clone = kryo.copy(robotConfigurationData);
          clone.setTimestamp(timestamp);
          robotConfigurationDataBuffer.receivedPacket(clone);
-         
+
          ArrayList<Point3D> points = new ArrayList<>(1000);
          long[] timestamps = new long[1000];
          Arrays.fill(timestamps, timestamp);
-   
+
          for (int i = 0; i < 1000; i++)
          {
             points.add(new Point3D(10.0 * random.nextDouble(), -10.0 + 10.0 * random.nextDouble(), -1.0 + 2.0 * random.nextDouble()));
          }
-   
+
          pointCloudDataReceiver.receivedPointCloudData(ReferenceFrame.getWorldFrame(), lidarFrame, timestamps, points, PointCloudSource.QUADTREE,
                PointCloudSource.NEARSCAN);
-      
+
       }
       catch(Throwable t)
       {
          t.printStackTrace();
       }
    }
-   
+
    public static void main(String[] args) throws IOException
    {
       new PointCloudDataReceiverSimulation();
