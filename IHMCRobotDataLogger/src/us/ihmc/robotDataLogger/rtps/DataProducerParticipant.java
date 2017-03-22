@@ -16,14 +16,12 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.attributes.DurabilityKind;
 import us.ihmc.pubsub.attributes.HistoryQosPolicy.HistoryQosPolicyKind;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
-import us.ihmc.pubsub.attributes.PublishModeKind;
 import us.ihmc.pubsub.attributes.PublisherAttributes;
 import us.ihmc.pubsub.attributes.ReliabilityKind;
 import us.ihmc.pubsub.attributes.SubscriberAttributes;
-import us.ihmc.pubsub.attributes.TopicAttributes.TopicKind;
+import us.ihmc.pubsub.common.LogLevel;
 import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.pubsub.common.Time;
 import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -97,16 +95,25 @@ public class DataProducerParticipant
    public DataProducerParticipant(String name) throws IOException
    {
       this.name = name;
-      ParticipantAttributes<?> att = domain.createParticipantAttributes();
-      att.setDomainId(LogParticipantSettings.domain);
-      att.setLeaseDuration(Time.Infinite);
-      att.setName(name);
+      
+      domain.setLogLevel(LogLevel.WARNING);
+      ParticipantAttributes<?> att = domain.createDefaultParticipantAttributes(LogParticipantSettings.domain, name);
       participant = domain.createParticipant(att, null);
 
       guidString = LogParticipantTools.createGuidString(participant.getGuid());
       
    }
    
+   /**
+    * Deactivate the data producer. 
+    * 
+    * After calling this function, the producer cannot be reactivated
+    */
+   public void deactivate()
+   {
+      domain.removeParticipant(participant);
+   }
+
    /**
     * Set the data producer IP address for streaming data 
     * 
@@ -166,32 +173,15 @@ public class DataProducerParticipant
       return LogParticipantSettings.partition + LogParticipantSettings.namespaceSeperator + guidString;
    }
 
-   private PublisherAttributes<?, ?> createPersistentPublisherAttributes(TopicDataType<?> topicDataType, String partition, String topicName)
+   private <T> void publishPersistentData(String partition, String topicName, TopicDataType<T> topicDataType, T data) throws IOException
    {
-      domain.registerType(participant, topicDataType);
-
-      PublisherAttributes<?, ?> publisherAttributes = domain.createPublisherAttributes();
-      publisherAttributes.getTopic().setTopicKind(TopicKind.NO_KEY);
-      publisherAttributes.getTopic().setTopicDataType(topicDataType.getName());
-      publisherAttributes.getTopic().setTopicName(topicName);
+      PublisherAttributes<?, ?> publisherAttributes = domain.createDefaultPublisherAttributes(participant, topicDataType, topicName, partition);
+      
       publisherAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
-      publisherAttributes.getQos().addPartition(partition);
-
       publisherAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setKind(HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setDepth(1);
-      
-      if(topicDataType.getTypeSize() > 65000)
-      {
-         publisherAttributes.getQos().setPublishMode(PublishModeKind.ASYNCHRONOUS_PUBLISH_MODE);
-      }
-
-      return publisherAttributes;
-   }
-
-   private <T> void publishPersistentData(String partition, String topicName, TopicDataType<T> topicDataType, T data) throws IOException
-   {
-      PublisherAttributes<?, ?> att = createPersistentPublisherAttributes(topicDataType, partition, topicName);
+      PublisherAttributes<?, ?> att = publisherAttributes;
       Publisher publisher = domain.createPublisher(participant, att, null);
       publisher.write(data);
    }
@@ -259,11 +249,11 @@ public class DataProducerParticipant
       announcement.setLog(log);
 
       HandshakePubSubType handshakePubSubType = new HandshakePubSubType();
-      System.out.println(handshakePubSubType.getTypeSize());
       publishPersistentData(partition, LogParticipantSettings.handshakeTopic, handshakePubSubType, handshake);
       
       if (logModelProvider != null)
       {
+         ByteBufferPubSubType modelFilePubSubType = new ByteBufferPubSubType(LogParticipantSettings.modelFileTypeName, logModelProvider.getModel().length);
          announcement.getModelFileDescription().setHasModel(true);
          announcement.getModelFileDescription().setName(logModelProvider.getModelName());
          announcement.getModelFileDescription().setModelFileSize(logModelProvider.getModel().length);
@@ -272,13 +262,12 @@ public class DataProducerParticipant
             announcement.getModelFileDescription().getResourceDirectories().add(resourceDirectory);
          }
 
-         ByteBufferPubSubType modelFilePubSubType = new ByteBufferPubSubType("us::ihmc::robotDataLogger::modelFile", logModelProvider.getModel().length);
          ByteBuffer modelBuffer = ByteBuffer.wrap(logModelProvider.getModel());
          publishPersistentData(partition, LogParticipantSettings.modelFileTopic, modelFilePubSubType, modelBuffer);
 
          if (logModelProvider.getResourceZip() != null && logModelProvider.getResourceZip().length > 0)
          {
-            ByteBufferPubSubType resourcesPubSubType = new ByteBufferPubSubType("us::ihmc::robotDataLogger::modelFile", logModelProvider.getResourceZip().length);
+            ByteBufferPubSubType resourcesPubSubType = new ByteBufferPubSubType(LogParticipantSettings.resourceBundleTypeName, logModelProvider.getResourceZip().length);
             ByteBuffer resourceBuffer = ByteBuffer.wrap(logModelProvider.getResourceZip());
             publishPersistentData(partition, LogParticipantSettings.resourceBundleTopic, resourcesPubSubType, resourceBuffer);
 
@@ -300,12 +289,8 @@ public class DataProducerParticipant
       {
          VariableChangeRequestPubSubType variableChangeRequestPubSubType = new VariableChangeRequestPubSubType();
          domain.registerType(participant, variableChangeRequestPubSubType);
-         SubscriberAttributes<?, ?> subscriberAttributes = domain.createSubscriberAttributes();
-         subscriberAttributes.getTopic().setTopicKind(TopicKind.NO_KEY);
-         subscriberAttributes.getTopic().setTopicDataType(variableChangeRequestPubSubType.getName());
-         subscriberAttributes.getTopic().setTopicName(LogParticipantSettings.variableChangeTopic);
+         SubscriberAttributes<?, ?> subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, variableChangeRequestPubSubType, LogParticipantSettings.variableChangeTopic, partition);
          subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
-         subscriberAttributes.getQos().addPartition(partition);
          domain.createSubscriber(participant, subscriberAttributes, new VariableChangeSubscriberListener());
 
       }
