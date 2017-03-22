@@ -1,6 +1,7 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,9 +15,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
@@ -30,7 +30,7 @@ import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
-public abstract class EndToEndEndEffectorLoadBearingMessageTest implements MultiRobotTestInterface
+public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
@@ -70,9 +70,9 @@ public abstract class EndToEndEndEffectorLoadBearingMessageTest implements Multi
          assertTrue(success);
 
          // Now we can do the usual test.
-         EndEffectorLoadBearingMessage endEffectorLoadBearingMessage = new EndEffectorLoadBearingMessage(robotSide, EndEffector.FOOT, LoadBearingRequest.LOAD);
+         FootLoadBearingMessage footLoadBearingMessage = new FootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
 
-         drcSimulationTestHelper.send(endEffectorLoadBearingMessage);
+         drcSimulationTestHelper.send(footLoadBearingMessage);
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
          assertTrue(success);

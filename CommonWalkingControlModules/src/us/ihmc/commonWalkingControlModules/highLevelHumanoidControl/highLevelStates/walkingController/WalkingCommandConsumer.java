@@ -21,7 +21,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAc
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
@@ -277,26 +277,13 @@ public class WalkingCommandConsumer
       }
    }
 
-   public void consumeEndEffectorLoadBearingCommands(WalkingState currentState)
+   public void consumeFootLoadBearingCommands(WalkingState currentState)
    {
-      if (!commandInputManager.isNewCommandAvailable(EndEffectorLoadBearingCommand.class))
+      if (!commandInputManager.isNewCommandAvailable(FootLoadBearingCommand.class))
          return;
 
-      EndEffectorLoadBearingCommand command = commandInputManager.pollAndCompileCommands(EndEffectorLoadBearingCommand.class);
-
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         if (handManagers.get(robotSide) == null)
-//            continue;
-//
-//         LoadBearingRequest request = command.getRequest(robotSide, EndEffector.HAND);
-//         if (request == LoadBearingRequest.LOAD)
-//            handManagers.get(robotSide).requestLoadBearing();
-//         else if (request == LoadBearingRequest.UNLOAD)
-//            handManagers.get(robotSide).holdInJointspace();
-//      }
-
-      currentState.handleEndEffectorLoadBearingCommand(command);
+      FootLoadBearingCommand command = commandInputManager.pollAndCompileCommands(FootLoadBearingCommand.class);
+      currentState.handleFootLoadBearingCommand(command);
    }
 
    public void consumeLoadBearingCommands()

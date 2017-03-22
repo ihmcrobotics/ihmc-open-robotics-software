@@ -530,7 +530,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       commandConsumer.consumeChestCommands();
       commandConsumer.consumePelvisHeightCommands();
       commandConsumer.consumeGoHomeMessages();
-      commandConsumer.consumeEndEffectorLoadBearingCommands(currentState);
+      commandConsumer.consumeFootLoadBearingCommands(currentState);
       commandConsumer.consumeStopAllTrajectoryCommands();
       commandConsumer.consumeFootCommands();
       commandConsumer.consumeAbortWalkingCommands(abortWalkingRequested);

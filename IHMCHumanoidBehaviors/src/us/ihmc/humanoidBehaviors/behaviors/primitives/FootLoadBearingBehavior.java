@@ -2,32 +2,32 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 
-public class EndEffectorLoadBearingBehavior extends AbstractBehavior
+public class FootLoadBearingBehavior extends AbstractBehavior
 {
    private final BooleanYoVariable packetHasBeenSent = new BooleanYoVariable("packetHasBeenSent" + behaviorName, registry);
-   private EndEffectorLoadBearingMessage outgoingEndEffectorLoadBearingMessage;
+   private FootLoadBearingMessage outgoingFootLoadBearingMessage;
 
-   public EndEffectorLoadBearingBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
+   public FootLoadBearingBehavior(CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(outgoingCommunicationBridge);
    }
-   public EndEffectorLoadBearingBehavior(String prefix, CommunicationBridgeInterface outgoingCommunicationBridge)
+   public FootLoadBearingBehavior(String prefix, CommunicationBridgeInterface outgoingCommunicationBridge)
    {
       super(prefix,outgoingCommunicationBridge);
    }
 
-   public void setInput(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
+   public void setInput(FootLoadBearingMessage endEffectorLoadBearingMessage)
    {
-      this.outgoingEndEffectorLoadBearingMessage = endEffectorLoadBearingMessage;
+      this.outgoingFootLoadBearingMessage = endEffectorLoadBearingMessage;
    }
 
    @Override
    public void doControl()
    {
-      if (!packetHasBeenSent.getBooleanValue() && (outgoingEndEffectorLoadBearingMessage != null))
+      if (!packetHasBeenSent.getBooleanValue() && (outgoingFootLoadBearingMessage != null))
       {
          sendFootStateToController();
       }
@@ -37,7 +37,7 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
    {
       if (!isPaused.getBooleanValue() &&!isAborted.getBooleanValue())
       {
-         sendPacketToController(outgoingEndEffectorLoadBearingMessage);
+         sendPacketToController(outgoingFootLoadBearingMessage);
          packetHasBeenSent.set(true);
       }
    }
@@ -47,7 +47,7 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
    public void onBehaviorExited()
    {
       packetHasBeenSent.set(false);
-      outgoingEndEffectorLoadBearingMessage = null;
+      outgoingFootLoadBearingMessage = null;
 
       isPaused.set(false);
       isAborted.set(false);
@@ -63,7 +63,7 @@ public class EndEffectorLoadBearingBehavior extends AbstractBehavior
    
    
    public boolean hasInputBeenSet() {
-	   if (outgoingEndEffectorLoadBearingMessage != null)
+	   if (outgoingFootLoadBearingMessage != null)
 		   return true;
 	   else
 		   return false;
