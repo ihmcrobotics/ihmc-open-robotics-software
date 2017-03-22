@@ -12,9 +12,9 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    {
    }
    
-   public HandTrajectoryCommand(RobotSide robotSide, ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame)
+   public HandTrajectoryCommand(RobotSide robotSide, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
-      super(expressedInFrame, trajectoryFrame);
+      super(dataFrame, trajectoryFrame);
       this.robotSide = robotSide;
    }
 
