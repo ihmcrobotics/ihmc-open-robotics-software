@@ -63,9 +63,11 @@ public class WholeBodyControlCoreToolbox
    private final JointIndexHandler jointIndexHandler;
 
    public WholeBodyControlCoreToolbox(FullRobotModel fullRobotModel, RigidBody[] controlledBodies, InverseDynamicsJoint[] controlledJoints,
-         MomentumOptimizationSettings momentumOptimizationSettings, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-         ReferenceFrames referenceFrames, double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-         List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry registry)
+                                      MomentumOptimizationSettings momentumOptimizationSettings,
+                                      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, ReferenceFrames referenceFrames,
+                                      double controlDT, double gravityZ, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
+                                      List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      YoVariableRegistry registry)
    {
       this.fullRobotModel = fullRobotModel;
       this.controlledBodies = controlledBodies;
@@ -86,8 +88,8 @@ public class WholeBodyControlCoreToolbox
       if (contactablePlaneBodies != null)
       {
          this.planeContactWrenchProcessor = new PlaneContactWrenchProcessor(contactablePlaneBodies, yoGraphicsListRegistry, registry);
-         this.wrenchVisualizer = WrenchVisualizer
-               .createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0, yoGraphicsListRegistry, registry);
+         this.wrenchVisualizer = WrenchVisualizer.createWrenchVisualizerWithContactableBodies("DesiredExternalWrench", contactablePlaneBodies, 1.0,
+                                                                                              yoGraphicsListRegistry, registry);
       }
       else
       {
@@ -124,11 +126,14 @@ public class WholeBodyControlCoreToolbox
    }
 
    public static WholeBodyControlCoreToolbox createForInverseKinematicsOnly(FullRobotModel fullRobotModel, InverseDynamicsJoint[] controlledJoints,
-         JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, CommonHumanoidReferenceFrames referenceFrames, double controlDT,
-         GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator, MomentumOptimizationSettings momentumOptimizationSettings)
+                                                                            JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+                                                                            CommonHumanoidReferenceFrames referenceFrames, double controlDT,
+                                                                            GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
+                                                                            MomentumOptimizationSettings momentumOptimizationSettings)
    {
       WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, momentumOptimizationSettings,
-            jointPrivilegedConfigurationParameters, referenceFrames, controlDT, Double.NaN, geometricJacobianHolder, twistCalculator, null, null, null);
+                                                                        jointPrivilegedConfigurationParameters, referenceFrames, controlDT, Double.NaN,
+                                                                        geometricJacobianHolder, twistCalculator, null, null, null);
       return ret;
    }
 
@@ -209,6 +214,7 @@ public class WholeBodyControlCoreToolbox
 
    /**
     * Return a jacobian previously created with the getOrCreate method using a jacobianId.
+    * 
     * @param jacobianId
     * @return
     */
