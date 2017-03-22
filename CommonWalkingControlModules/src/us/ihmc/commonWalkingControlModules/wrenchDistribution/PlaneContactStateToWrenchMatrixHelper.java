@@ -105,6 +105,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = contactablePlaneBody.getSoleFrame();
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
+      yoPlaneContactState.clear();
+      yoPlaneContactState.computeSupportPolygon();
 
       hasReset = new BooleanYoVariable(namePrefix + "HasReset", registry);
       resetRequested = new BooleanYoVariable(namePrefix + "ResetRequested", registry);
@@ -112,7 +114,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       hasReceivedCenterOfPressureCommand = new BooleanYoVariable(namePrefix + "HasReceivedCoPCommand", registry);
       desiredCoPCommandInSoleFrame = new YoFramePoint2d(namePrefix + "DesiredCoPCommand", planeFrame, registry);
-      
+
       yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);
 
       for (int i = 0; i < rhoSize; i++)
@@ -208,7 +210,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             desiredCoPMatrix.set(1, 0, desiredCoPCommandInSoleFrame.getY());
             desiredCoPWeightMatrix.set(0, 0, desiredCoPCommandWeightInSoleFrame.getX());
             desiredCoPWeightMatrix.set(1, 1, desiredCoPCommandWeightInSoleFrame.getY());
-            
+
             hasReceivedCenterOfPressureCommand.set(false);
          }
          else
@@ -337,9 +339,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       {
          basisVectorOrigin.changeFrame(planeFrame);
          basisVector.changeFrame(planeFrame);
-         
+
          unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
-         
+
          singleRhoCoPJacobian.set(0, 0, -unitSpatialForceVector.getAngularPartY() / forceFromRho.getZ());
          singleRhoCoPJacobian.set(1, 0, unitSpatialForceVector.getAngularPartX() / forceFromRho.getZ());
       }
