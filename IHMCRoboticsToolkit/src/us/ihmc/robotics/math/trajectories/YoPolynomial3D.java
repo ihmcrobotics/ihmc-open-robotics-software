@@ -233,8 +233,8 @@ public class YoPolynomial3D
    public Tuple3DReadOnly getIntegral(double from, double to)
    {
       xIntegralResult = xPolynomial.getIntegral(from, to);
-      yIntegralResult = xPolynomial.getIntegral(from, to);
-      zIntegralResult = xPolynomial.getIntegral(from, to);
+      yIntegralResult = yPolynomial.getIntegral(from, to);
+      zIntegralResult = zPolynomial.getIntegral(from, to);
       return integralResult;
    }
 
