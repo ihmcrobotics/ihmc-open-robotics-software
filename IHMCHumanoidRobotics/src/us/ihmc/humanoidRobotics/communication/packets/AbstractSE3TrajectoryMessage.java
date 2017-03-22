@@ -25,7 +25,11 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    @RosIgnoredField
    public float[] selectionMatrixDiagonal;
    
+   
+   @RosExportedField(documentation = "The ID of the reference frame to execute the trajectory in")
    public long trajectoryReferenceFrameId;
+   
+   @RosExportedField(documentation = "The Id of the reference frame defining which frame the taskspaceTrajectoryPoints are expressed in")
    public long dataReferenceFrameId;
 
    public AbstractSE3TrajectoryMessage()
