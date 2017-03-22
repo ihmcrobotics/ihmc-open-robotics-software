@@ -105,9 +105,7 @@ public class TwistCalculatorTest
       Random random = new Random(234234L);
       int numberOfJoints = 100;
       List<PrismaticJoint> prismaticJoints = ScrewTestTools.createRandomTreeRobotWithPrismaticJoints(numberOfJoints, random);
-      // FIXME I think that is a bug, not a bad one but still
-      //      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(0).getPredecessor());
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
       {
@@ -151,9 +149,7 @@ public class TwistCalculatorTest
       Random random = new Random(234234L);
       int numberOfJoints = 100;
       List<RevoluteJoint> revoluteJoints = ScrewTestTools.createRandomTreeRobot(numberOfJoints, random);
-      // FIXME I think that is a bug, not a bad one but still
-      //      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, revoluteJoints.get(0).getPredecessor());
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
       {
@@ -358,7 +354,7 @@ public class TwistCalculatorTest
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor());
 
       double dt = 1.0e-8;
 
@@ -428,7 +424,7 @@ public class TwistCalculatorTest
       }
    }
 
-   private Twist computeExpectedTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static Twist computeExpectedTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
@@ -440,7 +436,7 @@ public class TwistCalculatorTest
       return expectedTwist;
    }
 
-   private Twist computeExpectedRelativeTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture, ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture)
+   public static Twist computeExpectedRelativeTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture, ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture)
    {
       Twist bodyTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
       bodyTwist.changeFrame(bodyFrame);
@@ -453,7 +449,7 @@ public class TwistCalculatorTest
       return relativeTwist;
    }
 
-   private FrameVector computeAngularVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static FrameVector computeAngularVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       FrameOrientation bodyOrientation = new FrameOrientation(bodyFrame);
       bodyOrientation.changeFrame(worldFrame);
@@ -470,7 +466,7 @@ public class TwistCalculatorTest
       return bodyAngularVelocity;
    }
 
-   private FrameVector computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static FrameVector computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       FramePoint bodyPosition = new FramePoint(bodyFrame);
       bodyPosition.changeFrame(worldFrame);
