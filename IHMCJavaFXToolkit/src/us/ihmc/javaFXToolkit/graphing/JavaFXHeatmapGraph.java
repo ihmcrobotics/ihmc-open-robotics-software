@@ -1,10 +1,18 @@
 package us.ihmc.javaFXToolkit.graphing;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
+
+import javax.imageio.ImageIO;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
 import javafx.scene.ParallelCamera;
 import javafx.scene.Scene;
@@ -31,9 +39,7 @@ public class JavaFXHeatmapGraph
    private final JFXPanel javaFXPanel;
    private Group rootGroup;
    private final GraphIndicesHolder graphIndicesHolder;
-   private final SelectedVariableHolder selectedVariableHolder;
    private final DataEntryHolder dataEntryHolder;
-   private final TimeDataHolder dataBuffer;
    
    private final Point2D focusPoint;
    private final AffineTransform transformToCanvasSpace;
@@ -59,9 +65,7 @@ public class JavaFXHeatmapGraph
    {
       javaFXPanel = new JFXPanel();
       this.graphIndicesHolder = graphIndicesHolder;
-      this.selectedVariableHolder = selectedVariableHolder;
       this.dataEntryHolder = dataEntryHolder;
-      this.dataBuffer = dataBuffer;
 
       heatmap = new TObjectIntHashMap<Point2D>(dataBuffer.getTimeData().length);
       
@@ -126,6 +130,12 @@ public class JavaFXHeatmapGraph
             graphicsContext.strokeLine(gridCenter.getX(), 0.0, gridCenter.getX(), javaFXPanel.getHeight());
 
             plotXYHeatmap();
+            
+            graphicsContext.setStroke(colors.getLabelColor());
+            graphicsContext.strokeText(x.getName(), canvas.getWidth() / 2, canvas.getHeight() - 5);
+            graphicsContext.rotate(-90.0);
+            graphicsContext.strokeText(y.getName(), -canvas.getHeight() / 2, 10);
+            graphicsContext.rotate(90.0);
 
             // restore context for next draw
             graphicsContext.restore();
@@ -201,9 +211,27 @@ public class JavaFXHeatmapGraph
       transformToCanvasSpace.setScale(javaFXPanel.getWidth() / viewRangeXMeters, javaFXPanel.getHeight() / viewRangeYMeters, 1.0);
    }
 
-   public void snapshot(WritableImage writableImage)
+   public BufferedImage snapshot()
    {
-      scene.snapshot(writableImage);
+      WritableImage snapshot = scene.snapshot(null);
+      BufferedImage fromFXImage = SwingFXUtils.fromFXImage(snapshot, null);
+      BufferedImage pngImage = null;
+      byte[] imageInByte;
+      try
+      {
+         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+         ImageIO.write(fromFXImage, "png", byteArrayOutputStream);
+         byteArrayOutputStream.flush();
+         imageInByte = byteArrayOutputStream.toByteArray();
+         byteArrayOutputStream.close();
+         InputStream in = new ByteArrayInputStream(imageInByte);
+         pngImage = ImageIO.read(in);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+      return pngImage;
    }
 
    private void adjustViewRange(double xInMeters, double yInMeters)
