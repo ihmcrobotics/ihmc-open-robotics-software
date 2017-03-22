@@ -91,8 +91,13 @@ public class CommandInputManager
       registerNewCommands(commandsToRegister);
    }
 
+   /**
+    * Registers a converter that helps convert a packet to a command. Currently only supports one converter
+    * @param commandConversionHelper
+    */
    public void registerConversionHelper(CommandConversionInterface commandConversionHelper)
    {
+      //update this to be a collection or map when you need more than one CommandConverter
       this.commandConverter = commandConversionHelper;
    }
    
