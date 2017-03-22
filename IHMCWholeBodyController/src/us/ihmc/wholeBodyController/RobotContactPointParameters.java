@@ -12,12 +12,13 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.BidirectionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
-public abstract class RobotContactPointParameters
+public abstract class RobotContactPointParameters implements ContactPointDefinitionHolder
 {
    protected final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
 

@@ -5,11 +5,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.atlas.parameters.AtlasRobotMultiContactControllerParameters;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
@@ -18,7 +15,6 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
@@ -87,7 +83,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          robot.getOneDegreeOfFreedomJoint("right_f1_j1").setQ(-1.4672);
          robot.getOneDegreeOfFreedomJoint("right_f2_j1").setQ(-1.4672);
          robot.getOneDegreeOfFreedomJoint("right_f3_j1").setQ(0.0);
-         
+
          robot.getOneDegreeOfFreedomJoint("right_f0_j2").setQ(-1.4706);
          robot.getOneDegreeOfFreedomJoint("right_f1_j2").setQ(-1.4706);
          robot.getOneDegreeOfFreedomJoint("right_f2_j2").setQ(-1.4706);
@@ -97,9 +93,9 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       default:
          break;
       }
-      
+
       robot.update();
-      
+
       robot.setPositionInWorld(new Vector3D(pelvisInitialPose.getX(), pelvisInitialPose.getY(), groundZ + pelvisInitialPose.getZ()));
       robot.setOrientation(pelvisInitialPose.getYaw(), pelvisInitialPose.getPitch(), pelvisInitialPose.getRoll());
    }
@@ -112,7 +108,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
    {
       FramePoint pelvisPosition = new FramePoint(ReferenceFrame.getWorldFrame());
       FrameOrientation pelvisOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame());
-      
+
       Map<ArmJointName, Double> leftArmInitialJointPositions = new LinkedHashMap<ArmJointName, Double>();
       Map<ArmJointName, Double> rightArmInitialJointPositions = new LinkedHashMap<ArmJointName, Double>();
 
@@ -121,7 +117,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       case FACING_LHAND_GRABBING:
          pelvisPosition.set(-0.016, 0.21, 0.8413);
          pelvisOrientation.setYawPitchRoll(0, 0, 0);
-         
+
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.5958);
          legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.0931);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.4973);
@@ -144,7 +140,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       case FACING_LHAND_GRABBING_RHAND_SEAT:
          pelvisPosition.set(-0.016, 0.21, 0.8413);
          pelvisOrientation.setYawPitchRoll(0, 0, 0);
-         
+
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.5958);
          legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.0931);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.4973);
@@ -167,7 +163,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       case FACING_BOTH_HANDS_GRABBING:
          pelvisPosition.set(-0.1, 0.2548, 0.7891);
          pelvisOrientation.setYawPitchRoll(0, 0, 0);
-         
+
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.84);
          legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.34);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.5);
@@ -190,7 +186,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       case SIDE_RHAND_GRABBING_FRONT_BAR:
          pelvisPosition.set(0.13, 0.21, 0.8326);
          pelvisOrientation.setYawPitchRoll(Math.PI / 2.0, 0, 0);
-         
+
          legInitialJointPositions.put(LegJointName.HIP_PITCH, -0.6521);
          legInitialJointPositions.put(LegJointName.KNEE_PITCH, 1.1418);
          legInitialJointPositions.put(LegJointName.ANKLE_PITCH, -0.49);
@@ -357,31 +353,12 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
       default:
          throw new RuntimeException("Not implemented yet!");
       }
-      
+
       pelvisInitialPose.setPosition(pelvisPosition);
       pelvisInitialPose.setOrientation(pelvisOrientation);
 
       armInitialJointPositions.put(RobotSide.LEFT, leftArmInitialJointPositions);
       armInitialJointPositions.put(RobotSide.RIGHT, rightArmInitialJointPositions);
-   }
-
-   public static class AtlasControllerParametersGettingIntoTheCar extends AtlasRobotMultiContactControllerParameters
-   {
-      public AtlasControllerParametersGettingIntoTheCar(AtlasJointMap jointMap)
-      {
-         super(jointMap);
-      }
-
-      public Map<OneDoFJoint, Double> getDefaultArmJointPositions(FullHumanoidRobotModel fullRobotModel, RobotSide robotSide)
-      {
-         Map<OneDoFJoint, Double> jointPositions = new LinkedHashMap<OneDoFJoint, Double>();
-         Map<ArmJointName, Double> armInitialJointPositions = AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar.armInitialJointPositions.get(robotSide);
-         for (ArmJointName armJointName : armInitialJointPositions.keySet())
-         {
-            jointPositions.put(fullRobotModel.getArmJoint(robotSide, armJointName), armInitialJointPositions.get(armJointName));
-         }
-         return jointPositions;
-      }
    }
 
    @Override
@@ -415,6 +392,6 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
    @Override
    public void getOffset(Vector3D offsetToPack)
    {
-      
+
    }
 }

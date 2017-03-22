@@ -67,7 +67,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector3D handLinearWeight = new Vector3D(1.0, 1.0, 1.0);
    private final Map<String, Vector3D> taskspaceLinearWeights = new HashMap<>();
 
-   public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap)
+   public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap, int numberOfContactableBodies)
    {
       double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
@@ -110,7 +110,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
          taskspaceLinearWeights.put(jointMap.getHandName(robotSide), handLinearWeight);
       }
 
-      nContactableBodies = jointMap.getNumberOfContactableBodies();
+      this.nContactableBodies = numberOfContactableBodies;
    }
 
    /** @inheritDoc */

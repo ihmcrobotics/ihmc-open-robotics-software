@@ -68,6 +68,7 @@ public class WandererRobotModel implements DRCRobotModel
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
    private final WandererJointMap jointMap = new WandererJointMap();
+   private final WandererContactPointParameters contactPointParameters = new WandererContactPointParameters(jointMap);
    private final DRCRobotSensorInformation sensorInformation;
    private final WandererCapturePointPlannerParameters capturePointPlannerParameters;
    private final WandererWalkingControllerParameters walkingControllerParameters;
@@ -99,7 +100,7 @@ public class WandererRobotModel implements DRCRobotModel
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
       return robotDescription;
    }
 
@@ -177,7 +178,7 @@ public class WandererRobotModel implements DRCRobotModel
    @Override
    public RobotContactPointParameters getContactPointParameters()
    {
-      return jointMap.getContactPointParameters();
+      return contactPointParameters;
    }
 
    @Override
