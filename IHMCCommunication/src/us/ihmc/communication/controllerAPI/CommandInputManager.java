@@ -65,6 +65,7 @@ public class CommandInputManager
    /** List of the listeners that should get notified when receiving a new valid command. */
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
    
+   /** command converter, helps converts packets to commands **/
    private CommandConversionInterface commandConverter = null;
 
 
