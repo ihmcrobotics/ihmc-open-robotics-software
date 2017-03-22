@@ -2,12 +2,12 @@ package us.ihmc.robotDataLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectIntHashMap;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.RemoteYoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
@@ -27,11 +27,12 @@ public class YoVariableHandShakeBuilder
 {
    private final Handshake handshake = new Handshake();
    private final ArrayList<JointHolder> jointHolders = new ArrayList<JointHolder>();   
-   private final HashMap<YoVariable<?>, Integer> yoVariableIndices = new HashMap<YoVariable<?>, Integer>();
+   private final TObjectIntHashMap<YoVariable<?>> yoVariableIndices = new TObjectIntHashMap<>();
    private final ArrayList<ImmutablePair<YoVariable<?>, YoVariableRegistry>> variablesAndRootRegistries = new ArrayList<>();
-
+   private final TObjectIntHashMap<Class<?>> enumDescriptions = new TObjectIntHashMap<>(); 
    
    private int registryID = 1;
+   private int enumID = 0;
 
    public YoVariableHandShakeBuilder(List<RigidBody> rootBodies, double dt)
    {
@@ -55,8 +56,12 @@ public class YoVariableHandShakeBuilder
          {
             if (yoGraphic instanceof RemoteYoGraphic)
             {
-               DynamicGraphicMessage msg = handshake.getGraphic_object().add();
-               msg.setList_name(yoGraphicsList.getLabel());
+               if(handshake.getGraphicObjects().remaining() == 0)
+               {
+                  throw new RuntimeException("The number of YoGraphics exceeds the maximum amount for the logger (" + handshake.getGraphicObjects().capacity() + ")");
+               }
+               GraphicObjectMessage msg = handshake.getGraphicObjects().add();
+               msg.setListName(yoGraphicsList.getLabel());
                messageFromDynamicGraphicObject((RemoteYoGraphic) yoGraphic, msg);
                
             }
@@ -74,9 +79,14 @@ public class YoVariableHandShakeBuilder
       {
          for (Artifact artifact : artifactList.getArtifacts())
          {
+            
             if (artifact instanceof RemoteYoGraphic)
             {
-               DynamicGraphicMessage msg = handshake.getArtifact().add();
+               if(handshake.getArtifacts().remaining() == 0)
+               {
+                  throw new RuntimeException("The number of Artifacts exceeds the maximum amount for the logger (" + handshake.getArtifacts().capacity() + ")");
+               }
+               GraphicObjectMessage msg = handshake.getArtifacts().add();
                messageFromDynamicGraphicObject((RemoteYoGraphic) artifact, msg);
             }
             else
@@ -94,7 +104,7 @@ public class YoVariableHandShakeBuilder
       {
          JointHolder jointHolder = JointHolderFactory.getJointHolder(joint);
 
-         JointDefinition jointDefinition = handshake.getJoint().add();
+         JointDefinition jointDefinition = handshake.getJoints().add();
          jointDefinition.setName(joint.getName());
          jointDefinition.setType(jointHolder.getJointType());
 
@@ -115,9 +125,9 @@ public class YoVariableHandShakeBuilder
    private void createRootRegistry()
    {
       
-      YoRegistryDefinition yoRegistryDescription = handshake.getRegistry().add();
+      YoRegistryDefinition yoRegistryDescription = handshake.getRegistries().add();
       yoRegistryDescription.setName("main");
-      yoRegistryDescription.setParent(0);
+      yoRegistryDescription.setParent((short) 0);
    }
 
    public int addRegistry(YoVariableRegistry registry, List<YoVariable<?>> variableListToPack)
@@ -129,12 +139,17 @@ public class YoVariableHandShakeBuilder
 
    private void addRegistry(int parentID, YoVariableRegistry registry, List<YoVariable<?>> variableListToPack, YoVariableRegistry rootRegistry)
    {
+      
       int myID = registryID;
+      if(myID > handshake.getRegistries().capacity())
+      {
+         throw new RuntimeException("The number of registries exceeds the maximum number of registries for the logger (" + handshake.getRegistries().capacity() +")");
+      }
       registryID++;
 
-      YoRegistryDefinition yoRegistryDescription = handshake.getRegistry().add();
+      YoRegistryDefinition yoRegistryDescription = handshake.getRegistries().add();
       yoRegistryDescription.setName(registry.getName());
-      yoRegistryDescription.setParent(parentID);
+      yoRegistryDescription.setParent((short) parentID);
 
       addVariables(myID, registry, variableListToPack, rootRegistry);
 
@@ -144,16 +159,59 @@ public class YoVariableHandShakeBuilder
       }
 
    }
+   
+   private short getOrAddEnumType(Class<?> enumClass, String[] enumTypes)
+   {
+      if(enumDescriptions.containsKey(enumClass))
+      {
+         return (short) enumDescriptions.get(enumClass);
+      }
+      
+      int myID = enumID;
+      if(myID > handshake.getEnumTypes().capacity())
+      {
+         throw new RuntimeException("The number of enum types exceeds the maximum number of enum types for the logger (" + handshake.getEnumTypes().capacity() +")");
+      }
+      enumID++;
+      
+      EnumType enumTypeDescription = handshake.getEnumTypes().add();
+      String name = enumClass.getCanonicalName();
+      if(name.length() > 255)
+      {
+         name = name.substring(name.length() - 255);
+         if(name.startsWith("."))
+         {
+            name = name.substring(1);
+         }
+      }
+      
+      enumTypeDescription.setName(name);
+      for (String enumType : enumTypes)
+      {
+         if(enumType == null)
+         {
+            enumType = "null";
+         }
+         enumTypeDescription.getEnumValues().add(enumType);
+      }
+      
+      enumDescriptions.put(enumClass, myID);
+      
+      return (short) myID;
+   }
 
    private void addVariables(int registryID, YoVariableRegistry registry, List<YoVariable<?>> variableListToPack, YoVariableRegistry rootRegistry)
    {
       ArrayList<YoVariable<?>> variables = registry.getAllVariablesInThisListOnly();
-
+      if(variables.size() > handshake.getVariables().capacity())
+      {
+         throw new RuntimeException("The number of variables exceeds the maximum number of variables for the logger (" + handshake.getVariables().capacity() +")");
+      }
       for (YoVariable<?> variable : variables)
       {
-         YoVariableDefinition yoVariableDefinition = handshake.getVariable().add();
+         YoVariableDefinition yoVariableDefinition = handshake.getVariables().add();
          yoVariableDefinition.setName(variable.getName());
-         yoVariableDefinition.setRegistry(registryID);
+         yoVariableDefinition.setRegistry((short) registryID);
 
          switch (variable.getYoVariableType())
          {
@@ -171,16 +229,13 @@ public class YoVariableHandShakeBuilder
             break;
          case ENUM:
             yoVariableDefinition.setType(YoType.EnumYoVariable);
-
-            String[] enumTypes = ((EnumYoVariable<?>) variable).getEnumValuesAsString();
-
-            for (String enumType : enumTypes)
+            if(((EnumYoVariable<?>) variable).isBackedByEnum())
             {
-               if(enumType == null)
-               {
-                  enumType = "null";
-               }
-               yoVariableDefinition.getEnumValues().add(enumType);
+               yoVariableDefinition.setEnumType(getOrAddEnumType(((EnumYoVariable<?>) variable).getEnumType(), ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
+            }
+            else
+            {
+               yoVariableDefinition.setEnumType(getOrAddEnumType(variable.getClass(), ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
             }
             yoVariableDefinition.setAllowNullValues(((EnumYoVariable<?>) variable).getAllowNullValue());
             break;
@@ -196,10 +251,10 @@ public class YoVariableHandShakeBuilder
 
    }
 
-   private void messageFromDynamicGraphicObject(RemoteYoGraphic obj, DynamicGraphicMessage objectMessage)
+   private void messageFromDynamicGraphicObject(RemoteYoGraphic obj, GraphicObjectMessage objectMessage)
    {
 
-      objectMessage.setType(obj.getRemoteGraphicType().ordinal());
+      objectMessage.setType((short) obj.getRemoteGraphicType().ordinal());
       objectMessage.setName(obj.getName());
 
       try
@@ -217,12 +272,12 @@ public class YoVariableHandShakeBuilder
 
       for (YoVariable<?> yoVar : obj.getVariables())
       {
-         Integer index = this.yoVariableIndices.get(yoVar);
-         if (index == null)
+         if (!this.yoVariableIndices.containsKey(yoVar))
          {
             throw new RuntimeException("Backing YoVariableRegistry not added for " + obj.getName());
          }
-         objectMessage.getYo_index().add(index);
+         int index = this.yoVariableIndices.get(yoVar);
+         objectMessage.getYoVariableIndex().add((short) index);
       }
 
       for (double d : obj.getConstants())

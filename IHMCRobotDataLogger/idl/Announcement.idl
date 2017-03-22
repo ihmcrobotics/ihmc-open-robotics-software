@@ -1,15 +1,35 @@
 module us{
 module ihmc{
 module robotDataLogger{
+	
+	struct CameraAnnouncement
+	{	
+		string name;
+		long id;
+	};
+	
+	struct ModelFileDescription{
+		boolean hasModel;
+		string name;
+		sequence<string, 255> resourceDirectories;
+		
+		long modelFileSize;
+		
+		boolean hasResourceZip;
+		long resourceZipSize;
+	};
+	
 	struct Announcement
 	{
-		octet guid[16];
+		string identifier;
 		
 		octet dataIP[4];
 		short dataPort;
 		
-		sequence<octet, 127> cameras;
 		string name;
+		sequence<CameraAnnouncement, 127> cameras;
+		ModelFileDescription modelFileDescription;
+		
 		boolean log;
 	};
 };

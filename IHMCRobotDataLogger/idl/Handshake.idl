@@ -3,7 +3,7 @@ module ihmc{
 module robotDataLogger{
 	struct YoRegistryDefinition
 	{
-		long parent;
+		short parent;
 		string name;
 	};
 	
@@ -26,9 +26,9 @@ module robotDataLogger{
 	struct YoVariableDefinition
 	{
 		string name;
-		long registry;
 		YoType type;
-		sequence<string, 255> enumValues;
+		short registry;
+		short enumType;
 		boolean allowNullValues;
 	};
 	
@@ -48,25 +48,32 @@ module robotDataLogger{
 		double transparency;
 	};
 	
-	struct DynamicGraphicMessage
+	struct GraphicObjectMessage
 	{
-		long type;
+		short type;
 		string name;
 		
-		sequence<long, 255> yo_index;
-		sequence<double, 255> constants;
+		sequence<short, 128> yoVariableIndex;
+		sequence<double, 128> constants;
 		AppearanceDefinitionMessage appearance;
-		string list_name;
+		string listName;
+	};
+	
+	struct EnumType
+	{
+		string name;
+		sequence<string, 128> enumValues;
 	};
 	
 	struct Handshake
 	{
 		double dt;
-		sequence<YoRegistryDefinition, 1024> registry;
-		sequence<YoVariableDefinition, 32767> variable;
-		sequence<JointDefinition, 255> joint;
-		sequence<DynamicGraphicMessage, 4096> graphic_object;
-		sequence<DynamicGraphicMessage, 4096> artifact;
+		sequence<YoRegistryDefinition, 1024> registries;
+		sequence<YoVariableDefinition, 32767> variables;
+		sequence<JointDefinition, 128> joints;
+		sequence<GraphicObjectMessage, 2048> graphicObjects;
+		sequence<GraphicObjectMessage, 2048> artifacts;
+		sequence<EnumType, 1024> enumTypes;
 	};
 
 };

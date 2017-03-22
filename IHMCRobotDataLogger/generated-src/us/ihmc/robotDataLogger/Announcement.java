@@ -17,37 +17,46 @@ public class Announcement implements IDLStruct<Announcement>
 {
     public Announcement()
     {
-        	guid_ = new byte[16];
+        	identifier_ = new StringBuilder(255); 
         	dataIP_ = new byte[4];
-        	cameras_ = new IDLSequence.Byte (127, "type_9");
         	name_ = new StringBuilder(255); 
+        	cameras_ = new IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement> (127, us.ihmc.robotDataLogger.CameraAnnouncement.class, new us.ihmc.robotDataLogger.CameraAnnouncementPubSubType());
+
+        	modelFileDescription_ = new us.ihmc.robotDataLogger.ModelFileDescription();
         
         
     }
     @Override
     public void set(Announcement other)
     {
-        	for(int b = 0; b < guid_.length; ++b)
+        	identifier_.setLength(0);
+        	identifier_.append(other.identifier_);
+        	for(int b = 0; b < dataIP_.length; ++b)
         	{
-        	    	guid_[b] = other.guid_[b];	
-
-        	}
-        	for(int d = 0; d < dataIP_.length; ++d)
-        	{
-        	    	dataIP_[d] = other.dataIP_[d];	
+        	    	dataIP_[b] = other.dataIP_[b];	
 
         	}
         	dataPort_ = other.dataPort_;
-        	cameras_.set(other.cameras_);name_.setLength(0);
+        	name_.setLength(0);
         	name_.append(other.name_);
-        	log_ = other.log_;
+        	cameras_.set(other.cameras_);modelFileDescription_.set(other.modelFileDescription_);log_ = other.log_;
 
     }
 
+        public void setIdentifier(String identifier)
+        {
+        	identifier_.setLength(0);
+        	identifier_.append(identifier);
+        }
+        
+        public String getIdentifierAsString()
+        {
+        	return getIdentifier().toString();
+        }
 
-    public byte[] getGuid()
+    public StringBuilder getIdentifier()
     {
-        return guid_;
+        return identifier_;
     }
 
         
@@ -69,13 +78,6 @@ public class Announcement implements IDLStruct<Announcement>
     }
 
         
-
-    public IDLSequence.Byte  getCameras()
-    {
-        return cameras_;
-    }
-
-        
         public void setName(String name)
         {
         	name_.setLength(0);
@@ -90,6 +92,20 @@ public class Announcement implements IDLStruct<Announcement>
     public StringBuilder getName()
     {
         return name_;
+    }
+
+        
+
+    public IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  getCameras()
+    {
+        return cameras_;
+    }
+
+        
+
+    public us.ihmc.robotDataLogger.ModelFileDescription getModelFileDescription()
+    {
+        return modelFileDescription_;
     }
 
         
@@ -115,18 +131,20 @@ public class Announcement implements IDLStruct<Announcement>
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += ((16) * 1) + CDR.alignment(current_alignment, 1);
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	    current_alignment += ((4) * 1) + CDR.alignment(current_alignment, 1);
 
 	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (127 * 1) + CDR.alignment(current_alignment, 1);
-
-
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    for(int a = 0; a < 127; ++a)
+	    {
+	        current_alignment += us.ihmc.robotDataLogger.CameraAnnouncement.getMaxCdrSerializedSize(current_alignment);}
+
+	    current_alignment += us.ihmc.robotDataLogger.ModelFileDescription.getMaxCdrSerializedSize(current_alignment);
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
 	
@@ -143,16 +161,19 @@ public class Announcement implements IDLStruct<Announcement>
 	{
 	    int initial_alignment = current_alignment;
 	            
-	    current_alignment += ((16) * 1) + CDR.alignment(current_alignment, 1);
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
+
 	    current_alignment += ((4) * 1) + CDR.alignment(current_alignment, 1);
 	    current_alignment += 2 + CDR.alignment(current_alignment, 2);
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (data.getCameras().size() * 1) + CDR.alignment(current_alignment, 1);
-
-
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    for(int a = 0; a < data.getCameras().size(); ++a)
+	    {
+	        current_alignment += us.ihmc.robotDataLogger.CameraAnnouncement.getCdrSerializedSize(data.getCameras().get(a), current_alignment);}
+
+	    current_alignment += us.ihmc.robotDataLogger.ModelFileDescription.getCdrSerializedSize(data.getModelFileDescription(), current_alignment);
 	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
 
 	
@@ -164,10 +185,9 @@ public class Announcement implements IDLStruct<Announcement>
 	{
 
 
-	    for(int a = 0; a < guid_.length; ++a)
-	    {
-	        	cdr.write_type_9(guid_[a]);	
-	    }
+	    if(identifier_.length() <= 255)
+	    cdr.write_type_d(identifier_);else
+	        throw new RuntimeException("identifier field exceeds the maximum length");
 
 	    for(int a = 0; a < dataIP_.length; ++a)
 	    {
@@ -176,13 +196,15 @@ public class Announcement implements IDLStruct<Announcement>
 
 	    cdr.write_type_1(dataPort_);
 
+	    if(name_.length() <= 255)
+	    cdr.write_type_d(name_);else
+	        throw new RuntimeException("name field exceeds the maximum length");
+
 	    if(cameras_.size() <= 127)
 	    cdr.write_type_e(cameras_);else
 	        throw new RuntimeException("cameras field exceeds the maximum length");
 
-	    if(name_.length() <= 255)
-	    cdr.write_type_d(name_);else
-	        throw new RuntimeException("name field exceeds the maximum length");
+	    cdr.write_type_a(modelFileDescription_);
 
 	    cdr.write_type_7(log_);
 	}
@@ -191,11 +213,7 @@ public class Announcement implements IDLStruct<Announcement>
 	public final void deserialize(CDR cdr)
 	{
 
-	    	for(int a = 0; a < guid_.length; ++a)
-	    	{
-	    	    	guid_[a] = cdr.read_type_9();	
-	    	}
-	    	
+	    	cdr.read_type_d(identifier_);	
 
 	    	for(int a = 0; a < dataIP_.length; ++a)
 	    	{
@@ -205,9 +223,11 @@ public class Announcement implements IDLStruct<Announcement>
 
 	    	dataPort_ = cdr.read_type_1();	
 
+	    	cdr.read_type_d(name_);	
+
 	    	cdr.read_type_e(cameras_);	
 
-	    	cdr.read_type_d(name_);	
+	    	cdr.read_type_a(modelFileDescription_);	
 
 	    	log_ = cdr.read_type_7();	
 	}
@@ -215,15 +235,17 @@ public class Announcement implements IDLStruct<Announcement>
 	@Override
 	public final void serialize(InterchangeSerializer ser)
 	{
-			    ser.write_type_f("guid", guid_);
+			    ser.write_type_d("identifier", identifier_);
 			    
 			    ser.write_type_f("dataIP", dataIP_);
 			    
 			    ser.write_type_1("dataPort", dataPort_);
 			    
+			    ser.write_type_d("name", name_);
+			    
 			    ser.write_type_e("cameras", cameras_);
 			    
-			    ser.write_type_d("name", name_);
+			    ser.write_type_a("modelFileDescription", modelFileDescription_);
 			    
 			    ser.write_type_7("log", log_);
 			    
@@ -232,15 +254,17 @@ public class Announcement implements IDLStruct<Announcement>
 	@Override
 	public final void deserialize(InterchangeSerializer ser)
 	{
-	    			ser.read_type_f("guid", guid_);	
+	    			ser.read_type_d("identifier", identifier_);	
 	    	    
 	    			ser.read_type_f("dataIP", dataIP_);	
 	    	    
 	    			dataPort_ = ser.read_type_1("dataPort");	
 	    	    
+	    			ser.read_type_d("name", name_);	
+	    	    
 	    			ser.read_type_e("cameras", cameras_);	
 	    	    
-	    			ser.read_type_d("name", name_);	
+	    			ser.read_type_a("modelFileDescription", modelFileDescription_);	
 	    	    
 	    			log_ = ser.read_type_7("log");	
 	    	    
@@ -255,22 +279,21 @@ public class Announcement implements IDLStruct<Announcement>
         Announcement otherMyClass = (Announcement)other;
         boolean returnedValue = true;
 
-                	for(int c = 0; c < guid_.length; ++c)
+        returnedValue &= us.ihmc.idl.IDLTools.equals(this.identifier_, otherMyClass.identifier_);
+                
+                	for(int c = 0; c < dataIP_.length; ++c)
                 	{
-                	    returnedValue &= this.guid_[c] == otherMyClass.guid_[c];
-
-                	}        
-                	for(int e = 0; e < dataIP_.length; ++e)
-                	{
-                	    returnedValue &= this.dataIP_[e] == otherMyClass.dataIP_[e];
+                	    returnedValue &= this.dataIP_[c] == otherMyClass.dataIP_[c];
 
                 	}        
         returnedValue &= this.dataPort_ == otherMyClass.dataPort_;
 
                 
+        returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
+                
         returnedValue &= this.cameras_.equals(otherMyClass.cameras_);
                 
-        returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
+        returnedValue &= this.modelFileDescription_.equals(otherMyClass.modelFileDescription_);
                 
         returnedValue &= this.log_ == otherMyClass.log_;
 
@@ -285,8 +308,8 @@ public class Announcement implements IDLStruct<Announcement>
 		StringBuilder builder = new StringBuilder();
 		
       	builder.append("Announcement {");
-        builder.append("guid=");
-        builder.append(Arrays.toString(this.guid_));
+        builder.append("identifier=");
+        builder.append(this.identifier_);
 
                 builder.append(", ");
         builder.append("dataIP=");
@@ -297,12 +320,16 @@ public class Announcement implements IDLStruct<Announcement>
         builder.append(this.dataPort_);
 
                 builder.append(", ");
+        builder.append("name=");
+        builder.append(this.name_);
+
+                builder.append(", ");
         builder.append("cameras=");
         builder.append(this.cameras_);
 
                 builder.append(", ");
-        builder.append("name=");
-        builder.append(this.name_);
+        builder.append("modelFileDescription=");
+        builder.append(this.modelFileDescription_);
 
                 builder.append(", ");
         builder.append("log=");
@@ -313,11 +340,12 @@ public class Announcement implements IDLStruct<Announcement>
 		return builder.toString();
     }
 
-    private byte[] guid_; 
+    private StringBuilder identifier_; 
     private byte[] dataIP_; 
     private short dataPort_; 
-    private IDLSequence.Byte  cameras_; 
     private StringBuilder name_; 
+    private IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  cameras_; 
+    private us.ihmc.robotDataLogger.ModelFileDescription modelFileDescription_; 
     private boolean log_; 
 
 }

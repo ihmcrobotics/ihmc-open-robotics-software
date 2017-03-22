@@ -7,10 +7,10 @@ import java.util.Arrays;
 
 /**
 * 
-* Definition of the class "ModelFileDescription" defined in ModelFileDescription.idl. 
+* Definition of the class "ModelFileDescription" defined in Announcement.idl. 
 *
-* This file was automatically generated from ModelFileDescription.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit ModelFileDescription.idl instead.
+* This file was automatically generated from Announcement.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit Announcement.idl instead.
 *
 */
 public class ModelFileDescription implements IDLStruct<ModelFileDescription>
@@ -24,6 +24,7 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
     @Override
     public void set(ModelFileDescription other)
     {
+        	hasModel_ = other.hasModel_;
         	name_.setLength(0);
         	name_.append(other.name_);
         	resourceDirectories_.set(other.resourceDirectories_);modelFileSize_ = other.modelFileSize_;
@@ -32,6 +33,17 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 
     }
 
+    public void setHasModel(boolean hasModel)
+    {
+        hasModel_ = hasModel;
+    }
+
+    public boolean getHasModel()
+    {
+        return hasModel_;
+    }
+
+        
         public void setName(String name)
         {
         	name_.setLength(0);
@@ -100,6 +112,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	{
 	    int initial_alignment = current_alignment;
 	            
+	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
@@ -127,6 +141,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	{
 	    int initial_alignment = current_alignment;
 	            
+	    current_alignment += 1 + CDR.alignment(current_alignment, 1);
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
@@ -149,6 +165,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	{
 
 
+	    cdr.write_type_7(hasModel_);
+
 	    if(name_.length() <= 255)
 	    cdr.write_type_d(name_);else
 	        throw new RuntimeException("name field exceeds the maximum length");
@@ -168,6 +186,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	public final void deserialize(CDR cdr)
 	{
 
+	    	hasModel_ = cdr.read_type_7();	
+
 	    	cdr.read_type_d(name_);	
 
 	    	cdr.read_type_e(resourceDirectories_);	
@@ -182,6 +202,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	@Override
 	public final void serialize(InterchangeSerializer ser)
 	{
+			    ser.write_type_7("hasModel", hasModel_);
+			    
 			    ser.write_type_d("name", name_);
 			    
 			    ser.write_type_e("resourceDirectories", resourceDirectories_);
@@ -197,6 +219,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	@Override
 	public final void deserialize(InterchangeSerializer ser)
 	{
+	    			hasModel_ = ser.read_type_7("hasModel");	
+	    	    
 	    			ser.read_type_d("name", name_);	
 	    	    
 	    			ser.read_type_e("resourceDirectories", resourceDirectories_);	
@@ -218,6 +242,9 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
         ModelFileDescription otherMyClass = (ModelFileDescription)other;
         boolean returnedValue = true;
 
+        returnedValue &= this.hasModel_ == otherMyClass.hasModel_;
+
+                
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
                 
         returnedValue &= this.resourceDirectories_.equals(otherMyClass.resourceDirectories_);
@@ -241,6 +268,10 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 		StringBuilder builder = new StringBuilder();
 		
       	builder.append("ModelFileDescription {");
+        builder.append("hasModel=");
+        builder.append(this.hasModel_);
+
+                builder.append(", ");
         builder.append("name=");
         builder.append(this.name_);
 
@@ -265,6 +296,7 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 		return builder.toString();
     }
 
+    private boolean hasModel_; 
     private StringBuilder name_; 
     private IDLSequence.StringBuilderHolder  resourceDirectories_; 
     private int modelFileSize_; 
