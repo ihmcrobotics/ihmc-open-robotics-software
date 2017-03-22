@@ -238,6 +238,11 @@ public class WholeBodyControlCoreToolbox
       return planeContactWrenchProcessor;
    }
 
+   public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
+   {
+      return planeContactWrenchProcessor.getDesiredCenterOfPressureDataHolder();
+   }
+
    public WrenchVisualizer getWrenchVisualizer()
    {
       return wrenchVisualizer;
