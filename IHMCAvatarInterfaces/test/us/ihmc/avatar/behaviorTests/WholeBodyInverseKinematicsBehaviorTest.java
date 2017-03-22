@@ -637,7 +637,7 @@ public abstract class WholeBodyInverseKinematicsBehaviorTest implements MultiRob
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 30.0)
-   @Test(timeout = 60000)
+   @Test(timeout = 300000)
    public void testSolvingForTrackingWeights() throws SimulationExceededMaximumTimeException, IOException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
