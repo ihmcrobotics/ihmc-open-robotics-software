@@ -17,6 +17,8 @@ public class SolarPanelCleaningPose
    private double zRotation;
    private Pose pose;
    
+   private boolean isValidPose = true;
+   
    public SolarPanelCleaningPose(SolarPanel solarPanel)
    {
       this.solarPanel = solarPanel;
@@ -171,5 +173,15 @@ public class SolarPanelCleaningPose
    public double getZRotation()
    {
       return zRotation;
+   }   
+   
+   public void setValidity(boolean isValid)
+   {
+      isValidPose = isValid;
+   }
+   
+   public boolean isValid()
+   {
+      return isValidPose;
    }
 }

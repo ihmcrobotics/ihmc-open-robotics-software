@@ -1,6 +1,7 @@
 package us.ihmc.avatar.rrtManipulation;
 
 import static org.junit.Assert.assertTrue;
+import static us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox.createForInverseKinematicsOnly;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,8 +13,11 @@ import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -42,12 +46,11 @@ import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMot
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.kinematics.InverseKinematicsLogDataParserToMatlabFormat.JointData;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -373,7 +376,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    }
    
    
-   @Test(timeout = 160000)
+   //@Test(timeout = 160000)
    public void testSolarPanelMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -396,14 +399,22 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      motionTime = 5.0;
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion, motionTime);
+      motionTime = 35.0;
+      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotionWhole, motionTime);
+      
+      for(int i=0;i<solarPanelPlanner.debugPose.size();i++)
+      {
+         //scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPose.get(i)));
+      }
+      
       wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();      
+      
       drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
-      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
-      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseTwo));
+//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
+//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseTwo));
+      
       
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -436,6 +447,29 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       //PrintTools.info("l_arm_shx "+ drcBehaviorTestHelper.getRobot().getOneDegreeOfFreedomJoint("l_arm_shx").getQ());
       
+      
+   }
+   
+   @Test(timeout = 160000)
+   public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+      setupCamera(scs);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      
+      // ***************************************************** //
+      
+      
+//      InverseDynamicsJoint[] controlledJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(desiredFullRobotModel);
+//      
+//      WholeBodyControlCoreToolbox toolbox;
+//      toolbox = createForInverseKinematicsOnly(desiredFullRobotModel, controlledJoints, jointPrivilegedConfigurationParameters, referenceFrames, updateDT,
+//                                               geometricJacobianHolder, twistCalculator, momentumOptimizationSettings);
+//      
       
    }
    
