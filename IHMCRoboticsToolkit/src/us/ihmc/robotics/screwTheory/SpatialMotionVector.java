@@ -552,9 +552,13 @@ public abstract class SpatialMotionVector
    
    public void checkReferenceFramesMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
-      if (this.bodyFrame != bodyFrame) throw new ReferenceFrameMismatchException("this.bodyFrame != bodyFrame");
-      if (this.baseFrame != baseFrame) throw new ReferenceFrameMismatchException("this.baseFrame != baseFrame");
-      if (this.expressedInFrame != expressedInFrame) throw new ReferenceFrameMismatchException("this.expressedInFrame != expressedInFrame");
+      if (this.bodyFrame != bodyFrame)
+         throw new ReferenceFrameMismatchException("bodyFrame mismatch: this.bodyFrame = " + this.bodyFrame + ", other bodyFrame = " + bodyFrame);
+      if (this.baseFrame != baseFrame)
+         throw new ReferenceFrameMismatchException("baseFrame mismatch: this.baseFrame = " + this.baseFrame + ", other baseFrame = " + baseFrame);
+      if (this.expressedInFrame != expressedInFrame)
+         throw new ReferenceFrameMismatchException("expressedInFrame mismatch: this.expressedInFrame = " + this.expressedInFrame + ", other expressedInFrame = "
+               + expressedInFrame);
    }
 
    public boolean containsNaN(SpatialMotionVector spatialMotionVector)
