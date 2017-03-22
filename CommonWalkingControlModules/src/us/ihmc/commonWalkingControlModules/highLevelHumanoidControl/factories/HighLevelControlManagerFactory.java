@@ -135,7 +135,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
 
-      // TODO: replace this when we support reference frames
+      // get trajectory reference frames
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       ReferenceFrameHashCodeResolver referenceFrameResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
