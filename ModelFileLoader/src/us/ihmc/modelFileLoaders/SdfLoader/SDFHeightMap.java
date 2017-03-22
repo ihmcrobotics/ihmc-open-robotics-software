@@ -6,15 +6,15 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class SDFHeightMap implements us.ihmc.graphicsDescription.HeightMap
 {
    double xMin, xMax, yMin, yMax, zOffset;
-   private BoundingBox3d boundingBox;
+   private BoundingBox3D boundingBox;
 
    double scale;
    
@@ -49,7 +49,7 @@ public class SDFHeightMap implements us.ihmc.graphicsDescription.HeightMap
          
          double zMin = Double.NEGATIVE_INFINITY;
          double zMax = Double.POSITIVE_INFINITY;
-         boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+         boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
       }
       catch (IOException e)
       {
@@ -79,7 +79,7 @@ public class SDFHeightMap implements us.ihmc.graphicsDescription.HeightMap
       return offset;
    }
 
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

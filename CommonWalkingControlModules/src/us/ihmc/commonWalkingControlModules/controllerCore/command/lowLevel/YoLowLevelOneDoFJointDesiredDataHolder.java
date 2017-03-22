@@ -109,6 +109,15 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       lowLevelJointData.setDesiredAcceleration(desiredAcceleration);
    }
 
+   public void setDesiredJointCurrent(OneDoFJoint joint, double desiredCurrent)
+   {
+      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      if (lowLevelJointData == null)
+         throwJointNotRegisteredException(joint);
+
+      lowLevelJointData.setDesiredCurrent(desiredCurrent);
+   }
+
    public void setupForPositionControl(OneDoFJoint joint, double desiredPosition, double desiredVelocity)
    {
       YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
@@ -185,6 +194,11 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       }
    }
 
+   public YoLowLevelJointData getYoLowLevelJointData(OneDoFJoint joint)
+   {
+      return lowLevelJointDataMap.get(joint);
+   }
+
    @Override
    public LowLevelJointControlMode getJointControlMode(OneDoFJoint joint)
    {
@@ -228,6 +242,15 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
       if (lowLevelJointData == null)
          throwJointNotRegisteredException(joint);
       return lowLevelJointData.getDesiredAcceleration();
+   }
+
+   @Override
+   public double getDesiredJointCurrent(OneDoFJoint joint)
+   {
+      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      if (lowLevelJointData == null)
+         throwJointNotRegisteredException(joint);
+      return lowLevelJointData.getDesiredCurrent();
    }
 
    @Override
@@ -302,6 +325,16 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
          return false;
       else
          return lowLevelJointData.hasDesiredAcceleration();
+   }
+
+   @Override
+   public boolean hasDesiredCurrentForJoint(OneDoFJoint joint)
+   {
+      YoLowLevelJointData lowLevelJointData = lowLevelJointDataMap.get(joint.getName());
+      if (lowLevelJointData == null)
+         return false;
+      else
+         return lowLevelJointData.hasDesiredCurrent();
    }
 
    @Override

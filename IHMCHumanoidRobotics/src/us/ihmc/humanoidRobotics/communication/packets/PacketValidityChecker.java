@@ -6,7 +6,6 @@ import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -357,6 +356,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(handTrajectoryMessage, true);
       if (errorMessage != null)
          return HandTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+      
+      if(handTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+      
+      if(handTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
@@ -441,6 +450,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(headTrajectoryMessage, true);
       if (errorMessage != null)
          return HeadTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+      
+      if(headTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+      
+      if(headTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -553,6 +572,16 @@ public abstract class PacketValidityChecker
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
+      
+      if(message.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+      
+      if(message.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
       {
@@ -575,6 +604,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(pelvisOrientationTrajectoryMessage, true);
       if (errorMessage != null)
          return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+      
+      if(pelvisOrientationTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+      
+      if(pelvisOrientationTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -606,6 +645,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(pelvisTrajectoryMessage, true);
       if (errorMessage != null)
          return PelvisTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+      
+      if(pelvisTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+      
+      if(pelvisTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -637,6 +686,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(footTrajectoryMessage, true);
       if (errorMessage != null)
          return FootTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+      
+      if(footTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+      
+      if(footTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
@@ -786,23 +845,14 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.armControlMode);
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s armControlMode field" + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      boolean isInUserControlMode = armDesiredAccelerationsMessage.armControlMode == ArmControlMode.USER_CONTROL_MODE;
-      if (isInUserControlMode && armDesiredAccelerationsMessage.armDesiredJointAccelerations == null)
+      if (armDesiredAccelerationsMessage.desiredJointAccelerations == null)
       {
          String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";
          return errorMessage;
       }
 
-      if (isInUserControlMode && armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
+      if (armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
       {
          String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";

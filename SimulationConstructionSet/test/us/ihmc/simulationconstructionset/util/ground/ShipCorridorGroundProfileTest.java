@@ -4,10 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class ShipCorridorGroundProfileTest 
 {
@@ -26,11 +26,11 @@ public class ShipCorridorGroundProfileTest
    public void testSurfaceNormalAlongYAxis()
    {
       int nSteps = 1000;
-      BoundingBox3d boundingBox = groundProfile.getBoundingBox();
+      BoundingBox3D boundingBox = groundProfile.getBoundingBox();
       
-      double yStep = (boundingBox.getYMax() - boundingBox.getYMin()) / nSteps;
+      double yStep = (boundingBox.getMaxY() - boundingBox.getMinY()) / nSteps;
       double dy = 1e-8;
-      double x = (boundingBox.getXMax() - boundingBox.getXMin()) / 2.0;
+      double x = (boundingBox.getMaxX() - boundingBox.getMinX()) / 2.0;
       double z = 0.0;
       double y = -2.5; //Start on the left side and move to the right side
 

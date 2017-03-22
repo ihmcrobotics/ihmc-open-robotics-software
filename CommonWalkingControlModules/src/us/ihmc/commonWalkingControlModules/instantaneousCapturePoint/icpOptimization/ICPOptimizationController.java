@@ -194,10 +194,10 @@ public class ICPOptimizationController
       upcomingDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "UpcomingDoubleSupportSplitFraction", registry);
       magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
-      exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
-      defaultDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
+      exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getSwingDurationAlpha());
+      defaultDoubleSupportSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
       doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
-      upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
+      upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();

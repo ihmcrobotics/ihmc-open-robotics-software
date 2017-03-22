@@ -17,7 +17,6 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.networkProcessor.DRCNetworkProcessor;
 import us.ihmc.avatar.sensors.DRCRenderedSceneVideoHandler;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredHeadingAndVelocity.HeadingAndVelocityEvaluationScriptParameters;
@@ -44,6 +43,7 @@ import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -98,7 +98,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private boolean setupControllerNetworkSubscriber = true;
 
    private final WalkingControllerParameters walkingControllerParameters;
-   private final ArmControllerParameters armControllerParameters;
    private final CapturePointPlannerParameters capturePointPlannerParameters;
    private final ICPOptimizationParameters icpOptimizationParameters;
    private final RobotContactPointParameters contactPointParameters;
@@ -146,7 +145,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       }
 
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      this.armControllerParameters = robotModel.getArmControllerParameters();
       this.capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       this.icpOptimizationParameters = robotModel.getICPOptimizationParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
@@ -414,8 +412,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames, wristForceSensorNames,
-                                                             walkingControllerParameters, armControllerParameters, capturePointPlannerParameters,
-                                                             HighLevelState.WALKING);
+            walkingControllerParameters, capturePointPlannerParameters, HighLevelState.WALKING);
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
       if (setupControllerNetworkSubscriber)
@@ -430,7 +427,6 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
-      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands);
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
 
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
@@ -447,6 +443,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setGuiInitialSetup(guiInitialSetup);
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
+
+      CommonHumanoidReferenceFrames referenceFrames = controllerFactory.getHighLevelHumanoidControllerToolbox().getReferenceFrames();
+      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands, referenceFrames);
 
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);

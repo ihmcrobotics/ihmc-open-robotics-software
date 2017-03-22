@@ -14,7 +14,6 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    private static final long serialVersionUID = 8118722036566615731L;
    private static final int defaultNumberOfElements = 16;
 
-   private final T emptyObject;
    private final GenericTypeBuilder<T> typeBuilder;
    private final ArrayDeque<T> unusedObjects;
 
@@ -40,7 +39,6 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
       unusedObjects = new ArrayDeque<>(numElements);
       for (int i = 0; i < numElements; i++)
          unusedObjects.add(typeBuilder.newInstance());
-      emptyObject = typeBuilder.newInstance();
    }
 
    /** {@inheritDoc} */
@@ -58,25 +56,23 @@ public class RecyclingArrayDeque<T extends Settable<T>> extends ArrayDeque<T>
    }
 
    /**
-    * Add an empty object at the front of this deque and return it.
+    * Add an object at the front of this deque and return it. Because we are recycling objects the object may have data in it.
     * @return the new empty object.
     */
    public T addFirst()
    {
       T newObject = getOrCreateUnusedObject();
-      newObject.set(emptyObject);
       super.addFirst(newObject);
       return newObject;
    }
 
    /**
-    * Add an empty object at the end of this deque and return it.
+    * Add an object at the end of this deque and return it. Because we are recycling objects the object may have data in it.
     * @return the new empty object.
     */
    public T addLast()
    {
       T newObject = getOrCreateUnusedObject();
-      newObject.set(emptyObject);
       super.addLast(newObject);
       return newObject;
    }

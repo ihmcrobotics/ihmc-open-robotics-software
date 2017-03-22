@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -13,7 +13,7 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    private LineSegment3D lineSegmentInShapeFrame = new LineSegment3D();
    private LineSegment3D lineSegment = new LineSegment3D();
 
-   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+   private final BoundingBox3D boundingBox = new BoundingBox3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
                                                                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private boolean boundingBoxNeedsUpdating = true;
    private RigidBodyTransform transform = new RigidBodyTransform();
@@ -91,7 +91,7 @@ public class CapsuleShapeDescription<T extends CapsuleShapeDescription<T>> imple
    }
 
    @Override
-   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox3D boundingBoxToPack)
    {
       if (boundingBoxNeedsUpdating)
       {

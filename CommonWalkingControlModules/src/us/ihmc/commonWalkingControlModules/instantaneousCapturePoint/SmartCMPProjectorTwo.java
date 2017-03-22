@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FramePoint2d;
@@ -20,7 +20,7 @@ public class SmartCMPProjectorTwo extends CMPProjector
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final BoundingBox2d tempBoundingBox = new BoundingBox2d();
+   private final BoundingBox2D tempBoundingBox = new BoundingBox2D();
    private final FramePoint2d intersection1 = new FramePoint2d();
    private final FramePoint2d intersection2 = new FramePoint2d();
    private final BooleanYoVariable cmpWasProjected = new BooleanYoVariable("CmpWasProjected", registry);

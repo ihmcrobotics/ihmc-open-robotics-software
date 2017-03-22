@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.hyperCubeTree.ConstantResolutionProvider;
 import us.ihmc.robotics.hyperCubeTree.HyperCubeLeaf;
@@ -31,7 +31,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
    // Constructors
    //================================================================================
 
-   public GroundOnlyQuadTree(BoundingBox2d bounds, double resolution, double heightThreshold, int maxNodes)
+   public GroundOnlyQuadTree(BoundingBox2D bounds, double resolution, double heightThreshold, int maxNodes)
    {
       this(toBounds(bounds), new ConstantResolutionProvider(resolution), heightThreshold, maxNodes);
    }
@@ -205,7 +205,7 @@ public class GroundOnlyQuadTree extends HyperCubeTree<GroundAirDescriptor, Groun
       return new OneDimensionalBounds[] { new OneDimensionalBounds(xMin, xMax), new OneDimensionalBounds(yMin, yMax) };
    }
    
-   private static OneDimensionalBounds[] toBounds(BoundingBox2d bounds)
+   private static OneDimensionalBounds[] toBounds(BoundingBox2D bounds)
    {
       return new OneDimensionalBounds[] { new OneDimensionalBounds(bounds.getMinPoint().getX(), bounds.getMaxPoint().getX()), new OneDimensionalBounds(bounds.getMinPoint().getY(), bounds.getMaxPoint().getY()) };
    }
