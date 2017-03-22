@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAc
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
@@ -63,7 +63,7 @@ public abstract class ControllerAPIDefinition
       commands.add(FootstepDataListCommand.class);
       commands.add(AdjustFootstepCommand.class);
       commands.add(GoHomeCommand.class);
-      commands.add(EndEffectorLoadBearingCommand.class);
+      commands.add(FootLoadBearingCommand.class);
       commands.add(ArmDesiredAccelerationsCommand.class);
       commands.add(AutomaticManipulationAbortCommand.class);
       commands.add(HandComplianceControlParametersCommand.class);

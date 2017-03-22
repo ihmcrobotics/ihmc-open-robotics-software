@@ -1,12 +1,12 @@
 package us.ihmc.valkyrie.controllerAPI;
 
-import us.ihmc.avatar.controllerAPI.EndToEndEndEffectorLoadBearingMessageTest;
+import us.ihmc.avatar.controllerAPI.EndToEndEndFootBearingMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
-public class ValkyrieEndToEndEndEffectorLoadBearingMessageTest extends EndToEndEndEffectorLoadBearingMessageTest
+public class ValkyrieEndToEndFootLoadBearingMessageTest extends EndToEndEndFootBearingMessageTest
 {
    private final ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, false);
 

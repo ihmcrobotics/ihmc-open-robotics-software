@@ -5,14 +5,13 @@ import java.util.ArrayList;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.EndEffectorLoadBearingBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.primitives.FootLoadBearingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidBehaviors.taskExecutor.FootTrajectoryTask;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -117,14 +116,14 @@ public class KickBehavior extends AbstractBehavior
 
       submitFootPosition(kickFoot, new FramePoint(ankleZUpFrames.get(kickFoot.getOppositeSide()), 0.0, kickFoot.negateIfRightSide(0.25), 0));
 
-      final EndEffectorLoadBearingBehavior footStateBehavior = new EndEffectorLoadBearingBehavior(communicationBridge);
+      final FootLoadBearingBehavior footStateBehavior = new FootLoadBearingBehavior(communicationBridge);
       pipeLine.submitSingleTaskStage(new BehaviorAction(footStateBehavior)
       {
 
          @Override
          protected void setBehaviorInput()
          {
-            EndEffectorLoadBearingMessage message = new EndEffectorLoadBearingMessage(kickFoot, EndEffector.FOOT, LoadBearingRequest.LOAD);
+            FootLoadBearingMessage message = new FootLoadBearingMessage(kickFoot, LoadBearingRequest.LOAD);
             footStateBehavior.setInput(message);
 
          }
@@ -201,7 +200,7 @@ public class KickBehavior extends AbstractBehavior
       }
    }
 
-  
+
 
    public boolean hasInputBeenSet()
    {
