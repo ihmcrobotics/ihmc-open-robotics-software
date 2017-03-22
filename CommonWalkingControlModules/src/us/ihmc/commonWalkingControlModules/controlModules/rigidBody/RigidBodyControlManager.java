@@ -65,6 +65,7 @@ public class RigidBodyControlManager
    private final BooleanYoVariable hasBeenInitialized;
 
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final BooleanYoVariable stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
@@ -79,6 +80,7 @@ public class RigidBodyControlManager
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
+      stateSwitched = new BooleanYoVariable(namePrefix + "StateSwitched", registry);
 
       OneDoFJoint[] jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
       jointsOriginal = jointsToControl;
@@ -158,7 +160,7 @@ public class RigidBodyControlManager
       if (stateMachine.getCurrentState().abortState())
          holdInJointspace();
 
-      stateMachine.checkTransitionConditions();
+      stateSwitched.set(stateMachine.checkTransitionConditions());
       stateMachine.doAction();
 
       positionControlHelper.update();
@@ -334,8 +336,12 @@ public class RigidBodyControlManager
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
       inverseDynamicsCommandList.addCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
 
-      if (loadBearingControlState != null && !isLoadBearing())
-         inverseDynamicsCommandList.addCommand(loadBearingControlState.getEmptyPlaneContactStateCommand());
+      if (stateSwitched.getBooleanValue())
+      {
+         RigidBodyControlState previousState = stateMachine.getPreviousState();
+         InverseDynamicsCommand<?> transitionOutOfStateCommand = previousState.getTransitionOutOfStateCommand();
+         inverseDynamicsCommandList.addCommand(transitionOutOfStateCommand);
+      }
 
       return inverseDynamicsCommandList;
    }

@@ -111,4 +111,9 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    {
       return true;
    }
+
+   public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
+   {
+      return null;
+   }
 }

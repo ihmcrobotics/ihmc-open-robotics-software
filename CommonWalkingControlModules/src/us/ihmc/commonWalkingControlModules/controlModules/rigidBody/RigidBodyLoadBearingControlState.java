@@ -259,17 +259,18 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       return inverseDynamicsCommandList;
    }
 
-   public InverseDynamicsCommand<?> getEmptyPlaneContactStateCommand()
-   {
-      planeContactStateCommand.clearContactPoints();
-      planeContactStateCommand.setId(NO_CONTACT_ID);
-      return planeContactStateCommand;
-   }
-
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return spatialFeedbackControlCommand;
+   }
+
+   @Override
+   public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
+   {
+      planeContactStateCommand.clearContactPoints();
+      planeContactStateCommand.setId(NO_CONTACT_ID);
+      return planeContactStateCommand;
    }
 
    @Override
