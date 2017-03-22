@@ -344,6 +344,16 @@ public class ScrewTestTools
       joint.setQd(RandomNumbers.nextDouble(random, min, max));
    }
 
+   public static void setRandomAcceleration(OneDoFJoint joint, Random random, double min, double max)
+   {
+      joint.setQdd(RandomNumbers.nextDouble(random, min, max));
+   }
+
+   public static void setRandomDesiredAcceleration(OneDoFJoint joint, Random random, double min, double max)
+   {
+      joint.setQddDesired(RandomNumbers.nextDouble(random, min, max));
+   }
+
    public static void setRandomDesiredAccelerations(OneDoFJoint[] joints, Random random)
    {
       for (OneDoFJoint joint : joints)
@@ -405,6 +415,22 @@ public class ScrewTestTools
       for (OneDoFJoint joint : joints)
       {
          joint.setQdd(random.nextDouble());
+      }
+   }
+
+   public static void setRandomAccelerations(Iterable<? extends OneDoFJoint> joints, Random random, double min, double max)
+   {
+      for (OneDoFJoint joint : joints)
+      {
+         setRandomAcceleration(joint, random, min, max);
+      }
+   }
+
+   public static void setRandomDesiredAccelerations(Iterable<? extends OneDoFJoint> joints, Random random, double min, double max)
+   {
+      for (OneDoFJoint joint : joints)
+      {
+         setRandomDesiredAcceleration(joint, random, min, max);
       }
    }
 
@@ -517,17 +543,48 @@ public class ScrewTestTools
       }
    }
 
-   public static void integrateAccelerations(SixDoFJoint rootJoint, double dt)
+   public static void integrateAccelerations(SixDoFJoint sixDoFJoint, double dt)
    {
       SpatialAccelerationVector deltaTwist = new SpatialAccelerationVector();
-      rootJoint.getJointAcceleration(deltaTwist);
+      sixDoFJoint.getJointAcceleration(deltaTwist);
       deltaTwist.scale(dt);
 
       Twist rootJointTwist = new Twist();
-      rootJoint.getJointTwist(rootJointTwist);
+      sixDoFJoint.getJointTwist(rootJointTwist);
       rootJointTwist.angularPart.add(deltaTwist.angularPart);
       rootJointTwist.linearPart.add(deltaTwist.linearPart);
-      rootJoint.setJointTwist(rootJointTwist);
+      sixDoFJoint.setJointTwist(rootJointTwist);
+   }
+
+   public static void doubleIntegrateAccelerations(SixDoFJoint sixDoFJoint, double dt)
+   {
+      SpatialAccelerationVector deltaTwist = new SpatialAccelerationVector();
+      sixDoFJoint.getJointAcceleration(deltaTwist);
+      deltaTwist.scale(dt);
+
+      Twist rootJointTwist = new Twist();
+      sixDoFJoint.getJointTwist(rootJointTwist);
+      rootJointTwist.angularPart.add(deltaTwist.angularPart);
+      rootJointTwist.linearPart.add(deltaTwist.linearPart);
+      sixDoFJoint.setJointTwist(rootJointTwist);
+
+
+      Twist deltaConfiguration = new Twist();
+      sixDoFJoint.getJointTwist(deltaConfiguration);
+
+      RotationMatrix rotation = new RotationMatrix();
+      sixDoFJoint.getRotation(rotation);
+      Vector3D position = new Vector3D();
+      sixDoFJoint.getTranslation(position);
+
+      deltaTwist.scale(0.5 * dt);
+      deltaConfiguration.angularPart.add(deltaTwist.getAngularPart());
+      deltaConfiguration.linearPart.add(deltaTwist.getLinearPart());
+
+      integrate(rotation, position, dt, deltaConfiguration);
+
+      sixDoFJoint.setRotation(rotation);
+      sixDoFJoint.setPosition(position);
    }
 
    public static void integrateAccelerations(Iterable<? extends OneDoFJoint> joints, double dt)
