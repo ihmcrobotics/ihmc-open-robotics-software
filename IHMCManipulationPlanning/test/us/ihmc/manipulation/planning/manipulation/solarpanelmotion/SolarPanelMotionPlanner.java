@@ -1,5 +1,7 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
+import java.util.ArrayList;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.robotics.geometry.transformables.Pose;
@@ -14,6 +16,7 @@ public class SolarPanelMotionPlanner
    // debug
    public Pose debugPoseOne;
    public Pose debugPoseTwo;
+   public ArrayList<Pose> debugPose = new ArrayList<Pose>();
    
    public SolarPanelMotionPlanner(SolarPanel panel)
    {
@@ -24,6 +27,7 @@ public class SolarPanelMotionPlanner
    {
       ReadyPose,
       LinearCleaningMotion,
+      LinearCleaningMotionWhole,
       RRTPlanningMotion
    }
    
@@ -51,15 +55,53 @@ public class SolarPanelMotionPlanner
          
          SolarPanelCleaningPose lineStart = new SolarPanelCleaningPose(readyPose);
          SolarPanelCleaningPose lineEnd = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1);
-         SolarPanelStraightPath linePath = new SolarPanelStraightPath(solarPanel, lineStart, lineEnd, 10);
+         SolarPanelStraightPath linePath = new SolarPanelStraightPath(solarPanel, motionTime, lineStart, lineEnd, 10);
+         SolarPanelStraightPathPlanner cleaningMotionPlanner = new SolarPanelStraightPathPlanner(linePath);
          
-         SolarPanelStraightPathPlanner cleaningMotionPlanner = new SolarPanelStraightPathPlanner(linePath, motionTime);
-         cleaningMotionPlanner.getOptimalRedundancyForSLIR();
-         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(cleaningMotionPlanner.getHandTrajectorySLIR());
-         wholeBodyTrajectoryMessage.setChestTrajectoryMessage(cleaningMotionPlanner.getChestTrajectorySLIR());
+         cleaningMotionPlanner.temporarySolution();
+         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(cleaningMotionPlanner.getHandTrajectoryTemporary());         
+         wholeBodyTrajectoryMessage.setChestTrajectoryMessage(cleaningMotionPlanner.getChestTrajectoryTemporary());
+         
          
          debugPoseOne = linePath.getStartPose().getPose();
          debugPoseTwo = linePath.getEndPose().getPose();
+         
+         break;
+         
+      case LinearCleaningMotionWhole:
+         
+         ArrayList<SolarPanelCleaningPose> tempPoses = new ArrayList<SolarPanelCleaningPose>();
+         
+         // ten
+         tempPoses.add(new SolarPanelCleaningPose(readyPose));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.1));
+         tempPoses.add(new SolarPanelCleaningPose(solarPanel, 0.1, 0.5, -0.1));
+         
+         ArrayList<SolarPanelStraightPath> paths = new ArrayList<SolarPanelStraightPath>();
+         
+         for(int i=0;i<tempPoses.size()-1;i++)
+         {
+            paths.add(new SolarPanelStraightPath(solarPanel, motionTime, tempPoses.get(i), tempPoses.get(i+1), 3));            
+         }
+         SolarPanelStraightPathPlanner cleaningMotionPlanner1 = new SolarPanelStraightPathPlanner(paths);
+         cleaningMotionPlanner1.temporarySolution();
+         
+         for(int i=0;i<tempPoses.size();i++)
+         {
+            debugPose.add(tempPoses.get(i).getPose());            
+         }
+                  
+         wholeBodyTrajectoryMessage.setHandTrajectoryMessage(cleaningMotionPlanner1.getHandTrajectoryTemporaryWhole());         
+         wholeBodyTrajectoryMessage.setChestTrajectoryMessage(cleaningMotionPlanner1.getChestTrajectoryTemporaryWhole());
+         
+         
          
          break;
          

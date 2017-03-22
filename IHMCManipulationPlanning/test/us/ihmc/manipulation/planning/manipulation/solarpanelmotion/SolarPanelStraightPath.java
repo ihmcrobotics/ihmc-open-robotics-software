@@ -1,21 +1,15 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
-import java.util.ArrayList;
-
-public class SolarPanelStraightPath
-{
-   private SolarPanel solarPanel;
+public class SolarPanelStraightPath extends SolarPanelAbstractPath
+{   
    private SolarPanelCleaningPose startPose;
    private SolarPanelCleaningPose endPose;
-   private int numberOfWayPoints;
-   private ArrayList<SolarPanelCleaningPose> poses = new ArrayList<SolarPanelCleaningPose>();
    
-   public SolarPanelStraightPath(SolarPanel solarPanel, SolarPanelCleaningPose startPose, SolarPanelCleaningPose endPose, int numberOfWayPoints)
+   public SolarPanelStraightPath(SolarPanel solarPanel, double motionTime, SolarPanelCleaningPose startPose, SolarPanelCleaningPose endPose, int numberOfWayPoints)
    {
-      this.solarPanel = solarPanel;
+      super(solarPanel, motionTime, numberOfWayPoints);      
       this.startPose = startPose;
       this.endPose = endPose;
-      this.numberOfWayPoints = numberOfWayPoints;    
       initPoses();
    }
    
@@ -45,9 +39,15 @@ public class SolarPanelStraightPath
    {
       return endPose;
    }
-   
-   public ArrayList<SolarPanelCleaningPose> getPoses()
+
+   @Override
+   public void getPiecewise()
    {
-      return poses;
+      
+      
    }
+   
+
+   
+
 }
