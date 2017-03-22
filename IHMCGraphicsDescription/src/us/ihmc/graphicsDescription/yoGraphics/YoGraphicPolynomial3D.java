@@ -714,12 +714,16 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       switch (getCurrentGraphicType())
       {
       case SHOW_AS_LINE:
+         if (globalScaleProvider != null)
+            segmentedLine3DMeshGenerator.setLineRadius(radius * globalScaleProvider.getValue());
          segmentedLine3DMeshGenerator.compute(intermediatePositions, intermediateVelocities);
          for (int i = 0; i < resolution - 1; i++)
             graphics3DAddMeshDataInstructions[i].setMesh(segmentedLine3DMeshGenerator.getMeshDataHolders()[i]);
          break;
 
       case SHOW_AS_POINTS:
+         if (globalScaleProvider != null)
+            pointCloud3DMeshGenerator.setPointRadius(radius * globalScaleProvider.getValue());
          pointCloud3DMeshGenerator.compute(intermediatePositions);
          for (int i = 0; i < resolution - 1; i++)
             graphics3DAddMeshDataInstructions[i].setMesh(pointCloud3DMeshGenerator.getMeshDataHolders()[i]);
