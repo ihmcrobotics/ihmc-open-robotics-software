@@ -1,5 +1,7 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
+import static java.util.Collections.*;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -166,6 +168,68 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
    private final BooleanYoVariable readerExists;
 
    private final AtomicBoolean dirtyGraphic = new AtomicBoolean(false);
+
+   /**
+    * Creates a new {@link YoGraphic} to display a 3D trajectory.
+    * <p>
+    * WARNING: The given {@link YoPolynomial3D}s are assumed to be expressed in world frame. If this
+    * is not the case, one of the constructors with {@link YoFramePoseUsingQuaternions} has to be
+    * used instead.
+    * </p>
+    * <p>
+    * The new {@link YoGraphic} is considered to be the {@link YoGraphicJob#WRITER}, i.e. updating
+    * the {@link YoVariable}s and updating the meshes only if ran locally (without any
+    * {@link RemoteYoGraphic}).
+    * </p>
+    * 
+    * @param name name of this {@link YoGraphic}, also used as a prefix for the internal
+    *           {@link YoVariable}s.
+    * @param yoPolynomial3D the {@link YoPolynomial3D} used by the trajectory to visualize. Not
+    *           modified.
+    * @param trajectoryTime the duration of the trajectory. Not modified.
+    * @param radius either the radius of the segmented line of the points.
+    * @param resolution defines the number of trajectory samples to use.
+    * @param radialResolution used to define the mesh resolution.
+    * @param registry the {@link YoVariableRegistry} to which internal {@link YoVariable}s will be
+    *           registered to. Modified.
+    * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
+    *            waypoint times.
+    */
+   public YoGraphicPolynomial3D(String name, YoPolynomial3D yoPolynomial3D, DoubleYoVariable trajectoryTime, double radius, int resolution,
+                                int radialResolution, YoVariableRegistry registry)
+   {
+      this(name, null, yoPolynomial3D, trajectoryTime, radius, resolution, radialResolution, registry);
+   }
+
+   /**
+    * Creates a new {@link YoGraphic} to display a 3D trajectory.
+    * <p>
+    * The new {@link YoGraphic} is considered to be the {@link YoGraphicJob#WRITER}, i.e. updating
+    * the {@link YoVariable}s and updating the meshes only if ran locally (without any
+    * {@link RemoteYoGraphic}).
+    * </p>
+    * 
+    * @param name name of this {@link YoGraphic}, also used as a prefix for the internal
+    *           {@link YoVariable}s.
+    * @param poseFromTrajectoryFrameToWorldFrame the pose used to keep track of the local coordinate
+    *           system in which the trajectory is computed. Can be {@code null}. Not modified.
+    * @param yoPolynomial3D the {@link YoPolynomial3D} used by the trajectory to visualize. Not
+    *           modified.
+    * @param trajectoryTime the duration of the trajectory. Not modified.
+    * @param radius either the radius of the segmented line of the points.
+    * @param resolution defines the number of trajectory samples to use.
+    * @param radialResolution used to define the mesh resolution.
+    * @param registry the {@link YoVariableRegistry} to which internal {@link YoVariable}s will be
+    *           registered to. Modified.
+    * @throws RuntimeException if the number of {@link YoPolynomial3D}s differs from the number of
+    *            waypoint times.
+    */
+   public YoGraphicPolynomial3D(String name, YoFramePoseUsingQuaternions poseFromTrajectoryFrameToWorldFrame, YoPolynomial3D yoPolynomial3D,
+                                DoubleYoVariable trajectoryTime, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
+   {
+      this(name, poseFromTrajectoryFrameToWorldFrame, singletonList(yoPolynomial3D), singletonList(trajectoryTime), radius, resolution, radialResolution,
+           registry);
+   }
 
    /**
     * Creates a new {@link YoGraphic} to display a 3D trajectory.
