@@ -67,7 +67,7 @@ public class VirtualModelControlOptimizationControlModule
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
-      WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
+      WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       groundContactForceOptimization = new GroundContactForceOptimizationControlModule(wrenchMatrixCalculator, contactablePlaneBodies,
             toolbox.getMomentumOptimizationSettings(), parentRegistry, toolbox.getYoGraphicsListRegistry());
 
