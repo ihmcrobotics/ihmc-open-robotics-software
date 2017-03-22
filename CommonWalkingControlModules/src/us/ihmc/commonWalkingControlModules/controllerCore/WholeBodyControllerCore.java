@@ -68,7 +68,7 @@ public class WholeBodyControllerCore
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
-      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = inverseDynamicsSolver.getDesiredCenterOfPressureDataHolder();
+      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
       controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints);
 
       parentRegistry.addChild(registry);
