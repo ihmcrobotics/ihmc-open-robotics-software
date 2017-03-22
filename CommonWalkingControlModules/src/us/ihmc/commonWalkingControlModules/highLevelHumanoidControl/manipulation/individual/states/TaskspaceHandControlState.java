@@ -79,8 +79,6 @@ public class TaskspaceHandControlState extends HandControlState
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
 
-//   private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap;
-
    private final BooleanYoVariable abortTaskspaceControlState;
    private final LongYoVariable lastCommandId;
 
@@ -94,8 +92,6 @@ public class TaskspaceHandControlState extends HandControlState
    {
       super(HandControlMode.TASKSPACE);
       this.gains = gains;
-//      this.baseForControlToReferenceFrameMap = baseForControlToReferenceFrameMap;
-
       name = namePrefix + FormattingTools.underscoredToCamelCase(getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
