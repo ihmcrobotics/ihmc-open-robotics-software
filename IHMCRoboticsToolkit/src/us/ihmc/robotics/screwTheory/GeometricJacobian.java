@@ -1,9 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -42,8 +38,6 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     * {@link ConvectiveTermCalculator} when the list of joints of the Jacobian is not continuous.
     */
    private final InverseDynamicsJoint[] jointPathFromBaseToEndEffector;
-   private final LinkedHashMap<InverseDynamicsJoint, List<Twist>> unitTwistMap;
-   private final List<Twist> unitTwistList;
    private final DenseMatrix64F jacobian;
    private ReferenceFrame jacobianFrame;
 
@@ -54,22 +48,39 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    private final long nameBasedHashCode;
 
    /**
-    * Creates a new Jacobian for the open loop chain described by the ordered keys of {@code unitTwists}.
+    * Creates the Jacobian for the kinematic chain described by the given joints. These joints have
+    * to be ordered and going downstream (the first joint has to be the closest joint to the root of
+    * the system and the last the farthest).
     * 
-    * @param unitTwists an ordered list of relative joint twists. 
-    *       The order in which the twists are ordered will correspond to the order of the columns in the Jacobian
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
-    * @param allowChangeFrame whether the feature {@link #changeFrame(ReferenceFrame)} will be available or not.
+    * @param joints the joints that this Jacobian considers.
+    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
+    *           to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
-   private GeometricJacobian(LinkedHashMap<InverseDynamicsJoint, List<Twist>> unitTwists, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
    {
-      this.joints = new InverseDynamicsJoint[unitTwists.size()];
-      unitTwists.keySet().toArray(joints);
-      this.unitTwistMap = unitTwists;
-      this.unitTwistList = extractUnitTwistList(unitTwists);
+      this(joints, jacobianFrame, true);
+   }
+
+   /**
+    * Creates the Jacobian for the kinematic chain described by the given joints. These joints have
+    * to be ordered and going downstream (the first joint has to be the closest joint to the root of
+    * the system and the last the farthest).
+    * 
+    * @param joints the joints that this Jacobian considers.
+    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
+    *           to the base frame will be expressed.
+    * @param allowChangeFrame whether the feature {@link #changeFrame(ReferenceFrame)} will be
+    *           available or not.
+    * @throws RuntimeException if the joint ordering is incorrect.
+    */
+   public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   {
+      checkJointOrder(joints);
+      this.joints = new InverseDynamicsJoint[joints.length];
+      System.arraycopy(joints, 0, this.joints, 0, joints.length);
       this.jacobianFrame = jacobianFrame;
-      this.jacobian = createJacobianMatrix(this.unitTwistMap);
+      this.jacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, ScrewTools.computeDegreesOfFreedom(joints));
       this.jointPathFromBaseToEndEffector = ScrewTools.createJointPath(getBase(), getEndEffector());
       this.allowChangeFrame = allowChangeFrame;
 
@@ -83,14 +94,16 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
     * </p>
     * 
     * @param joint the joint for which the motion subspace is to be created.
-    * @param unitTwists the list of unitary twists representing the degrees of freedom of {@code joint}.
-    * For instance, the unit twist of a {@link RevoluteJoint} around the y-axis is: T<sub>u</sub> = [0 1 0 0 0 0]<sup>T</sup>.
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
+    * @param unitTwists the list of unitary twists representing the degrees of freedom of
+    *           {@code joint}. For instance, the unit twist of a {@link RevoluteJoint} around the
+    *           y-axis is: T<sub>u</sub> = [0 1 0 0 0 0]<sup>T</sup>.
+    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
+    *           to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
-   public GeometricJacobian(InverseDynamicsJoint joint, List<Twist> unitTwists, ReferenceFrame jacobianFrame)
+   public GeometricJacobian(InverseDynamicsJoint joint, ReferenceFrame jacobianFrame)
    {
-      this(createUnitTwistMap(joint, unitTwists), jacobianFrame, true);
+      this(new InverseDynamicsJoint[] {joint}, jacobianFrame, true);
    }
 
    /**
@@ -109,47 +122,6 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Creates the Jacobian for the kinematic chain described by the given joints.
-    * These joints have to be ordered and going downstream (the first joint has to be the closest joint
-    * to the root of the system and the last the farthest).
-    * 
-    * @param joints the joints that this Jacobian considers.
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
-    * @throws RuntimeException if the joint ordering is incorrect.
-    */
-   public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
-   {
-      this(extractTwistsFromJoints(joints), jacobianFrame, true);
-   }
-
-   /**
-    * Creates the Jacobian for the kinematic chain described by the given joints.
-    * These joints have to be ordered and going downstream (the first joint has to be the closest joint
-    * to the root of the system and the last the farthest).
-    * 
-    * @param joints the joints that this Jacobian considers.
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
-    * @param allowChangeFrame whether the feature {@link #changeFrame(ReferenceFrame)} will be available or not.
-    * @throws RuntimeException if the joint ordering is incorrect.
-    */
-   public GeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
-   {
-      this(extractTwistsFromJoints(joints), jacobianFrame, allowChangeFrame);
-   }
-
-   /**
-    * Creates a new Jacobian representing one joint.
-    * 
-    * @param joint the joint that this Jacobian considers.
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
-    * @throws RuntimeException if the joint ordering is incorrect.
-    */
-   public GeometricJacobian(InverseDynamicsJoint joint, ReferenceFrame jacobianFrame)
-   {
-      this(joint, joint.getMotionSubspace().getAllUnitTwists(), jacobianFrame);
-   }
-
-   /**
     * Temporary twist used for intermediate garbage free operations. To use only in the method
     * {@link #compute()}.
     */
@@ -161,13 +133,17 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    public void compute()
    {
       int column = 0;
-      for (int i = 0; i < unitTwistList.size(); i++)
+      for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
-         Twist twist = unitTwistList.get(i);
-         tempTwist.set(twist);
-         tempTwist.changeFrame(jacobianFrame);
-         tempTwist.getMatrix(tempMatrix, 0);
-         CommonOps.extract(tempMatrix, 0, tempMatrix.getNumRows(), 0, tempMatrix.getNumCols(), jacobian, 0, column++);
+         InverseDynamicsJoint joint = joints[jointIndex];
+
+         for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
+         {
+            joint.getUnitTwist(dofIndex, tempTwist);
+            tempTwist.changeFrame(jacobianFrame);
+            tempTwist.getMatrix(tempMatrix, 0);
+            CommonOps.extract(tempMatrix, 0, tempMatrix.getNumRows(), 0, tempMatrix.getNumCols(), jacobian, 0, column++);
+         }
       }
    }
 
@@ -352,26 +328,6 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       return getEndEffector().getBodyFixedFrame();
    }
 
-   // default access for efficiency
-   List<Twist> getAllUnitTwists()
-   {
-      return unitTwistList;
-   }
-
-   private static LinkedHashMap<InverseDynamicsJoint, List<Twist>> extractTwistsFromJoints(InverseDynamicsJoint[] joints)
-   {
-      checkJointOrder(joints);
-
-      LinkedHashMap<InverseDynamicsJoint, List<Twist>> ret = new LinkedHashMap<InverseDynamicsJoint, List<Twist>>();
-      for (int i = 0; i < joints.length; i++)
-      {
-         InverseDynamicsJoint joint = joints[i];
-         ret.put(joint, joint.getMotionSubspace().unitTwistMap.get(joint));
-      }
-
-      return ret;
-   }
-
    private static void checkJointOrder(InverseDynamicsJoint[] joints)
    {
       for (int i = 1; i < joints.length; i++)
@@ -381,39 +337,6 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
          if (ScrewTools.isAncestor(previousJoint.getPredecessor(), joint.getPredecessor()))
             throw new RuntimeException("joints must be in order from ancestor to descendant");
       }
-   }
-
-   private List<Twist> extractUnitTwistList(LinkedHashMap<InverseDynamicsJoint, List<Twist>> unitTwistMap)
-   {
-      int size = 0;
-      for (List<Twist> twistList : unitTwistMap.values())
-      {
-         size += twistList.size();
-      }
-
-      List<Twist> ret = new ArrayList<Twist>(size);
-      for (List<Twist> twistList : unitTwistMap.values())
-      {
-         for (int i = 0; i < twistList.size(); i++)
-         {
-            ret.add(twistList.get(i));
-         }
-      }
-
-      return ret;
-   }
-
-   private static LinkedHashMap<InverseDynamicsJoint, List<Twist>> createUnitTwistMap(InverseDynamicsJoint joint, List<Twist> unitTwists)
-   {
-      LinkedHashMap<InverseDynamicsJoint, List<Twist>> ret = new LinkedHashMap<InverseDynamicsJoint, List<Twist>>(1);
-      ret.put(joint, unitTwists);
-
-      return ret;
-   }
-
-   private static DenseMatrix64F createJacobianMatrix(LinkedHashMap<InverseDynamicsJoint, List<Twist>> unitTwists)
-   {
-      return new DenseMatrix64F(SpatialMotionVector.SIZE, ScrewTools.computeDegreesOfFreedom(unitTwists.keySet()));
    }
 
    /**
