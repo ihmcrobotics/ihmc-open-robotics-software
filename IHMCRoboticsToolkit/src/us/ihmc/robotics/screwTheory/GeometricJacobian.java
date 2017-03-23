@@ -141,8 +141,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
          {
             joint.getUnitTwist(dofIndex, tempTwist);
             tempTwist.changeFrame(jacobianFrame);
-            tempTwist.getMatrix(tempMatrix, 0);
-            CommonOps.extract(tempMatrix, 0, tempMatrix.getNumRows(), 0, tempMatrix.getNumCols(), jacobian, 0, column++);
+            tempTwist.getMatrix(jacobian, 0, column++);
          }
       }
    }
