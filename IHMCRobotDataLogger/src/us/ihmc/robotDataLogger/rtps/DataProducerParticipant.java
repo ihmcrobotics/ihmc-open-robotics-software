@@ -39,7 +39,7 @@ import us.ihmc.tools.thread.ThreadTools;
 /**
  * This class implements all communication for a data producer inside a DDS logging network
  * 
- * @author jesper
+ * @author Jesper Smith
  *
  */
 public class DataProducerParticipant
@@ -97,7 +97,7 @@ public class DataProducerParticipant
       this.name = name;
       
       domain.setLogLevel(LogLevel.WARNING);
-      ParticipantAttributes<?> att = domain.createDefaultParticipantAttributes(LogParticipantSettings.domain, name);
+      ParticipantAttributes att = domain.createDefaultParticipantAttributes(LogParticipantSettings.domain, name);
       participant = domain.createParticipant(att, null);
 
       guidString = LogParticipantTools.createGuidString(participant.getGuid());
@@ -175,13 +175,13 @@ public class DataProducerParticipant
 
    private <T> void publishPersistentData(String partition, String topicName, TopicDataType<T> topicDataType, T data) throws IOException
    {
-      PublisherAttributes<?, ?> publisherAttributes = domain.createDefaultPublisherAttributes(participant, topicDataType, topicName, partition);
+      PublisherAttributes publisherAttributes = domain.createDefaultPublisherAttributes(participant, topicDataType, topicName, ReliabilityKind.RELIABLE, partition);
       
       publisherAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
       publisherAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setKind(HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setDepth(1);
-      PublisherAttributes<?, ?> att = publisherAttributes;
+      PublisherAttributes att = publisherAttributes;
       Publisher publisher = domain.createPublisher(participant, att, null);
       publisher.write(data);
    }
@@ -289,7 +289,7 @@ public class DataProducerParticipant
       {
          VariableChangeRequestPubSubType variableChangeRequestPubSubType = new VariableChangeRequestPubSubType();
          domain.registerType(participant, variableChangeRequestPubSubType);
-         SubscriberAttributes<?, ?> subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, variableChangeRequestPubSubType, LogParticipantSettings.variableChangeTopic, partition);
+         SubscriberAttributes subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, variableChangeRequestPubSubType, LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE, partition);
          subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
          domain.createSubscriber(participant, subscriberAttributes, new VariableChangeSubscriberListener());
 
