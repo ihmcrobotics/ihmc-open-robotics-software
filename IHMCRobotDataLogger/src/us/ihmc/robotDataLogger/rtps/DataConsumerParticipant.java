@@ -12,6 +12,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.attributes.DurabilityKind;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
+import us.ihmc.pubsub.attributes.PublisherAttributes;
 import us.ihmc.pubsub.attributes.ReliabilityKind;
 import us.ihmc.pubsub.attributes.SubscriberAttributes;
 import us.ihmc.pubsub.common.DiscoveryStatus;
@@ -22,6 +23,7 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.participant.ParticipantDiscoveryInfo;
 import us.ihmc.pubsub.participant.ParticipantListener;
+import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
@@ -29,7 +31,8 @@ import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
-import us.ihmc.tools.thread.ThreadTools;
+import us.ihmc.robotDataLogger.VariableChangeRequest;
+import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 
 /**
  * This class implements all communication for a data consumer inside a DDS logging network
@@ -45,6 +48,7 @@ public class DataConsumerParticipant
    private final Participant participant;
    private LogAnnouncementListener logAnnouncementListener;
    private final HashMap<GuidPrefix, Announcement> announcements = new HashMap<>();
+   private Publisher variableChangeDataPublisher = null;
 
    private class LeaveListener implements ParticipantListener
    {
@@ -119,7 +123,7 @@ public class DataConsumerParticipant
    public DataConsumerParticipant(String name) throws IOException
    {
       domain.setLogLevel(LogLevel.WARNING);
-      ParticipantAttributes<?> att = domain.createDefaultParticipantAttributes(LogParticipantSettings.domain, name);
+      ParticipantAttributes att = domain.createDefaultParticipantAttributes(LogParticipantSettings.domain, name);
       participant = domain.createParticipant(att, new LeaveListener());
    }
 
@@ -144,8 +148,7 @@ public class DataConsumerParticipant
       this.logAnnouncementListener = listener;
 
       AnnouncementPubSubType announcementPubSubType = new AnnouncementPubSubType();
-      SubscriberAttributes<?, ?> subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, announcementPubSubType, LogParticipantSettings.annoucementTopic, LogParticipantSettings.partition);
-      subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
+      SubscriberAttributes subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, announcementPubSubType, LogParticipantSettings.annoucementTopic, ReliabilityKind.RELIABLE, LogParticipantSettings.partition);
       subscriberAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       domain.createSubscriber(participant, subscriberAttributes, new AnnouncementListener());
 
@@ -153,7 +156,7 @@ public class DataConsumerParticipant
 
    private <T> T getData(T data, TopicDataType<T> topicDataType, Announcement announcement, String topic) throws IOException
    {
-      SubscriberAttributes<?, ?> subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, topicDataType, topic, getPartition(announcement.getIdentifierAsString()));
+      SubscriberAttributes subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, topicDataType, topic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
       subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
       subscriberAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       Subscriber subscriber = domain.createSubscriber(participant, subscriberAttributes, null);
@@ -248,7 +251,40 @@ public class DataConsumerParticipant
       HandshakePubSubType handshakePubSubType = new HandshakePubSubType();
       return getData(new Handshake(), handshakePubSubType, announcement, LogParticipantSettings.handshakeTopic);
    }
+   
+   /**
+    * Create a variable change producer 
+    * 
+    * @param announcement
+    * @throws IOException if the variable change producer is already created or cannot be created
+    */
+   public void createVariableChangeProducer(Announcement announcement) throws IOException
+   {
+      if(variableChangeDataPublisher != null)
+      {
+         throw new RuntimeException("Variable change producer is already created");
+      }
 
+      VariableChangeRequestPubSubType topicDataType = new VariableChangeRequestPubSubType();
+      PublisherAttributes attributes = domain.createDefaultPublisherAttributes(participant, topicDataType, LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
+      variableChangeDataPublisher = domain.createPublisher(participant, attributes, null);
+   }
+   
+   
+   public void writeVariableChangeRequest(int variableID, double requestedValue) throws IOException
+   {
+      if(variableChangeDataPublisher == null)
+      {
+         throw new RuntimeException("No variable change data publisher created");
+      }
+      
+      VariableChangeRequest request = new VariableChangeRequest();
+      request.setVariableID(variableID);
+      request.setRequestedValue(requestedValue);
+      variableChangeDataPublisher.write(request);
+   }
+
+   
 
    public static void main(String[] args) throws IOException, InterruptedException
    {
@@ -280,14 +316,13 @@ public class DataConsumerParticipant
       });
 
       Announcement received;
-      while ((received = queue.take()) != null)
+      if((received = queue.take()) != null)
       {
          System.out.println(dataConsumerParticipant.getHandshake(received));
          System.out.println(dataConsumerParticipant.getModelFile(received).length);
          System.out.println(dataConsumerParticipant.getResourceZip(received).length);
       }
 
-      ThreadTools.sleepForever();
    }
 
 }
