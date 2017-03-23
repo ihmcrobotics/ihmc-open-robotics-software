@@ -32,7 +32,6 @@ public class ReferenceFrameHashCodeResolver
    public ReferenceFrameHashCodeResolver(FullRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
       checkAndAddReferenceFrame(ReferenceFrame.getWorldFrame());
-
       
       try
       {
@@ -63,7 +62,12 @@ public class ReferenceFrameHashCodeResolver
       {
          for(long key : referenceFrameDefaultHashIds.keys())
          {
-            checkAndAddReferenceFrame(referenceFrameDefaultHashIds.get(key), key);
+            ReferenceFrame referenceFrame = referenceFrameDefaultHashIds.get(key);
+            if(referenceFrame != null)
+            {
+               checkAndAddReferenceFrame(referenceFrame);
+            }
+            checkAndAddReferenceFrame(referenceFrame, key);
          }
       }
    }
@@ -86,14 +90,20 @@ public class ReferenceFrameHashCodeResolver
             if (method.getParameterCount() == 0)
             {
                ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj);
-               checkAndAddReferenceFrame(referenceFrame);
+               if(referenceFrame != null)
+               {
+                  checkAndAddReferenceFrame(referenceFrame);
+               }
             }
             else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == RobotSide.class)
             {
                for (RobotSide robotSide : RobotSide.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj, robotSide);
-                  checkAndAddReferenceFrame(referenceFrame);
+                  if(referenceFrame != null)
+                  {
+                     checkAndAddReferenceFrame(referenceFrame);
+                  }
                }
             }
             else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == RobotQuadrant.class)
@@ -101,7 +111,10 @@ public class ReferenceFrameHashCodeResolver
                for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj, robotQuadrant);
-                  checkAndAddReferenceFrame(referenceFrame);
+                  if(referenceFrame != null)
+                  {
+                     checkAndAddReferenceFrame(referenceFrame);
+                  }
                }
             }
             else if (method.getParameterCount() == 1 && method.getParameterTypes()[0] == RobotSextant.class)
@@ -109,7 +122,10 @@ public class ReferenceFrameHashCodeResolver
                for (RobotSextant robotSextant : RobotSextant.values)
                {
                   ReferenceFrame referenceFrame = (ReferenceFrame) method.invoke(obj, robotSextant);
-                  checkAndAddReferenceFrame(referenceFrame);
+                  if(referenceFrame != null)
+                  {
+                     checkAndAddReferenceFrame(referenceFrame);
+                  }
                }
             }
          }
