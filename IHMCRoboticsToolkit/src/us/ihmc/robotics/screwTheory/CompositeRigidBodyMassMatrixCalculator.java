@@ -61,30 +61,29 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
          RigidBody currentBody = allRigidBodiesInOrder[i];
          InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
          CompositeRigidBodyInertia currentBodyInertia = crbInertiasInOrder[i];
-         GeometricJacobian motionSubspace = parentJoint.getMotionSubspace();
          
-         setUnitMomenta(currentBodyInertia, motionSubspace);
-         setDiagonalTerm(i, motionSubspace);
+         setUnitMomenta(currentBodyInertia, parentJoint);
+         setDiagonalTerm(i, parentJoint);
          setOffDiagonalTerms(i);
          buildCrbInertia(i);
       }
    }
 
-   private void setUnitMomenta(CompositeRigidBodyInertia currentBodyInertia, GeometricJacobian motionSubspace)
+   private void setUnitMomenta(CompositeRigidBodyInertia currentBodyInertia, InverseDynamicsJoint joint)
    {
-      nMomentaInUse = motionSubspace.getNumberOfColumns();
+      nMomentaInUse = joint.getDegreesOfFreedom();
 
       for (int i = 0; i < nMomentaInUse; i++)
       {
-         tempTwist.set(motionSubspace.getAllUnitTwists().get(i));
+         joint.getUnitTwist(i, tempTwist);
          tempTwist.changeFrame(currentBodyInertia.getExpressedInFrame());
          unitMomenta[i].compute(currentBodyInertia, tempTwist);
       }
    }
 
-   private void setDiagonalTerm(int i, GeometricJacobian motionSubspace)
+   private void setDiagonalTerm(int i, InverseDynamicsJoint joint)
    {
-      setMassMatrixPart(i, i, motionSubspace);
+      setMassMatrixPart(i, i, joint);
    }
    
    private void setOffDiagonalTerms(int i)
@@ -96,8 +95,7 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
          ReferenceFrame parentFrame = allRigidBodiesInOrder[parentIndex].getInertia().getExpressedInFrame();
          changeFrameOfMomenta(parentFrame);
          j = parentIndex;
-         GeometricJacobian motionSubspace = allRigidBodiesInOrder[j].getParentJoint().getMotionSubspace();
-         setMassMatrixPart(i, j, motionSubspace);
+         setMassMatrixPart(i, j, allRigidBodiesInOrder[j].getParentJoint());
       }
    }
 
@@ -133,7 +131,9 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
       }
    }
 
-   private void setMassMatrixPart(int i, int j, GeometricJacobian motionSubspace)
+   private final Twist tempUnitTwist = new Twist();
+
+   private void setMassMatrixPart(int i, int j, InverseDynamicsJoint joint)
    {
       int rowStart = massMatrixIndices[i];
       int colStart = massMatrixIndices[j];
@@ -143,11 +143,11 @@ public class CompositeRigidBodyMassMatrixCalculator implements MassMatrixCalcula
          Momentum unitMomentum = unitMomenta[m];
          int massMatrixRow = rowStart + m;
 
-         for (int n = 0; n < motionSubspace.getNumberOfColumns(); n++)
+         for (int n = 0; n < joint.getDegreesOfFreedom(); n++)
          {
-            Twist unitRelativeTwist = motionSubspace.getAllUnitTwists().get(n);
-            unitRelativeTwist.changeFrame(unitMomentum.getExpressedInFrame());
-            double entry = unitMomentum.computeKineticCoEnergy(unitRelativeTwist);
+            joint.getUnitTwist(n, tempUnitTwist);
+            tempUnitTwist.changeFrame(unitMomentum.getExpressedInFrame());
+            double entry = unitMomentum.computeKineticCoEnergy(tempUnitTwist);
             int massMatrixCol = colStart + n;
             setMassMatrixSymmetrically(massMatrixRow, massMatrixCol, entry);
          }
