@@ -57,7 +57,6 @@ public class WrenchMatrixCalculator
    private final DenseMatrix64F desiredCoPWeightMatrix;
    private final DenseMatrix64F copRateWeightMatrix;
 
-   private final ReferenceFrame centerOfMassFrame;
    private final Map<RigidBody, Wrench> wrenchesFromRho = new HashMap<>();
 
    private final List<RigidBody> rigidBodies = new ArrayList<>();
@@ -97,8 +96,6 @@ public class WrenchMatrixCalculator
 
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
-
-      this.centerOfMassFrame = centerOfMassFrame;
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {

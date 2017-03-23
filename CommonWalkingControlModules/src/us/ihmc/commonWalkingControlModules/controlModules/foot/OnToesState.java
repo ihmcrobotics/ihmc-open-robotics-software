@@ -127,7 +127,7 @@ public class OnToesState extends AbstractFootControlState
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
 
-      twistCalculator.getRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
+      twistCalculator.getRelativeTwist(rootBody, contactableFoot.getRigidBody(), footTwist);
       footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
 
       toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
