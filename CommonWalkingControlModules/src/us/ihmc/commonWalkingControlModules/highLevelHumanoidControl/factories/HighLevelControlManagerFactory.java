@@ -117,7 +117,7 @@ public class HighLevelControlManagerFactory
    }
 
    public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBody bodyToControl, RigidBody baseBody, ReferenceFrame controlFrame,
-         ReferenceFrame baseFrame)
+         ReferenceFrame baseFrame, Collection<ReferenceFrame> trajectoryFrames)
    {
       if (bodyToControl == null)
          return null;
@@ -135,12 +135,6 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
 
-      // get trajectory reference frames
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      ReferenceFrameHashCodeResolver referenceFrameResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
-      Collection<ReferenceFrame> trajectoryFrames = referenceFrameResolver.getAllReferenceFrames();
-      
       // Gains
       Map<String, YoPIDGains> jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry);
       YoOrientationPIDGainsInterface taskspaceOrientationGains = walkingControllerParameters.getOrCreateTaskspaceOrientationControlGains(registry).get(bodyName);
