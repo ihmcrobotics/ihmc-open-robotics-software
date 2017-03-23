@@ -12,26 +12,24 @@ import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * This class provides a simple tool to compute the Jacobian matrix
- * of a kinematic chain composed of {@link InverseDynamicsJoint}s.
+ * This class provides a simple tool to compute the Jacobian matrix of a kinematic chain composed of
+ * {@link InverseDynamicsJoint}s.
  * <p>
  * To use this tool, one can create an object by using the constructor
- * {@link #GeometricJacobian(RigidBody, RigidBody, ReferenceFrame)}.
- * The Jacobian computed will include all the joints from {@code ancestor}
- * to {@code descendant} and will be expressed in {@code jacobianFrame}.
- * Then the method {@link #compute()} is to be called every time the 
- * joint configuration has changed and Jacobian matrix is to be updated.
- * Finally several options are offered on how to use the Jacobian matrix:
+ * {@link #GeometricJacobian(RigidBody, RigidBody, ReferenceFrame)}. The Jacobian computed will
+ * include all the joints from {@code ancestor} to {@code descendant} and will be expressed in
+ * {@code jacobianFrame}. Then the method {@link #compute()} is to be called every time the joint
+ * configuration has changed and Jacobian matrix is to be updated. Finally several options are
+ * offered on how to use the Jacobian matrix:
  * <ul>
- *    <li> {@link #getJacobianMatrix()} can be used to get the reference to
- *     the raw matrix can be used to then perform external operations with it
- *     using the third-party library EJML.
- *    <li> {@link #computeJointTorques(Wrench, DenseMatrix64F)} computes
- *     the joint torques necessary to achieve a given {@code Wrench} at the
- *     end-effector or descendant of this Jacobian. It uses the relation:
- *     <br> &tau; = J<sup>T</sup> * W </br>
- *     with &tau; being the joint torques, J the Jacobian matrix, and
- *     W the wrench to exert at the end-effector.
+ * <li>{@link #getJacobianMatrix()} can be used to get the reference to the raw matrix can be used
+ * to then perform external operations with it using the third-party library EJML.
+ * <li>{@link #computeJointTorques(Wrench, DenseMatrix64F)} computes the joint torques necessary to
+ * achieve a given {@code Wrench} at the end-effector or descendant of this Jacobian. It uses the
+ * relation: <br>
+ * &tau; = J<sup>T</sup> * W </br>
+ * with &tau; being the joint torques, J the Jacobian matrix, and W the wrench to exert at the
+ * end-effector.
  * </ul>
  * </p>
  */
@@ -40,9 +38,8 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    /** Array of the joints to be considered by this Jacobian. */
    private final InverseDynamicsJoint[] joints;
    /**
-    *  Array of ALL the joints from the base to the end effector of this Jacobian.
-    *  This is useful in {@link ConvectiveTermCalculator} when the list of joints
-    *  of the Jacobian is not continuous.
+    * Array of ALL the joints from the base to the end effector of this Jacobian. This is useful in
+    * {@link ConvectiveTermCalculator} when the list of joints of the Jacobian is not continuous.
     */
    private final InverseDynamicsJoint[] jointPathFromBaseToEndEffector;
    private final LinkedHashMap<InverseDynamicsJoint, List<Twist>> unitTwistMap;
@@ -51,7 +48,6 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    private ReferenceFrame jacobianFrame;
 
    // Temporary variables
-   private final Twist tempTwist = new Twist();
    private final DenseMatrix64F tempMatrix = new DenseMatrix64F(Twist.SIZE, 1);
 
    private final boolean allowChangeFrame;
@@ -98,11 +94,13 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Creates a new Jacobian for the kinematic starting from {@code ancestor} and ending at {@code descendant}.
+    * Creates a new Jacobian for the kinematic starting from {@code ancestor} and ending at
+    * {@code descendant}.
     * 
     * @param ancestor the predecessor of the first joint considered by this Jacobian.
     * @param descendant the successor of the last joint considered by this Jacobian.
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
+    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
+    *           to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
    public GeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
@@ -152,6 +150,12 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the method
+    * {@link #compute()}.
+    */
+   private final Twist tempTwist = new Twist();
+
+   /**
     * Computes the Jacobian.
     */
    public void compute()
@@ -168,8 +172,13 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Changes the frame in which the resulting twist of the end effector with respect to the base frame will be expressed.
-    * The boolean {@code allowChangeFrame} has to be initialize to {@code true} at construction time.
+    * Changes the frame in which the resulting twist of the end effector with respect to the base
+    * frame will be expressed. The boolean {@code allowChangeFrame} has to be initialize to
+    * {@code true} at construction time.
+    * <p>
+    * WARNING: This method only changes the current frame without updating the Jacobian matrix. The
+    * method {@link #compute()} after having changed the frame.
+    * </p>
     * 
     * @param jacobianFrame the new frame of this Jacobian.
     * @throws RuntimeException if this feature is not enabled.
@@ -185,10 +194,11 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    /**
     * Computes and packs the twist that corresponds to the given joint velocity vector.
     * 
-    * @param jointVelocities the joint velocity column vector.
-    *       The vector should have the same ordering as the unit twists of the ordered joint list of this Jacobian
-    *        that were passed in during construction.
-    * @return the twist of the end effector with respect to the base, expressed in the jacobianFrame.
+    * @param jointVelocities the joint velocity column vector. The vector should have the same
+    *           ordering as the unit twists of the ordered joint list of this Jacobian that were
+    *           passed in during construction.
+    * @return the twist of the end effector with respect to the base, expressed in the
+    *         jacobianFrame.
     */
    public void getTwist(DenseMatrix64F jointVelocities, Twist twistToPack)
    {
@@ -199,13 +209,13 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    /**
     * Computes and returns the joint torque vector that corresponds to the given wrench.
     * 
-    * @param wrench the resulting wrench at the end effector.
-    *       The wrench should be expressed in {@code jacobianFrame} and the wrench's {@code bodyFrame}
-    *        should be the body fixed frame of the end-effector.
+    * @param wrench the resulting wrench at the end effector. The wrench should be expressed in
+    *           {@code jacobianFrame} and the wrench's {@code bodyFrame} should be the body fixed
+    *           frame of the end-effector.
     * @return joint torques that result in the given wrench as a column vector.
     * @throws ReferenceFrameMismatchException if the given wrench
-    *  {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
-    *  {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
+    *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
+    *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
    public DenseMatrix64F computeJointTorques(Wrench wrench)
    {
@@ -217,11 +227,12 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    /**
     * Computes and packs the joint torque vector that corresponds to the given wrench.
     * 
-    * @param wrench the resulting wrench at the end effector.
-    *       The wrench should be expressed in {@code jacobianFrame} and the wrench's {@code bodyFrame}
-    *        should be the body fixed frame of the end-effector.
-    * @throws ReferenceFrameMismatchException if the given wrench {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
-    *  {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
+    * @param wrench the resulting wrench at the end effector. The wrench should be expressed in
+    *           {@code jacobianFrame} and the wrench's {@code bodyFrame} should be the body fixed
+    *           frame of the end-effector.
+    * @throws ReferenceFrameMismatchException if the given wrench
+    *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
+    *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
    public void computeJointTorques(Wrench wrench, DenseMatrix64F jointTorquesToPack)
    {
@@ -236,7 +247,8 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Returns a reference to the underlying {@code DenseMatrix64F} object. Does not recompute the Jacobian.
+    * Returns a reference to the underlying {@code DenseMatrix64F} object. Does not recompute the
+    * Jacobian.
     * 
     * @return a reference to the underlying {@code DenseMatrix64F} object
     */
@@ -287,15 +299,18 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       return joints;
    }
 
-   /** @return a {@code Array} of joints describing a continuous path from the base to the end effector of this Jacobian. */
+   /**
+    * @return a {@code Array} of joints describing a continuous path from the base to the end
+    *         effector of this Jacobian.
+    */
    public InverseDynamicsJoint[] getJointPathFromBaseToEndEffector()
    {
       return jointPathFromBaseToEndEffector;
    }
 
    /**
-    * Returns the base {@code RigidBody} of this Jacobian.
-    * The base is the predecessor of the first joint that this Jacobian considers.
+    * Returns the base {@code RigidBody} of this Jacobian. The base is the predecessor of the first
+    * joint that this Jacobian considers.
     * 
     * @return the base of this Jacobian.
     */
@@ -305,8 +320,8 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Returns the end-effector {@code RigidBody} of this Jacobian.
-    * The end-effector is the successor of the last joint this Jacobian considers.
+    * Returns the end-effector {@code RigidBody} of this Jacobian. The end-effector is the successor
+    * of the last joint this Jacobian considers.
     * 
     * @return the end-effector of this jacobian.
     */
@@ -316,8 +331,8 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Returns the body fixed frame of the base {@code RigidBody} of this Jacobian.
-    * The base is the predecessor of the first joint that this Jacobian considers.
+    * Returns the body fixed frame of the base {@code RigidBody} of this Jacobian. The base is the
+    * predecessor of the first joint that this Jacobian considers.
     * 
     * @return the body fixed frame of the base.
     */
@@ -327,8 +342,8 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Returns the body fixed frame of the end-effector {@code RigidBody} of this Jacobian.
-    * The end-effector is the successor of the last joint this Jacobian considers.
+    * Returns the body fixed frame of the end-effector {@code RigidBody} of this Jacobian. The
+    * end-effector is the successor of the last joint this Jacobian considers.
     * 
     * @return the body fixed frame of the end-effector.
     */
@@ -402,9 +417,9 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
    }
 
    /**
-    * Creates a descriptive {@code String} for this Jacobian containing
-    * information such as the {@code jacobianFrame}, the list of the joint names,
-    * and the current value of the Jacobian matrix.
+    * Creates a descriptive {@code String} for this Jacobian containing information such as the
+    * {@code jacobianFrame}, the list of the joint names, and the current value of the Jacobian
+    * matrix.
     * 
     * @return a descriptive {@code String} for this Jacobian.
     */
@@ -414,7 +429,7 @@ public class GeometricJacobian implements NameBasedHashCodeHolder
       StringBuilder builder = new StringBuilder();
       builder.append("Jacobian. jacobianFrame = " + jacobianFrame + ". Joints:\n");
 
-      for (InverseDynamicsJoint joint : unitTwistMap.keySet())
+      for (InverseDynamicsJoint joint : joints)
       {
          builder.append(joint.getClass().getSimpleName() + " " + joint.getName() + "\n");
       }
