@@ -196,15 +196,17 @@ public class TwistCalculator
     */
    public void getLinearVelocityOfBodyFixedPoint(FrameVector linearVelocityToPack, RigidBody body, FramePoint bodyFixedPoint)
    {
-      Twist twist = twistForGetLinearVelocityOfBodyFixedPoint;
+      FramePoint localPoint = pointForGetLinearVelocityOfBodyFixedPoint;
+      Twist localTwist = twistForGetLinearVelocityOfBodyFixedPoint;
 
-      getTwistOfBody(twist, body);
-      ReferenceFrame baseFrame = twist.getBaseFrame();
-      twist.changeFrame(baseFrame);
+      getTwistOfBody(localTwist, body);
+      ReferenceFrame baseFrame = localTwist.getBaseFrame();
+      localPoint.setIncludingFrame(bodyFixedPoint);
 
-      pointForGetLinearVelocityOfBodyFixedPoint.setIncludingFrame(bodyFixedPoint);
-      pointForGetLinearVelocityOfBodyFixedPoint.changeFrame(baseFrame);
-      twist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, pointForGetLinearVelocityOfBodyFixedPoint);
+      localTwist.changeFrame(baseFrame);
+      localPoint.changeFrame(baseFrame);
+
+      localTwist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, localPoint);
    }
 
    /**
@@ -224,15 +226,17 @@ public class TwistCalculator
     */
    public void getLinearVelocityOfBodyFixedPoint(FrameVector linearVelocityToPack, RigidBody base, RigidBody body, FramePoint bodyFixedPoint)
    {
-      Twist twist = twistForGetLinearVelocityOfBodyFixedPoint;
+      FramePoint localPoint = pointForGetLinearVelocityOfBodyFixedPoint;
+      Twist localTwist = twistForGetLinearVelocityOfBodyFixedPoint;
 
-      getRelativeTwist(twist, base, body);
-      ReferenceFrame baseFrame = twist.getBaseFrame();
-      twist.changeFrame(baseFrame);
+      getRelativeTwist(localTwist, base, body);
+      ReferenceFrame baseFrame = localTwist.getBaseFrame();
+      localPoint.setIncludingFrame(bodyFixedPoint);
 
-      pointForGetLinearVelocityOfBodyFixedPoint.setIncludingFrame(bodyFixedPoint);
-      pointForGetLinearVelocityOfBodyFixedPoint.changeFrame(baseFrame);
-      twist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, pointForGetLinearVelocityOfBodyFixedPoint);
+      localTwist.changeFrame(baseFrame);
+      localPoint.changeFrame(baseFrame);
+
+      localTwist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, localPoint);
    }
 
    /**
