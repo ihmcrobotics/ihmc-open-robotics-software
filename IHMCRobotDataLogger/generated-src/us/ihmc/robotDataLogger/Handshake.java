@@ -29,7 +29,7 @@ public class Handshake implements IDLStruct<Handshake>
 
         	enumTypes_ = new IDLSequence.Object<us.ihmc.robotDataLogger.EnumType> (1024, us.ihmc.robotDataLogger.EnumType.class, new us.ihmc.robotDataLogger.EnumTypePubSubType());
 
-
+        	summary_ = new us.ihmc.robotDataLogger.Summary();
         
         
     }
@@ -37,7 +37,7 @@ public class Handshake implements IDLStruct<Handshake>
     public void set(Handshake other)
     {
         	dt_ = other.dt_;
-        	registries_.set(other.registries_);variables_.set(other.variables_);joints_.set(other.joints_);graphicObjects_.set(other.graphicObjects_);artifacts_.set(other.artifacts_);enumTypes_.set(other.enumTypes_);
+        	registries_.set(other.registries_);variables_.set(other.variables_);joints_.set(other.joints_);graphicObjects_.set(other.graphicObjects_);artifacts_.set(other.artifacts_);enumTypes_.set(other.enumTypes_);summary_.set(other.summary_);
     }
 
     public void setDt(double dt)
@@ -94,6 +94,13 @@ public class Handshake implements IDLStruct<Handshake>
 
         
 
+    public us.ihmc.robotDataLogger.Summary getSummary()
+    {
+        return summary_;
+    }
+
+        
+
 
 	public static int getMaxCdrSerializedSize()
 	{
@@ -136,6 +143,7 @@ public class Handshake implements IDLStruct<Handshake>
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.EnumType.getMaxCdrSerializedSize(current_alignment);}
 
+	    current_alignment += us.ihmc.robotDataLogger.Summary.getMaxCdrSerializedSize(current_alignment);
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -182,6 +190,7 @@ public class Handshake implements IDLStruct<Handshake>
 	    {
 	        current_alignment += us.ihmc.robotDataLogger.EnumType.getCdrSerializedSize(data.getEnumTypes().get(a), current_alignment);}
 
+	    current_alignment += us.ihmc.robotDataLogger.Summary.getCdrSerializedSize(data.getSummary(), current_alignment);
 	
 	    return current_alignment - initial_alignment;
 	}
@@ -216,6 +225,8 @@ public class Handshake implements IDLStruct<Handshake>
 	    if(enumTypes_.size() <= 1024)
 	    cdr.write_type_e(enumTypes_);else
 	        throw new RuntimeException("enumTypes field exceeds the maximum length");
+
+	    cdr.write_type_a(summary_);
 	}
 	
 	@Override
@@ -235,6 +246,8 @@ public class Handshake implements IDLStruct<Handshake>
 	    	cdr.read_type_e(artifacts_);	
 
 	    	cdr.read_type_e(enumTypes_);	
+
+	    	cdr.read_type_a(summary_);	
 	}
 	
 	@Override
@@ -254,6 +267,8 @@ public class Handshake implements IDLStruct<Handshake>
 			    
 			    ser.write_type_e("enumTypes", enumTypes_);
 			    
+			    ser.write_type_a("summary", summary_);
+			    
 	}
 	
 	@Override
@@ -272,6 +287,8 @@ public class Handshake implements IDLStruct<Handshake>
 	    			ser.read_type_e("artifacts", artifacts_);	
 	    	    
 	    			ser.read_type_e("enumTypes", enumTypes_);	
+	    	    
+	    			ser.read_type_a("summary", summary_);	
 	    	    
 	}
 
@@ -298,6 +315,8 @@ public class Handshake implements IDLStruct<Handshake>
         returnedValue &= this.artifacts_.equals(otherMyClass.artifacts_);
                 
         returnedValue &= this.enumTypes_.equals(otherMyClass.enumTypes_);
+                
+        returnedValue &= this.summary_.equals(otherMyClass.summary_);
                 
 
         return returnedValue;
@@ -336,6 +355,10 @@ public class Handshake implements IDLStruct<Handshake>
         builder.append("enumTypes=");
         builder.append(this.enumTypes_);
 
+                builder.append(", ");
+        builder.append("summary=");
+        builder.append(this.summary_);
+
                 
         builder.append("}");
 		return builder.toString();
@@ -348,5 +371,6 @@ public class Handshake implements IDLStruct<Handshake>
     private IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  graphicObjects_; 
     private IDLSequence.Object<us.ihmc.robotDataLogger.GraphicObjectMessage>  artifacts_; 
     private IDLSequence.Object<us.ihmc.robotDataLogger.EnumType>  enumTypes_; 
+    private us.ihmc.robotDataLogger.Summary summary_; 
 
 }

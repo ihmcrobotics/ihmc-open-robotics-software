@@ -19,6 +19,8 @@ public enum HandshakeFileType implements IDLStruct<HandshakeFileType>
         
         	IDL_YAML,
         
+        	IDL_CDR,
+        
 	;
 	
 	public static HandshakeFileType[] values = values();

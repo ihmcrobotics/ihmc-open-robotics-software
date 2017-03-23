@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -154,7 +155,7 @@ public class DataConsumerParticipant
 
    }
 
-   private <T> T getData(T data, TopicDataType<T> topicDataType, Announcement announcement, String topic) throws IOException
+   private <T> T getData(T data, TopicDataType<T> topicDataType, Announcement announcement, String topic, int timeout) throws IOException
    {
       SubscriberAttributes subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, topicDataType, topic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
       subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
@@ -162,12 +163,12 @@ public class DataConsumerParticipant
       Subscriber subscriber = domain.createSubscriber(participant, subscriberAttributes, null);
       try
       {
-         subscriber.waitForUnreadMessage(LogParticipantSettings.handshakeTimeout);
+         subscriber.waitForUnreadMessage(timeout);
       }
       catch (InterruptedException e)
       {
          domain.removeSubscriber(subscriber);
-         throw new IOException("Did not receive data from " + topic + " within " + LogParticipantSettings.handshakeTimeout + " milliseconds");
+         throw new IOException("Did not receive data from " + topic + " within " + timeout + " milliseconds");
       }
 
       SampleInfo sampleInfo = new SampleInfo();
@@ -194,7 +195,7 @@ public class DataConsumerParticipant
     * @throws IOException if no reply has been received within  the timeout
     * @throws RuntimeException if no model file is announced in the announcement
     */
-   public byte[] getModelFile(Announcement announcement) throws IOException
+   public byte[] getModelFile(Announcement announcement, int timeout) throws IOException
    {
       if(!announcement.getModelFileDescription().getHasModel())
       {
@@ -204,7 +205,7 @@ public class DataConsumerParticipant
       byte[] data = new byte[announcement.getModelFileDescription().getModelFileSize()];
       ByteBufferPubSubType byteBufferPubSubType = new ByteBufferPubSubType(LogParticipantSettings.modelFileTypeName, data.length);
       
-      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.modelFileTopic);
+      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.modelFileTopic, timeout);
       
       return data;
       
@@ -219,7 +220,7 @@ public class DataConsumerParticipant
     * @throws IOException if no reply has been received within the timeout
     * @throws RuntimeException if no resource bundle is announced in the announcement
     */
-   public byte[] getResourceZip(Announcement announcement) throws IOException
+   public byte[] getResourceZip(Announcement announcement, int timeout) throws IOException
    {
       if(!announcement.getModelFileDescription().getHasResourceZip())
       {
@@ -229,7 +230,7 @@ public class DataConsumerParticipant
       byte[] data = new byte[announcement.getModelFileDescription().getResourceZipSize()];
       ByteBufferPubSubType byteBufferPubSubType = new ByteBufferPubSubType(LogParticipantSettings.resourceBundleTypeName, data.length);
       
-      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.resourceBundleTopic);
+      getData(ByteBuffer.wrap(data), byteBufferPubSubType, announcement, LogParticipantSettings.resourceBundleTopic, timeout);
       
       return data;
       
@@ -246,10 +247,10 @@ public class DataConsumerParticipant
     * 
     * @throws IOException if no reply has been received within the timeout
     */
-   public Handshake getHandshake(Announcement announcement) throws IOException
+   public Handshake getHandshake(Announcement announcement, int timeout) throws IOException
    {
       HandshakePubSubType handshakePubSubType = new HandshakePubSubType();
-      return getData(new Handshake(), handshakePubSubType, announcement, LogParticipantSettings.handshakeTopic);
+      return getData(new Handshake(), handshakePubSubType, announcement, LogParticipantSettings.handshakeTopic, timeout);
    }
    
    /**
@@ -318,11 +319,21 @@ public class DataConsumerParticipant
       Announcement received;
       if((received = queue.take()) != null)
       {
-         System.out.println(dataConsumerParticipant.getHandshake(received));
-         System.out.println(dataConsumerParticipant.getModelFile(received).length);
-         System.out.println(dataConsumerParticipant.getResourceZip(received).length);
+         System.out.println(dataConsumerParticipant.getHandshake(received, 15000));
+         System.out.println(dataConsumerParticipant.getModelFile(received, 15000).length);
+         System.out.println(dataConsumerParticipant.getResourceZip(received, 15000).length);
       }
 
+   }
+
+   public void remove()
+   {
+      domain.removeParticipant(participant);
+   }
+
+   public void sendClearLogRequest()
+   {
+      PrintTools.error(this, "TODO: Implement me");
    }
 
 }

@@ -10,23 +10,15 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.robotDataLogger.YoVariableHandShakeBuilder;
 
 public class MultiClientStreamingDataTCPServer extends Thread
 {
 
+   public final static byte STREAM_REQUEST = 0x7A;
+   
    private final ClientHandler handlers[] = new ClientHandler[4];
    private final ServerSocketChannel server;
-   
-   private ByteBuffer handshakeBuffer;
 
-   public MultiClientStreamingDataTCPServer(int port, int dataSize, int bufferLength) throws IOException
-   {
-      this(port, ByteBuffer.allocateDirect(1), dataSize, bufferLength);
-   }
 
    /**
     * Create new server 
@@ -37,48 +29,15 @@ public class MultiClientStreamingDataTCPServer extends Thread
     *  
     * @throws IOException
     */
-   public MultiClientStreamingDataTCPServer(int port, ByteBuffer handshakeBuffer, int dataSize, int bufferLength) throws IOException
+   public MultiClientStreamingDataTCPServer(int port, int dataSize, int bufferLength) throws IOException
    {
       server = ServerSocketChannel.open();
       server.bind(new InetSocketAddress(port));
-      this.handshakeBuffer = handshakeBuffer;
       for (int i = 0; i < handlers.length; i++)
       {
          handlers[i] = new ClientHandler(dataSize, bufferLength);
          new Thread(handlers[i], "StreamingDataTCPServer-" + i).start();
       }
-   }
-
-   public MultiClientStreamingDataTCPServer(int port, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider, SummaryProvider summaryProvider, int dataSize, int bufferLength)
-         throws IOException
-   {
-      this(port, createHandshakeBuffer(handshakeBuilder, logModelProvider, summaryProvider), dataSize, bufferLength);
-   }
-
-   private static ByteBuffer createHandshakeBuffer(YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider ,SummaryProvider summaryProvider)
-   {
-      LogHandshake handshake = new LogHandshake();
-
-      handshake.protoShake = new byte[0];//handshakeBuilder.toByteArray();
-
-      if (logModelProvider != null)
-      {
-         handshake.modelLoaderClass = logModelProvider.getLoader().getCanonicalName();
-         handshake.modelName = logModelProvider.getModelName();
-         handshake.model = logModelProvider.getModel();
-         handshake.resourceDirectories = logModelProvider.getResourceDirectories();
-         handshake.resourceZip = logModelProvider.getResourceZip();
-      }
-      
-      if(summaryProvider != null)
-      {
-         handshake.createSummary = summaryProvider.isSummarize();
-         handshake.summaryTriggerVariable = summaryProvider.getSummaryTriggerVariable();
-         handshake.summarizedVariables = summaryProvider.getSummarizedVariables();
-      }
-
-      return handshake.toBuffer();
-
    }
 
    public void send(ByteBuffer data)
@@ -133,17 +92,7 @@ public class MultiClientStreamingDataTCPServer extends Thread
             }
 
             byte request = startByteBuffer.get();
-            if (request == LogHandshake.HANDSHAKE_REQUEST)
-            {
-               handshakeBuffer.clear();
-               while (handshakeBuffer.hasRemaining())
-               {
-                  client.write(handshakeBuffer);
-               }
-               client.close();
-               continue;
-            }
-            else if (request == LogHandshake.STREAM_REQUEST)
+            if (request == STREAM_REQUEST)
             {
                startByteBuffer.clear();
                read = client.read(startByteBuffer);

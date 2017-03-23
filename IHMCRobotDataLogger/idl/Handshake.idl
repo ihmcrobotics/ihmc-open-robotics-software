@@ -65,6 +65,13 @@ module robotDataLogger{
 		sequence<string, 128> enumValues;
 	};
 	
+	
+	struct Summary{
+	   	boolean createSummary;
+   	   	string<1024> summaryTriggerVariable;
+   	 	sequence<string<1024>, 128> summarizedVariables;
+	};
+	
 	struct Handshake
 	{
 		double dt;
@@ -74,6 +81,7 @@ module robotDataLogger{
 		sequence<GraphicObjectMessage, 2048> graphicObjects;
 		sequence<GraphicObjectMessage, 2048> artifacts;
 		sequence<EnumType, 1024> enumTypes;
+		Summary summary;
 	};
 
 };

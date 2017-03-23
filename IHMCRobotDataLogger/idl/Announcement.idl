@@ -11,6 +11,7 @@ module robotDataLogger{
 	struct ModelFileDescription{
 		boolean hasModel;
 		string name;
+		string modelLoaderClass;
 		sequence<string, 255> resourceDirectories;
 		
 		long modelFileSize;
@@ -18,7 +19,8 @@ module robotDataLogger{
 		boolean hasResourceZip;
 		long resourceZipSize;
 	};
-	
+		
+		
 	struct Announcement
 	{
 		string identifier;
@@ -27,6 +29,7 @@ module robotDataLogger{
 		short dataPort;
 		
 		string name;
+		string hostName;
 		sequence<CameraAnnouncement, 127> cameras;
 		ModelFileDescription modelFileDescription;
 		
