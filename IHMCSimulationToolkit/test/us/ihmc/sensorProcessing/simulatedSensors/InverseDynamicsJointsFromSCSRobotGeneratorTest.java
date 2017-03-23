@@ -413,7 +413,7 @@ public class InverseDynamicsJointsFromSCSRobotGeneratorTest
                   EuclidCoreTestTools.assertTuple3DEquals(comOffset, comOffsetCheck.getVectorCopy(), 1e-7);
 
                   Twist revoluteJointTwist = new Twist();
-                  twistCalculator.getTwistOfBody(revoluteJointTwist, revoluteJoint.getSuccessor());
+                  twistCalculator.getTwistOfBody(revoluteJoint.getSuccessor(), revoluteJointTwist);
                   revoluteJointTwist.changeFrame(revoluteJoint.getSuccessor().getBodyFixedFrame());
                   
                   Vector3D revoluteJointAngularVelocityInBody = revoluteJointTwist.getAngularPartCopy();

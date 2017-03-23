@@ -46,7 +46,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -83,7 +83,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -120,7 +120,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -164,7 +164,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -226,7 +226,7 @@ public class TwistCalculatorTest
             OneDoFJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
@@ -272,7 +272,7 @@ public class TwistCalculatorTest
             OneDoFJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
@@ -333,7 +333,7 @@ public class TwistCalculatorTest
             InverseDynamicsJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
@@ -344,7 +344,7 @@ public class TwistCalculatorTest
             Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
             FramePoint frameBodyFixedPoint = new FramePoint(bodyFrame, bodyFixedPoint);
             FrameVector actualLinearVelocity = new FrameVector();
-            twistCalculator.getLinearVelocityOfBodyFixedPoint(actualLinearVelocity, body, frameBodyFixedPoint);
+            twistCalculator.getLinearVelocityOfBodyFixedPoint(body, frameBodyFixedPoint, actualLinearVelocity);
             FrameVector expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
 
             expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
@@ -403,7 +403,7 @@ public class TwistCalculatorTest
             InverseDynamicsJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
@@ -416,7 +416,7 @@ public class TwistCalculatorTest
             {
                RigidBody base = joints.get(baseJointIndex).getSuccessor();
                Twist actualRelativeTwist = new Twist();
-               twistCalculator.getRelativeTwist(actualRelativeTwist, base, body);
+               twistCalculator.getRelativeTwist(base, body, actualRelativeTwist);
 
                ReferenceFrame baseFrame = base.getBodyFixedFrame();
                ReferenceFrame baseFrameInFuture = jointsInFuture.get(baseJointIndex).getSuccessor().getBodyFixedFrame();
@@ -427,7 +427,7 @@ public class TwistCalculatorTest
                Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
                FramePoint frameBodyFixedPoint = new FramePoint(bodyFrame, bodyFixedPoint);
                FrameVector actualLinearVelocity = new FrameVector();
-               twistCalculator.getLinearVelocityOfBodyFixedPoint(actualLinearVelocity, base, body, frameBodyFixedPoint);
+               twistCalculator.getLinearVelocityOfBodyFixedPoint(base, body, frameBodyFixedPoint, actualLinearVelocity);
                FrameVector expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame, baseFrameInFuture, bodyFixedPoint);
 
                expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
@@ -539,7 +539,7 @@ public class TwistCalculatorTest
          twistCalculator.compute();
 
          for (int i = 0; i < 100; i++)
-            twistCalculator.getTwistOfBody(dummyTwist, randomChainRobot.get(random.nextInt(numberOfJoints)).getSuccessor());
+            twistCalculator.getTwistOfBody(randomChainRobot.get(random.nextInt(numberOfJoints)).getSuccessor(), dummyTwist);
       }
    }
 }

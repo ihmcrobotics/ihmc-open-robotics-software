@@ -44,7 +44,7 @@ public class SimulatedPointVelocitySensor extends SimulatedSensor<Vector3D>
 
    public void startComputation()
    {
-      twistCalculator.getTwistOfBody(twist, rigidBody);
+      twistCalculator.getTwistOfBody(rigidBody, twist);
       twist.changeFrame(twist.getBaseFrame());
       
       tempPointToMeasureVelocityOf.setIncludingFrame(pointToMeasureVelocityOf);
