@@ -224,7 +224,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * @param constants the list of constants (variables that will never change) needed for this YoGraphic expected to be in the same order as packed in {@link #getConstants()}.
     * @return a YoGraphic setup for remote visualization.
     */
-   static YoGraphicPlanarRegionsList createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, Double[] constants)
+   static YoGraphicPlanarRegionsList createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, double[] constants)
    {
       return new YoGraphicPlanarRegionsList(name, yoVariables, constants);
    }
@@ -234,14 +234,14 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * It is automatically handled and should not be used for creating a new YoGraphic.
     * For the latter, use the other constructor(s).
     */
-   private YoGraphicPlanarRegionsList(String name, YoVariable<?>[] yoVariables, Double[] constants)
+   private YoGraphicPlanarRegionsList(String name, YoVariable<?>[] yoVariables, double[] constants)
    {
       super(name);
 
       yoGraphicJob = YoGraphicJob.READER;
 
-      vertexBufferSize = constants[0].intValue();
-      meshBufferSize = constants[1].intValue();
+      vertexBufferSize = (int)constants[0];
+      meshBufferSize = (int)constants[1];
 
       vertexBuffer = new ArrayList<>(vertexBufferSize);
 

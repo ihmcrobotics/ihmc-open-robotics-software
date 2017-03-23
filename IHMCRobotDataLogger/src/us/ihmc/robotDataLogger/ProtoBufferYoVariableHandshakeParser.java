@@ -1,9 +1,12 @@
 package us.ihmc.robotDataLogger;
 
 import java.awt.Color;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 
@@ -41,9 +44,22 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 @Deprecated
 public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakeParser
 {
-   public ProtoBufferYoVariableHandshakeParser(String registryPrefix)
+   ProtoBufferYoVariableHandshakeParser(String registryPrefix)
    {
       super(registryPrefix);
+   }
+   
+   private static JointType convertJointType(us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType type)
+   {
+      switch(type)
+      {
+      case OneDoFJoint:
+         return JointType.OneDoFJoint;
+      case SiXDoFJoint:
+         return JointType.SiXDoFJoint;
+      default:
+         throw new RuntimeException();
+      }
    }
 
    private static YoProtoHandshake parseYoProtoHandshake(byte[] handShake)
@@ -65,7 +81,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       int jointStateVariables = 0;
       for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
       {
-         jointStateVariables += JointState.getNumberOfVariables(yoProtoHandshake.getJoint(i).getType());
+         jointStateVariables += JointState.getNumberOfVariables(convertJointType(yoProtoHandshake.getJoint(i).getType()));
       }
       
       return 1 + yoProtoHandshake.getVariableList().size() + jointStateVariables;
@@ -170,7 +186,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
       {
          JointDefinition joint = yoProtoHandshake.getJoint(i);
-         numberOfJointStates += JointState.getNumberOfVariables(joint.getType());
+         numberOfJointStates += JointState.getNumberOfVariables(convertJointType(joint.getType()));
       }
       return numberOfJointStates;
    }
@@ -180,7 +196,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
       {
          JointDefinition joint = yoProtoHandshake.getJoint(i);
-         jointStates.add(JointState.createJointState(joint.getName(), joint.getType()));
+         jointStates.add(JointState.createJointState(joint.getName(), convertJointType(joint.getType())));
       }
    }
 
@@ -247,7 +263,7 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       for (int v = 0; v < vars.length; v++)
          vars[v] = variables.get(msg.getYoIndex(v));
    
-      Double[] consts = msg.getConstantList().toArray(new Double[msg.getConstantCount()]);
+      double[] consts = ArrayUtils.toPrimitive(msg.getConstantList().toArray(new Double[msg.getConstantCount()]));
    
       AppearanceDefinition appearance = new YoAppearanceRGBColor(Color.red, 0.0);
       if (msg.hasAppearance())
@@ -257,5 +273,11 @@ public class ProtoBufferYoVariableHandshakeParser extends YoVariableHandshakePar
       }
    
       return YoGraphicFactory.yoGraphicFromMessage(type, name, vars, consts, appearance);
+   }
+
+   @Override
+   public void parseFrom(Handshake handshake) throws IOException
+   {
+      throw new RuntimeException("Not implemented");
    }
 }

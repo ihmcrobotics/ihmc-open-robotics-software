@@ -18,6 +18,7 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
     public ModelFileDescription()
     {
         	name_ = new StringBuilder(255); 
+        	modelLoaderClass_ = new StringBuilder(255); 
         	resourceDirectories_ = new IDLSequence.StringBuilderHolder (255, "type_d");           
         
     }
@@ -27,6 +28,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
         	hasModel_ = other.hasModel_;
         	name_.setLength(0);
         	name_.append(other.name_);
+        	modelLoaderClass_.setLength(0);
+        	modelLoaderClass_.append(other.modelLoaderClass_);
         	resourceDirectories_.set(other.resourceDirectories_);modelFileSize_ = other.modelFileSize_;
         	hasResourceZip_ = other.hasResourceZip_;
         	resourceZipSize_ = other.resourceZipSize_;
@@ -58,6 +61,23 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
     public StringBuilder getName()
     {
         return name_;
+    }
+
+        
+        public void setModelLoaderClass(String modelLoaderClass)
+        {
+        	modelLoaderClass_.setLength(0);
+        	modelLoaderClass_.append(modelLoaderClass);
+        }
+        
+        public String getModelLoaderClassAsString()
+        {
+        	return getModelLoaderClass().toString();
+        }
+
+    public StringBuilder getModelLoaderClass()
+    {
+        return modelLoaderClass_;
     }
 
         
@@ -116,6 +136,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < 255; ++a)
 	    {
@@ -145,6 +167,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getModelLoaderClass().length() + 1;
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
 	    for(int a = 0; a < data.getResourceDirectories().size(); ++a)
 	    {
@@ -171,6 +195,10 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	    cdr.write_type_d(name_);else
 	        throw new RuntimeException("name field exceeds the maximum length");
 
+	    if(modelLoaderClass_.length() <= 255)
+	    cdr.write_type_d(modelLoaderClass_);else
+	        throw new RuntimeException("modelLoaderClass field exceeds the maximum length");
+
 	    if(resourceDirectories_.size() <= 255)
 	    cdr.write_type_e(resourceDirectories_);else
 	        throw new RuntimeException("resourceDirectories field exceeds the maximum length");
@@ -190,6 +218,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 
 	    	cdr.read_type_d(name_);	
 
+	    	cdr.read_type_d(modelLoaderClass_);	
+
 	    	cdr.read_type_e(resourceDirectories_);	
 
 	    	modelFileSize_ = cdr.read_type_2();	
@@ -205,6 +235,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 			    ser.write_type_7("hasModel", hasModel_);
 			    
 			    ser.write_type_d("name", name_);
+			    
+			    ser.write_type_d("modelLoaderClass", modelLoaderClass_);
 			    
 			    ser.write_type_e("resourceDirectories", resourceDirectories_);
 			    
@@ -222,6 +254,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 	    			hasModel_ = ser.read_type_7("hasModel");	
 	    	    
 	    			ser.read_type_d("name", name_);	
+	    	    
+	    			ser.read_type_d("modelLoaderClass", modelLoaderClass_);	
 	    	    
 	    			ser.read_type_e("resourceDirectories", resourceDirectories_);	
 	    	    
@@ -246,6 +280,8 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 
                 
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
+                
+        returnedValue &= us.ihmc.idl.IDLTools.equals(this.modelLoaderClass_, otherMyClass.modelLoaderClass_);
                 
         returnedValue &= this.resourceDirectories_.equals(otherMyClass.resourceDirectories_);
                 
@@ -276,6 +312,10 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
         builder.append(this.name_);
 
                 builder.append(", ");
+        builder.append("modelLoaderClass=");
+        builder.append(this.modelLoaderClass_);
+
+                builder.append(", ");
         builder.append("resourceDirectories=");
         builder.append(this.resourceDirectories_);
 
@@ -298,6 +338,7 @@ public class ModelFileDescription implements IDLStruct<ModelFileDescription>
 
     private boolean hasModel_; 
     private StringBuilder name_; 
+    private StringBuilder modelLoaderClass_; 
     private IDLSequence.StringBuilderHolder  resourceDirectories_; 
     private int modelFileSize_; 
     private boolean hasResourceZip_; 

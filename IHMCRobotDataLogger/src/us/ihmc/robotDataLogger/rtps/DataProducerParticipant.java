@@ -256,6 +256,7 @@ public class DataProducerParticipant
          ByteBufferPubSubType modelFilePubSubType = new ByteBufferPubSubType(LogParticipantSettings.modelFileTypeName, logModelProvider.getModel().length);
          announcement.getModelFileDescription().setHasModel(true);
          announcement.getModelFileDescription().setName(logModelProvider.getModelName());
+         announcement.getModelFileDescription().setModelLoaderClass(logModelProvider.getLoader().getCanonicalName());
          announcement.getModelFileDescription().setModelFileSize(logModelProvider.getModel().length);
          for (String resourceDirectory : logModelProvider.getResourceDirectories())
          {

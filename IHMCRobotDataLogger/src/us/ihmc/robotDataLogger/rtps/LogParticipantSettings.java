@@ -2,7 +2,6 @@ package us.ihmc.robotDataLogger.rtps;
 
 public class LogParticipantSettings
 {
-   public static final int handshakeTimeout = 15000; //15 seconds
    
    public static final int domain = 7;
    public static final String namespaceSeperator = "/";

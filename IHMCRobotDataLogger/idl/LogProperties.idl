@@ -4,7 +4,8 @@ module robotDataLogger{
 
 	enum HandshakeFileType{
 		PROTOBUFFER,
-		IDL_YAML
+		IDL_YAML,
+		IDL_CDR
 	};
 	
 

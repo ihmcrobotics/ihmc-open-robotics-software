@@ -3,7 +3,8 @@ package us.ihmc.robotDataLogger.jointState;
 import java.nio.LongBuffer;
 import java.util.List;
 
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
+import us.ihmc.robotDataLogger.JointType;
+
 
 public abstract class JointState
 {
@@ -37,7 +38,7 @@ public abstract class JointState
    {
       return createJointState(null, type).getNumberOfStateVariables();
    }
-   
+      
    public static JointState createJointState(String name, JointType type)
    {
       switch (type)

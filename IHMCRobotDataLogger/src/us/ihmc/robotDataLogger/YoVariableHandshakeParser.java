@@ -1,5 +1,6 @@
 package us.ihmc.robotDataLogger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,9 +10,24 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
-public class YoVariableHandshakeParser
+public abstract class YoVariableHandshakeParser
 {
 
+   @SuppressWarnings("deprecation")
+   public static YoVariableHandshakeParser create(HandshakeFileType type, String registryPrefix)
+   {
+      switch(type)
+      {
+      case IDL_CDR:
+      case IDL_YAML:
+         return new IDLYoVariableHandshakeParser(type, registryPrefix);
+      case PROTOBUFFER:
+         return new ProtoBufferYoVariableHandshakeParser(registryPrefix);
+      default:
+         throw new RuntimeException("Not implemented");
+      }
+   }
+   
    protected final String registryPrefix;
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    protected final ArrayList<JointState> jointStates = new ArrayList<>();
@@ -20,6 +36,9 @@ public class YoVariableHandshakeParser
    protected List<YoVariableRegistry> registries = new ArrayList<>();
    protected List<YoVariable<?>> variables = new ArrayList<>();
 
+   public abstract void parseFrom(Handshake handshake) throws IOException;
+   public abstract void parseFrom(byte[] handShake) throws IOException;
+   
    public YoVariableHandshakeParser(String registryPrefix)
    {
       this.registryPrefix = registryPrefix;

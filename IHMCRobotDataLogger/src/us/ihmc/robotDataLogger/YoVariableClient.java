@@ -19,12 +19,12 @@ import java.util.zip.CRC32;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
-import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
 import us.ihmc.multicastLogDataProtocol.control.LogControlClient.LogControlVariableChangeListener;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataLogger.jointState.JointState;
+import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
+import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -36,11 +36,12 @@ public class YoVariableClient implements LogPacketHandler
 
    private final CRC32 crc32 = new CRC32();
    private final String serverName;
+   private final Announcement announcement;
    private final StreamingDataTCPClient streamingDataTCPClient;
    private final ThreadedLogPacketHandler threadedLogPacketHandler;
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;
-   private final LogControlClient logControlClient;
-   private final ProtoBufferYoVariableHandshakeParser handshakeParser;
+   private final DataConsumerParticipant dataConsumerParticipant;
+   private final IDLYoVariableHandshakeParser handshakeParser;
    private final List<YoVariable<?>> yoVariablesList;
    private final List<JointState> jointStates;
    private final int displayOneInNPackets;
@@ -55,24 +56,54 @@ public class YoVariableClient implements LogPacketHandler
       WAITING, RUNNING, STOPPED
    }
 
-   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix)
+   private static DataConsumerParticipant createParticipant()
    {
-      this(LogSessionDisplay.getAnnounceRequest(), listener, registryPrefix);
+      try
+      {
+         return new DataConsumerParticipant("YoVariableClient");
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+   
+   /**
+    * Start a new client while allowing the user to select a desired logging session
+    * 
+    * @param listener
+    * @param registryPrefix
+    * @param filters
+    */
+   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, LogProducerDisplay.LogSessionFilter... filters)
+   {
+      this(createParticipant(), null, listener, registryPrefix, filters);
    }
 
-   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, LogSessionDisplay.RobotIPToNameRemapHandler remapHandler)
+   /**
+    * Connect to an already selected log session
+    * 
+    * @param request
+    * @param yoVariablesUpdatedListener
+    * @param registryPrefix
+    */
+   public YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix)
    {
-      this(LogSessionDisplay.getAnnounceRequest(remapHandler), listener, registryPrefix);
+      this(participant, request, yoVariablesUpdatedListener, registryPrefix, null);
    }
-
-   public YoVariableClient(YoVariablesUpdatedListener listener, String registryPrefix, LogSessionDisplay.RobotIPToNameRemapHandler remapHandler, LogSessionDisplay.LogSessionFilter... filters)
-   {
-      this(LogSessionDisplay.getAnnounceRequest(remapHandler, filters), listener, registryPrefix);
-   }
-
-   public YoVariableClient(AnnounceRequest request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix)
-   {      
-      this.serverName = request.getName();
+   
+   
+   private YoVariableClient(DataConsumerParticipant participant, Announcement request, final YoVariablesUpdatedListener yoVariablesUpdatedListener, String registryPrefix, LogProducerDisplay.LogSessionFilter[] filters)
+   {   
+      this.dataConsumerParticipant = participant;
+      if(request == null)
+      {
+         LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, filters);
+      }
+      
+      
+      this.serverName = request.getNameAsString();
+      this.announcement = request;
       this.yoVariablesUpdatedListener = yoVariablesUpdatedListener;
       displayOneInNPackets = this.yoVariablesUpdatedListener.getDisplayOneInNPackets();
 
@@ -89,8 +120,8 @@ public class YoVariableClient implements LogPacketHandler
       threadedLogPacketHandler = new ThreadedLogPacketHandler(this, RECEIVE_BUFFER_SIZE);
       streamingDataTCPClient = new StreamingDataTCPClient(inetAddress, request.getDataPort(), threadedLogPacketHandler, displayOneInNPackets);
       
-      logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), this.yoVariablesUpdatedListener);
-      handshakeParser = new ProtoBufferYoVariableHandshakeParser(registryPrefix);
+//      logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), this.yoVariablesUpdatedListener);
+      handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR, registryPrefix);
       yoVariablesList = handshakeParser.getYoVariablesList();
       jointStates = handshakeParser.getJointStates();
 
@@ -189,11 +220,12 @@ public class YoVariableClient implements LogPacketHandler
       yoVariablesUpdatedListener.receiveTimedOut();
    }
    
-   public LogHandshake getHandshake()
+
+   public void start()
    {
       try
       {
-         return streamingDataTCPClient.getHandshake();
+         start(15000);
       }
       catch (IOException e)
       {
@@ -201,35 +233,40 @@ public class YoVariableClient implements LogPacketHandler
       }
    }
 
-   public void start()
-   {
-      try
-      {
-         start(-1L);
-      }
-      catch (SocketTimeoutException e)
-      {
-         throw new RuntimeException(e);
-      }
-   }
-
-   public synchronized void start(long timeout) throws SocketTimeoutException
+   public synchronized void start(int timeout) throws IOException
    {
       if (state != ClientState.WAITING)
       {
          throw new RuntimeException("Client already started");
       }
 
+      
+      
       System.out.println("Requesting handshake");
-      LogHandshake handshake = getHandshake();
+      Handshake handshake = dataConsumerParticipant.getHandshake(announcement, timeout);
 
-      logControlClient.connect();
-      handshakeParser.parseFrom(handshake.protoShake);
+      
+      handshakeParser.parseFrom(handshake);
 
-      yoVariablesUpdatedListener.start(handshake, handshakeParser);
+      LogHandshake logHandshake = new LogHandshake();
+      logHandshake.handshake = handshake;
+      if(announcement.getModelFileDescription().getHasModel())
+      {
+         logHandshake.model = dataConsumerParticipant.getModelFile(announcement, timeout);
+         logHandshake.modelLoaderClass = announcement.getModelFileDescription().getModelLoaderClassAsString();
+         logHandshake.resourceDirectories = announcement.getModelFileDescription().getResourceDirectories().toStringArray();
+         if(announcement.getModelFileDescription().getHasResourceZip())
+         {
+            logHandshake.resourceZip = dataConsumerParticipant.getResourceZip(announcement, timeout);
+         }
+         
+      }
+            
+      yoVariablesUpdatedListener.start(logHandshake, handshakeParser);
       if (yoVariablesUpdatedListener.changesVariables())
       {
          List<YoVariable<?>> variablesList = handshakeParser.getYoVariablesList();
+         dataConsumerParticipant.createVariableChangeProducer(announcement);
          logControlClient.startVariableChangedProducers(variablesList, yoVariablesUpdatedListener.executeVariableChangedListeners());
       }
 
@@ -258,7 +295,7 @@ public class YoVariableClient implements LogPacketHandler
    {
       if (state == ClientState.RUNNING)
       {
-         logControlClient.close();
+         dataConsumerParticipant.remove();
          yoVariablesUpdatedListener.disconnected();
 
          state = ClientState.STOPPED;
@@ -272,7 +309,7 @@ public class YoVariableClient implements LogPacketHandler
 
    public void sendClearLogRequest()
    {
-      logControlClient.sendClearLogRequest();
+      dataConsumerParticipant.sendClearLogRequest();
    }
 
    @Override
