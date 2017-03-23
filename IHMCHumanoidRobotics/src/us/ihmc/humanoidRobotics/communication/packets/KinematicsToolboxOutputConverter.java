@@ -169,6 +169,11 @@ public class KinematicsToolboxOutputConverter
       output.setFootTrajectoryMessage(footTrajectoryMessage);
    }
 
+   public FullHumanoidRobotModel getFullRobotModel()
+   {
+      return fullRobotModelToUseForConversion;
+   }
+
    private void checkIfDataHasBeenSet()
    {
       if (output == null)

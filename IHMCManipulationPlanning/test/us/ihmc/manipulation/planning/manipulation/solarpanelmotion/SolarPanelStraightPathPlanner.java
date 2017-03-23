@@ -7,8 +7,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SolarPanelStraightPathPlanner
@@ -49,7 +49,7 @@ public class SolarPanelStraightPathPlanner
    public void temporarySolution()
    {
       // linear
-      if(false)
+      if(true)
       {
          PrintTools.info("a");
          zRotation.add(-Math.PI*0.2);
@@ -87,7 +87,9 @@ public class SolarPanelStraightPathPlanner
    
    public HandTrajectoryMessage getHandTrajectoryTemporary()
    {      
-      HandTrajectoryMessage retMaessage = new HandTrajectoryMessage(RobotSide.RIGHT, BaseForControl.WORLD, straightPaths.size()+1);
+      HandTrajectoryMessage retMassage = new HandTrajectoryMessage(RobotSide.RIGHT, 2);
+      retMassage.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
+      retMassage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
       
       Point3D desiredPosition;
       Vector3D desiredLinearVelocity;
@@ -96,12 +98,14 @@ public class SolarPanelStraightPathPlanner
 
       SolarPanelCleaningPose startPose = straightPaths.get(0).getStartPose();
       SolarPanelCleaningPose endPose = straightPaths.get(0).getEndPose();
+      
       startPose.setZRotation(zRotation.get(0));
       desiredPosition = new Point3D(startPose.getDesiredHandPosition());
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(startPose.getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(0, 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      
+      retMassage.setTrajectoryPoint(0, 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
             
       endPose.setZRotation(zRotation.get(1));
       desiredPosition = new Point3D(endPose.getDesiredHandPosition());
@@ -109,14 +113,15 @@ public class SolarPanelStraightPathPlanner
       desiredOrientation = new Quaternion(endPose.getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
       
-      retMaessage.setTrajectoryPoint(1, straightPaths.get(0).getMotionTime() - 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(1, straightPaths.get(0).getMotionTime(), desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
-      return retMaessage;
+      return retMassage;
    } 
    
    public HandTrajectoryMessage getHandTrajectoryTemporaryWhole()
    {      
-      HandTrajectoryMessage retMaessage = new HandTrajectoryMessage(RobotSide.RIGHT, BaseForControl.WORLD, straightPaths.size()+1);
+      HandTrajectoryMessage retMassage = new HandTrajectoryMessage(RobotSide.RIGHT, straightPaths.size()+1);
+      retMassage.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
       
       Point3D desiredPosition;
       Vector3D desiredLinearVelocity;
@@ -131,7 +136,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 1;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -139,7 +144,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 6.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 6.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 2;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -147,7 +152,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 7.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 7.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 3;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -155,7 +160,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 15.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 15.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 4;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -163,7 +168,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 16.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 16.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 5;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -171,7 +176,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 21.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 21.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 6;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -179,7 +184,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 22.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 22.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 7;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -187,7 +192,7 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 27.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 27.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 8;      
       straightPaths.get(index).getStartPose().setZRotation(zRotation.get(index));      
@@ -195,23 +200,25 @@ public class SolarPanelStraightPathPlanner
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getStartPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 28.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 28.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
            
       straightPaths.get(index).getEndPose().setZRotation(zRotation.get(index+1));      
       desiredPosition = new Point3D(straightPaths.get(index).getEndPose().getDesiredHandPosition());
       desiredLinearVelocity = new Vector3D();
       desiredOrientation = new Quaternion(straightPaths.get(index).getEndPose().getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index+1, 33.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index+1, 33.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
                   
 
-      return retMaessage;
+      return retMassage;
    } 
 
    public ChestTrajectoryMessage getChestTrajectoryTemporary()
    {
-      ChestTrajectoryMessage retMaessage = new ChestTrajectoryMessage(2);
-
+      ChestTrajectoryMessage retMassage = new ChestTrajectoryMessage(2);
+      retMassage.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
+      retMassage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
+      
       Quaternion desiredOrientation;      
       Vector3D desiredAngularVelocity;
       
@@ -219,20 +226,20 @@ public class SolarPanelStraightPathPlanner
       desiredOrientation.appendYawRotation(pelvisYaw.get(0));
       desiredAngularVelocity = new Vector3D();
       
-      retMaessage.setTrajectoryPoint(0, 1.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(0, 1.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
             
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(1));
       desiredAngularVelocity = new Vector3D();
       
-      retMaessage.setTrajectoryPoint(1, straightPaths.get(0).getMotionTime() - 1.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(1, straightPaths.get(0).getMotionTime(), desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
-      return retMaessage;
+      return retMassage;
    }
    
    public ChestTrajectoryMessage getChestTrajectoryTemporaryWhole()
    {
-      ChestTrajectoryMessage retMaessage = new ChestTrajectoryMessage(straightPaths.size()+1);
+      ChestTrajectoryMessage retMassage = new ChestTrajectoryMessage(straightPaths.size()+1);
 
       Quaternion desiredOrientation;      
       Vector3D desiredAngularVelocity;
@@ -243,62 +250,62 @@ public class SolarPanelStraightPathPlanner
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 1.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 1.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 1;      
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 6.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 6.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
       index = 2;      
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 7.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 7.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
       index = 3;      
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 15.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 15.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 4;      
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 16.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 16.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
       index = 5;      
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 21.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 21.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 6;      
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 22.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 22.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 7;      
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 27.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 27.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       index = 8;  
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 28.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 28.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
       index = 9;   
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(pelvisYaw.get(index));
       desiredAngularVelocity = new Vector3D();
-      retMaessage.setTrajectoryPoint(index, 33.0, desiredOrientation, desiredAngularVelocity);
+      retMassage.setTrajectoryPoint(index, 33.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
       
-      return retMaessage;
+      return retMassage;
    
    }
    

@@ -1,7 +1,6 @@
 package us.ihmc.avatar.rrtManipulation;
 
 import static org.junit.Assert.assertTrue;
-import static us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox.createForInverseKinematicsOnly;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,11 +12,8 @@ import org.junit.Test;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.testTools.DRCBehaviorTestHelper;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
@@ -34,7 +30,6 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.forwaypoint.EuclideanTrajectoryQuaternionCalculator;
@@ -50,7 +45,7 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -230,12 +225,19 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       drcBehaviorTestHelper.updateRobotModel();
             
+      RigidBody chest = fullRobotModel.getChest();
+      RigidBody hand = fullRobotModel.getHand(RobotSide.RIGHT);
+      ReferenceFrame chestFrame = chest.getBodyFixedFrame();
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      
       double motionTime = 3.0;
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      HandTrajectoryMessage handTrajectoryMessageOne = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, new Point3D(0.70,  -0.5,  1.2), new Quaternion());
+      //HandTrajectoryMessage handTrajectoryMessageOne = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, new Point3D(0.70,  -0.5,  1.2), new Quaternion());
+      HandTrajectoryMessage handTrajectoryMessageOne = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, new Point3D(0.70,  -0.5,  1.2), new Quaternion(), worldFrame, worldFrame);
       int numberOfWayPointForCircle = 19;
-      HandTrajectoryMessage handTrajectoryMessageCircle = new HandTrajectoryMessage(RobotSide.RIGHT, BaseForControl.WORLD, numberOfWayPointForCircle);
+      HandTrajectoryMessage handTrajectoryMessageCircle = new HandTrajectoryMessage(RobotSide.RIGHT, numberOfWayPointForCircle);
+      handTrajectoryMessageCircle.setTrajectoryReferenceFrameId(worldFrame);
       
       wholeBodyTrajectoryMessage.clear();
       wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessageOne);
@@ -267,7 +269,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       EuclideanTrajectoryQuaternionCalculator euclideanWayPointCalculator = new EuclideanTrajectoryQuaternionCalculator();
       
-      for(int i =0;i<numberOfWayPointForCircle;i++)
+      for(int i=0;i<numberOfWayPointForCircle;i++)
       {         
          Pose poseOfWayPoint = new Pose(centerPoseOfCircle.getPosition(), centerPoseOfCircle.getOrientation());
          
@@ -309,7 +311,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          desiredOrientation = trajectoryQuaternions.get(i).getQuaternion();
          desiredAngularVelocity = trajectoryQuaternions.get(i).getAngularVelocity();
                   
-         handTrajectoryMessageCircle.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+         handTrajectoryMessageCircle.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
       }
       
       wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessageCircle);
@@ -376,7 +378,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    }
    
    
-   //@Test(timeout = 160000)
+   @Test(timeout = 160000)
    public void testSolarPanelMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -399,8 +401,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      motionTime = 35.0;
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotionWhole, motionTime);
+      motionTime = 5.0;
+      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion, motionTime);
       
       for(int i=0;i<solarPanelPlanner.debugPose.size();i++)
       {
@@ -412,8 +414,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
-//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
-//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseTwo));
+      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
+      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseTwo));
       
       
       
@@ -450,7 +452,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
    }
    
-   @Test(timeout = 160000)
+   //@Test(timeout = 160000)
    public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
