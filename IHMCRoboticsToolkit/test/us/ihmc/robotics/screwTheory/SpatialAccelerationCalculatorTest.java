@@ -317,7 +317,7 @@ public class SpatialAccelerationCalculatorTest
          ScrewTestTools.setRandomAcceleration(floatingJoint, random);
 
          floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
-         ScrewTestTools.doubleIntegrateAccelerations(floatingJointInFuture, dt);
+         ScrewTestTools.doubleIntegrateFromAcceleration(floatingJointInFuture, dt);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -1.0, 1.0);
@@ -398,7 +398,7 @@ public class SpatialAccelerationCalculatorTest
          ScrewTestTools.setRandomAcceleration(floatingJoint, random);
 
          floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
-         ScrewTestTools.doubleIntegrateAccelerations(floatingJointInFuture, dt);
+         ScrewTestTools.doubleIntegrateFromAcceleration(floatingJointInFuture, dt);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -1.0, 1.0);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -1.0, 1.0);
