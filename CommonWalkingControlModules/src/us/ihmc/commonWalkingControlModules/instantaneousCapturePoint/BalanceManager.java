@@ -479,7 +479,7 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      dynamicReachabilityCalculator.checkReachabilityOfStep();
+      dynamicReachabilityCalculator.verifyAndEnsureReachability();
    }
 
    public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
@@ -509,7 +509,7 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      dynamicReachabilityCalculator.checkReachabilityOfStep();
+      dynamicReachabilityCalculator.verifyAndEnsureReachability();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
