@@ -1,5 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
+import static us.ihmc.robotics.screwTheory.ScrewTools.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -104,7 +106,7 @@ public class SpatialAccelerationCalculator
     */
    public SpatialAccelerationCalculator(RigidBody body, TwistCalculator twistCalculator, double gravity, boolean useDesireds)
    {
-      this(body, ReferenceFrame.getWorldFrame(), ScrewTools.createGravitationalSpatialAcceleration(body, gravity), twistCalculator, true, useDesireds);
+      this(body, ReferenceFrame.getWorldFrame(), createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), twistCalculator, true, useDesireds);
    }
 
    /**
