@@ -36,6 +36,7 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -59,6 +60,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
@@ -283,6 +285,10 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          createUserDesiredControllerCommandGenerator();
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
+      FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
+      commandInputManager.registerConversionHelper(commandConversionHelper);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the WalkingHighLevelHumanoidController /////////////////////////////////////////////
