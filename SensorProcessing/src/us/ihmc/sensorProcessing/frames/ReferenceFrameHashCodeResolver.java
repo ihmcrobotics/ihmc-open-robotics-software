@@ -33,6 +33,7 @@ public class ReferenceFrameHashCodeResolver
    {
       checkAndAddReferenceFrame(ReferenceFrame.getWorldFrame());
 
+      
       try
       {
          referenceFrameExtractor(referenceFrames);
@@ -55,6 +56,15 @@ public class ReferenceFrameHashCodeResolver
          checkAndAddReferenceFrame(frameAfterJoint);
          checkAndAddReferenceFrame(comLinkBefore);
          checkAndAddReferenceFrame(comLinkAfter);
+      }
+      
+      TLongObjectHashMap<ReferenceFrame> referenceFrameDefaultHashIds = referenceFrames.getReferenceFrameDefaultHashIds();
+      if(referenceFrameDefaultHashIds != null)
+      {
+         for(long key : referenceFrameDefaultHashIds.keys())
+         {
+            checkAndAddReferenceFrame(referenceFrameDefaultHashIds.get(key), key);
+         }
       }
    }
 
@@ -112,16 +122,21 @@ public class ReferenceFrameHashCodeResolver
     */
    private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame)
    {
-      if(nameBasedHashCodeToReferenceFrameMap.containsKey(referenceFrame.getNameBasedHashCode()))
+      checkAndAddReferenceFrame(referenceFrame, referenceFrame.getNameBasedHashCode());
+   }
+   
+   private void checkAndAddReferenceFrame(ReferenceFrame referenceFrame, long nameBasedHashCode)
+   {
+      if(nameBasedHashCodeToReferenceFrameMap.containsKey(nameBasedHashCode))
       {
-         ReferenceFrame existingFrame = nameBasedHashCodeToReferenceFrameMap.get(referenceFrame.getNameBasedHashCode());
+         ReferenceFrame existingFrame = nameBasedHashCodeToReferenceFrameMap.get(nameBasedHashCode);
          if(!referenceFrame.equals(existingFrame))
          {
             throw new IllegalArgumentException("ReferenceFrameHashCodeResolver: Tried to put in a reference frame with the same name");
          }
          return;
       }
-      nameBasedHashCodeToReferenceFrameMap.put(referenceFrame.getNameBasedHashCode(), referenceFrame);
+      nameBasedHashCodeToReferenceFrameMap.put(nameBasedHashCode, referenceFrame);
    }
 
    public ReferenceFrame getReferenceFrameFromNameBaseHashCode(long nameBasedHashCode)
