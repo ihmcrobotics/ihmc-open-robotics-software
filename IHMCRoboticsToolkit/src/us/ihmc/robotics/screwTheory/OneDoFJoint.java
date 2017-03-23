@@ -47,10 +47,6 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    private double kp;
    private double kd;
 
-//   // Friction parameters are here, maybe move when creating a new class with parameters that don't belong to the OneDofJoint
-//   private FrictionModel frictionModel = FrictionModel.OFF;
-//   private double frictionCompensationEffectiveness = 0.0;
-//   private boolean useBeforeTransmissionVelocityForFriction = false;
 
    private boolean isUnderPositionControl = false;
    private boolean enabled = true;
@@ -252,13 +248,25 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
       accelerationToPack.set(unitJointAcceleration);
    }
 
-   protected void setMotionSubspace(Twist unitTwist)
+   /**
+    * Setup the motion subspace for this one DoF joint assuming that the field
+    * {@code unitSuccessorTwist} has already been properly setup.
+    */
+   protected void setMotionSubspace()
    {
       ArrayList<Twist> unitTwists = new ArrayList<Twist>();
-      unitTwists.add(unitTwist);
+      unitTwists.add(unitSuccessorTwist);
 
-      this.motionSubspace = new GeometricJacobian(this, unitTwists, unitTwist.getExpressedInFrame());
+      this.motionSubspace = new GeometricJacobian(this, unitSuccessorTwist.getExpressedInFrame());
       this.motionSubspace.compute();
+   }
+
+   @Override
+   public void getUnitTwist(int dofIndex, Twist unitTwistToPack)
+   {
+      if (dofIndex != 0)
+         throw new ArrayIndexOutOfBoundsException("Illegal index: " + dofIndex + ", was expecting dofIndex equal to 0.");
+      unitTwistToPack.set(unitSuccessorTwist);
    }
 
    @Override

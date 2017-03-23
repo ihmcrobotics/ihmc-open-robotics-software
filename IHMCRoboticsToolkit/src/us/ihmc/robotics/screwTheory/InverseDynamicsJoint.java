@@ -321,6 +321,24 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
    public abstract GeometricJacobian getMotionSubspace();
 
    /**
+    * Retrieves the unit-twist corresponding to the {@code dofIndex}<sup>th</sup> degree of freedom
+    * of this joint.
+    * <p>
+    * Unit-twist are mostly used to compute a Jacobian.
+    * </p>
+    * <p>
+    * For instance, the unit-twist for a {@link RevoluteJoint} about the the y-axis is equal to [0,
+    * 1, 0, 0, 0, 0]<sup>T</sup> with {@code body = joint.getSuccessor()},
+    * {@code base = joint.getSuccessor()}, and expressed in the predecessor body-fixed frame.
+    * </p>
+    * 
+    * @param dofIndex index used to specify for which degree of freedom of this joint the unit-twist
+    *           should retrieved.
+    * @param unitTwistToPack a twist used to stored one of the unit-twists of this joint. Modified.
+    */
+   public abstract void getUnitTwist(int dofIndex, Twist unitTwistToPack);
+
+   /**
     * Update the motion subspace of this joint. It is only necessary for when the motion subspace
     * depends on this joint configuration. A good example is a four bar linkage, for which the
     * motion subspace depends on the linkage configuration.
