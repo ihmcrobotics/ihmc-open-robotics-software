@@ -215,7 +215,7 @@ public class FootStepPlanner
    public void getDesiredFootPosition(RobotSextant robotSextant, double swingTime, FramePoint framePointToPack)
    {
       twistCalculator.compute();
-      twistCalculator.getTwistOfBody(twistToPack, pelvis);
+      twistCalculator.getTwistOfBody(pelvis, twistToPack);
       twistToPack.changeFrame(ReferenceFrame.getWorldFrame());
       twistToPack.getAngularPart(angularVelocity);
 

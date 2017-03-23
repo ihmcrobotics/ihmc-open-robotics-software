@@ -157,8 +157,8 @@ public abstract class SimulatedIMURawSensorReader implements RawSensorReader
    {
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
-      twistCalculator.getTwistOfBody(twist, rigidBody);    // Twist of bodyCoM and not IMU!
-      spatialAccelerationCalculator.getAccelerationOfBody(spatialAcceleration, rigidBody);
+      twistCalculator.getTwistOfBody(rigidBody, twist);    // Twist of bodyCoM and not IMU!
+      spatialAccelerationCalculator.getAccelerationOfBody(rigidBody, spatialAcceleration);
       spatialAcceleration.changeFrame(worldFrame, twist, twist);
 
       updatePerfectOrientation();

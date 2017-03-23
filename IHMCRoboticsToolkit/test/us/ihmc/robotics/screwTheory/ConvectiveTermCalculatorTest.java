@@ -43,7 +43,7 @@ public class ConvectiveTermCalculatorTest
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector accelerationBack = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.getRelativeAcceleration(accelerationBack, jacobian.getBase(), jacobian.getEndEffector());
+      spatialAccelerationCalculator.getRelativeAcceleration(jacobian.getBase(), jacobian.getEndEffector(), accelerationBack);
 
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(accelerationBack, acceleration, 1e-12);
    }

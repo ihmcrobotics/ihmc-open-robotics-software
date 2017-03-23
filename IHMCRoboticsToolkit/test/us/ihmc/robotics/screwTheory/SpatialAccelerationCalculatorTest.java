@@ -65,7 +65,7 @@ public class SpatialAccelerationCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
-            spatialAccelerationCalculator.getAccelerationOfBody(actualAcceleration, body);
+            spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame);
@@ -133,7 +133,7 @@ public class SpatialAccelerationCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
-            spatialAccelerationCalculator.getAccelerationOfBody(actualAcceleration, body);
+            spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame);
@@ -181,7 +181,7 @@ public class SpatialAccelerationCalculatorTest
             RevoluteJoint joint = revoluteJoints.get(j);
             RigidBody body = joint.getSuccessor();
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
-            spatialAccelerationCalculator.getAccelerationOfBody(actualAcceleration, body);
+            spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector(bodyFrame, worldFrame, bodyFrame);
@@ -196,7 +196,7 @@ public class SpatialAccelerationCalculatorTest
             {
                // Need to account for the Coriolis acceleration
                Twist bodyTwist = new Twist();
-               twistCalculator.getTwistOfBody(bodyTwist, body);
+               twistCalculator.getTwistOfBody(body, bodyTwist);
                bodyTwist.changeFrame(bodyFrame);
                FrameVector coriolis = new FrameVector(bodyFrame);
                jointAxis.changeFrame(bodyFrame);
@@ -268,7 +268,7 @@ public class SpatialAccelerationCalculatorTest
             RigidBody bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
 
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
-            spatialAccelerationCalculator.getAccelerationOfBody(actualAcceleration, body);
+            spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
             SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
                                                                                                            twistCalculatorInFuture, rootAcceleration);
@@ -349,7 +349,7 @@ public class SpatialAccelerationCalculatorTest
             RigidBody body = joint.getSuccessor();
             RigidBody bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
-            spatialAccelerationCalculator.getAccelerationOfBody(actualAcceleration, body);
+            spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
             SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
                                                                                                            twistCalculatorInFuture, rootAcceleration);
@@ -359,7 +359,7 @@ public class SpatialAccelerationCalculatorTest
             Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0);
             FramePoint frameBodyFixedPoint = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
             FrameVector actualLinearAcceleration = new FrameVector();
-            spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, body, frameBodyFixedPoint);
+            spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(body, frameBodyFixedPoint, actualLinearAcceleration);
             FrameVector expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
                                                                                                          twistCalculatorInFuture, bodyFixedPoint,
                                                                                                          rootAcceleration);
@@ -442,7 +442,7 @@ public class SpatialAccelerationCalculatorTest
             RigidBody body = joint.getSuccessor();
             RigidBody bodyInFuture = jointsInFuture.get(jointIndex).getSuccessor();
             SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
-            spatialAccelerationCalculator.getAccelerationOfBody(actualAcceleration, body);
+            spatialAccelerationCalculator.getAccelerationOfBody(body, actualAcceleration);
 
             SpatialAccelerationVector expectedAcceleration = computeExpectedAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
                                                                                                            twistCalculatorInFuture, rootAcceleration);
@@ -455,7 +455,7 @@ public class SpatialAccelerationCalculatorTest
                RigidBody base = joints.get(baseJointIndex).getSuccessor();
                RigidBody baseInFuture = jointsInFuture.get(baseJointIndex).getSuccessor();
                SpatialAccelerationVector actualRelativeAcceleration = new SpatialAccelerationVector();
-               spatialAccelerationCalculator.getRelativeAcceleration(actualRelativeAcceleration, base, body);
+               spatialAccelerationCalculator.getRelativeAcceleration(base, body, actualRelativeAcceleration);
 
                SpatialAccelerationVector expectedRelativeAcceleration = computeExpectedRelativeAccelerationByFiniteDifference(dt, body, bodyInFuture, base,
                                                                                                                               baseInFuture, twistCalculator,
@@ -467,7 +467,7 @@ public class SpatialAccelerationCalculatorTest
                Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0);
                FramePoint frameBodyFixedPoint = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
                FrameVector actualLinearAcceleration = new FrameVector();
-               spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, base, body, frameBodyFixedPoint);
+               spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(base, body, frameBodyFixedPoint, actualLinearAcceleration);
                FrameVector expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt, body, bodyInFuture, base, baseInFuture,
                                                                                                             twistCalculator, twistCalculatorInFuture,
                                                                                                             bodyFixedPoint);
@@ -490,8 +490,8 @@ public class SpatialAccelerationCalculatorTest
       FramePoint point = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
       FramePoint pointInFuture = new FramePoint(bodyInFuture.getBodyFixedFrame(), bodyFixedPoint);
 
-      twistCalculator.getLinearVelocityOfBodyFixedPoint(pointLinearVelocity, body, point);
-      twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(pointLinearVelocityInFuture, bodyInFuture, pointInFuture);
+      twistCalculator.getLinearVelocityOfBodyFixedPoint(body, point, pointLinearVelocity);
+      twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(bodyInFuture, pointInFuture, pointLinearVelocityInFuture);
 
       FrameVector pointLinearAcceleration = new FrameVector(worldFrame);
       pointLinearAcceleration.sub(pointLinearVelocityInFuture.getVector(), pointLinearVelocity.getVector());
@@ -527,8 +527,8 @@ public class SpatialAccelerationCalculatorTest
       FramePoint point = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
       FramePoint pointInFuture = new FramePoint(bodyInFuture.getBodyFixedFrame(), bodyFixedPoint);
 
-      twistCalculator.getLinearVelocityOfBodyFixedPoint(pointLinearVelocity, base, body, point);
-      twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(pointLinearVelocityInFuture, baseInFuture, bodyInFuture, pointInFuture);
+      twistCalculator.getLinearVelocityOfBodyFixedPoint(base, body, point, pointLinearVelocity);
+      twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(baseInFuture, bodyInFuture, pointInFuture, pointLinearVelocityInFuture);
 
       FrameVector pointLinearAcceleration = new FrameVector(base.getBodyFixedFrame());
       pointLinearAcceleration.sub(pointLinearVelocityInFuture.getVector(), pointLinearVelocity.getVector());
@@ -549,8 +549,8 @@ public class SpatialAccelerationCalculatorTest
       Twist relativeTwist = new Twist();
       Twist relativeTwistInFuture = new Twist();
 
-      twistCalculator.getRelativeTwist(relativeTwist, base, body);
-      twistCalculatorInFuture.getRelativeTwist(relativeTwistInFuture, baseInFuture, bodyInFuture);
+      twistCalculator.getRelativeTwist(base, body, relativeTwist);
+      twistCalculatorInFuture.getRelativeTwist(baseInFuture, bodyInFuture, relativeTwistInFuture);
 
       Vector3D angularAcceleration = firstOrderFiniteDifference(dt, relativeTwist.getAngularPart(), relativeTwistInFuture.getAngularPart());
       Vector3D linearAcceleration = firstOrderFiniteDifference(dt, relativeTwist.getLinearPart(), relativeTwistInFuture.getLinearPart());
@@ -570,8 +570,8 @@ public class SpatialAccelerationCalculatorTest
       Twist bodyTwist = new Twist();
       Twist bodyTwistInFuture = new Twist();
 
-      twistCalculator.getTwistOfBody(bodyTwist, body);
-      twistCalculatorInFuture.getTwistOfBody(bodyTwistInFuture, bodyInFuture);
+      twistCalculator.getTwistOfBody(body, bodyTwist);
+      twistCalculatorInFuture.getTwistOfBody(bodyInFuture, bodyTwistInFuture);
 
       Vector3D angularAcceleration = firstOrderFiniteDifference(dt, bodyTwist.getAngularPart(), bodyTwistInFuture.getAngularPart());
       Vector3D linearAcceleration = firstOrderFiniteDifference(dt, bodyTwist.getLinearPart(), bodyTwistInFuture.getLinearPart());

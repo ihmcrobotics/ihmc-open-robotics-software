@@ -168,7 +168,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
            ControlFlowOutputPort<FrameVector> angularVelocityPort, double epsilon)
    {
       Twist estimationLinkTwist = new Twist();
-      twistCalculator.getTwistOfBody(estimationLinkTwist, estimationLink);
+      twistCalculator.getTwistOfBody(estimationLink, estimationLinkTwist);
       estimationLinkTwist.changeFrame(estimationFrame);
       FrameVector angularVelocityBack = new FrameVector(estimationFrame);
       estimationLinkTwist.getAngularPart(angularVelocityBack);
@@ -179,7 +179,7 @@ public class OrientationAndPositionFullRobotModelUpdaterTest
            SpatialAccelerationCalculator spatialAccelerationCalculator, ControlFlowOutputPort<FrameVector> angularAccelerationPort, double epsilon)
    {
       SpatialAccelerationVector estimationLinkAcceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.getAccelerationOfBody(estimationLinkAcceleration, estimationLink);
+      spatialAccelerationCalculator.getAccelerationOfBody(estimationLink, estimationLinkAcceleration);
       estimationLinkAcceleration.changeFrameNoRelativeMotion(estimationFrame);
       FrameVector angularAccelerationBack = new FrameVector(estimationFrame);
       estimationLinkAcceleration.getAngularPart(angularAccelerationBack);
