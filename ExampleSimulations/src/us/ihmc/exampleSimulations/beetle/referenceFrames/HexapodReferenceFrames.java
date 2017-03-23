@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.referenceFrames;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -17,6 +18,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 public class HexapodReferenceFrames implements ReferenceFrames
 {
+   
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final TranslationReferenceFrame centerOfFeetFrame;
    private final SegmentDependentList<RobotSextant, ReferenceFrame> feetFrames = new SegmentDependentList<>(RobotSextant.class);
@@ -104,5 +106,12 @@ public class HexapodReferenceFrames implements ReferenceFrames
    public PoseReferenceFrame getCenterOfMassFrameWithBodyZUpOrientation()
    {
       return centerOfMassFrameWithBodyZUpOrientation;
+   }
+
+   @Override
+   public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 }

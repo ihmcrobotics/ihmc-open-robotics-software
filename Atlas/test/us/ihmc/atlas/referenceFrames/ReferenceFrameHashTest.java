@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
@@ -211,8 +212,11 @@ public class ReferenceFrameHashTest
       {
          return comFrame2;
       }
-      
-      
-      
+
+      @Override
+      public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
+      {
+         return null;
+      }
    }
 }
