@@ -9,8 +9,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /*
@@ -81,7 +81,8 @@ public class SolarPanelSLIR
 
    public HandTrajectoryMessage getHandTrajectory()
    {
-      HandTrajectoryMessage retMaessage = new HandTrajectoryMessage(RobotSide.RIGHT, BaseForControl.WORLD, 2);
+      HandTrajectoryMessage retMaessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2);
+      retMaessage.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
 
       Point3D desiredPosition;
       Vector3D desiredLinearVelocity;
@@ -97,7 +98,7 @@ public class SolarPanelSLIR
       desiredOrientation = new Quaternion(startPose.getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
             
-      retMaessage.setTrajectoryPoint(0, 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMaessage.setTrajectoryPoint(0, 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
             
       endPose.setZRotation(endZRotationSLIR);
       desiredPosition = new Point3D(endPose.getDesiredHandPosition());
@@ -105,7 +106,7 @@ public class SolarPanelSLIR
       desiredOrientation = new Quaternion(endPose.getDesiredHandOrientation());
       desiredAngularVelocity = new Vector3D();
       
-      retMaessage.setTrajectoryPoint(1, motionTime - 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+      retMaessage.setTrajectoryPoint(1, motionTime - 1.0, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
       return retMaessage;
    }   
@@ -121,13 +122,13 @@ public class SolarPanelSLIR
       desiredOrientation.appendYawRotation(startPelvisYawSLIR);
       desiredAngularVelocity = new Vector3D();
       
-      retMaessage.setTrajectoryPoint(0, 1.0, desiredOrientation, desiredAngularVelocity);
+      retMaessage.setTrajectoryPoint(0, 1.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
             
       desiredOrientation = new Quaternion();
       desiredOrientation.appendYawRotation(endPelvisYawSLIR);
       desiredAngularVelocity = new Vector3D();
       
-      retMaessage.setTrajectoryPoint(1, motionTime - 1.0, desiredOrientation, desiredAngularVelocity);
+      retMaessage.setTrajectoryPoint(1, motionTime - 1.0, desiredOrientation, desiredAngularVelocity, ReferenceFrame.getWorldFrame());
 
       return retMaessage;
    }
