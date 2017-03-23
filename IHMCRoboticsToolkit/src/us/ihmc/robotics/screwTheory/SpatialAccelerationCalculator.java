@@ -258,21 +258,39 @@ public class SpatialAccelerationCalculator
 
    /**
     * Packs the spatial acceleration of the given {@code rigidBody}. The resulting spatial
-    * acceleration is the acceleration of the {@code rigidBody.getBodyFixedFrame()} with respect to
-    * {@code inertialFrame}, expressed in {@code rigidBody.getBodyFixedFrame()}.
+    * acceleration is the acceleration of the {@code body.getBodyFixedFrame()} with respect to
+    * {@code inertialFrame}, expressed in {@code body.getBodyFixedFrame()}.
+    * <p>
+    * Note that the resulting acceleration includes the root acceleration. To obtain the
+    * acceleration of a rigid-body without accounting for the root acceleration use
+    * {@link #getRelativeAcceleration(SpatialAccelerationVector, RigidBody, RigidBody)} giving
+    * {@link #getRootBody()} as the {@code base}.
+    * </p>
     * 
-    * @param spatialAccelerationToPack the spatial acceleration of the {@code rigidBody} to pack.
+    * @param spatialAccelerationToPack the spatial acceleration of the {@code body} to pack.
     *           Modified.
-    * @param rigidBody the rigid-body to get the acceleration of.
+    * @param body the rigid-body to get the acceleration of.
     */
    // FIXME Change the method signature to have spatialAccelerationToPack as the last argument.
-   public void getAccelerationOfBody(SpatialAccelerationVector spatialAccelerationToPack, RigidBody rigidBody)
+   public void getAccelerationOfBody(SpatialAccelerationVector spatialAccelerationToPack, RigidBody body)
    {
-      spatialAccelerationToPack.set(accelerations.get(rigidBody));
+      spatialAccelerationToPack.set(accelerations.get(body));
    }
 
+   /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the
+    * method {@link #getRelativeAcceleration(SpatialAccelerationVector, RigidBody, RigidBody)}.
+    */
    private final Twist twistOfCurrentWithRespectToNew = new Twist();
+   /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the
+    * method {@link #getRelativeAcceleration(SpatialAccelerationVector, RigidBody, RigidBody)}.
+    */
    private final Twist twistOfBodyWithRespectToBase = new Twist();
+   /**
+    * Temporary acceleration used for intermediate garbage free operations. To use only in the
+    * method {@link #getRelativeAcceleration(SpatialAccelerationVector, RigidBody, RigidBody)}.
+    */
    private final SpatialAccelerationVector baseAcceleration = new SpatialAccelerationVector();
 
    /**
@@ -313,7 +331,25 @@ public class SpatialAccelerationCalculator
       spatialAccelerationToPack.sub(baseAcceleration);
    }
 
-   private final SpatialAccelerationVector endEffectorAcceleration = new SpatialAccelerationVector();
+   /**
+    * Temporary acceleration used for intermediate garbage free operations. To use only in the
+    * method
+    * {@link #getLinearVelocityOfBodyFixedPoint(FrameVector, RigidBody, RigidBody, FramePoint)} and
+    * {@link #getLinearAccelerationOfBodyFixedPoint(FrameVector, RigidBody, FramePoint)}.
+    */
+   private final SpatialAccelerationVector accelerationForGetLinearAccelerationOfBodyFixedPoint = new SpatialAccelerationVector();
+   /**
+    * Temporary point used for intermediate garbage free operations. To use only in the method
+    * {@link #getLinearVelocityOfBodyFixedPoint(FrameVector, RigidBody, RigidBody, FramePoint)} and
+    * {@link #getLinearAccelerationOfBodyFixedPoint(FrameVector, RigidBody, FramePoint)}.
+    */
+   private final FramePoint pointForGetLinearAccelerationOfBodyFixedPoint = new FramePoint();
+   /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the method
+    * {@link #getLinearVelocityOfBodyFixedPoint(FrameVector, RigidBody, RigidBody, FramePoint)} and
+    * {@link #getLinearAccelerationOfBodyFixedPoint(FrameVector, RigidBody, FramePoint)}.
+    */
+   private final Twist twistForGetLinearAccelerationOfBodyFixedPoint = new Twist();
 
    /**
     * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is
@@ -332,34 +368,43 @@ public class SpatialAccelerationCalculator
     * @param body the rigid-body to which {@code bodyFixedPoint} belongs.
     * @param bodyFixedPoint the point to compute the linear acceleration of. Not modified.
     */
-   // FIXME This method looks somewhat suspicious when comparing with getRelativeAcceleration. Needs to be tested!
    // FIXME Change the method signature to have linearAccelerationToPack as the last argument.
    public void getLinearAccelerationOfBodyFixedPoint(FrameVector linearAccelerationToPack, RigidBody base, RigidBody body, FramePoint bodyFixedPoint)
    {
-      twistCalculator.getRelativeTwist(twistOfCurrentWithRespectToNew, base, body);
-      twistCalculator.getTwistOfBody(twistOfBodyWithRespectToBase, body);
+      FramePoint localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
+      Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
+      SpatialAccelerationVector localAcceleration = accelerationForGetLinearAccelerationOfBodyFixedPoint;
 
-      getAccelerationOfBody(baseAcceleration, base);
-      getAccelerationOfBody(endEffectorAcceleration, body);
+      getRelativeAcceleration(localAcceleration, base, body);
 
-      endEffectorAcceleration.changeFrame(baseAcceleration.getBodyFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
-      endEffectorAcceleration.sub(baseAcceleration);
-      bodyFixedPoint.changeFrame(endEffectorAcceleration.getExpressedInFrame());
+      ReferenceFrame baseFrame = localAcceleration.getBaseFrame();
+      twistCalculator.getRelativeTwist(localTwist, base, body);
+      localPoint.setIncludingFrame(bodyFixedPoint);
 
-      twistOfCurrentWithRespectToNew.changeFrame(endEffectorAcceleration.getExpressedInFrame());
-      endEffectorAcceleration.getAccelerationOfPointFixedInBodyFrame(twistOfCurrentWithRespectToNew, bodyFixedPoint, linearAccelerationToPack);
+      /*
+       * By changing the expressedInFrame from bodyFrame to baseFrame, there is no need to use the
+       * more expensive changeFrame(ReferenceFrame, Twist, Twist).
+       */
+      localAcceleration.getExpressedInFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
+      localAcceleration.changeFrameNoRelativeMotion(baseFrame);
+      localTwist.changeFrame(baseFrame);
+      localPoint.changeFrame(baseFrame);
+
+      localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
    }
 
    /**
     * Computes and packs the linear acceleration of the point {@code bodyFixedPoint} that is
-    * attached to {@code body} with respect to {@code rootBody}.
+    * attached to {@code body} with respect to {@code inertialFrame}.
+    * <p>
+    * Note that the root acceleration is considered in this calculation. To get the linear
+    * acceleration without considering the root acceleration use
+    * {@link #getLinearAccelerationOfBodyFixedPoint(FrameVector, RigidBody, RigidBody, FramePoint)}
+    * providing {@link #getRootBody()} as the {@code base}.
+    * </p>
     * <p>
     * WARNING: This method assumes that the internal memory of this {@code TwistCalculator} is
     * up-to-date. The update of the internal memory is done through the method {@link #compute()}.
-    * </p>
-    * <p>
-    * See
-    * {@link #getLinearAccelerationOfBodyFixedPoint(FrameVector, RigidBody, RigidBody, FramePoint)}.
     * </p>
     * 
     * @param linearAccelerationToPack the linear acceleration of the body fixed point. Modified.
@@ -369,7 +414,26 @@ public class SpatialAccelerationCalculator
    // FIXME Change the method signature to have linearAccelerationToPack as the last argument.
    public void getLinearAccelerationOfBodyFixedPoint(FrameVector linearAccelerationToPack, RigidBody body, FramePoint bodyFixedPoint)
    {
-      getLinearAccelerationOfBodyFixedPoint(linearAccelerationToPack, getRootBody(), body, bodyFixedPoint);
+      FramePoint localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
+      Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
+      SpatialAccelerationVector localAcceleration = accelerationForGetLinearAccelerationOfBodyFixedPoint;
+
+      getAccelerationOfBody(localAcceleration, body);
+
+      ReferenceFrame baseFrame = localAcceleration.getBaseFrame();
+      twistCalculator.getTwistOfBody(localTwist, body);
+      localPoint.setIncludingFrame(bodyFixedPoint);
+
+      /*
+       * By changing the expressedInFrame from bodyFrame to baseFrame, there is no need to use the
+       * more expensive changeFrame(ReferenceFrame, Twist, Twist).
+       */
+      localAcceleration.getExpressedInFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
+      localAcceleration.changeFrameNoRelativeMotion(baseFrame);
+      localTwist.changeFrame(baseFrame);
+      localPoint.changeFrame(baseFrame);
+
+      localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
    }
 
    /**

@@ -406,7 +406,8 @@ public class LinearAccelerationMeasurementModelElement extends AbstractMeasureme
    private void computeUnbiasedEstimatedMeasurement(SpatialAccelerationCalculator spatialAccelerationCalculator, FrameVector estimatedMeasurement)
    {
       tempFramePoint.setToZero(measurementFrame);
-      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(estimatedMeasurement, measurementLink, tempFramePoint);
+      RigidBody rootBody = spatialAccelerationCalculator.getRootBody();
+      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(estimatedMeasurement, rootBody, measurementLink, tempFramePoint);
       estimatedMeasurement.changeFrame(gravitationalAcceleration.getReferenceFrame());
       estimatedMeasurement.sub(gravitationalAcceleration);
       estimatedMeasurement.changeFrame(measurementFrame);
