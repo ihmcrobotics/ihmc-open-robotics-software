@@ -556,7 +556,7 @@ public class ScrewTestTools
       sixDoFJoint.setJointTwist(rootJointTwist);
    }
 
-   public static void doubleIntegrateAccelerations(SixDoFJoint sixDoFJoint, double dt)
+   public static void doubleIntegrateFromAcceleration(SixDoFJoint sixDoFJoint, double dt)
    {
       SpatialAccelerationVector deltaTwist = new SpatialAccelerationVector();
       sixDoFJoint.getJointAcceleration(deltaTwist);
