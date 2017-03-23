@@ -706,7 +706,6 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       humanoidReferenceFrames.updateFrames();
-      ReferenceFrame chestFrame = humanoidReferenceFrames.getChestFrame();
       RigidBody chest = fullRobotModel.getChest();
       
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
