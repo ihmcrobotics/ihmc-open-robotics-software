@@ -120,7 +120,7 @@ public class ProvidedMassMatrixToolRigidBody
       jointsToIgnore.remove(toolJoint);
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore,
-            spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
+                                                                spatialAccelerationCalculator, twistCalculator);
    }
 
    private final FramePoint toolFramePoint = new FramePoint();

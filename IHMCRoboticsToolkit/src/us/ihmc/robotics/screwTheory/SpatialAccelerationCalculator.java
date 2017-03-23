@@ -422,6 +422,17 @@ public class SpatialAccelerationCalculator
    }
 
    /**
+    * Whether rigid-body accelerations resulting from centrifugal and Coriolis effects are
+    * considered or ignored.
+    * 
+    * @return {@code true} if this spatial acceleration calculator considers the velocity terms.
+    */
+   public boolean areVelocitiesConsidered()
+   {
+      return doVelocityTerms;
+   }
+
+   /**
     * 
     */
    private final Twist twistForComputeOrGetTwistOfBody1 = new Twist();
