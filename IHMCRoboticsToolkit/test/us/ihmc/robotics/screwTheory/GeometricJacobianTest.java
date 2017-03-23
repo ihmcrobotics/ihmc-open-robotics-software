@@ -15,6 +15,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
 
 public class GeometricJacobianTest
 {
@@ -66,6 +67,58 @@ public class GeometricJacobianTest
       {
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random, -10.0, 10.0);
+         twistCalculator.compute();
+
+         int randomEndEffectorIndex = random.nextInt(numberOfJoints);
+         RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
+         GeometricJacobian rootJacobian = new GeometricJacobian(rootBody, randomEndEffector, randomEndEffector.getBodyFixedFrame());
+         rootJacobian.compute();
+
+         DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
+         ScrewTools.getJointVelocitiesMatrix(rootJacobian.getJointsInOrder(), jointVelocitiesMatrix);
+
+         twistCalculator.getRelativeTwist(rootBody, randomEndEffector, expectedTwist);
+         rootJacobian.getTwist(jointVelocitiesMatrix, actualTwist);
+
+         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+
+         RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
+         GeometricJacobian jacobian = new GeometricJacobian(randomBase, randomEndEffector, randomEndEffector.getBodyFixedFrame());
+         jacobian.compute();
+
+         jointVelocitiesMatrix.reshape(jacobian.getNumberOfColumns(), 1);
+         ScrewTools.getJointVelocitiesMatrix(jacobian.getJointsInOrder(), jointVelocitiesMatrix);
+
+         twistCalculator.getRelativeTwist(randomBase, randomEndEffector, expectedTwist);
+         jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
+   public void testAgainstTwistCalculatorFloatingJointRobot() throws Exception
+   {
+      Random random = new Random(4324342L);
+
+      int numberOfJoints = random.nextInt(100);
+
+      RandomFloatingChain floatingChain = new RandomFloatingChain(random, numberOfJoints);
+      SixDoFJoint floatingJoint = floatingChain.getRootJoint();
+      List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
+      List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
+
+      RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
+
+      Twist expectedTwist = new Twist();
+      Twist actualTwist = new Twist();
+
+      for (int i = 0; i < 1000; i++)
+      {
+         ScrewTestTools.setRandomPositionAndOrientation(floatingJoint, random);
+         ScrewTestTools.setRandomVelocity(floatingJoint, random);
+         ScrewTestTools.setRandomPositions(revoluteJoints, random);
+         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
          twistCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
