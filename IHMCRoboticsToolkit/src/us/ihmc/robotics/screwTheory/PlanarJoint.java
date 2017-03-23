@@ -23,8 +23,8 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    private final Quaternion jointRotation = new Quaternion();
    private final Vector3D jointTranslation = new Vector3D();
    private final Twist jointTwist;
-   public final SpatialAccelerationVector jointAcceleration;
-   protected final SpatialAccelerationVector jointAccelerationDesired;
+   private final SpatialAccelerationVector jointAcceleration;
+   private final SpatialAccelerationVector jointAccelerationDesired;
 
    private Wrench successorWrench;
 
