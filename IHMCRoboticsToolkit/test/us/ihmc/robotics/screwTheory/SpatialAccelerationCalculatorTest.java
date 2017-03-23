@@ -11,6 +11,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -354,6 +355,18 @@ public class SpatialAccelerationCalculatorTest
                                                                                                            twistCalculatorInFuture, rootAcceleration);
 
             assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-4);
+
+            Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0);
+            FramePoint frameBodyFixedPoint = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
+            FrameVector actualLinearAcceleration = new FrameVector();
+            spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, body, frameBodyFixedPoint);
+            FrameVector expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt, body, bodyInFuture, twistCalculator,
+                                                                                                         twistCalculatorInFuture, bodyFixedPoint,
+                                                                                                         rootAcceleration);
+
+            expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearAcceleration.getVector(), actualLinearAcceleration.getVector(), 1.0e-4);
+
          }
       }
    }
@@ -450,9 +463,79 @@ public class SpatialAccelerationCalculatorTest
                                                                                                                               rootAcceleration);
 
                assertSpatialAccelerationVectorEquals(expectedRelativeAcceleration, actualRelativeAcceleration, 1.0e-4);
+
+               Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0);
+               FramePoint frameBodyFixedPoint = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
+               FrameVector actualLinearAcceleration = new FrameVector();
+               spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, base, body, frameBodyFixedPoint);
+               FrameVector expectedLinearAcceleration = computeExpectedLinearAccelerationByFiniteDifference(dt, body, bodyInFuture, base, baseInFuture,
+                                                                                                            twistCalculator, twistCalculatorInFuture,
+                                                                                                            bodyFixedPoint);
+
+               expectedLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
+               EuclidCoreTestTools.assertTuple3DEquals("iteration: " + i + ", joint index: " + baseJointIndex, expectedLinearAcceleration.getVector(),
+                                                       actualLinearAcceleration.getVector(), 5.0e-5);
             }
          }
       }
+   }
+
+   public static FrameVector computeExpectedLinearAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture,
+                                                                                 TwistCalculator twistCalculator, TwistCalculator twistCalculatorInFuture,
+                                                                                 Point3D bodyFixedPoint, SpatialAccelerationVector rootAcceleration)
+   {
+      FrameVector pointLinearVelocity = new FrameVector();
+      FrameVector pointLinearVelocityInFuture = new FrameVector();
+
+      FramePoint point = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
+      FramePoint pointInFuture = new FramePoint(bodyInFuture.getBodyFixedFrame(), bodyFixedPoint);
+
+      twistCalculator.getLinearVelocityOfBodyFixedPoint(pointLinearVelocity, body, point);
+      twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(pointLinearVelocityInFuture, bodyInFuture, pointInFuture);
+
+      FrameVector pointLinearAcceleration = new FrameVector(worldFrame);
+      pointLinearAcceleration.sub(pointLinearVelocityInFuture.getVector(), pointLinearVelocity.getVector());
+      pointLinearAcceleration.scale(1.0 / dt);
+
+      // Need to account for the root acceleration
+      rootAcceleration.getBodyFrame().checkReferenceFrameMatch(rootAcceleration.getExpressedInFrame());
+      FrameVector rootAngularAcceleration = new FrameVector();
+      FrameVector rootLinearAcceleration = new FrameVector();
+      rootAcceleration.getAngularPart(rootAngularAcceleration);
+      rootAcceleration.getLinearPart(rootLinearAcceleration);
+
+      FramePoint bodyFixedPointToRoot = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
+      bodyFixedPointToRoot.changeFrame(rootAcceleration.getBodyFrame());
+      FrameVector crossPart = new FrameVector(rootAcceleration.getBodyFrame());
+      crossPart.cross(bodyFixedPointToRoot, rootAngularAcceleration);
+      crossPart.changeFrame(worldFrame);
+      rootLinearAcceleration.changeFrame(worldFrame);
+      pointLinearAcceleration.sub(crossPart);
+      pointLinearAcceleration.add(rootLinearAcceleration);
+
+      return pointLinearAcceleration;
+
+   }
+
+   public static FrameVector computeExpectedLinearAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture, RigidBody base,
+                                                                                 RigidBody baseInFuture, TwistCalculator twistCalculator,
+                                                                                 TwistCalculator twistCalculatorInFuture, Point3D bodyFixedPoint)
+   {
+      FrameVector pointLinearVelocity = new FrameVector();
+      FrameVector pointLinearVelocityInFuture = new FrameVector();
+
+      FramePoint point = new FramePoint(body.getBodyFixedFrame(), bodyFixedPoint);
+      FramePoint pointInFuture = new FramePoint(bodyInFuture.getBodyFixedFrame(), bodyFixedPoint);
+
+      twistCalculator.getLinearVelocityOfBodyFixedPoint(pointLinearVelocity, base, body, point);
+      twistCalculatorInFuture.getLinearVelocityOfBodyFixedPoint(pointLinearVelocityInFuture, baseInFuture, bodyInFuture, pointInFuture);
+
+      FrameVector pointLinearAcceleration = new FrameVector(base.getBodyFixedFrame());
+      pointLinearAcceleration.sub(pointLinearVelocityInFuture.getVector(), pointLinearVelocity.getVector());
+      pointLinearAcceleration.scale(1.0 / dt);
+
+      return pointLinearAcceleration;
+
    }
 
    private SpatialAccelerationVector computeExpectedRelativeAccelerationByFiniteDifference(double dt, RigidBody body, RigidBody bodyInFuture, RigidBody base,
