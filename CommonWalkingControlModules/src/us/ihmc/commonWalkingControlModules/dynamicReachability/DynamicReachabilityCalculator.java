@@ -4,6 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
+import us.ihmc.commons.PrintTools;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -17,7 +20,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -25,6 +30,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class DynamicReachabilityCalculator
 {
@@ -35,7 +41,7 @@ public class DynamicReachabilityCalculator
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
 
    private static final boolean VISUALIZE = true;
-   private static final double TWIDDLE_SIZE = 0.1;
+   private static final double TWIDDLE_SIZE = 0.05;
    
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -57,6 +63,9 @@ public class DynamicReachabilityCalculator
    private final BooleanYoVariable reachableWRTStanceFoot = new BooleanYoVariable("reachableWRTStanceFoot", registry);
    private final BooleanYoVariable reachableWRTFootstep = new BooleanYoVariable("reachableWRTFootstep", registry);
    private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
+
+   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfIterations", registry);
+   private final IntegerYoVariable maximumNumberOfIterations = new IntegerYoVariable("maximumNumberOfIterations", registry);
 
    private final SideDependentList<YoFramePoint> hipMinimumLocations = new SideDependentList<>();
    private final SideDependentList<YoFramePoint> hipMaximumLocations = new SideDependentList<>();
@@ -89,11 +98,13 @@ public class DynamicReachabilityCalculator
    private final YoFrameVector2d yoTransferGradient = new YoFrameVector2d("transferGradient", worldFrame, registry);
    private final YoFrameVector2d yoSwingGradient = new YoFrameVector2d("swingGradient", worldFrame, registry);
    private final DoubleYoVariable requiredAdjustment = new DoubleYoVariable("requiredAdjustment", registry);
+   private final YoFrameVector2d adjustmentSolution = new YoFrameVector2d("adjustmentSolution", worldFrame, registry);
 
    private final FrameVector transferGradient = new FrameVector();
    private final FrameVector swingGradient = new FrameVector();
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
+   private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
 
    private final FramePoint tempPoint = new FramePoint();
    private final FramePoint2d tempFinalCoM = new FramePoint2d();
@@ -109,6 +120,7 @@ public class DynamicReachabilityCalculator
       this.fullRobotModel = fullRobotModel;
 
       maximumDesiredKneeBend.set(0.3);
+      maximumNumberOfIterations.set(3);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -218,6 +230,8 @@ public class DynamicReachabilityCalculator
    {
       this.nextFootstep = nextFootstep;
    }
+   
+   //// TODO: 3/22/17  this needs to work in single support too 
 
    /**
     * Checks whether the current footstep is reachable given the desired footstep timing. If it is, does nothing. If it is not, modifies the
@@ -225,17 +239,31 @@ public class DynamicReachabilityCalculator
     */
    public void verifyAndEnsureReachability()
    {
+      numberOfIterations.set(0);
+
       boolean isStepReachable = checkReachabilityOfStep();
 
-      if (isStepReachable)
-         return;
+      while (!isStepReachable)
+      {
+         double requiredAdjustment = computeRequiredAdjustment();
+         this.requiredAdjustment.set(requiredAdjustment);
 
-      computeTransferGradient();
-      computeSwingGradient();
+         computeTransferGradient();
+         computeSwingGradient();
 
-      double requiredAdjustment = computeRequiredAdjustment();
-      this.requiredAdjustment.set(requiredAdjustment);
-      computeTimingAdjustment(requiredAdjustment);
+         computeTimingAdjustment(requiredAdjustment);
+
+         double initialTime = icpPlanner.getInitialTime();
+         icpPlanner.adjustTransferDurations(transferTimeAdjustment.getDoubleValue());
+         icpPlanner.adjustSwingDurations(swingTimeAdjustment.getDoubleValue());
+         icpPlanner.initializeForTransfer(initialTime);
+
+         isStepReachable = checkReachabilityOfStep();
+         numberOfIterations.increment();
+
+         if (numberOfIterations.getIntegerValue() > maximumNumberOfIterations.getIntegerValue())
+            break;
+      }
    }
 
    /**
@@ -264,6 +292,8 @@ public class DynamicReachabilityCalculator
    private final double requiredAdjustmentSafetyFactor = 1.0;
    private double computeRequiredAdjustment()
    {
+      // // FIXME: 3/22/17  this is differing from the reachability. Need to be using the hip points, not the center of mass
+
       RobotSide stanceSide = nextFootstep.getRobotSide().getOppositeSide();
       FramePoint upcomingAnklePoint = ankleLocations.get(stanceSide.getOppositeSide());
       FramePoint stanceAnklePoint = ankleLocations.get(stanceSide);
@@ -274,10 +304,9 @@ public class DynamicReachabilityCalculator
       tempVector2d.setByProjectionOntoXYPlaneIncludingFrame(tempVector);
 
       double stepDistance = tempVector2d.length();
-      //// FIXME: 3/22/17  these values are totally not correct
       double minimumCoMPosition = (Math.pow(stepDistance, 2.0) - Math.pow(maximumLegLength.getDoubleValue(), 2.0) + Math.pow(minimumLegLength.getDoubleValue(), 2.0)) / (2.0 * stepDistance);
       double maximumCoMPosition = (Math.pow(stepDistance, 2.0) - Math.pow(minimumLegLength.getDoubleValue(), 2.0) + Math.pow(maximumLegLength.getDoubleValue(), 2.0)) / (2.0 * stepDistance);
-      
+
       predictedCoMPosition.changeFrame(stepDirectionFrames.get(stanceSide));
       if (predictedCoMPosition.getX() < minimumCoMPosition)
       {
@@ -291,45 +320,61 @@ public class DynamicReachabilityCalculator
       return 0.0;
    }
 
-   // // TODO: 3/22/17 figure out some way to insure that both timing adjustments are happening in the same direction 
-   private final double perpindicularWeight = 5.0;
-   private final double timingAdjustmentWeight = 5.0;
-   private final DenseMatrix64F A = new DenseMatrix64F(3,3);
-   private final DenseMatrix64F b = new DenseMatrix64F(3,1);
+
+   private final double perpendicularWeight = 0.1;
+   private final double swingAdjustmentWeight = 5.0;
+   private final double transferAdjustmentWeight = 5.0;
+
    private final DenseMatrix64F solution = new DenseMatrix64F(3,1);
+
+   private final DenseMatrix64F solverInput_H = new DenseMatrix64F(2,2);
+   private final DenseMatrix64F solverInput_h = new DenseMatrix64F(2,1);
+   private final DenseMatrix64F solverInput_Aeq = new DenseMatrix64F(1, 2);
+   private final DenseMatrix64F solverInput_beq = new DenseMatrix64F(1, 1);
 
    private void computeTimingAdjustment(double requiredAdjustment)
    {
-      //// FIXME: 3/22/17
       RobotSide stanceSide = nextFootstep.getRobotSide().getOppositeSide();
       transferGradient.changeFrame(stepDirectionFrames.get(stanceSide));
       swingGradient.changeFrame(stepDirectionFrames.get(stanceSide));
 
-      A.zero();
-      b.zero();
       solution.zero();
+
+      solverInput_H.zero();
 
       double transferPerpendicularGradient = transferGradient.getY();
       double transferParallelGradient = transferGradient.getX();
       double swingPerpendicularGradient = swingGradient.getY();
       double swingParallelGradient = swingGradient.getX();
 
-      A.set(0, 0, perpindicularWeight * Math.pow(transferPerpendicularGradient, 2.0) + timingAdjustmentWeight);
-      A.set(0, 1, perpindicularWeight * transferPerpendicularGradient * swingPerpendicularGradient);
-      A.set(0, 2, transferParallelGradient);
-      A.set(1, 0, perpindicularWeight * transferPerpendicularGradient * swingPerpendicularGradient);
-      A.set(1, 1, perpindicularWeight * Math.pow(swingPerpendicularGradient, 2.0) + timingAdjustmentWeight);
-      A.set(1, 2, swingParallelGradient);
-      A.set(2, 0, transferPerpendicularGradient);
-      A.set(2, 1, transferParallelGradient);
+      solverInput_H.set(0, 0, perpendicularWeight * Math.pow(transferPerpendicularGradient, 2.0) + transferAdjustmentWeight);
+      solverInput_H.set(0, 1, perpendicularWeight * transferPerpendicularGradient * swingPerpendicularGradient);
+      solverInput_H.set(1, 0, perpendicularWeight * transferPerpendicularGradient * swingPerpendicularGradient);
+      solverInput_H.set(1, 1, perpendicularWeight * Math.pow(swingPerpendicularGradient, 2.0) + swingAdjustmentWeight);
 
-      b.set(2, 0, requiredAdjustment);
+      solverInput_Aeq.set(0, 0, transferParallelGradient);
+      solverInput_Aeq.set(0, 1, swingParallelGradient);
+      solverInput_beq.set(0, 0, requiredAdjustment);
 
-      solver.setA(A);
-      solver.solve(b, solution);
+      activeSetSolver.clear();
+
+      activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
+      activeSetSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+      int numberOfIterations = activeSetSolver.solve(solution);
+
+      if (MatrixTools.containsNaN(solution))
+      {
+         NoConvergenceException e = new NoConvergenceException(numberOfIterations);
+         e.printStackTrace();
+         PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+      }
 
       transferTimeAdjustment.set(solution.get(0, 0));
       swingTimeAdjustment.set(solution.get(1, 0));
+
+      adjustmentSolution.setX(transferParallelGradient * transferTimeAdjustment.getDoubleValue() + swingParallelGradient * swingTimeAdjustment.getDoubleValue());
+      adjustmentSolution.setY(transferPerpendicularGradient * transferTimeAdjustment.getDoubleValue() +
+            swingPerpendicularGradient * swingTimeAdjustment.getDoubleValue());
    }
 
 
@@ -479,50 +524,50 @@ public class DynamicReachabilityCalculator
 
    private void computeTransferGradient()
    {
-      double currentTransferDuration = icpPlanner.getCurrentTransferDuration();
       double currentInitialTime = icpPlanner.getInitialTime();
+      double variation = TWIDDLE_SIZE;
 
-      double modifiedTransferDuration = currentTransferDuration - TWIDDLE_SIZE;
-
-      icpPlanner.setCurrentTransferDuration(modifiedTransferDuration);
+      icpPlanner.adjustTransferDurations(variation);
       icpPlanner.initializeForTransfer(currentInitialTime);
 
       icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
 
-      icpPlanner.setCurrentTransferDuration(currentTransferDuration);
+      icpPlanner.adjustTransferDurations(-variation);
       icpPlanner.initializeForTransfer(currentInitialTime);
 
+      predictedCoMPosition.changeFrame(worldFrame);
+      tempPoint.setToZero(worldFrame);
       tempPoint.set(predictedCoMPosition);
       tempPoint.setZ(0.0);
       transferGradient.setToZero(worldFrame);
       transferGradient.setXY(adjustedCoMPosition);
       transferGradient.sub(tempPoint);
-      transferGradient.scale(1.0 / -TWIDDLE_SIZE);
+      transferGradient.scale(1.0 / variation);
 
       yoTransferGradient.setByProjectionOntoXYPlane(transferGradient);
    }
 
    private void computeSwingGradient()
    {
-      double currentSwingDuration = icpPlanner.getCurrentSwingDuration();
       double currentInitialTime = icpPlanner.getInitialTime();
+      double variation = TWIDDLE_SIZE;
 
-      double modifiedSwingDuration = currentSwingDuration - TWIDDLE_SIZE;
-
-      icpPlanner.setCurrentTransferDuration(modifiedSwingDuration);
+      icpPlanner.adjustSwingDurations(variation);
       icpPlanner.initializeForTransfer(currentInitialTime);
 
       icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
 
-      icpPlanner.setCurrentTransferDuration(currentSwingDuration);
+      icpPlanner.adjustSwingDurations(-variation);
       icpPlanner.initializeForTransfer(currentInitialTime);
 
+      predictedCoMPosition.changeFrame(worldFrame);
+      tempPoint.setToZero(worldFrame);
       tempPoint.set(predictedCoMPosition);
       tempPoint.setZ(0.0);
       swingGradient.setToZero(worldFrame);
       swingGradient.setXY(adjustedCoMPosition);
       swingGradient.sub(tempPoint);
-      swingGradient.scale(1.0 / -TWIDDLE_SIZE);
+      swingGradient.scale(1.0 / variation);
 
       yoSwingGradient.setByProjectionOntoXYPlane(swingGradient);
    }

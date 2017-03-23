@@ -1217,49 +1217,35 @@ public class ICPPlanner
    public double getCurrentStateDuration()
    {
       if (isDoubleSupport.getBooleanValue())
-         return getCurrentTransferDuration();
+         return transferDurations.get(0).getDoubleValue();
       else
-         return getCurrentSwingDuration();
+         return swingDurations.get(0).getDoubleValue();
    }
 
    /**
-    * Gets the duration of the current transfer state.
-    *
-    * @return the current transfer duration
+    * Adjusts all the transfer phase durations
+    * @param timingAdjustment
     */
-   public double getCurrentTransferDuration()
+   public void adjustTransferDurations(double timingAdjustment)
    {
-      return transferDurations.get(0).getDoubleValue();
+      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
+      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
+      {
+         transferDurations.get(stepIndex).add(timingAdjustment);
+      }
    }
 
    /**
-    * Gets the duration of the current swing state.
-    *
-    * @return the current swing duration
+    * Adjusts all the swing phase durations
+    * @param timingAdjustment
     */
-   public double getCurrentSwingDuration()
+   public void adjustSwingDurations(double timingAdjustment)
    {
-      return swingDurations.get(0).getDoubleValue();
-   }
-
-   /**
-    * Changes the duration for the current transfer duration.
-    *
-    * @param duration
-    */
-   public void setCurrentTransferDuration(double duration)
-   {
-      transferDurations.get(0).set(duration);
-   }
-
-   /**
-    * Changes the duration for the current swing duration.
-    *
-    * @param duration
-    */
-   public void setCurrentSwingDuration(double duration)
-   {
-      swingDurations.get(0).set(duration);
+      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
+      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
+      {
+         swingDurations.get(stepIndex).add(timingAdjustment);
+      }
    }
 
    /**
