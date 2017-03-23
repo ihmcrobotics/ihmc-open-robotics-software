@@ -1217,9 +1217,49 @@ public class ICPPlanner
    public double getCurrentStateDuration()
    {
       if (isDoubleSupport.getBooleanValue())
-         return transferDurations.get(0).getDoubleValue();
+         return getCurrentTransferDuration();
       else
-         return swingDurations.get(0).getDoubleValue();
+         return getCurrentSwingDuration();
+   }
+
+   /**
+    * Gets the duration of the current transfer state.
+    *
+    * @return the current transfer duration
+    */
+   public double getCurrentTransferDuration()
+   {
+      return transferDurations.get(0).getDoubleValue();
+   }
+
+   /**
+    * Gets the duration of the current swing state.
+    *
+    * @return the current swing duration
+    */
+   public double getCurrentSwingDuration()
+   {
+      return swingDurations.get(0).getDoubleValue();
+   }
+
+   /**
+    * Changes the duration for the current transfer duration.
+    *
+    * @param duration
+    */
+   public void setCurrentTransferDuration(double duration)
+   {
+      transferDurations.get(0).set(duration);
+   }
+
+   /**
+    * Changes the duration for the current swing duration.
+    *
+    * @param duration
+    */
+   public void setCurrentSwingDuration(double duration)
+   {
+      swingDurations.get(0).set(duration);
    }
 
    /**
@@ -1233,6 +1273,16 @@ public class ICPPlanner
    public void setFinalTransferDuration(double duration)
    {
       finalTransferDuration.set(duration);
+   }
+
+   /**
+    * Gets the time at which the swing phase is initalized
+    *
+    * @return initialTime
+    */
+   public double getInitialTime()
+   {
+      return initialTime.getDoubleValue();
    }
 
    /**
