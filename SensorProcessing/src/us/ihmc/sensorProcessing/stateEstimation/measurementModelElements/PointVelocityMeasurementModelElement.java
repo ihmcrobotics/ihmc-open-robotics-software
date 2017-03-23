@@ -163,7 +163,7 @@ public class PointVelocityMeasurementModelElement extends AbstractMeasurementMod
 
       try
       {
-         twistCalculator.getTwistOfBody(tempTwist, stationaryPointLink);
+         twistCalculator.getTwistOfBody(stationaryPointLink, tempTwist);
       }
       catch(Exception e)
       {

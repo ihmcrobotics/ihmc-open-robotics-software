@@ -193,7 +193,7 @@ public class IMUBiasStateEstimator implements IMUBiasProvider
          {
             RigidBody trustedFoot = trustedFeet.get(footIndex);
 
-            twistCalculator.getRelativeTwist(twist, trustedFoot, measurementLink);
+            twistCalculator.getRelativeTwist(trustedFoot, measurementLink, twist);
             feetToIMUAngularVelocityMagnitude += twist.getAngularPartMagnitude();
             feetToIMULinearVelocityMagnitude += twist.getLinearPartMagnitude();
          }

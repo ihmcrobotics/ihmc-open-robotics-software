@@ -77,7 +77,7 @@ public class CentroidalMomentumRateADotVTerm
 
          RigidBodyInertia inertia = rigidBody.getInertia(); // I
 
-         twistCalculator.getRelativeTwist(tempTwist, rootBody, rigidBody);
+         twistCalculator.getRelativeTwist(rootBody, rigidBody, tempTwist);
 
          tempTwist.changeFrame(inertia.getExpressedInFrame());
 
@@ -106,7 +106,7 @@ public class CentroidalMomentumRateADotVTerm
          CommonOps.add(aDotV, leftSide.toDenseMatrix(), aDotV);
          //Right Side
          // \dot{J} * v : Note: during creation of spatialAccelerationCalculator, the boolean for setting acceleration term to zero was set to true.
-         spatialAccelerationCalculator.getAccelerationOfBody(tempSpatialAcceleration, rigidBody);
+         spatialAccelerationCalculator.getAccelerationOfBody(rigidBody, tempSpatialAcceleration);
 
          inertia.changeFrame(tempSpatialAcceleration.getExpressedInFrame()); // easier to change the frame of inertia than the spatial acceleration
 

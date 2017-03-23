@@ -1,5 +1,6 @@
 package us.ihmc.javaFXToolkit.graphing;
 
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -131,6 +132,8 @@ public class JavaFXHeatmapGraph
 
             plotXYHeatmap();
             
+            drawGridLines();
+            
             graphicsContext.setStroke(colors.getLabelColor());
             graphicsContext.strokeText(x.getName(), canvas.getWidth() / 2, canvas.getHeight() - 5);
             graphicsContext.rotate(-90.0);
@@ -141,6 +144,65 @@ public class JavaFXHeatmapGraph
             graphicsContext.restore();
          }
       });
+   }
+   
+   private void drawGridLines()
+   {
+//      // change grid line scale from 1m to 10cm ehn below 10m
+//      Point2D gridSize = new Point2D();
+//      gridSize.set(calculateGridSizePixels(transformToCanvasSpace.getScaleX()), calculateGridSizePixels(transformToCanvasSpace.getScaleY()));
+//      
+//      upperLeftCorner.changeFrame(pixelsFrame);
+//      lowerRightCorner.changeFrame(pixelsFrame);
+//
+//      focusPoint.changeFrame(pixelsFrame);
+//      double gridStart = (Math.round(focusPoint.getX() / gridSize.getX()) - 20.0) * gridSize.getX();
+//      double gridEnd = (Math.round(focusPoint.getX() / gridSize.getX()) + 20.0) * gridSize.getX();
+//
+//      for (double gridX = gridStart; gridX < gridEnd; gridX += gridSize.getX())
+//      {
+//         gridLinePencil.setIncludingFrame(pixelsFrame, gridX, 0.0);
+//
+//         gridLinePencil.changeFrame(metersFrame);
+//         gridSize.changeFrame(metersFrame);
+//         int nthGridLineFromOrigin = (int) (Math.abs(gridLinePencil.getX()) / gridSize.getX());
+//         if (MathTools.epsilonEquals(Math.abs(gridLinePencil.getX()) % gridSize.getX(), gridSize.getX(), 1e-7))
+//         {
+//            nthGridLineFromOrigin++;
+//         }
+//         applyParametersForGridline(graphics2d, nthGridLineFromOrigin);
+//
+//         gridLinePencil.changeFrame(pixelsFrame);
+//         gridSize.changeFrame(pixelsFrame);
+//         tempGridLine.set(gridLinePencil.getX(), gridLinePencil.getY(), 0.0, 1.0);
+//         graphics2d.drawLine(pixelsFrame, tempGridLine);
+//      }
+   }
+
+   private double calculateGridSizePixels(double pixelsPerMeter)
+   {
+      double medianGridWidthInPixels = Toolkit.getDefaultToolkit().getScreenResolution();
+      double desiredMeters = medianGridWidthInPixels / pixelsPerMeter;
+      double decimalPlace = Math.log10(desiredMeters);
+      double orderOfMagnitude = Math.floor(decimalPlace);
+      double nextOrderOfMagnitude = Math.pow(10, orderOfMagnitude + 1);
+      double percentageToNextOrderOfMagnitude = desiredMeters / nextOrderOfMagnitude;
+      
+      double remainder = percentageToNextOrderOfMagnitude % 0.5;
+      double roundToNearestPoint5 = remainder >= 0.25 ? percentageToNextOrderOfMagnitude + (0.5 - remainder) : percentageToNextOrderOfMagnitude - remainder;
+      
+      double gridSizeMeters;
+      if (roundToNearestPoint5 > 0.0)
+      {
+         gridSizeMeters = nextOrderOfMagnitude * roundToNearestPoint5;
+      }
+      else
+      {
+         gridSizeMeters = Math.pow(10, orderOfMagnitude);
+      }
+      double gridSizePixels = gridSizeMeters * pixelsPerMeter;
+      
+      return gridSizePixels;
    }
 
    private void plotXYHeatmap()

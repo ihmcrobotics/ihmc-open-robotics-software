@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController;
 
+import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -87,19 +88,20 @@ public class WalkingCommandConsumer
       RigidBody head = controllerToolbox.getFullRobotModel().getHead();
       RigidBody chest = controllerToolbox.getFullRobotModel().getChest();
       RigidBody pelvis = controllerToolbox.getFullRobotModel().getPelvis();
+      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
       ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
       ReferenceFrame headBodyFrame = head.getBodyFixedFrame();
 
-      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
-      this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame);
+      this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame, trajectoryFrames);
+      this.headManager = managerFactory.getOrCreateRigidBodyManager(head, chest, headBodyFrame, chestBodyFrame, trajectoryFrames);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
          ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
          handManagers.put(robotSide, handManager);
       }
 
