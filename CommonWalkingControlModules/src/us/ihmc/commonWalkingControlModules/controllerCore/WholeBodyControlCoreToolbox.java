@@ -144,7 +144,7 @@ public class WholeBodyControlCoreToolbox
    {
       WholeBodyControlCoreToolbox ret = new WholeBodyControlCoreToolbox(fullRobotModel, null, controlledJoints, momentumOptimizationSettings,
                                                                         jointPrivilegedConfigurationParameters, referenceFrames, controlDT, Double.NaN,
-                                                                        geometricJacobianHolder, twistCalculator, null, null, null);
+                                                                        geometricJacobianHolder, twistCalculator, null, null, new YoVariableRegistry("Dummy"));
       return ret;
    }
 
