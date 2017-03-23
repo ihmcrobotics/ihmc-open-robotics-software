@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
@@ -52,11 +54,6 @@ public class TwistCalculator
     * List of out-of-date twists used to recycle memory.
     */
    private final List<Twist> unnassignedTwists = new ArrayList<>();
-
-   /**
-    * Temporary twist used for intermediate garbage free operations.
-    */
-   private final Twist tempTwist = new Twist();
 
    /**
     * Creates a new {@code TwistCalculator} that will compute all the twists of all the rigid-bodies
@@ -136,6 +133,12 @@ public class TwistCalculator
    }
 
    /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the method
+    * {@link #getRelativeTwist(Twist, RigidBody, RigidBody)}.
+    */
+   private final Twist twistForGetRelativeTwist = new Twist();
+
+   /**
     * Computes and packs the twist of the given {@code body} relative to the given {@code base}.
     * <p>
     * The resulting twist is the twist of the {@code body.getBodyFixedFrame()}, with respect to
@@ -161,9 +164,75 @@ public class TwistCalculator
    public void getRelativeTwist(Twist twistToPack, RigidBody base, RigidBody body)
    {
       twistToPack.set(computeOrGetTwistOfBody(body));
-      tempTwist.set(computeOrGetTwistOfBody(base));
-      tempTwist.changeFrame(twistToPack.getExpressedInFrame());
-      twistToPack.sub(tempTwist);
+      twistForGetRelativeTwist.set(computeOrGetTwistOfBody(base));
+      twistForGetRelativeTwist.changeFrame(twistToPack.getExpressedInFrame());
+      twistToPack.sub(twistForGetRelativeTwist);
+   }
+
+   /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the method
+    * {@link #getLinearVelocityOfBodyFixedPoint(FrameVector, RigidBody, RigidBody, FramePoint)}.
+    */
+   private final Twist twistForGetLinearVelocityOfBodyFixedPoint = new Twist();
+   /**
+    * Temporary point used for intermediate garbage free operations. To use only in the method
+    * {@link #getLinearVelocityOfBodyFixedPoint(FrameVector, RigidBody, RigidBody, FramePoint)}.
+    */
+   private final FramePoint pointForGetLinearVelocityOfBodyFixedPoint = new FramePoint();
+
+   /**
+    * Computes and packs the linear velocity of a point defined by {@code bodyFixedPoint} that is
+    * fixed to the given {@code body}.
+    * <p>
+    * The result will be the linear velocity of the {@code bodyFixedPoint} with respect to the
+    * {@code inertialFrame}. The vector is expressed in {@code inertialFrame}.
+    * </p>
+    * 
+    * @param linearVelocityToPack the linear velocity of the body fixed point with respect to the
+    *           inertial frame. Modified.
+    * @param body the rigid-body to which {@code bodyFixedPoint} is attached to.
+    * @param bodyFixedPoint the coordinates of the point attached to {@code body} that linear
+    *           velocity is to be computed. Not modified.
+    */
+   public void getLinearVelocityOfBodyFixedPoint(FrameVector linearVelocityToPack, RigidBody body, FramePoint bodyFixedPoint)
+   {
+      Twist twist = twistForGetLinearVelocityOfBodyFixedPoint;
+
+      getTwistOfBody(twist, body);
+      ReferenceFrame baseFrame = twist.getBaseFrame();
+      twist.changeFrame(baseFrame);
+
+      pointForGetLinearVelocityOfBodyFixedPoint.setIncludingFrame(bodyFixedPoint);
+      pointForGetLinearVelocityOfBodyFixedPoint.changeFrame(baseFrame);
+      twist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, pointForGetLinearVelocityOfBodyFixedPoint);
+   }
+
+   /**
+    * Computes and packs the linear velocity of a point defined by {@code bodyFixedPoint} that is
+    * fixed to the given {@code body} with respect to the given {@code base}.
+    * <p>
+    * The result will be the linear velocity of the {@code bodyFixedPoint} with respect to the
+    * {@code base.getBodyFixedFrame()}. The vector is expressed in {@code base.getBodyFixedFrame()}.
+    * </p>
+    * 
+    * @param linearVelocityToPack the linear velocity of the body fixed point with respect to the
+    *           inertial frame. Modified.
+    * @param base the rigid-body with respect to which the linear velocity is to be computed.
+    * @param body the rigid-body to which {@code bodyFixedPoint} is attached to.
+    * @param bodyFixedPoint the coordinates of the point attached to {@code body} that linear
+    *           velocity is to be computed. Not modified.
+    */
+   public void getLinearVelocityOfBodyFixedPoint(FrameVector linearVelocityToPack, RigidBody base, RigidBody body, FramePoint bodyFixedPoint)
+   {
+      Twist twist = twistForGetLinearVelocityOfBodyFixedPoint;
+
+      getRelativeTwist(twist, base, body);
+      ReferenceFrame baseFrame = twist.getBaseFrame();
+      twist.changeFrame(baseFrame);
+
+      pointForGetLinearVelocityOfBodyFixedPoint.setIncludingFrame(bodyFixedPoint);
+      pointForGetLinearVelocityOfBodyFixedPoint.changeFrame(baseFrame);
+      twist.getLinearVelocityOfPointFixedInBodyFrame(linearVelocityToPack, pointForGetLinearVelocityOfBodyFixedPoint);
    }
 
    /**
@@ -176,6 +245,12 @@ public class TwistCalculator
    {
       return rootBody;
    }
+
+   /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the method
+    * {@link #computeOrGetTwistOfBody(RigidBody)}.
+    */
+   private final Twist twistForComputeOrGetTwistOfBody = new Twist();
 
    /**
     * Retrieves or computes the twist with respect to the inertial frame of the given
@@ -217,11 +292,11 @@ public class TwistCalculator
          Twist twistOfPredecessor = computeOrGetTwistOfBody(predecessor);
          twist = assignAndGetEmptyTwist(rigidBody);
 
-         parentJoint.getSuccessorTwist(tempTwist);
+         parentJoint.getSuccessorTwist(twistForComputeOrGetTwistOfBody);
 
          twist.set(twistOfPredecessor);
          twist.changeFrame(bodyFrame);
-         twist.add(tempTwist);
+         twist.add(twistForComputeOrGetTwistOfBody);
       }
 
       return twist;
