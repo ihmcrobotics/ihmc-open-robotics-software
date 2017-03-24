@@ -16,6 +16,7 @@ import javax.swing.table.DefaultTableModel;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.robotDataLogger.Announcement;
+import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 
 public class LogProducerDisplay extends JFrame
 {

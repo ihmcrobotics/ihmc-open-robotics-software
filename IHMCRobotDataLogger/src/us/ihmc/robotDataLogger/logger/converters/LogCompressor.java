@@ -20,7 +20,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import us.ihmc.idl.serializers.extra.PropertiesSerializer;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.LogPropertiesPubSubType;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.tools.compression.SnappyUtils;

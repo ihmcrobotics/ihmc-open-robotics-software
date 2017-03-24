@@ -25,8 +25,8 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
 import us.ihmc.robotDataLogger.LogDataHeader;
-import us.ihmc.robotDataLogger.gui.GUICaptureHandler;
-import us.ihmc.robotDataLogger.gui.GUICaptureReceiver;
+import us.ihmc.robotDataLogger.guiRecorder.GUICaptureHandler;
+import us.ihmc.robotDataLogger.guiRecorder.GUICaptureReceiver;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
 

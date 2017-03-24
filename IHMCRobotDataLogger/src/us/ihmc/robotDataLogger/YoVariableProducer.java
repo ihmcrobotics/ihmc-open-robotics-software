@@ -9,7 +9,8 @@ import java.util.zip.CRC32;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
-import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
+import us.ihmc.robotDataLogger.handshake.SummaryProvider;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.util.PeriodicThreadScheduler;

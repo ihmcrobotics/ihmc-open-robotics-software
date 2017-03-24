@@ -8,8 +8,8 @@ import java.nio.channels.FileChannel;
 
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
-import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
-import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
+import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 
 public class YoVariableLogCropper extends YoVariableLogReader
 {

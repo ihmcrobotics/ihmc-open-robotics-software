@@ -9,8 +9,8 @@ import java.util.List;
 
 import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataLogger.LogProperties;
-import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
-import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
+import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.simulationconstructionset.PlaybackListener;

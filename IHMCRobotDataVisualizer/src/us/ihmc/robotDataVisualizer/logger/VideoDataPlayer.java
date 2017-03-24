@@ -21,8 +21,8 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataLogger.LogProperties;
-import us.ihmc.robotDataLogger.logger.converters.VideoConverter;
-import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
+import us.ihmc.robotDataVisualizer.logger.converters.VideoConverter;
+import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 
 public class VideoDataPlayer
 {

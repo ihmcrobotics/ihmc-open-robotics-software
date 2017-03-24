@@ -17,11 +17,12 @@ import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.handshake.SummaryProvider;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandShakeBuilder;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
+import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.robotDataLogger.logger.LogSettings;
-import us.ihmc.robotDataLogger.rtps.DataProducerListener;
 import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
@@ -34,7 +35,7 @@ import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 
-public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, DataProducerListener
+public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, VariableChangedListener
 {
    private static final int VARIABLE_BUFFER_CAPACITY = 128;
    private static final int CHANGED_BUFFER_CAPACITY = 128;

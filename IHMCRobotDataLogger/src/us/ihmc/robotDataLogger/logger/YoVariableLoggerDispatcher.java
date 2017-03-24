@@ -6,8 +6,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import com.martiansoftware.jsap.JSAPException;
 
 import us.ihmc.robotDataLogger.Announcement;
+import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
-import us.ihmc.robotDataLogger.rtps.LogAnnouncementListener;
 
 public class YoVariableLoggerDispatcher implements LogAnnouncementListener
 {

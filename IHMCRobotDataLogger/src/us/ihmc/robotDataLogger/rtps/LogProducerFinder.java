@@ -1,16 +1,11 @@
 package us.ihmc.robotDataLogger.rtps;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
 import us.ihmc.commons.PrintTools;
-import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
 import us.ihmc.robotDataLogger.Announcement;
-import us.ihmc.robotDataLogger.rtps.LogProducerDisplay.LogSessionFilter;
+import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
 
 public class LogProducerFinder
 {
@@ -24,14 +19,6 @@ public class LogProducerFinder
    
    public Announcement getAnnounceRequestByIP(String IPAdress)
    {
-
-      return getAnnounceRequestByIP(IPAdress, 100000000);
-   }
-
-   public Announcement getAnnounceRequestByIP(String IPAdress, int timeOut)
-   {
-      int timeOutCounter = 0;
-      
       PrintTools.info("Looking for: " + IPAdress + " to come online");
       Announcement announcement;
       try

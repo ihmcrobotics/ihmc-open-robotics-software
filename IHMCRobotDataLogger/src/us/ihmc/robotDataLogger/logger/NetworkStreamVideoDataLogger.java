@@ -12,8 +12,8 @@ import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
 import us.ihmc.robotDataLogger.LogProperties;
-import us.ihmc.robotDataLogger.gui.GUICaptureHandler;
-import us.ihmc.robotDataLogger.gui.GUICaptureReceiver;
+import us.ihmc.robotDataLogger.guiRecorder.GUICaptureHandler;
+import us.ihmc.robotDataLogger.guiRecorder.GUICaptureReceiver;
 
 public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements GUICaptureHandler
 {

@@ -11,14 +11,14 @@ import java.util.Arrays;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
-import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.CameraAnnouncement;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClient;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
+import us.ihmc.robotDataLogger.handshake.LogHandshake;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
 import us.ihmc.tools.compression.SnappyUtils;
 
