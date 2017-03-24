@@ -1,7 +1,6 @@
-package us.ihmc.simulationconstructionset.util.math.functionGenerator;
+package us.ihmc.robotics.math.functionGenerator;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.math.functionGenerator.YoRandomPulseGenerator;
 import us.ihmc.robotics.robotController.RobotController;
 
 public class YoRandomPulseGeneratorVisualizer implements RobotController
