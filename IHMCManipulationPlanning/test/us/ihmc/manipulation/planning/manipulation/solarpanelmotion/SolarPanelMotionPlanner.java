@@ -127,8 +127,9 @@ public class SolarPanelMotionPlanner
       {
       case ReadyPose:
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.ReadyPose);
+         SolarPanelWholeBodyPose wholebodyReadyPose = new SolarPanelWholeBodyPose(readyPose, 0.0, 0.0);
+         wholebodyReadyPose.getWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage, 3.0);
          
-         //this.wholeBodyTrajectoryMessage.setHandTrajectoryMessage(readyPose.getHandTrajectoryMessage(motionTime));
          debugPoseOne = readyPose.getPose();
          
          break;
@@ -157,6 +158,7 @@ public class SolarPanelMotionPlanner
    
    public double getMotionTime()
    {
+      PrintTools.info("MotionTime is "+this.wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getTrajectoryTime());
       return this.wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getTrajectoryTime();
    }
    
