@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.bambooTools;
+package us.ihmc.simulationconstructionsettools.bambooTools;
 
 import java.io.File;
 import java.io.FileFilter;

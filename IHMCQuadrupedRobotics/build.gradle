@@ -73,6 +73,7 @@ dependencies {
     
     testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
     testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
+    testCompile ihmc.getProjectTestDependency(":SimulationConstructionSetTools")
     testCompile ihmc.getProjectTestDependency(":CommonWalkingControlModules")
 }
 jar {

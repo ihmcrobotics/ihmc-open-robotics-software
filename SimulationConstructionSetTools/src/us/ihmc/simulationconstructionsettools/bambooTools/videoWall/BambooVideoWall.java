@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.bambooTools.videoWall;
+package us.ihmc.simulationconstructionsettools.bambooTools.videoWall;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
@@ -14,7 +14,7 @@ import org.apache.commons.lang3.SystemUtils;
 
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class BambooVideoWall

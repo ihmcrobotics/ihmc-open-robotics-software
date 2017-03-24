@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.simulationRunner;
+package us.ihmc.simulationconstructionsettools.util.simulationrunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +10,8 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class GoalOrientedTestConductor implements VariableChangedListener
