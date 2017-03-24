@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui.setterUpper;
+package us.ihmc.simulationconstructionsettools.setterUpper;
 
 import java.util.ArrayList;
 
