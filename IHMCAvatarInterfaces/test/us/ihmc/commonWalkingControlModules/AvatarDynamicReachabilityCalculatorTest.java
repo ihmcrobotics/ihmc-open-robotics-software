@@ -79,7 +79,7 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
    @Test(timeout = 120000)
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
-      setupTest(script);
+      setupTest(slowStepScript);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
