@@ -18,8 +18,7 @@ public class SolarPanelWholeBodyPose
    {
       this.cleaningPose = cleaningPose;      
       this.desiredPelvisYaw = pelvisYaw;
-      this.deisredPelvisHeight = pelvisHeight;
-   
+      this.deisredPelvisHeight = pelvisHeight;   
    }
    
    public void getWholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage wholeBodyMessage, double motionTime)
@@ -32,7 +31,6 @@ public class SolarPanelWholeBodyPose
       
       wholeBodyMessage.setHandTrajectoryMessage(handTrajectoryMessage);
       wholeBodyMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
-      wholeBodyMessage.setPelvisTrajectoryMessage(pelvisHeightTrajectoryMessage);
-      
+      //wholeBodyMessage.setPelvisTrajectoryMessage(pelvisHeightTrajectoryMessage);      
    }
 }
