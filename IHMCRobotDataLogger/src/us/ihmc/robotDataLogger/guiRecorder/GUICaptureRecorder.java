@@ -3,8 +3,6 @@ package us.ihmc.robotDataLogger.guiRecorder;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
@@ -17,9 +15,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.LogSettings;
 import us.ihmc.robotDataLogger.logger.NetworkStreamVideoDataLogger;
@@ -110,8 +105,6 @@ public class GUICaptureRecorder extends JFrame
 
          LogProperties logProperties = new LogProperties();
          
-         InetAddress listen = InetAddress.getByName(NetworkParameters.getHost(NetworkParameterKeys.logger)); 
-         InetSocketAddress address = new InetSocketAddress(settings.getVideoStream(), LogDataProtocolSettings.UI_DATA_PORT);
 //         currentLogger = new NetworkStreamVideoDataLogger(listen.getAddress(), target, logProperties, address);
          start.setEnabled(false);
          stop.setEnabled(true);

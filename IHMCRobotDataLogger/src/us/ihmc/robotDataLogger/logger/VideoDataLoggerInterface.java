@@ -3,11 +3,10 @@ package us.ihmc.robotDataLogger.logger;
 import java.io.File;
 import java.io.IOException;
 
-import us.ihmc.communication.net.TimestampListener;
 import us.ihmc.robotDataLogger.Camera;
 import us.ihmc.robotDataLogger.LogProperties;
 
-public abstract class VideoDataLoggerInterface implements TimestampListener
+public abstract class VideoDataLoggerInterface
 {
    public static final String timestampDataPostfix = "Timestamps.dat";
    public static final String videoPostfix = "Video.mov";
@@ -52,5 +51,7 @@ public abstract class VideoDataLoggerInterface implements TimestampListener
          videoFileFile.delete();
       }
    }
+
+   public abstract void timestampChanged(long newTimestamp);
 
 }
