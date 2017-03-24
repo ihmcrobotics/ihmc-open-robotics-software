@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui;
+package us.ihmc.simulationconstructionsettools.gui;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -21,7 +21,10 @@ import javax.swing.TransferHandler;
 import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-
+import us.ihmc.simulationconstructionset.gui.EntryBoxArrayPanel;
+import us.ihmc.simulationconstructionset.gui.ForcedRepaintPopupMenu;
+import us.ihmc.simulationconstructionset.gui.YoEntryBoxTransferHandler;
+import us.ihmc.simulationconstructionset.gui.YoGraph;
 
 public class YoEntryBoxNew extends JPanel implements MouseListener, ActionListener, FocusListener
 {
