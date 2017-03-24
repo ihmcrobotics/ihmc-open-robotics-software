@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.tools;
+package us.ihmc.simulationconstructionsettools.tools;
 
 import java.io.File;
 import java.io.IOException;
