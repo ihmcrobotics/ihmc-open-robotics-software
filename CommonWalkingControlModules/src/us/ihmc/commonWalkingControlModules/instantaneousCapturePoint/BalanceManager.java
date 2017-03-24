@@ -53,6 +53,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class BalanceManager
 {
+   private static final boolean EDIT_RECHABILITY = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -479,7 +480,10 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      dynamicReachabilityCalculator.verifyAndEnsureReachability();
+      if (EDIT_RECHABILITY)
+         dynamicReachabilityCalculator.verifyAndEnsureReachability();
+      else
+         dynamicReachabilityCalculator.checkReachabilityOfStep();
    }
 
    public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
@@ -509,7 +513,10 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      dynamicReachabilityCalculator.verifyAndEnsureReachability();
+      if (EDIT_RECHABILITY)
+         dynamicReachabilityCalculator.verifyAndEnsureReachability();
+      else
+         dynamicReachabilityCalculator.checkReachabilityOfStep();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
