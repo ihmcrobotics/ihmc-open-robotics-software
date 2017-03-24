@@ -131,7 +131,7 @@ public class LogControlClient implements NetStateListener
       @Override
       public void consumeObject(ClearLogRequest object)
       {
-         yoVariablesUpdatedListener.clearLog();
+         yoVariablesUpdatedListener.clearLog("");
       }
    }
 }

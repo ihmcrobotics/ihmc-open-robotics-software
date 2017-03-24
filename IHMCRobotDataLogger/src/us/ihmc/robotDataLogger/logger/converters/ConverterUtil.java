@@ -5,13 +5,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.HandshakeFileType;
 import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 
 public class ConverterUtil
 {
 
-   static YoVariableHandshakeParser getHandshake(File handshake) throws IOException
+   static YoVariableHandshakeParser getHandshake(HandshakeFileType type, File handshake) throws IOException
    {
       if (!handshake.exists())
       {
@@ -23,7 +23,7 @@ public class ConverterUtil
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
    
-      ProtoBufferYoVariableHandshakeParser parser = new ProtoBufferYoVariableHandshakeParser("logged");
+      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(type, "logged");
       parser.parseFrom(handshakeData);
       return parser;
    }

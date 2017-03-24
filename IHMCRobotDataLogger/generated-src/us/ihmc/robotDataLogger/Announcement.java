@@ -70,12 +70,12 @@ public class Announcement implements IDLStruct<Announcement>
     }
 
         
-    public void setDataPort(short dataPort)
+    public void setDataPort(int dataPort)
     {
         dataPort_ = dataPort;
     }
 
-    public short getDataPort()
+    public int getDataPort()
     {
         return dataPort_;
     }
@@ -218,7 +218,7 @@ public class Announcement implements IDLStruct<Announcement>
 	        	cdr.write_type_9(dataIP_[a]);	
 	    }
 
-	    cdr.write_type_1(dataPort_);
+	    cdr.write_type_3(dataPort_);
 
 	    if(name_.length() <= 255)
 	    cdr.write_type_d(name_);else
@@ -249,7 +249,7 @@ public class Announcement implements IDLStruct<Announcement>
 	    	}
 	    	
 
-	    	dataPort_ = cdr.read_type_1();	
+	    	dataPort_ = cdr.read_type_3();	
 
 	    	cdr.read_type_d(name_);	
 
@@ -269,7 +269,7 @@ public class Announcement implements IDLStruct<Announcement>
 			    
 			    ser.write_type_f("dataIP", dataIP_);
 			    
-			    ser.write_type_1("dataPort", dataPort_);
+			    ser.write_type_3("dataPort", dataPort_);
 			    
 			    ser.write_type_d("name", name_);
 			    
@@ -290,7 +290,7 @@ public class Announcement implements IDLStruct<Announcement>
 	    	    
 	    			ser.read_type_f("dataIP", dataIP_);	
 	    	    
-	    			dataPort_ = ser.read_type_1("dataPort");	
+	    			dataPort_ = ser.read_type_3("dataPort");	
 	    	    
 	    			ser.read_type_d("name", name_);	
 	    	    
@@ -382,7 +382,7 @@ public class Announcement implements IDLStruct<Announcement>
 
     private StringBuilder identifier_; 
     private byte[] dataIP_; 
-    private short dataPort_; 
+    private int dataPort_; 
     private StringBuilder name_; 
     private StringBuilder hostName_; 
     private IDLSequence.Object<us.ihmc.robotDataLogger.CameraAnnouncement>  cameras_; 

@@ -18,7 +18,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
     public GraphicObjectMessage()
     {
         	name_ = new StringBuilder(255); 
-        	yoVariableIndex_ = new IDLSequence.Short (128, "type_1");
+        	yoVariableIndex_ = new IDLSequence.Integer (128, "type_3");
         	constants_ = new IDLSequence.Double (128, "type_6");
         	appearance_ = new us.ihmc.robotDataLogger.AppearanceDefinitionMessage();listName_ = new StringBuilder(255); 
         
@@ -35,12 +35,12 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 
     }
 
-    public void setType(short type)
+    public void setType(int type)
     {
         type_ = type;
     }
 
-    public short getType()
+    public int getType()
     {
         return type_;
     }
@@ -64,7 +64,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 
         
 
-    public IDLSequence.Short  getYoVariableIndex()
+    public IDLSequence.Integer  getYoVariableIndex()
     {
         return yoVariableIndex_;
     }
@@ -165,7 +165,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 	{
 
 
-	    cdr.write_type_1(type_);
+	    cdr.write_type_3(type_);
 
 	    if(name_.length() <= 255)
 	    cdr.write_type_d(name_);else
@@ -190,7 +190,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 	public final void deserialize(CDR cdr)
 	{
 
-	    	type_ = cdr.read_type_1();	
+	    	type_ = cdr.read_type_3();	
 
 	    	cdr.read_type_d(name_);	
 
@@ -206,7 +206,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 	@Override
 	public final void serialize(InterchangeSerializer ser)
 	{
-			    ser.write_type_1("type", type_);
+			    ser.write_type_3("type", type_);
 			    
 			    ser.write_type_d("name", name_);
 			    
@@ -223,7 +223,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 	@Override
 	public final void deserialize(InterchangeSerializer ser)
 	{
-	    			type_ = ser.read_type_1("type");	
+	    			type_ = ser.read_type_3("type");	
 	    	    
 	    			ser.read_type_d("name", name_);	
 	    	    
@@ -297,9 +297,9 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 		return builder.toString();
     }
 
-    private short type_; 
+    private int type_; 
     private StringBuilder name_; 
-    private IDLSequence.Short  yoVariableIndex_; 
+    private IDLSequence.Integer  yoVariableIndex_; 
     private IDLSequence.Double  constants_; 
     private us.ihmc.robotDataLogger.AppearanceDefinitionMessage appearance_; 
     private StringBuilder listName_; 

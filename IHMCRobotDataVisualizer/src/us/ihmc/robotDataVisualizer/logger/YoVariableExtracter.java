@@ -28,6 +28,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 
 import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
@@ -51,7 +52,7 @@ public class YoVariableExtracter
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      ProtoBufferYoVariableHandshakeParser parser = new ProtoBufferYoVariableHandshakeParser("logged");
+      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType(), "logged");
       parser.parseFrom(handshakeData);
       YoVariableRegistry registry = parser.getRootRegistry();
 

@@ -36,7 +36,15 @@ public abstract class JointState
 
    public static int getNumberOfVariables(JointType type)
    {
-      return createJointState(null, type).getNumberOfStateVariables();
+      switch (type)
+      {
+      case OneDoFJoint:
+         return OneDoFState.numberOfStateVariables;
+      case SiXDoFJoint:
+         return SixDoFState.numberOfStateVariables;
+      default:
+         throw new RuntimeException("Unknown joint type" + type);
+      }
    }
       
    public static JointState createJointState(String name, JointType type)

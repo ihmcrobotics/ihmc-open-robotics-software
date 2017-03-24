@@ -27,9 +27,9 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    
    private int frame;
 
-   public BlackmagicVideoDataLogger(File logPath, LogProperties logProperties, int decklinkID, YoVariableLoggerOptions options) throws IOException
+   public BlackmagicVideoDataLogger(String name, File logPath, LogProperties logProperties, int decklinkID, YoVariableLoggerOptions options) throws IOException
    {
-      super(logPath, logProperties, "Camera" + decklinkID);
+      super(logPath, logProperties, name);
       decklink = decklinkID;
       quality = options.getVideoQuality();
 

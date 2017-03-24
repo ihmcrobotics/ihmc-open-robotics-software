@@ -1,18 +1,14 @@
 package us.ihmc.robotDataLogger.logger;
 
-import java.net.InetAddress;
-
-import us.ihmc.multicastLogDataProtocol.LogUtils;
-
 public enum LogSettings
 {
-   ATLAS_IAN(true, "239.255.25.1"),
+   ATLAS_IAN(true, "AtlasGUI"),
    ATLAS_NO_CAMERAS(true),
-   VALKYRIE_IHMC(true, "239.255.25.2"),
-   VALKYRIE_JSC(true, "239.255.25.2"),
+   VALKYRIE_IHMC(true, "ValkyrieIHMCGUI"),
+   VALKYRIE_JSC(true, "ValkyrieJSCGUI"),
    VALKYRIE_NO_CAMERAS(true),
-   STEPPR_IHMC(true, "239.255.25.3"),
-   SIMULATION(false, "239.255.25.4"),
+   STEPPR_IHMC(true, "StepprIHMCGUI"),
+   SIMULATION(false, "SimulationGUI"),
    TEST_LOGGER(true),
    BEHAVIOR(true),
    TOOLBOX(false),
@@ -23,28 +19,21 @@ public enum LogSettings
    MINI_BEAST(false),
    BABY_BEAST(true),
    V2EXO(true),
-   MEGABOTS(true, "239.255.25.5"),
+   MEGABOTS(true, "MegaBOTSGUI"),
    FOOTSTEP_PLANNER(true);
 
    private final boolean log;
-   private final InetAddress videoStream;
+   private final String videoStream;
 
    LogSettings(boolean log)
    {
       this(log, null);
    }
 
-   LogSettings(boolean log, String videoStreamGroup)
+   LogSettings(boolean log, String videoStreamIdentifier)
    {
       this.log = log;
-      if (videoStreamGroup == null)
-      {
-         this.videoStream = null;
-      }
-      else
-      {
-         this.videoStream = LogUtils.getByName(videoStreamGroup);
-      }
+      this.videoStream = videoStreamIdentifier;
    }
 
    public boolean isLog()
@@ -52,7 +41,7 @@ public enum LogSettings
       return log;
    }
 
-   public InetAddress getVideoStream()
+   public String getVideoStream()
    {
       return videoStream;
    }

@@ -30,12 +30,12 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 
     }
 
-    public void setParent(short parent)
+    public void setParent(int parent)
     {
         parent_ = parent;
     }
 
-    public short getParent()
+    public int getParent()
     {
         return parent_;
     }
@@ -100,7 +100,7 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 	{
 
 
-	    cdr.write_type_1(parent_);
+	    cdr.write_type_3(parent_);
 
 	    if(name_.length() <= 255)
 	    cdr.write_type_d(name_);else
@@ -111,7 +111,7 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 	public final void deserialize(CDR cdr)
 	{
 
-	    	parent_ = cdr.read_type_1();	
+	    	parent_ = cdr.read_type_3();	
 
 	    	cdr.read_type_d(name_);	
 	}
@@ -119,7 +119,7 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 	@Override
 	public final void serialize(InterchangeSerializer ser)
 	{
-			    ser.write_type_1("parent", parent_);
+			    ser.write_type_3("parent", parent_);
 			    
 			    ser.write_type_d("name", name_);
 			    
@@ -128,7 +128,7 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 	@Override
 	public final void deserialize(InterchangeSerializer ser)
 	{
-	    			parent_ = ser.read_type_1("parent");	
+	    			parent_ = ser.read_type_3("parent");	
 	    	    
 	    			ser.read_type_d("name", name_);	
 	    	    
@@ -170,7 +170,7 @@ public class YoRegistryDefinition implements IDLStruct<YoRegistryDefinition>
 		return builder.toString();
     }
 
-    private short parent_; 
+    private int parent_; 
     private StringBuilder name_; 
 
 }

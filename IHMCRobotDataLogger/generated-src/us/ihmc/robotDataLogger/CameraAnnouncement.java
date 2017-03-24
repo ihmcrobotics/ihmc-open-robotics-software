@@ -18,18 +18,32 @@ public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
     public CameraAnnouncement()
     {
         	name_ = new StringBuilder(255); 
+        	identifier_ = new StringBuilder(255); 
         
         
     }
     @Override
     public void set(CameraAnnouncement other)
     {
+        	type_ = other.type_;
         	name_.setLength(0);
         	name_.append(other.name_);
-        	id_ = other.id_;
+        	identifier_.setLength(0);
+        	identifier_.append(other.identifier_);
 
     }
 
+    public void setType(us.ihmc.robotDataLogger.CameraType type)
+    {
+        type_ = type;
+    }
+
+    public us.ihmc.robotDataLogger.CameraType getType()
+    {
+        return type_;
+    }
+
+        
         public void setName(String name)
         {
         	name_.setLength(0);
@@ -47,14 +61,20 @@ public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
     }
 
         
-    public void setId(int id)
-    {
-        id_ = id;
-    }
+        public void setIdentifier(String identifier)
+        {
+        	identifier_.setLength(0);
+        	identifier_.append(identifier);
+        }
+        
+        public String getIdentifierAsString()
+        {
+        	return getIdentifier().toString();
+        }
 
-    public int getId()
+    public StringBuilder getIdentifier()
     {
-        return id_;
+        return identifier_;
     }
 
         
@@ -69,9 +89,11 @@ public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
 	{
 	    int initial_alignment = current_alignment;
 	            
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	
 	    return current_alignment - initial_alignment;
@@ -87,9 +109,11 @@ public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
 	{
 	    int initial_alignment = current_alignment;
 	            
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
-	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
+	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + data.getIdentifier().length() + 1;
 
 	
 	    return current_alignment - initial_alignment;
@@ -100,37 +124,50 @@ public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
 	{
 
 
+	    cdr.write_type_c(type_.ordinal());
+
+
 	    if(name_.length() <= 255)
 	    cdr.write_type_d(name_);else
 	        throw new RuntimeException("name field exceeds the maximum length");
 
-	    cdr.write_type_2(id_);
+	    if(identifier_.length() <= 255)
+	    cdr.write_type_d(identifier_);else
+	        throw new RuntimeException("identifier field exceeds the maximum length");
 	}
 	
 	@Override
 	public final void deserialize(CDR cdr)
 	{
 
+	    	type_ = us.ihmc.robotDataLogger.CameraType.values[cdr.read_type_c()];
+	    	
+
 	    	cdr.read_type_d(name_);	
 
-	    	id_ = cdr.read_type_2();	
+	    	cdr.read_type_d(identifier_);	
 	}
 	
 	@Override
 	public final void serialize(InterchangeSerializer ser)
 	{
+			    ser.write_type_c("type", type_);
+			    
 			    ser.write_type_d("name", name_);
 			    
-			    ser.write_type_2("id", id_);
+			    ser.write_type_d("identifier", identifier_);
 			    
 	}
 	
 	@Override
 	public final void deserialize(InterchangeSerializer ser)
 	{
+	    			type_ = (us.ihmc.robotDataLogger.CameraType)ser.read_type_c("type", us.ihmc.robotDataLogger.CameraType.class);
+	    	
+	    	    
 	    			ser.read_type_d("name", name_);	
 	    	    
-	    			id_ = ser.read_type_2("id");	
+	    			ser.read_type_d("identifier", identifier_);	
 	    	    
 	}
 
@@ -143,10 +180,12 @@ public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
         CameraAnnouncement otherMyClass = (CameraAnnouncement)other;
         boolean returnedValue = true;
 
+        returnedValue &= this.type_ == otherMyClass.type_;
+
+                
         returnedValue &= us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_);
                 
-        returnedValue &= this.id_ == otherMyClass.id_;
-
+        returnedValue &= us.ihmc.idl.IDLTools.equals(this.identifier_, otherMyClass.identifier_);
                 
 
         return returnedValue;
@@ -158,19 +197,24 @@ public class CameraAnnouncement implements IDLStruct<CameraAnnouncement>
 		StringBuilder builder = new StringBuilder();
 		
       	builder.append("CameraAnnouncement {");
+        builder.append("type=");
+        builder.append(this.type_);
+
+                builder.append(", ");
         builder.append("name=");
         builder.append(this.name_);
 
                 builder.append(", ");
-        builder.append("id=");
-        builder.append(this.id_);
+        builder.append("identifier=");
+        builder.append(this.identifier_);
 
                 
         builder.append("}");
 		return builder.toString();
     }
 
+    private us.ihmc.robotDataLogger.CameraType type_; 
     private StringBuilder name_; 
-    private int id_; 
+    private StringBuilder identifier_; 
 
 }

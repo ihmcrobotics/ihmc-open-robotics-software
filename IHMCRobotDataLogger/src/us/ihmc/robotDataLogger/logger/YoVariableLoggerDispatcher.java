@@ -1,44 +1,59 @@
 package us.ihmc.robotDataLogger.logger;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.martiansoftware.jsap.JSAPException;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.configuration.NetworkParameterKeys;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
-import us.ihmc.multicastLogDataProtocol.broadcast.LogBroadcastListener;
-import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcastClient;
+import us.ihmc.robotDataLogger.Announcement;
+import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
+import us.ihmc.robotDataLogger.rtps.LogAnnouncementListener;
 
-public class YoVariableLoggerDispatcher implements LogBroadcastListener
+public class YoVariableLoggerDispatcher implements LogAnnouncementListener
 {
-   private final YoVariableLoggerOptions options;
+   private final DataConsumerParticipant participant;
+
+   private final LinkedBlockingQueue<Announcement> announcenments = new LinkedBlockingQueue<>();
 
    public YoVariableLoggerDispatcher(YoVariableLoggerOptions options) throws IOException
    {
-      this.options = options;
+
       System.out.println("Starting YoVariableLoggerDispatcher");
-
-      InetAddress myIP = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
-      NetworkInterface iface = NetworkInterface.getByInetAddress(myIP);
-
-      PrintTools.info("Listening on interface " + iface);
-      LogSessionBroadcastClient client = new LogSessionBroadcastClient(iface, this);
-      client.start();
+      
+      participant = new DataConsumerParticipant("YoVariableLoggerDispatcher");
+      participant.listenForAnnouncements(this);
       System.out.println("Client started, waiting for announcements");
+      
+      
+      Announcement announcement;
       try
       {
-         client.join();
+         while((announcement = announcenments.take()) != null)
+         {
+            System.out.println("New control session came online " + announcement);
+            if (announcement.getLog())
+            {
+               System.out.println("Logging sesion " + announcement.getNameAsString() + " on " + announcement.getHostNameAsString());
+               try
+               {
+                  new YoVariableLogger(announcement, options);
+                  System.out.println("Logging session started");
+               }
+               catch (Exception e)
+               {
+                  e.printStackTrace();
+               }
+            }
+         }
       }
       catch (InterruptedException e)
       {
+         System.err.println("Variable server go interrupted, shutting down");         
       }
-
-      System.err.println("Logger has shut down");
+      
+      participant.remove();
+      
+      
    }
 
    public static void main(String[] args) throws JSAPException, IOException
@@ -48,26 +63,21 @@ public class YoVariableLoggerDispatcher implements LogBroadcastListener
    }
 
    @Override
-   public synchronized void logSessionCameOnline(AnnounceRequest request)
+   public void logSessionCameOnline(Announcement request)
    {
-      System.out.println("New control session came online " + request);
-      if (request.isLog())
+      try
       {
-         System.out.println("Logging sesion " + request);
-         try
-         {
-            new YoVariableLogger(request, options);
-            System.out.println("Logging session started");
-         }
-         catch (Exception e)
-         {
-            e.printStackTrace();
-         }
+         announcenments.put(request);
       }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+
    }
 
    @Override
-   public void logSessionWentOffline(AnnounceRequest description)
+   public void logSessionWentOffline(Announcement description)
    {
 
    }

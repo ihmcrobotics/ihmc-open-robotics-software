@@ -1,21 +1,16 @@
 package us.ihmc.robotDataLogger;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.StandardProtocolFamily;
-import java.net.StandardSocketOptions;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.nio.channels.DatagramChannel;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.CRC32;
 
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
-import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
 import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
-import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.tools.compression.SnappyUtils;
 import us.ihmc.util.PeriodicThreadScheduler;
 
@@ -35,38 +30,26 @@ public class YoVariableProducer implements Runnable
    private final LongBuffer writeBuffer;
    private final ByteBuffer compressedBuffer;
    private final ByteBuffer compressedBufferDirect;
-   
-   private final SummaryProvider summaryProvider;
-
    private final int jointStateOffset;
 
    private int keepAliveCounter = 0;
-   
-   private final LogSessionBroadcaster session;
-   private final YoVariableHandShakeBuilder handshakeBuilder;
-   private final LogModelProvider logModelProvider;
 
+   private final DataProducerParticipant participant;
    private MultiClientStreamingDataTCPServer server;
    
    private final LogDataHeader logDataHeader = new LogDataHeader();
-   private final CRC32 crc32 = new CRC32();
-
-   private final DatagramChannel channel;
-   private final ByteBuffer timestampBuffer = ByteBuffer.allocateDirect(12);
-   
+   private final CRC32 crc32 = new CRC32();   
    private final boolean sendKeepAlive;
    
    @SuppressWarnings("unchecked")
-   public YoVariableProducer(PeriodicThreadScheduler scheduler, LogSessionBroadcaster session, YoVariableHandShakeBuilder handshakeBuilder, LogModelProvider logModelProvider,
-         ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers, SummaryProvider summaryProvider, boolean sendKeepAlive)
+   public YoVariableProducer(PeriodicThreadScheduler scheduler, YoVariableHandShakeBuilder handshakeBuilder, DataProducerParticipant participant,
+         ConcurrentRingBuffer<FullStateBuffer> mainBuffer, Collection<ConcurrentRingBuffer<RegistryBuffer>> buffers, boolean sendKeepAlive)
    {
       this.scheduler = scheduler;
       this.mainBuffer = mainBuffer;
-      this.handshakeBuilder = handshakeBuilder;
-      this.logModelProvider = logModelProvider;
       this.buffers = buffers.toArray(new ConcurrentRingBuffer[buffers.size()]);
       this.sendKeepAlive = sendKeepAlive;
-      this.summaryProvider = summaryProvider;
+      this.participant = participant;
 
       this.jointStateOffset = handshakeBuilder.getNumberOfVariables();
       int numberOfJointStates = handshakeBuilder.getNumberOfJointStates();
@@ -78,42 +61,18 @@ public class YoVariableProducer implements Runnable
       compressedBackingArray = new byte[SnappyUtils.maxCompressedLength(bufferSize) + LogDataHeader.length()];
       compressedBuffer = ByteBuffer.wrap(compressedBackingArray);
       compressedBufferDirect = ByteBuffer.allocateDirect(compressedBuffer.capacity());
-      this.session = session;
-
-      timestampBuffer.putInt(0, TIMESTAMP_HEADER);
-
-      try
-      {
-         channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true)
-               .setOption(StandardSocketOptions.IP_MULTICAST_IF, session.getInterface());
-         channel.configureBlocking(false);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
    }
    
    
    public void publishTimestampRealtime(long timestamp)
    {
-      timestampBuffer.putLong(4, timestamp);
-      for(int i = 0; i < server.getMaximumNumberOfConnections(); i++)
+      try
       {
-         InetSocketAddress target = server.getUDPAddress(i);
-         if(target != null)
-         {
-            timestampBuffer.clear();
-            try
-            {
-               channel.send(timestampBuffer, target);
-            }
-            catch (IOException e)
-            {
-               System.out.println(e.getMessage());
-            }
-         }
+         participant.publishTimestamp(timestamp);
+      }
+      catch (IOException e)
+      {
+         System.out.println(e.getMessage());
       }
    }
 
@@ -140,7 +99,7 @@ public class YoVariableProducer implements Runnable
       try
       {
          // Make server here, so it is open before the logger connects
-         server = new MultiClientStreamingDataTCPServer(session.getPort(), handshakeBuilder, logModelProvider, summaryProvider, compressedBackingArray.length, SEND_BUFFER_LENGTH);
+         server = new MultiClientStreamingDataTCPServer(participant.getPort(), compressedBackingArray.length, SEND_BUFFER_LENGTH);
          server.start();
       }
       catch (IOException e)

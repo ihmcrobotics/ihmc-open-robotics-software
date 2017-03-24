@@ -4,10 +4,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
@@ -15,15 +11,12 @@ import javax.imageio.ImageIO;
 import com.esotericsoftware.kryo.io.ByteBufferInputStream;
 
 import us.ihmc.codecs.builder.MP4MJPEGMovieBuilder;
-import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.robotDataLogger.LogDataHeader;
 import us.ihmc.robotDataLogger.LogProperties;
+import us.ihmc.robotDataLogger.gui.GUICaptureHandler;
 import us.ihmc.robotDataLogger.gui.GUICaptureReceiver;
 
-public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements LogPacketHandler
+public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface implements GUICaptureHandler
 {
-   private final static String description = "NetworkStream";
    private final GUICaptureReceiver client;
    
    private MP4MJPEGMovieBuilder builder;
@@ -32,14 +25,13 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    
    private volatile long timestamp = 0;
    
-   public NetworkStreamVideoDataLogger(byte[] controlIP, File logPath, LogProperties logProperties, InetSocketAddress address) throws SocketException, UnknownHostException
+   public NetworkStreamVideoDataLogger(File logPath, LogProperties logProperties, int domainId, String topicName) throws IOException
    {
-      super(logPath, logProperties, description);
+      super(logPath, logProperties, topicName);
       
-      NetworkInterface iface = NetworkInterface.getByInetAddress(LogUtils.getMyIP(controlIP));
+    
       
-      
-      client = new GUICaptureReceiver(iface, address.getAddress(), this);
+      client = new GUICaptureReceiver(domainId, topicName, this);
       client.start();
    }
 
@@ -96,13 +88,7 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
    }
    
    @Override
-   public void timestampReceived(long timestamp)
-   {
-      
-   }
-
-   @Override
-   public void newDataAvailable(LogDataHeader header, ByteBuffer buffer)
+   public void receivedFrame(ByteBuffer buffer)
    {
       if(builder == null)
       {
@@ -146,23 +132,6 @@ public class NetworkStreamVideoDataLogger extends VideoDataLoggerInterface imple
          // TODO Auto-generated catch block
          e.printStackTrace();
       }
-   }
-
-   @Override
-   public void timeout()
-   {
-      
-   }
-
-   @Override
-   public void connected(InetSocketAddress localAddress)
-   {
-   }
-
-   @Override
-   public void keepAlive()
-   {
-      
    }
 
 }

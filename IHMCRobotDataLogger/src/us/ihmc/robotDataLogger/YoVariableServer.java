@@ -1,11 +1,12 @@
 package us.ihmc.robotDataLogger;
 
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
@@ -14,13 +15,14 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
 import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcaster;
-import us.ihmc.multicastLogDataProtocol.control.LogControlServer;
 import us.ihmc.multicastLogDataProtocol.control.SummaryProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotDataLogger.jointState.JointHolder;
 import us.ihmc.robotDataLogger.logger.LogSettings;
+import us.ihmc.robotDataLogger.rtps.DataProducerListener;
+import us.ihmc.robotDataLogger.rtps.DataProducerParticipant;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.visualizer.RobotVisualizer;
 import us.ihmc.robotics.TickAndUpdatable;
@@ -28,19 +30,17 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.tools.thread.ThreadTools;
 import us.ihmc.util.PeriodicThreadScheduler;
 
 
-public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
+public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, DataProducerListener
 {
    private static final int VARIABLE_BUFFER_CAPACITY = 128;
    private static final int CHANGED_BUFFER_CAPACITY = 128;
    
    private final double dt;
-   private final String mainClazz;
-   private final InetAddress bindAddress;   
-   private final LogModelProvider logModelProvider;
-   private final LogSettings logSettings;
+   private final InetAddress bindAddress;
    
    // Data to send
    private List<RigidBody> mainBodies = new ArrayList<>();
@@ -64,8 +64,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    private final PeriodicThreadScheduler scheduler;
    
    // Servers
-   private LogSessionBroadcaster sessionBroadcaster;
-   private LogControlServer controlServer;
+   private final DataProducerParticipant dataProducerParticipant;
    private YoVariableProducer producer;
    private YoVariableHandShakeBuilder handshakeBuilder;
 
@@ -84,11 +83,73 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    public YoVariableServer(String mainClazz, PeriodicThreadScheduler scheduler, LogModelProvider logModelProvider, LogSettings logSettings, double dt)
    {
       this.dt = dt;
-      this.mainClazz = mainClazz;
       this.scheduler = scheduler;
       this.bindAddress = LogUtils.getMyIP(NetworkParameters.getHost(NetworkParameterKeys.logger));
-      this.logModelProvider = logModelProvider;
-      this.logSettings = logSettings;
+      
+      try
+      {
+         this.dataProducerParticipant = new DataProducerParticipant(mainClazz);
+         dataProducerParticipant.setDataAddress(bindAddress);
+         dataProducerParticipant.setPort(getRandomPort());
+         dataProducerParticipant.setDataProducerListener(this);
+         dataProducerParticipant.setModelFileProvider(logModelProvider);
+         dataProducerParticipant.setLog(logSettings.isLog());
+         addCameras(logSettings);
+         
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      
+   }
+   
+   
+   public void addCameras(LogSettings logSettings)
+   {
+      String cameraString;
+      if(NetworkParameters.hasKey(NetworkParameterKeys.loggedCameras))
+      {
+         cameraString = NetworkParameters.getHost(NetworkParameterKeys.loggedCameras);
+      }
+      else
+      {
+         cameraString = null;
+      }
+         
+      if(cameraString != null && !cameraString.trim().isEmpty())
+      {
+         String[] split = cameraString.split(",");
+         for(int i = 0; i < split.length; i++)
+         {
+            try
+            {
+               byte camera = Byte.parseByte(split[i].trim());
+               if(camera >= 0 && camera <= 127)
+               {
+                  dataProducerParticipant.addCamera(CameraType.CAPTURE_CARD, "Camera-" + camera, String.valueOf(camera));
+               }
+               else
+               {
+                  throw new NumberFormatException();
+               }
+            }
+            catch(NumberFormatException e)
+            {
+               throw new RuntimeException("Invalid camera id: " + split[i] +". Valid camera ids are 0-127");
+            }
+         }
+      }
+      
+      if(logSettings.getVideoStream() != null)
+      {
+         dataProducerParticipant.addCamera(CameraType.NETWORK_STREAM, logSettings.getVideoStream(), logSettings.getVideoStream());
+      }
+   }
+   
+   public static int getRandomPort()
+   {
+      return LogDataProtocolSettings.LOG_DATA_PORT_RANGE_START + (new Random().nextInt(1023) + 1);
    }
 
    public synchronized void start()
@@ -106,17 +167,22 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       
       handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);
 
-      startControlServer();
+      registerVariablesAndCreateBuffers();
       
-      InetSocketAddress controlAddress = new InetSocketAddress(bindAddress, controlServer.getPort());
-      sessionBroadcaster = new LogSessionBroadcaster(controlAddress, bindAddress, mainClazz, logSettings);
-      producer = new YoVariableProducer(scheduler, sessionBroadcaster, handshakeBuilder, logModelProvider, mainBuffer,
-            buffers.values(), summaryProvider, sendKeepAlive);
-            
-      sessionBroadcaster.requestPort();
-      producer.start();
-      sessionBroadcaster.start();
       
+      
+      try
+      {
+         dataProducerParticipant.setHandshake(handshakeBuilder.getHandShake());
+         dataProducerParticipant.activate();
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+      producer = new YoVariableProducer(scheduler, handshakeBuilder, dataProducerParticipant, mainBuffer,
+            buffers.values(), sendKeepAlive);
+      producer.start();     
       started = true;
    }
 
@@ -125,17 +191,15 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       this.sendKeepAlive = sendKeepAlive;
    }
    
-   private List<JointHolder> startControlServer()
+   private List<JointHolder> registerVariablesAndCreateBuffers()
    {
-      
-      controlServer = new LogControlServer(handshakeBuilder, variableChangeData, dt);
-      List<JointHolder> jointHolders = controlServer.getHandshakeBuilder().getJointHolders();
+      List<JointHolder> jointHolders = handshakeBuilder.getJointHolders();
       
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
-      int mainOffset = controlServer.getHandshakeBuilder().addRegistry(mainRegistry, variables);
+      int mainOffset = handshakeBuilder.addRegistry(mainRegistry, variables);
       if(mainYoGraphicsListRegistry != null)
       {
-         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(mainYoGraphicsListRegistry);
+         handshakeBuilder.addDynamicGraphicObjects(mainYoGraphicsListRegistry);
       }
       FullStateBuffer.Builder builder = new FullStateBuffer.Builder(mainOffset, variables, jointHolders);
       mainBuffer = new ConcurrentRingBuffer<FullStateBuffer>(builder, VARIABLE_BUFFER_CAPACITY);
@@ -146,7 +210,6 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
          addVariableBuffer(data);
       }
 
-      controlServer.start();
       return jointHolders;
    }
 
@@ -154,9 +217,8 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    {
       if(started)
       {
-         sessionBroadcaster.close();
          producer.close();
-         controlServer.close();         
+         dataProducerParticipant.remove();         
       }
    }
 
@@ -212,10 +274,10 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
       ArrayList<YoVariable<?>> variables = new ArrayList<>();
       YoVariableRegistry registry = data.getLeft();
       YoGraphicsListRegistry yoGraphicsListRegistry = data.getRight();
-      int variableOffset = controlServer.getHandshakeBuilder().addRegistry(registry, variables);
+      int variableOffset = handshakeBuilder.addRegistry(registry, variables);
       if(yoGraphicsListRegistry != null)
       {
-         controlServer.getHandshakeBuilder().addDynamicGraphicObjects(yoGraphicsListRegistry);
+         handshakeBuilder.addDynamicGraphicObjects(yoGraphicsListRegistry);
       }
       RegistryBuffer.Builder builder = new RegistryBuffer.Builder(variableOffset, variables);
       ConcurrentRingBuffer<RegistryBuffer> buffer = new ConcurrentRingBuffer<>(builder, VARIABLE_BUFFER_CAPACITY);
@@ -328,6 +390,27 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable
    public void addSummarizedVariable(YoVariable<?> variable)
    {      
       this.summaryProvider.addSummarizedVariable(variable);
+   }
+
+   @Override
+   public void changeVariable(int id, double newValue)
+   {
+      VariableChangedMessage message;
+      ImmutablePair<YoVariable<?>, YoVariableRegistry> variableAndRootRegistry = handshakeBuilder.getVariablesAndRootRegistries().get(id);
+
+      ConcurrentRingBuffer<VariableChangedMessage> buffer = variableChangeData.get(variableAndRootRegistry.getRight());
+      while ((message = buffer.next()) == null)
+      {
+         ThreadTools.sleep(1);
+      }
+
+      if (message != null)
+      {
+         message.setVariable(variableAndRootRegistry.getLeft());
+         message.setVal(newValue);
+         buffer.commit();
+      }
+
    }
 
 
