@@ -8,6 +8,8 @@ import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the head to the desired orientation while going through the specified trajectory points."
@@ -51,13 +53,25 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
     * @param trajectoryTime how long it takes to reach the desired orientation.
     * @param desiredOrientation desired head orientation expressed in world frame.
     */
-   public HeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation)
+   public HeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, ReferenceFrame expressedInFrame, ReferenceFrame trajectoryFrame)
    {
-      super(trajectoryTime, desiredOrientation);
+      super(trajectoryTime, desiredOrientation, expressedInFrame, trajectoryFrame);
+   }
+
+   /**
+    * Use this constructor to execute a simple interpolation in taskspace to the desired orientation.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param trajectoryTime how long it takes to reach the desired orientation.
+    * @param desiredOrientation desired head orientation expressed in world frame.
+    */
+   public HeadTrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long expressedInReferenceFrameID, long trajectoryReferenceFrameId)
+   {
+      super(trajectoryTime, desiredOrientation, expressedInReferenceFrameID, trajectoryReferenceFrameId);
    }
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
+    * By default this constructor sets the trajectory frame to chest Center of mass frame and the data frame to world
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
@@ -66,5 +80,7 @@ public class HeadTrajectoryMessage extends AbstractSO3TrajectoryMessage<HeadTraj
    {
       super(numberOfTrajectoryPoints);
       setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      super.setTrajectoryReferenceFrameId(CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
    }
 }

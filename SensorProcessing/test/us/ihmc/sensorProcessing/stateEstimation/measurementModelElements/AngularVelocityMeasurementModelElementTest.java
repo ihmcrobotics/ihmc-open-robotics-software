@@ -94,7 +94,7 @@ public class AngularVelocityMeasurementModelElementTest
    private FrameVector getAngularVelocity(TwistCalculator twistCalculator, RigidBody rigidBody, ReferenceFrame referenceFrame)
    {
       Twist twist = new Twist();
-      twistCalculator.getTwistOfBody(twist, rigidBody);
+      twistCalculator.getTwistOfBody(rigidBody, twist);
       twist.changeFrame(referenceFrame);
       FrameVector ret = new FrameVector(referenceFrame);
       twist.getAngularPart(ret);

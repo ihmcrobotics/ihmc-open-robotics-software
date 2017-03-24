@@ -11,6 +11,7 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
@@ -2408,6 +2409,19 @@ public class VirtualModelControllerTestHelper
 
       public SideDependentList<ReferenceFrame> getSoleZUpFrames()
       {
+         return null;
+      }
+
+      @Override
+      public ReferenceFrame getChestFrame()
+      {
+         return null;
+      }
+
+      @Override
+      public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
+      {
+         // TODO Auto-generated method stub
          return null;
       }
    }

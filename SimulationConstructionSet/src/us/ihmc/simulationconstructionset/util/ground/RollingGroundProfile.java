@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -7,7 +8,6 @@ import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
@@ -17,7 +17,7 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
    private static final double xMinDefault = -20.0, xMaxDefault = 20.0, yMinDefault = -20.0, yMaxDefault = 20.0;
    private static final double amplitudeDefault = 0.1, frequencyDefault = 0.3, offsetDefault = 0.0;
    
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    
 
    protected final double amplitude, frequency, offset;
@@ -41,11 +41,11 @@ public class RollingGroundProfile extends GroundProfileFromHeightMap
       double zMin = Double.NEGATIVE_INFINITY; //-100.0;
       double zMax = Math.abs(amplitude) + 1e-4;
             
-      boundingBox = new BoundingBox3d(new Point3D(xMin, yMin, zMin), new Point3D(xMax, yMax, zMax));
+      boundingBox = new BoundingBox3D(new Point3D(xMin, yMin, zMin), new Point3D(xMax, yMax, zMax));
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

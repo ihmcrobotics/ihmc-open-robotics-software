@@ -105,7 +105,7 @@ public class OrientationStateRobotModelUpdater extends AbstractControlFlowElemen
       tempEstimationLinkAngularVelocity.setIncludingFrame(angularVelocityEstimationLink);
 
       // T_{root}^{root, estimation}
-      twistCalculator.getRelativeTwist(tempRootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
+      twistCalculator.getRelativeTwist(estimationLink, rootJoint.getSuccessor(), tempRootToEstimationTwist);
       tempRootToEstimationTwist.changeFrame(rootJoint.getFrameAfterJoint());
 
       // omega_{root}^{root, estimation}

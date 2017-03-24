@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +9,9 @@ import java.util.Random;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -43,7 +46,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -80,7 +83,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -105,9 +108,7 @@ public class TwistCalculatorTest
       Random random = new Random(234234L);
       int numberOfJoints = 100;
       List<PrismaticJoint> prismaticJoints = ScrewTestTools.createRandomTreeRobotWithPrismaticJoints(numberOfJoints, random);
-      // FIXME I think that is a bug, not a bad one but still
-      //      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(0).getPredecessor());
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
       {
@@ -119,7 +120,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -151,9 +152,7 @@ public class TwistCalculatorTest
       Random random = new Random(234234L);
       int numberOfJoints = 100;
       List<RevoluteJoint> revoluteJoints = ScrewTestTools.createRandomTreeRobot(numberOfJoints, random);
-      // FIXME I think that is a bug, not a bad one but still
-      //      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, prismaticJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, revoluteJoints.get(0).getPredecessor());
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, revoluteJoints.get(random.nextInt(numberOfJoints)).getPredecessor());
 
       for (int i = 0; i < 100; i++)
       {
@@ -165,7 +164,7 @@ public class TwistCalculatorTest
          {
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
@@ -227,7 +226,7 @@ public class TwistCalculatorTest
             OneDoFJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
@@ -273,7 +272,7 @@ public class TwistCalculatorTest
             OneDoFJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
@@ -295,7 +294,8 @@ public class TwistCalculatorTest
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
       List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
-      List<InverseDynamicsJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new InverseDynamicsJoint[numberOfRevoluteJoints + 1])));
+      List<InverseDynamicsJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new InverseDynamicsJoint[numberOfRevoluteJoints
+            + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
@@ -307,7 +307,8 @@ public class TwistCalculatorTest
       {
          floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
          floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
-         Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(), floatingJoint.getFrameAfterJoint());
+         Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
+                                                              floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
          floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
@@ -332,13 +333,22 @@ public class TwistCalculatorTest
             InverseDynamicsJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
             Twist expectedTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
 
             assertTwistEquals(expectedTwist, actualTwist, 1.0e-5);
+
+            Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
+            FramePoint frameBodyFixedPoint = new FramePoint(bodyFrame, bodyFixedPoint);
+            FrameVector actualLinearVelocity = new FrameVector();
+            twistCalculator.getLinearVelocityOfBodyFixedPoint(body, frameBodyFixedPoint, actualLinearVelocity);
+            FrameVector expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, bodyFixedPoint);
+
+            expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
+            EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 1.0e-5);
          }
       }
    }
@@ -354,11 +364,12 @@ public class TwistCalculatorTest
       SixDoFJoint floatingJoint = floatingChain.getRootJoint();
       List<RevoluteJoint> revoluteJoints = floatingChain.getRevoluteJoints();
       List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
-      List<InverseDynamicsJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new InverseDynamicsJoint[numberOfRevoluteJoints + 1])));
+      List<InverseDynamicsJoint> jointsInFuture = Arrays.asList(ScrewTools.cloneJointPath(joints.toArray(new InverseDynamicsJoint[numberOfRevoluteJoints
+            + 1])));
       SixDoFJoint floatingJointInFuture = (SixDoFJoint) jointsInFuture.get(0);
       List<RevoluteJoint> revoluteJointsInFuture = ScrewTools.filterJoints(jointsInFuture, RevoluteJoint.class);
 
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(random.nextInt(numberOfRevoluteJoints)).getPredecessor());
 
       double dt = 1.0e-8;
 
@@ -366,7 +377,8 @@ public class TwistCalculatorTest
       {
          floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
          floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
-         Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(), floatingJoint.getFrameAfterJoint());
+         Twist floatingJointTwist = Twist.generateRandomTwist(random, floatingJoint.getFrameAfterJoint(), floatingJoint.getFrameBeforeJoint(),
+                                                              floatingJoint.getFrameAfterJoint());
          floatingJoint.setJointTwist(floatingJointTwist);
 
          floatingJointInFuture.setJointPositionVelocityAndAcceleration(floatingJoint);
@@ -391,7 +403,7 @@ public class TwistCalculatorTest
             InverseDynamicsJoint joint = joints.get(jointIndex);
             RigidBody body = joint.getSuccessor();
             Twist actualTwist = new Twist();
-            twistCalculator.getTwistOfBody(actualTwist, body);
+            twistCalculator.getTwistOfBody(body, actualTwist);
 
             ReferenceFrame bodyFrame = body.getBodyFixedFrame();
             ReferenceFrame bodyFrameInFuture = jointsInFuture.get(jointIndex).getSuccessor().getBodyFixedFrame();
@@ -404,13 +416,22 @@ public class TwistCalculatorTest
             {
                RigidBody base = joints.get(baseJointIndex).getSuccessor();
                Twist actualRelativeTwist = new Twist();
-               twistCalculator.getRelativeTwist(actualRelativeTwist, base, body);
+               twistCalculator.getRelativeTwist(base, body, actualRelativeTwist);
 
                ReferenceFrame baseFrame = base.getBodyFixedFrame();
                ReferenceFrame baseFrameInFuture = jointsInFuture.get(baseJointIndex).getSuccessor().getBodyFixedFrame();
                Twist expectedRelativeTwist = computeExpectedRelativeTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame, baseFrameInFuture);
 
                assertTwistEquals(expectedRelativeTwist, actualRelativeTwist, 1.0e-5);
+
+               Point3D bodyFixedPoint = EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0);
+               FramePoint frameBodyFixedPoint = new FramePoint(bodyFrame, bodyFixedPoint);
+               FrameVector actualLinearVelocity = new FrameVector();
+               twistCalculator.getLinearVelocityOfBodyFixedPoint(base, body, frameBodyFixedPoint, actualLinearVelocity);
+               FrameVector expectedLinearVelocity = computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, baseFrame, baseFrameInFuture, bodyFixedPoint);
+
+               expectedLinearVelocity.checkReferenceFrameMatch(actualLinearVelocity);
+               EuclidCoreTestTools.assertTuple3DEquals(expectedLinearVelocity.getVector(), actualLinearVelocity.getVector(), 2.0e-5);
             }
          }
       }
@@ -428,7 +449,27 @@ public class TwistCalculatorTest
       }
    }
 
-   private Twist computeExpectedTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static FrameVector computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
+                                                                             Point3D bodyFixedPoint)
+   {
+      return computeExpectedLinearVelocityByFiniteDifference(dt, bodyFrame, bodyFrameInFuture, worldFrame, worldFrame, bodyFixedPoint);
+   }
+
+   public static FrameVector computeExpectedLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
+                                                                             ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture, Point3D bodyFixedPoint)
+   {
+      FramePoint point = new FramePoint(bodyFrame, bodyFixedPoint);
+      FramePoint pointInFuture = new FramePoint(bodyFrameInFuture, bodyFixedPoint);
+      point.changeFrame(baseFrame);
+      pointInFuture.changeFrame(baseFrameInFuture);
+
+      FrameVector pointLinearVelocity = new FrameVector(baseFrame);
+      pointLinearVelocity.sub(pointInFuture.getPoint(), point.getPoint());
+      pointLinearVelocity.scale(1.0 / dt);
+      return pointLinearVelocity;
+   }
+
+   public static Twist computeExpectedTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       Twist expectedTwist = new Twist(bodyFrame, worldFrame, bodyFrame);
 
@@ -440,7 +481,8 @@ public class TwistCalculatorTest
       return expectedTwist;
    }
 
-   private Twist computeExpectedRelativeTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture, ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture)
+   public static Twist computeExpectedRelativeTwistByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture,
+                                                                      ReferenceFrame baseFrame, ReferenceFrame baseFrameInFuture)
    {
       Twist bodyTwist = computeExpectedTwistByFiniteDifference(dt, bodyFrame, bodyFrameInFuture);
       bodyTwist.changeFrame(bodyFrame);
@@ -453,7 +495,7 @@ public class TwistCalculatorTest
       return relativeTwist;
    }
 
-   private FrameVector computeAngularVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static FrameVector computeAngularVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       FrameOrientation bodyOrientation = new FrameOrientation(bodyFrame);
       bodyOrientation.changeFrame(worldFrame);
@@ -470,13 +512,13 @@ public class TwistCalculatorTest
       return bodyAngularVelocity;
    }
 
-   private FrameVector computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
+   public static FrameVector computeLinearVelocityByFiniteDifference(double dt, ReferenceFrame bodyFrame, ReferenceFrame bodyFrameInFuture)
    {
       FramePoint bodyPosition = new FramePoint(bodyFrame);
       bodyPosition.changeFrame(worldFrame);
       FramePoint bodyPositionInFuture = new FramePoint(bodyFrameInFuture);
       bodyPositionInFuture.changeFrame(worldFrame);
-      
+
       FrameVector bodyLinearVelocity = new FrameVector(worldFrame);
       bodyLinearVelocity.subAndScale(1.0 / dt, bodyPositionInFuture, bodyPosition);
       bodyLinearVelocity.changeFrame(bodyFrame);
@@ -497,7 +539,7 @@ public class TwistCalculatorTest
          twistCalculator.compute();
 
          for (int i = 0; i < 100; i++)
-            twistCalculator.getTwistOfBody(dummyTwist, randomChainRobot.get(random.nextInt(numberOfJoints)).getSuccessor());
+            twistCalculator.getTwistOfBody(randomChainRobot.get(random.nextInt(numberOfJoints)).getSuccessor(), dummyTwist);
       }
    }
 }

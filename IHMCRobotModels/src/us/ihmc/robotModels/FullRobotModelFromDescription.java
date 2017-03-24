@@ -344,7 +344,12 @@ public class FullRobotModelFromDescription implements FullRobotModel
    @Override
    public ReferenceFrame getHeadBaseFrame()
    {
-      return head.getParentJoint().getFrameAfterJoint();
+      if(head != null)
+      {
+         InverseDynamicsJoint headJoint = head.getParentJoint();
+         return headJoint.getFrameAfterJoint();
+      }
+      return null;
    }
 
    protected void checkLinkIsNeededForSensor(InverseDynamicsJoint joint, JointDescription jointDescription)

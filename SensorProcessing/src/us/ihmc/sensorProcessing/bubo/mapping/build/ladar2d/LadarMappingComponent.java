@@ -18,17 +18,21 @@
 
 package us.ihmc.sensorProcessing.bubo.mapping.build.ladar2d;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JToolBar;
+
 import georegression.struct.se.Se2_F64;
 import us.ihmc.sensorProcessing.bubo.desc.sensors.lrf2d.Lrf2dParam;
 import us.ihmc.sensorProcessing.bubo.gui.maps.GridMapInteractionDisplay;
 import us.ihmc.sensorProcessing.bubo.gui.sensors.laser2d.LadarComponent;
 import us.ihmc.sensorProcessing.bubo.maps.d2.grid.GridMapSpacialInfo;
 import us.ihmc.sensorProcessing.bubo.maps.d2.grid.OccupancyGrid2D_F32;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * @author Peter Abeles

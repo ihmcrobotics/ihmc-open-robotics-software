@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.environments;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -74,11 +74,11 @@ public class PlanarRegionsListDefinedEnvironmentExample
             planarRegion.getTransformToWorld(transformToWorld);
 
             Graphics3DObject boundingBoxVisualization = new Graphics3DObject();
-            BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+            BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
-            double lx = boundingBox3dInWorld.getXMax() - boundingBox3dInWorld.getXMin();
-            double ly = boundingBox3dInWorld.getYMax() - boundingBox3dInWorld.getYMin();
-            double lz = boundingBox3dInWorld.getZMax() - boundingBox3dInWorld.getZMin();
+            double lx = boundingBox3dInWorld.getMaxX() - boundingBox3dInWorld.getMinX();
+            double ly = boundingBox3dInWorld.getMaxY() - boundingBox3dInWorld.getMinY();
+            double lz = boundingBox3dInWorld.getMaxZ() - boundingBox3dInWorld.getMinZ();
 
             transformToWorld.getTranslation(translation);
             translation.setZ(translation.getZ() - (lz / 2.0));

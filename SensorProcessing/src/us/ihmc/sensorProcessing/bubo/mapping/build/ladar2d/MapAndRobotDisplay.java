@@ -18,10 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.mapping.build.ladar2d;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
 import georegression.struct.se.Se2_F64;
 import us.ihmc.sensorProcessing.bubo.gui.maps.GridMapBasicDisplay;
-
-import java.awt.*;
 
 /**
  * Draw a robot on top of the occupancy grid.

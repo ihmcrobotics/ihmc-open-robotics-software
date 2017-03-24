@@ -371,7 +371,7 @@ public class WholeBodyVirtualModelControlSolver
       SpatialAccelerationVector accelerationVector = command.getSpatialAcceleration();
       accelerationVector.changeBaseFrameNoRelativeAcceleration(ReferenceFrame.getWorldFrame());
 
-      twistCalculator.getTwistOfBody(tmpTwist, controlledBody);
+      twistCalculator.getTwistOfBody(controlledBody, tmpTwist);
 
       tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
 

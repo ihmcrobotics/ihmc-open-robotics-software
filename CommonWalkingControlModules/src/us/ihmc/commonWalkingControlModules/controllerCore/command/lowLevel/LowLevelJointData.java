@@ -13,6 +13,7 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    private final AtomicDouble desiredPosition = new AtomicDouble(Double.NaN);
    private final AtomicDouble desiredVelocity = new AtomicDouble(Double.NaN);
    private final AtomicDouble desiredAcceleration = new AtomicDouble(Double.NaN);
+   private final AtomicDouble desiredCurrent = new AtomicDouble(Double.NaN);
    private final AtomicBoolean resetIntegrators = new AtomicBoolean(false);
 
    public LowLevelJointData()
@@ -26,6 +27,8 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       desiredTorque.set(Double.NaN);
       desiredPosition.set(Double.NaN);
       desiredVelocity.set(Double.NaN);
+      desiredAcceleration.set(Double.NaN);
+      desiredCurrent.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -36,6 +39,7 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       desiredPosition.set(other.getDesiredPosition());
       desiredVelocity.set(other.getDesiredVelocity());
       desiredAcceleration.set(other.getDesiredAcceleration());
+      desiredCurrent.set(other.getDesiredCurrent());
       resetIntegrators.set(other.peekResetIntegratorsRequest());
    }
 
@@ -55,6 +59,8 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
          desiredVelocity.set(other.getDesiredVelocity());
       if (!hasDesiredAcceleration())
          desiredAcceleration.set(other.getDesiredAcceleration());
+      if (!hasDesiredCurrent())
+         desiredCurrent.set(other.getDesiredCurrent());
       if (!peekResetIntegratorsRequest())
          resetIntegrators.set(other.peekResetIntegratorsRequest());
    }
@@ -93,6 +99,11 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       desiredAcceleration.set(qdd);
    }
 
+   public void setDesiredCurrent(double i)
+   {
+      desiredCurrent.set(i);
+   }
+
    public void setResetIntegrators(boolean reset)
    {
       resetIntegrators.set(reset);
@@ -129,6 +140,12 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    }
 
    @Override
+   public boolean hasDesiredCurrent()
+   {
+      return !Double.isNaN(desiredCurrent.get());
+   }
+
+   @Override
    public LowLevelJointControlMode getControlMode()
    {
       return controlMode;
@@ -159,6 +176,12 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
    }
 
    @Override
+   public double getDesiredCurrent()
+   {
+      return desiredCurrent.doubleValue();
+   }
+
+   @Override
    public boolean pollResetIntegratorsRequest()
    {
       return resetIntegrators.getAndSet(false);
@@ -178,6 +201,7 @@ public class LowLevelJointData implements LowLevelJointDataReadOnly
       ret += "desiredPosition = " + getDesiredPosition() + "\n";
       ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
       ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
+      ret += "desiredCurrent = " + getDesiredCurrent() + "\n";
       return ret;
    }
 }
