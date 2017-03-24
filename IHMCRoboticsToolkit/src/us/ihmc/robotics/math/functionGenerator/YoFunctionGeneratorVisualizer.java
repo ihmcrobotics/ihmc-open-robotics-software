@@ -7,8 +7,6 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
 import us.ihmc.robotics.robotController.RobotController;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class YoFunctionGeneratorVisualizer implements RobotController
 {
@@ -108,40 +106,6 @@ public class YoFunctionGeneratorVisualizer implements RobotController
          e.printStackTrace();
       }
    }
-   
-   public static void main(String[] args)
-   {
-      Robot robot = new Robot("Robot");
-      
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
-      
-      YoFunctionGenerator yoFunctionGenerator = new YoFunctionGenerator("FunGen", registry);
-      YoFunctionGeneratorVisualizer yoFunctionGeneratorVisualizer = new YoFunctionGeneratorVisualizer(yoFunctionGenerator);
-      
-      yoFunctionGeneratorVisualizer.setTimeVariable(robot.getYoTime());
-      
-      robot.setController(yoFunctionGeneratorVisualizer);
-      
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-
-      scs.setDT(0.001, 10);
-      
-      Thread thread = new Thread(scs);
-
-      thread.start();
-      
-//      try
-//      {
-//         Thread.sleep(1000);
-//      }
-//      catch (InterruptedException e)
-//      {
-//         e.printStackTrace();
-//      }
-//      
-      scs.hideViewport();
-   }
-
 }
 
 
