@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.eventBased;
+package us.ihmc.simulationconstructionsettools.eventBased;
 
 
 /**

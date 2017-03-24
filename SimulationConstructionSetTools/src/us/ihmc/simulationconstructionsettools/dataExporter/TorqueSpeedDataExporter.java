@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.dataExporter;
+package us.ihmc.simulationconstructionsettools.dataExporter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
