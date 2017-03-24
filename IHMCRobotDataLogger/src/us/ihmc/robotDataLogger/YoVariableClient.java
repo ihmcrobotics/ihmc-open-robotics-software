@@ -3,15 +3,9 @@ package us.ihmc.robotDataLogger;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketTimeoutException;
-import java.net.StandardProtocolFamily;
-import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.LongBuffer;
-import java.nio.channels.DatagramChannel;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
@@ -19,12 +13,11 @@ import java.util.zip.CRC32;
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
-import us.ihmc.multicastLogDataProtocol.control.LogControlClient;
-import us.ihmc.multicastLogDataProtocol.control.LogControlClient.LogControlVariableChangeListener;
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
+import us.ihmc.robotDataLogger.rtps.VariableChangedProducer;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.tools.compression.SnappyUtils;
@@ -32,15 +25,23 @@ import us.ihmc.tools.compression.SnappyUtils;
 public class YoVariableClient implements LogPacketHandler
 {
    private static final int RECEIVE_BUFFER_SIZE = 1024;
-   private static final int TIMEOUT = 1000;
 
    private final CRC32 crc32 = new CRC32();
    private final String serverName;
+   
+   //DDS
    private final Announcement announcement;
+   private final DataConsumerParticipant dataConsumerParticipant;
+   private final VariableChangedProducer variableChangedProducer;
+
+   // Streaming protocol
    private final StreamingDataTCPClient streamingDataTCPClient;
    private final ThreadedLogPacketHandler threadedLogPacketHandler;
+   
+   // Callback
    private final YoVariablesUpdatedListener yoVariablesUpdatedListener;
-   private final DataConsumerParticipant dataConsumerParticipant;
+   
+   // Internal values
    private final IDLYoVariableHandshakeParser handshakeParser;
    private final List<YoVariable<?>> yoVariablesList;
    private final List<JointState> jointStates;
@@ -49,7 +50,6 @@ public class YoVariableClient implements LogPacketHandler
    private ByteBuffer decompressed;
    private long previous;
    private ClientState state = ClientState.WAITING;
-   private TimestampListener timestampListener;
    
    private enum ClientState
    {
@@ -98,14 +98,22 @@ public class YoVariableClient implements LogPacketHandler
       this.dataConsumerParticipant = participant;
       if(request == null)
       {
-         LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, filters);
+         request = LogProducerDisplay.getAnnounceRequest(dataConsumerParticipant, filters);
       }
       
       
       this.serverName = request.getNameAsString();
       this.announcement = request;
       this.yoVariablesUpdatedListener = yoVariablesUpdatedListener;
-      displayOneInNPackets = this.yoVariablesUpdatedListener.getDisplayOneInNPackets();
+      this.displayOneInNPackets = this.yoVariablesUpdatedListener.getDisplayOneInNPackets();
+      if(yoVariablesUpdatedListener.changesVariables())
+      {
+         this.variableChangedProducer = new VariableChangedProducer(dataConsumerParticipant);
+      }
+      else
+      {
+         this.variableChangedProducer = null;
+      }
 
       InetAddress inetAddress;
       try
@@ -120,7 +128,6 @@ public class YoVariableClient implements LogPacketHandler
       threadedLogPacketHandler = new ThreadedLogPacketHandler(this, RECEIVE_BUFFER_SIZE);
       streamingDataTCPClient = new StreamingDataTCPClient(inetAddress, request.getDataPort(), threadedLogPacketHandler, displayOneInNPackets);
       
-//      logControlClient = new LogControlClient(request.getControlIP(), request.getControlPort(), this.yoVariablesUpdatedListener);
       handshakeParser = new IDLYoVariableHandshakeParser(HandshakeFileType.IDL_CDR, registryPrefix);
       yoVariablesList = handshakeParser.getYoVariablesList();
       jointStates = handshakeParser.getJointStates();
@@ -184,7 +191,7 @@ public class YoVariableClient implements LogPacketHandler
                   for (int listener = 0; listener < changedListeners.size(); listener++)
                   {
                      VariableChangedListener changedListener = changedListeners.get(listener);
-                     if (!(changedListener instanceof LogControlVariableChangeListener))
+                     if (!(changedListener instanceof VariableChangedProducer.VariableListener))
                      {
                         changedListener.variableChanged(variable);
                      }
@@ -216,8 +223,8 @@ public class YoVariableClient implements LogPacketHandler
    public void timeout()
    {
       threadedLogPacketHandler.shutdown();
-      timestampListener.interrupt();
       yoVariablesUpdatedListener.receiveTimedOut();
+      dataConsumerParticipant.remove();
    }
    
 
@@ -249,15 +256,15 @@ public class YoVariableClient implements LogPacketHandler
       handshakeParser.parseFrom(handshake);
 
       LogHandshake logHandshake = new LogHandshake();
-      logHandshake.handshake = handshake;
+      logHandshake.setHandshake(handshake);
       if(announcement.getModelFileDescription().getHasModel())
       {
-         logHandshake.model = dataConsumerParticipant.getModelFile(announcement, timeout);
-         logHandshake.modelLoaderClass = announcement.getModelFileDescription().getModelLoaderClassAsString();
-         logHandshake.resourceDirectories = announcement.getModelFileDescription().getResourceDirectories().toStringArray();
+         logHandshake.setModel(dataConsumerParticipant.getModelFile(announcement, timeout));
+         logHandshake.setModelLoaderClass(announcement.getModelFileDescription().getModelLoaderClassAsString());
+         logHandshake.setResourceDirectories(announcement.getModelFileDescription().getResourceDirectories().toStringArray());
          if(announcement.getModelFileDescription().getHasResourceZip())
          {
-            logHandshake.resourceZip = dataConsumerParticipant.getResourceZip(announcement, timeout);
+            logHandshake.setResourceZip(dataConsumerParticipant.getResourceZip(announcement, timeout));
          }
          
       }
@@ -266,10 +273,12 @@ public class YoVariableClient implements LogPacketHandler
       if (yoVariablesUpdatedListener.changesVariables())
       {
          List<YoVariable<?>> variablesList = handshakeParser.getYoVariablesList();
-         dataConsumerParticipant.createVariableChangeProducer(announcement);
-         logControlClient.startVariableChangedProducers(variablesList, yoVariablesUpdatedListener.executeVariableChangedListeners());
+         variableChangedProducer.startVariableChangedProducers(announcement, variablesList);
       }
-
+      
+      dataConsumerParticipant.createClearLogPubSub(announcement, yoVariablesUpdatedListener);
+      dataConsumerParticipant.createTimestampListener(announcement, yoVariablesUpdatedListener);
+      
       decompressed = ByteBuffer.allocate(handshakeParser.getBufferSize());
 
       threadedLogPacketHandler.start();
@@ -288,7 +297,7 @@ public class YoVariableClient implements LogPacketHandler
    
    public void setSendingVariableChanges(boolean sendVariableChanges)
    {
-      logControlClient.setSendingChangesEnabled(sendVariableChanges);
+      variableChangedProducer.setSendingChangesEnabled(sendVariableChanges);
    }
    
    public synchronized void disconnected()
@@ -309,81 +318,24 @@ public class YoVariableClient implements LogPacketHandler
 
    public void sendClearLogRequest()
    {
-      dataConsumerParticipant.sendClearLogRequest();
-   }
-
-   @Override
-   public void connected(InetSocketAddress localAddress)
-   {
-      System.out.println("Listening on " + localAddress);
-      timestampListener = new TimestampListener(localAddress);
-      timestampListener.start();
-   }
-   
-   
-   private class TimestampListener extends Thread
-   {
-      InetSocketAddress address;
-
-      public TimestampListener(InetSocketAddress localAddress)
+      try
       {
-         super("TimestampListener");
-         
-         address = new InetSocketAddress(localAddress.getAddress(), localAddress.getPort());
-         
+         dataConsumerParticipant.sendClearLogRequest(announcement);
       }
-      
-      @Override
-      public void run()
+      catch (IOException e)
       {
-         try
-         {
-            DatagramChannel channel = DatagramChannel.open(StandardProtocolFamily.INET).setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(address);
-            channel.configureBlocking(false);
-            Selector selector = Selector.open();
-            SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
-            ByteBuffer receiveBuffer = ByteBuffer.allocateDirect(12);
-            System.out.println("Starting timestamp thread on " + address);
-            while(!interrupted())
-            {
-               if (selector.select(TIMEOUT) > 0)
-               {
-                  selector.selectedKeys().remove(key);
-                  if (key.isReadable())
-                  {
-                     receiveBuffer.clear();
-                     channel.receive(receiveBuffer);
-                     receiveBuffer.flip();
-                     
-                     if(receiveBuffer.getInt() == YoVariableProducer.TIMESTAMP_HEADER)
-                     {
-                        yoVariablesUpdatedListener.receivedTimestampOnly(receiveBuffer.getLong());
-                     }
-                     else
-                     {
-                        System.err.println("Received invalid timestamp, dropping");
-                     }
-                     
-                  }
-               }
-            }
-
-            System.out.println("Closing timestamp client");
-            channel.close();
-
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-            return;
-         }
-
+         e.printStackTrace();
       }
    }
-
 
    @Override
    public void keepAlive()
    {
    }
+
+   @Override
+   public void connected(InetSocketAddress localAddress)
+   {
+   }
+
 }

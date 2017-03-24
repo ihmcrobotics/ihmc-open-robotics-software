@@ -30,8 +30,11 @@ import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
 import us.ihmc.robotDataLogger.CameraAnnouncement;
+import us.ihmc.robotDataLogger.CameraType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
+import us.ihmc.robotDataLogger.Timestamp;
+import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.tools.thread.ThreadTools;
@@ -47,6 +50,8 @@ public class DataProducerParticipant
    private final String name;
    private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
    private final Participant participant;
+   private final Timestamp timestamp = new Timestamp();
+   private Publisher timestampPublisher;
    private final String guidString;
    private boolean activated = false;
    
@@ -58,6 +63,8 @@ public class DataProducerParticipant
    private boolean log = false;
 
    private DataProducerListener dataProducerListener = null;
+   
+   
    
    private class VariableChangeSubscriberListener implements SubscriberListener
    {
@@ -96,9 +103,9 @@ public class DataProducerParticipant
    {
       this.name = name;
       
-      domain.setLogLevel(LogLevel.WARNING);
-      ParticipantAttributes att = domain.createDefaultParticipantAttributes(LogParticipantSettings.domain, name);
-      participant = domain.createParticipant(att, null);
+      domain.setLogLevel(LogLevel.ERROR);
+      ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, name);
+      participant = domain.createParticipant(att);
 
       guidString = LogParticipantTools.createGuidString(participant.getGuid());
       
@@ -109,7 +116,7 @@ public class DataProducerParticipant
     * 
     * After calling this function, the producer cannot be reactivated
     */
-   public void deactivate()
+   public void remove()
    {
       domain.removeParticipant(participant);
    }
@@ -144,6 +151,12 @@ public class DataProducerParticipant
       this.dataPort = port;
    }
 
+   @Deprecated
+   public int getPort()
+   {
+      return this.dataPort;
+   }
+   
    /**
     * Add a callback listener for variable change requests
     * 
@@ -175,14 +188,14 @@ public class DataProducerParticipant
 
    private <T> void publishPersistentData(String partition, String topicName, TopicDataType<T> topicDataType, T data) throws IOException
    {
-      PublisherAttributes publisherAttributes = domain.createDefaultPublisherAttributes(participant, topicDataType, topicName, ReliabilityKind.RELIABLE, partition);
+      PublisherAttributes publisherAttributes = domain.createPublisherAttributes(participant, topicDataType, topicName, ReliabilityKind.RELIABLE, partition);
       
       publisherAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
       publisherAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setKind(HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setDepth(1);
       PublisherAttributes att = publisherAttributes;
-      Publisher publisher = domain.createPublisher(participant, att, null);
+      Publisher publisher = domain.createPublisher(participant, att);
       publisher.write(data);
    }
 
@@ -194,7 +207,7 @@ public class DataProducerParticipant
     * @param provider
     * @throws IOException
     */
-   public void setModelFileProvider(LogModelProvider provider) throws IOException
+   public void setModelFileProvider(LogModelProvider provider)
    {
       this.logModelProvider = provider;
    }
@@ -207,11 +220,11 @@ public class DataProducerParticipant
     * @param name User friendly name to show in the log files
     * @param cameraId ID of the camera on the logger machine
     */
-   public void addCamera(String name, int cameraId)
+   public void addCamera(CameraType type, String name, String cameraId)
    {
       CameraAnnouncement cameraAnnouncement = new CameraAnnouncement();
       cameraAnnouncement.setName(name);
-      cameraAnnouncement.setId(cameraId);
+      cameraAnnouncement.setIdentifier(cameraId);
       cameras.add(cameraAnnouncement);
    }
    
@@ -243,6 +256,7 @@ public class DataProducerParticipant
       Announcement announcement = new Announcement();
       
       announcement.setName(name);
+      announcement.setHostName(InetAddress.getLocalHost().getHostName());
       announcement.setIdentifier(guidString);
       System.arraycopy(dataAddress.getAddress(), 0, announcement.getDataIP(), 0, 4);
       announcement.setDataPort((short) dataPort);
@@ -290,11 +304,15 @@ public class DataProducerParticipant
       {
          VariableChangeRequestPubSubType variableChangeRequestPubSubType = new VariableChangeRequestPubSubType();
          domain.registerType(participant, variableChangeRequestPubSubType);
-         SubscriberAttributes subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, variableChangeRequestPubSubType, LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE, partition);
+         SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, variableChangeRequestPubSubType, LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE, partition);
          subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
          domain.createSubscriber(participant, subscriberAttributes, new VariableChangeSubscriberListener());
 
       }
+      
+      TimestampPubSubType timestampPubSubType = new TimestampPubSubType();
+      PublisherAttributes timestampPublisherAttributes = domain.createPublisherAttributes(participant, timestampPubSubType, LogParticipantSettings.timestampTopic, ReliabilityKind.BEST_EFFORT, partition);
+      timestampPublisher = domain.createPublisher(participant, timestampPublisherAttributes);
       
       publishPersistentData(LogParticipantSettings.partition, LogParticipantSettings.annoucementTopic, announcementPubSubType, announcement);
 
@@ -310,6 +328,18 @@ public class DataProducerParticipant
       this.log = log;
    }
 
+   
+   /** 
+    * Publisher a timestamp update
+    * @param timestamp
+    * @throws IOException 
+    */
+   public void publishTimestamp(long timestamp) throws IOException
+   {
+      this.timestamp.setTimestamp(timestamp);
+      timestampPublisher.write(this.timestamp);
+   }
+   
    public static void main(String[] args) throws IOException
    {
       DataProducerParticipant participant = new DataProducerParticipant("testParticipant");

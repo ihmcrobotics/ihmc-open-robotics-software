@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.pubsub.Domain;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -30,8 +29,12 @@ import us.ihmc.pubsub.subscriber.SubscriberListener;
 import us.ihmc.pubsub.types.ByteBufferPubSubType;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.AnnouncementPubSubType;
+import us.ihmc.robotDataLogger.ClearLogRequest;
+import us.ihmc.robotDataLogger.ClearLogRequestPubSubType;
 import us.ihmc.robotDataLogger.Handshake;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
+import us.ihmc.robotDataLogger.Timestamp;
+import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 
@@ -50,7 +53,94 @@ public class DataConsumerParticipant
    private LogAnnouncementListener logAnnouncementListener;
    private final HashMap<GuidPrefix, Announcement> announcements = new HashMap<>();
    private Publisher variableChangeDataPublisher = null;
+   
+   private Publisher clearLogPublisher = null;
 
+   private class TimestampListenerImpl implements SubscriberListener
+   {
+      private final Timestamp timestamp = new Timestamp();
+      private final SampleInfo info = new SampleInfo();
+      private final TimestampListener listener;
+      
+      
+      
+      public TimestampListenerImpl(TimestampListener listener)
+      {
+         this.listener = listener;
+      }
+
+      @Override
+      public void onNewDataMessage(Subscriber subscriber)
+      {
+         try
+         {
+            if(subscriber.takeNextData(timestamp, info))
+            {
+               listener.receivedTimestampOnly(timestamp.getTimestamp());
+            }
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+      @Override
+      public void onSubscriptionMatched(Subscriber subscriber, MatchingInfo info)
+      {
+         // TODO Auto-generated method stub
+         
+      }
+      
+      
+   }
+   
+   private class ClearLogListenerImpl implements SubscriberListener
+   {
+      private final String logGuid;
+      private final ClearLogListener clearLogListener;
+      
+      private ClearLogListenerImpl(ClearLogListener clearLogListener, String logGuid)
+      {
+         this.clearLogListener = clearLogListener;
+         this.logGuid = logGuid;
+      }
+         
+      @Override
+      public void onNewDataMessage(Subscriber subscriber)
+      {
+         ClearLogRequest clearLogRequest = new ClearLogRequest();
+         SampleInfo info = new SampleInfo();
+
+         try
+         {
+            if (subscriber.takeNextData(clearLogRequest, info))
+            {
+               if (clearLogListener != null && clearLogRequest.getGuidAsString().equals(logGuid))
+               {
+                  clearLogListener.clearLog(LogParticipantTools.createGuidString(info.getSampleIdentity().getGuid()));
+               }
+               else
+               {
+                  System.err.println("Clear log guid is invalid");
+               }
+            }
+         }
+         catch (IOException e)
+         {
+            e.printStackTrace();
+         }
+      }
+
+      @Override
+      public void onSubscriptionMatched(Subscriber subscriber, MatchingInfo info)
+      {
+         // TODO Auto-generated method stub
+         
+      }
+      
+   }
+   
    private class LeaveListener implements ParticipantListener
    {
       @Override
@@ -123,8 +213,8 @@ public class DataConsumerParticipant
     */
    public DataConsumerParticipant(String name) throws IOException
    {
-      domain.setLogLevel(LogLevel.WARNING);
-      ParticipantAttributes att = domain.createDefaultParticipantAttributes(LogParticipantSettings.domain, name);
+      domain.setLogLevel(LogLevel.ERROR);
+      ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, name);
       participant = domain.createParticipant(att, new LeaveListener());
    }
 
@@ -149,7 +239,7 @@ public class DataConsumerParticipant
       this.logAnnouncementListener = listener;
 
       AnnouncementPubSubType announcementPubSubType = new AnnouncementPubSubType();
-      SubscriberAttributes subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, announcementPubSubType, LogParticipantSettings.annoucementTopic, ReliabilityKind.RELIABLE, LogParticipantSettings.partition);
+      SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, announcementPubSubType, LogParticipantSettings.annoucementTopic, ReliabilityKind.RELIABLE, LogParticipantSettings.partition);
       subscriberAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       domain.createSubscriber(participant, subscriberAttributes, new AnnouncementListener());
 
@@ -157,10 +247,10 @@ public class DataConsumerParticipant
 
    private <T> T getData(T data, TopicDataType<T> topicDataType, Announcement announcement, String topic, int timeout) throws IOException
    {
-      SubscriberAttributes subscriberAttributes = domain.createDefaultSubscriberAttributes(participant, topicDataType, topic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
+      SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, topicDataType, topic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
       subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
       subscriberAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
-      Subscriber subscriber = domain.createSubscriber(participant, subscriberAttributes, null);
+      Subscriber subscriber = domain.createSubscriber(participant, subscriberAttributes);
       try
       {
          subscriber.waitForUnreadMessage(timeout);
@@ -267,11 +357,17 @@ public class DataConsumerParticipant
       }
 
       VariableChangeRequestPubSubType topicDataType = new VariableChangeRequestPubSubType();
-      PublisherAttributes attributes = domain.createDefaultPublisherAttributes(participant, topicDataType, LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
-      variableChangeDataPublisher = domain.createPublisher(participant, attributes, null);
+      PublisherAttributes attributes = domain.createPublisherAttributes(participant, topicDataType, LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
+      variableChangeDataPublisher = domain.createPublisher(participant, attributes);
    }
    
-   
+   /**
+    * Send a request to change variables
+    * 
+    * @param variableID
+    * @param requestedValue
+    * @throws IOException
+    */
    public void writeVariableChangeRequest(int variableID, double requestedValue) throws IOException
    {
       if(variableChangeDataPublisher == null)
@@ -286,7 +382,44 @@ public class DataConsumerParticipant
    }
 
    
+   /**
+    * Create a clear log publisher/subscriber pair. Clear log gets send to all subscribers off the producer
+    * 
+    * @param listener
+    * @throws IOException 
+    */
+   public void createClearLogPubSub(Announcement announcement, ClearLogListener listener) throws IOException
+   {
+      ClearLogRequestPubSubType clearLogRequestPubSubType = new ClearLogRequestPubSubType();
+      PublisherAttributes publisherAttributes = domain.createPublisherAttributes(participant, clearLogRequestPubSubType, LogParticipantSettings.clearLogTopic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
+      publisherAttributes.getQos().setDurabilityKind(DurabilityKind.VOLATILE_DURABILITY_QOS); // make sure we do not persist
+      clearLogPublisher = domain.createPublisher(participant, publisherAttributes);
+      
+      SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, clearLogRequestPubSubType, LogParticipantSettings.clearLogTopic, ReliabilityKind.RELIABLE, getPartition(announcement.getIdentifierAsString()));
+      domain.createSubscriber(participant, subscriberAttributes, new ClearLogListenerImpl(listener, announcement.getIdentifierAsString()));
+   }
+   
+   /**
+    * Send a clear log request
+    * 
+    * @param announcement announcement of this domain as safe-guard
+    * @throws IOException
+    */
+   public void sendClearLogRequest(Announcement announcement) throws IOException
+   {
+      ClearLogRequest request = new ClearLogRequest();
+      request.setGuid(announcement.getIdentifierAsString());
+      clearLogPublisher.write(request);
+   }
+   
 
+   public void createTimestampListener(Announcement announcement, TimestampListener listener) throws IOException
+   {
+      TimestampPubSubType pubSubType = new TimestampPubSubType();
+      SubscriberAttributes attributes = domain.createSubscriberAttributes(participant, pubSubType, LogParticipantSettings.timestampTopic, ReliabilityKind.BEST_EFFORT, getPartition(announcement.getIdentifierAsString()));
+      domain.createSubscriber(participant, attributes, new TimestampListenerImpl(listener));
+   }
+   
    public static void main(String[] args) throws IOException, InterruptedException
    {
       DataConsumerParticipant dataConsumerParticipant = new DataConsumerParticipant("testConsumer");
@@ -329,11 +462,6 @@ public class DataConsumerParticipant
    public void remove()
    {
       domain.removeParticipant(participant);
-   }
-
-   public void sendClearLogRequest()
-   {
-      PrintTools.error(this, "TODO: Implement me");
    }
 
 }

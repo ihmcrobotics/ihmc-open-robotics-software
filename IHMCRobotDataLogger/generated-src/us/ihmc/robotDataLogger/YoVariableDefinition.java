@@ -61,23 +61,23 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
     }
 
         
-    public void setRegistry(short registry)
+    public void setRegistry(int registry)
     {
         registry_ = registry;
     }
 
-    public short getRegistry()
+    public int getRegistry()
     {
         return registry_;
     }
 
         
-    public void setEnumType(short enumType)
+    public void setEnumType(int enumType)
     {
         enumType_ = enumType;
     }
 
-    public short getEnumType()
+    public int getEnumType()
     {
         return enumType_;
     }
@@ -155,9 +155,9 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 	    cdr.write_type_c(type_.ordinal());
 
 
-	    cdr.write_type_1(registry_);
+	    cdr.write_type_3(registry_);
 
-	    cdr.write_type_1(enumType_);
+	    cdr.write_type_3(enumType_);
 
 	    cdr.write_type_7(allowNullValues_);
 	}
@@ -171,9 +171,9 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 	    	type_ = us.ihmc.robotDataLogger.YoType.values[cdr.read_type_c()];
 	    	
 
-	    	registry_ = cdr.read_type_1();	
+	    	registry_ = cdr.read_type_3();	
 
-	    	enumType_ = cdr.read_type_1();	
+	    	enumType_ = cdr.read_type_3();	
 
 	    	allowNullValues_ = cdr.read_type_7();	
 	}
@@ -185,9 +185,9 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 			    
 			    ser.write_type_c("type", type_);
 			    
-			    ser.write_type_1("registry", registry_);
+			    ser.write_type_3("registry", registry_);
 			    
-			    ser.write_type_1("enumType", enumType_);
+			    ser.write_type_3("enumType", enumType_);
 			    
 			    ser.write_type_7("allowNullValues", allowNullValues_);
 			    
@@ -201,9 +201,9 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 	    			type_ = (us.ihmc.robotDataLogger.YoType)ser.read_type_c("type", us.ihmc.robotDataLogger.YoType.class);
 	    	
 	    	    
-	    			registry_ = ser.read_type_1("registry");	
+	    			registry_ = ser.read_type_3("registry");	
 	    	    
-	    			enumType_ = ser.read_type_1("enumType");	
+	    			enumType_ = ser.read_type_3("enumType");	
 	    	    
 	    			allowNullValues_ = ser.read_type_7("allowNullValues");	
 	    	    
@@ -268,8 +268,8 @@ public class YoVariableDefinition implements IDLStruct<YoVariableDefinition>
 
     private StringBuilder name_; 
     private us.ihmc.robotDataLogger.YoType type_; 
-    private short registry_; 
-    private short enumType_; 
+    private int registry_; 
+    private int enumType_; 
     private boolean allowNullValues_; 
 
 }

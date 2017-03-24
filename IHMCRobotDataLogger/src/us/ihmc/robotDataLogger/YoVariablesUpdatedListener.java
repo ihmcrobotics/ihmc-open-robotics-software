@@ -3,8 +3,10 @@ package us.ihmc.robotDataLogger;
 import java.nio.ByteBuffer;
 
 import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
+import us.ihmc.robotDataLogger.rtps.ClearLogListener;
+import us.ihmc.robotDataLogger.rtps.TimestampListener;
 
-public interface YoVariablesUpdatedListener
+public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogListener
 {
    /**
     * 
@@ -35,14 +37,7 @@ public interface YoVariablesUpdatedListener
     */
    int getDisplayOneInNPackets();
 
-   /**
-    * Called when an UDP packet with the timestamp is received. The timestamps are send
-    * over UDP for synchronization purposes. Timestamps are published directly from the realtime
-    * thread and should have minimum delay
-    * 
-    * @param timestamp
-    */
-   void receivedTimestampOnly(long timestamp);
+
 
    /**s
     * Data and timestamp is received over the TCP channel. Significant delay can occur depending on the
@@ -52,12 +47,6 @@ public interface YoVariablesUpdatedListener
     * @param buf data
     */
    void receivedTimestampAndData(long timestamp, ByteBuffer buf);
-
-   /**
-    * Broadcast to all clients to clear the log and start recording anew.
-    * 
-    */
-   void clearLog();
 
    boolean executeVariableChangedListeners();
 }

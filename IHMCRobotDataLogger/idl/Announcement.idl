@@ -1,11 +1,17 @@
 module us{
 module ihmc{
 module robotDataLogger{
+	enum CameraType
+	{
+		CAPTURE_CARD,
+		NETWORK_STREAM
+	};
 	
 	struct CameraAnnouncement
 	{	
+		CameraType type;
 		string name;
-		long id;
+		string identifier;
 	};
 	
 	struct ModelFileDescription{
@@ -26,7 +32,7 @@ module robotDataLogger{
 		string identifier;
 		
 		octet dataIP[4];
-		short dataPort;
+		unsigned short dataPort;
 		
 		string name;
 		string hostName;

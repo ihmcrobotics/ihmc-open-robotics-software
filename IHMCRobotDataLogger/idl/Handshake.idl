@@ -3,7 +3,7 @@ module ihmc{
 module robotDataLogger{
 	struct YoRegistryDefinition
 	{
-		short parent;
+		unsigned short parent;
 		string name;
 	};
 	
@@ -27,8 +27,8 @@ module robotDataLogger{
 	{
 		string name;
 		YoType type;
-		short registry;
-		short enumType;
+		unsigned short registry;
+		unsigned short enumType;
 		boolean allowNullValues;
 	};
 	
@@ -50,10 +50,10 @@ module robotDataLogger{
 	
 	struct GraphicObjectMessage
 	{
-		short type;
+		unsigned short type;
 		string name;
 		
-		sequence<short, 128> yoVariableIndex;
+		sequence<unsigned short, 128> yoVariableIndex;
 		sequence<double, 128> constants;
 		AppearanceDefinitionMessage appearance;
 		string listName;

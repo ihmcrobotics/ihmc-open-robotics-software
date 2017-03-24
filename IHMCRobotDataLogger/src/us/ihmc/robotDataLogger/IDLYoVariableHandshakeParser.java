@@ -1,6 +1,5 @@
 package us.ihmc.robotDataLogger;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,8 +17,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.idl.serializers.extra.AbstractSerializer;
 import us.ihmc.idl.serializers.extra.YAMLSerializer;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.DynamicGraphicMessage;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.MutableColor;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -54,17 +51,15 @@ public class IDLYoVariableHandshakeParser extends YoVariableHandshakeParser
       }
    }
 
-   public static int getNumberOfVariables(byte[] handShake)
+   public static int getNumberOfVariables(Handshake handShake)
    {
-      YoProtoHandshake yoProtoHandshake = parseYoProtoHandshake(handShake);
-
       int jointStateVariables = 0;
-      for (int i = 0; i < yoProtoHandshake.getJointCount(); i++)
+      for (int i = 0; i < handShake.getJoints().size(); i++)
       {
-         jointStateVariables += JointState.getNumberOfVariables(yoProtoHandshake.getJoint(i).getType());
+         jointStateVariables += JointState.getNumberOfVariables(handShake.getJoints().get(i).getType());
       }
 
-      return 1 + yoProtoHandshake.getVariableList().size() + jointStateVariables;
+      return 1 + handShake.getVariables().size() + jointStateVariables;
    }
 
    public void parseFrom(byte[] data) throws IOException

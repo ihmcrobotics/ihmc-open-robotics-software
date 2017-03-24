@@ -15,8 +15,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
-import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionBroadcastClient;
 import us.ihmc.robotDataLogger.Announcement;
 
 public class LogProducerDisplay extends JFrame
@@ -72,7 +70,7 @@ public class LogProducerDisplay extends JFrame
       pack();
    }
 
-   private static String ipToString(byte[] address)
+   public static String ipToString(byte[] address)
    {
       return (address[0] & 0xFF) + "." + (address[1] & 0xFF) + "." + (address[2] & 0xFF) + "." + (address[3] & 0xFF);
    }
@@ -89,62 +87,6 @@ public class LogProducerDisplay extends JFrame
       {
          throw new RuntimeException(e);
       }
-   }
-
-
-   public AnnounceRequest getAnnounceRequestByIP(String IPAdress)
-   {
-
-      return getAnnounceRequestByIP(IPAdress, 100000000);
-   }
-
-   public AnnounceRequest getAnnounceRequestByIP(String IPAdress, int timeOut)
-   {
-      Boolean announceRequestFound = false;
-      int timeOutCounter = 0;
-      final LinkedBlockingQueue<AnnounceRequest> request = new LinkedBlockingQueue<>();
-      SwingUtilities.invokeLater(new Runnable()
-      {
-         @Override public void run()
-         {
-            setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            PrintTools.info("Showing");
-            setVisible(false);
-         }
-      });
-
-      PrintTools.info("Looking for: " + IPAdress + " to come online");
-      while ((!announceRequestFound) && (timeOutCounter < timeOut))
-      {
-         for (int i = 1; i <= model.getRowCount(); i++)
-         {
-            if (model.getValueAt(i - 1, 3).equals(IPAdress))
-            {
-               announceRequestFound = true;
-               try
-               {
-                  request.put((AnnounceRequest) model.getValueAt(i - 1, 1));
-
-                  SwingUtilities.invokeLater(new Runnable()
-                  {
-                     @Override public void run()
-                     {
-                        dispose();
-                     }
-                  });
-
-                  return request.take();
-               }
-               catch (InterruptedException e)
-               {
-                  e.printStackTrace();
-               }
-            }
-         }
-         timeOutCounter++;
-      }
-
-      return null;
    }
 
    private static Announcement selectLogSession(DataConsumerParticipant dataConsumerParticipant) throws IOException

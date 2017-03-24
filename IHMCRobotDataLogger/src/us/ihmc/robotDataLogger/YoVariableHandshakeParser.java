@@ -16,6 +16,12 @@ public abstract class YoVariableHandshakeParser
    @SuppressWarnings("deprecation")
    public static YoVariableHandshakeParser create(HandshakeFileType type, String registryPrefix)
    {
+      if(type == null)
+      {
+         System.err.println("Handshake file type is null. Defaulting to PROTOBUFFER");
+         type = HandshakeFileType.PROTOBUFFER;
+      }
+      
       switch(type)
       {
       case IDL_CDR:

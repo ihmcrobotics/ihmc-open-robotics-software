@@ -145,7 +145,7 @@ public class LogSessionBroadcaster extends Thread
       canIHazRequest.setDataIP(dataAddress.getAddress());
       if(logSettings.getVideoStream() != null)
       {
-         canIHazRequest.setVideoStream(logSettings.getVideoStream().getAddress());
+//         canIHazRequest.setVideoStream(logSettings.getVideoStream().getAddress());
          canIHazRequest.setVideoPort(LogDataProtocolSettings.UI_DATA_PORT);
       }
       canIHazRequest.setCameras(cameras);
@@ -219,7 +219,7 @@ public class LogSessionBroadcaster extends Thread
       announcement.setControlPort((short) controlAddress.getPort());
       if(logSettings.getVideoStream() != null)
       {
-         announcement.setVideoStream(logSettings.getVideoStream().getAddress());
+//         announcement.setVideoStream(logSettings.getVideoStream().getAddress());
          announcement.setVideoPort(LogDataProtocolSettings.UI_ANNOUNCE_PORT);
       }
       announcement.setCameras(cameras);

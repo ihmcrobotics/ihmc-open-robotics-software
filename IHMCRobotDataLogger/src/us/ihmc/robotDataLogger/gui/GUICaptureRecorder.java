@@ -112,7 +112,7 @@ public class GUICaptureRecorder extends JFrame
          
          InetAddress listen = InetAddress.getByName(NetworkParameters.getHost(NetworkParameterKeys.logger)); 
          InetSocketAddress address = new InetSocketAddress(settings.getVideoStream(), LogDataProtocolSettings.UI_DATA_PORT);
-         currentLogger = new NetworkStreamVideoDataLogger(listen.getAddress(), target, logProperties, address);
+//         currentLogger = new NetworkStreamVideoDataLogger(listen.getAddress(), target, logProperties, address);
          start.setEnabled(false);
          stop.setEnabled(true);
       }
@@ -140,6 +140,7 @@ public class GUICaptureRecorder extends JFrame
 
    public static void main(String args[])
    {
-      new GUICaptureRecorder();
+      throw new RuntimeException("TODO: FIX ME");
+//      new GUICaptureRecorder();
    }
 }

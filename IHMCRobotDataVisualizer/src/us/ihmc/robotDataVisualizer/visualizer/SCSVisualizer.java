@@ -205,10 +205,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public final void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       Robot robot = new Robot("DummyRobot");
-      if (handshake.modelLoaderClass != null)
+      if (handshake.getModelLoaderClass() != null)
       {
          SDFModelLoader modelLoader = new SDFModelLoader();
-         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip, null);
+         modelLoader.load(handshake.getModelName(), handshake.getModel(), handshake.getResourceDirectories(), handshake.getResourceZip(), null);
          robot = new FloatingRootJointRobot(modelLoader.createRobot());
       }
 
@@ -343,7 +343,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public void clearLog()
+   public void clearLog(String guid)
    {
    }
 

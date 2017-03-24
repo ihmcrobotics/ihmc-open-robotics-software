@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -20,15 +19,23 @@ import us.ihmc.codecs.screenCapture.ScreenCapture;
 import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.commons.Conversions;
-import us.ihmc.multicastLogDataProtocol.LogDataProtocolSettings;
-import us.ihmc.multicastLogDataProtocol.LogUtils;
-import us.ihmc.multicastLogDataProtocol.MultiClientStreamingDataTCPServer;
-import us.ihmc.robotDataLogger.LogDataHeader;
+import us.ihmc.pubsub.Domain;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.attributes.ParticipantAttributes;
+import us.ihmc.pubsub.attributes.PublisherAttributes;
+import us.ihmc.pubsub.attributes.ReliabilityKind;
+import us.ihmc.pubsub.participant.Participant;
+import us.ihmc.pubsub.publisher.Publisher;
+import us.ihmc.pubsub.types.ByteBufferPubSubType;
+import us.ihmc.robotDataLogger.rtps.LogParticipantSettings;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class GUICaptureStreamer
 {
-   private final int MAXIMUM_IMAGE_DATA_SIZE= 1024*1024;
+   public static final String topicType = "us::ihmc::robotDataLogger::gui::screenshot";
+   public static final String partition = LogParticipantSettings.partition + LogParticipantSettings.namespaceSeperator + "GuiStreamer";
+   public static final int MAXIMUM_IMAGE_DATA_SIZE= 1024*1024;
    private final JFrame window;
    private final int fps;
 
@@ -38,22 +45,26 @@ public class GUICaptureStreamer
    private final CaptureRunner captureRunner = new CaptureRunner();
    private final Dimension size = new Dimension();
 
-   private final MultiClientStreamingDataTCPServer server;
-   private final GUICaptureBroadcast broadcast;
+   private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
+   private final Participant participant;
+   private Publisher publisher;
+   private final String topicName;
+   
    private JPEGEncoder encoder = new JPEGEncoder();
    
    private ScheduledFuture<?> future = null;
 
-   public GUICaptureStreamer(JFrame window, int fps, float quality, String hostToBindTo, InetAddress group)
+   public GUICaptureStreamer(JFrame window, int fps, float quality, int domainID, String topicName)
    {
 
       this.window = window;
       this.fps = fps;
+      this.topicName = topicName;
       try
       {
-         server = new MultiClientStreamingDataTCPServer(LogDataProtocolSettings.UI_DATA_PORT, MAXIMUM_IMAGE_DATA_SIZE, 10);
-         System.out.println("Connecting to host " + hostToBindTo);
-         broadcast = new GUICaptureBroadcast(LogUtils.getMyIP(hostToBindTo), group.getAddress());
+         ParticipantAttributes attributes = domain.createParticipantAttributes(domainID, getClass().getSimpleName());
+         participant = domain.createParticipant(attributes);
+                  
       }
       catch (IOException e)
       {
@@ -68,9 +79,17 @@ public class GUICaptureStreamer
       {
          future.cancel(false);
       }
+      ByteBufferPubSubType pubSubType = new ByteBufferPubSubType(topicType, MAXIMUM_IMAGE_DATA_SIZE);
+      PublisherAttributes attributes = domain.createPublisherAttributes(participant, pubSubType, topicName, ReliabilityKind.BEST_EFFORT, partition);
+      try
+      {
+         publisher = domain.createPublisher(participant, attributes);
+      }
+      catch (IllegalArgumentException | IOException e)
+      {
+         throw new RuntimeException(e);
+      }
       scheduler.scheduleAtFixedRate(captureRunner, 10, Conversions.nano / fps, TimeUnit.NANOSECONDS);
-      broadcast.start();
-      server.start();
    }
 
    public synchronized void stop()
@@ -79,29 +98,11 @@ public class GUICaptureStreamer
       {
          future.cancel(false);
       }
-      broadcast.stop();
-      server.close();
+      domain.removeParticipant(participant);
    }
 
    private class CaptureRunner implements Runnable
    {
-      private ByteBuffer directBuffer;
-
-      private ByteBuffer getOrCreateBuffer(int size)
-      {
-         if (directBuffer == null)
-         {
-            directBuffer = ByteBuffer.allocateDirect(size);
-         }
-         else if (directBuffer.capacity() < size)
-         {
-            directBuffer = ByteBuffer.allocateDirect(size);
-         }
-
-         directBuffer.clear();
-         return directBuffer;
-      }
-
       @Override
       public void run()
       {
@@ -123,21 +124,9 @@ public class GUICaptureStreamer
             {
                YUVPicture yuv = img.toYUV(YUVSubsamplingType.YUV420);
                ByteBuffer buffer = encoder.encode(yuv, 90);
-               int dataLength = buffer.remaining();
-               ByteBuffer sendBuffer = getOrCreateBuffer(dataLength + LogDataHeader.length());
-               LogDataHeader header = new LogDataHeader();
-               header.setUid(0);
-               header.setDataSize(dataLength);
-               header.setTimestamp(System.nanoTime());
-               header.setType(LogDataHeader.VIDEO_PACKET);
-               header.setCrc32(0);
-               header.writeBuffer(0, sendBuffer);
-               sendBuffer.position(LogDataHeader.length());
-               sendBuffer.put(buffer);
-               sendBuffer.flip();
-               if(sendBuffer.remaining() <= MAXIMUM_IMAGE_DATA_SIZE)
+               if(buffer.remaining() <= MAXIMUM_IMAGE_DATA_SIZE)
                {
-                  server.send(sendBuffer);
+                  publisher.write(buffer);
                }
                else
                {

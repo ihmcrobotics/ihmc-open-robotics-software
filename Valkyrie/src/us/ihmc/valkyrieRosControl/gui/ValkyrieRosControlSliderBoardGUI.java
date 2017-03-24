@@ -8,7 +8,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
-import us.ihmc.valkyrie.visualizer.ValkyrieIpToNiceNameRemapper;
 
 public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
 {
@@ -65,7 +64,7 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
       SCSVisualizer scsYoVariablesUpdatedListener = new ValkyrieRosControlSliderBoardGUI(16384);
       scsYoVariablesUpdatedListener.setShowOverheadView(false);
       
-      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote", new ValkyrieIpToNiceNameRemapper());
+      YoVariableClient client = new YoVariableClient(scsYoVariablesUpdatedListener, "remote");
       client.start();
    }
 }
