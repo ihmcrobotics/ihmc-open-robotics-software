@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.dataExporter;
+package us.ihmc.simulationconstructionsettools.dataExporter;
 
 import java.awt.Color;
 import java.io.File;

@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.dataExporter;
+package us.ihmc.simulationconstructionsettools.dataExporter;
 
 import java.awt.Dimension;
 import java.io.File;
