@@ -399,7 +399,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
 
       motionTime = 3.0;
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose, motionTime);
+      //solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose, motionTime);
       wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
       drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
@@ -407,7 +407,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       motionTime = 5.0;
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion, motionTime);
+      //solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion, motionTime);
       
       for(int i=0;i<solarPanelPlanner.debugPose.size();i++)
       {
@@ -476,7 +476,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
 
       motionTime = 3.0;
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose, motionTime);
+      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
       wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
       wholeBodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
@@ -503,10 +503,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH).getQ());
       PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.WRIST_ROLL).getQ());
       PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SECOND_WRIST_PITCH).getQ());
-      
-      
-      
-      
+            
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       
       OneDoFJoint[] oneDoFJoints = desiredFullRobotModel.getOneDoFJoints();
@@ -520,25 +517,22 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       
       
-    for (int i = 0; i < oneDoFJoints.length; i++)
-    {         
-       double jointPosition = oneDoFJoints[i].getQ();
-
-       Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(oneDoFJoints[i].getName());
-       if (scsJoint instanceof PinJoint)
-       {
-          PinJoint pinJoint = (PinJoint) scsJoint;
-          pinJoint.setQ(jointPosition);
-       }
-       else
-       {
-          PrintTools.info(oneDoFJoints[i].getName() + " was not a PinJoint.");
-       }
-    }
-    scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
-      
-      
-    drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {         
+         double jointPosition = oneDoFJoints[i].getQ();
+         Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(oneDoFJoints[i].getName());
+         if (scsJoint instanceof PinJoint)
+         {
+            PinJoint pinJoint = (PinJoint) scsJoint;
+            pinJoint.setQ(jointPosition);
+         }
+         else
+         {
+            PrintTools.info(oneDoFJoints[i].getName() + " was not a PinJoint.");
+         }
+      }
+      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
    }
    
    private void setUpSolarPanel()
