@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.bambooTools.videoWall;
+package us.ihmc.simulationconstructionsettools.bambooTools.videoWall;
 
 import java.awt.GridLayout;
 import java.nio.file.Path;

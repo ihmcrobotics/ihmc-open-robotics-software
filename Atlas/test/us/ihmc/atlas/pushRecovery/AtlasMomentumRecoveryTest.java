@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.pushRecovery.HumanoidMomentumRecoveryTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasMomentumRecoveryTest extends HumanoidMomentumRecoveryTest

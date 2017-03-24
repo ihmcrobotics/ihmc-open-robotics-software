@@ -96,6 +96,7 @@ dependencies {
     testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 	testCompile ihmc.getProjectTestDependency(":IHMCFootstepPlanning")
 	testCompile ihmc.getProjectTestDependency(":IHMCHumanoidRobotics")
+	testCompile ihmc.getProjectTestDependency(":SimulationConstructionSetTools")
 }
 
 jar {

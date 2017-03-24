@@ -8,7 +8,7 @@ import us.ihmc.avatar.behaviorTests.AvatarWalkOverTerrainBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 public class AtlasWalkOverTerrainBehaviorTest extends AvatarWalkOverTerrainBehaviorTest
