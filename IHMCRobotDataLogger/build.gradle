@@ -11,7 +11,7 @@ buildscript {
   dependencies {
     classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
     classpath "org.hidetake:gradle-ssh-plugin:2.1.1"
-    classpath group: 'us.ihmc', name: 'IHMCPubSubGenerator', version: '0.2.1'
+    classpath group: 'us.ihmc', name: 'IHMCPubSubGenerator', version: '0.2.2'
   }
 }
 
@@ -70,15 +70,14 @@ dependencies {
    compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'
    compile group: 'us.ihmc', name: 'IHMCJavaDecklinkCapture', version: '0.1.7'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
-   compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
    compile group: 'org.tukaani', name: 'xz', version: '1.5'
-   compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.1.4'
-   compile group: 'us.ihmc', name: 'IHMCPubSubSerializersExtra', version: '0.1.1'
+   compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.2'
+   compile group: 'us.ihmc', name: 'IHMCPubSubSerializersExtra', version: '0.2'
    
    compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCCommunication")
    compile ihmc.getProjectDependency(":IHMCJavaToolkit")
-    compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+   compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
    compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
    compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
