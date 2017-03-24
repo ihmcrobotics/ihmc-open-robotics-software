@@ -1,7 +1,8 @@
 package us.ihmc.ihmcPerception.vision.shapes;
 
 import org.opencv.core.Scalar;
-import us.ihmc.ihmcPerception.vision.HSVValue;
+
+import us.ihmc.graphicsDescription.color.HSVValue;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>

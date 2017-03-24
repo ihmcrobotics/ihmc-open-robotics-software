@@ -438,7 +438,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          Twist footTwistInWorld = footTwistsInWorld.get(foot);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(foot);
 
-         twistCalculator.getTwistOfBody(footTwistInWorld, foot);
+         twistCalculator.getTwistOfBody(foot, footTwistInWorld);
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));
          footTwistInWorld.changeFrame(soleFrames.get(foot));
 

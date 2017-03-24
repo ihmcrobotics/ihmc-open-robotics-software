@@ -36,7 +36,7 @@ def strings = ['ihmc', 'robotics']
 ihmc.configureForIHMCOpenSourceBintrayPublish(false, "mavenJava", "maven-release", strings)
 
 dependencies {
-	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
+	compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
     compile group: 'commons-net', name: 'commons-net', version: '3.3'
 	compile group: 'org.yaml', name: 'snakeyaml', version: '1.17' //1.11
 	compile group: 'us.ihmc', name: 'IHMCRealtime', version: '1.1.2'

@@ -1,7 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.actions;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.Dimension;
 import java.awt.Point;

@@ -1,6 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.jme;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.Callable;
 

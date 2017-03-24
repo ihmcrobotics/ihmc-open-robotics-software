@@ -6,6 +6,7 @@ import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArr
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -64,6 +65,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 
@@ -86,6 +88,9 @@ public class HighLevelHumanoidControllerToolbox
 
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
+   
+   private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
+   private final Collection<ReferenceFrame> trajectoryFrames;
 
    private final List<ContactablePlaneBody> contactablePlaneBodyList;
    private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
@@ -166,7 +171,7 @@ public class HighLevelHumanoidControllerToolbox
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       this.robotJacobianHolder = robotJacobianHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-
+      
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
@@ -174,6 +179,10 @@ public class HighLevelHumanoidControllerToolbox
 
       this.footSwitches = footSwitches;
       this.wristForceSensors = wristForceSensors;
+      
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+      trajectoryFrames = new ArrayList<ReferenceFrame>();
+      trajectoryFrames.addAll(referenceFrameHashCodeResolver.getAllReferenceFrames());
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -1037,6 +1046,16 @@ public class HighLevelHumanoidControllerToolbox
    public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
+   }
+
+   public ReferenceFrameHashCodeResolver getReferenceFrameHashCodeResolver()
+   {
+      return referenceFrameHashCodeResolver;
+   }
+   
+   public Collection<ReferenceFrame> getTrajectoryFrames()
+   {
+      return trajectoryFrames;
    }
 
 }

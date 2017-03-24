@@ -112,7 +112,7 @@ public class ProvidedMassMatrixToolRigidBody
 
       boolean doVelocityTerms = true;
       boolean useDesireds = false;
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, elevatorFrame,
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, ReferenceFrame.getWorldFrame(),
             ScrewTools.createGravitationalSpatialAcceleration(fullRobotModel.getElevator(), gravity), twistCalculator, doVelocityTerms, useDesireds);
 
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();

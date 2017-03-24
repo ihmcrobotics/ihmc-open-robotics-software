@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class DesiredJointDataHolder

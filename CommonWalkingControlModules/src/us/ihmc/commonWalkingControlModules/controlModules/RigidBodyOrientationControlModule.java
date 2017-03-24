@@ -42,7 +42,7 @@ public class RigidBodyOrientationControlModule
          FrameVector feedForwardAngularAcceleration, RigidBody base)
    {
       // using twists is a bit overkill; optimize if needed.
-      twistCalculator.getRelativeTwist(endEffectorTwist, base, endEffector);
+      twistCalculator.getRelativeTwist(base, endEffector, endEffectorTwist);
       currentAngularVelocity.setToZero(endEffectorTwist.getExpressedInFrame());
       endEffectorTwist.getAngularPart(currentAngularVelocity);
 

@@ -20,6 +20,7 @@ import com.jme3.texture.Texture2D;
 import com.jme3.texture.plugins.AWTLoader;
 
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.HeightBasedTerrainBlend;
@@ -31,7 +32,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.dataStructures.MutableColor;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.tools.ClassLoaderTools;
 
 public class JMEAppearanceMaterial
@@ -71,12 +71,12 @@ public class JMEAppearanceMaterial
       }
 
       HeightMap heightMap = appearanceDefinition.getHeightMap();
-      BoundingBox3d boundingBox = heightMap.getBoundingBox();
+      BoundingBox3D boundingBox = heightMap.getBoundingBox();
 
-      double xMin = boundingBox.getXMin();
-      double xStep = (boundingBox.getXMax() - boundingBox.getXMin()) / ((double) alphaMapSize);
-      double yMin = boundingBox.getYMin();
-      double yStep = (boundingBox.getYMax() - boundingBox.getYMin()) / ((double) alphaMapSize);
+      double xMin = boundingBox.getMinX();
+      double xStep = (boundingBox.getMaxX() - boundingBox.getMinX()) / ((double) alphaMapSize);
+      double yMin = boundingBox.getMinY();
+      double yStep = (boundingBox.getMaxY() - boundingBox.getMinY()) / ((double) alphaMapSize);
 
       BufferedImage alphaMap = new BufferedImage(alphaMapSize, alphaMapSize, BufferedImage.TYPE_INT_ARGB);
       for (int x = 0; x < alphaMapSize; x++)

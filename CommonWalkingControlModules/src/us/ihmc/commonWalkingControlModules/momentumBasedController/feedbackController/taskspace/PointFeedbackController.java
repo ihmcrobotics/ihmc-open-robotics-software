@@ -144,7 +144,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    public void computeAchievedAcceleration()
    {
       accelerationControlModule.getBodyFixedPoint(tempPosition);
-      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(achievedLinearAcceleration, base, endEffector, tempPosition);
+      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(base, endEffector, tempPosition, achievedLinearAcceleration);
       yoAchievedLinearAcceleration.setAndMatchFrame(achievedLinearAcceleration);
    }
 

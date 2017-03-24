@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals, GroundProfile3D
 {   
@@ -17,7 +17,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return this.getBoundingBox().isInside(x, y, z);
+      return this.getBoundingBox().isInsideInclusive(x, y, z);
    }
 
    @Override
@@ -53,7 +53,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
          }
 
          @Override
-         public BoundingBox3d getBoundingBox()
+         public BoundingBox3D getBoundingBox()
          {
             return heightMap.getBoundingBox();
          }
@@ -81,7 +81,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
          }
 
          @Override
-         public BoundingBox3d getBoundingBox()
+         public BoundingBox3D getBoundingBox()
          {
             return heightMap.getBoundingBox();
          }
@@ -96,7 +96,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
       return ret;
    }
    
-   public static GroundProfileFromHeightMap createAGroundProfileFromAHeightMapWithPoints(final HeightMapWithPoints heightMapWithPoints, final BoundingBox3d boundingBox)
+   public static GroundProfileFromHeightMap createAGroundProfileFromAHeightMapWithPoints(final HeightMapWithPoints heightMapWithPoints, final BoundingBox3D boundingBox)
    {
       GroundProfileFromHeightMap ret = new GroundProfileFromHeightMap()
       {
@@ -108,7 +108,7 @@ public abstract class GroundProfileFromHeightMap implements HeightMapWithNormals
          }
 
          @Override
-         public BoundingBox3d getBoundingBox()
+         public BoundingBox3D getBoundingBox()
          {
             return boundingBox;
          }

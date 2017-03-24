@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.commands.AllCommandsExecutor;
@@ -79,7 +80,7 @@ public class GraphArrayWindow implements SelectGraphConfigurationCommandExecutor
       
       frame = new JFrame(windowName, configurationToUse);
       frame.setName(windowName);
-      myGraphArrayPanel = new GraphArrayPanel(selectedVariableHolder, dataBuffer, frame);
+      myGraphArrayPanel = new GraphArrayPanel(selectedVariableHolder, dataBuffer, frame, sim.getGUI());
 
       windowGUIActions = new StandardGUIActions();
 

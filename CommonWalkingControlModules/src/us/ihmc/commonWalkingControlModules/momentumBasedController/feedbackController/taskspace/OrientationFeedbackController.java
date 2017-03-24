@@ -157,7 +157,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    @Override
    public void computeAchievedAcceleration()
    {
-      spatialAccelerationCalculator.getRelativeAcceleration(endEffectorAchievedAcceleration, base, endEffector);
+      spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, endEffectorAchievedAcceleration);
       endEffectorAchievedAcceleration.getAngularPart(achievedAngularAcceleration);
 
       yoAchievedAngularAcceleration.setAndMatchFrame(achievedAngularAcceleration);
