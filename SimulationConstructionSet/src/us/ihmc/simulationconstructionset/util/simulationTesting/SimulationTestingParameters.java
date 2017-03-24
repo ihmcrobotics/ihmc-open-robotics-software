@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.bambooTools;
+package us.ihmc.simulationconstructionset.util.simulationTesting;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 

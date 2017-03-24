@@ -15,7 +15,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class YoVariableValueDataCheckerTest
