@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.externalcontroller;
+package us.ihmc.simulationconstructionsettools.externalcontroller;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.FloatingPlanarJoint;

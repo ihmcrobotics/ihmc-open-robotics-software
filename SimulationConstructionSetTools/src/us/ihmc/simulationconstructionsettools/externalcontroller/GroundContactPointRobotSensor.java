@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.externalcontroller;
+package us.ihmc.simulationconstructionsettools.externalcontroller;
 
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;

@@ -1,19 +1,18 @@
-package us.ihmc.simulationconstructionset.externalcontroller;
+package us.ihmc.simulationconstructionsettools.externalcontroller;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.SliderJoint;
+import us.ihmc.simulationconstructionset.PinJoint;
 
-class SliderJointRobotSensor implements SensorInterface
+class PinJointRobotSensor implements SensorInterface
 {
    private DoubleYoVariable q, qd, qdd, tau_actual;
 
-   public SliderJointRobotSensor(SliderJoint joint)
+   PinJointRobotSensor(PinJoint joint)
    {
       q = joint.getQYoVariable();
       qd = joint.getQDYoVariable();
       qdd = joint.getQDDYoVariable();
       tau_actual = joint.getTauYoVariable();
-
    }
 
 
@@ -21,7 +20,6 @@ class SliderJointRobotSensor implements SensorInterface
    public double[] getMessageValues()
    {
       return new double[] {q.getDoubleValue(), qd.getDoubleValue(), qdd.getDoubleValue(), tau_actual.getDoubleValue()};
-
    }
 
 
@@ -37,9 +35,10 @@ class SliderJointRobotSensor implements SensorInterface
    @Override
    public int getNumberOfVariables()
    {
-      // TODO Auto-generated method stub
       return 4;
+
    }
+
 
    @Override
    public void setTau(double tau)
