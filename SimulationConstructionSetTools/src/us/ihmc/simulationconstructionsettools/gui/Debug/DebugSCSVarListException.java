@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.gui.Debug;
+package us.ihmc.simulationconstructionsettools.gui.Debug;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
