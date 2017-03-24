@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.IndexChangedListener;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationconstructionsettools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.steppr.hardware.StepprActuator;
 import us.ihmc.steppr.hardware.StepprDashboard;
 import us.ihmc.steppr.hardware.StepprJoint;
