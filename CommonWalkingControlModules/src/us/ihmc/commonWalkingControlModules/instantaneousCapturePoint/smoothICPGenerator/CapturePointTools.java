@@ -179,6 +179,54 @@ public class CapturePointTools
     * {@link #computeDesiredCornerPoints(List, List, boolean, double, double)} but considering
     * transfer time and swing time on a per step basis.
     * <p>
+    * This method is to be used when in double support, or transfer. The difference with single
+    * support is the presence of an additional constant CMP for the trailing foot for which the
+    * corner point does not need to be computed and also that offsets the transfer/swing time index.
+    *
+    * @param cornerPointsToPack the ICP corner points computed by this method. Modified.
+    * @param constantCMPs the constant CMPs already computed. Not modified.
+    * @param swingTimes the swing time on a per step basis. Not modified.
+    * @param transferTimes the transfer time on a per step basis. Not modified.
+    * @param doubleSupportSplitFractions repartition around the ICP entry corner point of the double
+    *           support.
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    */
+   public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
+         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> doubleSupportSplitFractions, double omega0)
+   {
+      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+
+      for (int i = cornerPointsToPack.size() - 1; i >= 1; i--)
+      {
+         double doubleSupportSplitFraction = doubleSupportSplitFractions.get(i - 1).getDoubleValue();
+         double nextDoubleSupportSplitFraction = doubleSupportSplitFractions.get(i).getDoubleValue();
+
+         double stepTime = swingTimes.get(i - 1).getDoubleValue();
+         double transferTime = transferTimes.get(i - 1).getDoubleValue();
+         double nextTransferTime = transferTimes.get(i).getDoubleValue();
+         stepTime += (1.0 - doubleSupportSplitFraction) * transferTime;
+         stepTime += nextDoubleSupportSplitFraction * nextTransferTime;
+
+         double exponentialTerm = Math.exp(-omega0 * stepTime);
+
+         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
+         YoFramePoint initialCMP = constantCMPs.get(i);
+
+         cornerPoint.interpolate(initialCMP, nextCornerPoint, exponentialTerm);
+
+         nextCornerPoint = cornerPoint;
+      }
+
+      cornerPointsToPack.get(0).setToNaN();
+   }
+
+   /**
+    * Backward calculation of the ICP corner points as the method
+    * {@link #computeDesiredCornerPoints(List, List, boolean, double, double)} but considering
+    * transfer time and swing time on a per step basis.
+    * <p>
     * This method is to be used when in single support, or swing.
     * 
     * @param cornerPointsToPack the ICP corner points computed by this method. Modified.
@@ -202,6 +250,58 @@ public class CapturePointTools
          double stepTime = swingTimes.get(i).getDoubleValue();
          stepTime += (1.0 - doubleSupportSplitFraction) * transferTimes.get(i).getDoubleValue();
          stepTime += doubleSupportSplitFraction * transferTimes.get(i + 1).getDoubleValue();
+
+         YoFramePoint cornerPoint = cornerPointsToPack.get(i);
+         YoFramePoint initialCMP = constantCMPs.get(i);
+
+         if (Double.isNaN(stepTime))
+         {
+            nextCornerPoint = constantCMPs.get(i);
+            cornerPoint.setToNaN();
+            continue;
+         }
+
+         double exponentialTerm = Math.exp(-omega0 * stepTime);
+
+         cornerPoint.interpolate(initialCMP, nextCornerPoint, exponentialTerm);
+
+         nextCornerPoint = cornerPoint;
+      }
+   }
+
+   /**
+    * Backward calculation of the ICP corner points as the method
+    * {@link #computeDesiredCornerPoints(List, List, boolean, double, double)} but considering
+    * transfer time and swing time on a per step basis.
+    * <p>
+    * This method is to be used when in single support, or swing.
+    *
+    * @param cornerPointsToPack the ICP corner points computed by this method. Modified.
+    * @param constantCMPs the constant CMPs already computed. Not modified.
+    * @param swingTimes the swing time on a per step basis. Not modified.
+    * @param transferTimes the transfer time on a per step basis. Not modified.
+    * @param doubleSupportSplitFractions repartition around the ICP entry corner point of the double
+    *           support.
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    */
+   public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> cornerPointsToPack, List<YoFramePoint> constantCMPs,
+         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes,
+         List<DoubleYoVariable> doubleSupportSplitFractions, double omega0)
+   {
+      YoFramePoint nextCornerPoint = constantCMPs.get(cornerPointsToPack.size());
+
+      for (int i = cornerPointsToPack.size() - 1; i >= 0; i--)
+      {
+         double doubleSupportSplitFraction = doubleSupportSplitFractions.get(i).getDoubleValue();
+         double nextDoubleSupportSplitFraction = doubleSupportSplitFractions.get(i + 1).getDoubleValue();
+
+         double transferTime = transferTimes.get(i).getDoubleValue();
+         double nextTransferTime = transferTimes.get(i + 1).getDoubleValue();
+         double stepTime = swingTimes.get(i).getDoubleValue();
+         stepTime += (1.0 - doubleSupportSplitFraction) * transferTime;
+         stepTime += nextDoubleSupportSplitFraction * nextTransferTime;
 
          YoFramePoint cornerPoint = cornerPointsToPack.get(i);
          YoFramePoint initialCMP = constantCMPs.get(i);
@@ -326,6 +426,67 @@ public class CapturePointTools
     * constant CMPs per support: an entryCMP and an exitCMP, and considering transfer time and swing
     * time on a per step basis.
     * <p>
+    * This method is to be used when in double support, or transfer. The difference with single
+    * support is the presence of an additional pair of entry/exit CMPs for the trailing foot for
+    * which the entry/exit corner points do not need to be computed and also that offsets the
+    * transfer/swing time index.
+    *
+    * @param entryCornerPointsToPack the ICP entry corner points computed by this method. Modified.
+    * @param exitCornerPointsToPack the ICP exit corner points computed by this method. Modified.
+    * @param entryCMPs the entry constant CMPs already computed. Not modified.
+    * @param exitCMPs the exit constant CMPs already computed. Not modified.
+    * @param swingTimes the swing time on a per step basis. Not modified.
+    * @param transferTimes the transfer time on a per step basis. Not modified.
+    * @param swingSplitFractions repartition of the time between the entry and exit CMPs during
+    *           swing on a per step basis. Not modified.
+    * @param transferSplitFractions repartition of the time between the exit and entry CMPs during
+    *           transfer on a per step basis. Not modified.
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    */
+   public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
+         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
+         List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions, double omega0)
+   {
+      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+
+      for (int i = exitCornerPointsToPack.size() - 1; i >= 1; i--)
+      {
+         double swingSplitFraction = swingSplitFractions.get(i - 1).getDoubleValue();
+         double upcomingTransferSplitFraction = transferSplitFractions.get(i - 1).getDoubleValue();
+         double nextTransferSplitFraction = transferSplitFractions.get(i).getDoubleValue();
+
+         double upcomingSwingTime = swingTimes.get(i - 1).getDoubleValue();
+         double transferTime = transferTimes.get(i - 1).getDoubleValue();
+         double nextTransferTime = transferTimes.get(i).getDoubleValue();
+
+         double timeSpentOnEntryCMP = upcomingSwingTime * swingSplitFraction + transferTime * (1.0 - upcomingTransferSplitFraction);
+         double timeSpentOnExitCMP = upcomingSwingTime * (1.0 - swingSplitFraction) + nextTransferTime * nextTransferSplitFraction;
+         double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
+         double exitExponentialTerm = Math.exp(-omega0 * timeSpentOnExitCMP);
+
+         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
+         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
+         YoFramePoint exitCMP = exitCMPs.get(i);
+         YoFramePoint entryCMP = entryCMPs.get(i);
+
+         exitCornerPoint.interpolate(exitCMP, nextEntryCornerPoint, exitExponentialTerm);
+         entryCornerPoint.interpolate(entryCMP, exitCornerPoint, entryExponentialTerm);
+
+         nextEntryCornerPoint = entryCornerPoint;
+      }
+
+      exitCornerPointsToPack.get(0).setToNaN();
+      entryCornerPointsToPack.get(0).setToNaN();
+   }
+
+   /**
+    * Backward calculation of the ICP corner points as the method
+    * {@link #computeDesiredCornerPoints(List, List, boolean, double, double)} but considering two
+    * constant CMPs per support: an entryCMP and an exitCMP, and considering transfer time and swing
+    * time on a per step basis.
+    * <p>
     * This method is to be used when in single support, or swing.
     * 
     * @param entryCornerPointsToPack the ICP entry corner points computed by this method. Modified.
@@ -371,6 +532,69 @@ public class CapturePointTools
 
          double timeSpentOnEntryCMP = swingTime * swingSplitFraction + previousTransferTime * (1.0 - transferSplitFraction);
          double timeSpentOnExitCMP = swingTime * (1.0 - swingSplitFraction) + nextTransferTime * transferSplitFraction;
+         double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
+         double exitExponentialTerm = Math.exp(-omega0 * timeSpentOnExitCMP);
+
+         exitCornerPoint.interpolate(exitCMP, nextEntryCornerPoint, exitExponentialTerm);
+         entryCornerPoint.interpolate(entryCMP, exitCornerPoint, entryExponentialTerm);
+
+         nextEntryCornerPoint = entryCornerPoint;
+      }
+   }
+
+   /**
+    * Backward calculation of the ICP corner points as the method
+    * {@link #computeDesiredCornerPoints(List, List, boolean, double, double)} but considering two
+    * constant CMPs per support: an entryCMP and an exitCMP, and considering transfer time and swing
+    * time on a per step basis.
+    * <p>
+    * This method is to be used when in single support, or swing.
+    *
+    * @param entryCornerPointsToPack the ICP entry corner points computed by this method. Modified.
+    * @param exitCornerPointsToPack the ICP exit corner points computed by this method. Modified.
+    * @param entryCMPs the entry constant CMPs already computed. Not modified.
+    * @param exitCMPs the exit constant CMPs already computed. Not modified.
+    * @param swingTimes the swing time on a per step basis. Not modified.
+    * @param transferTimes the transfer time on a per step basis. Not modified.
+    * @param swingSplitFractions repartition of the time between the entry and exit CMPs during
+    *           swing on a per step basis. Not modified.
+    * @param transferSplitFractions repartition of the time between the exit and entry CMPs during
+    *           transfer on a per step basis. Not modified.
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    */
+   public static void computeDesiredCornerPointsSingleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
+         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
+         List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions, double omega0)
+   {
+      YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
+
+      for (int i = exitCornerPointsToPack.size() - 1; i >= 0; i--)
+      {
+         double swingSplitFraction = swingSplitFractions.get(i).getDoubleValue();
+         double previousTransferSplitFraction = transferSplitFractions.get(i).getDoubleValue();
+         double nextTransferSplitFraction = transferSplitFractions.get(i + 1).getDoubleValue();
+
+         double swingTime = swingTimes.get(i).getDoubleValue();
+         double previousTransferTime = transferTimes.get(i).getDoubleValue();
+         double nextTransferTime = transferTimes.get(i + 1).getDoubleValue();
+
+         YoFramePoint exitCornerPoint = exitCornerPointsToPack.get(i);
+         YoFramePoint entryCornerPoint = entryCornerPointsToPack.get(i);
+         YoFramePoint exitCMP = exitCMPs.get(i);
+         YoFramePoint entryCMP = entryCMPs.get(i);
+
+         if (Double.isNaN(swingTime))
+         {
+            nextEntryCornerPoint = entryCMP;
+            exitCornerPoint.setToNaN();
+            entryCornerPoint.setToNaN();
+            continue;
+         }
+
+         double timeSpentOnEntryCMP = swingTime * swingSplitFraction + previousTransferTime * (1.0 - previousTransferSplitFraction);
+         double timeSpentOnExitCMP = swingTime * (1.0 - swingSplitFraction) + nextTransferTime * nextTransferSplitFraction;
          double entryExponentialTerm = Math.exp(-omega0 * timeSpentOnEntryCMP);
          double exitExponentialTerm = Math.exp(-omega0 * timeSpentOnExitCMP);
 
