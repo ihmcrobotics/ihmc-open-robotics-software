@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelBehaviorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.MomentumBasedControllerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.PacketRouter;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
@@ -41,9 +42,9 @@ import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.robotDataVisualizer.logger.BehaviorVisualizer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.DRCRobotCameraParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
@@ -444,8 +445,9 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       avatarSimulationFactory.setHumanoidGlobalDataProducer(dataProducer);
       AvatarSimulation avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
 
-      CommonHumanoidReferenceFrames referenceFrames = controllerFactory.getHighLevelHumanoidControllerToolbox().getReferenceFrames();
-      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands, referenceFrames);
+      HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = controllerFactory.getHighLevelHumanoidControllerToolbox();
+      FullHumanoidRobotModel fullRobotModel = highLevelHumanoidControllerToolbox.getFullRobotModel();
+      scriptBasedControllerCommandGenerator = new ScriptBasedControllerCommandGenerator(controllerCommands, fullRobotModel);
 
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulation.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);

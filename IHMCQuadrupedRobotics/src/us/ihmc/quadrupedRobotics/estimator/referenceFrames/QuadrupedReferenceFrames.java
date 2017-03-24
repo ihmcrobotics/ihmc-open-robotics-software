@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 import java.util.EnumMap;
 import java.util.Map;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -411,5 +412,11 @@ public class QuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
    public ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds()
    {
       return supportPolygonCentroidZUpFrame;
+   }
+
+   @Override
+   public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
+   {
+      return null;
    }
 }

@@ -18,20 +18,20 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMess
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisHeightTrajectoryMessage;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class ScriptBasedControllerCommandGenerator
 {
    private final ConcurrentLinkedQueue<ScriptObject> scriptObjects = new ConcurrentLinkedQueue<ScriptObject>();
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
-   private CommonHumanoidReferenceFrames referenceFrames;
-   private ReferenceFrame worldFrame;
+   private final ReferenceFrame worldFrame;
+   private final FullHumanoidRobotModel fullRobotModel;
    
-   public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands, CommonHumanoidReferenceFrames referenceFrames)
+   public ScriptBasedControllerCommandGenerator(ConcurrentLinkedQueue<Command<?, ?>> controllerCommands, FullHumanoidRobotModel fullRobotModel)
    {
       this.controllerCommands = controllerCommands;
-      this.referenceFrames = referenceFrames;
+      this.fullRobotModel = fullRobotModel;
       worldFrame = ReferenceFrame.getWorldFrame();
    }
 
@@ -97,7 +97,7 @@ public class ScriptBasedControllerCommandGenerator
       }
       else if (scriptObject instanceof HandTrajectoryMessage)
       {
-         ReferenceFrame chestFrame = referenceFrames.getChestFrame();
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          HandTrajectoryMessage message = (HandTrajectoryMessage) scriptObject;
          message.setTrajectoryReferenceFrameId(chestFrame);
          message.setDataReferenceFrameId(worldFrame);
