@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.dataProcessors;
+package us.ihmc.simulationconstructionsettools.util.dataProcessors;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
