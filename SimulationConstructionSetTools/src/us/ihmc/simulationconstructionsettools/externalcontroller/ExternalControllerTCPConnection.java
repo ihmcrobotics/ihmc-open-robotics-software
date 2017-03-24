@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.externalcontroller;
+package us.ihmc.simulationconstructionsettools.externalcontroller;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
