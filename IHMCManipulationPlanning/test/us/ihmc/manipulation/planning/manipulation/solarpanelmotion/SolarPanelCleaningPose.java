@@ -140,7 +140,7 @@ public class SolarPanelCleaningPose
             
       return handMessage;
    }
-   
+      
    public Point3D getDesiredHandPosition()
    {
       return new Point3D(this.pose.getPosition());
