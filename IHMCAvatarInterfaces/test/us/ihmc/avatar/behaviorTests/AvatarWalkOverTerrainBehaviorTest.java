@@ -22,7 +22,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.CinderBlockFieldWithFiducialEnvironment;
 import us.ihmc.simulationconstructionset.util.environments.CinderBlockFieldWithFiducialEnvironment.FiducialType;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
