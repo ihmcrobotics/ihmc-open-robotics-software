@@ -230,7 +230,9 @@ public class ICPPlanner
 
    private final List<DoubleYoVariable> swingDurations = new ArrayList<>();
    private final List<DoubleYoVariable> transferDurations = new ArrayList<>();
+   private final DoubleYoVariable defaultFinalTransferDuration = new DoubleYoVariable(namePrefix + "DefaultFinalTransferDuration", registry);
    private final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(namePrefix + "FinalTransferDuration", registry);
+   private final DoubleYoVariable finalTransferDurationAlpha = new DoubleYoVariable(namePrefix + "FinalTransferDurationAlpha", registry);
 
    private final ICPPlannerTrajectoryGenerator icpDoubleSupportTrajectoryGenerator;
    private final ICPPlannerSegmentedTrajectoryGenerator icpSingleSupportTrajectoryGenerator;
@@ -276,6 +278,7 @@ public class ICPPlanner
       numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
       defaultTransferDurationAlpha.set(icpPlannerParameters.getTransferDurationAlpha());
       defaultSwingDurationAlpha.set(icpPlannerParameters.getSwingDurationAlpha());
+      finalTransferDurationAlpha.set(icpPlannerParameters.getTransferDurationAlpha());
       useTwoConstantCMPsPerSupport.set(icpPlannerParameters.useTwoCMPsPerSupport());
 
       velocityDecayDurationWhenDone.set(icpPlannerParameters.getVelocityDecayDurationWhenDone());
@@ -481,8 +484,12 @@ public class ICPPlanner
       int footstepIndex = referenceCMPsCalculator.getNumberOfFootstepRegistered() - 1;
       swingDurations.get(footstepIndex).set(timing.getSwingTime());
       transferDurations.get(footstepIndex).set(timing.getTransferTime());
+
       swingDurationAlphas.get(footstepIndex).set(defaultSwingDurationAlpha.getDoubleValue());
       transferDurationAlphas.get(footstepIndex).set(defaultTransferDurationAlpha.getDoubleValue());
+
+      finalTransferDuration.set(defaultFinalTransferDuration.getDoubleValue());
+      finalTransferDurationAlpha.set(defaultTransferDurationAlpha.getDoubleValue());
    }
 
 
@@ -525,7 +532,7 @@ public class ICPPlanner
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
-      transferDurationAlphas.get(0).set(defaultTransferDurationAlpha.getDoubleValue());
+      transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       updateTransferPlan();
    }
 
@@ -549,7 +556,7 @@ public class ICPPlanner
       if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
       {
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-         transferDurationAlphas.get(numberOfFootstepRegistered).set(defaultTransferDurationAlpha.getDoubleValue());
+         transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       }
 
       updateTransferPlan();
@@ -737,7 +744,7 @@ public class ICPPlanner
       if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
       {
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
-         transferDurationAlphas.get(numberOfFootstepRegistered).set(defaultTransferDurationAlpha.getDoubleValue());
+         transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
       }
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
@@ -1392,6 +1399,11 @@ public class ICPPlanner
       finalTransferDuration.set(duration);
    }
 
+   public void setFinalTransferDurationAlpha(double durationAlpha)
+   {
+      finalTransferDurationAlpha.set(durationAlpha);
+   }
+
    /**
     * Allows setting of the transfer duration alpha (see {@link #defaultTransferDurationAlpha}) for the specified step number.
     *
@@ -1412,6 +1424,16 @@ public class ICPPlanner
    public void setSwingDurationAlpha(int stepNumber, double swingDurationAlpha)
    {
       swingDurationAlphas.get(stepNumber).set(swingDurationAlpha);
+   }
+
+   public double getTransferDurationAlpha(int stepNumber)
+   {
+      return transferDurationAlphas.get(stepNumber).getDoubleValue();
+   }
+
+   public double getSwingDurationAlpha(int stepNumber)
+   {
+      return swingDurationAlphas.get(stepNumber).getDoubleValue();
    }
 
    /**
