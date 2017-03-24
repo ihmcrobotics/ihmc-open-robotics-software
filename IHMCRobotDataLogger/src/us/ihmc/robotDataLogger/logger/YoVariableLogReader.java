@@ -11,7 +11,7 @@ import com.google.common.io.Files;
 
 import us.ihmc.robotDataLogger.LogIndex;
 import us.ihmc.robotDataLogger.LogProperties;
-import us.ihmc.robotDataLogger.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.ProtoBufferYoVariableHandshakeParser;
 import us.ihmc.tools.compression.SnappyUtils;
 
 public class YoVariableLogReader

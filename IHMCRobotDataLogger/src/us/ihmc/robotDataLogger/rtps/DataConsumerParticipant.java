@@ -37,6 +37,9 @@ import us.ihmc.robotDataLogger.Timestamp;
 import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
+import us.ihmc.robotDataLogger.listeners.ClearLogListener;
+import us.ihmc.robotDataLogger.listeners.LogAnnouncementListener;
+import us.ihmc.robotDataLogger.listeners.TimestampListener;
 
 /**
  * This class implements all communication for a data consumer inside a DDS logging network

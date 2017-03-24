@@ -37,6 +37,7 @@ import us.ihmc.robotDataLogger.Timestamp;
 import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
+import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -62,7 +63,7 @@ public class DataProducerParticipant
    private int dataPort;
    private boolean log = false;
 
-   private DataProducerListener dataProducerListener = null;
+   private VariableChangedListener dataProducerListener = null;
    
    
    
@@ -164,7 +165,7 @@ public class DataProducerParticipant
     * 
     * @param listener
     */
-   public void setDataProducerListener(DataProducerListener listener)
+   public void setDataProducerListener(VariableChangedListener listener)
    {
       this.dataProducerListener = listener;
    }
@@ -352,7 +353,7 @@ public class DataProducerParticipant
       participant.setPort(2048);
       participant.setModelFileProvider(logModelProvider);
       participant.setHandshake(new Handshake());
-      participant.setDataProducerListener(new DataProducerListener()
+      participant.setDataProducerListener(new VariableChangedListener()
       {
          
          @Override

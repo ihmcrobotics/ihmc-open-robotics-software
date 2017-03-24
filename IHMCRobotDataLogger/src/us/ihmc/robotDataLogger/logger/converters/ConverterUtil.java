@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import us.ihmc.robotDataLogger.HandshakeFileType;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 
 public class ConverterUtil
 {

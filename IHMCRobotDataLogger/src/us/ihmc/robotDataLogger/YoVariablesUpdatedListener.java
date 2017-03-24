@@ -2,9 +2,10 @@ package us.ihmc.robotDataLogger;
 
 import java.nio.ByteBuffer;
 
-import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
-import us.ihmc.robotDataLogger.rtps.ClearLogListener;
-import us.ihmc.robotDataLogger.rtps.TimestampListener;
+import us.ihmc.robotDataLogger.handshake.LogHandshake;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.listeners.ClearLogListener;
+import us.ihmc.robotDataLogger.listeners.TimestampListener;
 
 public interface YoVariablesUpdatedListener extends TimestampListener, ClearLogListener
 {
