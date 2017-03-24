@@ -20,6 +20,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.containers.ContainerTools;
 
@@ -40,6 +41,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final FullHumanoidRobotModel fullRobotModel;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
+   private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
 
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame pelvisFrame;
@@ -194,6 +197,19 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       RigidBody elevator = fullRobotModel.getElevator();
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
+      
+      // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
+      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME.getHashId(), getMidFeetZUpFrame());
+      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.PELVIS_ZUP_FRAME.getHashId(), getPelvisZUpFrame());
+      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.PELVIS_FRAME.getHashId(), getPelvisFrame());
+      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME.getHashId(), getCenterOfMassFrame());
+      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.LEFT_SOLE_FRAME.getHashId(), getSoleFrame(RobotSide.LEFT));
+      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.RIGHT_SOLE_FRAME.getHashId(), getSoleFrame(RobotSide.RIGHT));
+      RigidBody chest = fullRobotModel.getChest();
+      if(chest != null)
+      {
+         nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.CHEST_FRAME.getHashId(), chest.getBodyFixedFrame());
+      }
    }
 
    @Override
@@ -407,5 +423,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public SideDependentList<ReferenceFrame> getSoleZUpFrames()
    {
       return soleZUpFrames;
+   }
+
+   @Override
+   public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
+   {
+      return nameBasedHashCodeToReferenceFrameMap;
    }
 }

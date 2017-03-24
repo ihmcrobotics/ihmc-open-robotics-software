@@ -428,8 +428,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       for (int messageIndex = 0; messageIndex < numberOfMessages; messageIndex++)
       {
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
-         handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
-         handTrajectoryMessage.setTrajectoryReferenceFrameId(chestBodyFixedFrame);
          handTrajectoryMessage.setUniqueId(id);
          if (messageIndex > 0)
             handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
