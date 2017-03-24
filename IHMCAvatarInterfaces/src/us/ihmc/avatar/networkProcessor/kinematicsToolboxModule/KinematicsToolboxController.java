@@ -229,7 +229,6 @@ public class KinematicsToolboxController extends ToolboxController
             desiredHandPoses.put(robotSide, desiredPose);
             DenseMatrix64F selectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
             handSelectionMatrices.put(robotSide, selectionMatrix);
-
          }
       }
 
@@ -645,5 +644,10 @@ public class KinematicsToolboxController extends ToolboxController
    {
       // This toolbox should run until if falls asleep.
       return false;
+   }
+   
+   public KinematicsToolboxOutputStatus getSolution()
+   {
+      return inverseKinematicsSolution;
    }
 }

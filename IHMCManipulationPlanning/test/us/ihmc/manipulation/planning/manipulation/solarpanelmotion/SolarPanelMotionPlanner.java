@@ -48,6 +48,7 @@ public class SolarPanelMotionPlanner
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.ReadyPose);
          
          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(readyPose.getHandTrajectoryMessage(motionTime));
+         debugPoseOne = readyPose.getPose();
          
          break;
       case LinearCleaningMotion:
@@ -112,6 +113,44 @@ public class SolarPanelMotionPlanner
          
       }
       
+   }
+   
+   public void setWholeBodyTrajectoryMessage(CleaningMotion motion, WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage)
+   {
+      readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.1, -Math.PI*0.2);
+      this.wholeBodyTrajectoryMessage = wholeBodyTrajectoryMessage;
+      
+           
+      switch(motion)
+      {
+      case ReadyPose:
+         PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.ReadyPose);
+         
+         //this.wholeBodyTrajectoryMessage.setHandTrajectoryMessage(readyPose.getHandTrajectoryMessage(motionTime));
+         debugPoseOne = readyPose.getPose();
+         
+         break;
+      case LinearCleaningMotion:
+         PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.LinearCleaningMotion);
+         
+         
+         break;
+         
+      case LinearCleaningMotionWhole:
+         
+         ArrayList<SolarPanelCleaningPose> tempPoses = new ArrayList<SolarPanelCleaningPose>();
+        
+         
+         
+         
+         break;
+         
+      default:
+         PrintTools.info("setTrajectoryMessage -> NONE");
+         
+         break;
+         
+      }
    }
    
    
