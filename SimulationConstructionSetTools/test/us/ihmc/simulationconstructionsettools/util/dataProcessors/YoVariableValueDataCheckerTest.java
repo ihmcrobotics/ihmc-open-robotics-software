@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.dataProcessors;
+package us.ihmc.simulationconstructionsettools.util.dataProcessors;
 
 import static org.junit.Assert.*;
 

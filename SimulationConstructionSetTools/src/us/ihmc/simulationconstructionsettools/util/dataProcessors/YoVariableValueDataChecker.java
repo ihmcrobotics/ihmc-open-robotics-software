@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.dataProcessors;
+package us.ihmc.simulationconstructionsettools.util.dataProcessors;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
