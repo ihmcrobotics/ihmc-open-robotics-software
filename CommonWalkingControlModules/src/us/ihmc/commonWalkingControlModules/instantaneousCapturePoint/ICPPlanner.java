@@ -116,9 +116,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    /** Visualization parameter. */
-   private static final double ICP_CORNER_POINT_SIZE = 0.004;
+   private static final double ICP_CORNER_POINT_SIZE = 0.008;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -525,6 +525,7 @@ public class ICPPlanner
       isDoubleSupport.set(true);
       this.initialTime.set(initialTime);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
+      transferDurationAlphas.get(0).set(defaultTransferDurationAlpha.getDoubleValue());
       updateTransferPlan();
    }
 
@@ -546,7 +547,10 @@ public class ICPPlanner
 
       int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
       if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
+      {
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+         transferDurationAlphas.get(numberOfFootstepRegistered).set(defaultTransferDurationAlpha.getDoubleValue());
+      }
 
       updateTransferPlan();
    }
@@ -731,7 +735,10 @@ public class ICPPlanner
 
       int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
       if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
+      {
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+         transferDurationAlphas.get(numberOfFootstepRegistered).set(defaultTransferDurationAlpha.getDoubleValue());
+      }
 
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
       desiredCoMPosition.getFrameTuple2d(singleSupportInitialCoM);
@@ -1383,6 +1390,28 @@ public class ICPPlanner
    public void setFinalTransferDuration(double duration)
    {
       finalTransferDuration.set(duration);
+   }
+
+   /**
+    * Allows setting of the transfer duration alpha (see {@link #defaultTransferDurationAlpha}) for the specified step number.
+    *
+    * @param stepNumber step transfer duration alpha to modify.
+    * @param transferDurationAlpha new transfer duration alpha value.
+    */
+   public void setTransferDurationAlpha(int stepNumber, double transferDurationAlpha)
+   {
+      transferDurationAlphas.get(stepNumber).set(transferDurationAlpha);
+   }
+
+   /**
+    * Allows setting of the swing duration alpha (see {@link #defaultSwingDurationAlpha}) for the specified step number.
+    *
+    * @param stepNumber step swing duration alpha to modify.
+    * @param swingDurationAlpha new swing duration alpha value.
+    */
+   public void setSwingDurationAlpha(int stepNumber, double swingDurationAlpha)
+   {
+      swingDurationAlphas.get(stepNumber).set(swingDurationAlpha);
    }
 
    /**
