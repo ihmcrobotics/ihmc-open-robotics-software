@@ -53,7 +53,6 @@ public class DynamicReachabilityCalculator
    private final DoubleYoVariable minimumLegLength = new DoubleYoVariable("minimumLegLength", registry);
    private final DoubleYoVariable maximumLegLength = new DoubleYoVariable("maximumLegLength", registry);
 
-
    private final DoubleYoVariable maximumDesiredKneeBend = new DoubleYoVariable("maximumDesiredKneeBend", registry);
 
    private final DoubleYoVariable stanceLegMinimumHeight = new DoubleYoVariable("stanceLegMinimumHeight", registry);
@@ -146,8 +145,8 @@ public class DynamicReachabilityCalculator
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
 
    private static final double perpendicularWeight = 0.01;
-   private static final double swingAdjustmentWeight = 1.0;
-   private static final double transferAdjustmentWeight = 5.0;
+   private static final double swingAdjustmentWeight = 10.0;
+   private static final double transferAdjustmentWeight = 1.0;
    private static final double constraintWeight = 1000.0;
 
    private final DenseMatrix64F solverInput_H;
@@ -178,7 +177,7 @@ public class DynamicReachabilityCalculator
       maximumDesiredKneeBend.set(0.1);
       maximumNumberOfIterations.set(3);
 
-      minimumInitialTransferDuration.set(0.05);
+      minimumInitialTransferDuration.set(0.01);
       minimumEndTransferDuration.set(0.05);
       minimumInitialSwingDuration.set(0.15);
       minimumEndSwingDuration.set(0.15);
@@ -208,7 +207,6 @@ public class DynamicReachabilityCalculator
          higherTransferGradients.add(higherTransferGradient);
          higherSwingGradients.add(higherSwingGradient);
       }
-
 
       solverInput_H = new DenseMatrix64F(2 * numberOfFootstepsToConsider, 2 * numberOfFootstepsToConsider);
       solverInput_h = new DenseMatrix64F(2 * numberOfFootstepsToConsider, 1);
@@ -756,13 +754,12 @@ public class DynamicReachabilityCalculator
       solverInput_Ub.set(4, 0, Double.POSITIVE_INFINITY);
       solverInput_Ub.set(5, 0, Double.POSITIVE_INFINITY);
 
-      /*
       solverInput_Ain.set(0, 0, -1.0);
       solverInput_Ain.set(0, 1, -1.0);
-      solverInput_Ain.set(1, 0, -1.0);
-      solverInput_Ain.set(1, 1, -1.0);
-      solverInput_Ain.set(2, 0, -1.0);
-      solverInput_Ain.set(2, 1, -1.0);
+      solverInput_Ain.set(1, 2, -1.0);
+      solverInput_Ain.set(1, 3, -1.0);
+      solverInput_Ain.set(2, 4, -1.0);
+      solverInput_Ain.set(2, 5, -1.0);
 
       solverInput_bin.set(0, 0, -minimumTransferDuration.getDoubleValue() + (currentTransferInitialDuration + currentTransferEndDuration));
       solverInput_bin.set(1, 0, -minimumSwingDuration.getDoubleValue() + (currentSwingInitialDuration + currentSwingEndDuration));
@@ -770,21 +767,20 @@ public class DynamicReachabilityCalculator
 
       solverInput_Ain.set(3, 0, 1.0);
       solverInput_Ain.set(3, 1, 1.0);
-      solverInput_Ain.set(4, 0, 1.0);
-      solverInput_Ain.set(4, 1, 1.0);
-      solverInput_Ain.set(5, 0, 1.0);
-      solverInput_Ain.set(5, 1, 1.0);
+      solverInput_Ain.set(4, 2, 1.0);
+      solverInput_Ain.set(4, 3, 1.0);
+      solverInput_Ain.set(5, 4, 1.0);
+      solverInput_Ain.set(5, 5, 1.0);
 
       solverInput_bin.set(3, 0, maximumTransferDuration.getDoubleValue() - (currentTransferInitialDuration + currentTransferEndDuration));
       solverInput_bin.set(4, 0, maximumSwingDuration.getDoubleValue() - (currentSwingInitialDuration + currentSwingEndDuration));
       solverInput_bin.set(5, 0, maximumTransferDuration.getDoubleValue() - (nextTransferInitialDuration + nextTransferEndDuration));
-      */
 
       activeSetSolver.clear();
 
       activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, scalar);
       activeSetSolver.setVariableBounds(solverInput_Lb, solverInput_Ub);
-      //activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+      activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       int numberOfIterations = activeSetSolver.solve(solution);
 
       if (MatrixTools.containsNaN(solution))
@@ -886,7 +882,6 @@ public class DynamicReachabilityCalculator
       swingEndDuration += endSwingAdjustment;
       swingAdjustment.set(initialSwingAdjustment + endSwingAdjustment);
       this.swingAlpha.set(swingInitialDuration / (swingInitialDuration + swingEndDuration));
-
 
       // handle next transfer
       double nextInitialTransferAdjustment = solution.get(4, 0);
