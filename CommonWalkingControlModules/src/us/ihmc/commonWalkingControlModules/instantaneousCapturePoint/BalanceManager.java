@@ -480,6 +480,8 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
+      dynamicReachabilityCalculator.setInSwing();
+
       if (EDIT_RECHABILITY)
          dynamicReachabilityCalculator.verifyAndEnsureReachability();
       else
@@ -512,6 +514,8 @@ public class BalanceManager
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
+
+      dynamicReachabilityCalculator.setInTransfer();
 
       if (EDIT_RECHABILITY)
          dynamicReachabilityCalculator.verifyAndEnsureReachability();

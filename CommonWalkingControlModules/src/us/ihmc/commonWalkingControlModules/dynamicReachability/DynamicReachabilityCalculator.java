@@ -41,10 +41,11 @@ public class DynamicReachabilityCalculator
    //// TODO: 3/21/17 disable checks on stance leg bending if the upcoming step is a step down 
    //// TODO: 3/21/17 add in the ability to angle the hip forward for reachability
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
+   //// TODO: 3/25/17 explore for step up and step down for sphere intersection
 
    private static final boolean VISUALIZE = true;
-   private static final double TRANSFER_TWIDDLE_SIZE = 0.6;
-   private static final double SWING_TWIDDLE_SIZE = 0.6;
+   private static final double TRANSFER_TWIDDLE_SIZE = 0.2;
+   private static final double SWING_TWIDDLE_SIZE = 0.2;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -64,7 +65,9 @@ public class DynamicReachabilityCalculator
    private final BooleanYoVariable reachableWRTFootstep = new BooleanYoVariable("reachableWRTFootstep", registry);
    private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
 
-   private final IntegerYoVariable numberOfIterations = new IntegerYoVariable("numberOfIterations", registry);
+   private final IntegerYoVariable numberOfAdjustments = new IntegerYoVariable("numberOfAdjustments", registry);
+   private final IntegerYoVariable numberOfForwardAdjustments = new IntegerYoVariable("numberOfForwardAdjustments", registry);
+   private final IntegerYoVariable numberOfBackwardAdjustments = new IntegerYoVariable("numberOfBackwardAdjustments", registry);
    private final IntegerYoVariable maximumNumberOfIterations = new IntegerYoVariable("maximumNumberOfIterations", registry);
 
    private final DoubleYoVariable minimumInitialTransferDuration = new DoubleYoVariable("minimumInitialTransferDuration", registry);
@@ -126,10 +129,10 @@ public class DynamicReachabilityCalculator
    private final DoubleYoVariable nextTransferAlpha = new DoubleYoVariable("nextTransferAlpha", registry);
 
    private final DoubleYoVariable requiredAdjustment = new DoubleYoVariable("requiredAdjustment", registry);
-   private final YoFrameVector2d adjustmentSolution = new YoFrameVector2d("adjustmentSolution", worldFrame, registry);
 
-   private final FrameVector transferGradient = new FrameVector();
-   private final FrameVector swingGradient = new FrameVector();
+   private final BooleanYoVariable isInTransfer = new BooleanYoVariable("isInTransfer", registry);
+
+   private final FrameVector tempGradient = new FrameVector();
 
    private final FramePoint tempPoint = new FramePoint();
    private final FramePoint2d tempFinalCoM = new FramePoint2d();
@@ -174,7 +177,7 @@ public class DynamicReachabilityCalculator
       this.icpPlanner = icpPlanner;
       this.fullRobotModel = fullRobotModel;
 
-      maximumDesiredKneeBend.set(0.1);
+      maximumDesiredKneeBend.set(0.2);
       maximumNumberOfIterations.set(3);
 
       minimumInitialTransferDuration.set(0.01);
@@ -241,7 +244,6 @@ public class DynamicReachabilityCalculator
       anklePoint.changeFrame(kneePitchFrame);
 
       shinLength = kneePoint.distance(anklePoint);
-
 
       // setup reference frames
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
@@ -465,7 +467,9 @@ public class DynamicReachabilityCalculator
 
    private void reset()
    {
-      numberOfIterations.set(0);
+      numberOfAdjustments.set(0);
+      numberOfForwardAdjustments.set(0);
+      numberOfBackwardAdjustments.set(0);
 
       currentTransferTotalAdjustment.set(0.0);
       swingTotalAdjustment.set(0.0);
@@ -485,8 +489,6 @@ public class DynamicReachabilityCalculator
       this.nextFootstep = nextFootstep;
    }
    
-   //// TODO: 3/22/17  this needs to work in single support too 
-
    /**
     * Checks whether the current footstep is reachable given the desired footstep timing. If it is, does nothing. If it is not, modifies the
     * ICP Plan timing to make sure that is is.
@@ -502,10 +504,19 @@ public class DynamicReachabilityCalculator
          boolean needToMoveCoMBackward = (stanceHeightLine.getMaxPoint() <= stepHeightLine.getMinPoint());
          double requiredAdjustment;
          if (needToMoveCoMBackward)
+         {
             requiredAdjustment = computeRequiredAdjustmentBackward();
+            numberOfBackwardAdjustments.increment();
+         }
          else
+         {
             requiredAdjustment = computeRequiredAdjustmentForward();
+            numberOfForwardAdjustments.increment();
+         }
          this.requiredAdjustment.set(requiredAdjustment);
+
+         if (numberOfAdjustments.getIntegerValue() > maximumNumberOfIterations.getIntegerValue())
+            break;
 
          computeCurrentTransferGradient();
          computeNextTransferGradient();
@@ -527,18 +538,25 @@ public class DynamicReachabilityCalculator
          nextTransferTotalAdjustment.add(nextTransferDurationAdjustment);
          icpPlanner.adjustTransferDuration(1, nextTransferDurationAdjustment);
          icpPlanner.setTransferDurationAlpha(1, nextTransferAlpha.getDoubleValue());
-         icpPlanner.initializeForTransfer(initialTime);
 
+         if (isInTransfer.getBooleanValue())
+            icpPlanner.initializeForTransfer(initialTime);
+         else
+            icpPlanner.initializeForSingleSupport(initialTime);
 
          isStepReachable = checkReachabilityOfStep();
-         numberOfIterations.increment();
-
-         //if (numberOfIterations.getIntegerValue() > maximumNumberOfIterations.getIntegerValue() || requiredAdjustment == 0.0)
-         if (numberOfIterations.getIntegerValue() > maximumNumberOfIterations.getIntegerValue())
-         {
-            break;
-          }
+         numberOfAdjustments.increment();
       }
+   }
+
+   public void setInTransfer()
+   {
+      isInTransfer.set(true);
+   }
+
+   public void setInSwing()
+   {
+      isInTransfer.set(false);
    }
 
    /**
@@ -564,7 +582,8 @@ public class DynamicReachabilityCalculator
    }
 
 
-   private final double requiredAdjustmentSafetyFactor = 1.0;
+   //// FIXME: 3/25/17  this seems to be maybe too much
+   private final double requiredAdjustmentSafetyFactor = 0.6;
 
    private double computeRequiredAdjustmentForward()
    {
@@ -596,11 +615,8 @@ public class DynamicReachabilityCalculator
       double stepHeight = tempVector.getZ();
       double stepDistance = tempVector.getX();
 
-      //// TODO: 3/23/17  make this account for stepping up / stepping down
       double minimumHipPosition = SphereIntersectionTools.computeMinimumDistanceToIntersectingPlane(stepDistance, stepHeight, minimumLegLength.getDoubleValue(),
             maximumLegLength.getDoubleValue());
-      double maximumHipPosition = SphereIntersectionTools.computeMaximumDistanceToIntersectingPlane(stepDistance, stepHeight, maximumLegLength.getDoubleValue(),
-            minimumLegLength.getDoubleValue());
 
       tempPoint.setToZero(stanceHipFrame);
       tempPoint.changeFrame(stepDirectionFrame);
@@ -610,32 +626,42 @@ public class DynamicReachabilityCalculator
 
    private double computeRequiredAdjustmentBackward()
    {
-      // // FIXME: 3/22/17  this is differing from the reachability. Need to be using the hip points, not the center of mass
+      RobotSide stepSide = nextFootstep.getRobotSide();
+      RobotSide stanceSide = stepSide.getOppositeSide();
 
-      RobotSide stanceSide = nextFootstep.getRobotSide().getOppositeSide();
+      ReferenceFrame stepHipFrame = predictedHipFrames.get(stepSide);
+      Vector2dZUpFrame stepDirectionFrame = stepDirectionFrames.get(stanceSide);
+
+      // compute base point of upcoming sphere account for hip offsets
       FramePoint upcomingAnklePoint = ankleLocations.get(stanceSide.getOppositeSide());
       FramePoint stanceAnklePoint = ankleLocations.get(stanceSide);
-      upcomingAnklePoint.changeFrame(stanceAnklePoint.getReferenceFrame());
+      stanceAnklePoint.changeFrame(upcomingAnklePoint.getReferenceFrame());
+      tempPoint.setToZero(predictedHipFrames.get(stanceSide));
+      tempPoint.changeFrame(stepHipFrame);
+      tempHipVector.setIncludingFrame(tempPoint);
 
+      // compute step direction frame accounting for hip offsets
+      tempPoint.setIncludingFrame(stanceAnklePoint);
+      tempPoint.changeFrame(stepHipFrame);
+      tempPoint.sub(tempHipVector);
+      tempPoint.changeFrame(worldFrame);
       tempVector.setIncludingFrame(upcomingAnklePoint);
-      tempVector.sub(stanceAnklePoint);
-      tempVector2d.setByProjectionOntoXYPlaneIncludingFrame(tempVector);
+      tempVector.sub(tempPoint);
+      stepDirectionFrame.setXAxis(tempVector);
 
-      double stepDistance = tempVector2d.length();
-      double minimumCoMPosition = (Math.pow(stepDistance, 2.0) - Math.pow(maximumLegLength.getDoubleValue(), 2.0) + Math.pow(minimumLegLength.getDoubleValue(), 2.0)) / (2.0 * stepDistance);
-      double maximumCoMPosition = (Math.pow(stepDistance, 2.0) - Math.pow(minimumLegLength.getDoubleValue(), 2.0) + Math.pow(maximumLegLength.getDoubleValue(), 2.0)) / (2.0 * stepDistance);
+      // compute the actual planar step direction
+      tempVector.changeFrame(stepDirectionFrame);
+      double stepHeight = tempVector.getZ();
+      double stepDistance = tempVector.getX();
 
-      predictedCoMPosition.changeFrame(stepDirectionFrames.get(stanceSide));
-      if (predictedCoMPosition.getX() < minimumCoMPosition)
-      {
-         return requiredAdjustmentSafetyFactor * (minimumCoMPosition - predictedCoMPosition.getX());
-      }
-      else if (predictedCoMPosition.getX() > maximumCoMPosition)
-      {
-         return requiredAdjustmentSafetyFactor * (maximumCoMPosition - predictedCoMPosition.getX());
-      }
+      //// TODO: 3/23/17  make this account for stepping up / stepping down
+      double maximumHipPosition = SphereIntersectionTools.computeMaximumDistanceToIntersectingPlane(stepDistance, stepHeight, maximumLegLength.getDoubleValue(),
+            minimumLegLength.getDoubleValue());
 
-      return 0.0;
+      tempPoint.setToZero(stepHipFrame);
+      tempPoint.changeFrame(stepDirectionFrame);
+
+      return requiredAdjustmentSafetyFactor * (maximumHipPosition - tempPoint.getX());
    }
 
 
@@ -649,35 +675,35 @@ public class DynamicReachabilityCalculator
 
       reshape();
 
-      extractGradient(currentInitialTransferGradient, stanceSide);
+      extractGradient(currentInitialTransferGradient, stanceSide, tempGradient);
 
-      double currentInitialTransferPerpendicularGradient = transferGradient.getY();
-      double currentInitialTransferParallelGradient = transferGradient.getX();
+      double currentInitialTransferPerpendicularGradient = tempGradient.getY();
+      double currentInitialTransferParallelGradient = tempGradient.getX();
 
-      extractGradient(currentEndTransferGradient, stanceSide);
+      extractGradient(currentEndTransferGradient, stanceSide, tempGradient);
 
-      double currentEndTransferPerpendicularGradient = transferGradient.getY();
-      double currentEndTransferParallelGradient = transferGradient.getX();
+      double currentEndTransferPerpendicularGradient = tempGradient.getY();
+      double currentEndTransferParallelGradient = tempGradient.getX();
 
-      extractGradient(initialSwingGradient, stanceSide);
+      extractGradient(initialSwingGradient, stanceSide, tempGradient);
 
-      double swingInitialPerpendicularGradient = transferGradient.getY();
-      double swingInitialParallelGradient = transferGradient.getX();
+      double swingInitialPerpendicularGradient = tempGradient.getY();
+      double swingInitialParallelGradient = tempGradient.getX();
 
-      extractGradient(endSwingGradient, stanceSide);
+      extractGradient(endSwingGradient, stanceSide, tempGradient);
 
-      double swingEndPerpendicularGradient = transferGradient.getY();
-      double swingEndParallelGradient = transferGradient.getX();
+      double swingEndPerpendicularGradient = tempGradient.getY();
+      double swingEndParallelGradient = tempGradient.getX();
 
-      extractGradient(nextInitialTransferGradient, stanceSide);
+      extractGradient(nextInitialTransferGradient, stanceSide, tempGradient);
 
-      double nextInitialTransferPerpendicularGradient = transferGradient.getY();
-      double nextInitialTransferParallelGradient = transferGradient.getX();
+      double nextInitialTransferPerpendicularGradient = tempGradient.getY();
+      double nextInitialTransferParallelGradient = tempGradient.getX();
 
-      extractGradient(nextEndTransferGradient, stanceSide);
+      extractGradient(nextEndTransferGradient, stanceSide, tempGradient);
 
-      double nextEndTransferPerpendicularGradient = transferGradient.getY();
-      double nextEndTransferParallelGradient = transferGradient.getX();
+      double nextEndTransferPerpendicularGradient = tempGradient.getY();
+      double nextEndTransferParallelGradient = tempGradient.getX();
 
       parallel_J.set(0, 0, currentInitialTransferParallelGradient);
       parallel_J.set(0, 1, currentEndTransferParallelGradient);
@@ -845,12 +871,24 @@ public class DynamicReachabilityCalculator
       solverInput_bin.zero();
    }
 
-   private void extractGradient(YoFrameVector2d gradientToExtract, RobotSide stanceSide)
+   private void computeGradient(FramePoint originalPosition, FramePoint2d adjustedPosition, double variation, FrameVector gradientToPack)
    {
-      transferGradient.setToZero(worldFrame);
+      originalPosition.changeFrame(worldFrame);
+      tempPoint.setToZero(worldFrame);
+      tempPoint.set(originalPosition);
+      tempPoint.setZ(0.0);
+      gradientToPack.setToZero(worldFrame);
+      gradientToPack.setXY(adjustedPosition);
+      gradientToPack.sub(tempPoint);
+      gradientToPack.scale(1.0 / variation);
+   }
+
+   private void extractGradient(YoFrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector gradientToPack)
+   {
+      gradientToPack.setToZero(worldFrame);
       gradientToExtract.getFrameTuple2d(tempVector2d);
-      transferGradient.setXY(tempVector2d);
-      transferGradient.changeFrame(stepDirectionFrames.get(stanceSide));
+      gradientToPack.setXY(tempVector2d);
+      gradientToPack.changeFrame(stepDirectionFrames.get(stanceSide));
    }
 
    private void extractSolution(DenseMatrix64F solution)
@@ -902,10 +940,10 @@ public class DynamicReachabilityCalculator
 
    private void computeCurrentTransferGradient()
    {
-      double currentInitialTime = icpPlanner.getInitialTime();
+      int stepNumber = 0;
 
-      double currentTransferDuration = icpPlanner.getTransferDuration(0);
-      double currentTransferDurationAlpha = icpPlanner.getTransferDurationAlpha(0);
+      double currentTransferDuration = icpPlanner.getTransferDuration(stepNumber);
+      double currentTransferDurationAlpha = icpPlanner.getTransferDurationAlpha(stepNumber);
 
       double currentInitialTransferDuration = currentTransferDurationAlpha * currentTransferDuration;
       double currentEndTransferDuration = (1.0 - currentTransferDurationAlpha) * currentTransferDuration;
@@ -914,60 +952,30 @@ public class DynamicReachabilityCalculator
       double variation = TRANSFER_TWIDDLE_SIZE * currentInitialTransferDuration;
       double modifiedTransferDurationAlpha = (currentInitialTransferDuration + variation) / (currentTransferDuration + variation);
 
-      icpPlanner.adjustTransferDuration(0, variation);
-      icpPlanner.setTransferDurationAlpha(0, modifiedTransferDurationAlpha);
-      icpPlanner.initializeForTransfer(currentInitialTime);
-
-      icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
-
-      //// TODO: 3/24/17  review this
-      predictedCoMPosition.changeFrame(worldFrame);
-      tempPoint.setToZero(worldFrame);
-      tempPoint.set(predictedCoMPosition);
-      tempPoint.setZ(0.0);
-      transferGradient.setToZero(worldFrame);
-      transferGradient.setXY(adjustedCoMPosition);
-      transferGradient.sub(tempPoint);
-      transferGradient.scale(1.0 / variation);
-
-      currentInitialTransferGradient.setByProjectionOntoXYPlane(transferGradient);
+      applyTransferAdjustment(stepNumber, currentTransferDuration, variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
+      computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+      currentInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
-      icpPlanner.adjustTransferDuration(0, -variation);
+      icpPlanner.adjustTransferDuration(stepNumber, -variation);
       variation = TRANSFER_TWIDDLE_SIZE * currentEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (currentEndTransferDuration + variation) / (currentTransferDuration + variation);
 
-      icpPlanner.adjustTransferDuration(0, variation);
-      icpPlanner.setTransferDurationAlpha(0, modifiedTransferDurationAlpha);
-      icpPlanner.initializeForTransfer(currentInitialTime);
-
-      icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
-
-      predictedCoMPosition.changeFrame(worldFrame);
-      tempPoint.setToZero(worldFrame);
-      tempPoint.set(predictedCoMPosition);
-      tempPoint.setZ(0.0);
-      transferGradient.setToZero(worldFrame);
-      transferGradient.setXY(adjustedCoMPosition);
-      transferGradient.sub(tempPoint);
-      transferGradient.scale(1.0 / variation);
-
-      currentEndTransferGradient.setByProjectionOntoXYPlane(transferGradient);
+      applyTransferAdjustment(stepNumber, currentTransferDuration, variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
+      computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+      currentEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // reset everything to normal
-      icpPlanner.adjustTransferDuration(0, -variation);
-      icpPlanner.setTransferDurationAlpha(0, currentTransferDurationAlpha);
-      icpPlanner.initializeForTransfer(currentInitialTime);
+      applyTransferAdjustment(stepNumber, currentTransferDuration, -variation, currentTransferDurationAlpha, adjustedCoMPosition);
    }
 
    private void computeNextTransferGradient()
    {
-      boolean isThisTheFinalTransfer = icpPlanner.getNumberOfFootstepsRegistered() == 1;
+      int stepNumber = 1;
+      boolean isThisTheFinalTransfer = icpPlanner.getNumberOfFootstepsRegistered() == stepNumber;
 
-      double currentInitialTime = icpPlanner.getInitialTime();
-
-      double nextTransferDuration = icpPlanner.getTransferDuration(1);
-      double nextTransferDurationAlpha = icpPlanner.getTransferDurationAlpha(1);
+      double nextTransferDuration = icpPlanner.getTransferDuration(stepNumber);
+      double nextTransferDurationAlpha = icpPlanner.getTransferDurationAlpha(stepNumber);
 
       double nextInitialTransferDuration = nextTransferDurationAlpha * nextTransferDuration;
       double nextEndTransferDuration = (1.0 - nextTransferDurationAlpha) * nextTransferDuration;
@@ -976,171 +984,132 @@ public class DynamicReachabilityCalculator
       double variation = TRANSFER_TWIDDLE_SIZE * nextInitialTransferDuration;
       double modifiedTransferDurationAlpha = (nextInitialTransferDuration + variation) / (nextTransferDuration + variation);
 
-      if (isThisTheFinalTransfer)
-      {
-         icpPlanner.setFinalTransferDuration(nextTransferDuration + variation);
-         icpPlanner.setFinalTransferDurationAlpha(modifiedTransferDurationAlpha);
-      }
-      else
-      {
-         icpPlanner.adjustTransferDuration(1, variation);
-         icpPlanner.setTransferDurationAlpha(1, modifiedTransferDurationAlpha);
-      }
-      icpPlanner.initializeForTransfer(currentInitialTime);
-
-      icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
-
-      predictedCoMPosition.changeFrame(worldFrame);
-      tempPoint.setToZero(worldFrame);
-      tempPoint.set(predictedCoMPosition);
-      tempPoint.setZ(0.0);
-      transferGradient.setToZero(worldFrame);
-      transferGradient.setXY(adjustedCoMPosition);
-      transferGradient.sub(tempPoint);
-      transferGradient.scale(1.0 / variation);
-
-      nextInitialTransferGradient.setByProjectionOntoXYPlane(transferGradient);
+      applyTransferAdjustment(stepNumber, nextTransferDuration, variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
+      computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+      nextInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
       if (isThisTheFinalTransfer)
          icpPlanner.setFinalTransferDuration(nextTransferDuration);
       else
-         icpPlanner.adjustTransferDuration(1, -variation);
+         icpPlanner.adjustTransferDuration(stepNumber, -variation);
 
       variation = TRANSFER_TWIDDLE_SIZE * nextEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (nextEndTransferDuration + variation) / (nextTransferDuration + variation);
 
-      if (isThisTheFinalTransfer)
-      {
-         icpPlanner.setFinalTransferDuration(nextTransferDuration + variation);
-         icpPlanner.setFinalTransferDurationAlpha(modifiedTransferDurationAlpha);
-      }
-      else
-      {
-         icpPlanner.adjustTransferDuration(1, variation);
-         icpPlanner.setTransferDurationAlpha(1, modifiedTransferDurationAlpha);
-      }
-      icpPlanner.initializeForTransfer(currentInitialTime);
-
-      icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
-
-      predictedCoMPosition.changeFrame(worldFrame);
-      tempPoint.setToZero(worldFrame);
-      tempPoint.set(predictedCoMPosition);
-      tempPoint.setZ(0.0);
-      transferGradient.setToZero(worldFrame);
-      transferGradient.setXY(adjustedCoMPosition);
-      transferGradient.sub(tempPoint);
-      transferGradient.scale(1.0 / variation);
-
-      nextEndTransferGradient.setByProjectionOntoXYPlane(transferGradient);
+      applyTransferAdjustment(stepNumber, nextTransferDuration, variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
+      computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+      nextEndTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // reset everything to normal
+      applyTransferAdjustment(stepNumber, nextTransferDuration, -variation, nextTransferDurationAlpha, adjustedCoMPosition);
+   }
+
+   private void applyTransferAdjustment(int stepNumber, double originalDuration, double timeVariation, double alpha, FramePoint2d comToPack)
+   {
+      boolean isThisTheFinalTransfer = icpPlanner.getNumberOfFootstepsRegistered() == stepNumber;
+
+      double currentInitialTime = icpPlanner.getInitialTime();
+
       if (isThisTheFinalTransfer)
       {
-         icpPlanner.setFinalTransferDuration(nextTransferDuration);
-         icpPlanner.setFinalTransferDurationAlpha(nextTransferDurationAlpha);
+         icpPlanner.setFinalTransferDuration(originalDuration + timeVariation);
+         icpPlanner.setFinalTransferDurationAlpha(alpha);
       }
       else
       {
-         icpPlanner.adjustTransferDuration(1, -variation);
-         icpPlanner.setTransferDurationAlpha(1, nextTransferDurationAlpha);
+         icpPlanner.adjustTransferDuration(stepNumber, timeVariation);
+         icpPlanner.setTransferDurationAlpha(stepNumber, alpha);
       }
-      icpPlanner.initializeForTransfer(currentInitialTime);
+
+      if (isInTransfer.getBooleanValue())
+         icpPlanner.initializeForTransfer(currentInitialTime);
+      else
+         icpPlanner.initializeForSingleSupport(currentInitialTime);
+
+      icpPlanner.getFinalDesiredCenterOfMassPosition(comToPack);
    }
 
    private void computeSwingGradient()
    {
-      double currentInitialTime = icpPlanner.getInitialTime();
+      int stepNumber = 0;
 
-      double currentSwingDuration = icpPlanner.getSwingDuration(0);
-      double currentSwingDurationAlpha = icpPlanner.getSwingDurationAlpha(0);
+      double currentSwingDuration = icpPlanner.getSwingDuration(stepNumber);
+      double currentSwingDurationAlpha = icpPlanner.getSwingDurationAlpha(stepNumber);
 
       double currentInitialSwingDuration = currentSwingDurationAlpha * currentSwingDuration;
       double currentEndSwingDuration = (1.0 - currentSwingDurationAlpha) * currentSwingDuration;
 
-      // compute initial transfer duration gradient
+      // compute initial swing duration gradient
       double variation = SWING_TWIDDLE_SIZE * currentInitialSwingDuration;
       double modifiedSwingDurationAlpha = (currentInitialSwingDuration + variation) / (currentSwingDuration + variation);
 
-      icpPlanner.adjustSwingDuration(0, variation);
-      icpPlanner.setSwingDurationAlpha(0, modifiedSwingDurationAlpha);
-      icpPlanner.initializeForTransfer(currentInitialTime);
+      applySwingAdjustment(stepNumber, variation, modifiedSwingDurationAlpha, adjustedCoMPosition);
+      computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+      initialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
 
-      icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
-
-      predictedCoMPosition.changeFrame(worldFrame);
-      tempPoint.setToZero(worldFrame);
-      tempPoint.set(predictedCoMPosition);
-      tempPoint.setZ(0.0);
-      transferGradient.setToZero(worldFrame);
-      transferGradient.setXY(adjustedCoMPosition);
-      transferGradient.sub(tempPoint);
-      transferGradient.scale(1.0 / variation);
-
-      initialSwingGradient.setByProjectionOntoXYPlane(transferGradient);
-
-      // compute end transfer duration gradient
-      icpPlanner.adjustTransferDuration(0, -variation);
+      // compute end swing duration gradient
+      icpPlanner.adjustSwingDuration(stepNumber, -variation);
       variation = SWING_TWIDDLE_SIZE * currentEndSwingDuration;
       modifiedSwingDurationAlpha = 1.0 - (currentEndSwingDuration + variation) / (currentSwingDuration + variation);
 
-      icpPlanner.adjustSwingDuration(0, variation);
-      icpPlanner.setSwingDurationAlpha(0, modifiedSwingDurationAlpha);
-      icpPlanner.initializeForTransfer(currentInitialTime);
-
-      icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
-
-      predictedCoMPosition.changeFrame(worldFrame);
-      tempPoint.setToZero(worldFrame);
-      tempPoint.set(predictedCoMPosition);
-      tempPoint.setZ(0.0);
-      transferGradient.setToZero(worldFrame);
-      transferGradient.setXY(adjustedCoMPosition);
-      transferGradient.sub(tempPoint);
-      transferGradient.scale(1.0 / variation);
-
-      endSwingGradient.setByProjectionOntoXYPlane(transferGradient);
+      applySwingAdjustment(stepNumber, variation, modifiedSwingDurationAlpha, adjustedCoMPosition);
+      computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+      endSwingGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // reset everything to normal
-      icpPlanner.adjustSwingDuration(0, -variation);
-      icpPlanner.setTransferDurationAlpha(0, currentSwingDurationAlpha);
-      icpPlanner.initializeForTransfer(currentInitialTime);
+      applySwingAdjustment(stepNumber, -variation, currentSwingDurationAlpha, adjustedCoMPosition);
    }
-   
-   //// TODO: 3/24/17  
-   private void computeHigherTransferGradients()
+
+   private void applySwingAdjustment(int stepNumber, double timeVariation, double alpha, FramePoint2d comToPack)
    {
       double currentInitialTime = icpPlanner.getInitialTime();
 
-      int numberOfStepsRegister = icpPlanner.getNumberOfFootstepsRegistered();
+      icpPlanner.adjustSwingDuration(stepNumber, timeVariation);
+      icpPlanner.setSwingDurationAlpha(stepNumber, alpha);
+
+      if (isInTransfer.getBooleanValue())
+         icpPlanner.initializeForTransfer(currentInitialTime);
+      else
+         icpPlanner.initializeForSingleSupport(currentInitialTime);
+
+      icpPlanner.getFinalDesiredCenterOfMassPosition(comToPack);
+   }
+
+
+   //// TODO: 3/24/17  
+   private void computeHigherTransferGradients()
+   {
+      boolean isInTransfer = this.isInTransfer.getBooleanValue();
+      double currentInitialTime = icpPlanner.getInitialTime();
+
+     int numberOfStepsRegister = icpPlanner.getNumberOfFootstepsRegistered();
       for (int stepIndex = 0; stepIndex < numberOfStepsRegister; stepIndex++)
       {
          double variation = TRANSFER_TWIDDLE_SIZE * icpPlanner.getTransferDuration(stepIndex);
          icpPlanner.adjustTransferDuration(stepIndex, variation);
-         icpPlanner.initializeForTransfer(currentInitialTime);
+         if (isInTransfer)
+            icpPlanner.initializeForTransfer(currentInitialTime);
+         else
+            icpPlanner.initializeForSingleSupport(currentInitialTime);
 
          icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
 
          icpPlanner.adjustTransferDuration(stepIndex, -variation);
-         icpPlanner.initializeForTransfer(currentInitialTime);
+         if (isInTransfer)
+            icpPlanner.initializeForTransfer(currentInitialTime);
+         else
+            icpPlanner.initializeForSingleSupport(currentInitialTime);
 
-         predictedCoMPosition.changeFrame(worldFrame);
-         tempPoint.setToZero(worldFrame);
-         tempPoint.set(predictedCoMPosition);
-         tempPoint.setZ(0.0);
-         transferGradient.setToZero(worldFrame);
-         transferGradient.setXY(adjustedCoMPosition);
-         transferGradient.sub(tempPoint);
-         transferGradient.scale(1.0 / variation);
-
-         higherTransferGradients.get(stepIndex).setByProjectionOntoXYPlane(transferGradient);
+         computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+         higherTransferGradients.get(stepIndex).setByProjectionOntoXYPlane(tempGradient);
       }
    }
 
    //// TODO: 3/24/17  
    private void computeHigherSwingGradients()
    {
+      boolean isInTransfer = this.isInTransfer.getBooleanValue();
       double currentInitialTime = icpPlanner.getInitialTime();
 
       int numberOfStepsRegister = icpPlanner.getNumberOfFootstepsRegistered();
@@ -1148,23 +1117,21 @@ public class DynamicReachabilityCalculator
       {
          double variation = SWING_TWIDDLE_SIZE * icpPlanner.getSwingDuration(stepIndex);
          icpPlanner.adjustSwingDuration(stepIndex, variation);
-         icpPlanner.initializeForTransfer(currentInitialTime);
+         if (isInTransfer)
+            icpPlanner.initializeForTransfer(currentInitialTime);
+         else
+            icpPlanner.initializeForSingleSupport(currentInitialTime);
 
          icpPlanner.getFinalDesiredCenterOfMassPosition(adjustedCoMPosition);
 
          icpPlanner.adjustSwingDuration(stepIndex, -variation);
-         icpPlanner.initializeForTransfer(currentInitialTime);
+         if (isInTransfer)
+            icpPlanner.initializeForTransfer(currentInitialTime);
+         else
+            icpPlanner.initializeForSingleSupport(currentInitialTime);
 
-         predictedCoMPosition.changeFrame(worldFrame);
-         tempPoint.setToZero(worldFrame);
-         tempPoint.set(predictedCoMPosition);
-         tempPoint.setZ(0.0);
-         swingGradient.setToZero(worldFrame);
-         swingGradient.setXY(adjustedCoMPosition);
-         swingGradient.sub(tempPoint);
-         swingGradient.scale(1.0 / variation);
-
-         higherSwingGradients.get(stepIndex).setByProjectionOntoXYPlane(swingGradient);
+         computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
+         higherSwingGradients.get(stepIndex).setByProjectionOntoXYPlane(tempGradient);
       }
    }
 
