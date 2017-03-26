@@ -135,11 +135,10 @@ public class DynamicReachabilityCalculator
    private final FrameVector tempGradient = new FrameVector();
 
    private final FramePoint tempPoint = new FramePoint();
-   private final FramePoint2d tempFinalCoM = new FramePoint2d();
    private final FramePoint2d tempPoint2d = new FramePoint2d();
+   private final FramePoint2d tempFinalCoM = new FramePoint2d();
 
    private final FrameVector tempVector = new FrameVector();
-   private final FrameVector tempHipVector = new FrameVector();
    private final FrameVector2d tempVector2d = new FrameVector2d();
 
    private final double thighLength;
@@ -147,7 +146,8 @@ public class DynamicReachabilityCalculator
 
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
 
-   private static final double perpendicularWeight = 0.01;
+   private static final double requiredAdjustmentSafetyFactor = 1.0;
+   private static final double perpendicularWeight = 0.0;
    private static final double swingAdjustmentWeight = 10.0;
    private static final double transferAdjustmentWeight = 1.0;
    private static final double constraintWeight = 1000.0;
@@ -228,7 +228,6 @@ public class DynamicReachabilityCalculator
       parallelObjective_h = new DenseMatrix64F(2 * numberOfFootstepsToConsider, 1);
       parallel_J = new DenseMatrix64F(1, 2 * numberOfFootstepsToConsider);
       perpendicular_J = new DenseMatrix64F(1, 2 * numberOfFootstepsToConsider);
-
 
       // compute leg segment lengths
       ReferenceFrame hipPitchFrame = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint();
@@ -502,21 +501,11 @@ public class DynamicReachabilityCalculator
       while (!isStepReachable)
       {
          boolean needToMoveCoMBackward = (stanceHeightLine.getMaxPoint() <= stepHeightLine.getMinPoint());
-         double requiredAdjustment;
-         if (needToMoveCoMBackward)
-         {
-            requiredAdjustment = computeRequiredAdjustmentBackward();
-            numberOfBackwardAdjustments.increment();
-         }
-         else
-         {
-            requiredAdjustment = computeRequiredAdjustmentForward();
-            numberOfForwardAdjustments.increment();
-         }
+         double requiredAdjustment = computeRequiredAdjustment(needToMoveCoMBackward);
          this.requiredAdjustment.set(requiredAdjustment);
 
          if (numberOfAdjustments.getIntegerValue() > maximumNumberOfIterations.getIntegerValue())
-            break;
+            throw new RuntimeException();
 
          computeCurrentTransferGradient();
          computeNextTransferGradient();
@@ -582,32 +571,44 @@ public class DynamicReachabilityCalculator
    }
 
 
-   //// FIXME: 3/25/17  this seems to be maybe too much
-   private final double requiredAdjustmentSafetyFactor = 0.6;
+   private final FramePoint adjustedUpcomingAnklePoint = new FramePoint();
+   private final FramePoint adjustedStanceAnklePoint = new FramePoint();
+   private final FrameVector stepHipVector = new FrameVector();
+   private final FrameVector stanceHipVector = new FrameVector();
 
-   private double computeRequiredAdjustmentForward()
+   private double computeRequiredAdjustment(boolean needToMoveCoMBackward)
    {
       RobotSide stepSide = nextFootstep.getRobotSide();
       RobotSide stanceSide = stepSide.getOppositeSide();
 
       ReferenceFrame stanceHipFrame = predictedHipFrames.get(stanceSide);
+      ReferenceFrame stepHipFrame = predictedHipFrames.get(stepSide);
       Vector2dZUpFrame stepDirectionFrame = stepDirectionFrames.get(stanceSide);
 
       // compute base point of upcoming sphere account for hip offsets
       FramePoint upcomingAnklePoint = ankleLocations.get(stanceSide.getOppositeSide());
       FramePoint stanceAnklePoint = ankleLocations.get(stanceSide);
-      upcomingAnklePoint.changeFrame(stanceAnklePoint.getReferenceFrame());
-      tempPoint.setToZero(predictedHipFrames.get(stepSide));
-      tempPoint.changeFrame(stanceHipFrame);
-      tempHipVector.setIncludingFrame(tempPoint);
+
+      tempPoint.setToZero(stepHipFrame);
+      tempPoint.changeFrame(predictedCoMFrame);
+      stepHipVector.setIncludingFrame(tempPoint);
+      stepHipVector.changeFrame(worldFrame);
+      tempPoint.setToZero(stanceHipFrame);
+      tempPoint.changeFrame(predictedCoMFrame);
+      stanceHipVector.setIncludingFrame(tempPoint);
+      stanceHipVector.changeFrame(worldFrame);
 
       // compute step direction frame accounting for hip offsets
-      tempPoint.setIncludingFrame(upcomingAnklePoint);
-      tempPoint.changeFrame(stanceHipFrame);
-      tempPoint.sub(tempHipVector);
-      tempPoint.changeFrame(worldFrame);
-      tempVector.setIncludingFrame(tempPoint);
-      tempVector.sub(stanceAnklePoint);
+      adjustedUpcomingAnklePoint.setIncludingFrame(upcomingAnklePoint);
+      adjustedUpcomingAnklePoint.changeFrame(worldFrame);
+      adjustedUpcomingAnklePoint.sub(stepHipVector);
+
+      adjustedStanceAnklePoint.setIncludingFrame(stanceAnklePoint);
+      adjustedStanceAnklePoint.changeFrame(worldFrame);
+      adjustedStanceAnklePoint.sub(stanceHipVector);
+
+      tempVector.setIncludingFrame(adjustedUpcomingAnklePoint);
+      tempVector.sub(adjustedStanceAnklePoint);
       stepDirectionFrame.setXAxis(tempVector);
 
       // compute the actual planar step direction
@@ -617,56 +618,32 @@ public class DynamicReachabilityCalculator
 
       double minimumHipPosition = SphereIntersectionTools.computeMinimumDistanceToIntersectingPlane(stepDistance, stepHeight, minimumLegLength.getDoubleValue(),
             maximumLegLength.getDoubleValue());
-
-      tempPoint.setToZero(stanceHipFrame);
-      tempPoint.changeFrame(stepDirectionFrame);
-
-      return requiredAdjustmentSafetyFactor * (minimumHipPosition - tempPoint.getX());
-   }
-
-   private double computeRequiredAdjustmentBackward()
-   {
-      RobotSide stepSide = nextFootstep.getRobotSide();
-      RobotSide stanceSide = stepSide.getOppositeSide();
-
-      ReferenceFrame stepHipFrame = predictedHipFrames.get(stepSide);
-      Vector2dZUpFrame stepDirectionFrame = stepDirectionFrames.get(stanceSide);
-
-      // compute base point of upcoming sphere account for hip offsets
-      FramePoint upcomingAnklePoint = ankleLocations.get(stanceSide.getOppositeSide());
-      FramePoint stanceAnklePoint = ankleLocations.get(stanceSide);
-      stanceAnklePoint.changeFrame(upcomingAnklePoint.getReferenceFrame());
-      tempPoint.setToZero(predictedHipFrames.get(stanceSide));
-      tempPoint.changeFrame(stepHipFrame);
-      tempHipVector.setIncludingFrame(tempPoint);
-
-      // compute step direction frame accounting for hip offsets
-      tempPoint.setIncludingFrame(stanceAnklePoint);
-      tempPoint.changeFrame(stepHipFrame);
-      tempPoint.sub(tempHipVector);
-      tempPoint.changeFrame(worldFrame);
-      tempVector.setIncludingFrame(upcomingAnklePoint);
-      tempVector.sub(tempPoint);
-      stepDirectionFrame.setXAxis(tempVector);
-
-      // compute the actual planar step direction
-      tempVector.changeFrame(stepDirectionFrame);
-      double stepHeight = tempVector.getZ();
-      double stepDistance = tempVector.getX();
-
-      //// TODO: 3/23/17  make this account for stepping up / stepping down
-      double maximumHipPosition = SphereIntersectionTools.computeMaximumDistanceToIntersectingPlane(stepDistance, stepHeight, maximumLegLength.getDoubleValue(),
+      double maximumHipPosition = SphereIntersectionTools.computeMinimumDistanceToIntersectingPlane(stepDistance, stepHeight, maximumLegLength.getDoubleValue(),
             minimumLegLength.getDoubleValue());
 
-      tempPoint.setToZero(stepHipFrame);
+      tempPoint.setToZero(predictedCoMFrame);
+      tempPoint.changeFrame(worldFrame);
+      tempPoint.sub(adjustedStanceAnklePoint);
       tempPoint.changeFrame(stepDirectionFrame);
 
-      return requiredAdjustmentSafetyFactor * (maximumHipPosition - tempPoint.getX());
+      if (needToMoveCoMBackward)
+      {
+         numberOfBackwardAdjustments.increment();
+
+         return requiredAdjustmentSafetyFactor * (maximumHipPosition - tempPoint.getX());
+      }
+      else
+      {
+         numberOfForwardAdjustments.increment();
+
+         return requiredAdjustmentSafetyFactor * (minimumHipPosition - tempPoint.getX());
+      }
    }
 
 
 
-
+   private final DenseMatrix64F parallelAdjustment = new DenseMatrix64F(1, 1);
+   private final DenseMatrix64F perpendicularAdjustment = new DenseMatrix64F(1, 1);
    private void computeTimingAdjustment(double requiredAdjustment)
    {
       RobotSide stanceSide = nextFootstep.getRobotSide().getOppositeSide();
@@ -817,6 +794,9 @@ public class DynamicReachabilityCalculator
       }
 
       extractSolution(solution);
+
+      CommonOps.mult(parallel_J, solution, parallelAdjustment);
+      CommonOps.mult(perpendicular_J, solution, perpendicularAdjustment);
    }
 
 
