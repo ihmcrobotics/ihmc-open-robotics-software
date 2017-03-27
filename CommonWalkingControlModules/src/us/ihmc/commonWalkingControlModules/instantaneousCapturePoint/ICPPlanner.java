@@ -1246,61 +1246,23 @@ public class ICPPlanner
    public double getCurrentStateDuration()
    {
       if (isDoubleSupport.getBooleanValue())
-         return transferDurations.get(0).getDoubleValue();
+         return getTransferDuration(0);
       else
-         return swingDurations.get(0).getDoubleValue();
+         return getSwingDuration(0);
    }
 
-   /**
-    * Adjusts all the transfer phase durations
-    * @param timingAdjustment
-    */
-   public void adjustTransferDurations(double timingAdjustment)
-   {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
-      {
-         adjustTransferDuration(stepIndex, timingAdjustment);
-      }
-   }
-
-   /**
-    * Adjusts all the swing phase durations
-    * @param timingAdjustment
-    */
-   public void adjustSwingDurations(double timingAdjustment)
-   {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
-      {
-         adjustSwingDuration(stepIndex, timingAdjustment);
-      }
-   }
-
-   /**
-    * Adjusts the transfer phase duration of step {@param stepNumber}.
-    *
-    * @param stepNumber timing to adjust
-    * @param timingAdjustment
-    */
-   public void adjustTransferDuration(int stepNumber, double timingAdjustment)
+   public void setTransferDuration(int stepNumber, double duration)
    {
       int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
       if (stepNumber < numberOfFootstepRegistered)
-         transferDurations.get(stepNumber).add(timingAdjustment);
+         transferDurations.get(stepNumber).set(duration);
    }
 
-   /**
-    * Adjusts the swing phase duration of step {@param stepNumber}.
-    *
-    * @param stepNumber
-    * @param timingAdjustment
-    */
-   public void adjustSwingDuration(int stepNumber, double timingAdjustment)
+   public void setSwingDuration(int stepNumber, double duration)
    {
       int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
       if (stepNumber < numberOfFootstepRegistered)
-         swingDurations.get(stepNumber).add(timingAdjustment);
+         swingDurations.get(stepNumber).set(duration);
    }
 
    public double getTransferDuration(int stepNumber)
@@ -1319,71 +1281,6 @@ public class ICPPlanner
          return swingDurations.get(stepNumber).getDoubleValue();
       else
          return 0.0;
-   }
-
-   /**
-    * Gets the shortest transfer duration
-    *
-    * @return transfer duration
-    */
-   public double getMinimumTransferDuration()
-   {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      double minimumDuration = Double.POSITIVE_INFINITY;
-      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
-      {
-         minimumDuration = Math.min(minimumDuration, transferDurations.get(stepIndex).getDoubleValue());
-      }
-
-      return minimumDuration;
-   }
-
-   /**
-    * Gets the shortest swing duration
-    * @return swing duration
-    */
-   public double getMinimumSwingDuration()
-   {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      double minimumDuration = Double.POSITIVE_INFINITY;
-      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
-      {
-         minimumDuration = Math.min(minimumDuration, swingDurations.get(stepIndex).getDoubleValue());
-      }
-
-      return minimumDuration;
-   }
-
-   /**
-    * Gets the longest transfer duration
-    * @return transfer duration
-    */
-   public double getMaximumTransferDuration()
-   {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      double maximumDuration = 0.0;
-      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
-      {
-         maximumDuration = Math.max(maximumDuration, transferDurations.get(stepIndex).getDoubleValue());
-      }
-
-      return maximumDuration;
-   }
-
-   /**
-    * Gets the longest swing duration
-    * @return swing duration
-    */
-   public double getMaximumSwingDuration()
-   {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      double maximumDuration = 0.0;
-      for (int stepIndex = 0; stepIndex < numberOfFootstepRegistered; stepIndex++)
-      {
-         maximumDuration = Math.max(maximumDuration, swingDurations.get(stepIndex).getDoubleValue());
-      }
-
-      return maximumDuration;
    }
 
    /**

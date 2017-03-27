@@ -69,6 +69,7 @@ public class TimeAdjustmentSolver
 
    private int numberOfFootstepsToConsider;
    private int numberOfFootstepsRegistered;
+   private int numberOfHigherSteps;
 
    public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, YoVariableRegistry registry)
    {
@@ -130,11 +131,11 @@ public class TimeAdjustmentSolver
    {
       int problemSize = 6;
 
-      //// TODO: 3/24/17
-      /*
       if (numberOfFootstepsToConsider > 3 & numberOfFootstepsRegistered > 2)
-         problemSize += 2 * Math.min(numberOfFootstepsToConsider - 3, numberOfFootstepsRegistered - 1);
-         */
+      {
+         numberOfHigherSteps = Math.min(numberOfFootstepsToConsider - 3, numberOfFootstepsRegistered - 1);
+         problemSize += 2 * numberOfHigherSteps;
+      }
 
       solution.reshape(problemSize, problemSize);
 
@@ -206,6 +207,16 @@ public class TimeAdjustmentSolver
       setGradient(nextEndTransferIndex, gradient);
    }
 
+   public void setHigherSwingGradient(int higherIndex, FrameVector swingGradient)
+   {
+      setGradient(6 + 2 * higherIndex, swingGradient);
+   }
+
+   public void setHigherTransferGradient(int higherIndex, FrameVector transferGradient)
+   {
+      setGradient(7 + 2 * higherIndex, transferGradient);
+   }
+
    private void setGradient(int colIndex, FrameVector gradient)
    {
       double parallel = gradient.getX();
@@ -256,6 +267,16 @@ public class TimeAdjustmentSolver
       solverInput_bin.set(5, 0, yoMaximumTransferDuration.getDoubleValue() - duration);
    }
 
+   public void setHigherSwingDuration(int higherIndex, double duration)
+   {
+      solverInput_Lb.set(6 + 2 * higherIndex, 0, yoMinimumSwingDuration.getDoubleValue() - duration);
+   }
+
+   public void setHigherTransferDuration(int higherIndex, double duration)
+   {
+      solverInput_Lb.set(7 + 2 * higherIndex, 0, yoMinimumTransferDuration.getDoubleValue() - duration);
+   }
+
    public void compute() throws NoConvergenceException
    {
       // compute objectives
@@ -271,7 +292,7 @@ public class TimeAdjustmentSolver
       CommonOps.add(solverInput_h, parallelObjective_h, solverInput_h);
 
       // define bounds and timing constraints
-      assembleVariableBounds();
+      CommonOps.fill(solverInput_Ub, Double.POSITIVE_INFINITY);
       assembleTimingConstraints();
 
       activeSetSolver.clear();
@@ -314,6 +335,12 @@ public class TimeAdjustmentSolver
       segmentAdjustmentObjective_H.set(4, 4, transferAdjustmentWeight);
       segmentAdjustmentObjective_H.set(5, 5, transferAdjustmentWeight);
 
+      for (int i = 0; i < numberOfHigherSteps; i++)
+      {
+         segmentAdjustmentObjective_H.set(6 + 2 * i, 6 + 2 * i, swingAdjustmentWeight);
+         segmentAdjustmentObjective_H.set(7 + 2 * i, 7 + 2 * i, transferAdjustmentWeight);
+      }
+
       stepAdjustmentObjective_H.set(0, 0, transferAdjustmentWeight);
       stepAdjustmentObjective_H.set(0, 1, transferAdjustmentWeight);
       stepAdjustmentObjective_H.set(1, 0, transferAdjustmentWeight);
@@ -326,16 +353,6 @@ public class TimeAdjustmentSolver
       stepAdjustmentObjective_H.set(4, 5, transferAdjustmentWeight);
       stepAdjustmentObjective_H.set(5, 4, transferAdjustmentWeight);
       stepAdjustmentObjective_H.set(5, 5, transferAdjustmentWeight);
-   }
-
-   private void assembleVariableBounds()
-   {
-      solverInput_Ub.set(0, 0, Double.POSITIVE_INFINITY);
-      solverInput_Ub.set(1, 0, Double.POSITIVE_INFINITY);
-      solverInput_Ub.set(2, 0, Double.POSITIVE_INFINITY);
-      solverInput_Ub.set(3, 0, Double.POSITIVE_INFINITY);
-      solverInput_Ub.set(4, 0, Double.POSITIVE_INFINITY);
-      solverInput_Ub.set(5, 0, Double.POSITIVE_INFINITY);
    }
 
    private void assembleTimingConstraints()
@@ -383,5 +400,15 @@ public class TimeAdjustmentSolver
    public double getNextEndTransferAdjustment()
    {
       return solution.get(nextEndTransferIndex, 0);
+   }
+
+   public double getHigherSwingAdjustment(int higherIndex)
+   {
+      return solution.get(6 + 2 * higherIndex, 0);
+   }
+
+   public double getHigherTransferAdjustment(int higherIndex)
+   {
+      return solution.get(7 + 2 * higherIndex, 0);
    }
 }
