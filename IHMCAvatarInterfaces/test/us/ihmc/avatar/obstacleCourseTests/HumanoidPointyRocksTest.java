@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -38,7 +39,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -57,8 +57,8 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
@@ -279,7 +279,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       Point3D center = new Point3D(-0.0198, 0.1317, 0.7865);
       Vector3D plusMinusVector = new Vector3D(0.025, 0.025, 0.025);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       assertTrue(success);
@@ -305,6 +305,14 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       BooleanYoVariable doFootExplorationInTransferToStanding = (BooleanYoVariable) drcSimulationTestHelper.getYoVariable("doFootExplorationInTransferToStanding");
       doFootExplorationInTransferToStanding.set(false);
 
+      // should make the test more robust
+      BooleanYoVariable allowUpperBodyMomentumInSingleSupport = (BooleanYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("allowUpperBodyMomentumInSingleSupport");
+      BooleanYoVariable allowUpperBodyMomentumInDoubleSupport = (BooleanYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("allowUpperBodyMomentumInDoubleSupport");
+      BooleanYoVariable allowUsingHighMomentumWeight = (BooleanYoVariable) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("allowUsingHighMomentumWeight");
+      allowUsingHighMomentumWeight.set(true);
+      allowUpperBodyMomentumInSingleSupport.set(true);
+      allowUpperBodyMomentumInDoubleSupport.set(true);
+
       ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
 
       setupCameraForWalkingUpToRamp();
@@ -327,7 +335,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       Point3D center = new Point3D(1.4277546756235229, 0.2801160933192322, 0.7880809572883962);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -386,7 +394,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       assertTrue(success);
 
       Vector3D plusMinusVector = new Vector3D(0.01, 0.01, 0.01);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(rootPositionAtStart, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(rootPositionAtStart, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -806,7 +814,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       Point3D center = new Point3D(-0.06095496955280358, -0.001119333179390724, 0.7875020745919501);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

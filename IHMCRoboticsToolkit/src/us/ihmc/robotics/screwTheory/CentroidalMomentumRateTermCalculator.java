@@ -140,7 +140,7 @@ public class CentroidalMomentumRateTermCalculator
             {
                if (isAncestorMapping[i][j])
                {
-                  tempTwist.set(jointList[j].getMotionSubspace().getAllUnitTwists().get(k));
+                  jointList[j].getUnitTwist(k, tempTwist);
                   tempTwist.changeFrame(rigidBodies[i].getInertia().getExpressedInFrame());
 
                   tempTwist.getMatrix(tempSpatialMotionMatrix, 0);
@@ -162,7 +162,7 @@ public class CentroidalMomentumRateTermCalculator
          }
 
          // Pack twist of body j w.r.t. elevator expressed in body j com
-         twistCalculator.getRelativeTwist(bodyTwists[j], rootBody, rigidBodies[j]);
+         twistCalculator.getRelativeTwist(rootBody, rigidBodies[j], bodyTwists[j]);
          // Change expressed in frame to center of mass frame
          bodyTwists[j].changeFrame(centerOfMassFrame);
 
@@ -213,7 +213,7 @@ public class CentroidalMomentumRateTermCalculator
       // Here we calculate Jdot * v by computing the spatial acceleration with vddot = 0
       for (int j = 0; j < jointList.length; j++)
       {
-         spatialAccelerationCalculator.getAccelerationOfBody(tempSpatialAcceleration, rigidBodies[j]);
+         spatialAccelerationCalculator.getAccelerationOfBody(rigidBodies[j], tempSpatialAcceleration);
          tempSpatialAcceleration.getMatrix(tempSpatialMotionMatrix, 0);
          CommonOps.mult(denseAdjTimesI[j], tempSpatialMotionMatrix, tempMatrix);
          CommonOps.add(aDotV, tempMatrix, aDotV);

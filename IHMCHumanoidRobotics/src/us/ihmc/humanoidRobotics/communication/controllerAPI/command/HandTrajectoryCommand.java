@@ -1,6 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.BaseForControl;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -12,18 +11,10 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    public HandTrajectoryCommand()
    {
    }
-
-   public HandTrajectoryCommand(ReferenceFrame referenceFrame, RobotSide robotSide)
+   
+   public HandTrajectoryCommand(RobotSide robotSide, ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame)
    {
-      super.clear(referenceFrame);
-      this.robotSide = robotSide;
-   }
-
-   public HandTrajectoryCommand(ReferenceFrame referenceFrame, RobotSide robotSide, BaseForControl baseForControl)
-   {
-      // TODO: nuke this constructor once BaseForControl is no more.
-
-      super.clear(referenceFrame);
+      super(dataFrame, trajectoryFrame);
       this.robotSide = robotSide;
    }
 
@@ -86,12 +77,5 @@ public class HandTrajectoryCommand extends SE3TrajectoryControllerCommand<HandTr
    public boolean isCommandValid()
    {
       return robotSide != null && super.isCommandValid();
-   }
-
-   public BaseForControl getBase()
-   {
-      // TODO: nuke this once BaseForControl is no more.
-
-      return BaseForControl.WORLD;
    }
 }

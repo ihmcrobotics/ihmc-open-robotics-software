@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -32,7 +33,7 @@ import us.ihmc.robotics.random.RandomGeometry;
 public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 {
    private final ArrayList<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
-   private final BoundingBox2d boundingBox = new BoundingBox2d();
+   private final BoundingBox2D boundingBox = new BoundingBox2D();
    private final Point2D centroid = new Point2D();
    private int numberOfVertices = 0;
    private boolean isUpToDate = false;
@@ -534,7 +535,7 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return centroid;
    }
 
-   public BoundingBox2d getBoundingBox()
+   public BoundingBox2D getBoundingBox()
    {
       return boundingBox;
    }
@@ -549,15 +550,15 @@ public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
       return boundingBox.getMaxPoint().getY() - boundingBox.getMinPoint().getY();
    }
 
-   public BoundingBox2d getBoundingBoxCopy()
+   public BoundingBox2D getBoundingBoxCopy()
    {
       checkIfUpToDate();
-      BoundingBox2d ret = new BoundingBox2d(boundingBox);
+      BoundingBox2D ret = new BoundingBox2D(boundingBox);
 
       return ret;
    }
 
-   public void getBoundingBox(BoundingBox2d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox2D boundingBoxToPack)
    {
       boundingBoxToPack.set(boundingBox);
    }

@@ -93,11 +93,9 @@ public class CenterOfMassJacobian
          FramePoint comPositionScaledByMass = getCoMScaledByMass(childBody);
          double subTreeMass = getSubTreeMass(childBody);
 
-         GeometricJacobian motionSubspace = joint.getMotionSubspace();
-         final List<Twist> allTwists = motionSubspace.getAllUnitTwists();
-         for (int i = 0; i < allTwists.size(); i++)
+         for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
-            tempUnitTwist.set(allTwists.get(i));
+            joint.getUnitTwist(dofIndex, tempUnitTwist);
             tempUnitTwist.changeFrame(rootFrame);
 
             setColumn(tempUnitTwist, comPositionScaledByMass, subTreeMass, column);

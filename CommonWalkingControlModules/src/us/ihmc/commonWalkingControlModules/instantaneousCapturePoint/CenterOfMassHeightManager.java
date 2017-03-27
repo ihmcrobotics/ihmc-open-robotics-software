@@ -209,7 +209,7 @@ public class CenterOfMassHeightManager
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ();
-         twistCalculator.getTwistOfBody(currentPelvisTwist, pelvis);
+         twistCalculator.getTwistOfBody(pelvis, currentPelvisTwist);
          currentPelvisTwist.changeFrame(worldFrame);
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }

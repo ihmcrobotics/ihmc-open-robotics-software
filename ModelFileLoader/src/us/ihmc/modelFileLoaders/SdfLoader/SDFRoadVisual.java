@@ -9,7 +9,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.robotics.geometry.GeometryTools;
 
 public class SDFRoadVisual extends Graphics3DObject
 {

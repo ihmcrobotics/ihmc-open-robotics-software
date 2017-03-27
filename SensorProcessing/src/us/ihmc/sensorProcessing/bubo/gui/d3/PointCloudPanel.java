@@ -18,14 +18,15 @@
 
 package us.ihmc.sensorProcessing.bubo.gui.d3;
 
+import java.util.List;
+
+import javax.swing.JPanel;
+
 import georegression.struct.line.LineSegment3D_F64;
 import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
 import georegression.struct.se.Se3_F64;
-
-import javax.swing.*;
-import java.util.List;
 
 /**
  * Class for displaying 3D point clouds in a swing panel.

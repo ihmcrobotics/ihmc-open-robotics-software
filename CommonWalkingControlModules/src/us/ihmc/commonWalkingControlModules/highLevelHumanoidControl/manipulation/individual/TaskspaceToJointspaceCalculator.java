@@ -156,7 +156,7 @@ public class TaskspaceToJointspaceCalculator
 
       populateRefrenceFrameMap();
 
-      jacobian = new GeometricJacobian(localJoints, localEndEffectorFrame);
+      jacobian = new GeometricJacobian(localJoints, localEndEffectorFrame, true);
       solver = new YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities(namePrefix, maxNumberOfConstraints, maxNumberOfConstraints, registry);
 
       inverseJacobianSolver = new InverseJacobianSolver(maxNumberOfConstraints, numberOfDoF, solver);

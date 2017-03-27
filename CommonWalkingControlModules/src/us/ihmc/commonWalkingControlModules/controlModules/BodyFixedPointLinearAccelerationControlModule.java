@@ -130,7 +130,7 @@ public class BodyFixedPointLinearAccelerationControlModule
    private void computeDerivativeTerm(FrameVector desiredVelocity, RigidBody base)
    {
       ReferenceFrame baseFrame = base.getBodyFixedFrame();
-      twistCalculator.getRelativeTwist(endEffectorTwist, base, endEffector);
+      twistCalculator.getRelativeTwist(base, endEffector, endEffectorTwist);
       endEffectorTwist.changeFrame(baseFrame);
       bodyFixedPoint.setToZero(frameAtBodyFixedPoint);
       bodyFixedPoint.changeFrame(baseFrame);

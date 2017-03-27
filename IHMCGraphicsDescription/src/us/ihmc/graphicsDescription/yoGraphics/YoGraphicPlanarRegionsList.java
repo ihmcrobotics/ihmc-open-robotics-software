@@ -65,27 +65,6 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 {
    private static final int MAX_PLANAR_REGIONS_LIST_DEQUE_SIZE = 2;
 
-   /**
-    * Describes the job of {@link YoGraphic}. When the user creates one, the {@link YoGraphic} is assumed 
-    * to be writing in the {@link YoVariable}s.
-    * When the graphic is created from {@link YoGraphicFactory}, it is assumed that the graphic is used as a
-    * {@link RemoteYoGraphic} and thus does only read the {@link YoVariable}s.
-    * 
-    * <p>
-    * Differentiating the {@link YoGraphic} according to their job allows to implement simple 
-    * synchronization between a {@code WRITER} and a {@code READER} to ensure proper rendering.
-    * 
-    * @author Sylvain
-    *
-    */
-   private enum YoGraphicJob
-   {
-      /** The YoGraphic is the one processing planar regions and updating the YoVariables. */
-      WRITER,
-      /** The YoGraphic reads the YoVariable to create the meshes only. */
-      READER
-   };
-
    private final YoGraphicJob yoGraphicJob;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();

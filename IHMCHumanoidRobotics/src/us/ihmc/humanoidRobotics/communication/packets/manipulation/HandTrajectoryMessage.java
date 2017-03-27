@@ -12,7 +12,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points."
@@ -59,47 +61,29 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
+   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, long expressedInReferenceFrameId, long trajectoryReferenceFrameId)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation);
+      super(trajectoryTime, desiredPosition, desiredOrientation, expressedInReferenceFrameId, trajectoryReferenceFrameId);
       this.robotSide = robotSide;
    }
-
+   
    /**
-    * Use this constructor to execute a straight line trajectory in taskspace.
+    * Use this constructor to execute a straight line trajectory in taskspace. The chest is used as the base for the control.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
-    * @param base define with respect to what base the hand is controlled.
     * @param trajectoryTime how long it takes to reach the desired pose.
     * @param desiredPosition desired hand position expressed in world frame.
     * @param desiredOrientation desired hand orientation expressed in world frame.
     */
-   public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
+   public HandTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation, ReferenceFrame expressedInReferenceFrame, ReferenceFrame trajectoryReferenceFrame)
    {
-   // TODO: nuke this constructor once BaseForControl is no more.
-
-      super(trajectoryTime, desiredPosition, desiredOrientation);
+      super(trajectoryTime, desiredPosition, desiredOrientation, expressedInReferenceFrame, trajectoryReferenceFrame);
       this.robotSide = robotSide;
    }
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
-    * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
-    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
-    * @param robotSide is used to define which hand is performing the trajectory.
-    * @param base define with respect to what base the hand is controlled.
-    * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
-    */
-   public HandTrajectoryMessage(RobotSide robotSide, BaseForControl base, int numberOfTrajectoryPoints)
-   {
-      // TODO: nuke this constructor once BaseForControl is no more.
-
-      super(numberOfTrajectoryPoints);
-      this.robotSide = robotSide;
-   }
-
-   /**
-    * Use this constructor to build a message with more than one trajectory point.
+    * By default this constructor sets the trajectory frame to {@link CommonReferenceFrameIds#CHEST_FRAME} and the data frame to World
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     * @param robotSide is used to define which hand is performing the trajectory.
@@ -109,6 +93,9 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    {
       super(numberOfTrajectoryPoints);
       this.robotSide = robotSide;
+      super.setTrajectoryReferenceFrameId(CommonReferenceFrameIds.CHEST_FRAME.getHashId());
+      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
+      
    }
 
    @Override
@@ -149,12 +136,5 @@ public class HandTrajectoryMessage extends AbstractSE3TrajectoryMessage<HandTraj
    public String validateMessage()
    {
       return PacketValidityChecker.validateHandTrajectoryMessage(this);
-   }
-
-   public BaseForControl getBase()
-   {
-      // TODO: nuke this once BaseForControl is no more.
-
-      return BaseForControl.WORLD;
    }
 }

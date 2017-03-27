@@ -2,12 +2,12 @@ package us.ihmc.simulationToolkit.visualizers;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundLeaf;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundNode;
@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class QuadTreeHeightMapVisualizer
 {
    
-   public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, BoundingBox2d rangeOfPointsToDraw, double resolution)
+   public static Graphics3DNode drawHeightMap(QuadTreeHeightMapInterface heightMap, SimulationConstructionSet scs, BoundingBox2D rangeOfPointsToDraw, double resolution)
    {
       double minX = rangeOfPointsToDraw.getMinPoint().getX();
       double minY = rangeOfPointsToDraw.getMinPoint().getY();
