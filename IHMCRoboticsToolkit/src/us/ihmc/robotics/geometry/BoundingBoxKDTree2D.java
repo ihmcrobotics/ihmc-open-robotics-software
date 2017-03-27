@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 
 /**
@@ -32,7 +33,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 public class BoundingBoxKDTree2D
 {
    private KDTreeNode rootKDTreeNode;
-   private ArrayList<BoundingBox2d> allboundingBoxes;
+   private ArrayList<BoundingBox2D> allboundingBoxes;
    @SuppressWarnings("unused")
    private int uniqueIdForDisplay = 0;
    private final ArrayList<Object> allObjects;
@@ -43,11 +44,11 @@ public class BoundingBoxKDTree2D
     * 2 dimensional rectangles oriented along X and Y axes.
     *
     * @param ArrayList
-    *            <BoundingBox2d> boundingBoxes The list of the polygon to
+    *            <BoundingBox2D> boundingBoxes The list of the polygon to
     *            search from.
     */
 
-   public BoundingBoxKDTree2D(ArrayList<BoundingBox2d> boundingBoxes, ArrayList<Object> objects)
+   public BoundingBoxKDTree2D(ArrayList<BoundingBox2D> boundingBoxes, ArrayList<Object> objects)
    {
       rootKDTreeNode = new KDTreeNode(null);
       allboundingBoxes = boundingBoxes;
@@ -62,9 +63,9 @@ public class BoundingBoxKDTree2D
    }
 
    @SuppressWarnings("unchecked")
-   private KDTreeNode buildKDTree(ArrayList<BoundingBox2d> boundingBoxes, int depth, KDTreeNode nodeToExpand, ArrayList<Object> objects)
+   private KDTreeNode buildKDTree(ArrayList<BoundingBox2D> boundingBoxes, int depth, KDTreeNode nodeToExpand, ArrayList<Object> objects)
    {
-      ArrayList<BoundingBox2d>[] split = new ArrayList[2];
+      ArrayList<BoundingBox2D>[] split = new ArrayList[2];
       ArrayList<Object>[] objectSplit = new ArrayList[2];
 
       if (boundingBoxes.size() <= MAX_LEAF_SIZE)
@@ -117,24 +118,24 @@ public class BoundingBoxKDTree2D
     * rectangular search region. Search region must be a 2 dimensional
     * rectangle oriented along X and Y axes.
     *
-    * @param BoundingBox2d
+    * @param BoundingBox2D
     *            searchBox The rectangular search region.
-    * @return ArrayList<BoundingBox2d> The bounding boxes present
+    * @return ArrayList<BoundingBox2D> The bounding boxes present
     *         in/intersecting with the search region.
     */
 
-   public ArrayList<BoundingBox2d> getIntersectingBoundingBoxes(BoundingBox2d searchBox)
+   public ArrayList<BoundingBox2D> getIntersectingBoundingBoxes(BoundingBox2D searchBox)
    {
-      ArrayList<BoundingBox2d> intersectingBoundingBoxes = new ArrayList<BoundingBox2d>();
+      ArrayList<BoundingBox2D> intersectingBoundingBoxes = new ArrayList<BoundingBox2D>();
       ArrayList<Object> intersectingObjects = new ArrayList<Object>();
       getIntersectingBoundingBoxes(searchBox, rootKDTreeNode, 0, intersectingBoundingBoxes, intersectingObjects);
 
       return intersectingBoundingBoxes;
    }
 
-   public ArrayList<Object> getIntersectingObjects(BoundingBox2d searchBox)
+   public ArrayList<Object> getIntersectingObjects(BoundingBox2D searchBox)
    {
-      ArrayList<BoundingBox2d> intersectingBoundingBoxes = new ArrayList<BoundingBox2d>();
+      ArrayList<BoundingBox2D> intersectingBoundingBoxes = new ArrayList<BoundingBox2D>();
       ArrayList<Object> intersectingObjects = new ArrayList<Object>();
       getIntersectingBoundingBoxes(searchBox, rootKDTreeNode, 0, intersectingBoundingBoxes, intersectingObjects);
 
@@ -142,7 +143,7 @@ public class BoundingBoxKDTree2D
    }
 
 
-   private void getIntersectingBoundingBoxes(BoundingBox2d searchBox, KDTreeNode current, int depth, ArrayList<BoundingBox2d> intersectingBoundingBoxes,
+   private void getIntersectingBoundingBoxes(BoundingBox2D searchBox, KDTreeNode current, int depth, ArrayList<BoundingBox2D> intersectingBoundingBoxes,
            ArrayList<Object> intersectingObjects)
    {
       if (current.leafNode)
@@ -152,9 +153,9 @@ public class BoundingBoxKDTree2D
       else if (depth % 2 == 0)    // even
       {
          // see if point is left or right
-         if (searchBox.isBoxAtOrLeftOf(current.split))    // left
+         if (searchBox.getMaxX() <= current.split)    // left
             getIntersectingBoundingBoxes(searchBox, current.left, depth + 1, intersectingBoundingBoxes, intersectingObjects);
-         else if (searchBox.isBoxAtOrRightOf(current.split))
+         else if (searchBox.getMinX() >= current.split)
             getIntersectingBoundingBoxes(searchBox, current.right, depth + 1, intersectingBoundingBoxes, intersectingObjects);
          else
          {
@@ -164,9 +165,9 @@ public class BoundingBoxKDTree2D
          }
 
       }
-      else if (searchBox.isBoxAtOrAbove(current.split))    // above
+      else if (searchBox.getMinY() >= current.split)    // above
          getIntersectingBoundingBoxes(searchBox, current.left, depth + 1, intersectingBoundingBoxes, intersectingObjects);
-      else if (searchBox.isBoxAtOrBelow(current.split))
+      else if (searchBox.getMaxY() <= current.split)
          getIntersectingBoundingBoxes(searchBox, current.right, depth + 1, intersectingBoundingBoxes, intersectingObjects);
       else
       {
@@ -176,16 +177,16 @@ public class BoundingBoxKDTree2D
       }
    }
 
-   private void addToReturnList(ArrayList<BoundingBox2d> currentBoxes, ArrayList<Object> currentObjects, BoundingBox2d searchBox,
-                                ArrayList<BoundingBox2d> intersectingBoundingBoxes, ArrayList<Object> intersectingObjects)
+   private void addToReturnList(ArrayList<BoundingBox2D> currentBoxes, ArrayList<Object> currentObjects, BoundingBox2D searchBox,
+                                ArrayList<BoundingBox2D> intersectingBoundingBoxes, ArrayList<Object> intersectingObjects)
    {
       for (int i = 0; i < currentBoxes.size(); i++)
 
-//    for (BoundingBox2d b : currentBoxes)
+//    for (BoundingBox2D b : currentBoxes)
       {
          if (!intersectingBoundingBoxes.contains(currentBoxes.get(i)))
          {
-            if (searchBox.intersects(currentBoxes.get(i)))
+            if (searchBox.intersectsInclusive(currentBoxes.get(i)))
             {
                intersectingBoundingBoxes.add(currentBoxes.get(i));
                intersectingObjects.add(currentObjects.get(i));
@@ -195,15 +196,15 @@ public class BoundingBoxKDTree2D
    }
 
    @SuppressWarnings("unchecked")
-   private ArrayList<BoundingBox2d>[] splitInXPlane(ArrayList<BoundingBox2d> boundingBoxes, KDTreeNode current, ArrayList<Object> objects,
+   private ArrayList<BoundingBox2D>[] splitInXPlane(ArrayList<BoundingBox2D> boundingBoxes, KDTreeNode current, ArrayList<Object> objects,
            ArrayList<Object>[] objectSplit)
    {
-      ArrayList<BoundingBox2d> leftList = new ArrayList<BoundingBox2d>();
-      ArrayList<BoundingBox2d> rightList = new ArrayList<BoundingBox2d>();
+      ArrayList<BoundingBox2D> leftList = new ArrayList<BoundingBox2D>();
+      ArrayList<BoundingBox2D> rightList = new ArrayList<BoundingBox2D>();
       ArrayList<Object> leftObjectList = new ArrayList<Object>();
       ArrayList<Object> rightObjectList = new ArrayList<Object>();
 
-      ArrayList<BoundingBox2d>[] returnList = new ArrayList[2];
+      ArrayList<BoundingBox2D>[] returnList = new ArrayList[2];
 
       Point2D center = new Point2D();
       Point2D minPoint = new Point2D();
@@ -212,7 +213,7 @@ public class BoundingBoxKDTree2D
       double[] midPointsX = new double[boundingBoxes.size()];
       for (int i = 0; i < boundingBoxes.size(); i++)
       {
-         boundingBoxes.get(i).getCenterPointCopy(center);
+         boundingBoxes.get(i).getCenterPoint(center);
          midPointsX[i] = center.getX();
       }
 
@@ -253,15 +254,15 @@ public class BoundingBoxKDTree2D
    }
 
    @SuppressWarnings("unchecked")
-   private ArrayList<BoundingBox2d>[] splitInYPlane(ArrayList<BoundingBox2d> boundingBoxes, KDTreeNode current, ArrayList<Object> objects,
+   private ArrayList<BoundingBox2D>[] splitInYPlane(ArrayList<BoundingBox2D> boundingBoxes, KDTreeNode current, ArrayList<Object> objects,
            ArrayList<Object>[] objectSplit)
    {
-      ArrayList<BoundingBox2d> upperList = new ArrayList<BoundingBox2d>();
-      ArrayList<BoundingBox2d> lowerList = new ArrayList<BoundingBox2d>();
+      ArrayList<BoundingBox2D> upperList = new ArrayList<BoundingBox2D>();
+      ArrayList<BoundingBox2D> lowerList = new ArrayList<BoundingBox2D>();
       ArrayList<Object> upperObjectList = new ArrayList<Object>();
       ArrayList<Object> lowerObjectList = new ArrayList<Object>();
 
-      ArrayList<BoundingBox2d>[] returnList = new ArrayList[2];
+      ArrayList<BoundingBox2D>[] returnList = new ArrayList[2];
 
       Point2D center = new Point2D();
       Point2D minPoint = new Point2D();
@@ -270,7 +271,7 @@ public class BoundingBoxKDTree2D
       double[] midPointsY = new double[boundingBoxes.size()];
       for (int i = 0; i < boundingBoxes.size(); i++)
       {
-         boundingBoxes.get(i).getCenterPointCopy(center);
+         boundingBoxes.get(i).getCenterPoint(center);
          midPointsY[i] = center.getY();
       }
 
@@ -335,7 +336,7 @@ public class BoundingBoxKDTree2D
       @SuppressWarnings("unused")
       private KDTreeNode parent = null;
       private boolean leafNode = false;
-      private ArrayList<BoundingBox2d> boundingBoxes;
+      private ArrayList<BoundingBox2D> boundingBoxes;
       private ArrayList<Object> objects;
 
       private KDTreeNode(KDTreeNode parent)

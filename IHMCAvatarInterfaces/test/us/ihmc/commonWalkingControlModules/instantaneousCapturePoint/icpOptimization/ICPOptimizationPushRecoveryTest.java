@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.util.Random;
@@ -26,8 +26,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
@@ -191,7 +191,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       Vector3D firstForceDirection = new Vector3D(0.0, -1.0, 0.0);
       Vector3D secondForceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.17;
+      double percentWeight = 0.14;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
@@ -272,7 +272,7 @@ public abstract class ICPOptimizationPushRecoveryTest
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double percentWeight = 0.08;
       double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.8 * swingTime;
+      double duration = 0.7 * swingTime;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
       boolean noExceptions = caughtException == null;
@@ -372,7 +372,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.29;
+      double percentWeight = 0.27;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);

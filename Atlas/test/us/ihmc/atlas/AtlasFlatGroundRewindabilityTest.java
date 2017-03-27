@@ -4,7 +4,7 @@ import us.ihmc.avatar.DRCFlatGroundRewindabilityTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.FLAKY)
 public class AtlasFlatGroundRewindabilityTest extends DRCFlatGroundRewindabilityTest

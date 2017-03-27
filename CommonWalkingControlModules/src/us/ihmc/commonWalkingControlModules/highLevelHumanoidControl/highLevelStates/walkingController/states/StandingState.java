@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states;
 
+import java.util.Collection;
+
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
@@ -46,12 +48,13 @@ public class StandingState extends WalkingState
 
       RigidBody chest = controllerToolbox.getFullRobotModel().getChest();
       ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
+      Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
          ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
+         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame, trajectoryFrames);
          handManagers.put(robotSide, handManager);
       }
 

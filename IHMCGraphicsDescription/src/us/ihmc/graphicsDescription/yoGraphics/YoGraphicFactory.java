@@ -114,6 +114,8 @@ public class YoGraphicFactory
       {
          return YoGraphicPlanarRegionsList.createAsRemoteYoGraphic(name, vars, consts);
       }
+      case POLYNOMIAL_3D_DGO:
+         return YoGraphicPolynomial3D.createAsRemoteYoGraphic(name, vars, consts);
 
       default:
          throw new NotImplementedException(type.toString() + " is not implemented");

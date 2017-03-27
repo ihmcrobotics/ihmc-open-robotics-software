@@ -31,7 +31,7 @@ public class View3DFactory
    public enum SceneType
    {
       MAIN_SCENE, SUB_SCENE
-   };
+   }
 
    private final Group root = new Group();
    private final Scene scene;
@@ -311,5 +311,21 @@ public class View3DFactory
          return;
       subScene.heightProperty().bind(pane.heightProperty());
       subScene.widthProperty().bind(pane.widthProperty());
+   }
+   
+   /**
+    * Set background of scene or subscene.
+    * @param color
+    */
+   public void setBackgroundColor(Color color)
+   {
+      if (scene != null)
+      {
+         scene.setFill(color);
+      }
+      else
+      {
+         subScene.setFill(color);
+      }
    }
 }

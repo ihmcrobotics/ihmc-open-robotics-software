@@ -10,7 +10,7 @@ import us.ihmc.avatar.obstacleCourseTests.DRCWallWorldTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})

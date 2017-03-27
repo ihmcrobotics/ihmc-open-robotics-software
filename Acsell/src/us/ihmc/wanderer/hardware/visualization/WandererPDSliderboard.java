@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.IndexChangedListener;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.inputdevices.SliderBoardConfigurationManager;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.SliderBoardConfigurationManager;
 import us.ihmc.wanderer.hardware.WandererActuator;
 import us.ihmc.wanderer.hardware.WandererDashboard;
 import us.ihmc.wanderer.hardware.WandererJoint;

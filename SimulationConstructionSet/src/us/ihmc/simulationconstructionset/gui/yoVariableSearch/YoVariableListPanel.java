@@ -6,10 +6,10 @@ import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
-import us.ihmc.simulationconstructionset.gui.SelectedVariableHolder;
 
 public class YoVariableListPanel extends YoVariablePanel
 {

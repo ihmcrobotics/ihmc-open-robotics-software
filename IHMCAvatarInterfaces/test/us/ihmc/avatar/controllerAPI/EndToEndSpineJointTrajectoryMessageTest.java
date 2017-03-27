@@ -1,8 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -39,8 +38,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
@@ -375,6 +374,10 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
    private ChestTrajectoryMessage createRandomChestMessage(double trajectoryTime, Random random)
    {
+      FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(controllerFullRobotModel);
+      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      
       OneDoFJoint[] spineClone = ScrewTools.cloneOneDoFJointPath(pelvis, chest);
       ScrewTestTools.setRandomPositionsWithinJointLimits(spineClone, random);
       RigidBody chestClone = spineClone[spineClone.length - 1].getSuccessor();
@@ -382,7 +385,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
       desiredRandomChestOrientation.changeFrame(ReferenceFrame.getWorldFrame());
       Quaternion desiredOrientation = new Quaternion();
       desiredRandomChestOrientation.getQuaternion(desiredOrientation);
-      return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation);
+      return new ChestTrajectoryMessage(trajectoryTime, desiredOrientation, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
    }
 
    private static void assertControlWasConsistent(ControllerSpy controllerSpy)

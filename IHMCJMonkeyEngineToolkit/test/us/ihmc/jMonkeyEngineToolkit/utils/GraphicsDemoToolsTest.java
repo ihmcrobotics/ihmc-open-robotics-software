@@ -1,6 +1,6 @@
 package us.ihmc.jMonkeyEngineToolkit.utils;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
@@ -15,7 +15,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
    private final double xMiddle, yMiddle, bottomRadius, topRadius;
    private final double height;
 
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    
    private Graphics3DObject linkGraphics;
 
@@ -41,7 +41,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
       Point3D minPoint = new Point3D(xMin, yMin, Double.NEGATIVE_INFINITY);
       Point3D maxPoint = new Point3D(xMax, yMax, height);
       
-      boundingBox = new BoundingBox3d(minPoint, maxPoint);
+      boundingBox = new BoundingBox3D(minPoint, maxPoint);
    }
 
    public ConeTerrainObject(double xMiddle, double yMiddle, double bottomRadius, double topRadius, double height)
@@ -150,7 +150,7 @@ public class ConeTerrainObject implements TerrainObject3D, HeightMapWithNormals
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

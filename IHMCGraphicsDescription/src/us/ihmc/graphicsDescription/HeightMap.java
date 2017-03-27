@@ -1,9 +1,9 @@
 package us.ihmc.graphicsDescription;
 
-import us.ihmc.robotics.geometry.BoundingBox3d;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 
 public interface HeightMap
 {
    public abstract double heightAt(double x, double y, double z);
-   public abstract BoundingBox3d getBoundingBox();
+   public abstract BoundingBox3D getBoundingBox();
 }

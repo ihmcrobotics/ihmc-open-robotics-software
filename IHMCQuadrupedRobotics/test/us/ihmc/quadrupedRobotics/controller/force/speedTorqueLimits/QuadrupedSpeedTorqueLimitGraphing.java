@@ -13,7 +13,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.controller.QuadrupedControlMode;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
+import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class QuadrupedSpeedTorqueLimitGraphing implements QuadrupedMultiRobotTestInterface

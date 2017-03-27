@@ -1,7 +1,6 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -21,8 +20,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMes
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
@@ -84,8 +83,10 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
+      ReferenceFrame pelvisZUpFrame = drcBehaviorTestHelper.getReferenceFrames().getPelvisZUpFrame();
+      
       Quaternion desiredChestQuat = new Quaternion(RandomGeometry.nextQuaternion(new Random(), 0.8 * MAX_ANGLE_TO_TEST_RAD));
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, desiredChestQuat);
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(1.0, desiredChestQuat, ReferenceFrame.getWorldFrame(), pelvisZUpFrame);
 
       ChestTrajectoryBehavior chestOrientationBehavior = testChestOrientationBehavior(chestTrajectoryMessage);
 

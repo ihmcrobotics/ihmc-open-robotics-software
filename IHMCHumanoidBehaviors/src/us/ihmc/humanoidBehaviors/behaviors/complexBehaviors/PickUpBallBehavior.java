@@ -83,12 +83,18 @@ public class PickUpBallBehavior extends AbstractBehavior
    private final double standingDistance = 0.4; // 0.5;
 
    private HumanoidReferenceFrames referenceFrames;
+   private final ReferenceFrame chestCoMFrame;
+   private final ReferenceFrame pelvisZUpFrame;
+
 
    public PickUpBallBehavior(CommunicationBridge outgoingCommunicationBridge, DoubleYoVariable yoTime, BooleanYoVariable yoDoubleSupport,
          FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(outgoingCommunicationBridge);
       this.yoTime = yoTime;
+      chestCoMFrame = fullRobotModel.getChest().getBodyFixedFrame();
+      pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
+      
       midZupFrame = referenceFrames.getMidFeetZUpFrame();
       this.referenceFrames = referenceFrames;
 
@@ -276,8 +282,8 @@ public class PickUpBallBehavior extends AbstractBehavior
       desiredAxisAngle.set(axis, rotationDownAngle);
       Quaternion desiredHeadQuat = new Quaternion();
       desiredHeadQuat.set(desiredAxisAngle);
-
-      HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat);
+      
+      HeadTrajectoryMessage message = new HeadTrajectoryMessage(1, desiredHeadQuat, worldFrame, chestCoMFrame);
 
       HeadTrajectoryBehavior headTrajectoryBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
@@ -300,7 +306,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       Quaternion desiredHeadUpQuat = new Quaternion();
       desiredHeadUpQuat.set(desiredAxisUpAngle);
 
-      HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(1, desiredHeadUpQuat);
+      HeadTrajectoryMessage messageHeadUp = new HeadTrajectoryMessage(1, desiredHeadUpQuat, worldFrame, chestCoMFrame);
 
       HeadTrajectoryBehavior headTrajectoryUpBehavior = new HeadTrajectoryBehavior(communicationBridge, yoTime);
 
@@ -319,7 +325,7 @@ public class PickUpBallBehavior extends AbstractBehavior
       // BEND OVER *******************************************
       FrameOrientation desiredChestOrientation = new FrameOrientation(referenceFrames.getPelvisZUpFrame(), Math.toRadians(30), Math.toRadians(20), 0);
       desiredChestOrientation.changeFrame(worldFrame);
-      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior, 4);
+      ChestOrientationTask chestOrientationTask = new ChestOrientationTask(desiredChestOrientation, chestTrajectoryBehavior, 4, pelvisZUpFrame);
 
       //REDUCE LIDAR RANGE *******************************************
 

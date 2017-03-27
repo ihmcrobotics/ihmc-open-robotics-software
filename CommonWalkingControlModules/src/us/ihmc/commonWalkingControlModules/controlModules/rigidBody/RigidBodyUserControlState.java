@@ -28,7 +28,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
 
    public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.USER, bodyName, yoTime);
+      super(RigidBodyControlMode.USER, bodyName, yoTime, parentRegistry);
       String prefix = bodyName + "UserMode";
       hasWeights = new BooleanYoVariable(prefix + "HasWeights", registry);
 
@@ -48,7 +48,6 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       }
 
       abortUserControlMode = new BooleanYoVariable(prefix + "Abort", registry);
-      parentRegistry.addChild(registry);
    }
 
    public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)

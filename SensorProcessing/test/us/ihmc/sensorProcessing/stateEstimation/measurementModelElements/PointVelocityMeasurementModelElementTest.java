@@ -4,8 +4,6 @@ package us.ihmc.sensorProcessing.stateEstimation.measurementModelElements;
 
 import java.util.Random;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.EjmlUnitTests;
 import org.junit.Test;
@@ -16,6 +14,7 @@ import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
 import us.ihmc.controlFlow.NullControlFlowElement;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -132,7 +131,7 @@ public class PointVelocityMeasurementModelElementTest
            ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort)
    {
       Twist twist = new Twist();
-      twistCalculator.getTwistOfBody(twist, stationaryPointLink);
+      twistCalculator.getTwistOfBody(stationaryPointLink, twist);
       twist.changeFrame(twist.getBaseFrame());
       FramePoint pointInTwistBaseFrame = new FramePoint(measurementPointInBodyFrame);
       pointInTwistBaseFrame.changeFrame(twist.getBaseFrame());

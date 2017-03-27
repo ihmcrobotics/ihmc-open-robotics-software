@@ -18,18 +18,29 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ddogleg.fitting.modelset.ransac.RansacMulti;
+
 import georegression.fitting.cylinder.CodecCylinder3D_F64;
 import georegression.fitting.plane.CodecPlaneGeneral3D_F64;
 import georegression.fitting.sphere.CodecSphere3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.*;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.*;
-
-import org.ddogleg.fitting.modelset.ransac.RansacMulti;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ApproximateSurfaceNormals;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ConfigSchnabel2007;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.FindAllOfShapeInCloud;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointCloudShapeDetectionSchnabel2007;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PostProcessShapes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.RemoveFalseShapes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ShapeDescription;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigRemoveFalseShapes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.Ransac_to_PointCloudShapeFinder;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.Schnable2007_to_PointCloudShapeFinder;
 
 /**
  * Factory for creating implementations of {@link PointCloudShapeFinder}.
