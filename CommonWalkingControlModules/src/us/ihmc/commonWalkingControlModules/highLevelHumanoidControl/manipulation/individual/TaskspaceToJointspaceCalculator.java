@@ -670,14 +670,14 @@ public class TaskspaceToJointspaceCalculator
 
       for (int i = 0; i < numberOfDoF; i++)
       {
-         sumOfPows += MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnglesAtMidRangeOfMotion.get(i, 0)), p);
+         sumOfPows += MathTools.pow(Math.abs(localJoints[i].getQ() - jointAnglesAtMidRangeOfMotion.get(i, 0)), p);
       }
 
       pThRootOfSumOfPows = Math.pow(sumOfPows, 1.0 / ((double) p));
 
       for (int i = 0; i < numberOfDoF; i++)
       {
-         double numerator = MathTools.powWithInteger(Math.abs(localJoints[i].getQ() - jointAnglesAtMidRangeOfMotion.get(i, 0)), p - 1) * pThRootOfSumOfPows;
+         double numerator = MathTools.pow(Math.abs(localJoints[i].getQ() - jointAnglesAtMidRangeOfMotion.get(i, 0)), p - 1) * pThRootOfSumOfPows;
          double qDotPrivileged = -weight * numerator / sumOfPows;
          privilegedJointVelocitiesToPack.set(i, 0, qDotPrivileged);
       }
