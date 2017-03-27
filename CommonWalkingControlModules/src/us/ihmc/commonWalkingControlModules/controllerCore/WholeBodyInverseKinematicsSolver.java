@@ -40,7 +40,7 @@ public class WholeBodyInverseKinematicsSolver
 
    public WholeBodyInverseKinematicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      rootJoint = toolbox.getRobotRootJoint();
+      rootJoint = toolbox.getRootJoint();
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();

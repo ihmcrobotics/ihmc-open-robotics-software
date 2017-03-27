@@ -86,7 +86,11 @@ public class MotionQPInputCalculator
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
       centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, registry);
-      privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
+
+      if (jointPrivilegedConfigurationParameters != null)
+         privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
+      else
+         privilegedConfigurationHandler = null;
 
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       allTaskJacobian = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
@@ -105,12 +109,14 @@ public class MotionQPInputCalculator
 
    public void updatePrivilegedConfiguration(PrivilegedConfigurationCommand command)
    {
+      if (privilegedConfigurationHandler == null)
+         throw new NullPointerException("JointPrivilegedConfigurationParameters have to be set to enable this feature.");
       privilegedConfigurationHandler.submitPrivilegedConfigurationCommand(command);
    }
 
    public boolean computePrivilegedJointAccelerations(MotionQPInput motionQPInputToPack)
    {
-      if (!privilegedConfigurationHandler.isEnabled())
+      if (privilegedConfigurationHandler == null || !privilegedConfigurationHandler.isEnabled())
          return false;
 
       privilegedConfigurationHandler.computePrivilegedJointAccelerations();
@@ -144,7 +150,7 @@ public class MotionQPInputCalculator
 
    public boolean computePrivilegedJointVelocities(MotionQPInput motionQPInputToPack)
    {
-      if (!privilegedConfigurationHandler.isEnabled())
+      if (privilegedConfigurationHandler == null || !privilegedConfigurationHandler.isEnabled())
          return false;
 
       privilegedConfigurationHandler.computePrivilegedJointVelocities();
