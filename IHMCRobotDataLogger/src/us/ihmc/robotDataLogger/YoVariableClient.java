@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 
+import javax.swing.plaf.synth.SynthSplitPaneUI;
+
 import us.ihmc.multicastLogDataProtocol.LogPacketHandler;
 import us.ihmc.multicastLogDataProtocol.StreamingDataTCPClient;
 import us.ihmc.multicastLogDataProtocol.ThreadedLogPacketHandler;
@@ -252,7 +254,6 @@ public class YoVariableClient implements LogPacketHandler
       
       System.out.println("Requesting handshake");
       Handshake handshake = dataConsumerParticipant.getHandshake(announcement, timeout);
-
       
       handshakeParser.parseFrom(handshake);
 
@@ -260,13 +261,17 @@ public class YoVariableClient implements LogPacketHandler
       logHandshake.setHandshake(handshake);
       if(announcement.getModelFileDescription().getHasModel())
       {
+         logHandshake.setModelName(announcement.getModelFileDescription().getNameAsString());
+         System.out.println("Requesting model file");
          logHandshake.setModel(dataConsumerParticipant.getModelFile(announcement, timeout));
          logHandshake.setModelLoaderClass(announcement.getModelFileDescription().getModelLoaderClassAsString());
          logHandshake.setResourceDirectories(announcement.getModelFileDescription().getResourceDirectories().toStringArray());
          if(announcement.getModelFileDescription().getHasResourceZip())
          {
+            System.out.println("Requesting resource bundle");
             logHandshake.setResourceZip(dataConsumerParticipant.getResourceZip(announcement, timeout));
          }
+         System.out.println("Received model");
          
       }
             

@@ -38,6 +38,8 @@ import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
+import us.ihmc.rtps.impl.fastRTPS.Time_t;
+import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -195,6 +197,13 @@ public class DataProducerParticipant
       publisherAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setKind(HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setDepth(1);
+      WriterTimes times = publisherAttributes.getTimes();
+      times.getHeartbeatPeriod().setSeconds(0);
+      times.getHeartbeatPeriod().setFraction(4294967 * 100);
+      
+//      publisherAttributes.getThroughputController().setBytesPerPeriod(625000);
+//      publisherAttributes.getThroughputController().setPeriodMillisecs(100);
+      
       PublisherAttributes att = publisherAttributes;
       Publisher publisher = domain.createPublisher(participant, att);
       publisher.write(data);
@@ -224,6 +233,7 @@ public class DataProducerParticipant
    public void addCamera(CameraType type, String name, String cameraId)
    {
       CameraAnnouncement cameraAnnouncement = new CameraAnnouncement();
+      cameraAnnouncement.setType(type);
       cameraAnnouncement.setName(name);
       cameraAnnouncement.setIdentifier(cameraId);
       cameras.add(cameraAnnouncement);
