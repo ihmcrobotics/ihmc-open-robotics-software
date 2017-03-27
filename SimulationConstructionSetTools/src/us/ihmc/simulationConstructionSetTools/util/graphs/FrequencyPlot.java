@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.graphs;
+package us.ihmc.simulationConstructionSetTools.util.graphs;
 
 import us.ihmc.simulationconstructionset.DataBufferEntry;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
