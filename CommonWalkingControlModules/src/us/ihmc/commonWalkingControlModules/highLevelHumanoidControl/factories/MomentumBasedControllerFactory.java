@@ -372,8 +372,7 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
          toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, contactablePlaneBodies);
       }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
-      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, setupInverseDynamicsSolver, setupInverseKinematicsSolver,
-                                                                           setupVirtualModelControlSolver, registry);
+      WholeBodyControllerCore controllerCore = new WholeBodyControllerCore(toolbox, template, registry);
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
 
       /////////////////////////////////////////////////////////////////////////////////////////////
