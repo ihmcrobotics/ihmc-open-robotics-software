@@ -67,12 +67,16 @@ public class TimeAdjustmentSolver
 
    private final DenseMatrix64F solution;
 
+   private final boolean useHigherOrderSteps;
+
    private int numberOfFootstepsToConsider;
    private int numberOfFootstepsRegistered;
    private int numberOfHigherSteps;
 
-   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, YoVariableRegistry registry)
+   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, boolean useHigherOrderSteps, YoVariableRegistry registry)
    {
+      this.useHigherOrderSteps = useHigherOrderSteps;
+
       yoMinimumInitialTransferDuration = new DoubleYoVariable("minimumInitialTransferDuration", registry);
       yoMinimumEndTransferDuration = new DoubleYoVariable("minimumEndTransferDuration", registry);
       yoMinimumInitialSwingDuration = new DoubleYoVariable("minimumInitialSwingDuration", registry);
@@ -133,7 +137,7 @@ public class TimeAdjustmentSolver
 
       if (numberOfFootstepsToConsider > 3 & numberOfFootstepsRegistered > 2)
       {
-         numberOfHigherSteps = Math.min(numberOfFootstepsToConsider - 3, numberOfFootstepsRegistered - 1);
+         numberOfHigherSteps = computeHigherOrderSteps();
          problemSize += 2 * numberOfHigherSteps;
       }
 
@@ -175,6 +179,18 @@ public class TimeAdjustmentSolver
 
       solverInput_Ain.zero();
       solverInput_bin.zero();
+   }
+
+   private int computeHigherOrderSteps()
+   {
+      if (useHigherOrderSteps)
+      {
+         return Math.min(numberOfFootstepsToConsider - 3, numberOfFootstepsRegistered - 1);
+      }
+      else
+      {
+         return 0;
+      }
    }
 
    public void setCurrentInitialTransferGradient(FrameVector gradient)
