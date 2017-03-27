@@ -1,5 +1,8 @@
 package us.ihmc.robotics;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
@@ -679,6 +682,25 @@ public class MathTools
       return value * value * value;
    }
 
+   /**
+    * <p>Rounds to number of significant figures.</p>
+    * 
+    * <p>NOTE: For now, this method creates garbage. A garbage free solution needs to be found.</p>
+    * 
+    * @param value
+    * @param significantFigures
+    * @return Rounded to significant figures.
+    */
+   public static double roundToSignificantFigures(double value, int significantFigures)
+   {
+      if (Math.abs(value) < Double.MIN_VALUE)
+      {
+         return 0.0;
+      }
+   
+      return new BigDecimal(value, new MathContext(significantFigures, RoundingMode.HALF_UP)).doubleValue();
+   }
+
    public static double powWithInteger(double x, int exponent)
    {
       double ret = 1.0;
@@ -763,21 +785,6 @@ public class MathTools
       System.arraycopy(a, 1, b, 0, b.length);
       
       return lcm(a[0], lcm(b));
-   }
-
-   public static double roundToSignificantFigures(double value, int significantFigures)
-   {
-      if (Math.abs(value) < Double.MIN_VALUE)
-      {
-         return 0.0;
-      }
-   
-      final double log10 = Math.ceil(Math.log10(Math.abs(value)));
-      final int power = significantFigures - (int) log10;
-   
-      final double magnitude = Math.pow(10, power);
-      final long shifted = Math.round(value * magnitude);
-      return shifted / magnitude;
    }
 
    public static int orderOfMagnitude(double number)
