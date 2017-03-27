@@ -1,12 +1,12 @@
-package us.ihmc.simulationconstructionset.util.globalParameters;
-
-import static org.junit.Assert.*;
+package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+
+import static org.junit.Assert.assertEquals;
 
 public class DoubleGlobalParameterTest
 {

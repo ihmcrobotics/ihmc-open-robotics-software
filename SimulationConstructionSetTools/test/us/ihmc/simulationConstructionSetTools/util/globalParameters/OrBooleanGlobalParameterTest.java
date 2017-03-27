@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.globalParameters;
+package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
 import static org.junit.Assert.*;
 
