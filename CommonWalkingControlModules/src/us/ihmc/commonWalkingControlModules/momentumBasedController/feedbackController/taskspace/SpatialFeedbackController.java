@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
@@ -166,7 +167,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public void compute()
+   public void computeInverseDynamics()
    {
       if (!isEnabled())
          return;
@@ -189,6 +190,18 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       updateOrientationVisualization();
 
       output.setSpatialAcceleration(desiredSpatialAcceleration);
+   }
+
+   @Override
+   public void computeInverseKinematics()
+   {
+      throw new RuntimeException("Implement me!");
+   }
+
+   @Override
+   public void computeVirtualModelControl()
+   {
+      computeInverseDynamics();
    }
 
    private void updatePositionVisualization()
@@ -240,11 +253,25 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public SpatialAccelerationCommand getOutput()
+   public SpatialAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
       return output;
+   }
+
+   @Override
+   public SpatialVelocityCommand getInverseKinematicsOutput()
+   {
+      if (!isEnabled())
+         throw new RuntimeException("This controller is disabled.");
+      throw new RuntimeException("Implement me!");
+   }
+
+   @Override
+   public SpatialAccelerationCommand getVirtualModelControlOutput()
+   {
+      return getInverseDynamicsOutput();
    }
 
    @Override

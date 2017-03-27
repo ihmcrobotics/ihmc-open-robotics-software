@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -120,7 +121,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public void compute()
+   public void computeInverseDynamics()
    {
       if (!isEnabled())
          return;
@@ -136,6 +137,18 @@ public class PointFeedbackController implements FeedbackControllerInterface
       getBodyFixedPoint(tempPosition);
 
       output.setLinearAcceleration(desiredLinearAcceleration);
+   }
+
+   @Override
+   public void computeInverseKinematics()
+   {
+      throw new RuntimeException("Implement me!");
+   }
+
+   @Override
+   public void computeVirtualModelControl()
+   {
+      computeInverseDynamics();
    }
 
    private void updatePositionVisualization()
@@ -170,10 +183,24 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public PointAccelerationCommand getOutput()
+   public PointAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
       return output;
+   }
+
+   @Override
+   public SpatialVelocityCommand getInverseKinematicsOutput()
+   {
+      if (!isEnabled())
+         throw new RuntimeException("This controller is disabled.");
+      throw new RuntimeException("Implement me!");
+   }
+
+   @Override
+   public PointAccelerationCommand getVirtualModelControlOutput()
+   {
+      return getInverseDynamicsOutput();
    }
 }

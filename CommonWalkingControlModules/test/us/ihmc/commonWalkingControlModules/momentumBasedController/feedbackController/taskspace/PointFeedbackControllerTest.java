@@ -112,8 +112,8 @@ public final class PointFeedbackControllerTest
          twistCalculator.compute();
          geometricJacobianHolder.compute();
 
-         pointFeedbackController.compute();
-         PointAccelerationCommand output = pointFeedbackController.getOutput();
+         pointFeedbackController.computeInverseDynamics();
+         PointAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
 
          motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
@@ -223,8 +223,8 @@ public final class PointFeedbackControllerTest
          twistCalculator.compute();
          geometricJacobianHolder.compute();
 
-         pointFeedbackController.compute();
-         PointAccelerationCommand output = pointFeedbackController.getOutput();
+         pointFeedbackController.computeInverseDynamics();
+         PointAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
          motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
 
          MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
