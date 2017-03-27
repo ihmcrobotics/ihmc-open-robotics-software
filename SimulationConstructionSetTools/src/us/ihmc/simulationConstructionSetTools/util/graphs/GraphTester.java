@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.graphs;
+package us.ihmc.simulationConstructionSetTools.util.graphs;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -9,7 +9,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBuffer.RepeatDataBufferEntryException;
-import us.ihmc.simulationconstructionset.util.graphs.JFreePlot.PlotTypes;
 
 public class GraphTester
 {
@@ -62,13 +61,13 @@ public class GraphTester
          setupData(8);
          JFreePlot plot4 = new JFreePlot(buffer.getEntry(xPlot), buffer.getEntry(yPlot));
          plot1.setColor(Color.GREEN);
-         plot1.setType(PlotTypes.Dot);
+         plot1.setType(JFreePlot.PlotTypes.Dot);
          plot2.setColor(Color.BLUE);
-         plot2.setType(PlotTypes.Dash);
+         plot2.setType(JFreePlot.PlotTypes.Dash);
          plot3.setColor(Color.BLACK);
-         plot3.setType(PlotTypes.Solid);
+         plot3.setType(JFreePlot.PlotTypes.Solid);
          plot4.setColor(Color.RED);
-         plot4.setType(PlotTypes.Dot);
+         plot4.setType(JFreePlot.PlotTypes.Dot);
          JFreeGraph graph = new JFreeGraph("x vs y", "x", "y");
          graph.addPlot(plot1);
 //         graph.addPlot(plot2);

@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.graphs;
+package us.ihmc.simulationConstructionSetTools.util.graphs;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
