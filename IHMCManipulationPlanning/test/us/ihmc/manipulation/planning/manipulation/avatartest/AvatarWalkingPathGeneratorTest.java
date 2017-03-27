@@ -1,4 +1,4 @@
-package us.ihmc.avatar.rrtWalkingpath;
+package us.ihmc.manipulation.planning.manipulation.avatartest;
 
 import static org.junit.Assert.assertTrue;
 

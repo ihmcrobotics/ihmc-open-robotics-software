@@ -48,6 +48,7 @@ dependencies {
     compile group: 'org.ejml', name: 'dense64', version: '0.28'
     compile group: 'org.boofcv', name: 'geo', version: '0.24.1'
 
+	compile ihmc.getProjectDependency(":IHMCAvatarInterfaces")
     compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCCommunication")
@@ -58,9 +59,11 @@ dependencies {
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile ihmc.getProjectDependency(":IHMCHumanoidRobotics")
     compile ihmc.getProjectDependency(":IHMCHumanoidBehaviors")
+    compile ihmc.getProjectDependency(":IHMCWholeBodyController")
     
 
     testCompile ihmc.getProjectTestDependency(":IHMCCommunication")
+    
 }
 
 jar {

@@ -1,4 +1,4 @@
-package us.ihmc.avatar.rrtManipulation;
+package us.ihmc.manipulation.planning.manipulation.avatartest;
 
 import static org.junit.Assert.assertTrue;
 
@@ -39,19 +39,16 @@ import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPoseValidityTest;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
@@ -468,7 +465,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.updateRobotModel();
       
       
-      ThreadTools.sleep(20000);
+      //ThreadTools.sleep(20000);
       
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
@@ -478,66 +475,26 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
       wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
       
+
       drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
-      
       
       // ***************************************************** //
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();      
       wholeBodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      while (true)
-      {
-         ThreadTools.sleep(100);
-         toolboxCommunicator.send(wholeBodyTrajectoryMessage);
-      }
+      SolarPanelPoseValidityTest solarPanelValidityTest = new SolarPanelPoseValidityTest(solarPanel, kinematicsToolBoxController, wholeBodyTrajectoryMessage);
+      
+//      while (true)
+//      {
+//         ThreadTools.sleep(100);
+//         toolboxCommunicator.send(wholeBodyTrajectoryMessage);
+//         break;
+//      }
       
       
       
       
 
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(solarPanelPlanner.getMotionTime());
-//      
-//      
-//      kinematicsToolBoxController.update();
-//      FullHumanoidRobotModel desiredFullRobotModel = kinematicsToolBoxController.getDesiredFullRobotModel();
-//      
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL).getQ());      
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL).getQ());
-//      
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.WRIST_ROLL).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SECOND_WRIST_PITCH).getQ());
-//            
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-//      
-//      OneDoFJoint[] oneDoFJoints = desiredFullRobotModel.getOneDoFJoints();
-//      float[] jointAngles = kinematicsToolBoxController.getSolution().getJointAngles();
-//      PrintTools.info("!!!"+ jointAngles.length);
-//      
-//      for(int i=0;i<jointAngles.length;i++)
-//      {
-//      //   PrintTools.info("!!! "+ oneDoFJoints[i].getName() +" "+oneDoFJoints[i].getQ());
-//      }
-//      
-//      
-//      
-//      for (int i = 0; i < oneDoFJoints.length; i++)
-//      {         
-//         double jointPosition = oneDoFJoints[i].getQ();
-//         Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(oneDoFJoints[i].getName());
-//         if (scsJoint instanceof PinJoint)
-//         {
-//            PinJoint pinJoint = (PinJoint) scsJoint;
-//            pinJoint.setQ(jointPosition);
-//         }
-//         else
-//         {
-//            PrintTools.info(oneDoFJoints[i].getName() + " was not a PinJoint.");
-//         }
-//      }
-//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+
    }
    
    private void setUpSolarPanel()
@@ -630,4 +587,54 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       return ret;
    }
 
+   
+   
+   /*
+    *
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(solarPanelPlanner.getMotionTime());
+//      
+//      
+//      kinematicsToolBoxController.update();
+//      FullHumanoidRobotModel desiredFullRobotModel = kinematicsToolBoxController.getDesiredFullRobotModel();
+//      
+//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW).getQ());
+//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL).getQ());      
+//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH).getQ());
+//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL).getQ());
+//      
+//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH).getQ());
+//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.WRIST_ROLL).getQ());
+//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SECOND_WRIST_PITCH).getQ());
+//            
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+//      
+//      OneDoFJoint[] oneDoFJoints = desiredFullRobotModel.getOneDoFJoints();
+//      float[] jointAngles = kinematicsToolBoxController.getSolution().getJointAngles();
+//      PrintTools.info("!!!"+ jointAngles.length);
+//      
+//      for(int i=0;i<jointAngles.length;i++)
+//      {
+//      //   PrintTools.info("!!! "+ oneDoFJoints[i].getName() +" "+oneDoFJoints[i].getQ());
+//      }
+//      
+//      
+//      
+//      for (int i = 0; i < oneDoFJoints.length; i++)
+//      {         
+//         double jointPosition = oneDoFJoints[i].getQ();
+//         Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(oneDoFJoints[i].getName());
+//         if (scsJoint instanceof PinJoint)
+//         {
+//            PinJoint pinJoint = (PinJoint) scsJoint;
+//            pinJoint.setQ(jointPosition);
+//         }
+//         else
+//         {
+//            PrintTools.info(oneDoFJoints[i].getName() + " was not a PinJoint.");
+//         }
+//      }
+//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
+//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+    * 
+    */
 }
