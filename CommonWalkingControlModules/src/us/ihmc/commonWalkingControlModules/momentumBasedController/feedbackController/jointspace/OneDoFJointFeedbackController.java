@@ -13,7 +13,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class OneDoFJointFeedbackController implements FeedbackControllerInterface
 {
-   private final JointspaceAccelerationCommand output = new JointspaceAccelerationCommand();
+   private final JointspaceAccelerationCommand inverseDynamicsOutput = new JointspaceAccelerationCommand();
+   private final JointspaceVelocityCommand inverseKinematicsOutput = new JointspaceVelocityCommand();
 
    private final OneDoFJoint joint;
 
@@ -24,26 +25,35 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final DoubleYoVariable qDesired;
    private final DoubleYoVariable qDDesired;
+
+   private final DoubleYoVariable qDFeedforward;
    private final DoubleYoVariable qDDFeedforward;
 
    private final DoubleYoVariable qError;
    private final DoubleYoVariable qDError;
 
-   private final DoubleYoVariable maxFeedbackAcceleration;
-   private final DoubleYoVariable maxFeedbackJerk;
+   private final DoubleYoVariable maxFeedback;
+   private final DoubleYoVariable maxFeedbackRate;
 
    private final DoubleYoVariable qDDFeedback;
    private final RateLimitedYoVariable qDDFeedbackRateLimited;
    private final DoubleYoVariable qDDDesired;
    private final DoubleYoVariable qDDAchieved;
 
+   private final DoubleYoVariable qDFeedback;
+   private final RateLimitedYoVariable qDFeedbackRateLimited;
+
    private final DoubleYoVariable kp;
    private final DoubleYoVariable kd;
 
    private final DoubleYoVariable weightForSolver;
 
-   public OneDoFJointFeedbackController(OneDoFJoint joint, double dt, YoVariableRegistry parentRegistry)
+   public OneDoFJointFeedbackController(OneDoFJoint joint, double dt, boolean inverseDynamicsEnabled, boolean inverseKinematicsEnabled,
+                                        boolean virtualModelControlEnabled, YoVariableRegistry parentRegistry)
    {
+      if (!inverseDynamicsEnabled && !inverseKinematicsEnabled && !virtualModelControlEnabled)
+         throw new RuntimeException("Controller core is not properly setup, none of the control modes is enabled.");
+
       String jointName = joint.getName();
       YoVariableRegistry registry = new YoVariableRegistry(jointName + "PDController");
 
@@ -52,29 +62,63 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       isEnabled.set(false);
 
       qCurrent = new DoubleYoVariable("q_" + jointName, registry);
-      qDCurrent = new DoubleYoVariable("qd_" + jointName, registry);
-
       qDesired = new DoubleYoVariable("q_d_" + jointName, registry);
-      qDDesired = new DoubleYoVariable("qd_d_" + jointName, registry);
-      qDDFeedforward = new DoubleYoVariable("qdd_ff_" + jointName, registry);
-
       qError = new DoubleYoVariable("q_err_" + jointName, registry);
-      qDError = new DoubleYoVariable("qd_err_" + jointName, registry);
 
-      maxFeedbackAcceleration = new DoubleYoVariable("qdd_max_fb_" + jointName, registry);
-      maxFeedbackJerk = new DoubleYoVariable("qddd_fb_max_" + jointName, registry);
-      qDDFeedback = new DoubleYoVariable("qdd_fb_" + jointName, registry);
-      qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, registry, maxFeedbackJerk, qDDFeedback, dt);
-      qDDDesired = new DoubleYoVariable("qdd_d_" + jointName, registry);
-      qDDAchieved = new DoubleYoVariable("qdd_achieved_" + jointName, registry);
+      qDDesired = new DoubleYoVariable("qd_d_" + jointName, registry);
+
+      maxFeedback = new DoubleYoVariable("max_fb_" + jointName, registry);
+      maxFeedbackRate = new DoubleYoVariable("max_fb_rate_" + jointName, registry);
 
       kp = new DoubleYoVariable("kp_" + jointName, registry);
-      kd = new DoubleYoVariable("kd_" + jointName, registry);
+
+      if (inverseDynamicsEnabled || virtualModelControlEnabled)
+      {
+         qDCurrent = new DoubleYoVariable("qd_" + jointName, registry);
+         qDError = new DoubleYoVariable("qd_err_" + jointName, registry);
+
+         kd = new DoubleYoVariable("kd_" + jointName, registry);
+
+         qDDFeedforward = new DoubleYoVariable("qdd_ff_" + jointName, registry);
+         qDDFeedback = new DoubleYoVariable("qdd_fb_" + jointName, registry);
+         qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
+         qDDDesired = new DoubleYoVariable("qdd_d_" + jointName, registry);
+         qDDAchieved = new DoubleYoVariable("qdd_achieved_" + jointName, registry);
+      }
+      else
+      {
+         qDCurrent = null;
+         qDError = null;
+
+         kd = null;
+
+         qDDFeedforward = null;
+         qDDFeedback = null;
+         qDDFeedbackRateLimited = null;
+         qDDDesired = null;
+         qDDAchieved = null;
+      }
+
+      if (inverseKinematicsEnabled)
+      {
+         qDFeedforward = new DoubleYoVariable("qd_ff_" + jointName, registry);
+
+         qDFeedback = new DoubleYoVariable("qd_fb_" + jointName, registry);
+         qDFeedbackRateLimited = new RateLimitedYoVariable("qd_fb_rl_" + jointName, registry, maxFeedbackRate, qDDFeedback, dt);
+      }
+      else
+      {
+         qDFeedforward = null;
+
+         qDFeedback = null;
+         qDFeedbackRateLimited = null;
+      }
 
       weightForSolver = new DoubleYoVariable("weight_" + jointName, registry);
       weightForSolver.set(Double.POSITIVE_INFINITY);
 
-      output.addJoint(joint, Double.NaN);
+      inverseDynamicsOutput.addJoint(joint, Double.NaN);
+      inverseKinematicsOutput.addJoint(joint, Double.NaN);
 
       parentRegistry.addChild(registry);
    }
@@ -95,21 +139,23 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    {
       qDesired.set(q_d);
       qDDesired.set(qd_d);
-      qDDFeedforward.set(qdd_feedforward);
+      if (qDFeedforward != null)
+         qDFeedforward.set(qd_d);
+      if (qDDFeedforward != null)
+         qDDFeedforward.set(qdd_feedforward);
    }
 
    public void setGains(PDGainsInterface gains)
    {
       kp.set(gains.getKp());
       kd.set(gains.getKd());
-      maxFeedbackAcceleration.set(gains.getMaximumFeedback());
-      maxFeedbackJerk.set(gains.getMaximumFeedbackRate());
+      maxFeedback.set(gains.getMaximumFeedback());
+      maxFeedbackRate.set(gains.getMaximumFeedbackRate());
    }
 
    public void setWeightForSolver(double weightForSolver)
    {
       this.weightForSolver.set(weightForSolver);
-      output.setWeight(weightForSolver);
    }
 
    @Override
@@ -125,18 +171,33 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
 
       double qdd_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDError.getDoubleValue();
-      qdd_fb = MathTools.clamp(qdd_fb, maxFeedbackAcceleration.getDoubleValue());
+      qdd_fb = MathTools.clamp(qdd_fb, maxFeedback.getDoubleValue());
       qDDFeedback.set(qdd_fb);
       qDDFeedbackRateLimited.update();
 
       qDDDesired.set(qDDFeedforward.getDoubleValue() + qDDFeedbackRateLimited.getDoubleValue());
-      output.setOneDoFJointDesiredAcceleration(0, qDDDesired.getDoubleValue());
+      inverseDynamicsOutput.setOneDoFJointDesiredAcceleration(0, qDDDesired.getDoubleValue());
+      inverseDynamicsOutput.setWeight(0, weightForSolver.getDoubleValue());
    }
 
    @Override
    public void computeInverseKinematics()
    {
-      throw new RuntimeException("Implement me!");
+      if (!isEnabled.getBooleanValue())
+         return;
+
+      qCurrent.set(joint.getQ());
+
+      qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
+
+      double qd_fb = kp.getDoubleValue() * qError.getDoubleValue();
+      qd_fb = MathTools.clamp(qd_fb, maxFeedback.getDoubleValue());
+      qDFeedback.set(qd_fb);
+      qDFeedbackRateLimited.update();
+
+      qDDesired.set(qDFeedforward.getDoubleValue() + qDFeedbackRateLimited.getDoubleValue());
+      inverseKinematicsOutput.setOneDoFJointDesiredVelocity(0, qDDesired.getDoubleValue());
+      inverseKinematicsOutput.setWeight(0, weightForSolver.getDoubleValue());
    }
 
    @Override
@@ -172,7 +233,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return output;
+      return inverseDynamicsOutput;
    }
 
    @Override
@@ -180,7 +241,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      throw new RuntimeException("Implement me!");
+      return inverseKinematicsOutput;
    }
 
    @Override
