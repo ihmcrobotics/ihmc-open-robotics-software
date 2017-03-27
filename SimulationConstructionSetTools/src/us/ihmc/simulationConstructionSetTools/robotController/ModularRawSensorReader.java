@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotController;
+package us.ihmc.simulationConstructionSetTools.robotController;
 
 import java.util.ArrayList;
 import java.util.List;

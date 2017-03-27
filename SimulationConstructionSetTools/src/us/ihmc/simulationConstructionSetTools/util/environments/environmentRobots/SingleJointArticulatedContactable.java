@@ -1,4 +1,4 @@
-package us.ihmc.simulationConstructionSetTools.util.environments;
+package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
 import java.util.ArrayList;
 

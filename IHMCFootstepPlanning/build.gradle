@@ -45,6 +45,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":ConvexOptimizationAdapter")
 	
 	testCompile ihmc.getProjectTestDependency(":SimulationConstructionSet")
+    testCompile ihmc.getProjectTestDependency(":SimulationConstructionSetTools")
     testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 }
 

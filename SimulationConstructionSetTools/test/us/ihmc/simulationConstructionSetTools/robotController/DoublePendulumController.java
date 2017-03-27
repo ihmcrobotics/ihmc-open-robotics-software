@@ -1,11 +1,10 @@
-package us.ihmc.simulationconstructionset.testSimulations;
+package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
 
 public class DoublePendulumController implements MultiThreadedRobotControlElement
 {

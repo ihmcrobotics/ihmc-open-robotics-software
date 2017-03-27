@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.environments;
+package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import java.util.Random;
 
@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.DoNothingController;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.Robot;
@@ -74,7 +75,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
       for (int i = 0; i < numBoxes / 3; i++)
       {
          ContactableSelectableBoxRobot newBox = new ContactableSelectableBoxRobot("box" + i, (random.nextDouble() * boxSize) + 0.001,
-                                                   (random.nextDouble() * boxSize) + 0.001, (random.nextDouble() * boxSize) + 0.001, 5.0);
+                                                                                  (random.nextDouble() * boxSize) + 0.001, (random.nextDouble() * boxSize) + 0.001, 5.0);
 
          DoNothingController controller = new DoNothingController();
          newBox.setController(controller);

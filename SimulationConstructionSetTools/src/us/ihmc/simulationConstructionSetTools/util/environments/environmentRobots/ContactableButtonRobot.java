@@ -1,4 +1,4 @@
-package us.ihmc.simulationConstructionSetTools.util.environments;
+package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;

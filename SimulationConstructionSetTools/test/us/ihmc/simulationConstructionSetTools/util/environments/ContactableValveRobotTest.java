@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.environments;
+package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import static org.junit.Assert.*;
 
@@ -21,13 +21,14 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SliderJoint;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.robotController.ContactController;
+import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.thread.ThreadTools;

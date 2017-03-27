@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotController;
+package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;

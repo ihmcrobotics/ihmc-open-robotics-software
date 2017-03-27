@@ -1,7 +1,6 @@
-package us.ihmc.simulationconstructionset.testSimulations;
+package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotController;
 
 public class TestMultiThreadedSimulation
 {
