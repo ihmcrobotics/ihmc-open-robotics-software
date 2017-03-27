@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotcommprotocol;
+package us.ihmc.simulationconstructionset.gui;
 
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;

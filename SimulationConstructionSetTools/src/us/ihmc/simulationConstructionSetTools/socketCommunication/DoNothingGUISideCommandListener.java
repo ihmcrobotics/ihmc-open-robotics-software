@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotcommprotocol;
+package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import java.util.ArrayList;
 

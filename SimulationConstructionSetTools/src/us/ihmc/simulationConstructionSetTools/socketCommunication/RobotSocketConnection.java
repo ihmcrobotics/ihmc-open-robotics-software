@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotcommprotocol;
+package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -12,6 +12,7 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.NewDataListener;
 import us.ihmc.simulationconstructionset.gui.YoEntryBox;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
+import us.ihmc.simulationconstructionset.gui.RegistrySettingsChangedListener;
 
 public class RobotSocketConnection implements RobotConnection, VariableChangedListener, DoDisconnectListener, RegistrySettingsChangedListener
 {
