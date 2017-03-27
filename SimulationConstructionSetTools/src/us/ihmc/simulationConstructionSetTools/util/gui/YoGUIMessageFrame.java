@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.gui;
+package us.ihmc.simulationConstructionSetTools.util.gui;
 
 
 import java.awt.BorderLayout;
@@ -15,14 +15,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.util.globalParameters.BooleanGlobalParameter;
-import us.ihmc.simulationconstructionset.util.globalParameters.DoubleGlobalParameter;
-import us.ihmc.simulationconstructionset.util.globalParameters.EnumGlobalParameter;
-import us.ihmc.simulationconstructionset.util.globalParameters.GlobalParameter;
-import us.ihmc.simulationconstructionset.util.globalParameters.GlobalParameterChangedListener;
-import us.ihmc.simulationconstructionset.util.globalParameters.IntGlobalParameter;
-
-
+import us.ihmc.simulationConstructionSetTools.util.globalParameters.BooleanGlobalParameter;
+import us.ihmc.simulationConstructionSetTools.util.globalParameters.DoubleGlobalParameter;
+import us.ihmc.simulationConstructionSetTools.util.globalParameters.EnumGlobalParameter;
+import us.ihmc.simulationConstructionSetTools.util.globalParameters.GlobalParameter;
+import us.ihmc.simulationConstructionSetTools.util.globalParameters.GlobalParameterChangedListener;
+import us.ihmc.simulationConstructionSetTools.util.globalParameters.IntGlobalParameter;
 
 /**
  * <p>Title: </p>
