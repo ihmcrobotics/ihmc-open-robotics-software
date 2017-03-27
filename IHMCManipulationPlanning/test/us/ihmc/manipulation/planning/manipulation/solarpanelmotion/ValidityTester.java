@@ -1,6 +1,6 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
-public interface ValidityTest
+public interface ValidityTester
 {
    public abstract boolean isValid();
    
