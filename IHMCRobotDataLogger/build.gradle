@@ -71,7 +71,7 @@ dependencies {
    compile group: 'us.ihmc', name: 'IHMCJavaDecklinkCapture', version: '0.1.7'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
    compile group: 'org.tukaani', name: 'xz', version: '1.5'
-   compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.2'
+   compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.2.1'
    compile group: 'us.ihmc', name: 'IHMCPubSubSerializersExtra', version: '0.2'
    
    compile ihmc.getProjectDependency(":ModelFileLoader")
