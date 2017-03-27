@@ -39,6 +39,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -229,7 +230,6 @@ public class KinematicsToolboxController extends ToolboxController
             desiredHandPoses.put(robotSide, desiredPose);
             DenseMatrix64F selectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
             handSelectionMatrices.put(robotSide, selectionMatrix);
-
          }
       }
 
@@ -240,6 +240,13 @@ public class KinematicsToolboxController extends ToolboxController
          command.getLastTrajectoryPoint().getOrientation(desiredChestOrientation);
          desiredChestOrientationReference.set(desiredChestOrientation);
          chestSelectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
+      }
+
+      if (commandInputManager.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
+      {
+         PelvisHeightTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisHeightTrajectoryCommand.class);
+         double desiredHeight = command.getLastTrajectoryPoint().getPosition();
+         desiredPelvisHeight.set(desiredHeight);
       }
 
       if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
@@ -385,7 +392,6 @@ public class KinematicsToolboxController extends ToolboxController
          spatialVelocityCommand.setWeight(pelvisHeightWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
-      
       
       ret.addCommand(privilegedConfigurationCommandReference.getAndSet(null));
 
