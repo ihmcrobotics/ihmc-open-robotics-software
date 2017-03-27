@@ -74,6 +74,10 @@ public class WholeBodyControlCoreToolbox
    private InverseDynamicsQPBoundCalculator qpBoundCalculator;
    private WrenchMatrixCalculator wrenchMatrixCalculator;
 
+   private boolean enableInverseDynamicsModule = false;
+   private boolean enableInverseKinematicsModule = false;
+   private boolean enableVirtualModelControlModule = false;
+
    /**
     * Creates a new toolbox with the required parameters for running any of the controller core
     * modules.
@@ -91,6 +95,8 @@ public class WholeBodyControlCoreToolbox
     * <li>{@link #setupForVirtualModelControlSolver(RigidBody, RigidBody[])} to complete the
     * parameters necessary and sufficient to run the virtual model control module.
     * </ul>
+    * Calling these methods will also notice the {@link WholeBodyControllerCore} at construction
+    * time which module is to be created.
     * </p>
     * 
     * @param controlDT duration of one control tick.
@@ -153,28 +159,43 @@ public class WholeBodyControlCoreToolbox
    }
 
    /**
-    * Adds the missing information necessary to enable the inverse dynamics module.
+    * Adds the missing information necessary to enable the inverse dynamics module and notices the
+    * {@link WholeBodyControllerCore} at construction time that the inverse dynamics module has to
+    * be created.
+    * <p>
+    * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
+    * </p>
     * 
     * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot
     *           weight.
     */
    public void setupForInverseDynamicsSolver(List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
+      enableInverseDynamicsModule = true;
       // TODO add tools specific to the inverse dynamics module here.
       this.contactablePlaneBodies = contactablePlaneBodies;
    }
 
    /**
-    * This method is empty at the moment but will be modified when specific parameters to the
-    * inverse kinematics module are added.
+    * Notices the {@link WholeBodyControllerCore} at construction time that the inverse kinematics
+    * module has to be created.
+    * <p>
+    * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
+    * </p>
     */
    public void setupForInverseKinematicsSolver()
    {
+      enableInverseKinematicsModule = true;
       // TODO add tools specific to the inverse kinematics module here.
    }
 
    /**
-    * Adds the missing information necessary to enable the inverse dynamics module.
+    * Adds the missing information necessary to enable the virtual model control module and notices
+    * the {@link WholeBodyControllerCore} at construction time that the virtual model control module
+    * has to be created.
+    * <p>
+    * WARNING: This method has be to called BEFORE creating the {@link WholeBodyControllerCore}.
+    * </p>
     * 
     * @param vmcMainBody the main rigid-body of the robot.
     * @param controlledBodies the set of rigid-bodies that are to be controllable.
@@ -184,10 +205,44 @@ public class WholeBodyControlCoreToolbox
    public void setupForVirtualModelControlSolver(RigidBody vmcMainBody, RigidBody[] controlledBodies,
                                                  List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
+      enableVirtualModelControlModule = true;
       // TODO add tools specific to the virtual model control module here.
       this.vmcMainBody = vmcMainBody;
       this.controlledBodies = controlledBodies;
       this.contactablePlaneBodies = contactablePlaneBodies;
+   }
+
+   /**
+    * Informs whereas the inverse dynamics module is setup for the controller core using this
+    * toolbox.
+    * 
+    * @return {@code true} if the inverse dynamics module is setup, {@code false} otherwise.
+    */
+   public boolean isEnableInverseDynamicsModule()
+   {
+      return enableInverseDynamicsModule;
+   }
+
+   /**
+    * Informs whereas the inverse kinematics module is setup for the controller core using this
+    * toolbox.
+    * 
+    * @return {@code true} if the inverse kinematics module is setup, {@code false} otherwise.
+    */
+   public boolean isEnableInverseKinematicsModule()
+   {
+      return enableInverseKinematicsModule;
+   }
+
+   /**
+    * Informs whereas the virtual model control module is setup for the controller core using this
+    * toolbox.
+    * 
+    * @return {@code true} if the virtual model control module is setup, {@code false} otherwise.
+    */
+   public boolean isEnableVirtualModelControlModule()
+   {
+      return enableVirtualModelControlModule;
    }
 
    public MotionQPInputCalculator getMotionQPInputCalculator()

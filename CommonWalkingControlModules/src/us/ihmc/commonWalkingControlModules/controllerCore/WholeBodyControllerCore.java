@@ -42,23 +42,17 @@ public class WholeBodyControllerCore
 
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
    {
-      this(toolbox, allPossibleCommands, true, true, true, parentRegistry);
-   }
-
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, boolean setupInverseDynamics,
-                                  boolean setupInverseKinematics, boolean setupVirtualModelControl, YoVariableRegistry parentRegistry)
-   {
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
 
-      if (setupInverseDynamics)
+      if (toolbox.isEnableInverseDynamicsModule())
          inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       else
          inverseDynamicsSolver = null;
-      if (setupInverseKinematics)
+      if (toolbox.isEnableInverseKinematicsModule())
          inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
       else
          inverseKinematicsSolver = null;
-      if (setupVirtualModelControl)
+      if (toolbox.isEnableVirtualModelControlModule())
          virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
       else
          virtualModelControlSolver = null;
