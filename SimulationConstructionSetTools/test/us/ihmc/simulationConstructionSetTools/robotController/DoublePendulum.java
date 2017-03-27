@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.testSimulations;
+package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;

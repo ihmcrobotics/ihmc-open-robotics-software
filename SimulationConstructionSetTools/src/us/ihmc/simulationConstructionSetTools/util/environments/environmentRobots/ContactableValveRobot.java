@@ -1,4 +1,4 @@
-package us.ihmc.simulationConstructionSetTools.util.environments;
+package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
 import java.util.ArrayList;
 
@@ -25,6 +25,9 @@ import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
+import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
+import us.ihmc.simulationConstructionSetTools.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;

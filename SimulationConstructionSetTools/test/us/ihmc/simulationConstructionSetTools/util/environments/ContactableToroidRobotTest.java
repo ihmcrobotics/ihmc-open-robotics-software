@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.environments;
+package us.ihmc.simulationConstructionSetTools.util.environments;
 
 import static org.junit.Assert.*;
 
@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.random.RandomGeometry;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableToroidRobot;
 
 public class ContactableToroidRobotTest
 {

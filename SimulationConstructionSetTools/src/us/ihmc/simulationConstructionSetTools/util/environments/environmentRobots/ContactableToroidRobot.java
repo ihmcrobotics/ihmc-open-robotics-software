@@ -1,4 +1,4 @@
-package us.ihmc.simulationConstructionSetTools.util.environments;
+package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -25,6 +25,8 @@ import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
+import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
+import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
 import us.ihmc.simulationconstructionset.Link;

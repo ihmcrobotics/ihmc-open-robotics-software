@@ -1,4 +1,4 @@
-package us.ihmc.atlas.environments;
+package us.ihmc.avatar.environments;
 
 import java.util.List;
 

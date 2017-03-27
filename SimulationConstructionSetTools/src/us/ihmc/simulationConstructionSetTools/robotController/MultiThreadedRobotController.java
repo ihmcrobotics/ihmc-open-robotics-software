@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotController;
+package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.robotics.dataStructures.listener.RewoundListener;
 import us.ihmc.simulationconstructionset.PlayCycleListener;

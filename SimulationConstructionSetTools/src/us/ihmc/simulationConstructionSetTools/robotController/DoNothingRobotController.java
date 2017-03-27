@@ -1,12 +1,11 @@
-package us.ihmc.simulationconstructionset.robotController;
+package us.ihmc.simulationConstructionSetTools.robotController;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 
-public abstract class SimpleRobotController implements RobotController
+public class DoNothingRobotController implements RobotController
 {
-   private final String name = getClass().getSimpleName();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoVariableRegistry registry = new YoVariableRegistry("DoNothing");
 
    @Override
    public void initialize()
@@ -22,15 +21,18 @@ public abstract class SimpleRobotController implements RobotController
    @Override
    public String getName()
    {
-      return name;
+      return "DoNothing";
    }
 
    @Override
    public String getDescription()
    {
-      return name;
+      return getName();
    }
 
    @Override
-   abstract public void doControl();
+   public void doControl()
+   {
+   }
+
 }

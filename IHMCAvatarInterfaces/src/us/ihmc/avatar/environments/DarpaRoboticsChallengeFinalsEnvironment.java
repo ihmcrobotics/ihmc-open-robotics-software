@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.environments;
+package us.ihmc.avatar.environments;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,16 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.simulationConstructionSetTools.util.environments.*;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableCylinderRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableDoorRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableValveRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.robotController.ContactController;
+import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment.BLOCKTYPE;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
@@ -101,7 +104,7 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
 
       RigidBodyTransform initialDrillTransform = new RigidBodyTransform(new AxisAngle(), tableCenter);
       ContactableCylinderRobot drillRobot = new ContactableCylinderRobot("drill", initialDrillTransform, drillRadius, drillHeight, drillMass,
-            "models/drill.obj");
+                                                                         "models/drill.obj");
       final int groundContactGroupIdentifier = 0;
       drillRobot.createAvailableContactPoints(groundContactGroupIdentifier, 30, forceVectorScale, true);
       for (int i = 0; i < 4; i++)
@@ -228,14 +231,14 @@ public class DarpaRoboticsChallengeFinalsEnvironment implements CommonAvatarEnvi
 
       double[][] blockAngle = new double[nBlocksLong][nBlocksWide];
       int[][] blockHeight = new int[nBlocksLong][nBlocksWide];
-      BLOCKTYPE[][] blockType = new BLOCKTYPE[nBlocksLong][nBlocksWide];
+      DefaultCommonAvatarEnvironment.BLOCKTYPE[][] blockType = new DefaultCommonAvatarEnvironment.BLOCKTYPE[nBlocksLong][nBlocksWide];
       for (int i = 0; i < nBlocksLong; i++)
       {
          for (int j = 0; j < nBlocksWide; j++)
          {
             blockHeight[i][j] = -1; // (int) Math.round(Math.random()*4-1);
             blockAngle[i][j] = 0; // (int) Math.round(Math.random()*3)*45;
-            blockType[i][j] = BLOCKTYPE.ANGLED;
+            blockType[i][j] = DefaultCommonAvatarEnvironment.BLOCKTYPE.ANGLED;
          }
       }
 
