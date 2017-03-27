@@ -59,8 +59,7 @@ public class VirtualModelControlOptimizationControlModule
 
    private final boolean useMomentumQP;
 
-   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, boolean useMomentumQP,
-         YoVariableRegistry parentRegistry)
+   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, boolean useMomentumQP, YoVariableRegistry parentRegistry)
    {
       this.useMomentumQP = useMomentumQP;
       jointsToOptimizeFor = toolbox.getJointIndexHandler().getIndexedJoints();
@@ -91,7 +90,7 @@ public class VirtualModelControlOptimizationControlModule
          achievedAngularMomentumRate = null;
       }
 
-      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
+      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       parentRegistry.addChild(registry);
    }

@@ -85,7 +85,7 @@ public class WholeBodyInverseDynamicsSolver
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
-      rootJoint = toolbox.getRobotRootJoint();
+      rootJoint = toolbox.getRootJoint();
       inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, registry);
 

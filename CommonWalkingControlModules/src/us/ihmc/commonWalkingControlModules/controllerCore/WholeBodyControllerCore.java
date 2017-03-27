@@ -65,7 +65,7 @@ public class WholeBodyControllerCore
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      FloatingInverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
