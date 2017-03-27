@@ -132,7 +132,11 @@ public class WholeBodyFeedbackController
             continue;
 
          double controlDT = coreToolbox.getControlDT();
-         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, controlDT, registry);
+         boolean inverseDynamicsEnabled = coreToolbox.isEnableInverseDynamicsModule();
+         boolean inverseKinematicsEnabled = coreToolbox.isEnableInverseKinematicsModule();
+         boolean virtualModelControlEnabled = coreToolbox.isEnableVirtualModelControlModule();
+         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, controlDT, inverseDynamicsEnabled, inverseKinematicsEnabled,
+                                                                                      virtualModelControlEnabled, registry);
          oneDoFJointFeedbackControllerMap.put(joint, controller);
          allControllers.add(controller);
       }
