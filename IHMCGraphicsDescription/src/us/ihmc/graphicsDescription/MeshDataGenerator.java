@@ -214,14 +214,14 @@ public class MeshDataGenerator
     * @param ccwOrderedConvexPolygonPoints the counter-clockwise-ordered vertices of the polygon.
     * @return the created triangle mesh.
     */
-   public static MeshDataHolder Polygon(RigidBodyTransform polygonTransformToWorld, List<Point2D> ccwOrderedConvexPolygonPoints)
+   public static MeshDataHolder Polygon(RigidBodyTransform polygonTransformToWorld, List<? extends Point2DReadOnly> ccwOrderedConvexPolygonPoints)
    {
       Point3D32[] points = new Point3D32[ccwOrderedConvexPolygonPoints.size()];
       int reverseIndex = ccwOrderedConvexPolygonPoints.size();
       for (int i = 0; i < ccwOrderedConvexPolygonPoints.size(); i++)
       {
-         Point2D vertex = ccwOrderedConvexPolygonPoints.get(--reverseIndex);
-         points[i] = new Point3D32((float) vertex.getX(), (float) vertex.getY(), 0.0f);
+         Point2DReadOnly vertex = ccwOrderedConvexPolygonPoints.get(--reverseIndex);
+         points[i] = new Point3D32(vertex.getX32(), vertex.getY32(), 0.0f);
          polygonTransformToWorld.transform(points[i]);
       }
 
