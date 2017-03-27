@@ -133,6 +133,7 @@ public class TwistCalculator
     * predecessor to the parent joint. The twist of the predecessor is updated in the same manner.
     * This is done recursively until the predecessor has an up-to-date twist or is the root body.
     * </p>
+    * 
     * @param body the rigid-body to get the twist of.
     * @param twistToPack the twist of the {@code body} to pack. Modified.
     */
@@ -165,6 +166,7 @@ public class TwistCalculator
     * b2</sup><sub>i</sub> </br>
     * with 'b1' being the {@code base}, 'b2' the {@code body}, and 'i' the {@code inertialFrame}.
     * </p>
+    * 
     * @param base the rigid-body with respect to which the twist is to be computed.
     * @param body the rigid-body to compute the twist of.
     * @param twistToPack the twist of the {@code body} relative to the {@code base}. Modified.
@@ -175,6 +177,45 @@ public class TwistCalculator
       twistForGetRelativeTwist.set(computeOrGetTwistOfBody(base));
       twistForGetRelativeTwist.changeFrame(twistToPack.getExpressedInFrame());
       twistToPack.sub(twistForGetRelativeTwist);
+   }
+
+   /**
+    * Temporary twist used for intermediate garbage free operations. To use only in the method
+    * {@link #getAngularVelocityOfBody(RigidBody, FrameVector)}.
+    */
+   private final Twist twistForGetAngularVelocityOfBody = new Twist();
+
+   /**
+    * Computes and packs the angular velocity of the given {@code body} with respect to
+    * {@code inertialFrame}.
+    * <p>
+    * The result will be the angular velocity of {@code body.getBodyFixedFrame()} with respect to
+    * {@code inertialFrame} expressed in {@code body.getBodyFixedFrame()}.
+    * </p>
+    * 
+    * @param body the rigid-body to compute the angular velocity of.
+    * @param angularVelocityToPack the angular velocity of the given {@code body}. Modified.
+    */
+   public void getAngularVelocityOfBody(RigidBody body, FrameVector angularVelocityToPack)
+   {
+      getTwistOfBody(body, twistForGetAngularVelocityOfBody);
+      twistForGetAngularVelocityOfBody.getAngularPart(angularVelocityToPack);
+   }
+
+   /**
+    * Computes and packs the angular velocity of the given {@code body} with respect to the given {@code base}.
+    * <p>
+    * The result will be the angular velocity of {@code body.getBodyFixedFrame()} with respect to {@code base.getBodyFixedFrame()} expressed in {@code body.getBodyFixedFrame()}.
+    * </p>
+    * 
+    * @param base the rigid-body with respect to which the angular velocity is to be computed.
+    * @param body the rigid-body to compute the angular velocity of.
+    * @param angularVelocityToPack the angular velocity of {@code body} relative to the {@code base}. Modified.
+    */
+   public void getRelativeAngularVelocity(RigidBody base, RigidBody body, FrameVector angularVelocityToPack)
+   {
+      getRelativeTwist(base, body, twistForGetAngularVelocityOfBody);
+      twistForGetAngularVelocityOfBody.getAngularPart(angularVelocityToPack);
    }
 
    /**
@@ -195,6 +236,7 @@ public class TwistCalculator
     * The result will be the linear velocity of the {@code bodyFixedPoint} with respect to the
     * {@code inertialFrame}. The vector is expressed in {@code inertialFrame}.
     * </p>
+    * 
     * @param body the rigid-body to which {@code bodyFixedPoint} is attached to.
     * @param bodyFixedPoint the coordinates of the point attached to {@code body} that linear
     *           velocity is to be computed. Not modified.
@@ -223,6 +265,7 @@ public class TwistCalculator
     * The result will be the linear velocity of the {@code bodyFixedPoint} with respect to the
     * {@code base.getBodyFixedFrame()}. The vector is expressed in {@code base.getBodyFixedFrame()}.
     * </p>
+    * 
     * @param base the rigid-body with respect to which the linear velocity is to be computed.
     * @param body the rigid-body to which {@code bodyFixedPoint} is attached to.
     * @param bodyFixedPoint the coordinates of the point attached to {@code body} that linear
