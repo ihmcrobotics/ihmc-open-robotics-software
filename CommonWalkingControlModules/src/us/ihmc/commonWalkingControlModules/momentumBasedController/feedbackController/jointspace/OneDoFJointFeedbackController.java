@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.controllers.PDGainsInterface;
@@ -112,7 +113,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public void compute()
+   public void computeInverseDynamics()
    {
       if (!isEnabled.getBooleanValue())
          return;
@@ -130,6 +131,18 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       qDDDesired.set(qDDFeedforward.getDoubleValue() + qDDFeedbackRateLimited.getDoubleValue());
       output.setOneDoFJointDesiredAcceleration(0, qDDDesired.getDoubleValue());
+   }
+
+   @Override
+   public void computeInverseKinematics()
+   {
+      throw new RuntimeException("Implement me!");
+   }
+
+   @Override
+   public void computeVirtualModelControl()
+   {
+      computeInverseDynamics();
    }
 
    @Override
@@ -155,10 +168,24 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public JointspaceAccelerationCommand getOutput()
+   public JointspaceAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
       return output;
+   }
+
+   @Override
+   public JointspaceVelocityCommand getInverseKinematicsOutput()
+   {
+      if (!isEnabled())
+         throw new RuntimeException("This controller is disabled.");
+      throw new RuntimeException("Implement me!");
+   }
+
+   @Override
+   public JointspaceAccelerationCommand getVirtualModelControlOutput()
+   {
+      return getVirtualModelControlOutput();
    }
 }
