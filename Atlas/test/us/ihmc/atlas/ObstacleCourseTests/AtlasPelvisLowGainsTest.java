@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST, IntegrationCategory.VIDEO})
 public class AtlasPelvisLowGainsTest extends DRCPelvisLowGainsTest

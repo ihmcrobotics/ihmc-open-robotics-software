@@ -8,7 +8,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionsettools.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 
 public class TestIMUKalmanFilterSimulationJerryOne
 {

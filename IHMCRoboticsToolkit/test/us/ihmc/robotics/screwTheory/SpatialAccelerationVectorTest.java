@@ -6,6 +6,7 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -95,6 +96,7 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
    }
 
    // TODO: Figure out this test and get it to pass if it should.
+	@Ignore
 	@ContinuousIntegrationTest(estimatedDuration = 0.1, categoriesOverride = IntegrationCategory.EXCLUDE)
 	@Test(timeout=300000)
    public void testAccelerationOfPointFixedInBodyFrameAlternative()

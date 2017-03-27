@@ -701,8 +701,8 @@ public class MathToolsTest
       System.out.println("Double.MAX_VALUE: " + Double.MAX_VALUE);
       System.out.println("Integer.MAX_VALUE: " + Integer.MAX_VALUE);
       // test the limits
-      assertEquals("not equal", 1.0000000000000001E-307, MathTools.roundToSignificantFigures(1e-307, 0), 0.0);
-      assertEquals("not equal", 0.0, MathTools.roundToSignificantFigures(1.79e-308, 0), 0.0);
+      assertEquals("not equal", 1.0E-307, MathTools.roundToSignificantFigures(1e-307, 0), 0.0);
+      assertEquals("not equal", 1.79e-308, MathTools.roundToSignificantFigures(1.79e-308, 0), 0.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

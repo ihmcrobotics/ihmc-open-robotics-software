@@ -46,7 +46,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionsettools.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
 {
