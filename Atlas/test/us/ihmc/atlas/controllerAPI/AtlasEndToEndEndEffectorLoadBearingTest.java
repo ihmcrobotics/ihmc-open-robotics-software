@@ -4,7 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.controllerAPI.EndToEndEndEffectorLoadBearingMessageTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasEndToEndEndEffectorLoadBearingTest extends EndToEndEndEffectorLoadBearingMessageTest
 {

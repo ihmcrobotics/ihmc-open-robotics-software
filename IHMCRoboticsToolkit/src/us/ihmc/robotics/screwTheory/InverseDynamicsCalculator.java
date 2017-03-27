@@ -51,11 +51,11 @@ public class InverseDynamicsCalculator
          List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms, TwistCalculator twistCalculator)
    {
       this(inertialFrame, externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(twistCalculator.getRootBody(), inertialFrame, rootAcceleration,
-            twistCalculator, doVelocityTerms, doAccelerationTerms, true), twistCalculator, doVelocityTerms);
+            twistCalculator, doVelocityTerms, doAccelerationTerms, true), twistCalculator);
    }
 
    public InverseDynamicsCalculator(ReferenceFrame inertialFrame, HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
-         SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator, boolean doVelocityTerms)
+         SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator)
    {
       this.rootBody = twistCalculator.getRootBody();
       this.externalWrenches = new LinkedHashMap<RigidBody, Wrench>(externalWrenches);
@@ -63,7 +63,7 @@ public class InverseDynamicsCalculator
       this.twistCalculator = twistCalculator;
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
 
-      this.doVelocityTerms = doVelocityTerms;
+      this.doVelocityTerms = spatialAccelerationCalculator.areVelocitiesConsidered();
 
       populateMapsAndLists();
 

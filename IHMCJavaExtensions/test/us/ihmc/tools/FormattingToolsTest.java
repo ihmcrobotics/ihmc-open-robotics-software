@@ -13,7 +13,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.MathTools;
 
 public class FormattingToolsTest
 {
@@ -84,32 +83,25 @@ public class FormattingToolsTest
    }
 	
 	@ContinuousIntegrationTest(estimatedDuration = 0.1)
-   @Test(timeout = 30000)
+   @Test(timeout = 3000000)
    public void testFormatToSignificantFigures()
    {
-      assertEquals("not equal", 100, MathTools.roundToSignificantFigures(123.45, 1), 1e-12);
-      assertEquals("not equal", 120, MathTools.roundToSignificantFigures(123.45, 2), 1e-12);
-      
-      ByteArrayOutputStream byteArrayOutputStream;
-      PrintStream systemOut;
-      
-      byteArrayOutputStream = new ByteArrayOutputStream();
-      systemOut = System.out;
+      testFormatToPrecision(123.45, 0.01, 1, "100");
+      testFormatToPrecision(123.45, 0.01, 2, "120");
+      testFormatToPrecision(0.01000000000001, 0.01, 2, "0.01");
+      testFormatToPrecision(-8000000.0000000065, 999999.999999999, 2, "-8000000");
+   }
+
+   private void testFormatToPrecision(double value, double precision, int significantFigures, String expectedString)
+   {
+      ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      PrintStream systemOut = System.out;
       System.setOut(new PrintStream(byteArrayOutputStream));
-      System.out.println(FormattingTools.getFormattedToPrecision(0.00000000000001, 0.01, 2));
+      System.out.println(FormattingTools.getFormattedToPrecision(value, precision, significantFigures));
       System.out.flush();
       System.setOut(systemOut);
       System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
-      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", "0\r\n", byteArrayOutputStream.toString());
-      
-      byteArrayOutputStream = new ByteArrayOutputStream();
-      systemOut = System.out;
-      System.setOut(new PrintStream(byteArrayOutputStream));
-      System.out.println(FormattingTools.getFormattedToPrecision(0.01000000000001, 0.01, 2));
-      System.out.flush();
-      System.setOut(systemOut);
-      System.out.println("ByteArrayOutputStream.toString(): " + byteArrayOutputStream.toString());
-      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", "0.01\r\n", byteArrayOutputStream.toString());
+      assertEquals("FormattingTools.getFormattedToSignificantFigures didn't work.", expectedString + "\r\n", byteArrayOutputStream.toString());
    }
 	
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

@@ -4,7 +4,7 @@ import us.ihmc.avatar.IHMCROSAPIPacketTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.simulationconstructionsettools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 
 @ContinuousIntegrationPlan(categories=IntegrationCategory.IN_DEVELOPMENT)

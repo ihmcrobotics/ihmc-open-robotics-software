@@ -6,7 +6,7 @@ import us.ihmc.quadrupedRobotics.controller.force.QuadrupedForceControllerState;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerRequestedEvent;
 import us.ihmc.quadrupedRobotics.controller.position.QuadrupedPositionControllerState;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
-import us.ihmc.simulationconstructionsettools.util.simulationrunner.GoalOrientedTestConductor;
+import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 
 public class QuadrupedTestBehaviors
 {

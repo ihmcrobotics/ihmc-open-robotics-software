@@ -16,7 +16,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
-import us.ihmc.simulationconstructionsettools.dataExporter.TorqueSpeedDataExporter;
+import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporter;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
