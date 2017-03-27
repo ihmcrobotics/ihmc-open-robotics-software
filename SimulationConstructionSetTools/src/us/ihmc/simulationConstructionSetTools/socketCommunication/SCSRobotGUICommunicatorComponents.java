@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotcommprotocol;
+package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

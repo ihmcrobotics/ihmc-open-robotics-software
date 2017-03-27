@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotcommprotocol.commandrecorders;
+package us.ihmc.simulationConstructionSetTools.socketCommunication.commandrecorders;
 
 import java.awt.Container;
 

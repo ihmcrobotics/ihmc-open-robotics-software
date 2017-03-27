@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotcommprotocol;
+package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +11,8 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.DataBuffer;
+import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
+import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
 
 public class GUISideCommandListener implements GUISideAbstractCommandListener
 {

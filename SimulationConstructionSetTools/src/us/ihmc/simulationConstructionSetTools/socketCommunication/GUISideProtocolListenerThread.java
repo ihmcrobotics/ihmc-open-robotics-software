@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.robotcommprotocol;
+package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
