@@ -300,15 +300,25 @@ public class SpatialAccelerationCalculator
     */
    public void getRelativeAcceleration(RigidBody base, RigidBody body, SpatialAccelerationVector accelerationToPack)
    {
-      twistCalculator.getRelativeTwist(body, base, twistOfCurrentWithRespectToNew);
-      twistOfCurrentWithRespectToNew.changeFrame(base.getBodyFixedFrame());
-
-      twistCalculator.getTwistOfBody(base, twistOfBodyWithRespectToBase);
+      ReferenceFrame baseFrame = base.getBodyFixedFrame();
+      ReferenceFrame bodyFrame = body.getBodyFixedFrame();
 
       getAccelerationOfBody(base, baseAcceleration);
       getAccelerationOfBody(body, accelerationToPack);
 
-      baseAcceleration.changeFrame(accelerationToPack.getExpressedInFrame(), twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
+      if (doVelocityTerms)
+      {
+         twistCalculator.getRelativeTwist(body, base, twistOfCurrentWithRespectToNew);
+         twistOfCurrentWithRespectToNew.changeFrame(baseFrame);
+         twistCalculator.getTwistOfBody(base, twistOfBodyWithRespectToBase);
+         
+         baseAcceleration.changeFrame(bodyFrame, twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
+      }
+      else
+      {
+         baseAcceleration.changeFrameNoRelativeMotion(bodyFrame);
+      }
+
       accelerationToPack.sub(baseAcceleration);
    }
 
@@ -354,21 +364,28 @@ public class SpatialAccelerationCalculator
       FramePoint localPoint = pointForGetLinearAccelerationOfBodyFixedPoint;
       Twist localTwist = twistForGetLinearAccelerationOfBodyFixedPoint;
       SpatialAccelerationVector localAcceleration = accelerationForGetLinearAccelerationOfBodyFixedPoint;
+      ReferenceFrame baseFrame = base.getBodyFixedFrame();
 
-      getRelativeAcceleration(base, body, localAcceleration);
-
-      ReferenceFrame baseFrame = localAcceleration.getBaseFrame();
-      twistCalculator.getRelativeTwist(base, body, localTwist);
       localPoint.setIncludingFrame(bodyFixedPoint);
+      localPoint.changeFrame(baseFrame);
+
+      if (doVelocityTerms)
+      {
+         twistCalculator.getRelativeTwist(base, body, localTwist);
+         localTwist.changeFrame(baseFrame);
+      }
+      else
+      {
+         localTwist.setToZero(body.getBodyFixedFrame(), baseFrame, baseFrame);
+      }
 
       /*
        * By changing the expressedInFrame from bodyFrame to baseFrame, there is no need to use the
        * more expensive changeFrame(ReferenceFrame, Twist, Twist).
        */
+      getRelativeAcceleration(base, body, localAcceleration);
       localAcceleration.getExpressedInFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
       localAcceleration.changeFrameNoRelativeMotion(baseFrame);
-      localTwist.changeFrame(baseFrame);
-      localPoint.changeFrame(baseFrame);
 
       localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
    }
@@ -399,18 +416,25 @@ public class SpatialAccelerationCalculator
 
       getAccelerationOfBody(body, localAcceleration);
 
-      ReferenceFrame baseFrame = localAcceleration.getBaseFrame();
-      twistCalculator.getTwistOfBody(body, localTwist);
       localPoint.setIncludingFrame(bodyFixedPoint);
+      localPoint.changeFrame(inertialFrame);
+
+      if (doVelocityTerms)
+      {
+         twistCalculator.getTwistOfBody(body, localTwist);
+         localTwist.changeFrame(inertialFrame);
+      }
+      else
+      {
+         localTwist.setToZero(body.getBodyFixedFrame(), inertialFrame, inertialFrame);
+      }
 
       /*
        * By changing the expressedInFrame from bodyFrame to baseFrame, there is no need to use the
        * more expensive changeFrame(ReferenceFrame, Twist, Twist).
        */
       localAcceleration.getExpressedInFrame().checkReferenceFrameMatch(localAcceleration.getBodyFrame());
-      localAcceleration.changeFrameNoRelativeMotion(baseFrame);
-      localTwist.changeFrame(baseFrame);
-      localPoint.changeFrame(baseFrame);
+      localAcceleration.changeFrameNoRelativeMotion(inertialFrame);
 
       localAcceleration.getAccelerationOfPointFixedInBodyFrame(localTwist, localPoint, linearAccelerationToPack);
    }
