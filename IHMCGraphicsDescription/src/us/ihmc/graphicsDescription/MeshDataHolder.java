@@ -39,6 +39,26 @@ public class MeshDataHolder implements Transformable
       this.vertexNormals = vertexNormals;
    }
 
+   public boolean containsNaN()
+   {
+      for (Point3D32 vertex : vertices)
+      {
+         if (vertex.containsNaN())
+            return true;
+      }
+      for (TexCoord2f texturePoint : texturePoints)
+      {
+         if (texturePoint.containsNaN())
+            return true;
+      }
+      for (Vector3D32 normal : vertexNormals)
+      {
+         if (normal.containsNaN())
+            return true;
+      }
+      return false;
+   }
+
    /**
     * @return the 3D coordinates of the mesh vertices.
     */
