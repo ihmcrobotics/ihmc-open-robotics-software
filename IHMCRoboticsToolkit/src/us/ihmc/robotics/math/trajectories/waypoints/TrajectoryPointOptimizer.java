@@ -231,18 +231,37 @@ public class TrajectoryPointOptimizer
       problemSize.set(dimensions.getIntegerValue() * coefficients.getIntegerValue() * intervals);
       costs.reset();
       costs.add(solveMinAcceleration());
+      iteration.set(0);
 
       for (int iteration = 0; iteration < maxIterations; iteration++)
       {
-         double newCost = computeTimeUpdate(costs.get(iteration));
-         this.iteration.set(iteration + 1);
-         costs.add(newCost);
-
-         if (Math.abs(costs.get(iteration) - newCost) < costEpsilon)
+         if (doFullTimeUpdate())
             break;
       }
 
       timer.stopMeasurement();
+   }
+
+   /**
+    * Provides an alternative API to the optimizer. This method allows the user to run a single gradient descent step
+    * at a time. Will return true if the optimization has converged.
+    *
+    * If this is desired call compute(0) to initialize the optimizer and then call doFullTimeUpdate() to improve
+    * waypoint timing iteratively.
+    *
+    * @return whether the gradient descent has converged or not.
+    */
+   public boolean doFullTimeUpdate()
+   {
+      double oldCost = costs.get(iteration.getIntegerValue());
+      double newCost = computeTimeUpdate(oldCost);
+
+      costs.add(newCost);
+      iteration.increment();
+
+      if (Math.abs(oldCost - newCost) < costEpsilon)
+         return true;
+      return false;
    }
 
    private double computeTimeUpdate(double cost)
