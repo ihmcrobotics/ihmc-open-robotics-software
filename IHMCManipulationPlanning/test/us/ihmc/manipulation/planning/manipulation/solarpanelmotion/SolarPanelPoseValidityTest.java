@@ -1,6 +1,7 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 
 public class SolarPanelPoseValidityTest extends WholeBodyPoseValidityTester
@@ -16,6 +17,13 @@ public class SolarPanelPoseValidityTest extends WholeBodyPoseValidityTester
    
    public void addCollisionShapeForSolarPanel()
    {
+      
+   }
+
+   @Override
+   public void getEnvironmentCollisionShape()
+   {
+
       
    }
 

@@ -24,6 +24,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
 import us.ihmc.euclid.rotationConversion.QuaternionConversion;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -42,11 +43,14 @@ import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMot
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPoseValidityTest;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -454,12 +458,12 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
    }
    
-   @Test//(timeout = 160000)
+   @Test
    public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
       setupCamera(scs);
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
@@ -474,20 +478,62 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
       wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
-      
+      wholeBodyTrajectoryMessage.clear();
 
-      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      
+      
+      
+      
+      
+      
+      //drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       
       // ***************************************************** //
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();      
       wholeBodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      
+      toolboxCommunicator.send(wholeBodyTrajectoryMessage);
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       SolarPanelPoseValidityTest solarPanelValidityTest = new SolarPanelPoseValidityTest(solarPanel, kinematicsToolBoxController, wholeBodyTrajectoryMessage);
+      
+      solarPanelValidityTest.getInverseKienamticsModule();
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      solarPanelValidityTest.getCollisionShape();
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      solarPanelValidityTest.getCollisionResult();
+
+      for (int i=0;i<solarPanelValidityTest.debugAxis.size();i++)
+      {
+         scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.debugAxis.get(i), 0.25, 0.01));
+      }
+      
+      scs.addStaticLinkGraphics(solarPanelValidityTest.robotCollisionModel.getCollisionGraphics());
+      
+      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
+      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
+      
+      
+      
+      OneDoFJoint hipJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.HIP_YAW);      
+      OneDoFJoint kneeJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH);            
+      OneDoFJoint ankleJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH);
+      
+      
+      
+      for (int i=0;i<kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints().length;i++)
+      {
+         PrintTools.info("");
+         OneDoFJoint aJoint = kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints()[i];
+         PrintTools.info(""+aJoint.getName()+" "+aJoint.getQ());
+         OneDoFJoint bJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getOneDoFJoints()[i];
+         PrintTools.info(""+bJoint.getName()+" "+bJoint.getQ());         
+      }
+      
       
 //      while (true)
 //      {
 //         ThreadTools.sleep(100);
 //         toolboxCommunicator.send(wholeBodyTrajectoryMessage);
-//         break;
 //      }
       
       
@@ -528,8 +574,13 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    
    private ArrayList<Graphics3DObject> createXYZAxis(Pose pose)
    {
-      double axisHeight = 0.05;
-      double axisRadius = 0.005;
+      return createXYZAxis(pose, 0.05, 0.005);
+   }
+   
+   private ArrayList<Graphics3DObject> createXYZAxis(Pose pose, double height, double radius)
+   {
+      double axisHeight = height;
+      double axisRadius = radius;
       ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
 
       Graphics3DObject retCenter = new Graphics3DObject();
@@ -586,8 +637,77 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       return ret;
    }
-
    
+   private ArrayList<Graphics3DObject> createXYZAxis(RigidBodyTransform rigidBodyTransform, double height, double radius)
+   {
+      Point3D centerPoint = new Point3D();
+      rigidBodyTransform.getTranslation(centerPoint);
+      
+      Quaternion qtAxis = new Quaternion();
+      rigidBodyTransform.getRotation(qtAxis);
+
+      return createXYZAxis(centerPoint, qtAxis, height, radius);
+   }
+
+   private ArrayList<Graphics3DObject> createXYZAxis(Point3D center, Quaternion orientation, double height, double radius)
+   {
+      double axisHeight = height;
+      double axisRadius = radius;
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+
+      Graphics3DObject retCenter = new Graphics3DObject();
+      Graphics3DObject retX = new Graphics3DObject();
+      Graphics3DObject retY = new Graphics3DObject();
+      Graphics3DObject retZ = new Graphics3DObject();
+
+      Point3D centerPoint = center;
+
+      retX.translate(centerPoint);
+      retY.translate(centerPoint);
+      retZ.translate(centerPoint);
+
+      retCenter.translate(centerPoint);
+      retCenter.addSphere(0.01, YoAppearance.Black());
+      
+      ret.add(retCenter);
+      
+      Quaternion qtAxis = orientation;
+      Quaternion qtAlpha = new Quaternion();
+      AxisAngle rvAlpha = new AxisAngle();
+      AxisAngle rvAxis = new AxisAngle();      
+      
+      QuaternionConversion.convertAxisAngleToQuaternion(rvAlpha, qtAlpha);
+      
+      qtAxis.multiply(qtAlpha);
+      AxisAngleConversion.convertQuaternionToAxisAngle(qtAxis, rvAxis);
+            
+      retZ.rotate(rvAxis);
+      retZ.addCylinder(axisHeight, axisRadius, YoAppearance.Blue());      
+      
+      rvAlpha = new AxisAngle(0,1,0,Math.PI/2);
+      QuaternionConversion.convertAxisAngleToQuaternion(rvAlpha, qtAlpha);
+      
+      qtAxis.multiply(qtAlpha);
+      AxisAngleConversion.convertQuaternionToAxisAngle(qtAxis, rvAxis);
+            
+      retX.rotate(rvAxis);
+      retX.addCylinder(axisHeight, axisRadius, YoAppearance.Red());
+            
+      rvAlpha = new AxisAngle(1,0,0,-Math.PI/2);
+      QuaternionConversion.convertAxisAngleToQuaternion(rvAlpha, qtAlpha);
+      
+      qtAxis.multiply(qtAlpha);
+      AxisAngleConversion.convertQuaternionToAxisAngle(qtAxis, rvAxis);
+            
+      retY.rotate(rvAxis);
+      retY.addCylinder(axisHeight, axisRadius, YoAppearance.Green());
+      
+      ret.add(retX);
+      ret.add(retY);
+      ret.add(retZ);
+
+      return ret;
+   }
    
    /*
     *
