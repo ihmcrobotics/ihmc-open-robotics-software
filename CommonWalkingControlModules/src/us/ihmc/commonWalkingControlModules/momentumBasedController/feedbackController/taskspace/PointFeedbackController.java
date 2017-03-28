@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -43,6 +44,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
    private final PointAccelerationCommand output = new PointAccelerationCommand();
 
+   private final YoPositionPIDGainsInterface gains;
    private final BodyFixedPointLinearAccelerationControlModule accelerationControlModule;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -60,7 +62,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
       double dt = toolbox.getControlDT();
-      accelerationControlModule = new BodyFixedPointLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, dt, registry);
+      gains = feedbackControllerToolbox.getPositionGains(endEffector);
+      accelerationControlModule = new BodyFixedPointLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, dt, gains, registry);
 
       isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
@@ -87,7 +90,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       output.set(command.getPointAccelerationCommand());
 
-      accelerationControlModule.setGains(command.getGains());
+      gains.set(command.getGains());
 
       command.getBodyFixedPointIncludingFrame(tempPosition);
       accelerationControlModule.setPointToControl(tempPosition);
