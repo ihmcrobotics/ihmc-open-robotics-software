@@ -3,22 +3,19 @@ package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class RigidBodyUserControlState extends RigidBodyControlState
 {
    public static final double TIME_WITH_NO_MESSAGE_BEFORE_ABORT = 0.25;
 
-   // TODO: make multiple weights part of a single command instead of using a list here
-   private final JointspaceAccelerationCommand[] jointspaceAccelerationCommands;
-   private final InverseDynamicsCommandList jointspaceAccelerationCommandList = new InverseDynamicsCommandList();
+   private final JointspaceAccelerationCommand jointspaceAccelerationCommand;
 
    private final OneDoFJoint[] jointsToControl;
    private final int numberOfJoints;
@@ -31,14 +28,14 @@ public class RigidBodyUserControlState extends RigidBodyControlState
 
    public RigidBodyUserControlState(String bodyName, OneDoFJoint[] jointsToControl, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
-      super(RigidBodyControlMode.USER, bodyName, yoTime);
+      super(RigidBodyControlMode.USER, bodyName, yoTime, parentRegistry);
       String prefix = bodyName + "UserMode";
       hasWeights = new BooleanYoVariable(prefix + "HasWeights", registry);
 
       this.jointsToControl = jointsToControl;
       this.numberOfJoints = jointsToControl.length;
 
-      jointspaceAccelerationCommands = new JointspaceAccelerationCommand[jointsToControl.length];
+      jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
       userDesiredJointAccelerations = new DoubleYoVariable[jointsToControl.length];
       weights = new DoubleYoVariable[jointsToControl.length];
 
@@ -47,13 +44,10 @@ public class RigidBodyUserControlState extends RigidBodyControlState
          String jointName = jointsToControl[i].getName();
          userDesiredJointAccelerations[i] = new DoubleYoVariable(prefix + "_" + jointName + "_qdd_d", registry);
          weights[i] = new DoubleYoVariable(prefix + "_" + jointName + "_weight", registry);
-
-         jointspaceAccelerationCommands[i] = new JointspaceAccelerationCommand();
-         jointspaceAccelerationCommands[i].addJoint(jointsToControl[i], Double.NaN);
+         jointspaceAccelerationCommand.addJoint(jointsToControl[i], Double.NaN);
       }
 
       abortUserControlMode = new BooleanYoVariable(prefix + "Abort", registry);
-      parentRegistry.addChild(registry);
    }
 
    public boolean handleDesiredAccelerationsCommand(DesiredAccelerationCommand<?, ?> command)
@@ -89,10 +83,11 @@ public class RigidBodyUserControlState extends RigidBodyControlState
          return;
       }
 
-      for (int i = 0; i < numberOfJoints; i++)
+      for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
-         jointspaceAccelerationCommands[i].setOneDoFJointDesiredAcceleration(0, userDesiredJointAccelerations[i].getDoubleValue());
-         jointspaceAccelerationCommands[i].setWeight(weights[i].getDoubleValue());
+         double desiredAcceleration = userDesiredJointAccelerations[jointIdx].getDoubleValue();
+         jointspaceAccelerationCommand.setOneDoFJointDesiredAcceleration(jointIdx, desiredAcceleration);
+         jointspaceAccelerationCommand.setWeight(jointIdx, weights[jointIdx].getDoubleValue());
       }
    }
 
@@ -130,11 +125,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      jointspaceAccelerationCommandList.clear();
-      for (int i = 0; i < numberOfJoints; i++)
-         jointspaceAccelerationCommandList.addCommand(jointspaceAccelerationCommands[i]);
-
-      return jointspaceAccelerationCommandList;
+      return jointspaceAccelerationCommand;
    }
 
    @Override

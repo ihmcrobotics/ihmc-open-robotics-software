@@ -1,10 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.AWTException;
 import java.awt.Button;
@@ -53,11 +49,11 @@ import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupList;
 import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
@@ -70,7 +66,6 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
@@ -295,13 +290,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setScrollGraphsEnabled(false);
       boolean isScrollGraphsEnabled2 = scs.isSafeToScroll();
       assertFalse(isScrollGraphsEnabled2);
-
-      RobotSocketConnection robotSocketConnectionFromSCS = scs.allowTCPConnectionToHost("host");
-      assertNotNull(robotSocketConnectionFromSCS);
-
-      NewDataListener newDataListener = createNewDataListener();
-      RobotSocketConnection robotSocketConnectionFromSCS2 = scs.allowTCPConnectionToHost("host2", newDataListener);
-      assertNotNull(robotSocketConnectionFromSCS2);
 
       boolean initialKeyPointStatus = scs.isKeyPointModeToggled();
       scs.toggleKeyPointMode();

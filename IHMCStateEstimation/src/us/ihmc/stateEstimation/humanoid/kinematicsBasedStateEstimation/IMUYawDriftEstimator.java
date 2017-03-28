@@ -194,7 +194,7 @@ public class IMUYawDriftEstimator implements YawDriftProvider
       for (int i = 0; i < numberOfFeet; i++)
       {
          RigidBody foot = allFeet.get(i);
-         twistCalculator.getTwistOfBody(footTwist, foot);
+         twistCalculator.getTwistOfBody(foot, footTwist);
          footTwist.getLinearPart(footLinearVelocity);
          currentFootLinearVelocities.get(foot).set(footLinearVelocity.length());
       }

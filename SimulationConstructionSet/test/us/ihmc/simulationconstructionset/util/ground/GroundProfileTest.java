@@ -1,14 +1,13 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -20,7 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -81,11 +79,11 @@ public abstract class GroundProfileTest
          scs.startOnAThread();
       }
       
-      BoundingBox3d boundingBox = groundProfile.getBoundingBox();
-      double xMin = boundingBox.getXMin();
-      double yMin = boundingBox.getYMin();
-      double xMax = boundingBox.getXMax();
-      double yMax = boundingBox.getYMax();
+      BoundingBox3D boundingBox = groundProfile.getBoundingBox();
+      double xMin = boundingBox.getMinX();
+      double yMin = boundingBox.getMinY();
+      double xMax = boundingBox.getMaxX();
+      double yMax = boundingBox.getMaxY();
       
       if (Double.isInfinite(xMin)) xMin = -10.0;
       if (Double.isInfinite(xMax)) xMax = 10.0;

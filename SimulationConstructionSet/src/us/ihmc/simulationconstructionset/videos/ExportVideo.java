@@ -8,6 +8,7 @@ import java.util.Vector;
 
 import us.ihmc.codecs.builder.MP4H264MovieBuilder;
 import us.ihmc.codecs.generated.EUsageType;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraController;
 import us.ihmc.jMonkeyEngineToolkit.camera.CaptureDevice;
@@ -20,7 +21,6 @@ import us.ihmc.simulationconstructionset.gui.ActiveCanvas3DHolder;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.io.xml.XMLReaderUtility;
 
 public class ExportVideo implements ExportVideoCommandExecutor

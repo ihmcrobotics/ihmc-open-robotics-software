@@ -2,11 +2,13 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryGraphicType;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -18,20 +20,23 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.lists.GenericTypeBuilder;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.YoPolynomial3D;
 import us.ihmc.robotics.math.trajectories.waypoints.PolynomialOrder;
 import us.ihmc.robotics.math.trajectories.waypoints.TrajectoryPointOptimizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.XYPlaneFrom3PointsFrame;
 
 /**
- * Wrapper for TrajectoryPointOptimizer for the generation of swing trajectories. This is more efficient then
- * using the PositionOptimizedTrajectoryGenerator since it assumes that the trajectory can be reduced to a
- * two dimensional problem by smart choice of the reference frame the computation is done in. Use this class only
- * if your swing lies in a plane.
+ * Wrapper for TrajectoryPointOptimizer for the generation of swing trajectories. This is more
+ * efficient then using the PositionOptimizedTrajectoryGenerator since it assumes that the
+ * trajectory can be reduced to a two dimensional problem by smart choice of the reference frame the
+ * computation is done in. Use this class only if your swing lies in a plane.
  *
- * Aside from the reduction to two dimensions this class is similar to PositionOptimizedTrajectoryGenerator
+ * Aside from the reduction to two dimensions this class is similar to
+ * PositionOptimizedTrajectoryGenerator
  *
  * @author gwiedebach
  *
@@ -68,6 +73,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    private final IntegerYoVariable segments;
    private final IntegerYoVariable activeSegment;
    private final ArrayList<DoubleYoVariable> waypointTimes = new ArrayList<>();
+   private final YoFramePoseUsingQuaternions swingFramePose;
 
    private final YoFramePoint desiredPosition;
    private final YoFrameVector desiredVelocity;
@@ -77,11 +83,10 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    private final FrameVector tempVel = new FrameVector();
    private final FrameVector tempAcc = new FrameVector();
 
-   private final int markers = 30;
-   private final BagOfBalls trajectoryViz;
-   private final FramePoint ballPosition = new FramePoint();
+   private final YoGraphicPolynomial3D trajectoryViz;
 
    private final XYPlaneFrom3PointsFrame swingFrame = new XYPlaneFrom3PointsFrame(trajectoryFrame, "swingFrame");
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePoint trajectoryOrigin = new FramePoint();
    private final FrameVector direction = new FrameVector();
    private final FramePoint pointOnX = new FramePoint();
@@ -102,8 +107,8 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
       this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations);
    }
 
-   public Position2dOptimizedSwingTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry,
-         YoGraphicsListRegistry graphicsListRegistry, int maxIterations)
+   public Position2dOptimizedSwingTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
+                                                      int maxIterations)
    {
       this.namePrefix = namePrefix;
 
@@ -154,18 +159,24 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
       for (Direction axis : Direction.values)
       {
          ArrayList<YoPolynomial> segments = new ArrayList<>();
-         segments.add(new YoPolynomial(namePrefix + "Segment" + 0 + "Axis" + axis.getIndex(), order.getCoefficients(), registry));
          trajectories.put(axis, segments);
       }
       segments.set(1);
 
-      while (waypointTimes.size() < maxWaypoints)
+      while (waypointTimes.size() <= maxWaypoints)
          extendBySegment(registry);
+
+      swingFramePose = new YoFramePoseUsingQuaternions(namePrefix + "SwingFramePose", ReferenceFrame.getWorldFrame(), registry);
 
       parentRegistry.addChild(registry);
 
       if (graphicsListRegistry != null)
-         trajectoryViz = new BagOfBalls(markers, 0.01, namePrefix + "Trajectory", YoAppearance.Black(), registry, graphicsListRegistry);
+      {
+         List<YoPolynomial3D> yoPolynomial3Ds = YoPolynomial3D.createYoPolynomial3DList(trajectories.get(Direction.X), trajectories.get(Direction.Y),
+                                                                                        trajectories.get(Direction.Z));
+         trajectoryViz = new YoGraphicPolynomial3D(namePrefix + "Trajectory", swingFramePose, yoPolynomial3Ds, waypointTimes, 0.01, 50, 8, registry);
+         graphicsListRegistry.registerYoGraphic(namePrefix + "Trajectory", trajectoryViz);
+      }
       else
          trajectoryViz = null;
    }
@@ -201,6 +212,8 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
       pointOnY.add(direction.getY(), -direction.getX(), 0.0);
       swingFrame.setPoints(trajectoryOrigin, pointOnX, pointOnY);
       swingFrame.update();
+      swingFrame.getTransformToParent(tempTransform);
+      swingFramePose.setPose(tempTransform);
 
       this.initialPosition.changeFrame(swingFrame);
       this.initialVelocity.changeFrame(swingFrame);
@@ -250,16 +263,24 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    {
       optimizer.compute(maxIterations.getIntegerValue());
 
-      for (int i = 0; i < segments.getIntegerValue()-1; i++)
+      for (int i = 0; i < segments.getIntegerValue() - 1; i++)
          waypointTimes.get(i).set(optimizer.getWaypointTime(i));
+
+      waypointTimes.get(segments.getIntegerValue() - 1).set(1.0);
+
+      for (int i = segments.getIntegerValue(); i < waypointTimes.size(); i++)
+         waypointTimes.get(i).set(Double.NaN);
 
       for (int dimension = 0; dimension < dimensions; dimension++)
       {
          optimizer.getPolynomialCoefficients(coefficients, dimension);
          Direction axis;
-         if (dimension == 0) axis = Direction.X;
-         else if (dimension == 1) axis = Direction.Z;
-         else axis = null;
+         if (dimension == 0)
+            axis = Direction.X;
+         else if (dimension == 1)
+            axis = Direction.Z;
+         else
+            axis = null;
 
          for (int i = 0; i < segments.getIntegerValue(); i++)
          {
@@ -281,13 +302,8 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
       if (trajectoryViz == null)
          return;
 
-      for (int i = 0; i < markers; i++)
-      {
-         double time = (double) i / (double) markers;
-         compute(time);
-         getPosition(ballPosition);
-         trajectoryViz.setBall(ballPosition, i);
-      }
+      trajectoryViz.setGraphicType(TrajectoryGraphicType.SHOW_AS_LINE);
+      
    }
 
    @Override
@@ -297,11 +313,11 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
       isDone.set(time == 1.0);
 
       int activeSegment = 0;
-      for (int i = 0; i < segments.getIntegerValue()-1; i++)
+      for (int i = 0; i < segments.getIntegerValue() - 1; i++)
       {
          double waypointTime = waypointTimes.get(i).getDoubleValue();
          if (time > waypointTime)
-            activeSegment = i+1;
+            activeSegment = i + 1;
          else
             break;
       }
@@ -372,6 +388,9 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    @Override
    public void showVisualization()
    {
+      if (trajectoryViz == null)
+         return;
+      trajectoryViz.showGraphic();
    }
 
    @Override
@@ -379,7 +398,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
    {
       if (trajectoryViz == null)
          return;
-      trajectoryViz.hideAll();
+      trajectoryViz.hideGraphic();
    }
 
    @Override

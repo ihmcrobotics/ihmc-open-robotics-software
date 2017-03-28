@@ -6,23 +6,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointspaceAccelerationCommand implements InverseDynamicsCommand<JointspaceAccelerationCommand>
 {
-   private boolean hasWeight;
-   private double weight;
-
    private final int initialCapacity = 15;
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
    private final DenseMatrixArrayList desiredAccelerations = new DenseMatrixArrayList(initialCapacity);
+
+   private final RecyclingArrayList<MutableDouble> weights = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
 
    public JointspaceAccelerationCommand()
    {
@@ -31,7 +32,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
 
    public JointspaceAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
    {
-      this(joint, desiredAcceleration, Double.POSITIVE_INFINITY);
+      this(joint, desiredAcceleration, HARD_CONSTRAINT);
    }
 
    public JointspaceAccelerationCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration, double weight)
@@ -46,13 +47,14 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       joints.clear();
       jointNames.clear();
       desiredAccelerations.clear();
-      removeWeight();
+      weights.clear();
    }
 
    public void addJoint(OneDoFJoint joint, double desiredAcceleration)
    {
       joints.add(joint);
       jointNames.add(joint.getName());
+      weights.add().setValue(HARD_CONSTRAINT);
       DenseMatrix64F jointDesiredAcceleration = desiredAccelerations.add();
       jointDesiredAcceleration.reshape(1, 1);
       jointDesiredAcceleration.set(0, 0, desiredAcceleration);
@@ -87,15 +89,21 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       }
    }
 
-   public void removeWeight()
+   public void makeHardConstraint()
    {
-      setWeight(HARD_CONSTRAINT);
+      for (int jointIdx = 0; jointIdx < joints.size(); jointIdx++)
+         setWeight(jointIdx, HARD_CONSTRAINT);
+   }
+
+   public void setWeight(int jointIndex, double weight)
+   {
+      weights.get(jointIndex).setValue(weight);
    }
 
    public void setWeight(double weight)
    {
-      hasWeight = weight != HARD_CONSTRAINT;
-      this.weight = weight;
+      for (int jointIdx = 0; jointIdx < joints.size(); jointIdx++)
+         weights.get(jointIdx).setValue(weight);
    }
 
    @Override
@@ -106,10 +114,9 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       {
          joints.add(other.joints.get(i));
          jointNames.add(other.jointNames.get(i));
+         weights.add().setValue(other.getWeight(i));
       }
       desiredAccelerations.set(other.desiredAccelerations);
-      hasWeight = other.hasWeight;
-      weight = other.weight;
    }
 
    private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredAcceleration)
@@ -117,14 +124,30 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredAcceleration.getNumRows());
    }
 
-   public boolean getHasWeight()
+   public boolean isHardConstraint()
    {
-      return hasWeight;
+      if (getNumberOfJoints() == 0)
+         return true;
+
+      boolean isHardConstraint = getWeight(0) == HARD_CONSTRAINT;
+      if (getNumberOfJoints() == 1)
+         return isHardConstraint;
+
+      // If there are multiple joints, make sure they are consistent.
+      for (int jointIdx = 1; jointIdx < joints.size(); jointIdx++)
+      {
+         boolean isJointHardConstraint = getWeight(jointIdx) == HARD_CONSTRAINT;
+         if (isJointHardConstraint != isHardConstraint)
+            throw new RuntimeException("Inconsistent weights in " + getClass().getSimpleName() + ": some joint acceleration "
+                  + "desireds have weights, others are hard constraints. This is not supported in a single message.");
+      }
+
+      return isHardConstraint;
    }
 
-   public double getWeight()
+   public double getWeight(int jointIndex)
    {
-      return weight;
+      return weights.get(jointIndex).doubleValue();
    }
 
    public int getNumberOfJoints()

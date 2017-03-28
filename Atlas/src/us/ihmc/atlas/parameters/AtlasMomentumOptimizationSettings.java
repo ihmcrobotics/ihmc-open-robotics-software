@@ -34,7 +34,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
 
    private final int nBasisVectorsPerContactPoint = 4;
    private final int nContactPointsPerContactableBody = 4;
-   private final int nContactableBodies = 2;
+   private final int nContactableBodies;
 
    private final double jointAccelerationWeight = 0.005;
    private final double jointJerkWeight = 0.1;
@@ -48,7 +48,9 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final double rhoRateHighWeight;
 
    private final double neckJointspaceWeight = 1.0;
-   private final double spineJointspaceWeight = 15.0;
+   private final double spineJointspaceWeightYaw = 15.0;
+   private final double spineJointspaceWeightPitch = 45.0;
+   private final double spineJointspaceWeightRoll = 45.0;
    private final double armJointspaceWeight = 1.0;
    private final TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
 
@@ -65,7 +67,7 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
    private final Vector3D handLinearWeight = new Vector3D(1.0, 1.0, 1.0);
    private final Map<String, Vector3D> taskspaceLinearWeights = new HashMap<>();
 
-   public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap)
+   public AtlasMomentumOptimizationSettings(AtlasJointMap jointMap, int numberOfContactableBodies)
    {
       double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
@@ -79,10 +81,11 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       angularMomentumWeight.scale(1.0 / scale);
 
       for (SpineJointName jointName : jointMap.getSpineJointNames())
-      {
-         jointspaceWeights.put(jointMap.getSpineJointName(jointName), spineJointspaceWeight);
          userModeWeights.put(jointMap.getSpineJointName(jointName), spineUserModeWeight);
-      }
+
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), spineJointspaceWeightYaw);
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), spineJointspaceWeightPitch);
+      jointspaceWeights.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), spineJointspaceWeightRoll);
 
       for (ArmJointName jointName : jointMap.getArmJointNames())
       {
@@ -103,9 +106,11 @@ public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSetti
       taskspaceAngularWeights.put(jointMap.getHeadName(), headAngularWeight);
       for (RobotSide robotSide : RobotSide.values)
       {
-         taskspaceAngularWeights.put(jointMap.getJointBeforeHandName(robotSide), handAngularWeight);
-         taskspaceLinearWeights.put(jointMap.getJointBeforeHandName(robotSide), handLinearWeight);
+         taskspaceAngularWeights.put(jointMap.getHandName(robotSide), handAngularWeight);
+         taskspaceLinearWeights.put(jointMap.getHandName(robotSide), handLinearWeight);
       }
+
+      this.nContactableBodies = numberOfContactableBodies;
    }
 
    /** @inheritDoc */

@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.communication;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 public class ConcurrentListeningQueue<T>
 {

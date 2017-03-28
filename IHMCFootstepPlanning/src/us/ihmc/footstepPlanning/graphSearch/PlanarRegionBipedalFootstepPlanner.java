@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanner;
@@ -26,7 +27,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
 {
@@ -214,7 +214,7 @@ public class PlanarRegionBipedalFootstepPlanner implements FootstepPlanner
             break;
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanoSecondstoSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
+         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime.getLongValue()) > timeout.getDoubleValue())
             break;
       }
 

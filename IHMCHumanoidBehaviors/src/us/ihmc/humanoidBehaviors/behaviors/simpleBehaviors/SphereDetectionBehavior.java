@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.shapes.Sphere3D_F64;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,7 +31,6 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder.Shape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigMultiShapeRansac;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SphereDetectionBehavior extends AbstractBehavior
 {

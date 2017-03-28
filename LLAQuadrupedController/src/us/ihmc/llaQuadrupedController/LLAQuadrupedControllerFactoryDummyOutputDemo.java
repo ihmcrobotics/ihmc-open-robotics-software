@@ -190,7 +190,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
          {
             long itStart = System.nanoTime();
             simulationStateEstimator.doControl();
-            robotTimestamp.add(Conversions.milliSecondsToSeconds(1));
+            robotTimestamp.add(Conversions.millisecondsToSeconds(1));
             stateImpl.process();
             
             long itTime = System.nanoTime() - itStart;
@@ -209,7 +209,7 @@ public class LLAQuadrupedControllerFactoryDummyOutputDemo
          stateImpl.onExit();
          
          
-         System.out.println(state + ": " + Conversions.nanoSecondstoSeconds(endTime/TEST_ITERATIONS) + "s/it. Min: " + Conversions.nanoSecondstoSeconds(min) + "s ; max: " + Conversions.nanoSecondstoSeconds(max) + "s") ;
+         System.out.println(state + ": " + Conversions.nanosecondsToSeconds(endTime/TEST_ITERATIONS) + "s/it. Min: " + Conversions.nanosecondsToSeconds(min) + "s ; max: " + Conversions.nanosecondsToSeconds(max) + "s") ;
          
       }
       robotTimestamp.set(robotTimeBeforeWarmUp);

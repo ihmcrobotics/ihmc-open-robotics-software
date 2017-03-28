@@ -8,10 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import net.java.games.input.Component;
 import net.java.games.input.Controller;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.tools.inputDevices.JInputTools;
 import us.ihmc.tools.inputDevices.JInputTools.ControllerType;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class Mouse3DJoystick

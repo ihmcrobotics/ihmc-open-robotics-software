@@ -11,7 +11,7 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
 
-import us.ihmc.tools.io.printing.PrintTools;
+import us.ihmc.commons.PrintTools;
 
 public class NetworkParameters
 {

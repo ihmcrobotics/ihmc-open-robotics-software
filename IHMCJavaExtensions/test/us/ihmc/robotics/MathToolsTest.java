@@ -218,7 +218,7 @@ public class MathToolsTest
       {
          double x = randomValues[i];
          int exp = randomExponents[i];
-         double xPowedToTest = MathTools.powWithInteger(x, exp);
+         double xPowedToTest = MathTools.pow(x, exp);
          double xPowedExpected = Math.pow(x, (double) exp);
          double errorRatio = (xPowedToTest - xPowedExpected) / xPowedExpected;
          boolean isRelativeErrorLowEnough = MathTools.epsilonEquals(errorRatio, 0.0, 1.0e-15);
@@ -701,8 +701,8 @@ public class MathToolsTest
       System.out.println("Double.MAX_VALUE: " + Double.MAX_VALUE);
       System.out.println("Integer.MAX_VALUE: " + Integer.MAX_VALUE);
       // test the limits
-      assertEquals("not equal", 1.0000000000000001E-307, MathTools.roundToSignificantFigures(1e-307, 0), 0.0);
-      assertEquals("not equal", 0.0, MathTools.roundToSignificantFigures(1.79e-308, 0), 0.0);
+      assertEquals("not equal", 1.0E-307, MathTools.roundToSignificantFigures(1e-307, 0), 0.0);
+      assertEquals("not equal", 1.79e-308, MathTools.roundToSignificantFigures(1.79e-308, 0), 0.0);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)

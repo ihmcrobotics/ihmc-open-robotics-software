@@ -2,5 +2,5 @@ package us.ihmc.robotics.nameBasedHashCode;
 
 public interface NameBasedHashCodeHolder
 {
-   public abstract long nameBasedHashCode();
+   public abstract long getNameBasedHashCode();
 }

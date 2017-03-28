@@ -1,18 +1,17 @@
 package us.ihmc.sensorProcessing.stateEstimation.processModelElements;
 
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.controlFlow.ControlFlowInputPort;
 import us.ihmc.controlFlow.ControlFlowOutputPort;
-import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.stateEstimation.TimeDomain;
 
 public class AngularVelocityProcessModelElement extends AbstractProcessModelElement
 {

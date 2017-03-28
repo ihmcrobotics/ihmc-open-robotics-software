@@ -11,7 +11,6 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
@@ -41,7 +40,7 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
 
    private final double neckJointspaceWeight = 5.0;
-   private final double spineJointspaceWeight = 1.0;
+   private final double spineJointspaceWeight = 10.0;
    private final double armJointspaceWeight = 1.0;
    private final TObjectDoubleHashMap<String> jointspaceWeights = new TObjectDoubleHashMap<>();
 
@@ -58,7 +57,7 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final Vector3D handLinearWeight = new Vector3D(5.0, 5.0, 5.0);
    private final Map<String, Vector3D> taskspaceLinearWeights = new HashMap<>();
 
-   public ValkyrieMomentumOptimizationSettings(DRCRobotJointMap jointMap)
+   public ValkyrieMomentumOptimizationSettings(ValkyrieJointMap jointMap)
    {
       for (SpineJointName jointName : jointMap.getSpineJointNames())
       {
@@ -85,8 +84,8 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
       taskspaceAngularWeights.put(jointMap.getHeadName(), headAngularWeight);
       for (RobotSide robotSide : RobotSide.values)
       {
-         taskspaceAngularWeights.put(jointMap.getJointBeforeHandName(robotSide), handAngularWeight);
-         taskspaceLinearWeights.put(jointMap.getJointBeforeHandName(robotSide), handLinearWeight);
+         taskspaceAngularWeights.put(jointMap.getHandName(robotSide), handAngularWeight);
+         taskspaceLinearWeights.put(jointMap.getHandName(robotSide), handLinearWeight);
       }
    }
 

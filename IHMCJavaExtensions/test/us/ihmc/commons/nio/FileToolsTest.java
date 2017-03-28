@@ -20,6 +20,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
@@ -44,6 +45,7 @@ public class FileToolsTest
    private static final Path EXAMPLE_JAVA_FILE2_PATH = JAVA_DIRECTORY_PATH.resolve(EXAMPLE_JAVA_FILE2_JAVA);
    private static final Path FILE_TOOLS_EXAMPLE_FILE1_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE1_TXT);
    private static final Path FILE_TOOLS_EXAMPLE_FILE2_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE2_TXT);
+   private static final Path FILE_TOOLS_EXAMPLE_FILE_CAT_TXT_PATH = TEXT_DIRECTORY_PATH.resolve(FILE_TOOLS_EXAMPLE_FILE_CAT_TXT);
    private static final Path READ_ALL_LINES_PATH = FILE_TOOLS_TEST_PATH.resolve(TEST_READ_ALL_LINES_TXT);
 
    @Before
@@ -68,6 +70,7 @@ public class FileToolsTest
       FileTools.deleteQuietly(EXAMPLE_JAVA_FILE2_PATH);
       FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE1_PATH);
       FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE2_PATH);
+      FileTools.deleteQuietly(FILE_TOOLS_EXAMPLE_FILE_CAT_TXT_PATH);
       FileTools.deleteQuietly(READ_ALL_LINES_PATH);
    }
    
@@ -135,8 +138,6 @@ public class FileToolsTest
          assertEquals(EXAMPLE_FILE_2_TEXT_LINE_2, reader.readLine());
          assertNull(reader.readLine());
          reader.close();
-         
-         Files.delete(concatedFile);
       }
       catch (IOException e)
       {
@@ -199,5 +200,10 @@ public class FileToolsTest
       PrintWriter writer = FileTools.newPrintWriter(READ_ALL_LINES_PATH, WriteOption.TRUNCATE, DefaultExceptionHandler.PRINT_STACKTRACE);
       writer.print("line1\r\nline2\nline3\r");
       writer.close();
+   }
+   
+   public static void main(String[] args)
+   {
+      MutationTestFacilitator.facilitateMutationTestForClass(FileTools.class, FileToolsTest.class);
    }
 }

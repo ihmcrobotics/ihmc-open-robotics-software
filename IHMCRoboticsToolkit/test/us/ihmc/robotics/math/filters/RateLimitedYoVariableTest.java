@@ -185,7 +185,7 @@ public class RateLimitedYoVariableTest
       }
       catch (RuntimeException e)
       {
-         assertTrue(e.getMessage() == "The maxRate parameter in the RateLimitedYoVariable constructor cannot be negative.");
+         assertTrue(e.getMessage() == "The maxRate parameter in the RateLimitedYoVariable cannot be negative.");
       }
    }
 }

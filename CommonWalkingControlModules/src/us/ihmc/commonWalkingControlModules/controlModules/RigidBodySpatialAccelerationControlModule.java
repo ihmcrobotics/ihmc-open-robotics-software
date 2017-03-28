@@ -60,7 +60,7 @@ public class RigidBodySpatialAccelerationControlModule
    public void doPositionControl(FramePose desiredEndEffectorPose, Twist desiredEndEffectorTwist,
          SpatialAccelerationVector feedForwardEndEffectorSpatialAcceleration, RigidBody base)
    {
-      twistCalculator.getRelativeTwist(currentTwist, base, endEffector);
+      twistCalculator.getRelativeTwist(base, endEffector, currentTwist);
       currentTwist.changeBodyFrameNoRelativeTwist(endEffectorFrame);
       currentTwist.changeFrame(endEffectorFrame);
 
@@ -104,7 +104,7 @@ public class RigidBodySpatialAccelerationControlModule
       angularAcceleration.changeFrame(endEffectorFrame);
 
       linearAccelerationOfOrigin.changeFrame(endEffectorFrame);
-      twistCalculator.getRelativeTwist(twistOfEndEffectorWithRespectToElevator, base, endEffector);
+      twistCalculator.getRelativeTwist(base, endEffector, twistOfEndEffectorWithRespectToElevator);
       twistOfEndEffectorWithRespectToElevator.changeBodyFrameNoRelativeTwist(endEffectorFrame);
 
       ReferenceFrame baseFrame = base.getBodyFixedFrame();

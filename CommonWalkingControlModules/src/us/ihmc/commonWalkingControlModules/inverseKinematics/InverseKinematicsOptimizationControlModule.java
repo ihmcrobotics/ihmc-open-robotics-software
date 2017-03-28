@@ -14,22 +14,19 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class InverseKinematicsOptimizationControlModule
 {
@@ -57,17 +54,11 @@ public class InverseKinematicsOptimizationControlModule
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
-      ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
-
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       motionQPInput = new MotionQPInput(numberOfDoFs);
 
-      double controlDT = toolbox.getControlDT();
-      GeometricJacobianHolder geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
-      TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler,
-            toolbox.getJointPrivilegedConfigurationParameters(), registry);
-      boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
+      motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
+      boundCalculator = toolbox.getQPBoundCalculator();
 
       qDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
       qDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);

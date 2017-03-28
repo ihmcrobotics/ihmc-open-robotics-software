@@ -204,7 +204,7 @@ public class YoVariableLogPlaybackRobot extends VisualizerRobot implements Rewou
          }
 
          timestamp.set(logLongArray.get());
-         robotTime.set(Conversions.nanoSecondstoSeconds(timestamp.getLongValue() - initialTimestamp));
+         robotTime.set(Conversions.nanosecondsToSeconds(timestamp.getLongValue() - initialTimestamp));
 
          for (int i = 0; i < variables.size(); i++)
          {

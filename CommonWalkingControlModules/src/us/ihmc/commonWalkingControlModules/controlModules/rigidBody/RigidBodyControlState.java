@@ -4,17 +4,16 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public abstract class RigidBodyControlState extends FinishableState<RigidBodyControlMode>
 {
@@ -28,7 +27,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    private final DoubleYoVariable trajectoryStartTime;
    private final DoubleYoVariable yoTime;
 
-   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime)
+   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
       this.yoTime = yoTime;
@@ -42,6 +41,8 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       trajectoryStopped = new BooleanYoVariable(prefix + "TrajectoryStopped", registry);
       trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
       trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
+
+      parentRegistry.addChild(registry);
    }
 
    protected boolean handleCommandInternal(Command<?, ?> command)
@@ -92,11 +93,6 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       lastCommandId.set(Packet.INVALID_MESSAGE_ID);
    }
 
-   public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
-   {
-      trajectoryStopped.set(command.isStopAllTrajectory());
-   }
-
    public boolean abortState()
    {
       return false;
@@ -114,5 +110,10 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    public boolean isDone()
    {
       return true;
+   }
+
+   public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
+   {
+      return null;
    }
 }

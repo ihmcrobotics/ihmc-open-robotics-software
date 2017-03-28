@@ -45,10 +45,11 @@ dependencies {
     testCompile group: 'org.jfree', name: 'jcommon', version: '1.0.21'
     testCompile group: 'us.ihmc', name: 'ihmc-continuous-integration-framework', version: '0.9.4'
     
-	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+	 testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
-    compile group: 'us.ihmc', name: 'euclid', version: '0.1.0'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
+    compile group: 'us.ihmc', name: 'euclid', version: '0.2.2'
     compile group: 'org.ejml', name: 'denseC64', version: '0.30'
     compile group: 'com.esotericsoftware.kryo', name: 'kryo', version: '2.20'
     compile group: 'com.github.quickhull3d', name: 'quickhull3d', version: '1.0.0'
@@ -66,6 +67,7 @@ dependencies {
 
     // NOTE: IHMCRoboticsToolkit should not depend on any other IHMC project(!), especially it should not depend on IHMCJavaToolkit.
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
 }
 
 jar {

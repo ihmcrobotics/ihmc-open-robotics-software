@@ -213,7 +213,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       footPolygonInWorldFrame.setIncludingFrameAndUpdate(footPolygonInSoleFrame);
       footPolygonInWorldFrame.changeFrameAndProjectToXYPlane(worldFrame);
 
-      twistCalculator.getTwistOfBody(bodyTwist, rotatingBody.getRigidBody());
+      twistCalculator.getTwistOfBody(rotatingBody.getRigidBody(), bodyTwist);
       bodyTwist.getAngularPart(angularVelocity);
 
       angularVelocity.changeFrame(soleFrame);

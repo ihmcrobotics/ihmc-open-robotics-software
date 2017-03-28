@@ -60,7 +60,7 @@ public class PickUpBallBehaviorStateMachine extends StateMachineBehavior<PickUpB
       //NEW
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       searchFarForSphereBehavior = new SearchFarForSphereBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, false, atlasPrimitiveActions);
-      searchNearForSphereBehavior = new SearchNearForSphereBehavior(yoTime, coactiveElement, referenceFrames, communicationBridge, false,
+      searchNearForSphereBehavior = new SearchNearForSphereBehavior(yoTime, coactiveElement, referenceFrames, fullRobotModel, communicationBridge, false,
             atlasPrimitiveActions);
       walkToPickUpLocationBehavior = new WalkToPickObjectOffGroundLocationBehavior(yoTime, referenceFrames, communicationBridge, wholeBodyControllerParameters,
             fullRobotModel, atlasPrimitiveActions);

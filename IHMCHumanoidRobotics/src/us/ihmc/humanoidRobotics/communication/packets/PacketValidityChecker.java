@@ -6,7 +6,6 @@ import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmDesiredAccelerationsMessage.ArmControlMode;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.DesiredSteeringAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -14,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -116,7 +115,7 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultSwingTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultSwingDuration);
       if (packetFieldErrorType != null)
       {
          String messageClassName = packetToCheck.getClass().getSimpleName();
@@ -124,17 +123,13 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultTransferTime);
+      packetFieldErrorType = ObjectValidityChecker.validateDouble(packetToCheck.defaultTransferDuration);
       if (packetFieldErrorType != null)
       {
          String messageClassName = packetToCheck.getClass().getSimpleName();
          String errorMessage = messageClassName + "'s transferTime field" + packetFieldErrorType.getMessage();
          return errorMessage;
       }
-
-      boolean timingsValid = true;
-      boolean atLeastOneFootstepHadTiming = false;
-      double lastTime = 0.0;
 
       if (packetToCheck.getDataList() != null)
       {
@@ -149,19 +144,7 @@ public abstract class PacketValidityChecker
                String errorMessage = messageClassName + " field contains a FootstepData in which " + footstepDataListErrorMessage;
                return errorMessage;
             }
-
-            boolean timeIncreasing = footstepData.getSwingStartTime() > lastTime;
-            timingsValid = timingsValid && footstepData.hasAbsoluteTime() && timeIncreasing;
-            atLeastOneFootstepHadTiming = atLeastOneFootstepHadTiming || footstepData.hasAbsoluteTime();
-            lastTime = footstepData.getSwingStartTime();
          }
-      }
-
-      if (atLeastOneFootstepHadTiming && !timingsValid)
-      {
-         String messageClassName = packetToCheck.getClass().getSimpleName();
-         String errorMessage = messageClassName + " contained at least one footstep with absolute timing but the timing was invalid.";
-         return errorMessage;
       }
 
       return null;
@@ -374,6 +357,16 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return HandTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
+      if(handTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+
+      if(handTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
+
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -457,6 +450,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(headTrajectoryMessage, true);
       if (errorMessage != null)
          return HeadTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+
+      if(headTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+
+      if(headTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -570,6 +573,16 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
+      if(message.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+
+      if(message.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
+
       for (int i = 0; i < message.getNumberOfTrajectoryPoints(); i++)
       {
          SO3TrajectoryPointMessage waypoint = message.getTrajectoryPoint(i);
@@ -591,6 +604,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(pelvisOrientationTrajectoryMessage, true);
       if (errorMessage != null)
          return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+
+      if(pelvisOrientationTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+
+      if(pelvisOrientationTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       SO3TrajectoryPointMessage previousTrajectoryPoint = null;
 
@@ -623,6 +646,16 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return PelvisTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
 
+      if(pelvisTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+
+      if(pelvisTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
+
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
 
       if (pelvisTrajectoryMessage.getNumberOfTrajectoryPoints() == 0)
@@ -653,6 +686,16 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(footTrajectoryMessage, true);
       if (errorMessage != null)
          return FootTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
+
+      if(footTrajectoryMessage.getDataReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
+      }
+
+      if(footTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
+      {
+         return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
+      }
 
       ObjectErrorType errorType;
       SE3TrajectoryPointMessage previousTrajectoryPoint = null;
@@ -688,40 +731,20 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateEndEffectorLoadBearingMessage(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
+   public static String validateFootLoadBearingMessage(FootLoadBearingMessage message)
    {
-      String errorMessage = validatePacket(endEffectorLoadBearingMessage, true);
+      String errorMessage = validatePacket(message, true);
       if (errorMessage != null)
-         return EndEffectorLoadBearingMessage.class.getSimpleName() + " " + errorMessage;
+         return FootLoadBearingMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getEndEffector());
+      errorType = ObjectValidityChecker.validateEnum(message.getRequest());
       if (errorType != null)
       {
-         String messageClassName = endEffectorLoadBearingMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s endEffector field " + errorType.getMessage();
-         return errorMessage;
-      }
-
-      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRequest());
-      if (errorType != null)
-      {
-         String messageClassName = endEffectorLoadBearingMessage.getClass().getSimpleName();
+         String messageClassName = message.getClass().getSimpleName();
          errorMessage = messageClassName + "'s request field " + errorType.getMessage();
          return errorMessage;
-      }
-
-      if (endEffectorLoadBearingMessage.getEndEffector().isRobotSideNeeded())
-      {
-         errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRobotSide());
-         if (endEffectorLoadBearingMessage.getRobotSide() == null)
-         {
-            String messageClassName = endEffectorLoadBearingMessage.getClass().getSimpleName();
-            errorMessage = messageClassName + "'s robotSide field is null. It is required for the endEffector "
-                  + endEffectorLoadBearingMessage.getEndEffector();
-            return errorMessage;
-         }
       }
 
       return null;
@@ -802,23 +825,14 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(armDesiredAccelerationsMessage.armControlMode);
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s armControlMode field" + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
-      boolean isInUserControlMode = armDesiredAccelerationsMessage.armControlMode == ArmControlMode.USER_CONTROL_MODE;
-      if (isInUserControlMode && armDesiredAccelerationsMessage.armDesiredJointAccelerations == null)
+      if (armDesiredAccelerationsMessage.desiredJointAccelerations == null)
       {
          String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";
          return errorMessage;
       }
 
-      if (isInUserControlMode && armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
+      if (armDesiredAccelerationsMessage.getNumberOfJoints() == 0)
       {
          String messageClassName = armDesiredAccelerationsMessage.getClass().getSimpleName();
          errorMessage = messageClassName + "'s field with desired joint acceleration is empty.";

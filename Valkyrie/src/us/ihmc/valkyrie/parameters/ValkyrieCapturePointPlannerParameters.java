@@ -11,7 +11,7 @@ public class ValkyrieCapturePointPlannerParameters extends CapturePointPlannerPa
    public ValkyrieCapturePointPlannerParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
-      useTwoCMPsPerSupport = false;
+      useTwoCMPsPerSupport = true;
    }
 
    /** {@inheritDoc} */

@@ -120,7 +120,7 @@ public class DefaultCollisionVisualizer implements CollisionHandlerListener
       AppearanceDefinition appearance = isRed ? YoAppearance.Red() : YoAppearance.Blue();
       YoGraphicVector yoGraphicVector = new YoGraphicVector(name, yo0, yo1, yo2, yo3, yo4, yo5, scale, appearance);
       yoGraphicVector.setLineRadiusWhenOneMeterLong(0.005);
-      yoGraphicVector.setMinAndMaxScaleFactors(0.01, 1.5);
+      yoGraphicVector.setMinAndMaxRadiusScaleFactors(0.01, 1.5);
 
       yoGraphicsListRegistry.registerYoGraphic("CollisionVectors", yoGraphicVector);
 

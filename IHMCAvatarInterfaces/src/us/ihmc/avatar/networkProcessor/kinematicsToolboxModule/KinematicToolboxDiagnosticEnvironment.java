@@ -183,7 +183,7 @@ public class KinematicToolboxDiagnosticEnvironment
          @Override
          public long getVisionSensorTimestamp()
          {
-            timestamp += Conversions.milliSecondsToNanoSeconds(1L);
+            timestamp += Conversions.millisecondsToNanoseconds(1L);
             return timestamp;
          }
 
