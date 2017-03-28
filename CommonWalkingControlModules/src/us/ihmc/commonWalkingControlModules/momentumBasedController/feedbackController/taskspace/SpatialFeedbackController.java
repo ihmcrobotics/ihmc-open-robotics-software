@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -72,6 +73,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
+   private final YoSE3PIDGainsInterface gains;
    private final BodyFixedPointSpatialAccelerationControlModule accelerationControlModule;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -90,7 +92,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       registry = new YoVariableRegistry(endEffectorName + "SpatialFBController");
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
       double dt = toolbox.getControlDT();
-      accelerationControlModule = new BodyFixedPointSpatialAccelerationControlModule(endEffectorName, twistCalculator, endEffector, dt, registry);
+      gains = feedbackControllerToolbox.getSE3PIDGains(endEffector);
+      accelerationControlModule = new BodyFixedPointSpatialAccelerationControlModule(endEffectorName, twistCalculator, endEffector, dt, gains, registry);
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
@@ -131,7 +134,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       base = command.getBase();
       output.set(command.getSpatialAccelerationCommand());
 
-      accelerationControlModule.setGains(command.getGains());
+      gains.set(command.getGains());
 
       command.getControlFramePoseIncludingFrame(tempPosition, tempOrientation);
       accelerationControlModule.setBodyFixedControlFrame(tempPosition, tempOrientation);

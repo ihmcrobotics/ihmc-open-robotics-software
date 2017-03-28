@@ -4,6 +4,14 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
+import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -17,11 +25,7 @@ public class FeedbackControllerToolbox
 
    public enum Type
    {
-      DESIRED("Desired"),
-      CURRENT("Current"),
-      FEEDFORWARD("FeedForward"),
-      ACHIEVED("Achieved"),
-      ERROR("Error");
+      DESIRED("Desired"), CURRENT("Current"), FEEDFORWARD("FeedForward"), ACHIEVED("Achieved"), ERROR("Error");
 
       private final String name;
 
@@ -70,6 +74,8 @@ public class FeedbackControllerToolbox
    private final Map<RigidBody, EnumMap<Type, YoFramePoint>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, YoFrameQuaternion>> endEffectorOrientations = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, EnumMap<Space, YoFrameVector>>> endEffectorDataVectors = new HashMap<>();
+   private final Map<RigidBody, YoOrientationPIDGainsInterface> endEffectorOrientationGains = new HashMap<>();
+   private final Map<RigidBody, YoPositionPIDGainsInterface> endEffectorPositionGains = new HashMap<>();
 
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
@@ -154,5 +160,69 @@ public class FeedbackControllerToolbox
       }
 
       return yoFrameVector;
+   }
+
+   public YoOrientationPIDGainsInterface getOrientationGains(RigidBody endEffector)
+   {
+      YoOrientationPIDGainsInterface gains = endEffectorOrientationGains.get(endEffector);
+
+      if (gains == null)
+      {
+         gains = new YoAxisAngleOrientationGains(endEffector.getName(), registry);
+         endEffectorOrientationGains.put(endEffector, gains);
+      }
+      return gains;
+   }
+
+   public YoPositionPIDGainsInterface getPositionGains(RigidBody endEffector)
+   {
+      YoPositionPIDGainsInterface gains = endEffectorPositionGains.get(endEffector);
+
+      if (gains == null)
+      {
+         gains = new YoEuclideanPositionGains(endEffector.getName(), registry);
+         endEffectorPositionGains.put(endEffector, gains);
+      }
+      return gains;
+   }
+
+   public YoSE3PIDGainsInterface getSE3PIDGains(RigidBody endEffector)
+   {
+      YoPositionPIDGainsInterface positionGains = getPositionGains(endEffector);
+      YoOrientationPIDGainsInterface orientationGains = getOrientationGains(endEffector);
+
+      return new YoSE3PIDGainsInterface()
+      {
+         @Override
+         public void set(PositionPIDGainsInterface positionGains)
+         {
+            positionGains.set(positionGains);
+         }
+
+         @Override
+         public void set(OrientationPIDGainsInterface orientationGains)
+         {
+            orientationGains.set(orientationGains);
+         }
+
+         @Override
+         public void set(SE3PIDGainsInterface gains)
+         {
+            positionGains.set(gains.getPositionGains());
+            orientationGains.set(gains.getOrientationGains());
+         }
+
+         @Override
+         public YoPositionPIDGainsInterface getPositionGains()
+         {
+            return positionGains;
+         }
+
+         @Override
+         public YoOrientationPIDGainsInterface getOrientationGains()
+         {
+            return orientationGains;
+         }
+      };
    }
 }
