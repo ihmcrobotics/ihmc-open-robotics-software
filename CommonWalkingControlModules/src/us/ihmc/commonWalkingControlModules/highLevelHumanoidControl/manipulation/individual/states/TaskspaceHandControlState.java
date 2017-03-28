@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulatio
 
 import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
-import java.util.Map;
+import java.util.Collection;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -18,7 +18,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.BaseForControl;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -80,8 +79,6 @@ public class TaskspaceHandControlState extends HandControlState
    private final Vector3D angularWeight = new Vector3D();
    private final Vector3D linearWeight = new Vector3D();
 
-   private final Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap;
-
    private final BooleanYoVariable abortTaskspaceControlState;
    private final LongYoVariable lastCommandId;
 
@@ -90,13 +87,11 @@ public class TaskspaceHandControlState extends HandControlState
    private final RecyclingArrayDeque<HandTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(HandTrajectoryCommand.class);
 
    public TaskspaceHandControlState(String namePrefix, RigidBody base, RigidBody endEffector, RigidBody chest, YoSE3PIDGainsInterface gains,
-         Map<BaseForControl, ReferenceFrame> baseForControlToReferenceFrameMap, YoGraphicsListRegistry yoGraphicsListRegistry,
+         Collection<ReferenceFrame> trajectoryFrames, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.TASKSPACE);
       this.gains = gains;
-      this.baseForControlToReferenceFrameMap = baseForControlToReferenceFrameMap;
-
       name = namePrefix + FormattingTools.underscoredToCamelCase(getStateEnum().toString(), true) + "State";
       registry = new YoVariableRegistry(name);
 
@@ -119,7 +114,7 @@ public class TaskspaceHandControlState extends HandControlState
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(namePrefix, true, worldFrame, registry);
 
-      for (ReferenceFrame frameToRegister : baseForControlToReferenceFrameMap.values())
+      for (ReferenceFrame frameToRegister : trajectoryFrames)
       {
          positionTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
          orientationTrajectoryGenerator.registerNewTrajectoryFrame(frameToRegister);
@@ -270,11 +265,11 @@ public class TaskspaceHandControlState extends HandControlState
       updateControlFrameAndDesireds(newControlFrame, initializeToCurrent, initialTrajectoryPoint);
       command.addTimeOffset(firstTrajectoryPointTime);
 
-      ReferenceFrame trajectoryFrame = baseForControlToReferenceFrameMap.get(command.getBase());
+      ReferenceFrame trajectoryFrame = command.getTrajectoryFrame();
 
       if (trajectoryFrame == null)
       {
-         PrintTools.error(this, "The base: " + command.getBase() + " is not handled.");
+         PrintTools.error(this, "The base: " + command.getTrajectoryFrame() + " is not handled.");
          abortTaskspaceControlState.set(true);
          return;
       }

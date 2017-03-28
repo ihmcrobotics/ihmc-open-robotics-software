@@ -34,7 +34,7 @@ public class AtlasStepAdjustmentDemo
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap())
+            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
                public boolean allowDisturbanceRecoveryBySpeedingUpSwing()

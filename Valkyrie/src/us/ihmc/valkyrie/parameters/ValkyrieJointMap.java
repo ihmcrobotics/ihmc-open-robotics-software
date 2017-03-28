@@ -11,7 +11,6 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -24,7 +23,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class ValkyrieJointMap implements DRCRobotJointMap
 {
@@ -52,18 +50,11 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<>(SpineJointName.class);
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
-   private final ValkyrieContactPointParameters contactPointParameters;
-
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<>();
    private final SideDependentList<String> nameOfJointsBeforeHands = new SideDependentList<>();
    private final String[] jointNamesBeforeFeet = new String[2];
 
    public ValkyrieJointMap()
-   {
-      this(null);
-   }
-
-   public ValkyrieJointMap(FootContactPoints simulationContactPoints)
    {
       boolean selectedValkyrieVersionHasArms = ValkyrieConfigurationRoot.VALKYRIE_WITH_ARMS;
       if (selectedValkyrieVersionHasArms)
@@ -141,8 +132,6 @@ public class ValkyrieJointMap implements DRCRobotJointMap
          jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      contactPointParameters = new ValkyrieContactPointParameters(this, simulationContactPoints);
-
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
@@ -151,8 +140,6 @@ public class ValkyrieJointMap implements DRCRobotJointMap
 
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
-
-
    }
 
    private static String getRobotSidePrefix(RobotSide robotSide)
@@ -271,18 +258,6 @@ public class ValkyrieJointMap implements DRCRobotJointMap
    public String getJointBeforeHandName(RobotSide robotSide)
    {
       return nameOfJointsBeforeHands.get(robotSide);
-   }
-
-   @Override
-   public ValkyrieContactPointParameters getContactPointParameters()
-   {
-      return contactPointParameters;
-   }
-
-   @Override
-   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
-   {
-      return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
    @Override public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)

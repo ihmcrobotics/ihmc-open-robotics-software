@@ -22,6 +22,10 @@ public class RigidBody implements NameBasedHashCodeHolder
 
    public RigidBody(String name, ReferenceFrame rootBodyFrame) // root body constructor
    {
+      if(name == null)
+      {
+         throw new IllegalArgumentException("Name can not be null");
+      }
       nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(name);
       this.name = name;
       this.inertia = null;
@@ -139,7 +143,7 @@ public class RigidBody implements NameBasedHashCodeHolder
    }
 
    @Override
-   public long nameBasedHashCode()
+   public long getNameBasedHashCode()
    {
       return nameBasedHashCode;
    }

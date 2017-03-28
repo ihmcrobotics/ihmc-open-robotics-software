@@ -131,7 +131,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       tempEstimationLinkAngularVelocity.setIncludingFrame(angularVelocityPort.getData());
 
       // T_{root}^{root, estimation}
-      twistCalculator.getRelativeTwist(tempRootToEstimationTwist, estimationLink, rootJoint.getSuccessor());
+      twistCalculator.getRelativeTwist(estimationLink, rootJoint.getSuccessor(), tempRootToEstimationTwist);
       tempRootToEstimationTwist.changeFrame(rootJoint.getFrameAfterJoint());
 
       // omega_{root}^{root, estimation}
@@ -153,7 +153,7 @@ public class OrientationAndPositionFullRobotModelUpdater implements Runnable
       tempCrossTerm.cross(tempRootToEstimationAngularVelocity, tempEstimationLinkAngularVelocity);
 
       // \omega_{root}^{root, estimation}
-      spatialAccelerationCalculator.getRelativeAcceleration(tempRootToEstimationAcceleration, estimationLink, rootJoint.getSuccessor());
+      spatialAccelerationCalculator.getRelativeAcceleration(estimationLink, rootJoint.getSuccessor(), tempRootToEstimationAcceleration);
       tempRootToEstimationAcceleration.changeFrameNoRelativeMotion(rootJoint.getFrameAfterJoint());
       tempRootToEstimationAcceleration.getAngularPart(tempRootToEstimationAngularAcceleration);
       tempRootToEstimationAngularAcceleration.changeFrame(estimationFrame);

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -237,7 +238,7 @@ public class ConvexPolygon2dCalculator
     */
    public static boolean isPointInBoundingBox(double pointX, double pointY, double epsilon, ConvexPolygon2d polygon)
    {
-      BoundingBox2d boundingBox = polygon.getBoundingBox();
+      BoundingBox2D boundingBox = polygon.getBoundingBox();
 
       if (pointX < boundingBox.getMinPoint().getX() - epsilon)
          return false;

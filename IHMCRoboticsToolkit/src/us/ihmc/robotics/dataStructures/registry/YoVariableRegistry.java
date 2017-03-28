@@ -951,10 +951,10 @@ public class YoVariableRegistry implements YoVariableHolder
       });
 
       System.out.println("");
-      PrintTools.info("String recursively at " + root.getName() + " registry.");
+      PrintTools.info("Printing children of " + root.getName() + " registry.");
       System.out.println("Total Number of YoVariables: " + totalVariables);
-      System.out.println("Listing Variables with more then " + minVariablesToPrint + " variables or more then " + minChildrenToPrint + " children.");
-      System.out.println("Sorting by number of children.\n");
+      System.out.println("Listing registries with more then " + minVariablesToPrint + " variables or more then " + minChildrenToPrint + " children.");
+      System.out.println("Sorting by number of variables.\n");
 
       for (int registryIdx = 0; registryIdx < registriesOfInterest.size(); registryIdx++)
          YoVariableRegistry.printInfo(registriesOfInterest.get(registryIdx));

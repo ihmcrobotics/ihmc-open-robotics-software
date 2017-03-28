@@ -27,8 +27,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    private final DoubleYoVariable trajectoryStartTime;
    private final DoubleYoVariable yoTime;
 
-   // TODO: move adding the registry to the parent registry here instead of doing it in each implementation of this class.
-   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime)
+   public RigidBodyControlState(RigidBodyControlMode stateEnum, String bodyName, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
    {
       super(stateEnum);
       this.yoTime = yoTime;
@@ -42,6 +41,8 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       trajectoryStopped = new BooleanYoVariable(prefix + "TrajectoryStopped", registry);
       trajectoryDone = new BooleanYoVariable(prefix + "TrajectoryDone", registry);
       trajectoryStartTime = new DoubleYoVariable(prefix + "TrajectoryStartTime", registry);
+
+      parentRegistry.addChild(registry);
    }
 
    protected boolean handleCommandInternal(Command<?, ?> command)
@@ -109,5 +110,10 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    public boolean isDone()
    {
       return true;
+   }
+
+   public InverseDynamicsCommand<?> getTransitionOutOfStateCommand()
+   {
+      return null;
    }
 }

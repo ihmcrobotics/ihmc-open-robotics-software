@@ -14,6 +14,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbstractLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
@@ -37,7 +40,7 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineToo
 
 public class RigidBodyControlManager
 {
-   public static final double DEFAULT_GO_HOME_TIME = 2.0;
+   public static final double INITIAL_GO_HOME_TIME = 2.0;
 
    private final String bodyName;
    private final YoVariableRegistry registry;
@@ -59,14 +62,15 @@ public class RigidBodyControlManager
    private final OneDoFJoint[] jointsOriginal;
 
    private final BooleanYoVariable allJointsEnabled;
-   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
-
    private final BooleanYoVariable hasBeenInitialized;
+
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
+   private final BooleanYoVariable stateSwitched;
 
    public RigidBodyControlManager(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, TObjectDoubleHashMap<String> homeConfiguration,
          List<String> positionControlledJointNames, Map<String, JointAccelerationIntegrationSettings> integrationSettings,
-         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime,
-         YoVariableRegistry parentRegistry)
+         Collection<ReferenceFrame> trajectoryFrames, ReferenceFrame controlFrame, ReferenceFrame baseFrame, ContactablePlaneBody contactableBody,
+         DoubleYoVariable yoTime, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -76,17 +80,22 @@ public class RigidBodyControlManager
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
       hasBeenInitialized = new BooleanYoVariable(namePrefix + "HasBeenInitialized", registry);
+      stateSwitched = new BooleanYoVariable(namePrefix + "StateSwitched", registry);
 
       OneDoFJoint[] jointsToControl = ScrewTools.createOneDoFJointPath(baseBody, bodyToControl);
       jointsOriginal = jointsToControl;
       initialJointPositions = new double[jointsOriginal.length];
 
+      positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
+
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
-      loadBearingControlState = new RigidBodyLoadBearingControlState(bodyName, yoTime, registry);
 
-      positionControlHelper = new RigidBodyPositionControlHelper(bodyName, jointsToControl, positionControlledJointNames, integrationSettings, registry);
+      if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
+         loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, graphicsListRegistry, registry);
+      else
+         loadBearingControlState = null;
 
       allJointsEnabled = new BooleanYoVariable(namePrefix + "AllJointsEnabled", registry);
       allJointsEnabled.set(true);
@@ -101,7 +110,8 @@ public class RigidBodyControlManager
       states.add(jointspaceControlState);
       states.add(taskspaceControlState);
       states.add(userControlState);
-      states.add(loadBearingControlState);
+      if (loadBearingControlState != null)
+         states.add(loadBearingControlState);
 
       for (RigidBodyControlState fromState : states)
       {
@@ -119,6 +129,8 @@ public class RigidBodyControlManager
       jointspaceControlState.setWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       userControlState.setWeights(userModeWeights);
+      if (loadBearingControlState != null)
+         loadBearingControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
    }
 
    public void setGains(Map<String, YoPIDGains> jointspaceGains, YoOrientationPIDGainsInterface taskspaceOrientationGains,
@@ -126,13 +138,15 @@ public class RigidBodyControlManager
    {
       jointspaceControlState.setGains(jointspaceGains);
       taskspaceControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
+      if (loadBearingControlState != null)
+         loadBearingControlState.setGains(taskspaceOrientationGains, taskspacePositionGains);
    }
 
    public void initialize()
    {
       if (!hasBeenInitialized.getBooleanValue())
       {
-         goToHomeFromCurrent(DEFAULT_GO_HOME_TIME);
+         goToHomeFromCurrent(INITIAL_GO_HOME_TIME);
          hasBeenInitialized.set(true);
       }
    }
@@ -146,7 +160,7 @@ public class RigidBodyControlManager
       if (stateMachine.getCurrentState().abortState())
          holdInJointspace();
 
-      stateMachine.checkTransitionConditions();
+      stateSwitched.set(stateMachine.checkTransitionConditions());
       stateMachine.doAction();
 
       positionControlHelper.update();
@@ -167,7 +181,7 @@ public class RigidBodyControlManager
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
       initialOrientation.setToZero(controlFrame);
-      initialOrientation.changeFrame(command.getReferenceFrame());
+      initialOrientation.changeFrame(command.getDataFrame());
 
       if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialOrientation))
       {
@@ -183,7 +197,7 @@ public class RigidBodyControlManager
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
       initialPose.setToZero(controlFrame);
-      initialPose.changeFrame(command.getReferenceFrame());
+      initialPose.changeFrame(command.getDataFrame());
 
       if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
       {
@@ -237,19 +251,32 @@ public class RigidBodyControlManager
       requestState(jointspaceControlState.getStateEnum());
    }
 
-   public void requestLoadBearing()
+   public void handleLoadBearingCommand(AbstractLoadBearingCommand<?, ?> command)
    {
-      if (positionControlHelper.hasPositionControlledJoints())
+      if (loadBearingControlState == null)
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing since some joints are position controlled.");
+         PrintTools.info(getClass().getSimpleName() + " for " + bodyName + " can not go to load bearing.");
          return;
       }
+
+      if (!command.getLoad())
+      {
+         holdInJointspace();
+         return;
+      }
+
+      loadBearingControlState.setCoefficientOfFriction(command.getCoefficientOfFriction());
+      loadBearingControlState.setContactNormalInWorldFrame(command.getContactNormalInWorldFrame());
+      loadBearingControlState.setAndUpdateContactFrame(command.getBodyFrameToContactFrame());
       requestState(loadBearingControlState.getStateEnum());
    }
 
    public boolean isLoadBearing()
    {
-      return stateMachine.getCurrentStateEnum() == RigidBodyControlMode.LOAD_BEARING;
+      if (loadBearingControlState == null)
+         return false;
+
+      return stateMachine.getCurrentStateEnum() == loadBearingControlState.getStateEnum();
    }
 
    public void resetJointIntegrators()
@@ -260,7 +287,7 @@ public class RigidBodyControlManager
 
    private void computeDesiredJointPositions(double[] desiredJointPositionsToPack)
    {
-      if (stateMachine.getCurrentStateEnum() == RigidBodyControlMode.JOINTSPACE)
+      if (stateMachine.getCurrentStateEnum() == jointspaceControlState.getStateEnum())
       {
          for (int i = 0; i < jointsOriginal.length; i++)
             desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
@@ -308,6 +335,14 @@ public class RigidBodyControlManager
       inverseDynamicsCommandList.clear();
       inverseDynamicsCommandList.addCommand(stateMachine.getCurrentState().getInverseDynamicsCommand());
       inverseDynamicsCommandList.addCommand(positionControlHelper.getJointAccelerationIntegrationCommand());
+
+      if (stateSwitched.getBooleanValue())
+      {
+         RigidBodyControlState previousState = stateMachine.getPreviousState();
+         InverseDynamicsCommand<?> transitionOutOfStateCommand = previousState.getTransitionOutOfStateCommand();
+         inverseDynamicsCommandList.addCommand(transitionOutOfStateCommand);
+      }
+
       return inverseDynamicsCommandList;
    }
 

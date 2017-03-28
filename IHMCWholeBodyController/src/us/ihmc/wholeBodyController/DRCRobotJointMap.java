@@ -34,7 +34,5 @@ public interface DRCRobotJointMap extends HumanoidJointNameMap
 
    public abstract String[] getPositionControlledJointsForSimulation();
 
-   public abstract RobotContactPointParameters getContactPointParameters();
-
    public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry);
 }

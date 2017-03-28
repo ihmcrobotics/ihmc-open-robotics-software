@@ -22,12 +22,9 @@ import us.ihmc.robotics.time.ExecutionTimer;
 
 public class WholeBodyControllerCore
 {
-   private static final boolean INCLUDE_INVERSE_DYNAMICS_SOLVER = true;
-   private static final boolean INCLUDE_INVERSE_KINEMATICS_SOLVER = true;
-   private static final boolean INCLUDE_VIRTUAL_MODEL_CONTROL_SOLVER = true;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final EnumYoVariable<WholeBodyControllerCoreMode> currentMode = new EnumYoVariable<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
+   private final EnumYoVariable<WholeBodyControllerCoreMode> currentMode = new EnumYoVariable<>("currentControllerCoreMode", registry,
+                                                                                                WholeBodyControllerCoreMode.class);
    private final IntegerYoVariable numberOfFBControllerEnabled = new IntegerYoVariable("numberOfFBControllerEnabled", registry);
 
    private final WholeBodyFeedbackController feedbackController;
@@ -43,21 +40,25 @@ public class WholeBodyControllerCore
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
-         YoVariableRegistry parentRegistry)
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
    {
+      this(toolbox, allPossibleCommands, true, true, true, parentRegistry);
+   }
 
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, boolean setupInverseDynamics,
+                                  boolean setupInverseKinematics, boolean setupVirtualModelControl, YoVariableRegistry parentRegistry)
+   {
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
 
-      if (INCLUDE_INVERSE_DYNAMICS_SOLVER)
+      if (setupInverseDynamics)
          inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       else
          inverseDynamicsSolver = null;
-      if (INCLUDE_INVERSE_KINEMATICS_SOLVER)
+      if (setupInverseKinematics)
          inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
       else
          inverseKinematicsSolver = null;
-      if (INCLUDE_VIRTUAL_MODEL_CONTROL_SOLVER)
+      if (setupVirtualModelControl)
          virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
       else
          virtualModelControlSolver = null;
@@ -68,7 +69,7 @@ public class WholeBodyControllerCore
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
-      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = inverseDynamicsSolver.getDesiredCenterOfPressureDataHolder();
+      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
       controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints);
 
       parentRegistry.addChild(registry);

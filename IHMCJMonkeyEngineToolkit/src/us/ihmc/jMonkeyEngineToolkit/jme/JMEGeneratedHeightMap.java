@@ -9,13 +9,13 @@ import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 import com.jme3.system.JmeSystem;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.SimpleLRUCache;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.Ray3d;
 
 public class JMEGeneratedHeightMap implements HeightMap
@@ -30,7 +30,7 @@ public class JMEGeneratedHeightMap implements HeightMap
 
 //   private final double xMin = -100.0, xMax = 100.0, yMin = -100.0, yMax = 100.0; 
    private final double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0; // Disable rendering heightmap
-   private final BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   private final BoundingBox3D boundingBox = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
    private final JMERayCollisionAdapter jmeRayCollisionAdapter;
    private final Node rootNode = new Node("jmeGeneratedHeightMapRootNode");
@@ -215,7 +215,7 @@ public class JMEGeneratedHeightMap implements HeightMap
 
    }
    
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

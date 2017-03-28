@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -8,13 +9,12 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
    private final Point2D origin;
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    private final Vector2D direction;
    private final double width;
 
@@ -41,7 +41,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
       Point3D minPoint = new Point3D(xMin, yMin, zMin);
       Point3D maxPoint = new Point3D(xMax, yMax, zMax);
       
-      this.boundingBox = new BoundingBox3d(minPoint, maxPoint);
+      this.boundingBox = new BoundingBox3D(minPoint, maxPoint);
       
       this.direction = direction;
       this.width = width;
@@ -123,28 +123,28 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return boundingBox.isInside(x, y, z);
+      return boundingBox.isInsideInclusive(x, y, z);
    }
 
 
    public double getXMin()
    {
-      return boundingBox.getXMin();
+      return boundingBox.getMinX();
    }
 
    public double getYMin()
    {
-      return boundingBox.getYMin();
+      return boundingBox.getMinY();
    }
 
    public double getXMax()
    {
-      return boundingBox.getXMax();
+      return boundingBox.getMaxX();
    }
 
    public double getYMax()
    {
-      return boundingBox.getYMax();
+      return boundingBox.getMaxY();
    }
 
    @Override
@@ -154,7 +154,7 @@ public class BalanceBeamTerrainObject implements TerrainObject3D, HeightMapWithN
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }
