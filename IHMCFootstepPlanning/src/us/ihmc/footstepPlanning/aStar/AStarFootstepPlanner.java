@@ -218,7 +218,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          throw new RuntimeException("Planner does not support goals other then " + supportedGoalType);
    }
 
-   public static AStarFootstepPlanner createDefaultPlanner(FootstepNodeVisualization viz)
+   public static AStarFootstepPlanner createDefaultPlanner(GraphVisualization viz)
    {
       SimpleNodeChecker nodeChecker = new SimpleNodeChecker();
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
