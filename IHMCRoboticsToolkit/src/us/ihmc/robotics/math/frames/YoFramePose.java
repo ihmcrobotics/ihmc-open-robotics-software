@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -12,7 +13,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class YoFramePose extends AbstractReferenceFrameHolder
+public class YoFramePose extends AbstractReferenceFrameHolder implements Clearable
 {
    private final YoFramePoint position;
    private final YoFrameOrientation orientation;
@@ -199,18 +200,27 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       setYawPitchRoll(pose[3], pose[4], pose[5]);
    }
 
+   @Override
    public void setToNaN()
    {
       position.setToNaN();
       orientation.setToNaN();
    }
 
+   @Override
    public void setToZero()
    {
       position.setToZero();
       orientation.setToZero();
    }
 
+   @Override
+   public boolean containsNaN()
+   {
+      return position.containsNaN() || orientation.containsNaN();
+   }
+
+   @Override
    public ReferenceFrame getReferenceFrame()
    {
       return position.getReferenceFrame();
