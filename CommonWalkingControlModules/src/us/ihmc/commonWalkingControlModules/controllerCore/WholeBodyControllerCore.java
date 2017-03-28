@@ -57,6 +57,9 @@ public class WholeBodyControllerCore
       else
          virtualModelControlSolver = null;
 
+      if (inverseDynamicsSolver == null && inverseKinematicsSolver == null && virtualModelControlSolver == null)
+         throw new RuntimeException("Controller core is not properly setup, none of the control modes is enabled.");
+
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
