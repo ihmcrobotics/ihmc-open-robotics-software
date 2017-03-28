@@ -7,8 +7,9 @@ import java.util.List;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryGraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -176,6 +177,8 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
                                                                                         trajectories.get(Direction.Z));
          trajectoryViz = new YoGraphicPolynomial3D(namePrefix + "Trajectory", swingFramePose, yoPolynomial3Ds, waypointTimes, 0.01, 50, 8, registry);
          graphicsListRegistry.registerYoGraphic(namePrefix + "Trajectory", trajectoryViz);
+
+         trajectoryViz.setColorType(TrajectoryColorType.ACCELERATION_BASED);
       }
       else
          trajectoryViz = null;
@@ -303,7 +306,7 @@ public class Position2dOptimizedSwingTrajectoryGenerator implements WaypointTraj
          return;
 
       trajectoryViz.setGraphicType(TrajectoryGraphicType.SHOW_AS_LINE);
-      
+
    }
 
    @Override
