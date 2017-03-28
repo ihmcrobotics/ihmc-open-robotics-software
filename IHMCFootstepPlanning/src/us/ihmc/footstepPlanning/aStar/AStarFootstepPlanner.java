@@ -186,7 +186,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
          }
 
          long timeInNano = System.nanoTime();
-         if (Conversions.nanoSecondstoSeconds(timeInNano - planningStartTime) > timeout)
+         if (Conversions.nanosecondsToSeconds(timeInNano - planningStartTime) > timeout)
             break;
       }
    }
