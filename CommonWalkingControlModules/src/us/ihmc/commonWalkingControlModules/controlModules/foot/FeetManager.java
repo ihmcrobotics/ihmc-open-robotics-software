@@ -62,7 +62,7 @@ public class FeetManager
 
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
-         contactStates.put(robotSide, controllerToolbox.getContactState(feet.get(robotSide)));
+         contactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
 
       toeOffHelper = new ToeOffHelper(contactStates, feet, walkingControllerParameters, registry);
       walkOnTheEdgesManager = new WalkOnTheEdgesManager(controllerToolbox, toeOffHelper, walkingControllerParameters, feet, registry);

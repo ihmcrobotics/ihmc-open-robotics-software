@@ -60,6 +60,7 @@ import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrie.configuration.YamlWithIncludesLoader;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCapturePointPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -83,6 +84,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final DRCRobotPhysicalProperties physicalProperties;
    private final ValkyrieSensorInformation sensorInformation;
    private final ValkyrieJointMap jointMap;
+   private final ValkyrieContactPointParameters contactPointParameters;
    private final DRCHandType drcHandType = DRCHandType.VALKYRIE;
    private final String robotName = "VALKYRIE";
    private final SideDependentList<Transform> offsetHandFromWrist = new SideDependentList<Transform>();
@@ -122,7 +124,8 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public ValkyrieRobotModel(DRCRobotModel.RobotTarget target, boolean headless, String model, FootContactPoints simulationContactPoints)
    {
       this.target = target;
-      jointMap = new ValkyrieJointMap(simulationContactPoints);
+      jointMap = new ValkyrieJointMap();
+      contactPointParameters = new ValkyrieContactPointParameters(jointMap, simulationContactPoints);
       physicalProperties = new ValkyriePhysicalProperties();
       sensorInformation = new ValkyrieSensorInformation(target);
       InputStream sdf = null;
@@ -191,7 +194,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
       return robotDescription;
    }
 
@@ -322,7 +325,7 @@ public class ValkyrieRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public RobotContactPointParameters getContactPointParameters()
    {
-      return jointMap.getContactPointParameters();
+      return contactPointParameters;
    }
 
    @Override

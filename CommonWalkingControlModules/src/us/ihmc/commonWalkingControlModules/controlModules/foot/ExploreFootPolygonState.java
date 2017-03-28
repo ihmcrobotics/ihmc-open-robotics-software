@@ -187,7 +187,7 @@ public class ExploreFootPolygonState extends AbstractFootControlState
       boolean contactStateHasChanged = false;
       if (timeInState > recoverTime.getDoubleValue() && !done)
       {
-         YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
          {
