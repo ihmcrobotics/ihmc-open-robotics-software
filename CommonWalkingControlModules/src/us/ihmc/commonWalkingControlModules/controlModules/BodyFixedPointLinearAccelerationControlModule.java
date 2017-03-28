@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
