@@ -100,7 +100,7 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       position.set(tempFramePoint, notifyListeners);
       orientation.set(tempFrameOrientation, notifyListeners);
    }
-   
+
    /**
     * Sets this frame pose to the origin of the passed in reference frame.
     * 
@@ -117,30 +117,30 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
    }
-   
+
    public void setPosition(Tuple3DReadOnly position)
    {
-      this.position.set(position);      
+      this.position.set(position);
    }
-   
+
    public void setOrientation(FrameOrientation frameOrientation)
    {
       boolean notifyListeners = true;
       orientation.set(frameOrientation, notifyListeners);
    }
-   
+
    public void setOrientation(QuaternionReadOnly quaternion)
    {
       orientation.set(quaternion);
    }
-   
+
    public void set(FramePoint framePoint, FrameOrientation frameOrientation)
    {
       boolean notifyListeners = true;
       position.set(framePoint, notifyListeners);
       orientation.set(frameOrientation, notifyListeners);
    }
-   
+
    public void set(YoFramePose yoFramePose)
    {
       set(yoFramePose.getPosition().getFrameTuple(), yoFramePose.getOrientation().getFrameOrientation());
@@ -152,7 +152,7 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       position.setAndMatchFrame(framePoint, notifyListeners);
       orientation.setAndMatchFrame(frameOrientation, notifyListeners);
    }
-   
+
    public void setPosition(double x, double y, double z)
    {
       position.set(x, y, z);
@@ -172,22 +172,21 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    {
       orientation.setYawPitchRoll(yaw, pitch, roll);
    }
-   
+
    public void setYaw(double yaw)
    {
       orientation.setYaw(yaw);
    }
-   
+
    public void setPitch(double pitch)
    {
       orientation.setPitch(pitch);
    }
-   
+
    public void setRoll(double roll)
    {
       orientation.setRoll(roll);
    }
-
 
    public void setYawPitchRoll(double[] yawPitchRoll)
    {
@@ -211,7 +210,7 @@ public class YoFramePose extends AbstractReferenceFrameHolder
       position.setToZero();
       orientation.setToZero();
    }
-   
+
    public ReferenceFrame getReferenceFrame()
    {
       return position.getReferenceFrame();
@@ -232,42 +231,42 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    {
       position.setX(x);
    }
-   
+
    public void setY(double y)
    {
       position.setY(y);
    }
-   
+
    public void setZ(double z)
    {
       position.setZ(z);
    }
-   
+
    public double getX()
    {
       return getPosition().getX();
    }
-   
+
    public double getY()
    {
       return getPosition().getY();
    }
-   
+
    public double getZ()
    {
       return getPosition().getZ();
    }
-   
+
    public double getRoll()
    {
       return getOrientation().getRoll().getDoubleValue();
    }
-   
+
    public double getPitch()
    {
       return getOrientation().getPitch().getDoubleValue();
    }
-   
+
    public double getYaw()
    {
       return getOrientation().getYaw().getDoubleValue();
@@ -283,27 +282,27 @@ public class YoFramePose extends AbstractReferenceFrameHolder
    {
       return getPosition().getYoX();
    }
-   
+
    public DoubleYoVariable getYoY()
    {
       return getPosition().getYoY();
    }
-   
+
    public DoubleYoVariable getYoZ()
    {
       return getPosition().getYoZ();
    }
-   
+
    public DoubleYoVariable getYoPitch()
    {
       return getOrientation().getPitch();
    }
-   
+
    public DoubleYoVariable getYoRoll()
    {
       return getOrientation().getRoll();
    }
-   
+
    public DoubleYoVariable getYoYaw()
    {
       return getOrientation().getYaw();
