@@ -46,8 +46,8 @@ public class TrajectoryPointOptimizer
    private static final double regularizationWeight = 1E-10;
    private static final double epsilon = 1E-7;
 
-   private static final double initialTimeGain = 0.002;
-   private static final double costEpsilon = 0.1;
+   private static final double initialTimeGain = 0.001;
+   private static final double costEpsilon = 0.01;
 
    private final YoVariableRegistry registry;
 
@@ -88,7 +88,8 @@ public class TrajectoryPointOptimizer
    private final DenseMatrix64F timeUpdate = new DenseMatrix64F(1, 1);
    private final DoubleYoVariable timeGain;
 
-   private final ExecutionTimer timer;
+   private final ExecutionTimer computeTimer;
+   private final ExecutionTimer timeUpdateTimer;
 
    private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.linear(0);
 
@@ -122,7 +123,8 @@ public class TrajectoryPointOptimizer
       this.inversionSize = new IntegerYoVariable(namePrefix + "InversionSize", registry);
       this.constraints = new IntegerYoVariable(namePrefix + "Conditions", registry);
       this.iteration = new IntegerYoVariable(namePrefix + "Iteration", registry);
-      this.timer = new ExecutionTimer(namePrefix + "TrajectoryOptimizationTimer", 0.5, registry);
+      this.computeTimer = new ExecutionTimer(namePrefix + "ComputeTimer", 0.0, registry);
+      this.timeUpdateTimer = new ExecutionTimer(namePrefix + "TimeUpdateTimer", 0.0, registry);
       this.timeGain = new DoubleYoVariable(namePrefix + "TimeGain", registry);
 
       dimensions = Math.max(dimensions, 0);
@@ -220,7 +222,7 @@ public class TrajectoryPointOptimizer
     */
    public void compute(int maxIterations)
    {
-      timer.startMeasurement();
+      computeTimer.startMeasurement();
       timeGain.set(initialTimeGain);
 
       int intervals = nWaypoints.getIntegerValue() + 1;
@@ -239,7 +241,7 @@ public class TrajectoryPointOptimizer
             break;
       }
 
-      timer.stopMeasurement();
+      computeTimer.stopMeasurement();
    }
 
    /**
@@ -266,6 +268,8 @@ public class TrajectoryPointOptimizer
 
    private double computeTimeUpdate(double cost)
    {
+      timeUpdateTimer.startMeasurement();
+
       int intervals = this.intervals.getIntegerValue();
       timeGradient.reshape(intervals, 1);
       saveIntervalTimes.set(intervalTimes);
@@ -308,7 +312,10 @@ public class TrajectoryPointOptimizer
          }
       }
 
-      return applyTimeUpdate();
+      double newCost = applyTimeUpdate();
+
+      timeUpdateTimer.stopMeasurement();
+      return newCost;
    }
 
    private double applyTimeUpdate()
