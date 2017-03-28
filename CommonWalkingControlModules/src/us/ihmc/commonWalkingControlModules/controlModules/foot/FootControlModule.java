@@ -23,7 +23,9 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -85,8 +87,8 @@ public class FootControlModule
       this.toeOffHelper = toeOffHelper;
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
-      controllerToolbox.setPlaneContactCoefficientOfFriction(contactableFoot, coefficientOfFriction);
-      controllerToolbox.setPlaneContactStateFullyConstrained(contactableFoot);
+      controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
+      controllerToolbox.setFootContactStateFullyConstrained(robotSide);
 
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Foot";
@@ -318,7 +320,7 @@ public class FootControlModule
          footControlHelper.setFullyConstrainedNormalContactVector(normalContactVector);
       }
 
-      controllerToolbox.setPlaneContactState(contactableFoot, contactStatesMap.get(constraintType), normalContactVector);
+      controllerToolbox.setFootContactState(robotSide, contactStatesMap.get(constraintType), normalContactVector);
 
       if (getCurrentConstraintType() == constraintType) // Use resetCurrentState() for such case
          return;

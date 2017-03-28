@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logProcessor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
@@ -28,22 +29,20 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumanoidControllerToolbox
 {
    private static final boolean UPDATE_CAPTURE_POINT_FROM_SCS = false;
-   
+
    private final SideDependentList<YoFramePoint2d> desiredCoPsUpdatedFromSCS = new SideDependentList<>();
-   
+
    private final YoFramePoint capturePointUpdatedFromSCS;
 
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel,
-                                                      GeometricJacobianHolder robotJacobianHolder, CommonHumanoidReferenceFrames referenceFrames,
-                                                      SideDependentList<FootSwitchInterface> footSwitches,
-                                                      CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-                                                      SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ,
-                                                      double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet,
-                                                      SideDependentList<ContactablePlaneBody> hands, double controlDT, ArrayList<Updatable> updatables,
-                                                      YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+         GeometricJacobianHolder robotJacobianHolder, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+         CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime,
+         double gravityZ, double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, double controlDT,
+         ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+         InverseDynamicsJoint... jointsToIgnore)
    {
       super(fullRobotModel, robotJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors, yoTime, gravityZ, omega0,
-            twistCalculator, feet, hands, controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
+            twistCalculator, feet, controlDT, updatables, contactableBodies, yoGraphicsListRegistry, jointsToIgnore);
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)
       {

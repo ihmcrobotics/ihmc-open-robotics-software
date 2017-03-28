@@ -8,11 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -22,7 +22,7 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 
-public class LLAQuadrupedJointNameMap implements QuadrupedJointNameMap
+public class LLAQuadrupedJointNameMapAndContactDefinition implements QuadrupedJointNameMap, ContactPointDefinitionHolder
 {
    private final String modelName = "llaQuadruped";
    private final String rootJoint = "body";
@@ -37,7 +37,7 @@ public class LLAQuadrupedJointNameMap implements QuadrupedJointNameMap
    private final List<ImmutablePair<String, Vector3D>> jointNameGroundContactPointMap = new ArrayList<>();
    private final QuadrantDependentList<HashMap<LegJointName, String>> mapFromLegJointNameToJointId = new QuadrantDependentList<>();
 
-   public LLAQuadrupedJointNameMap(LLAQuadrupedPhysicalProperties physicalProperties)
+   public LLAQuadrupedJointNameMapAndContactDefinition(LLAQuadrupedPhysicalProperties physicalProperties)
    {
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
@@ -74,7 +74,7 @@ public class LLAQuadrupedJointNameMap implements QuadrupedJointNameMap
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values())
       {
          jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3D>(getJointBeforeFootName(robotQuadrant), physicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant)));
-         Vector3D shoulderContactOffset = new Vector3D(robotQuadrant.getEnd().negateIfHindEnd(0.08), robotQuadrant.getSide().negateIfRightSide(0.03), 0.02); // // FIXME: 6/2/16 
+         Vector3D shoulderContactOffset = new Vector3D(robotQuadrant.getEnd().negateIfHindEnd(0.08), robotQuadrant.getSide().negateIfRightSide(0.03), 0.02); // // FIXME: 6/2/16
          jointNameGroundContactPointMap.add(new ImmutablePair<String, Vector3D>(getLegJointName(robotQuadrant, LegJointName.HIP_ROLL), shoulderContactOffset));
       }
 
@@ -88,7 +88,7 @@ public class LLAQuadrupedJointNameMap implements QuadrupedJointNameMap
    {
       return quadrupedJointNameMap.values();
    }
-   
+
    @Override
    public String getModelName()
    {
@@ -216,13 +216,13 @@ public class LLAQuadrupedJointNameMap implements QuadrupedJointNameMap
    {
       return sdfJointNameMap.get(name);
    }
-   
+
    @Override
    public Enum<?>[] getRobotSegments()
    {
       return RobotQuadrant.values;
    }
-   
+
    @Override
    public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {

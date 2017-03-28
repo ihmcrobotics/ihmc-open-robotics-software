@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 import java.util.ArrayList;
 import java.util.List;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -91,6 +93,12 @@ public class ListOfPointsContactablePlaneBody implements ContactablePlaneBody
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
+   }
+
+   @Override
+   public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
+   {
+      throw new NotImplementedException();
    }
 
 }

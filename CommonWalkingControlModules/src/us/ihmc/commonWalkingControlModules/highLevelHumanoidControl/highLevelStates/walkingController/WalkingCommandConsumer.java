@@ -22,11 +22,12 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAc
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EndEffectorLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
@@ -38,8 +39,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajec
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.GoHomeMessage.BodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ManipulationAbortedStatus;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -263,8 +262,11 @@ public class WalkingCommandConsumer
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBodyControlManager handManager = handManagers.get(robotSide);
-            handManager.holdInJointspace();
-            handManager.resetJointIntegrators();
+            if (handManager != null && !handManager.isLoadBearing())
+            {
+               handManager.holdInJointspace();
+               handManager.resetJointIntegrators();
+            }
          }
 
          timeOfLastManipulationAbortRequest.set(yoTime.getDoubleValue());
@@ -277,26 +279,26 @@ public class WalkingCommandConsumer
       }
    }
 
-   public void consumeEndEffectorLoadBearingCommands(WalkingState currentState)
+   public void consumeFootLoadBearingCommands(WalkingState currentState)
    {
-      if (!commandInputManager.isNewCommandAvailable(EndEffectorLoadBearingCommand.class))
+      if (!commandInputManager.isNewCommandAvailable(FootLoadBearingCommand.class))
          return;
 
-      EndEffectorLoadBearingCommand command = commandInputManager.pollAndCompileCommands(EndEffectorLoadBearingCommand.class);
+      FootLoadBearingCommand command = commandInputManager.pollAndCompileCommands(FootLoadBearingCommand.class);
+      currentState.handleFootLoadBearingCommand(command);
+   }
 
-      for (RobotSide robotSide : RobotSide.values)
+   public void consumeLoadBearingCommands()
+   {
+      List<HandLoadBearingCommand> handLoadBearingCommands = commandInputManager.pollNewCommands(HandLoadBearingCommand.class);
+
+      for (int i = 0; i < handLoadBearingCommands.size(); i++)
       {
-         if (handManagers.get(robotSide) == null)
-            continue;
-
-         LoadBearingRequest request = command.getRequest(robotSide, EndEffector.HAND);
-         if (request == LoadBearingRequest.LOAD)
-            handManagers.get(robotSide).requestLoadBearing();
-         else if (request == LoadBearingRequest.UNLOAD)
-            handManagers.get(robotSide).holdInJointspace();
+         HandLoadBearingCommand command = handLoadBearingCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         if (handManagers.get(robotSide) != null)
+            handManagers.get(robotSide).handleLoadBearingCommand(command);
       }
-
-      currentState.handleEndEffectorLoadBearingCommand(command);
    }
 
    public void consumeStopAllTrajectoryCommands()
