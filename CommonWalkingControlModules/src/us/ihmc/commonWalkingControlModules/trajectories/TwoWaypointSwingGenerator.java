@@ -243,12 +243,15 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    public void getVelocity(FrameVector velocityToPack)
    {
       trajectoryMap.get(trajectoryType.getEnumValue()).getVelocity(velocityToPack);
+      velocityToPack.scale(1.0 / stepTime.getDoubleValue());
    }
 
    @Override
    public void getAcceleration(FrameVector accelerationToPack)
    {
       trajectoryMap.get(trajectoryType.getEnumValue()).getAcceleration(accelerationToPack);
+      accelerationToPack.scale(1.0 / stepTime.getDoubleValue());
+      accelerationToPack.scale(1.0 / stepTime.getDoubleValue());
    }
 
    @Override
