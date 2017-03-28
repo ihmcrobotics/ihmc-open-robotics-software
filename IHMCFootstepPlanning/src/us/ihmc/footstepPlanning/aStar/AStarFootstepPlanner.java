@@ -23,8 +23,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class AStarFootstepPlanner implements FootstepPlanner
 {
-   private static final double DEFAULT_COST_PER_STEP = 0.0;
-   private static final double DEFAULT_YAW_WEIGHT = 0.1;
+   public static final double DEFAULT_COST_PER_STEP = 0.0;
+   public static final double DEFAULT_YAW_WEIGHT = 0.1;
+   public static final double DEFAULT_STEP_WIDTH = 0.25;
 
    private FootstepGraph graph;
    private SideDependentList<FootstepNode> goalNodes;
@@ -83,7 +84,7 @@ public class AStarFootstepPlanner implements FootstepPlanner
       for (RobotSide side : RobotSide.values)
       {
          FramePose goalNodePose = new FramePose(goalFrame);
-         goalNodePose.setY(side.negateIfRightSide(0.125));
+         goalNodePose.setY(side.negateIfRightSide(DEFAULT_STEP_WIDTH / 2.0));
          goalNodePose.changeFrame(goalPose.getReferenceFrame());
          FootstepNode goalNode = new FootstepNode(goalNodePose.getX(), goalNodePose.getY(), goalNodePose.getYaw(), side);
          goalNodes.put(side, goalNode);

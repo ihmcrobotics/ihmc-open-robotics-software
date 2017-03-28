@@ -128,6 +128,9 @@ public class AStarPlanarRegionsPlannerTest
    @Test(timeout = 300000)
    public void testNodeExpansion()
    {
+      if (!visualize)
+         return;
+
       FootstepNode node = new FootstepNode(0.0, 0.0, Math.PI, RobotSide.RIGHT);
 
       SimpleSideBasedExpansion expansion = new SimpleSideBasedExpansion();
@@ -156,11 +159,8 @@ public class AStarPlanarRegionsPlannerTest
 
       scs.addYoVariableRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
-      if (visualize)
-      {
-         scs.startOnAThread();
-         ThreadTools.sleepForever();
-      }
+      scs.startOnAThread();
+      ThreadTools.sleepForever();
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -208,6 +208,8 @@ public class AStarPlanarRegionsPlannerTest
          SimpleFootstep lastStep = plan.getFootstep(plan.getNumberOfSteps() - 1);
          FramePose achievedGoalPose = new FramePose();
          lastStep.getSoleFramePose(achievedGoalPose);
+
+         goalPose.setY(-AStarFootstepPlanner.DEFAULT_STEP_WIDTH / 2.0);
          assertTrue(goalPose.epsilonEquals(achievedGoalPose, FootstepNode.gridSizeX));
 
          planner.setWeight(5.0);
