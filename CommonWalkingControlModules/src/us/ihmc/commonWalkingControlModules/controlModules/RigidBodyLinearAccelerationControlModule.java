@@ -14,7 +14,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-public class BodyFixedPointLinearAccelerationControlModule
+public class RigidBodyLinearAccelerationControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -24,7 +24,7 @@ public class BodyFixedPointLinearAccelerationControlModule
    private final Twist endEffectorTwist = new Twist();
 
    private final FramePoint bodyFixedPoint = new FramePoint();
-   private final YoTranslationFrame frameAtBodyFixedPoint;
+   private final ReferenceFrame endEffectorFrame;
 
    private final YoFrameVector positionError;
    private final YoFrameVector positionErrorCumulated;
@@ -46,14 +46,14 @@ public class BodyFixedPointLinearAccelerationControlModule
    private final YoPositionPIDGainsInterface gains;
    private final double dt;
 
-   public BodyFixedPointLinearAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, double dt,
-         YoVariableRegistry parentRegistry)
+   public RigidBodyLinearAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
+                                                   double dt, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, twistCalculator, endEffector, dt, null, parentRegistry);
+      this(namePrefix, twistCalculator, endEffector, endEffectorFrame, dt, null, parentRegistry);
    }
 
-   public BodyFixedPointLinearAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, double dt,
-         YoPositionPIDGainsInterface gains, YoVariableRegistry parentRegistry)
+   public RigidBodyLinearAccelerationControlModule(String namePrefix, TwistCalculator twistCalculator, RigidBody endEffector, ReferenceFrame endEffectorFrame,
+                                                   double dt, YoPositionPIDGainsInterface gains, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
 
@@ -69,7 +69,7 @@ public class BodyFixedPointLinearAccelerationControlModule
       derivativeGainMatrix = gains.createDerivativeGainMatrix();
       integralGainMatrix = gains.createIntegralGainMatrix();
 
-      frameAtBodyFixedPoint = new YoTranslationFrame(namePrefix + "BodyFixedPointFrame", endEffector.getBodyFixedFrame(), registry);
+      this.endEffectorFrame = endEffectorFrame;
 
       positionError = new YoFrameVector(namePrefix + "PositionError", worldFrame, registry);
       positionErrorCumulated = new YoFrameVector(namePrefix + "PositionErrorCumulated", worldFrame, registry);
@@ -77,7 +77,8 @@ public class BodyFixedPointLinearAccelerationControlModule
 
       feedbackLinearAcceleration = new YoFrameVector(namePrefix + "FeedbackLinearAcceleration", worldFrame, registry);
       rateLimitedFeedbackLinearAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(namePrefix + "RateLimitedFeedbackLinearAcceleration", "",
-            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAcceleration);
+                                                                                                      registry, gains.getYoMaximumFeedbackRate(), dt,
+                                                                                                      feedbackLinearAcceleration);
 
       parentRegistry.addChild(registry);
    }
@@ -118,7 +119,7 @@ public class BodyFixedPointLinearAccelerationControlModule
 
    private void computeProportionalTerm(FramePoint desiredPosition, ReferenceFrame baseFrame)
    {
-      desiredPosition.changeFrame(frameAtBodyFixedPoint);
+      desiredPosition.changeFrame(endEffectorFrame);
       positionError.setAndMatchFrame(desiredPosition);
 
       positionError.getFrameTupleIncludingFrame(proportionalTerm);
@@ -131,7 +132,7 @@ public class BodyFixedPointLinearAccelerationControlModule
       ReferenceFrame baseFrame = base.getBodyFixedFrame();
       twistCalculator.getRelativeTwist(base, endEffector, endEffectorTwist);
       endEffectorTwist.changeFrame(baseFrame);
-      bodyFixedPoint.setToZero(frameAtBodyFixedPoint);
+      bodyFixedPoint.setToZero(endEffectorFrame);
       bodyFixedPoint.changeFrame(baseFrame);
       endEffectorTwist.getLinearVelocityOfPointFixedInBodyFrame(currentVelocity, bodyFixedPoint);
 
@@ -174,24 +175,13 @@ public class BodyFixedPointLinearAccelerationControlModule
       this.gains.set(gains);
    }
 
-   public void getBodyFixedPoint(FramePoint bodyFixedPointToPack)
+   public void getCurrentLinearVelocity(FrameVector linearVelocityToPack)
    {
-      bodyFixedPointToPack.setToZero(frameAtBodyFixedPoint);
-      bodyFixedPointToPack.changeFrame(endEffector.getBodyFixedFrame());
-   }
-
-   public void getBodyFixedPointCurrentLinearVelocity(FrameVector bodyFixedPointLinearVelocityToPack)
-   {
-      bodyFixedPointLinearVelocityToPack.setIncludingFrame(currentVelocity);
+      linearVelocityToPack.setIncludingFrame(currentVelocity);
    }
 
    public RigidBody getEndEffector()
    {
       return endEffector;
-   }
-
-   public void setPointToControl(FramePoint tempPosition)
-   {
-      frameAtBodyFixedPoint.setTranslationToParent(tempPosition);
    }
 }

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import us.ihmc.commonWalkingControlModules.controlModules.BodyFixedPointSpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.RigidBodySpatialAccelerationControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
@@ -74,13 +75,14 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
    private final YoSE3PIDGainsInterface gains;
-   private final BodyFixedPointSpatialAccelerationControlModule accelerationControlModule;
+   private final RigidBodySpatialAccelerationControlModule accelerationControlModule;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
 
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
+   private final YoSE3OffsetFrame controlFrame;
 
    public SpatialFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
          YoVariableRegistry parentRegistry)
@@ -93,7 +95,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
       double dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getSE3PIDGains(endEffector);
-      accelerationControlModule = new BodyFixedPointSpatialAccelerationControlModule(endEffectorName, twistCalculator, endEffector, dt, gains, registry);
+      controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
+      accelerationControlModule = new RigidBodySpatialAccelerationControlModule(endEffectorName, twistCalculator, endEffector, controlFrame, dt, gains, registry);
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
@@ -137,7 +140,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       gains.set(command.getGains());
 
       command.getControlFramePoseIncludingFrame(tempPosition, tempOrientation);
-      accelerationControlModule.setBodyFixedControlFrame(tempPosition, tempOrientation);
+      controlFrame.setOffsetToParent(tempPosition, tempOrientation);
 
       command.getIncludingFrame(tempPosition, tempLinearVelocity, feedForwardLinearAcceleration);
       yoDesiredPosition.setAndMatchFrame(tempPosition);
@@ -193,7 +196,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredSpatialAcceleration.getLinearPart(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
 
-      tempPosition.setToZero(accelerationControlModule.getTrackingFrame());
+      tempPosition.setToZero(controlFrame);
       yoCurrentPosition.setAndMatchFrame(tempPosition);
 
       accelerationControlModule.getEndEffectorCurrentLinearVelocity(tempLinearVelocity);
@@ -205,7 +208,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
       yoDesiredAngularAcceleration.setAndMatchFrame(desiredAngularAcceleration);
 
-      tempOrientation.setToZero(accelerationControlModule.getTrackingFrame());
+      tempOrientation.setToZero(controlFrame);
       yoCurrentOrientation.setAndMatchFrame(tempOrientation);
 
       accelerationControlModule.getEndEffectorCurrentAngularVelocity(tempAngularVelocity);

@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
@@ -74,8 +75,11 @@ public class FeedbackControllerToolbox
    private final Map<RigidBody, EnumMap<Type, YoFramePoint>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, YoFrameQuaternion>> endEffectorOrientations = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, EnumMap<Space, YoFrameVector>>> endEffectorDataVectors = new HashMap<>();
+
    private final Map<RigidBody, YoOrientationPIDGainsInterface> endEffectorOrientationGains = new HashMap<>();
    private final Map<RigidBody, YoPositionPIDGainsInterface> endEffectorPositionGains = new HashMap<>();
+
+   private final Map<RigidBody, YoSE3OffsetFrame> endEffectorControlFrames = new HashMap<>();
 
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
@@ -224,5 +228,18 @@ public class FeedbackControllerToolbox
             return orientationGains;
          }
       };
+   }
+
+   public YoSE3OffsetFrame getControlFrame(RigidBody endEffector)
+   {
+      YoSE3OffsetFrame controlFrame = endEffectorControlFrames.get(endEffector);
+
+      if (controlFrame == null)
+      {
+         controlFrame = new YoSE3OffsetFrame(endEffector.getName() + "BodyFixedControlFrame", endEffector.getBodyFixedFrame(), registry);
+         endEffectorControlFrames.put(endEffector, controlFrame);
+      }
+
+      return controlFrame;
    }
 }
