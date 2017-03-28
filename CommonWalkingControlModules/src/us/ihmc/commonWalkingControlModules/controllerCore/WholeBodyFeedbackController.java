@@ -144,6 +144,9 @@ public class WholeBodyFeedbackController
 
    public void reset()
    {
+      // FIXME This results into discontinuities in the remote visualizer, need to change it such as the YoVariables change only once per tick.
+//      feedbackControllerToolbox.clearData();
+
       for (int i = 0; i < allControllers.size(); i++)
       {
          FeedbackControllerInterface controller = allControllers.get(i);
