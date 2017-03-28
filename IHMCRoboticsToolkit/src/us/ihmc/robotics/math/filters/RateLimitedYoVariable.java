@@ -7,10 +7,10 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class RateLimitedYoVariable extends DoubleYoVariable
 {
-   private double maxRate;
    private final DoubleYoVariable maxRateVariable;
 
    private final DoubleYoVariable position;
+   private final BooleanYoVariable limited;
 
    private final double dt;
 
@@ -20,10 +20,11 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.limited = new BooleanYoVariable(name  + "Limited", registry);
 
-      this.maxRate = maxRate;
+      this.maxRateVariable = new DoubleYoVariable(name + "MaxRate", registry);
+      this.maxRateVariable.set(maxRate);
 
-      this.maxRateVariable = null;
       this.position = null;
 
       this.dt = dt;
@@ -35,8 +36,7 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
-
-      this.maxRate = 0.0;
+      this.limited = new BooleanYoVariable(name  + "Limited", registry);
 
       this.maxRateVariable = maxRateVariable;
       this.position = null;
@@ -49,11 +49,13 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.limited = new BooleanYoVariable(name  + "Limited", registry);
 
-      this.maxRate = maxRate;
       position = positionVariable;
 
-      this.maxRateVariable = null;
+      this.maxRateVariable = new DoubleYoVariable(name + "MaxRate", registry);
+      this.maxRateVariable.set(maxRate);
+
       this.dt = dt;
 
       reset();
@@ -63,11 +65,11 @@ public class RateLimitedYoVariable extends DoubleYoVariable
    {
       super(name, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.limited = new BooleanYoVariable(name  + "Limited", registry);
 
       position = positionVariable;
       this.maxRateVariable = maxRateVariable;
 
-      this.maxRate = 0.0;
       this.dt = dt;
 
       reset();
@@ -75,10 +77,7 @@ public class RateLimitedYoVariable extends DoubleYoVariable
 
    public void setMaxRate(double maxRate)
    {
-      if (maxRateVariable != null)
-         maxRateVariable.set(maxRate);
-
-      this.maxRate = maxRate;
+      this.maxRateVariable.set(maxRate);
    }
 
    public void reset()
@@ -105,19 +104,17 @@ public class RateLimitedYoVariable extends DoubleYoVariable
          set(currentPosition);
       }
 
-      final double maxRateToUse;
-
-      if (maxRateVariable != null)
-         maxRateToUse = maxRateVariable.getDoubleValue();
-      else
-         maxRateToUse = maxRate;
-
-      if (maxRateToUse < 0)
-         throw new RuntimeException("The maxRate parameter in the RateLimitedYoVariable constructor cannot be negative.");
+      if (maxRateVariable.getDoubleValue() < 0)
+         throw new RuntimeException("The maxRate parameter in the RateLimitedYoVariable cannot be negative.");
 
       double difference = currentPosition - getDoubleValue();
-      if (Math.abs(difference) > maxRateToUse * dt)
-         difference = Math.signum(difference) * maxRateToUse * dt;
+      if (Math.abs(difference) > maxRateVariable.getDoubleValue() * dt)
+      {
+         difference = Math.signum(difference) * maxRateVariable.getDoubleValue() * dt;
+         this.limited.set(true);
+      }
+      else
+         this.limited.set(false);
 
       set(getDoubleValue() + difference);
    }

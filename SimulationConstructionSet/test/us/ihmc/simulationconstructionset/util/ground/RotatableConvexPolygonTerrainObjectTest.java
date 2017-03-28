@@ -1,8 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
@@ -11,7 +9,6 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -330,28 +327,28 @@ public class RotatableConvexPolygonTerrainObjectTest
 	@Test(timeout=300000)
    public void testGetXMin()
    {
-      assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getXMin(), epsilon);
+      assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getMinX(), epsilon);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetXMax()
    {
-      assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getXMax(), epsilon);
+      assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getMaxX(), epsilon);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYMin()
    {
-      assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getYMin(), epsilon);
+      assertEquals(-2.0, flatTopFaceOctagon3d.getBoundingBox().getMinY(), epsilon);
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
 	@Test(timeout=300000)
    public void testGetYMax()
    {
-      assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getYMax(), epsilon);
+      assertEquals(2.0, flatTopFaceOctagon3d.getBoundingBox().getMaxY(), epsilon);
    }
 
    public void testSetupInEnvironment()

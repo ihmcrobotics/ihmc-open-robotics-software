@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -15,6 +15,8 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -31,8 +33,6 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnapping
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
-import us.ihmc.robotics.geometry.BoundingBox2d;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
@@ -43,8 +43,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -93,7 +93,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       Point3D center = new Point3D(7.579638943201888, 0.020725665285290903, 1.46537366331119);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.5);
-      BoundingBox3d boundingBox = BoundingBox3d.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -147,7 +147,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          corruptedFootstepList.add(new Footstep(endEffector, robotSide, soleFrame, poseReferenceFrame));
       }
 
-      // Build the BoundingBox2d containing all the footsteps
+      // Build the BoundingBox2D containing all the footsteps
       Point2D boundingBoxMin = new Point2D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
       Point2D boundingBoxMax = new Point2D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 
@@ -166,7 +166,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       boundingBoxMin.sub(new Point2D(enlarge, enlarge));
       boundingBoxMax.add(new Point2D(enlarge, enlarge));
 
-      BoundingBox2d footstepContainer = new BoundingBox2d(boundingBoxMin, boundingBoxMax);
+      BoundingBox2D footstepContainer = new BoundingBox2D(boundingBoxMin, boundingBoxMax);
 
       us.ihmc.graphicsDescription.HeightMap inputHeightMap = drcSimulationTestHelper.getTestEnviroment().getTerrainObject3D().getHeightMapIfAvailable();
       double resolution = 0.02;
@@ -250,7 +250,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
       return footstepSnapper;
    }
 
-   public HeightMapWithPoints createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public HeightMapWithPoints createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2D testingRange, double resolution, double heightThreshold,
          double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose,
          int maxNodes, SimulationConstructionSet scs)
    {
@@ -282,7 +282,7 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
             maxAllowableXYDistanceForAPointToBeConsideredClose, maxNodes);
    }
 
-   public HeightMapWithPoints createHeightMap(ArrayList<Point3D> listOfPoints, BoundingBox2d testingRange, double resolution, double heightThreshold,
+   public HeightMapWithPoints createHeightMap(ArrayList<Point3D> listOfPoints, BoundingBox2D testingRange, double resolution, double heightThreshold,
          double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode, double maxAllowableXYDistanceForAPointToBeConsideredClose,
          int maxNodes)
    {

@@ -21,7 +21,6 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -60,8 +59,6 @@ public class WandererJointMap implements DRCRobotJointMap
    private final SideDependentList<EnumMap<LegJointName, String>> legJointStrings = SideDependentList.createListOfEnumMaps(LegJointName.class);
    private final SideDependentList<EnumMap<ArmJointName, String>> armJointStrings = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<SpineJointName, String>(SpineJointName.class);
-
-   private final WandererContactPointParameters contactPointParameters;
 
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<String>();
    private String[] jointNamesBeforeFeet = new String[2];
@@ -102,13 +99,11 @@ public class WandererJointMap implements DRCRobotJointMap
          jointRoles.put(spineJointString, JointRole.SPINE);
       }
 
-      contactPointParameters = new WandererContactPointParameters(this);
-
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
       }
-      
+
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
    }
@@ -141,18 +136,6 @@ public class WandererJointMap implements DRCRobotJointMap
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;
-   }
-
-   @Override
-   public WandererContactPointParameters getContactPointParameters()
-   {
-      return contactPointParameters;
-   }
-
-   @Override
-   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
-   {
-      return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
    @Override public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
@@ -278,7 +261,7 @@ public class WandererJointMap implements DRCRobotJointMap
    {
       return null;
    }
-   
+
    @Override
    public String getJointBeforeHandName(RobotSide robotSide)
    {
@@ -325,19 +308,19 @@ public class WandererJointMap implements DRCRobotJointMap
    {
       return pelvisName;
    }
-   
+
    @Override
    public String[] getJointNamesBeforeFeet()
    {
       return jointNamesBeforeFeet;
    }
-   
+
    @Override
    public Enum<?>[] getRobotSegments()
    {
       return RobotSide.values;
    }
-   
+
    @Override
    public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {

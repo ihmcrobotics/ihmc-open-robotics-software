@@ -102,7 +102,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(privilegedConfiguration);
-      privilegedOneDoFJointConfigurationOptions.put(joint.nameBasedHashCode(), null);
+      privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), null);
    }
 
    public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
@@ -111,7 +111,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       joints.add(joint);
       jointNames.add(joint.getName());
       privilegedOneDoFJointConfigurations.add(Double.NaN);
-      privilegedOneDoFJointConfigurationOptions.put(joint.nameBasedHashCode(), privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), privilegedConfiguration);
    }
 
    @Override
@@ -128,7 +128,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
          joints.add(joint);
          jointNames.add(other.jointNames.get(i));
          privilegedOneDoFJointConfigurations.add(other.privilegedOneDoFJointConfigurations.get(i));
-         privilegedOneDoFJointConfigurationOptions.put(joint.nameBasedHashCode(), other.privilegedOneDoFJointConfigurationOptions.get(joint.nameBasedHashCode()));
+         privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), other.privilegedOneDoFJointConfigurationOptions.get(joint.getNameBasedHashCode()));
       }
    }
 
@@ -214,7 +214,7 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
 
    public PrivilegedConfigurationOption getPrivilegedConfigurationOption(int jointIndex)
    {
-      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex).nameBasedHashCode());
+      return privilegedOneDoFJointConfigurationOptions.get(joints.get(jointIndex).getNameBasedHashCode());
    }
 
    public int getNumberOfJoints()

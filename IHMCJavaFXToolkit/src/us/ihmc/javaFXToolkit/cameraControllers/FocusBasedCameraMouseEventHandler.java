@@ -23,6 +23,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.Translate;
+import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.JavaFXTools;
@@ -62,7 +63,7 @@ public class FocusBasedCameraMouseEventHandler implements EventHandler<Event>
    {
       Vector3D left = new Vector3D();
       left.cross(up, forward);
-      if (!MathTools.epsilonEquals(left.length(), 1.0, 1.0 - 5))
+      if (!MathTools.epsilonEquals(left.length(), 1.0, Epsilons.ONE_HUNDRED_THOUSANDTH))
          throw new RuntimeException("The vectors up and forward must be orthogonal. Received: up = " + up + ", forward = " + forward);
 
       zoomCalculator.zoomProperty().bindBidirectional(offsetFromFocusPoint.zProperty());

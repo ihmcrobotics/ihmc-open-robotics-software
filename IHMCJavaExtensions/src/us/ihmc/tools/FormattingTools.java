@@ -42,6 +42,17 @@ public class FormattingTools
       else
          return String.valueOf(roundToSignificantFigures);
    }
+   
+   public static String getFormattedToPrecision(double value, double precision, int significantFigures)
+   {
+      double rounded = MathTools.roundToPrecision(value, precision);
+      double significant = MathTools.roundToSignificantFigures(rounded, significantFigures);
+      
+      if (significant % 1.0 == 0.0)
+         return String.valueOf((int) significant);
+      else
+         return String.valueOf(significant);
+   }
 
    public static String underscoredToCamelCase(String underscoredString, boolean capitalizeFirstLetter)
    {

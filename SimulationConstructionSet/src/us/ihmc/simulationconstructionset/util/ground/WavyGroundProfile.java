@@ -1,17 +1,17 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class WavyGroundProfile implements GroundProfile3D, HeightMapWithNormals
 {
    private double xMin = -2.0, xMax = 2.0, yMin = -2.0, yMax = 2.0, zMin = -10.0, zMax = 10.0;
    
-   private BoundingBox3d boundingBox = new BoundingBox3d(new Point3D(xMin, yMin, zMin), new Point3D(xMax, yMax, zMax));
+   private BoundingBox3D boundingBox = new BoundingBox3D(new Point3D(xMin, yMin, zMin), new Point3D(xMax, yMax, zMax));
 
    public WavyGroundProfile()
    {
@@ -66,11 +66,11 @@ public class WavyGroundProfile implements GroundProfile3D, HeightMapWithNormals
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return boundingBox.isInside(x, y, z);
+      return boundingBox.isInsideInclusive(x, y, z);
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

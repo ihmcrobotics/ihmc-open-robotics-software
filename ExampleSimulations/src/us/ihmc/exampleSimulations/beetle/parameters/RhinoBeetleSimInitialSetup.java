@@ -30,7 +30,7 @@ public class RhinoBeetleSimInitialSetup
       this.initialYaw = initialYaw;
    }
 
-   public void initializeRobot(FloatingRootJointRobot robot, RhinoBeetleJointNameMap jointMap)
+   public void initializeRobot(FloatingRootJointRobot robot, RhinoBeetleJointNameMapAndContactDefinition jointMap)
    {
       if (!robotInitialized)
       {

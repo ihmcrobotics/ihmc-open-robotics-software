@@ -563,7 +563,6 @@ public class FourBarKinematicLoop
       {
          // Geometric Jacobian - open kinematic chain Jacobian
          geometricJacobian.compute();
-         geometricJacobian.changeFrame(geometricJacobianFrame);
 
          // Vector to go from open loop to closed loop Jacobian
          computeVectorTransformGeometricToColumnJacobian();

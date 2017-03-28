@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -91,12 +92,12 @@ public class PlanarRegionsList
     */
    private boolean isLineSegmentObviouslyOutsideBoundingBox(PlanarRegion candidateRegion, LineSegment2d lineSegmentInWorld)
    {
-	   BoundingBox3d boundingBox = candidateRegion.getBoundingBox3dInWorld();
+	   BoundingBox3D boundingBox = candidateRegion.getBoundingBox3dInWorld();
 
-       double xMin = boundingBox.getXMin();
-       double yMin = boundingBox.getYMin();
-       double xMax = boundingBox.getXMax();
-       double yMax = boundingBox.getYMax();
+       double xMin = boundingBox.getMinX();
+       double yMin = boundingBox.getMinY();
+       double xMax = boundingBox.getMaxX();
+       double yMax = boundingBox.getMaxY();
 
        Point2D firstEndpoint = lineSegmentInWorld.getFirstEndpoint();
        Point2D secondEndpoint = lineSegmentInWorld.getSecondEndpoint();

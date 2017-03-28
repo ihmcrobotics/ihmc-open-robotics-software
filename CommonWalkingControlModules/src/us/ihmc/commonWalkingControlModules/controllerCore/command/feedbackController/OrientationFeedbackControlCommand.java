@@ -153,11 +153,6 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.setLinearWeightsToZero();
    }
 
-   public void setAlphaTaskPriorityForSolver(double alpha)
-   {
-      spatialAccelerationCommand.setAlphaTaskPriority(alpha);
-   }
-
    public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack,
                                  FrameVector feedForwardAngularAccelerationToPack)
    {

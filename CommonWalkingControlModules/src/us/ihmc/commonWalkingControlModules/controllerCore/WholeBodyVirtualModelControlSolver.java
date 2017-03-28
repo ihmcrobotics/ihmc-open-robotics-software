@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelController;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullRobotModel;
@@ -50,7 +51,6 @@ import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class WholeBodyVirtualModelControlSolver
 {
@@ -322,7 +322,7 @@ public class WholeBodyVirtualModelControlSolver
    private DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE);
    private void handleJointSpaceCommand(JointspaceAccelerationCommand command)
    {
-      if(command.getHasWeight())
+      if(!command.isHardConstraint())
       {
          for(int i = 0; i < command.getNumberOfJoints(); i++)
          {
@@ -371,7 +371,7 @@ public class WholeBodyVirtualModelControlSolver
       SpatialAccelerationVector accelerationVector = command.getSpatialAcceleration();
       accelerationVector.changeBaseFrameNoRelativeAcceleration(ReferenceFrame.getWorldFrame());
 
-      twistCalculator.getTwistOfBody(tmpTwist, controlledBody);
+      twistCalculator.getTwistOfBody(controlledBody, tmpTwist);
 
       tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
 

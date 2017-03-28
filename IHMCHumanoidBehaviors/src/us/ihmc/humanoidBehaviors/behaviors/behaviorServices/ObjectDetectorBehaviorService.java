@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.imageio.ImageIO;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -22,7 +23,6 @@ import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService

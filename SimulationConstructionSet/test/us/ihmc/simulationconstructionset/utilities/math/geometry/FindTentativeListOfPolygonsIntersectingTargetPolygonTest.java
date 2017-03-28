@@ -13,10 +13,10 @@ import javax.swing.JScrollPane;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.plotting.artifact.PolygonArtifact;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.BoundingBoxKDTree2D;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2dIntersectionSetCalculator;
@@ -303,8 +303,8 @@ public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 
       ArrayList<ConvexPolygon2d> convexPolygon2ds = new ArrayList<ConvexPolygon2d>();
       ArrayList<ConvexPolygon2d> captureRegionPolygon = new ArrayList<ConvexPolygon2d>();
-      ArrayList<BoundingBox2d> intersectingBoundingBoxes = new ArrayList<BoundingBox2d>();
-      ArrayList<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
+      ArrayList<BoundingBox2D> intersectingBoundingBoxes = new ArrayList<BoundingBox2D>();
+      ArrayList<BoundingBox2D> boundingBoxes = new ArrayList<BoundingBox2D>();
       ArrayList<ConvexPolygon2d> tentativeListofSteppintStonesIntersectingCaptureRegion = new ArrayList<ConvexPolygon2d>();
       ArrayList<ConvexPolygon2d> steppintStonesIntersectingCaptureRegion = new ArrayList<ConvexPolygon2d>();
 

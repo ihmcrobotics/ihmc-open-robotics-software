@@ -8,7 +8,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import com.jme3.math.Transform;
 
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasArmControllerParameters;
 import us.ihmc.atlas.parameters.AtlasCapturePointPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasDefaultArmConfigurations;
@@ -29,7 +28,6 @@ import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOf
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
@@ -68,14 +66,13 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotiq.control.RobotiqHandCommandManager;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.DRCHandType;
 import us.ihmc.wholeBodyController.FootContactPoints;
@@ -95,7 +92,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final DRCRobotModel.RobotTarget target;
 
    private static final long ESTIMATOR_DT_IN_NS = 1000000;
-   private static final double ESTIMATOR_DT = Conversions.nanoSecondstoSeconds(ESTIMATOR_DT_IN_NS);
+   private static final double ESTIMATOR_DT = Conversions.nanosecondsToSeconds(ESTIMATOR_DT_IN_NS);
    private static final double CONTROL_DT = 0.004;    // 0.006;
 
    private static final double ATLAS_ONBOARD_SAMPLINGFREQ = 1000.0;
@@ -107,8 +104,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    private final AtlasPhysicalProperties atlasPhysicalProperties;
    private final AtlasJointMap jointMap;
+   private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
-   private final AtlasArmControllerParameters armControllerParameters;
    private final AtlasCapturePointPlannerParameters capturePointPlannerParameters;
    private final AtlasICPOptimizationParameters icpOptimizationParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
@@ -122,12 +119,23 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless)
    {
-      this(atlasVersion, target, headless, null);
+      this(atlasVersion, target, headless, null, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, boolean createAdditionalContactPoints)
+   {
+      this(atlasVersion, target, headless, null, createAdditionalContactPoints);
    }
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints)
    {
-      if(SCALE_ATLAS)
+      this(atlasVersion, target, headless, simulationContactPoints, false);
+   }
+
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion, DRCRobotModel.RobotTarget target, boolean headless, FootContactPoints simulationContactPoints,
+         boolean createAdditionalContactPoints)
+   {
+      if (SCALE_ATLAS)
       {
          atlasPhysicalProperties  = new AtlasPhysicalProperties(DESIRED_ATLAS_HEIGHT, DESIRED_ATLAS_WEIGHT);
       }
@@ -137,7 +145,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       selectedVersion = atlasVersion;
-      jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties, simulationContactPoints);
+      jointMap = new AtlasJointMap(selectedVersion, atlasPhysicalProperties);
+
+      boolean createFootContactPoints = true;
+      contactPointParameters = new AtlasContactPointParameters(jointMap, atlasVersion, createFootContactPoints, simulationContactPoints,
+            createAdditionalContactPoints);
+
       this.target = target;
 
       this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), selectedVersion.getSdfFileAsStream(), this);
@@ -152,8 +165,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       boolean runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
       capturePointPlannerParameters = new AtlasCapturePointPlannerParameters(atlasPhysicalProperties);
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
-      armControllerParameters = new AtlasArmControllerParameters(runningOnRealRobot, jointMap);
-      walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap);
+      walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
       defaultArmConfigurations = new AtlasDefaultArmConfigurations();
       snappingParameters = new AtlasFootstepSnappingParameters();
@@ -167,7 +179,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
+            useCollisionMeshes);
       return robotDescription;
    }
 
@@ -175,12 +188,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public RobotDescription getRobotDescription()
    {
       return robotDescription;
-   }
-
-   @Override
-   public ArmControllerParameters getArmControllerParameters()
-   {
-      return armControllerParameters;
    }
 
    @Override
@@ -239,18 +246,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public AtlasContactPointParameters getContactPointParameters()
    {
-      return jointMap.getContactPointParameters();
+      return contactPointParameters;
    }
-
-   public void createHandContactPoints(boolean useHighResolutionPointGrid)
-   {
-      jointMap.getContactPointParameters().createHandContactPoints(useHighResolutionPointGrid);
-   }
-
-//   public void addMoreFootContactPointsSimOnly(int nContactPointsX, int nContactPointsY, boolean edgePointsOnly)
-//   {
-//      jointMap.getContactPointParameters().addMoreFootContactPointsSimOnly(nContactPointsX, nContactPointsY, edgePointsOnly);
-//   }
 
    public void setJointDamping(FloatingRootJointRobot simulatedRobot)
    {
@@ -287,7 +284,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      RobotDescription robotDescription = loader.createRobotDescription(getJointMap());
+      RobotDescription robotDescription = loader.createRobotDescription(getJointMap(), getContactPointParameters());
       FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelFromDescription(robotDescription, getJointMap(), sensorInformation.getSensorFramesToTrack());
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -393,31 +390,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public SideDependentList<HandCommandManager> createHandCommandManager()
    {
-      if (target == DRCRobotModel.RobotTarget.REAL_ROBOT)
-      {
-         SideDependentList<HandCommandManager> handCommandManagers = new SideDependentList<HandCommandManager>();
-         switch (selectedVersion)
-         {
-            case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI :
-               handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
-               return handCommandManagers;
-
-            case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ :
-               handCommandManagers.set(RobotSide.LEFT, new RobotiqHandCommandManager(RobotSide.LEFT));
-               handCommandManagers.set(RobotSide.RIGHT, new RobotiqHandCommandManager(RobotSide.RIGHT));
-               return handCommandManagers;
-
-            case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS :
-               break;
-
-            case ATLAS_UNPLUGGED_V5_NO_HANDS :
-               break;
-
-            default :
-               break;
-         }
-      }
-
       return null;
    }
 

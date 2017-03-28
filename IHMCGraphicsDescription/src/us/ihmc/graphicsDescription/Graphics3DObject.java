@@ -68,12 +68,12 @@ public class Graphics3DObject
 
    private boolean changeable = false;
 
-   public Graphics3DObject(Shape3d shape, AppearanceDefinition appearance)
+   public Graphics3DObject(Shape3d<?> shape, AppearanceDefinition appearance)
    {
       this(shape, appearance, null);
    }
 
-   public Graphics3DObject(Shape3d shape)
+   public Graphics3DObject(Shape3d<?> shape)
    {
       this(shape, null, null);
    }
@@ -83,7 +83,7 @@ public class Graphics3DObject
       this(null, null, graphics3DInstructions);
    }
 
-   private Graphics3DObject(Shape3d shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
+   private Graphics3DObject(Shape3d<?> shape, AppearanceDefinition appearance, ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions)
    {
       if (graphics3DInstructions != null)
       {
@@ -478,12 +478,12 @@ public class Graphics3DObject
       addArrow(length, YoAppearance.Blue(), arrowAppearance);
    }
 
-   public PrimitiveGraphics3DInstruction add(Shape3d shape)
+   public PrimitiveGraphics3DInstruction add(Shape3d<?> shape)
    {
       return add(shape, DEFAULT_APPEARANCE);
    }
 
-   public PrimitiveGraphics3DInstruction add(Shape3d shape, AppearanceDefinition app)
+   public PrimitiveGraphics3DInstruction add(Shape3d<?> shape, AppearanceDefinition app)
    {
       if (shape instanceof Sphere3d)
       {
@@ -1141,7 +1141,7 @@ public class Graphics3DObject
       for (int i = 0; i < numberOfConvexPolygons; i++)
       {
          ConvexPolygon2d convexPolygon = planarRegion.getConvexPolygon(i);
-         MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, 0.005);
+         MeshDataHolder meshDataHolder = MeshDataGenerator.ExtrudedPolygon(convexPolygon, -0.0001);
          addInstruction(new Graphics3DAddMeshDataInstruction(meshDataHolder, appearances[i % appearances.length]));
       }
 

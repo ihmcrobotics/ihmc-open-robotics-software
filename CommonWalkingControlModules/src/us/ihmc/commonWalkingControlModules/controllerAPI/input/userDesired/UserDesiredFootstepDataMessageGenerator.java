@@ -160,8 +160,8 @@ public class UserDesiredFootstepDataMessageGenerator
       }
 
       footstepCommandList.setExecutionMode(ExecutionMode.OVERRIDE);
-      footstepCommandList.setSwingTime(swingTime.getDoubleValue());
-      footstepCommandList.setTransferTime(transferTime.getDoubleValue());
+      footstepCommandList.setDefaultSwingDuration(swingTime.getDoubleValue());
+      footstepCommandList.setDefaultTransferDuration(transferTime.getDoubleValue());
 
       commandInputManager.submitCommand(footstepCommandList);
    }

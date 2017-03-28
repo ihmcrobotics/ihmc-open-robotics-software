@@ -11,7 +11,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.Twist;
@@ -85,7 +84,7 @@ public class AngularVelocityMeasurementModelElement extends AbstractMeasurementM
       Vector3D measuredAngularVelocityVector3d = angularVelocityMeasurementInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
       
-      twistCalculator.getRelativeTwist(tempTwist, orientationEstimationLink, measurementLink);
+      twistCalculator.getRelativeTwist(orientationEstimationLink, measurementLink, tempTwist);
       tempTwist.getAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(measurementFrame);
 

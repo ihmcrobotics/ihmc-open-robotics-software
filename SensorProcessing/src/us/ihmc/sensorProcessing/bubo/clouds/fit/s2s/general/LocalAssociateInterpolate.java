@@ -18,13 +18,13 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.fit.s2s.general;
 
-import georegression.struct.point.Point2D_F64;
-import us.ihmc.sensorProcessing.bubo.desc.sensors.lrf2d.Lrf2dParam;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ddogleg.struct.FastQueue;
 
-import java.util.ArrayList;
-import java.util.List;
+import georegression.struct.point.Point2D_F64;
+import us.ihmc.sensorProcessing.bubo.desc.sensors.lrf2d.Lrf2dParam;
 
 
 /**

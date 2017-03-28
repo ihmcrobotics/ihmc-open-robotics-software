@@ -45,8 +45,8 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
@@ -60,9 +60,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -81,6 +79,14 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
+   public static final SideDependentList<String> handNames = new SideDependentList<>();
+   static
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handNames.put(robotSide, getRobotSidePrefix(robotSide) + "hand");
+      }
+   }
 
    private final LegJointName[] legJoints = {HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL};
    private final ArmJointName[] armJoints;
@@ -100,7 +106,6 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<>(SpineJointName.class);
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
-   private final AtlasContactPointParameters contactPointParameters;
    private final AtlasRobotVersion atlasVersion;
    private final NewRobotPhysicalProperties atlasPhysicalProperties;
 
@@ -110,11 +115,6 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final String[] jointNamesBeforeFeet = new String[2];
 
    public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
-   {
-      this(atlasVersion, atlasPhysicalProperties, null);
-   }
-
-   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, FootContactPoints simulationContactPoints)
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;
@@ -190,9 +190,6 @@ public class AtlasJointMap implements DRCRobotJointMap
          jointRoles.put(neckJointString, JointRole.NECK);
       }
 
-      boolean createFootContactPoints = true;
-      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints, simulationContactPoints);
-
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(HIP_PITCH));
@@ -226,7 +223,7 @@ public class AtlasJointMap implements DRCRobotJointMap
       return spineJointStrings.get(SPINE_ROLL);
    }
 
-   private String getRobotSidePrefix(RobotSide robotSide)
+   private static String getRobotSidePrefix(RobotSide robotSide)
    {
       return (robotSide == RobotSide.LEFT) ? "l_" : "r_";
    }
@@ -285,6 +282,11 @@ public class AtlasJointMap implements DRCRobotJointMap
       return headName;
    }
 
+   public String getHandName(RobotSide robotSide)
+   {
+      return handNames.get(robotSide);
+   }
+
    @Override
    public LegJointName[] getLegJointNames()
    {
@@ -319,18 +321,6 @@ public class AtlasJointMap implements DRCRobotJointMap
    public String getJointBeforeHandName(RobotSide robotSide)
    {
       return nameOfJointsBeforeHands.get(robotSide);
-   }
-
-   @Override
-   public AtlasContactPointParameters getContactPointParameters()
-   {
-      return contactPointParameters;
-   }
-
-   @Override
-   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
-   {
-      return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
    @Override

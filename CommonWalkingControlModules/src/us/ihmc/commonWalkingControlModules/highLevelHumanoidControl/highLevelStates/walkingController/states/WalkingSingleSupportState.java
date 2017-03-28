@@ -18,7 +18,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -89,7 +88,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
 
-            balanceManager.updateICPPlanForSingleSupportDisturbances();
+            balanceManager.updateCurrentICPPlan();
          }
 
       }
@@ -106,7 +105,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
 
-            balanceManager.updateICPPlanForSingleSupportDisturbances();
+            balanceManager.updateCurrentICPPlan();
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())
@@ -128,7 +127,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.clearICPPlan();
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-            balanceManager.updateICPPlanForSingleSupportDisturbances();
+            balanceManager.updateCurrentICPPlan();
          }
       }
 
@@ -191,7 +190,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
-         balanceManager.updateICPPlanForSingleSupportDisturbances();
+         balanceManager.updateCurrentICPPlan();
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
@@ -242,7 +241,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(double, FramePoint2d)}.
+    * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     * @return the current swing time remaining for the swing foot trajectory
     */

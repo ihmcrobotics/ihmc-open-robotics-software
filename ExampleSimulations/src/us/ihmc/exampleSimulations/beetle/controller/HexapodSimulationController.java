@@ -16,7 +16,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.exampleSimulations.beetle.footContact.SimulatedPlaneContactStateUpdater;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
-import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleJointNameMap;
+import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleJointNameMapAndContactDefinition;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetlePhysicalProperties;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
@@ -99,7 +99,7 @@ public class HexapodSimulationController implements RobotController
    {
       ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
       ArrayList<SimulatedPlaneContactStateUpdater> contactStateUpdatersList = new ArrayList<>();
-      RhinoBeetleJointNameMap jointMap = new RhinoBeetleJointNameMap();
+      RhinoBeetleJointNameMapAndContactDefinition jointMap = new RhinoBeetleJointNameMapAndContactDefinition();
       for (RobotSextant robotSextant : RobotSextant.values)
       {
          RigidBody endEffector = fullRobotModel.getEndEffector(robotSextant);
@@ -225,6 +225,6 @@ public class HexapodSimulationController implements RobotController
       outputWriter.write();
 
       totalTimeToCompleteTick.set(System.nanoTime() - startTime);
-      totalTimeToCompleteTickInSeconds.set(Conversions.nanoSecondstoSeconds(System.nanoTime() - startTime));
+      totalTimeToCompleteTickInSeconds.set(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
    }
 }

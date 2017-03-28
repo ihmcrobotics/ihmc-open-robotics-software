@@ -1,14 +1,14 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class StepUpGroundProfile extends GroundProfileFromHeightMap
 {
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    private final double groundXStep;
    private final double groundZStep;
@@ -25,7 +25,7 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
       
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Double.POSITIVE_INFINITY;
-      boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    @Override
@@ -65,7 +65,7 @@ public class StepUpGroundProfile extends GroundProfileFromHeightMap
    }
    
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

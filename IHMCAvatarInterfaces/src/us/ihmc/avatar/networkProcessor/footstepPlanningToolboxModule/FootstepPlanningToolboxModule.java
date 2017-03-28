@@ -31,7 +31,7 @@ public class FootstepPlanningToolboxModule extends ToolboxModule
       super(fullHumanoidRobotModel, modelProvider, startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       footstepPlanningToolboxController = new FootstepPlanningToolboxController(drcRobotModel, fullHumanoidRobotModel, statusOutputManager, packetCommunicator,
-                                                                                registry, Conversions.milliSecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
+                                                                                registry, Conversions.millisecondsToSeconds(DEFAULT_UPDATE_PERIOD_MILLISECONDS));
       packetCommunicator.attachListener(FootstepPlanningRequestPacket.class, footstepPlanningToolboxController.createRequestConsumer());
       startYoVariableServer();
    }

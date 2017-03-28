@@ -17,9 +17,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.NoArmsArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -47,7 +45,7 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.steppr.controlParameters.BonoCapturePointPlannerParameters;
 import us.ihmc.steppr.controlParameters.BonoStateEstimatorParameters;
 import us.ihmc.steppr.controlParameters.BonoWalkingControllerParameters;
@@ -69,11 +67,10 @@ public class BonoRobotModel implements DRCRobotModel
    private final boolean runningOnRealRobot;
    private final JaxbSDFLoader loader;
    private final BonoJointMap jointMap = new BonoJointMap();
+   private final BonoContactPointParameters contactPointParameters = new BonoContactPointParameters(jointMap);
    private final DRCRobotSensorInformation sensorInformation;
-   private final NoArmsArmControllerParameters armControlParameters;
    private final BonoCapturePointPlannerParameters capturePointPlannerParameters;
    private final BonoWalkingControllerParameters walkingControllerParameters;
-   private final BonoWalkingControllerParameters multiContactControllerParameters;
 
    private boolean enableJointDamping = true;
 
@@ -92,9 +89,7 @@ public class BonoRobotModel implements DRCRobotModel
       }
 
       capturePointPlannerParameters = new BonoCapturePointPlannerParameters(runningOnRealRobot);
-      armControlParameters = new NoArmsArmControllerParameters();
       walkingControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
-      multiContactControllerParameters = new BonoWalkingControllerParameters(jointMap, runningOnRealRobot);
       robotDescription = createRobotDescription();
    }
 
@@ -104,7 +99,8 @@ public class BonoRobotModel implements DRCRobotModel
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
+      RobotDescription robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters,
+            useCollisionMeshes);
       return robotDescription;
    }
 
@@ -112,12 +108,6 @@ public class BonoRobotModel implements DRCRobotModel
    public RobotDescription getRobotDescription()
    {
       return robotDescription;
-   }
-
-   @Override
-   public ArmControllerParameters getArmControllerParameters()
-   {
-      return armControlParameters;
    }
 
    @Override
@@ -188,7 +178,7 @@ public class BonoRobotModel implements DRCRobotModel
    @Override
    public RobotContactPointParameters getContactPointParameters()
    {
-      return jointMap.getContactPointParameters();
+      return contactPointParameters;
    }
 
    @Override

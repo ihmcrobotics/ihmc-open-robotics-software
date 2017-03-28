@@ -13,6 +13,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    private final DoubleYoVariable desiredPosition;
    private final DoubleYoVariable desiredVelocity;
    private final DoubleYoVariable desiredAcceleration;
+   private final DoubleYoVariable desiredCurrent;
    private final BooleanYoVariable resetIntegrators;
 
    public YoLowLevelJointData(String namePrefix, YoVariableRegistry registry, String suffixString)
@@ -24,6 +25,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredPosition = new DoubleYoVariable(namePrefix + "DesiredPosition" + suffixString, registry);
       desiredVelocity = new DoubleYoVariable(namePrefix + "DesiredVelocity" + suffixString, registry);
       desiredAcceleration = new DoubleYoVariable(namePrefix + "DesiredAcceleration" + suffixString, registry);
+      desiredCurrent = new DoubleYoVariable(namePrefix + "DesiredCurrent" + suffixString, registry);
       resetIntegrators = new BooleanYoVariable(namePrefix + "ResetIntegrators" + suffixString, registry);
 
       clear();
@@ -36,6 +38,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredPosition.set(Double.NaN);
       desiredVelocity.set(Double.NaN);
       desiredAcceleration.set(Double.NaN);
+      desiredCurrent.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -46,6 +49,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredPosition.set(other.getDesiredPosition());
       desiredVelocity.set(other.getDesiredVelocity());
       desiredAcceleration.set(other.getDesiredAcceleration());
+      desiredCurrent.set(other.getDesiredCurrent());
       resetIntegrators.set(other.peekResetIntegratorsRequest());
    }
 
@@ -65,6 +69,8 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
          desiredVelocity.set(other.getDesiredVelocity());
       if (!hasDesiredAcceleration())
          desiredAcceleration.set(other.getDesiredAcceleration());
+      if (!hasDesiredCurrent())
+         desiredCurrent.set(other.getDesiredCurrent());
       if (!peekResetIntegratorsRequest())
          resetIntegrators.set(other.peekResetIntegratorsRequest());
    }
@@ -103,6 +109,11 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       desiredAcceleration.set(qdd);
    }
 
+   public void setDesiredCurrent(double i)
+   {
+      desiredCurrent.set(i);
+   }
+
    public void setResetIntegrators(boolean reset)
    {
       resetIntegrators.set(reset);
@@ -139,6 +150,12 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    }
 
    @Override
+   public boolean hasDesiredCurrent()
+   {
+      return !desiredCurrent.isNaN();
+   }
+
+   @Override
    public LowLevelJointControlMode getControlMode()
    {
       return controlMode.getEnumValue();
@@ -169,6 +186,12 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
    }
 
    @Override
+   public double getDesiredCurrent()
+   {
+      return desiredCurrent.getDoubleValue();
+   }
+
+   @Override
    public boolean pollResetIntegratorsRequest()
    {
       boolean request = resetIntegrators.getBooleanValue();
@@ -190,6 +213,7 @@ public class YoLowLevelJointData implements LowLevelJointDataReadOnly
       ret += "desiredPosition = " + getDesiredPosition() + "\n";
       ret += "desiredVelocity = " + getDesiredVelocity() + "\n";
       ret += "desiredAcceleration = " + getDesiredAcceleration() + "\n";
+      ret += "desiredCurrent = " + getDesiredCurrent() + "\n";
       return ret;
    }
 }

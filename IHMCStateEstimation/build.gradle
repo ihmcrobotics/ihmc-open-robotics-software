@@ -39,7 +39,7 @@ dependencies {
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
     compile group: 'org.ejml', name: 'dense64', version: '0.30'
     compile group: 'org.ejml', name: 'core', version: '0.30'
     
@@ -50,12 +50,14 @@ dependencies {
 	compile ihmc.getProjectDependency(":SensorProcessing")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
 	compile ihmc.getProjectDependency(":IHMCRoboticsToolkit")
     compile ihmc.getProjectDependency(":IHMCGraphicsDescription")
     
     testCompile ihmc.getProjectDependency(":SimulationConstructionSet")
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 }
 jar {
     manifest {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.swing.event.ChangeListener;
 
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
