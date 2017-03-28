@@ -15,7 +15,6 @@ public enum AtlasRobotVersion
    ATLAS_UNPLUGGED_V5_NO_FOREARMS,
    ATLAS_UNPLUGGED_V5_NO_HANDS,
    ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
-   ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS,
    ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI,
    ATLAS_UNPLUGGED_V5_TROOPER;
 
@@ -33,7 +32,6 @@ public enum AtlasRobotVersion
          return DRCHandType.ROBOTIQ_AND_SRI;
       case ATLAS_UNPLUGGED_V5_NO_HANDS:
       case ATLAS_UNPLUGGED_V5_NO_FOREARMS:
-      case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
       default:
          return DRCHandType.NONE;
       }
@@ -60,7 +58,6 @@ public enum AtlasRobotVersion
    {
       switch (this)
       {
-      case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
       case ATLAS_UNPLUGGED_V5_NO_HANDS:
          return "models/GFE/atlas_unplugged_v5.sdf";
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:

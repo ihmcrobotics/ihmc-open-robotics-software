@@ -22,6 +22,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -152,8 +154,11 @@ public class HighLevelControlManagerFactory
       RigidBody elevator = controllerToolbox.getFullRobotModel().getElevator();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
 
+      ContactablePlaneBody contactableBody = controllerToolbox.getContactableBody(bodyToControl);
+      YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
+
       RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, positionControlledJoints,
-            integrationSettings, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
+            integrationSettings, trajectoryFrames, controlFrame, baseFrame, contactableBody, yoTime, graphicsListRegistry, registry);
       manager.setGains(jointspaceGains, taskspaceOrientationGains, taskspacePositionGains);
       manager.setWeights(jointspaceWeights, taskspaceAngularWeight, taskspaceLinearWeight, userModeWeights);
 
@@ -283,4 +288,5 @@ public class HighLevelControlManagerFactory
 
       return ret;
    }
+
 }

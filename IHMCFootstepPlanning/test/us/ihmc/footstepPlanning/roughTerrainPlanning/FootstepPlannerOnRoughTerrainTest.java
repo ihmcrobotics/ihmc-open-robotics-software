@@ -430,6 +430,33 @@ public abstract class FootstepPlannerOnRoughTerrainTest implements PlanningTest
       assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
    }
 
+   public void testWalkingAroundHole()
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(0.75, 0.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(1.5, 5.0, 0.001);
+      generator.translate(2.5, 0.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(1.5, 5.0, 0.001);
+      generator.translate(-1.25, 1.5, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(1.0, 2.0, 0.001);
+      generator.translate(0.0, -3.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(1.0, 2.0, 0.001);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      // define start and goal conditions
+      FramePose initialStanceFootPose = new FramePose(worldFrame);
+      initialStanceFootPose.setPosition(0.5, 0.15, 0.0);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      FramePose goalPose = new FramePose(worldFrame);
+      goalPose.setPosition(3.5, 0.0, 0.0);
+
+      FootstepPlan footstepPlan = PlanningTestTools.runPlanner(getPlanner(), initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList,
+            !visualize());
+      if (visualize())
+         PlanningTestTools.visualizeAndSleep(planarRegionsList, footstepPlan, goalPose);
+      assertTrue(PlanningTestTools.isGoalNextToLastStep(goalPose, footstepPlan));
+   }
+
    private PlanarRegionsList generateRandomTerrain(Random random)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();

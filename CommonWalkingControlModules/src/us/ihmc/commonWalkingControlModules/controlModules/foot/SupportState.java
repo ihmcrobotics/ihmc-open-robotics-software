@@ -174,7 +174,7 @@ public class SupportState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
       FrameVector fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
-      controllerToolbox.setPlaneContactStateNormalContactVector(contactableFoot, fullyConstrainedNormalContactVector);
+      controllerToolbox.setFootContactStateNormalContactVector(robotSide, fullyConstrainedNormalContactVector);
 
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
@@ -209,7 +209,7 @@ public class SupportState extends AbstractFootControlState
          footSwitch.computeAndPackCoP(cop);
          controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
          partialFootholdControlModule.compute(desiredCoP, cop);
-         YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
          if (contactStateHasChanged)
             contactState.notifyContactStateHasChanged();

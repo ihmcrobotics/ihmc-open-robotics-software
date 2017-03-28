@@ -1,5 +1,8 @@
 package us.ihmc.robotics;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
@@ -679,20 +682,50 @@ public class MathTools
       return value * value * value;
    }
 
-   public static double powWithInteger(double x, int exponent)
+   /**
+    * <p>Rounds to number of significant figures.</p>
+    * 
+    * <p>NOTE: For now, this method creates garbage. A garbage free solution needs to be found.</p>
+    * 
+    * @param value
+    * @param significantFigures
+    * @return Rounded to significant figures.
+    */
+   public static double roundToSignificantFigures(double value, int significantFigures)
    {
-      double ret = 1.0;
+      if (Math.abs(value) < Double.MIN_VALUE)
+      {
+         return 0.0;
+      }
+   
+      return new BigDecimal(value, new MathContext(significantFigures, RoundingMode.HALF_UP)).doubleValue();
+   }
+
+   /**
+    * Calculates value to the power of exponent. Uses integer for efficiency.
+    * 
+    * @param value
+    * @param exponent
+    * @return Value to the power of exponent.
+    */
+   public static double pow(double value, int exponent)
+   {
+      double pow = 1.0;
       if (exponent >= 0)
       {
          for (int i = 0; i < exponent; i++)
-            ret *= x;
+         {
+            pow *= value;
+         }
       }
       else
       {
          for (int i = 0; i > exponent; i--)
-            ret /= x;
+         {
+            pow /= value;
+         }
       }
-      return ret;
+      return pow;
    }
 
    public static boolean isSignificantlyGreaterThan(double numberOne, double numberTwo, int significantFigures)
@@ -763,21 +796,6 @@ public class MathTools
       System.arraycopy(a, 1, b, 0, b.length);
       
       return lcm(a[0], lcm(b));
-   }
-
-   public static double roundToSignificantFigures(double value, int significantFigures)
-   {
-      if (Math.abs(value) < Double.MIN_VALUE)
-      {
-         return 0.0;
-      }
-   
-      final double log10 = Math.ceil(Math.log10(Math.abs(value)));
-      final int power = significantFigures - (int) log10;
-   
-      final double magnitude = Math.pow(10, power);
-      final long shifted = Math.round(value * magnitude);
-      return shifted / magnitude;
    }
 
    public static int orderOfMagnitude(double number)

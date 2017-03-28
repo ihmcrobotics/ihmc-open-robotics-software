@@ -13,7 +13,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.SteeringWheelInformationPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.AdjustFootstepMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -356,12 +356,12 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(handTrajectoryMessage, true);
       if (errorMessage != null)
          return HandTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-      
+
       if(handTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
-      
+
       if(handTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
@@ -450,12 +450,12 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(headTrajectoryMessage, true);
       if (errorMessage != null)
          return HeadTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-      
+
       if(headTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
-      
+
       if(headTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
@@ -572,12 +572,12 @@ public abstract class PacketValidityChecker
          errorMessage = "Received " + messageClassName + " with no waypoint.";
          return errorMessage;
       }
-      
+
       if(message.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
-      
+
       if(message.getTrajectoryReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
@@ -604,12 +604,12 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(pelvisOrientationTrajectoryMessage, true);
       if (errorMessage != null)
          return PelvisOrientationTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-      
+
       if(pelvisOrientationTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
-      
+
       if(pelvisOrientationTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
@@ -645,12 +645,12 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(pelvisTrajectoryMessage, true);
       if (errorMessage != null)
          return PelvisTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-      
+
       if(pelvisTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
-      
+
       if(pelvisTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
@@ -686,12 +686,12 @@ public abstract class PacketValidityChecker
       String errorMessage = validatePacket(footTrajectoryMessage, true);
       if (errorMessage != null)
          return FootTrajectoryMessage.class.getSimpleName() + " " + errorMessage;
-      
+
       if(footTrajectoryMessage.getDataReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
-      
+
       if(footTrajectoryMessage.getTrajectoryReferenceFrameId() == 0)
       {
          return ChestTrajectoryMessage.class.getSimpleName() + " Trajectory Reference Frame Id Not Set";
@@ -731,40 +731,20 @@ public abstract class PacketValidityChecker
       return null;
    }
 
-   public static String validateEndEffectorLoadBearingMessage(EndEffectorLoadBearingMessage endEffectorLoadBearingMessage)
+   public static String validateFootLoadBearingMessage(FootLoadBearingMessage message)
    {
-      String errorMessage = validatePacket(endEffectorLoadBearingMessage, true);
+      String errorMessage = validatePacket(message, true);
       if (errorMessage != null)
-         return EndEffectorLoadBearingMessage.class.getSimpleName() + " " + errorMessage;
+         return FootLoadBearingMessage.class.getSimpleName() + " " + errorMessage;
 
       ObjectErrorType errorType;
 
-      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getEndEffector());
+      errorType = ObjectValidityChecker.validateEnum(message.getRequest());
       if (errorType != null)
       {
-         String messageClassName = endEffectorLoadBearingMessage.getClass().getSimpleName();
-         errorMessage = messageClassName + "'s endEffector field " + errorType.getMessage();
-         return errorMessage;
-      }
-
-      errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRequest());
-      if (errorType != null)
-      {
-         String messageClassName = endEffectorLoadBearingMessage.getClass().getSimpleName();
+         String messageClassName = message.getClass().getSimpleName();
          errorMessage = messageClassName + "'s request field " + errorType.getMessage();
          return errorMessage;
-      }
-
-      if (endEffectorLoadBearingMessage.getEndEffector().isRobotSideNeeded())
-      {
-         errorType = ObjectValidityChecker.validateEnum(endEffectorLoadBearingMessage.getRobotSide());
-         if (endEffectorLoadBearingMessage.getRobotSide() == null)
-         {
-            String messageClassName = endEffectorLoadBearingMessage.getClass().getSimpleName();
-            errorMessage = messageClassName + "'s robotSide field is null. It is required for the endEffector "
-                  + endEffectorLoadBearingMessage.getEndEffector();
-            return errorMessage;
-         }
       }
 
       return null;

@@ -186,11 +186,6 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       spatialAccelerationCommand.setWeights(angular, linear);
    }
 
-   public void setAlphaTaskPriorityForSolver(double alpha)
-   {
-      spatialAccelerationCommand.setAlphaTaskPriority(alpha);
-   }
-
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);

@@ -15,13 +15,13 @@ import com.martiansoftware.jsap.JSAPException;
 import ihmc_msgs.HandDesiredConfigurationRosMessage;
 import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.environments.DarpaRoboticsChallengeFinalsEnvironment;
 import us.ihmc.avatar.ros.ROSAPISimulator;
 import us.ihmc.avatar.ros.subscriber.IHMCMsgToPacketSubscriber;
 import us.ihmc.avatar.simulationStarter.DRCSCStartingLocations;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.DarpaRoboticsChallengeFinalsEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 

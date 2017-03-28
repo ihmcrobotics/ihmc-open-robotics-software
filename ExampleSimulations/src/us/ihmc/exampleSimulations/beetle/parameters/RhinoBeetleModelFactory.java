@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 public class RhinoBeetleModelFactory implements FullRobotModelFactory
 {
    private final RhinoBeetleSDFParameters sdfParameters;
-   private final RhinoBeetleJointNameMap jointNameMap;
+   private final RhinoBeetleJointNameMapAndContactDefinition jointMapAndContactInfo;
 
    private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
 
@@ -27,7 +27,7 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
    public RhinoBeetleModelFactory()
    {
       sdfParameters = new RhinoBeetleSDFParameters();
-      jointNameMap = new RhinoBeetleJointNameMap();
+      jointMapAndContactInfo = new RhinoBeetleJointNameMapAndContactDefinition();
 
       JaxbSDFLoader loader;
       try
@@ -44,7 +44,8 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, getJointNameMap(), useCollisionMeshes);
+      robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMapAndContactInfo, jointMapAndContactInfo,
+            useCollisionMeshes);
    }
 
    private GeneralizedSDFRobotModel getGeneralizedRobotModel()
@@ -75,9 +76,9 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
       return robotDescription;
    }
 
-   public RhinoBeetleJointNameMap getJointNameMap()
+   public RhinoBeetleJointNameMapAndContactDefinition getJointNameMap()
    {
-      return jointNameMap;
+      return jointMapAndContactInfo;
    }
-   
+
 }
