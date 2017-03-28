@@ -34,7 +34,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final YoFrameVector yoDesiredLinearVelocity;
    private final YoFrameVector yoCurrentLinearVelocity;
 
+   private final YoFrameVector yoFeedForwardLinearVelocity;
    private final YoFrameVector yoFeedForwardLinearAcceleration;
+
+   private final YoFrameVector yoFeedbackLinearVelocity;
+
    private final YoFrameVector yoDesiredLinearAcceleration;
    private final YoFrameVector yoAchievedLinearAcceleration;
 
@@ -44,9 +48,11 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempLinearVelocity = new FrameVector();
    private final FrameVector feedForwardLinearAcceleration = new FrameVector();
+   private final FrameVector desiredLinearVelocity = new FrameVector();
    private final FrameVector desiredLinearAcceleration = new FrameVector();
 
-   private final PointAccelerationCommand output = new PointAccelerationCommand();
+   private final PointAccelerationCommand inverseDynamicsOutput = new PointAccelerationCommand();
+   private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
 
    private final YoPositionPIDGainsInterface gains;
    private final YoSE3OffsetFrame controlFrame;
@@ -58,7 +64,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final RigidBody endEffector;
 
    public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
-         YoVariableRegistry parentRegistry)
+                                  YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
@@ -69,7 +75,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       double dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getPositionGains(endEffector);
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
-      accelerationControlModule = new RigidBodyLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, controlFrame, dt, gains, registry);
 
       isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
@@ -78,11 +83,36 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoCurrentPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.CURRENT);
 
       yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
-      yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
 
-      yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
-      yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
-      yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
+      if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
+      {
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
+
+         accelerationControlModule = new RigidBodyLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, controlFrame, dt, gains, registry);
+         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
+         yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
+         yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
+      }
+      else
+      {
+         yoCurrentLinearVelocity = null;
+
+         accelerationControlModule = null;
+         yoFeedForwardLinearAcceleration = null;
+         yoDesiredLinearAcceleration = null;
+         yoAchievedLinearAcceleration = null;
+      }
+
+      if (toolbox.isEnableInverseKinematicsModule())
+      {
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
+      }
+      else
+      {
+         yoFeedForwardLinearVelocity = null;
+         yoFeedbackLinearVelocity = null;
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -94,7 +124,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       base = command.getBase();
 
-      output.set(command.getPointAccelerationCommand());
+      inverseDynamicsOutput.set(command.getPointAccelerationCommand());
 
       gains.set(command.getGains());
 
@@ -105,7 +135,10 @@ public class PointFeedbackController implements FeedbackControllerInterface
       command.getIncludingFrame(tempPosition, tempLinearVelocity, feedForwardLinearAcceleration);
       yoDesiredPosition.setAndMatchFrame(tempPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(tempLinearVelocity);
-      yoFeedForwardLinearAcceleration.setAndMatchFrame(feedForwardLinearAcceleration);
+      if (yoFeedForwardLinearVelocity != null)
+         yoFeedForwardLinearVelocity.setAndMatchFrame(tempLinearVelocity);
+      if (yoFeedForwardLinearAcceleration != null)
+         yoFeedForwardLinearAcceleration.setAndMatchFrame(feedForwardLinearAcceleration);
    }
 
    @Override
@@ -117,7 +150,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
    @Override
    public void initialize()
    {
-      accelerationControlModule.reset();
+      if (accelerationControlModule != null)
+         accelerationControlModule.reset();
    }
 
    @Override
@@ -132,17 +166,42 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       accelerationControlModule.compute(desiredLinearAcceleration, tempPosition, tempLinearVelocity, feedForwardLinearAcceleration, base);
 
-      updatePositionVisualization();
+      yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
 
-      getBodyFixedPoint(tempPosition);
+      tempPosition.setToZero(controlFrame);
+      yoCurrentPosition.setAndMatchFrame(tempPosition);
 
-      output.setLinearAcceleration(desiredLinearAcceleration);
+      accelerationControlModule.getCurrentLinearVelocity(tempLinearVelocity);
+      yoCurrentLinearVelocity.setAndMatchFrame(tempLinearVelocity);
+
+      inverseDynamicsOutput.setLinearAcceleration(desiredLinearAcceleration);
    }
 
    @Override
    public void computeInverseKinematics()
    {
-      throw new RuntimeException("Implement me!");
+      if (!isEnabled())
+         return;
+
+      inverseKinematicsOutput.setProperties(inverseDynamicsOutput);
+
+      yoDesiredPosition.getFrameTupleIncludingFrame(tempPosition);
+      yoFeedForwardLinearVelocity.getFrameTupleIncludingFrame(tempLinearVelocity);
+      tempLinearVelocity.changeFrame(controlFrame);
+
+      tempPosition.changeFrame(controlFrame);
+      double[] kp = gains.getProportionalGains();
+      desiredLinearVelocity.setToZero(controlFrame);
+      desiredLinearVelocity.set(kp[0] * tempPosition.getX(), kp[1] * tempPosition.getY(), kp[2] * tempPosition.getZ());
+      yoFeedbackLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+
+      desiredLinearVelocity.add(tempLinearVelocity);
+      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+
+      tempPosition.setToZero(controlFrame);
+      yoCurrentPosition.setAndMatchFrame(tempPosition);
+
+      inverseKinematicsOutput.setLinearVelocity(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), desiredLinearVelocity);
    }
 
    @Override
@@ -151,29 +210,13 @@ public class PointFeedbackController implements FeedbackControllerInterface
       computeInverseDynamics();
    }
 
-   private void updatePositionVisualization()
-   {
-      yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
-
-      getBodyFixedPoint(tempPosition);
-      yoCurrentPosition.setAndMatchFrame(tempPosition);
-
-      accelerationControlModule.getCurrentLinearVelocity(tempLinearVelocity);
-      yoCurrentLinearVelocity.setAndMatchFrame(tempLinearVelocity);
-   }
-
    @Override
    public void computeAchievedAcceleration()
    {
-      getBodyFixedPoint(tempPosition);
+      tempPosition.setToZero(controlFrame);
+      tempPosition.changeFrame(endEffector.getBodyFixedFrame());
       spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(base, endEffector, tempPosition, achievedLinearAcceleration);
       yoAchievedLinearAcceleration.setAndMatchFrame(achievedLinearAcceleration);
-   }
-
-   private void getBodyFixedPoint(FramePoint bodyFixedPointToPack)
-   {
-      bodyFixedPointToPack.setToZero(controlFrame);
-      bodyFixedPointToPack.changeFrame(endEffector.getBodyFixedFrame());
    }
 
    @Override
@@ -187,7 +230,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return output;
+      return inverseDynamicsOutput;
    }
 
    @Override
@@ -195,7 +238,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      throw new RuntimeException("Implement me!");
+      return inverseKinematicsOutput;
    }
 
    @Override
