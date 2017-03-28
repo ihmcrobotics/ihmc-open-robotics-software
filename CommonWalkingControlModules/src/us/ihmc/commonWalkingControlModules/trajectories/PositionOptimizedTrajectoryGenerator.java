@@ -69,6 +69,8 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
 
    private final YoVariableRegistry registry;
    private final BooleanYoVariable isDone;
+   private final BooleanYoVariable optimizeInOneTick;
+   private final BooleanYoVariable hasConverged;
    private final IntegerYoVariable segments;
    private final IntegerYoVariable activeSegment;
    private final ArrayList<DoubleYoVariable> waypointTimes = new ArrayList<>();
@@ -132,8 +134,13 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
       this.maxIterations = new IntegerYoVariable(namePrefix + "MaxIterations", registry);
       this.maxIterations.set(maxIterations);
       isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
+      optimizeInOneTick = new BooleanYoVariable(namePrefix + "OptimizeInOneTick", registry);
+      hasConverged = new BooleanYoVariable(namePrefix + "HasConverged", registry);
       segments = new IntegerYoVariable(namePrefix + "Segments", registry);
       activeSegment = new IntegerYoVariable(namePrefix + "ActiveSegment", registry);
+
+      optimizeInOneTick.set(maxIterations >= 0);
+      hasConverged.set(optimizeInOneTick.getBooleanValue());
 
       desiredPosition = new YoFramePoint(namePrefix + "DesiredPosition", trajectoryFrame, registry);
       desiredVelocity = new YoFrameVector(namePrefix + "DesiredVelocity", trajectoryFrame, registry);
@@ -274,8 +281,22 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
       if (initialPosition.containsNaN())
          throw new RuntimeException("Does not have valid enpoint conditions. Did you call setEndpointConditions?");
 
-      optimizer.compute(maxIterations.getIntegerValue());
+      if (optimizeInOneTick.getBooleanValue())
+      {
+         optimizer.compute(maxIterations.getIntegerValue());
+         hasConverged.set(true);
+      }
+      else
+      {
+         hasConverged.set(false);
+         optimizer.compute(0);
+      }
 
+      updateVariablesFromOptimizer();
+   }
+
+   private void updateVariablesFromOptimizer()
+   {
       for (int i = 0; i < segments.getIntegerValue() - 1; i++)
          waypointTimes.get(i).set(optimizer.getWaypointTime(i));
 
@@ -316,6 +337,12 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
    @Override
    public void compute(double time)
    {
+      if (!hasConverged.getBooleanValue())
+      {
+         hasConverged.set(optimizer.doFullTimeUpdate());
+         updateVariablesFromOptimizer();
+      }
+
       isDone.set(time > 1.0);
 
       if (isDone())
