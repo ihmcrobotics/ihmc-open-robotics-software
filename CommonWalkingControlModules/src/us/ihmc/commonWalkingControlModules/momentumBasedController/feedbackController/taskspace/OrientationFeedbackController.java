@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -52,6 +53,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
    private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
 
+   private final YoOrientationPIDGainsInterface gains;
    private final RigidBodyOrientationControlModule accelerationControlModule;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -71,7 +73,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       registry = new YoVariableRegistry(endEffectorName + "OrientationFBController");
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
       double dt = toolbox.getControlDT();
-      accelerationControlModule = new RigidBodyOrientationControlModule(endEffectorName, endEffector, twistCalculator, dt, registry);
+      gains = feedbackControllerToolbox.getOrientationGains(endEffector);
+      accelerationControlModule = new RigidBodyOrientationControlModule(endEffectorName, endEffector, twistCalculator, dt, gains, registry);
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
@@ -104,7 +107,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       output.set(command.getSpatialAccelerationCommand());
 
-      accelerationControlModule.setGains(command.getGains());
+      gains.set(command.getGains());
       command.getIncludingFrame(tempOrientation, tempAngularVelocity, feedForwardAngularAcceleration);
       yoDesiredOrientation.setAndMatchFrame(tempOrientation);
       yoDesiredAngularVelocity.setAndMatchFrame(tempAngularVelocity);
@@ -157,7 +160,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    @Override
    public void computeAchievedAcceleration()
    {
-      spatialAccelerationCalculator.getRelativeAcceleration(endEffectorAchievedAcceleration, base, endEffector);
+      spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, endEffectorAchievedAcceleration);
       endEffectorAchievedAcceleration.getAngularPart(achievedAngularAcceleration);
 
       yoAchievedAngularAcceleration.setAndMatchFrame(achievedAngularAcceleration);

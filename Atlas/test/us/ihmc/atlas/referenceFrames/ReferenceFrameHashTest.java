@@ -1,6 +1,7 @@
 package us.ihmc.atlas.referenceFrames;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -9,16 +10,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 import us.ihmc.tools.MemoryTools;
 
 public class ReferenceFrameHashTest
@@ -160,6 +164,20 @@ public class ReferenceFrameHashTest
       }
    }
 
+   
+   @ContinuousIntegrationTest(estimatedDuration = 1.0)
+   @Test(timeout = 30000, expected=IllegalArgumentException.class)
+   public void testAddingTwoFramesWithTheSameName() 
+   {
+      AtlasRobotModel robotModelA = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, true);
+      FullHumanoidRobotModel fullRobotModel = robotModelA.createFullRobotModel();
+      TestReferenceFrames referenceFrames = new TestReferenceFrames();
+
+      //should throw an IllegalArgumentException
+      ReferenceFrameHashCodeResolver referenceFrameHashCodeResolverA = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+
+   }
+   
    private void checkReferenceFramesMatch(ReferenceFrame referenceFrameA, ReferenceFrame referenceFrameB)
    {
       assertEquals("reference frame names didnt match", referenceFrameA.getName(), referenceFrameB.getName());
@@ -171,5 +189,34 @@ public class ReferenceFrameHashTest
          assertEquals("parent hash codes didn't match", referenceFrameA.getParent().getNameBasedHashCode(), referenceFrameB.getParent().getNameBasedHashCode());
       }
    }
+   
+   //create two frames with the same name
+   public class TestReferenceFrames implements ReferenceFrames
+   {
+      private final PoseReferenceFrame comFrame = new PoseReferenceFrame("comFrame", ReferenceFrame.getWorldFrame());
+      private final PoseReferenceFrame comFrame2 = new PoseReferenceFrame("comFrame", ReferenceFrame.getWorldFrame());
+      
+      @Override
+      public void updateFrames()
+      {
+         
+      }
 
+      @Override
+      public ReferenceFrame getCenterOfMassFrame()
+      {
+         return comFrame;
+      }
+      
+      public ReferenceFrame getCenterOfMassFrame2()
+      {
+         return comFrame2;
+      }
+
+      @Override
+      public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
+      {
+         return null;
+      }
+   }
 }

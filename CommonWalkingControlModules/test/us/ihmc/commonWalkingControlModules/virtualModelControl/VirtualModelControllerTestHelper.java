@@ -11,11 +11,11 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.junit.Assert;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -68,7 +68,7 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 public class VirtualModelControllerTestHelper
@@ -2414,6 +2414,13 @@ public class VirtualModelControllerTestHelper
       @Override
       public ReferenceFrame getChestFrame()
       {
+         return null;
+      }
+
+      @Override
+      public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
+      {
+         // TODO Auto-generated method stub
          return null;
       }
    }

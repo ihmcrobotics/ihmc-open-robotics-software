@@ -131,7 +131,7 @@ public class PointVelocityMeasurementModelElementTest
            ControlFlowInputPort<PointVelocityDataObject> pointVelocityMeasurementInputPort)
    {
       Twist twist = new Twist();
-      twistCalculator.getTwistOfBody(twist, stationaryPointLink);
+      twistCalculator.getTwistOfBody(stationaryPointLink, twist);
       twist.changeFrame(twist.getBaseFrame());
       FramePoint pointInTwistBaseFrame = new FramePoint(measurementPointInBodyFrame);
       pointInTwistBaseFrame.changeFrame(twist.getBaseFrame());

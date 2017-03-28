@@ -235,8 +235,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (pointQueue.isEmpty())
       {
          trajectoryDone.set(true);
-//         positionTrajectoryGenerator.changeFrame(trajectoryFrame);
-//         orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
          return;
       }
 
@@ -265,9 +263,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          orientationTrajectoryGenerator.appendWaypoint(pointToAdd);
       }
 
-      lastPointAdded.changeFrame(trajectoryFrame);
-//      positionTrajectoryGenerator.changeFrame(trajectoryFrame);
-//      orientationTrajectoryGenerator.changeFrame(trajectoryFrame);
       positionTrajectoryGenerator.initialize();
       orientationTrajectoryGenerator.initialize();
    }
@@ -280,7 +275,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public void doTransitionOutOfAction()
    {
-      PrintTools.debug("transition out of");
       trackingOrientation.set(false);
       trackingPosition.set(false);
 

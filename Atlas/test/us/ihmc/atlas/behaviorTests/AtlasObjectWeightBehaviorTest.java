@@ -4,7 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.behaviorTests.DRCObjectWeightBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 public class AtlasObjectWeightBehaviorTest extends DRCObjectWeightBehaviorTest
 {

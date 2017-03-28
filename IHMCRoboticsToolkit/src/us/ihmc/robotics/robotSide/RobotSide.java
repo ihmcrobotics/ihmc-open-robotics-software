@@ -63,6 +63,16 @@ public enum RobotSide
          return "Left";
    }
    
+   public String getCamelCaseName()
+   {
+      return getCamelCaseNameForStartOfExpression();
+   }
+   
+   public String getPascalCaseName()
+   {
+      return getCamelCaseNameForMiddleOfExpression();
+   }
+   
    public String getLowerCaseName()
    {
       if (this == RIGHT)

@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3TrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points."
@@ -68,6 +69,7 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
+    * By default this constructor sets the trajectory frame to pelvis z up and the data frame to world
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Quaternion, Vector3D)} for each trajectory point afterwards.
     * Sets the frame to control in to world
     * @param numberOfTrajectoryPoints number of trajectory points that will be sent to the controller.
@@ -75,6 +77,8 @@ public class ChestTrajectoryMessage extends AbstractSO3TrajectoryMessage<ChestTr
    public ChestTrajectoryMessage(int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
+      super.setTrajectoryReferenceFrameId(CommonReferenceFrameIds.PELVIS_ZUP_FRAME.getHashId());
+      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
    }
 
 }

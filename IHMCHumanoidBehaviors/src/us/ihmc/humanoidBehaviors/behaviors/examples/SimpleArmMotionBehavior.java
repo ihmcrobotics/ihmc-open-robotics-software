@@ -17,6 +17,7 @@ import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
 public class SimpleArmMotionBehavior extends AbstractBehavior
@@ -96,7 +97,7 @@ public class SimpleArmMotionBehavior extends AbstractBehavior
       FramePose point = offsetPointFromChestInWorldFrame(x, y, z, yaw, pitch, roll);
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-            point.getFrameOrientationCopy().getQuaternion(), ReferenceFrame.getWorldFrame(), referenceFrames.getChestFrame());
+            point.getFrameOrientationCopy().getQuaternion(), ReferenceFrame.getWorldFrame().getNameBasedHashCode(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
    }

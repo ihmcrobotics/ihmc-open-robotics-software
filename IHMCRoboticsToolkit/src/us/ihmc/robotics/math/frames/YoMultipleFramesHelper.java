@@ -105,7 +105,7 @@ public class YoMultipleFramesHelper extends AbstractReferenceFrameHolder
 
    /**
     * Pack the reference frames that have already been registered into the list.
-    * Careful, this method does not clear the list.
+    * Careful, this method does not clear the list and it might generate garbage.
     * @param referenceFramesToPack the list in which the reference frames are packed.
     */
    public void getRegisteredReferenceFrames(List<ReferenceFrame> referenceFramesToPack)
