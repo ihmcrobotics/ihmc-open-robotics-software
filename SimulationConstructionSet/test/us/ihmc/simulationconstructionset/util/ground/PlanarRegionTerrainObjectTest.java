@@ -1,9 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -11,11 +8,11 @@ import org.junit.Test;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 /**
@@ -36,11 +33,11 @@ public class PlanarRegionTerrainObjectTest
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
                                                                                                             RandomNumbers.nextDouble(random, 30.0),
                                                                                                             random.nextInt(10));
-         BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+         BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
-         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
-         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
-         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
+         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinX() - 10.0, boundingBox3dInWorld.getMaxX() + 10.0);
+         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinY() - 10.0, boundingBox3dInWorld.getMaxY() + 10.0);
+         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinZ() - 10.0, boundingBox3dInWorld.getMaxZ() + 10.0);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
@@ -72,11 +69,11 @@ public class PlanarRegionTerrainObjectTest
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
                                                                                                             RandomNumbers.nextDouble(random, 30.0),
                                                                                                             random.nextInt(10));
-         BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+         BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
-         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
-         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
-         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
+         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinX() - 10.0, boundingBox3dInWorld.getMaxX() + 10.0);
+         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinY() - 10.0, boundingBox3dInWorld.getMaxY() + 10.0);
+         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinZ() - 10.0, boundingBox3dInWorld.getMaxZ() + 10.0);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
@@ -151,15 +148,15 @@ public class PlanarRegionTerrainObjectTest
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
                                                                                                             RandomNumbers.nextDouble(random, 30.0),
                                                                                                             random.nextInt(10));
-         BoundingBox3d boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
+         BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
-         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getXMin() - 10.0, boundingBox3dInWorld.getXMax() + 10.0);
-         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getYMin() - 10.0, boundingBox3dInWorld.getYMax() + 10.0);
-         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getZMin() - 10.0, boundingBox3dInWorld.getZMax() + 10.0);
+         double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinX() - 10.0, boundingBox3dInWorld.getMaxX() + 10.0);
+         double randomYCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinY() - 10.0, boundingBox3dInWorld.getMaxY() + 10.0);
+         double randomZCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinZ() - 10.0, boundingBox3dInWorld.getMaxZ() + 10.0);
 
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
-         if (boundingBox3dInWorld.isXYInside(randomXCoord, randomYCoord))
+         if (boundingBox3dInWorld.isXYInsideInclusive(randomXCoord, randomYCoord))
          {
             assertTrue(terrainObject.isClose(randomXCoord, randomYCoord, randomZCoord));
          }

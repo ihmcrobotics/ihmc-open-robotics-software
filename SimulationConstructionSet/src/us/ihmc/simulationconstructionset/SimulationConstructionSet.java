@@ -94,15 +94,10 @@ import us.ihmc.simulationconstructionset.gui.ViewportWindow;
 import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
-import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
-import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RobotConnectionGUIUpdater;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import us.ihmc.simulationconstructionset.robotcommprotocol.SCSRobotGUICommunicatorComponents;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
@@ -3932,58 +3927,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public ViewportWindow createNewViewportWindow(String viewportName, int screenID, boolean maximizeWindow)
    {
       return standardAllCommandsExecutor.createNewViewportWindow(viewportName, screenID, maximizeWindow);
-   }
-
-   public RobotSocketConnection allowTCPConnectionToHost(String HOST)
-   {
-      return allowTCPConnectionToHost(HOST, (ArrayList<NewDataListener>) null);
-   }
-
-   public RobotSocketConnection allowTCPConnectionToHost(String HOST, NewDataListener newDataListener)
-   {
-      if (newDataListener == null)
-      {
-         return allowTCPConnectionToHost(HOST);
-      }
-
-      ArrayList<NewDataListener> newDataListeners = new ArrayList<NewDataListener>(1);
-      newDataListeners.add(newDataListener);
-
-      return allowTCPConnectionToHost(HOST, newDataListeners);
-   }
-
-   /**
-    * Creates a SCSRobotGUICommandListener which communicates to a robot at the specified ethernet HOST address.
-    * Only the variables specified in the YoVariableRegistries, set through the GUI are sent and/or logged on the robot side.
-    * This method adds the relevant GUI modifications for robot communication.
-    * Once communication is established the new RobotSocketConnection monitors and manages robot communication.
-    *
-    * @param HOST IP address of robot.
-    * @return The new SCSRobotGUICommandListener.
-    * @see SCSRobotGUICommunicatorComponents SCSRobotGUICommandListener
-    */
-   public RobotSocketConnection allowTCPConnectionToHost(String HOST, ArrayList<NewDataListener> newDataListeners)
-   {
-      RobotConnectionGUIUpdater guiUpdater = new RobotConnectionGUIUpdater(this);
-
-      GUISideCommandListener robotCommandListener = new GUISideCommandListener(mySimulation.getDataBuffer(), rootRegistry, guiUpdater, guiUpdater);
-      RobotSocketConnection robotSocketConnection = new RobotSocketConnection(HOST, robotCommandListener, rootRegistry, newDataListeners);
-
-      if (myGUI != null)
-      {
-         NameSpaceHierarchyTree nameSpaceHierarchyTree = myGUI.getCombinedVarPanel().getNameSpaceHierarchyTree();
-         nameSpaceHierarchyTree.addRegistrySettingsChangedListener(robotSocketConnection);
-         robotCommandListener.addCreatedNewRegistryListener(nameSpaceHierarchyTree);
-      }
-
-      SCSRobotGUICommunicatorComponents robotGUI = new SCSRobotGUICommunicatorComponents(robotSocketConnection);
-
-      robotCommandListener.attachDoDisconnectListener(robotSocketConnection);
-      robotCommandListener.attachDoDisconnectListener(robotGUI);
-
-      robotGUI.putButtonsAndExitActionListenerOnSimulationGUI(this);
-
-      return robotSocketConnection;
    }
 
    // ++JEP:  These aren't good, but is only there so that PC104 stuff can work...

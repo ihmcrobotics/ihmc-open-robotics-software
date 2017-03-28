@@ -20,6 +20,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -46,17 +47,19 @@ public class SDFRobotTest
       GeneralizedSDFRobotModel generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel(modelName);
 
       HumanoidJointNameMap sdfJointNameMap = null;
+      ContactPointDefinitionHolder contactDefinition = null;
       boolean useCollisionMeshes = true;
-      
+
       RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription description = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, useCollisionMeshes);
+      RobotDescription description = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, sdfJointNameMap, contactDefinition,
+            useCollisionMeshes);
       FloatingRootJointRobot sdfHumanoidRobot = new FloatingRootJointRobot(description);
 
       inputStream = getClass().getClassLoader().getResourceAsStream("sdfRobotTest.sdf");
       RobotDescriptionFromSDFLoader robotDescriptionFromSDFLoader = new RobotDescriptionFromSDFLoader();
-      
 
-      RobotDescription robotDescription = robotDescriptionFromSDFLoader.loadRobotDescriptionFromSDF(modelName, inputStream, resourceDirectories, mutator, sdfJointNameMap, useCollisionMeshes);
+      RobotDescription robotDescription = robotDescriptionFromSDFLoader.loadRobotDescriptionFromSDF(modelName, inputStream, resourceDirectories, mutator,
+            sdfJointNameMap, contactDefinition, useCollisionMeshes);
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
       boolean graphicsExist = checkRobotsMatch(sdfHumanoidRobot, robot);
@@ -66,7 +69,7 @@ public class SDFRobotTest
    private boolean checkRobotsMatch(Robot robotOne, Robot robotTwo)
    {
       boolean testSuccessful = true;
-      
+
       assertEquals(robotOne.getName(), robotTwo.getName());
 
       ArrayList<Joint> rootJointsOne = robotOne.getRootJoints();
@@ -81,14 +84,14 @@ public class SDFRobotTest
 
          testSuccessful &= checkJointsMatchRecursively(rootJointOne, rootJointTwo);
       }
-      
+
       return testSuccessful;
    }
 
    private boolean checkJointsMatchRecursively(Joint jointOne, Joint jointTwo)
    {
       boolean testSuccessful = true;
-      
+
       assertEquals(jointOne.getName(), jointTwo.getName());
 
       Vector3D offsetOne = new Vector3D();
@@ -121,7 +124,7 @@ public class SDFRobotTest
 
          checkJointsMatchRecursively(childJointOne, childJointTwo);
       }
-      
+
       return testSuccessful;
    }
 
@@ -165,7 +168,7 @@ public class SDFRobotTest
 
       Graphics3DObject linkGraphicsOne = linkOne.getLinkGraphics();
       Graphics3DObject linkGraphicsTwo = linkTwo.getLinkGraphics();
-      
+
       ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsOne;
       ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructionsTwo;
       try

@@ -116,7 +116,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPPlanner
 {
    /** Whether to display by default the various artifacts for debug or not. */
-   private static final boolean VISUALIZE = true;
+   private static final boolean VISUALIZE = false;
    /** Visualization parameter. */
    private static final double ICP_CORNER_POINT_SIZE = 0.004;
 
@@ -536,7 +536,6 @@ public class ICPPlanner
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
 
       updateTransferPlan();
-      computeFinalCoMPositionInTransfer();
    }
 
    private void updateTransferPlan()
@@ -643,14 +642,17 @@ public class ICPPlanner
          isHoldingPosition.set(false);
       }
 
-      singleSupportInitialICP.changeFrame(finalFrame);
-      singleSupportFinalICP.changeFrame(worldFrame);
-
       if (isStanding.getBooleanValue() && !isDoneWalking)
       {
          isInitialTransfer.set(true);
          isStanding.set(false);
       }
+
+      if (!isStanding.getBooleanValue())
+         computeFinalCoMPositionInTransfer();
+
+      singleSupportInitialICP.changeFrame(finalFrame);
+      singleSupportFinalICP.changeFrame(worldFrame);
 
       icpDoubleSupportTrajectoryGenerator.setTrajectoryTime(transferDuration);
       icpDoubleSupportTrajectoryGenerator.setInitialConditions(desiredICPPosition, desiredICPVelocity, initialFrame);
@@ -720,7 +722,6 @@ public class ICPPlanner
       yoSingleSupportInitialCoM.set(desiredCoMPosition);
       desiredCoMPosition.getFrameTuple(singleSupportInitialCoM);
       updateSingleSupportPlan();
-      computeFinalCoMPositionInSwing();
    }
 
    private void updateSingleSupportPlan()
@@ -777,6 +778,8 @@ public class ICPPlanner
          computeDesiredCapturePointPosition(omega0, tInitial, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICP);
          computeDesiredCapturePointPosition(omega0, tFinal, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportFinalICP);
       }
+
+      computeFinalCoMPositionInSwing();
 
       singleSupportInitialICP.changeFrame(supportSoleFrame);
       entryCornerPoints.get(0).changeFrame(supportSoleFrame);

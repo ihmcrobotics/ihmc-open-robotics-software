@@ -1,12 +1,6 @@
 package us.ihmc.avatar.logProcessor;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQsName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQxName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQyName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createQzName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createXName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createYName;
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createZName;
+import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.*;
 
 import java.util.ArrayList;
 
@@ -128,9 +122,8 @@ public class LogDataProcessorHelper
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
       yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
-      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames,
-            stateEstimatorFootSwitches, null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, null, controllerDT,
-            updatables, null);
+      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames, stateEstimatorFootSwitches,
+            null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, controllerDT, updatables, null, null);
 
    }
 

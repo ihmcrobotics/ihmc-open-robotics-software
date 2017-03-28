@@ -1,8 +1,8 @@
 
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
@@ -92,7 +92,7 @@ public class SimpleCollisionShape implements CollisionShape
    }
 
    @Override
-   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox3D boundingBoxToPack)
    {
       transformedCollisionShapeDescription.getBoundingBox(boundingBoxToPack);
    }

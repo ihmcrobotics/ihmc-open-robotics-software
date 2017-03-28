@@ -13,9 +13,13 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
+import us.ihmc.javaFXToolkit.graphing.JavaFX3DGraph;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
+import us.ihmc.simulationconstructionset.ExtraPanelConfiguration;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.commands.ZoomGraphCommandExecutor;
 
@@ -24,7 +28,9 @@ public class GraphArrayPanel extends JPanel implements GraphIndicesHolder, YoGra
    private static final long serialVersionUID = -4366771635271760899L;
 
    private ArrayList<YoGraph> graphsOnThisPanel;
+   private ArrayList<JavaFX3DGraph> javaFX3DGraphs;
 
+   private StandardSimulationGUI standardSimulationGUI;
    private JFrame parentFrame;
    private DataBuffer dataBuffer;
 
@@ -37,22 +43,23 @@ public class GraphArrayPanel extends JPanel implements GraphIndicesHolder, YoGra
 
    private SelectedVariableHolder selectedVariableHolder;
 
-   public GraphArrayPanel(SelectedVariableHolder holder, DataBuffer buffer, JFrame frame)
+   public GraphArrayPanel(SelectedVariableHolder holder, DataBuffer buffer, JFrame frame, StandardSimulationGUI standardSimulationGUI)
    {
       // super(new GridLayout(0,2,2,2));
       super(new GridLayout(0, 1, 2, 2));
       this.selectedVariableHolder = holder;
       this.setBackground(Color.lightGray);
 
+      this.standardSimulationGUI = standardSimulationGUI;
       this.parentFrame = frame;
-
       this.dataBuffer = buffer;
 
       leftPlotIndex = 0;
       rightPlotIndex = getMaxIndex();
 
       this.setOpaque(true);
-      this.graphsOnThisPanel = new ArrayList<YoGraph>(16);
+      this.graphsOnThisPanel = new ArrayList<>(16);
+      this.javaFX3DGraphs = new ArrayList<>();
 
       this.setPreferredSize(new Dimension(800, 400));
    }
@@ -464,6 +471,16 @@ public class GraphArrayPanel extends JPanel implements GraphIndicesHolder, YoGra
       addGraph(g);
    }
 
+   public void addNew3dGraph()
+   {
+      JavaFX3DGraph javaFX3DGraph = new JavaFX3DGraph(this, selectedVariableHolder, dataBuffer, dataBuffer);
+      javaFX3DGraphs.add(javaFX3DGraph);
+      standardSimulationGUI.setupExtraPanels(new ExtraPanelConfiguration("3D Graph " + javaFX3DGraphs.size(),
+                                                                         javaFX3DGraph.getPanel(),
+                                                                         true));
+      standardSimulationGUI.selectPanel("3D Graph " + javaFX3DGraphs.size());
+   }
+
    public void removeEmptyGraphs()
    {
       YoGraph emptyGraph = null;
@@ -661,6 +678,18 @@ public class GraphArrayPanel extends JPanel implements GraphIndicesHolder, YoGra
          }
       });
       graphButtonPanel.add(subColumnButton);
+      
+      JButton new3DGraphButton = new JButton("New 3D Graph");
+      new3DGraphButton.setName("New 3D Graph");
+      new3DGraphButton.addActionListener(new java.awt.event.ActionListener()
+      {
+         @Override
+         public void actionPerformed(java.awt.event.ActionEvent evt)
+         {
+            addNew3dGraph();
+         }
+      });
+      graphButtonPanel.add(new3DGraphButton);
 
       return graphButtonPanel;
    }

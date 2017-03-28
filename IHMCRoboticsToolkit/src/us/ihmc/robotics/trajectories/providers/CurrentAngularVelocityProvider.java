@@ -22,7 +22,7 @@ public class CurrentAngularVelocityProvider implements VectorProvider
 
    public void get(FrameVector frameVectorToPack)
    {
-      twistCalculator.getTwistOfBody(twist, rigidBody);
+      twistCalculator.getTwistOfBody(rigidBody, twist);
       twist.changeFrame(referenceFrame);
       twist.getAngularPart(frameVectorToPack);
    }

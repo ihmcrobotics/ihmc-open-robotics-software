@@ -2,17 +2,17 @@ package us.ihmc.geometry.polytope;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class ConvexPolytope implements SupportingVertexHolder
 {
    private final ArrayList<PolytopeVertex> vertices = new ArrayList<>();
 
    private boolean boundingBoxNeedsUpdating = false;
-   private final BoundingBox3d boundingBox = new BoundingBox3d(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
+   private final BoundingBox3D boundingBox = new BoundingBox3D(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY,
                                                                Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
    public ConvexPolytope()
@@ -29,7 +29,7 @@ public class ConvexPolytope implements SupportingVertexHolder
       boundingBoxNeedsUpdating = true;
    }
 
-   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox3D boundingBoxToPack)
    {
       if (boundingBoxNeedsUpdating)
       {

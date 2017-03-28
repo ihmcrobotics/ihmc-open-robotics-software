@@ -97,7 +97,7 @@ public class IMUBasedJointVelocityEstimator
       pelvisAngularVelocity.changeFrame(jacobian.getJacobianFrame());
       chestAngularVelocity.sub(pelvisAngularVelocity);
 
-      omega.setData(chestAngularVelocity.toArray());
+      chestAngularVelocity.getVector().get(omega);
       CommonOps.mult(inverseAngularJacobian64F, omega, qd_estimated);
 
       for (int i = 0; i < joints.length; i++)

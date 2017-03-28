@@ -257,7 +257,7 @@ public class QuadrupedTaskSpaceEstimator
       // compute sole poses, twists, and forces
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
-         twistCalculator.getTwistOfBody(twistStorage, footRigidBody.get(robotQuadrant));
+         twistCalculator.getTwistOfBody(footRigidBody.get(robotQuadrant), twistStorage);
          twistStorage.changeFrame(soleFrame.get(robotQuadrant));
          twistStorage.getAngularPart(estimates.getSoleAngularVelocity().get(robotQuadrant));
          twistStorage.getLinearPart(estimates.getSoleLinearVelocity().get(robotQuadrant));
@@ -268,7 +268,7 @@ public class QuadrupedTaskSpaceEstimator
       }
 
       // compute body pose and twist
-      twistCalculator.getTwistOfBody(twistStorage, pelvisRigidBody);
+      twistCalculator.getTwistOfBody(pelvisRigidBody, twistStorage);
       twistStorage.changeFrame(bodyFrame);
       twistStorage.getAngularPart(estimates.getBodyAngularVelocity());
       twistStorage.getLinearPart(estimates.getBodyLinearVelocity());
