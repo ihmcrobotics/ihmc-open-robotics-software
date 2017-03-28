@@ -53,7 +53,7 @@ dependencies {
 	compile ihmc.getProjectDependency(":SimulationConstructionSet")
 
 	compile ihmc.getProjectDependency(":SensorProcessing")
-	compile ihmc.getProjectDependency(":SimulationConstructionSet")
+	compile ihmc.getProjectDependency(":SimulationConstructionSetTools")
 	compile ihmc.getProjectDependency(":IHMCJavaToolkit")
     compile ihmc.getProjectDependency(":IHMCJavaExtensions")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'

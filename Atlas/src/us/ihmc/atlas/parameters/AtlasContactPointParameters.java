@@ -1,14 +1,11 @@
 package us.ihmc.atlas.parameters;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
@@ -19,16 +16,16 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class AtlasContactPointParameters extends RobotContactPointParameters
 {
+   private final int numberOfContactableBodies;
+
    private boolean handContactPointsHaveBeenCreated = false;
-   private final SideDependentList<RigidBodyTransform> handContactPointTransforms = new SideDependentList<>();
-   private final SideDependentList<List<Point2D>> handContactPoints = new SideDependentList<>();
    private final AtlasJointMap jointMap;
    private final AtlasRobotVersion atlasVersion;
 
    private boolean useSoftGroundContactParameters = false;
 
    public AtlasContactPointParameters(AtlasJointMap jointMap, AtlasRobotVersion atlasVersion, boolean createFootContactPoints,
-         FootContactPoints footContactPoints)
+         FootContactPoints footContactPoints, boolean createAdditionalContactPoints)
    {
       super(jointMap, jointMap.getPhysicalProperties().getToeWidthForControl(), jointMap.getPhysicalProperties().getFootWidthForControl(), jointMap.getPhysicalProperties().getFootLengthForControl(), jointMap.getPhysicalProperties().getSoleToAnkleFrameTransforms());
 
@@ -39,105 +36,65 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
          if (footContactPoints == null)
             createDefaultFootContactPoints();
          else
-            createContactPoints(footContactPoints);
+            createFootContactPoints(footContactPoints);
       }
+
+      int totalContacts = 2;
+      if (createAdditionalContactPoints)
+         totalContacts += createAdditionalHandContactPoints();
+
+      numberOfContactableBodies = totalContacts;
    }
 
-   public void createInvisibleHandContactPoints()
-   {
-      if (handContactPointsHaveBeenCreated)
-      {
-         throw new RuntimeException("Contact points for the hands have already been created");
-      }
-      else
-      {
-         handContactPointsHaveBeenCreated = true;
-      }
-
-      SideDependentList<String> nameOfJointBeforeHands = jointMap.getNameOfJointBeforeHands();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handContactPointTransforms.put(robotSide, new RigidBodyTransform());
-
-         double y0 = 0.0;
-
-         handContactPoints.put(robotSide, new ArrayList<Point2D>());
-         handContactPoints.get(robotSide).add(new Point2D(-0.05, -0.05 + y0));
-         handContactPoints.get(robotSide).add(new Point2D(-0.05, 0.05 + y0));
-         handContactPoints.get(robotSide).add(new Point2D(0.05, 0.05 + y0));
-         handContactPoints.get(robotSide).add(new Point2D(0.05, -0.05 + y0));
-
-         for (Point2D point : handContactPoints.get(robotSide))
-         {
-            Point3D point3d = new Point3D(point.getX(), point.getY(), 0.0);
-
-            handContactPointTransforms.get(robotSide).transform(point3d);
-            addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), point3d);
-         }
-      }
-
-      contactableBodiesFactory.addHandContactParameters(nameOfJointBeforeHands, handContactPoints, handContactPointTransforms);
-   }
-
-   public void createHandKnobContactPoints()
-   {
-      if (handContactPointsHaveBeenCreated)
-      {
-         throw new RuntimeException("Contact points for the hands have already been created");
-      }
-      else
-      {
-         handContactPointsHaveBeenCreated = true;
-      }
-
-      SideDependentList<String> nameOfJointBeforeHands = jointMap.getNameOfJointBeforeHands();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBodyTransform handContactPointTransform = new RigidBodyTransform();
-
-         handContactPointTransform.setRotationRollAndZeroTranslation(robotSide.negateIfRightSide(Math.PI / 2.0));
-         handContactPointTransform.setTranslation(new Vector3D(0.0, robotSide.negateIfRightSide(0.13), robotSide.negateIfRightSide(0.01)));
-         handContactPointTransforms.put(robotSide, handContactPointTransform);
-         handContactPoints.put(robotSide, new ArrayList<Point2D>());
-         handContactPoints.get(robotSide).add(new Point2D());
-
-         for (Point2D point : handContactPoints.get(robotSide))
-         {
-            Point3D point3d = new Point3D(point.getX(), point.getY(), 0.0);
-
-            handContactPointTransforms.get(robotSide).transform(point3d);
-            addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), point3d);
-         }
-      }
-
-      contactableBodiesFactory.addHandContactParameters(nameOfJointBeforeHands, handContactPoints, handContactPointTransforms);
-   }
-
-   public void createHandContactPoints(boolean useHighResolutionPointGrid)
+   public int createAdditionalHandContactPoints()
    {
       switch (atlasVersion)
       {
-      case ATLAS_UNPLUGGED_V5_INVISIBLE_CONTACTABLE_PLANE_HANDS:
+      case ATLAS_UNPLUGGED_V5_NO_HANDS:
          createHandKnobContactPoints();
-         break;
+         return 2;
 
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
          if (DRCHandType.ROBOTIQ.isHandSimulated())
          {
             for (RobotSide robotSide : RobotSide.values)
-            {
-               createRobotiqHandContactPoints(robotSide, useHighResolutionPointGrid, false);
-            }
+               createRobotiqHandContactPoints(robotSide, false);
          }
-         break;
+         return 2;
+
       default:
-         break;
+         return 0;
       }
    }
 
-   private void createRobotiqHandContactPoints(RobotSide robotSide, boolean useHighResolutionGrid, boolean areHandsFlipped)
+   private void createHandKnobContactPoints()
+   {
+      if (handContactPointsHaveBeenCreated)
+      {
+         throw new RuntimeException("Contact points for the hands have already been created");
+      }
+      else
+      {
+         handContactPointsHaveBeenCreated = true;
+      }
+
+      SideDependentList<String> nameOfJointBeforeHands = jointMap.getNameOfJointBeforeHands();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String bodyName = jointMap.getHandName(robotSide);
+         Point3D pointLocationInParentJoint = new Point3D(0.0, robotSide.negateIfRightSide(0.13), 0.0);
+
+         RigidBodyTransform transformToContactFrame = new RigidBodyTransform(new Quaternion(), pointLocationInParentJoint);
+         if (robotSide == RobotSide.LEFT)
+            transformToContactFrame.appendRollRotation(Math.PI);
+
+         addSimulationContactPoint(nameOfJointBeforeHands.get(robotSide), pointLocationInParentJoint);
+         contactableBodiesFactory.addAdditionalContactPoint(bodyName, bodyName + "Contact", transformToContactFrame);
+      }
+   }
+
+   private void createRobotiqHandContactPoints(RobotSide robotSide, boolean areHandsFlipped)
    {
       String nameOfJointBeforeHand = jointMap.getNameOfJointBeforeHands().get(robotSide);
 
@@ -153,7 +110,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       String thumb_joint_2 = RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_2.getJointName(robotSide);
       String thumb_joint_3 = RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3.getJointName(robotSide);
 
-      createRobotiqHandPalmContactPoints(robotSide, nameOfJointBeforeHand, useHighResolutionGrid, areHandsFlipped);
+      createRobotiqHandPalmContactPoints(robotSide, nameOfJointBeforeHand, areHandsFlipped);
 
       double plusOrMinusY = robotSide.negateIfRightSide(1.0);
       double plusOrMinusZ = 1.0;
@@ -185,8 +142,7 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       addSimulationContactPoint(thumb_joint_3, thumbJoint3ContactPoint);
    }
 
-   private void createRobotiqHandPalmContactPoints(RobotSide robotSide, String nameOfJointBeforeHand, boolean useHighResolutionPointGrid,
-         boolean areHandsFlipped)
+   private void createRobotiqHandPalmContactPoints(RobotSide robotSide, String nameOfJointBeforeHand, boolean areHandsFlipped)
    {
       double offsetFromWristToPalmPlane = 0.22; // 0.24
       Point3D palmCenter = new Point3D(-0.002, robotSide.negateIfRightSide(offsetFromWristToPalmPlane), 0.0); // [-0.002, 0.22, 0.0] (-0.002, 0.24, 0.015)
@@ -220,26 +176,11 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
       addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint5);
       addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint6);
 
-      if (useHighResolutionPointGrid)
-      {
-         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint1b);
-         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint2b);
-         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint4b);
-         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint5b);
-         addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint6b);
-      }
-   }
-
-   @Override
-   public SideDependentList<RigidBodyTransform> getHandContactPointTransforms()
-   {
-      return handContactPointTransforms;
-   }
-
-   @Override
-   public SideDependentList<List<Point2D>> getHandContactPoints()
-   {
-      return handContactPoints;
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint1b);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint2b);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint4b);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint5b);
+      addSimulationContactPoint(nameOfJointBeforeHand, palmContactPoint6b);
    }
 
    @Override
@@ -261,5 +202,10 @@ public class AtlasContactPointParameters extends RobotContactPointParameters
          linearGroundContactModel.setXYStiffness(scale * 50000.0);
          linearGroundContactModel.setXYDamping(scale * 2000.0);
       }
+   }
+
+   public int getNumberOfContactableBodies()
+   {
+      return numberOfContactableBodies;
    }
 }

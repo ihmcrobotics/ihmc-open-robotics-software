@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -24,7 +25,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 // Note: You should only make these once at the initialization of a controller. You shouldn't make
 // any on the fly since they contain YoVariables.
-public class YoFrameQuaternion extends AbstractReferenceFrameHolder
+public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -359,18 +360,21 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder
       qs.set(frameOrientation.getQs(), notifyListeners);
    }
 
+   @Override
    public void setToNaN()
    {
       frameOrientation.setToNaN();
       getYoValuesFromFrameOrientation();
    }
 
+   @Override
    public void setToZero()
    {
       frameOrientation.setToZero(getReferenceFrame());
       getYoValuesFromFrameOrientation();
    }
 
+   @Override
    public boolean containsNaN()
    {
       return qx.isNaN() || qy.isNaN() || qz.isNaN() || qs.isNaN();

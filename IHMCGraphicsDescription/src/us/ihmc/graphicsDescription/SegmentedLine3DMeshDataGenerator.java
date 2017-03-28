@@ -97,6 +97,10 @@ public final class SegmentedLine3DMeshDataGenerator
       compute(waypointPositions, null);
    }
 
+   /** Using a Matrix3D instead of RotationMatrix to speed up calculation. */
+   private final Matrix3D rotation = new Matrix3D();
+   private final Matrix3D previousRotation = new Matrix3D();
+
    /**
     * Update the meshes of this generator to represent a segmented line 3D that goes through the
     * given set of waypoints.
@@ -125,6 +129,7 @@ public final class SegmentedLine3DMeshDataGenerator
       int sectionIndex = 0;
 
       previousDirection.set(0.0, 0.0, 1.0);
+      previousRotation.setIdentity();
 
       for (sectionIndex = 0; sectionIndex < circles.length; sectionIndex++)
       {
@@ -132,14 +137,14 @@ public final class SegmentedLine3DMeshDataGenerator
          // Computing the rotation that is the closest from the rotation of the previous direction.
          // This trick allows to preserve the natural indexing of the base and top circles of each section.
          // If instead the minimum rotation from zUp to sectionDiretion was used, some of the section meshes would be messed up.
-         computeRotation(previousDirection, sectionDirection, rotation);
+         computeRotation(previousDirection, sectionDirection, previousRotation, rotation);
          previousDirection.set(sectionDirection);
 
          CircleVertices currentCircle = circles[sectionIndex];
          currentCircle.set(circleTemplate); // Resetting the vertices and normals of the circle using the unmodified template.
          currentCircle.rotate(rotation);
          currentCircle.translate(waypointPositions[sectionIndex]); // Translation has to be done after the rotation of the vertices.
-
+         previousRotation.set(rotation);
       }
    }
 
@@ -266,14 +271,31 @@ public final class SegmentedLine3DMeshDataGenerator
       return meshDataHolders;
    }
 
-   /** Using a Matrix3D instead of RotationMatrix to speed up calculation. */
-   private final Matrix3D rotation = new Matrix3D();
    private final Vector3D xAxis = new Vector3D();
    private final Vector3D yAxis = new Vector3D();
 
-   private void computeRotation(Vector3DReadOnly previousDirection, Vector3DReadOnly sectionDirection, Matrix3D rotationToPack)
+   /**
+    * Computes the rotation of current section with respect to zUp and which is the closest rotation from the previous section.
+    * <p>
+    * If the two sections are parallel, {@code rotationToPack} is set to {@code previousRotation}.
+    * </p>
+    * 
+    * @param previousDirection the direction of the previous section. Not modified.
+    * @param sectionDirection the direction of the section to compute the rotation of. Not modified.
+    * @param previousRotation the rotation of the previous section. Not modified.
+    * @param rotationToPack the rotation of this section. Modified.
+    */
+   private void computeRotation(Vector3DReadOnly previousDirection, Vector3DReadOnly sectionDirection, Matrix3DReadOnly previousRotation, Matrix3D rotationToPack)
    {
       xAxis.cross(previousDirection, sectionDirection);
+      double length = xAxis.length();
+
+      if (length < 1.0e-10)
+      {
+         rotationToPack.set(previousRotation);
+         return;
+      }
+
       xAxis.normalize();
       yAxis.cross(sectionDirection, xAxis);
       rotationToPack.setColumn(0, xAxis);

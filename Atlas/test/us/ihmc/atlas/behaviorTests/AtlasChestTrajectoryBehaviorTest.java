@@ -6,7 +6,7 @@ import us.ihmc.avatar.behaviorTests.DRCChestTrajectoryBehaviorTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.simulationconstructionset.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.FLAKY, IntegrationCategory.VIDEO})
 public class AtlasChestTrajectoryBehaviorTest extends DRCChestTrajectoryBehaviorTest

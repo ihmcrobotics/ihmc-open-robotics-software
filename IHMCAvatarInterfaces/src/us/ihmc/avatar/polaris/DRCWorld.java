@@ -6,7 +6,7 @@ import java.util.List;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
+import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 
 public abstract class DRCWorld 
 {

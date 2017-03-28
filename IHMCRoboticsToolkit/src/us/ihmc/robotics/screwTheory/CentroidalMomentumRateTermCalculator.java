@@ -140,7 +140,7 @@ public class CentroidalMomentumRateTermCalculator
             {
                if (isAncestorMapping[i][j])
                {
-                  tempTwist.set(jointList[j].getMotionSubspace().getAllUnitTwists().get(k));
+                  jointList[j].getUnitTwist(k, tempTwist);
                   tempTwist.changeFrame(rigidBodies[i].getInertia().getExpressedInFrame());
 
                   tempTwist.getMatrix(tempSpatialMotionMatrix, 0);
