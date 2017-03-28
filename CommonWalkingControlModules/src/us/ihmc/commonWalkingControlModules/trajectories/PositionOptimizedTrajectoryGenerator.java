@@ -6,6 +6,7 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D.TrajectoryColorType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -164,6 +165,8 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
                                                                                         trajectories.get(Direction.Z));
          trajectoryViz = new YoGraphicPolynomial3D(namePrefix + "Trajectory", null, yoPolynomial3Ds, waypointTimes, 0.01, 50, 8, registry);
          graphicsListRegistry.registerYoGraphic(namePrefix + "Trajectory", trajectoryViz);
+
+         trajectoryViz.setColorType(TrajectoryColorType.ACCELERATION_BASED);
       }
       else
          trajectoryViz = null;
