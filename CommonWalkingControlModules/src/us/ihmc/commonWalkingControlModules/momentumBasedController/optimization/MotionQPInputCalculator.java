@@ -65,7 +65,6 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempFullPrimaryTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
 
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
-   private final DenseMatrix64F tempCompactJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F tempTaskAlphaTaskPriority = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
@@ -286,9 +285,6 @@ public class MotionQPInputCalculator
       if (taskSize == 0)
          return false;
 
-      if (commandToConvert.getAlphaTaskPriority() < 1.0e-5)
-         return false;
-
       motionQPInputToPack.reshape(taskSize);
       motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
       if (commandToConvert.getHasWeight())
@@ -351,12 +347,6 @@ public class MotionQPInputCalculator
       spatialAcceleration.getMatrix(tempTaskObjective, 0);
       CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
-
-      if (commandToConvert.getAlphaTaskPriority() < 1.0 - 1.0e-5)
-      {
-         CommonOps.scale(commandToConvert.getAlphaTaskPriority(), motionQPInputToPack.taskJacobian);
-         CommonOps.scale(commandToConvert.getAlphaTaskPriority(), motionQPInputToPack.taskObjective);
-      }
 
       if (primaryBase != null)
          recordTaskJacobian(tempFullPrimaryTaskJacobian);
