@@ -5,8 +5,8 @@ import com.martiansoftware.jsap.JSAPException;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.DRCNetworkModuleParameters;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.WallWorldEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.WallWorldEnvironment;
 
 public class AtlasWallWorldDemo
 {

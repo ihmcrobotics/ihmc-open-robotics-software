@@ -45,7 +45,7 @@ public class PrismaticJoint extends OneDoFJoint
       unitPredecessorAcceleration.invert();
       unitPredecessorAcceleration.changeFrameNoRelativeMotion(predecessorFrame); // actually, there is relative motion, but not in the directions that matter
 
-      setMotionSubspace(unitSuccessorTwist);
+      setMotionSubspace();
    }
 
    @Override

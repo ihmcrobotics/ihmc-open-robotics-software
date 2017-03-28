@@ -66,7 +66,6 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
@@ -291,13 +290,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setScrollGraphsEnabled(false);
       boolean isScrollGraphsEnabled2 = scs.isSafeToScroll();
       assertFalse(isScrollGraphsEnabled2);
-
-      RobotSocketConnection robotSocketConnectionFromSCS = scs.allowTCPConnectionToHost("host");
-      assertNotNull(robotSocketConnectionFromSCS);
-
-      NewDataListener newDataListener = createNewDataListener();
-      RobotSocketConnection robotSocketConnectionFromSCS2 = scs.allowTCPConnectionToHost("host2", newDataListener);
-      assertNotNull(robotSocketConnectionFromSCS2);
 
       boolean initialKeyPointStatus = scs.isKeyPointModeToggled();
       scs.toggleKeyPointMode();

@@ -156,7 +156,7 @@ public class IMUSelectorAndDataConverter extends AbstractControlFlowElement
       Vector3D measuredAngularVelocityVector3d = angularVelocityInputPort.getData();
       TwistCalculator twistCalculator = inverseDynamicsStructureInputPort.getData().getTwistCalculator();
 
-      twistCalculator.getRelativeTwist(tempRelativeTwistOrientationMeasFrameToEstFrame, angularVelocityMeasurementLink, estimationLink);
+      twistCalculator.getRelativeTwist(angularVelocityMeasurementLink, estimationLink, tempRelativeTwistOrientationMeasFrameToEstFrame);
       tempRelativeTwistOrientationMeasFrameToEstFrame.getAngularPart(relativeAngularVelocity);
       relativeAngularVelocity.changeFrame(estimationFrame);
 

@@ -19,13 +19,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3TrajectoryMessage<T>> extends QueueableMessage<T> implements Transformable, FrameBasedMessage
 {
-   @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. All the information contained in these trajectory points needs to be expressed in world frame.")
+   @RosExportedField(documentation = "List of trajectory points (in taskpsace) to go through while executing the trajectory. Use dataFrame to define what frame the points are expressed in")
    public SO3TrajectoryPointMessage[] taskspaceTrajectoryPoints;
 
    @RosIgnoredField
    public float[] selectionMatrixDiagonal;
    
+   @RosExportedField(documentation = "The ID of the reference frame to execute the trajectory in")
    public long trajectoryReferenceFrameId;
+   
+   @RosExportedField(documentation = "The Id of the reference frame defining which frame the taskspaceTrajectoryPoints are expressed in")
    public long dataReferenceFrameId;
 
    /**

@@ -224,7 +224,7 @@ public class HexapodStepController
          currentPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
          //get current velocity of foot
-         twistCalculator.getTwistOfBody(currentTwist, shinRigidBodies.get(robotSextant));
+         twistCalculator.getTwistOfBody(shinRigidBodies.get(robotSextant), currentTwist);
          currentTwist.changeFrame(currentTwist.getBaseFrame());
 
          pointFixedInBodyFrame.setToZero(footFrame);

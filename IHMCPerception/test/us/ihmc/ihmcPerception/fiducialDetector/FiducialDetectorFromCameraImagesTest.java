@@ -32,10 +32,10 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.util.environments.Fiducial;
-import us.ihmc.simulationconstructionset.util.environments.FloatingFiducialBoxRobot;
-import us.ihmc.simulationconstructionset.util.simulationRunner.GoalOrientedTestConductor;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.FloatingFiducialBoxRobot;
+import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.thread.ThreadTools;
 

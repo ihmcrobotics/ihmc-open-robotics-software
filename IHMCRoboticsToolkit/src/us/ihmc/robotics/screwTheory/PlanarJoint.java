@@ -1,6 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -23,8 +25,10 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
    private final Quaternion jointRotation = new Quaternion();
    private final Vector3D jointTranslation = new Vector3D();
    private final Twist jointTwist;
-   public final SpatialAccelerationVector jointAcceleration;
-   protected final SpatialAccelerationVector jointAccelerationDesired;
+   private final SpatialAccelerationVector jointAcceleration;
+   private final SpatialAccelerationVector jointAccelerationDesired;
+
+   private List<Twist> unitTwists;
 
    private Wrench successorWrench;
 
@@ -445,8 +449,18 @@ public class PlanarJoint extends AbstractInverseDynamicsJoint implements Floatin
          previousFrame = frame;
       }
 
-      motionSubspace = new GeometricJacobian(this, unitTwistsInBodyFrame, afterJointFrame);
+      unitTwists = Collections.unmodifiableList(unitTwistsInBodyFrame);
+
+      motionSubspace = new GeometricJacobian(this, afterJointFrame);
       motionSubspace.compute();
+   }
+
+   @Override
+   public void getUnitTwist(int dofIndex, Twist unitTwistToPack)
+   {
+      if (dofIndex < 0 || dofIndex >= getDegreesOfFreedom())
+         throw new ArrayIndexOutOfBoundsException("Illegal index: " + dofIndex + ", was expecting dofIndex in [0, " + getDegreesOfFreedom() + "[.");
+      unitTwistToPack.set(unitTwists.get(dofIndex));
    }
 
    private PlanarJoint checkAndGetAsPlanarJoint(InverseDynamicsJoint originalJoint)

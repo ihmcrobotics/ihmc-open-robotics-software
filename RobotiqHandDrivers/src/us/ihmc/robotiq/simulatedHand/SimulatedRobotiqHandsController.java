@@ -25,7 +25,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
 

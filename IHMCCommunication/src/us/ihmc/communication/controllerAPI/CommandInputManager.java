@@ -65,6 +65,7 @@ public class CommandInputManager
    /** List of the listeners that should get notified when receiving a new valid command. */
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
    
+   /** command converter, helps converts packets to commands **/
    private CommandConversionInterface commandConverter = null;
 
 
@@ -91,8 +92,13 @@ public class CommandInputManager
       registerNewCommands(commandsToRegister);
    }
 
+   /**
+    * Registers a converter that helps convert a packet to a command. Currently only supports one converter
+    * @param commandConversionHelper
+    */
    public void registerConversionHelper(CommandConversionInterface commandConversionHelper)
    {
+      //update this to be a collection or map when you need more than one CommandConverter
       this.commandConverter = commandConversionHelper;
    }
    
