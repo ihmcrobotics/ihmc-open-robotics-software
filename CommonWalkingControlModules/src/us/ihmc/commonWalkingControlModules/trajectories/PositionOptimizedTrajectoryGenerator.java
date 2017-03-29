@@ -41,7 +41,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryGenerator
 {
-   public static final int maxWaypoints = 12;
    public static final int dimensions = 3;
    public static final PolynomialOrder order = PolynomialOrder.ORDER3;
    public static final ReferenceFrame trajectoryFrame = ReferenceFrame.getWorldFrame();
@@ -92,16 +91,16 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
 
    public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
    {
-      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations);
+      this(namePrefix, parentRegistry, null, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
    }
 
    public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations);
+      this(namePrefix, parentRegistry, graphicsListRegistry, TrajectoryPointOptimizer.maxIterations, TrajectoryPointOptimizer.maxWaypoints);
    }
 
    public PositionOptimizedTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry,
-                                               int maxIterations)
+                                               int maxIterations, int maxWaypoints)
    {
       this.namePrefix = namePrefix;
 
@@ -130,7 +129,7 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
       });
 
       registry = new YoVariableRegistry(namePrefix + "Trajectory");
-      optimizer = new TrajectoryPointOptimizer(dimensions, order, registry);
+      optimizer = new TrajectoryPointOptimizer(namePrefix, dimensions, order, registry);
       this.maxIterations = new IntegerYoVariable(namePrefix + "MaxIterations", registry);
       this.maxIterations.set(maxIterations);
       isDone = new BooleanYoVariable(namePrefix + "IsDone", registry);
@@ -248,7 +247,7 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
    @Override
    public void setWaypoints(ArrayList<FramePoint> waypointPositions)
    {
-      if (waypointPositions.size() > maxWaypoints)
+      if (waypointPositions.size() > waypointTimes.size())
          throw new RuntimeException("Too many waypoints");
 
       this.waypointPositions.clear();
