@@ -321,6 +321,7 @@ public class TimeAdjustmentSolver
 
       if (MatrixTools.containsNaN(solution))
       {
+         solution.zero();
          throw new NoConvergenceException(numberOfIterations);
       }
    }
@@ -420,11 +421,11 @@ public class TimeAdjustmentSolver
 
    public double getHigherSwingAdjustment(int higherIndex)
    {
-      return solution.get(6 + 2 * higherIndex, 0);
+      return solution.get(nextEndTransferIndex + 2 * (higherIndex + 1) - 1, 0);
    }
 
    public double getHigherTransferAdjustment(int higherIndex)
    {
-      return solution.get(7 + 2 * higherIndex, 0);
+      return solution.get(nextEndTransferIndex + 2 * (higherIndex + 1), 0);
    }
 }

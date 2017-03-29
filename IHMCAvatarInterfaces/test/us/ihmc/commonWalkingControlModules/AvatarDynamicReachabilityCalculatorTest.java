@@ -69,8 +69,10 @@ public abstract class AvatarDynamicReachabilityCalculatorTest
 
    protected abstract DRCRobotModel getRobotModel();
 
-   @ContinuousIntegrationTest(estimatedDuration =  20.0)
-   @Test(timeout = 120000)
+   /*
+   @ContinuousIntegrationTest(estimatedDuration = 100.0)
+   @Test(timeout = 100000000)
+   */
    public void testForwardWalking() throws SimulationExceededMaximumTimeException
    {
       setupTest(slowStepScript);
