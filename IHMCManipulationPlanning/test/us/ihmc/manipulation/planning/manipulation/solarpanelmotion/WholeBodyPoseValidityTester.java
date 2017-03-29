@@ -51,6 +51,10 @@ public abstract class WholeBodyPoseValidityTester implements ValidityTester
    
    public void getResult()
    {
+      robotCollisionModel.update();
+      
+      robotCollisionModel.getCollisionResult();
+      
       // joint limit tester
       // collision tester
    }   

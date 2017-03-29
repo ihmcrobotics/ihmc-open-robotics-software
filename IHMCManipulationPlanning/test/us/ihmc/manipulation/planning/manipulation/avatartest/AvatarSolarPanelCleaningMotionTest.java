@@ -495,7 +495,10 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       SolarPanelPoseValidityTest solarPanelValidityTest = new SolarPanelPoseValidityTest(solarPanel, kinematicsToolBoxController, wholeBodyTrajectoryMessage);
       
       solarPanelValidityTest.getInverseKienamticsModule();
+      
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+      
+      solarPanelValidityTest.getResult();
 
       for (int i=0;i<solarPanelValidityTest.debugAxis.size();i++)
       {

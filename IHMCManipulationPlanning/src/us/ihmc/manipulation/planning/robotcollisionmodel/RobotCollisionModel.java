@@ -131,20 +131,45 @@ public class RobotCollisionModel
       PrintTools.info("setCollisionMaskAndGroup Finished");
    }
    
-   public void getCollisionResult()
+   public void update()
    {
+      PrintTools.info("update Start");
+      chestBody.update();
+      pelvisBody.update();
+      
+      rightUpperArm.update();
+      rightLowerArm.update();
+      //rightHand.update();
+      
+      leftUpperArm.update();
+      leftLowerArm.update();
+      //leftHand.update();
+      
+      rightUpperLeg.update();
+      rightLowerLeg.update();
+      //rightFoot.update();
+      
+      leftUpperLeg.update();
+      leftLowerLeg.update();
+      //leftFoot.update();
+      PrintTools.info("update Finished");
+   }
+   
+   public void getCollisionResult()
+   {       
+      collisionDetectionResult.clear();
+      collisionDetector.performCollisionDetection(collisionDetectionResult);
+       
+      if(collisionDetectionResult.getNumberOfCollisions() > 0)
+      {
+         for (int i = 0; i<collisionDetectionResult.getNumberOfCollisions();i++)
+         {
+            
+         }
+         PrintTools.info("Collid! "+collisionDetectionResult.getNumberOfCollisions());
+      }
       
       
-//      collisionDetectionResult.clear();
-//      collisionDetector.performCollisionDetection(collisionDetectionResult);
-//       
-//      if(collisionDetectionResult.getNumberOfCollisions() > 0)
-//      {
-//         for (int i = 0; i<collisionDetectionResult.getNumberOfCollisions();i++)
-//         {
-//      
-//         }
-//      }  
    }
    
    public ArrayList<Graphics3DObject> getCollisionGraphics()

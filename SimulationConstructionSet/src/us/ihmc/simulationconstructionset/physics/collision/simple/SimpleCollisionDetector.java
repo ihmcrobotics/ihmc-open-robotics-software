@@ -104,7 +104,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             if ((objectTwo.getCollisionGroup() & objectOne.getCollisionMask()) == 0x00)
             {
                continue;
-            }
+            }            
 
             objectOne.getBoundingBox(boundingBoxOne);
             objectTwo.getBoundingBox(boundingBoxTwo);
@@ -214,9 +214,11 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
                      result);
             }
 
+            System.out.printf("mask is %d 2 mask is %d   \n", objectOne.getCollisionMask(), objectTwo.getCollisionMask());
             if (areColliding)
-            {
+            {               
                numberOfCollisions++;
+               System.out.printf("%d \n", numberOfCollisions);
 
                if (useSimpleSpeedupMethod) haveCollided[i][j] = true;
                //               ArrayList<CollisionShape> arrayList = collidingPairs.get(objectOne);
