@@ -460,6 +460,17 @@ public class PositionOptimizedTrajectoryGenerator implements WaypointTrajectoryG
    }
 
    /**
+    * Returns whether the trajectory optimization has converged or not. This is useful when continuously improving
+    * the solution quality instead of waiting for the optimizer to finish in the initialize method.
+    *
+    * @return whether the optimizer has converged or not
+    */
+   public boolean hasConverged()
+   {
+      return hasConverged.getBooleanValue();
+   }
+
+   /**
     * Numerically compute the maximum speed along the trajectory and the time at which this speed
     * occurs.
     */
