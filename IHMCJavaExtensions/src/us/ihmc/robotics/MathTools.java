@@ -701,20 +701,31 @@ public class MathTools
       return new BigDecimal(value, new MathContext(significantFigures, RoundingMode.HALF_UP)).doubleValue();
    }
 
-   public static double powWithInteger(double x, int exponent)
+   /**
+    * Calculates value to the power of exponent. Uses integer for efficiency.
+    * 
+    * @param value
+    * @param exponent
+    * @return Value to the power of exponent.
+    */
+   public static double pow(double value, int exponent)
    {
-      double ret = 1.0;
+      double pow = 1.0;
       if (exponent >= 0)
       {
          for (int i = 0; i < exponent; i++)
-            ret *= x;
+         {
+            pow *= value;
+         }
       }
       else
       {
          for (int i = 0; i > exponent; i--)
-            ret /= x;
+         {
+            pow /= value;
+         }
       }
-      return ret;
+      return pow;
    }
 
    public static boolean isSignificantlyGreaterThan(double numberOne, double numberTwo, int significantFigures)

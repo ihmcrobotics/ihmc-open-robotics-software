@@ -58,11 +58,9 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -584,19 +582,6 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
    }
-
-   public void createSCS()
-   {
-      Robot robot = new PointMassRobot();
-
-      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setCreateGUI(true);
-      simulationConstructionSet = new SimulationConstructionSet(robot, parameters);
-
-      Thread myThread = new Thread(simulationConstructionSet);
-      myThread.start();
-   }
-
 
    private RigidBodyTransform[] createRandomCorrectionTargets(int numTargets)
    {

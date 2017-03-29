@@ -528,13 +528,14 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       commandConsumer.consumeChestCommands();
       commandConsumer.consumePelvisHeightCommands();
       commandConsumer.consumeGoHomeMessages();
-      commandConsumer.consumeEndEffectorLoadBearingCommands(currentState);
+      commandConsumer.consumeFootLoadBearingCommands(currentState);
       commandConsumer.consumeStopAllTrajectoryCommands();
       commandConsumer.consumeFootCommands();
       commandConsumer.consumeAbortWalkingCommands(abortWalkingRequested);
       commandConsumer.consumePelvisCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.consumeManipulationCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
+      commandConsumer.consumeLoadBearingCommands();
 
       updateFailureDetection();
 
@@ -565,7 +566,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       boolean haveContactStatesChanged = false;
       for (RobotSide robotSide : RobotSide.values)
       {
-         YoPlaneContactState contactState = controllerToolbox.getContactState(feet.get(robotSide));
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          if (contactState.pollContactHasChangedNotification())
             haveContactStatesChanged = true;
       }
@@ -656,7 +657,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
 
-         YoPlaneContactState contactState = controllerToolbox.getContactState(feet.get(robotSide));
+         YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();
          contactState.getPlaneContactStateCommand(planeContactStateCommand);
          planeContactStateCommand.setUseHighCoPDamping(isHighCoPDampingNeeded);

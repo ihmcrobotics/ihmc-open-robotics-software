@@ -83,7 +83,7 @@ public class LogCrawler implements Runnable
       boolean useCollisionMeshes = false;
 
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes);
+      RobotDescription robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, null, useCollisionMeshes);
 
       robot = new SpecificLogVariableUpdater(selectedFile, robotDescription, parser.getJointStates(), parser.getYoVariablesList(), logProperties,
             yoVariablesToUpdate);
@@ -107,7 +107,7 @@ public class LogCrawler implements Runnable
       catch (IOException e)
       {
          e.printStackTrace();
-      } 
+      }
       finally
       {
          robot.close();

@@ -14,11 +14,11 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
-import us.ihmc.simulationconstructionset.util.environments.ContactableSphereRobot;
-import us.ihmc.simulationconstructionset.util.environments.ContactableStaticCylinderRobot;
-import us.ihmc.simulationconstructionset.util.environments.ContactableToroidRobot;
-import us.ihmc.simulationconstructionset.util.environments.PointMassRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSelectableBoxRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSphereRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableStaticCylinderRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableToroidRobot;
+import us.ihmc.exampleSimulations.pointMassRobot.PointMassRobot;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 
 public class ExampleContactSimulationWithMultipleObjects

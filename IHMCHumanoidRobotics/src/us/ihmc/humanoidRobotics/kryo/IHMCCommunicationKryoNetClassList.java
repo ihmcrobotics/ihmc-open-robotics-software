@@ -99,6 +99,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandCollision
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandComplianceControlParametersMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandDesiredConfigurationMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandJointAnglePacket;
+import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandLoadBearingMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandPowerCyclePacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandRotateAboutAxisPacket;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -145,10 +146,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.AutomaticManipulat
 import us.ihmc.humanoidRobotics.communication.packets.walking.BlindWalkingPacket;
 import us.ihmc.humanoidRobotics.communication.packets.walking.CapturabilityBasedStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.EndEffector;
-import us.ihmc.humanoidRobotics.communication.packets.walking.EndEffectorLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootLoadBearingMessage.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
@@ -245,9 +245,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(boolean[].class);
 
       // Endeffector load bearing message
-      registerPacketClass(EndEffectorLoadBearingMessage.class);
+      registerPacketClass(FootLoadBearingMessage.class);
+      registerPacketClass(HandLoadBearingMessage.class);
       registerPacketClass(LoadBearingRequest.class);
-      registerPacketClass(EndEffector.class);
 
       // User control mode
       registerPacketClass(ArmDesiredAccelerationsMessage.class);
