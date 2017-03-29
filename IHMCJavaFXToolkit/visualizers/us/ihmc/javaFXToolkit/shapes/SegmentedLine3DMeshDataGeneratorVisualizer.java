@@ -26,10 +26,20 @@ public class SegmentedLine3DMeshDataGeneratorVisualizer extends Application
       view3dFactory.addWorldCoordinateSystem(0.4);
 
       long startTime = System.nanoTime();
-      MeshDataHolder[] meshDataHolders = createMesh();
+      MeshDataHolder[] meshDataHolders = createSpringMesh();
       long endTime = System.nanoTime();
       System.out.println("Took: " + Conversions.nanosecondsToSeconds(endTime - startTime) + " sec");
 
+      addMeshDataHolderToView3D(view3dFactory, meshDataHolders);
+      addMeshDataHolderToView3D(view3dFactory, createLineMesh());
+
+      primaryStage.setMaximized(true);
+      primaryStage.setScene(view3dFactory.getScene());
+      primaryStage.show();
+   }
+
+   private void addMeshDataHolderToView3D(View3DFactory view3dFactory, MeshDataHolder[] meshDataHolders)
+   {
       for (int i = 0; i < meshDataHolders.length; i++)
       {
          double hue = i / (meshDataHolders.length - 1.0) * 360.0;
@@ -40,13 +50,9 @@ public class SegmentedLine3DMeshDataGeneratorVisualizer extends Application
          meshView.setMaterial(defaultMaterial);
          view3dFactory.addNodeToView(meshView);
       }
-
-      primaryStage.setMaximized(true);
-      primaryStage.setScene(view3dFactory.getScene());
-      primaryStage.show();
    }
 
-   private MeshDataHolder[] createMesh()
+   private MeshDataHolder[] createSpringMesh()
    {
       int numberOfSections = 1000;
       SegmentedLine3DMeshDataGenerator deformablePipeMeshCalculator = new SegmentedLine3DMeshDataGenerator(numberOfSections, 64, 0.02);
@@ -60,6 +66,25 @@ public class SegmentedLine3DMeshDataGeneratorVisualizer extends Application
          double x = i * lx / (numberOfSections - 1.0);
          double y = 0.3 * Math.cos(2.0 * Math.PI * 4.0 * x + phase);
          double z = 0.1 * Math.sin(2.0 * Math.PI * 4.0 * x + phase);
+         centers[i] = new Point3D(x, y, z);
+      }
+      deformablePipeMeshCalculator.compute(centers);
+      return deformablePipeMeshCalculator.getMeshDataHolders();
+   }
+
+   private MeshDataHolder[] createLineMesh()
+   {
+      int numberOfSections = 100;
+      SegmentedLine3DMeshDataGenerator deformablePipeMeshCalculator = new SegmentedLine3DMeshDataGenerator(numberOfSections, 64, 0.02);
+      Point3D[] centers = new Point3D[numberOfSections];
+
+      double lx = 1.0;
+
+      for (int i = 0; i < numberOfSections; i++)
+      {
+         double x = i * lx / (numberOfSections - 1.0);
+         double y = 0.3;
+         double z = 0.3;
          centers[i] = new Point3D(x, y, z);
       }
       deformablePipeMeshCalculator.compute(centers);

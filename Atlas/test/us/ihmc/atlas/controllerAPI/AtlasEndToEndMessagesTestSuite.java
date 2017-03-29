@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({AtlasEndToEndArmDesiredAccelerationsMessageTest.class, AtlasEndToEndArmTrajectoryMessageTest.class,
-      AtlasEndToEndChestTrajectoryMessageTest.class, AtlasEndToEndEndEffectorLoadBearingTest.class, AtlasEndToEndFootTrajectoryMessageTest.class,
+      AtlasEndToEndChestTrajectoryMessageTest.class, AtlasEndToEndFootLoadBearingTest.class, AtlasEndToEndFootTrajectoryMessageTest.class,
       AtlasEndToEndHandTrajectoryMessageTest.class, AtlasEndToEndHeadTrajectoryMessageTest.class, AtlasEndToEndPelvisHeightTrajectoryMessageTest.class,
       AtlasEndToEndPelvisTrajectoryMessageTest.class, AtlasEndToEndWholeBodyTrajectoryMessageTest.class})
 public class AtlasEndToEndMessagesTestSuite

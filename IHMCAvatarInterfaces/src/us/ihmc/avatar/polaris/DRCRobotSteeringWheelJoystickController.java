@@ -5,7 +5,7 @@ import java.io.IOException;
 import net.java.games.input.Component;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.joystick.DoubleYoVariableJoystickEventListener;
+import us.ihmc.simulationConstructionSetTools.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 
 

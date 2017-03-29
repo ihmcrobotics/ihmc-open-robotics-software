@@ -10,15 +10,15 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.BidirectionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
-public abstract class RobotContactPointParameters
+public abstract class RobotContactPointParameters implements ContactPointDefinitionHolder
 {
    protected final ContactableBodiesFactory contactableBodiesFactory = new ContactableBodiesFactory();
 
@@ -47,7 +47,7 @@ public abstract class RobotContactPointParameters
       this.soleToAnkleFrameTransforms = soleToAnkleFrameTransforms;
    }
 
-   protected void createContactPoints(FootContactPoints footContactPoints)
+   protected void createFootContactPoints(FootContactPoints footContactPoints)
    {
       Map<String, List<Tuple3DBasics>> simulationContactPoints = footContactPoints.getSimulationContactPoints(footLength, footWidth, toeWidth, jointMap, soleToAnkleFrameTransforms);
       for (String parentJointName : simulationContactPoints.keySet())
@@ -80,7 +80,7 @@ public abstract class RobotContactPointParameters
 
    protected void createDefaultFootContactPoints()
    {
-      createContactPoints(new DefaultFootContactPoints());
+      createFootContactPoints(new DefaultFootContactPoints());
    }
 
    protected final void clearSimulationContactPoints()
@@ -92,20 +92,6 @@ public abstract class RobotContactPointParameters
    {
       for (RobotSide robotSide : RobotSide.values)
          controllerFootGroundContactPoints.get(robotSide).clear();
-   }
-
-   protected final void addSimulationContactPoint(String parentJointName, RigidBodyTransform transformToParentJointFrame, double contactPointX, double contactPointY, double contactPointZ)
-   {
-      Point3D contactPoint = new Point3D(contactPointX, contactPointY, contactPointZ);
-      transformToParentJointFrame.transform(contactPoint);
-      addSimulationContactPoint(parentJointName, contactPoint);
-   }
-
-   protected final void addSimulationContactPoint(String parentJointName, RigidBodyTransform transformToParentJointFrame, Point2D contactPointPosition)
-   {
-      Point3D contactPoint = new Point3D(contactPointPosition.getX(), contactPointPosition.getY(), 0.0);
-      transformToParentJointFrame.transform(contactPoint);
-      addSimulationContactPoint(parentJointName, contactPoint);
    }
 
    protected final void addSimulationContactPoint(String parentJointName, Tuple3DBasics contactPointPositionInParentJointFrame)
@@ -133,16 +119,6 @@ public abstract class RobotContactPointParameters
       controllerToeContactPoints.get(robotSide).set(toeContactPoint);
       // Update the factory with the new set of contact points.
       contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
-   }
-
-   public SideDependentList<RigidBodyTransform> getHandContactPointTransforms()
-   {
-      return null;
-   }
-
-   public SideDependentList<List<Point2D>> getHandContactPoints()
-   {
-      return null;
    }
 
    public final List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
