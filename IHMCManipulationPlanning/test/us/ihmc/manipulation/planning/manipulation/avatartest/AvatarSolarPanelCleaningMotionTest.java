@@ -43,7 +43,6 @@ import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMot
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPoseValidityTest;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
@@ -52,16 +51,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.bambooTools.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationconstructionset.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -493,14 +492,10 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       wholeBodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
       
       toolboxCommunicator.send(wholeBodyTrajectoryMessage);
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       SolarPanelPoseValidityTest solarPanelValidityTest = new SolarPanelPoseValidityTest(solarPanel, kinematicsToolBoxController, wholeBodyTrajectoryMessage);
       
       solarPanelValidityTest.getInverseKienamticsModule();
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      solarPanelValidityTest.getCollisionShape();
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-      solarPanelValidityTest.getCollisionResult();
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
 
       for (int i=0;i<solarPanelValidityTest.debugAxis.size();i++)
       {
@@ -509,15 +504,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       scs.addStaticLinkGraphics(solarPanelValidityTest.robotCollisionModel.getCollisionGraphics());
       
-      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
-      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
-      
-      
-      
-      OneDoFJoint hipJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.HIP_YAW);      
-      OneDoFJoint kneeJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH);            
-      OneDoFJoint ankleJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH);
-      
+//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
+//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
       
       
       for (int i=0;i<kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints().length;i++)

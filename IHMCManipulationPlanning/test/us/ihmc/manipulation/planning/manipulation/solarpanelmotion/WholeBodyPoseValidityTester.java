@@ -17,7 +17,10 @@ public abstract class WholeBodyPoseValidityTester implements ValidityTester
    
    private WholeBodyTrajectoryMessage wholebodyTrajectoryMessage;
    
-   private boolean isValid = false;
+   private boolean isValid = true;
+   private boolean collisionFree = true;
+   private boolean jointlimitFree = true;
+
    
    
    
@@ -31,6 +34,9 @@ public abstract class WholeBodyPoseValidityTester implements ValidityTester
       this.ikFullRobotModel = this.ikToolboxController.getDesiredFullRobotModel();
       
       this.robotCollisionModel = new RobotCollisionModel(this.ikFullRobotModel);
+      
+      robotCollisionModel.getCollisionShape();      
+      robotCollisionModel.setCollisionMaskAndGroup();
    }
    
 
@@ -42,18 +48,11 @@ public abstract class WholeBodyPoseValidityTester implements ValidityTester
       ikToolboxController.updateTools();
    }
    
-   public void getCollisionShape()
-   {
-      robotCollisionModel.getCollisionShape();
-      
-      
-      
-      
-   }   
    
-   public void getCollisionResult()
+   public void getResult()
    {
-      isValid = true;
+      // joint limit tester
+      // collision tester
    }   
    
    public void update()
@@ -64,6 +63,14 @@ public abstract class WholeBodyPoseValidityTester implements ValidityTester
    @Override
    public boolean isValid()
    {
+      if(collisionFree == false || jointlimitFree == false)
+      {
+         isValid = false;
+      }
+      else
+      {
+         isValid = true;
+      }
       return isValid;
    }   
 
