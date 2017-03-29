@@ -56,6 +56,7 @@ public class GUICaptureReceiver implements SubscriberListener
          receiveBuffer.clear();
          if(subscriber.takeNextData(receiveBuffer, null))
          {
+            receiveBuffer.flip();
             handler.receivedFrame(receiveBuffer);
          }
       }

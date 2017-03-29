@@ -18,7 +18,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
     public GraphicObjectMessage()
     {
         	name_ = new StringBuilder(255); 
-        	yoVariableIndex_ = new IDLSequence.Integer (128, "type_3");
+        	yoVariableIndex_ = new IDLSequence.Integer (1024, "type_3");
         	constants_ = new IDLSequence.Double (128, "type_6");
         	appearance_ = new us.ihmc.robotDataLogger.AppearanceDefinitionMessage();listName_ = new StringBuilder(255); 
         
@@ -117,7 +117,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    current_alignment += (128 * 2) + CDR.alignment(current_alignment, 2);
+	    current_alignment += (1024 * 2) + CDR.alignment(current_alignment, 2);
 
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
@@ -171,7 +171,7 @@ public class GraphicObjectMessage implements IDLStruct<GraphicObjectMessage>
 	    cdr.write_type_d(name_);else
 	        throw new RuntimeException("name field exceeds the maximum length");
 
-	    if(yoVariableIndex_.size() <= 128)
+	    if(yoVariableIndex_.size() <= 1024)
 	    cdr.write_type_e(yoVariableIndex_);else
 	        throw new RuntimeException("yoVariableIndex field exceeds the maximum length");
 

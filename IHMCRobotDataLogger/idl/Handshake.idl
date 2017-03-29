@@ -53,7 +53,7 @@ module robotDataLogger{
 		unsigned short type;
 		string name;
 		
-		sequence<unsigned short, 128> yoVariableIndex;
+		sequence<unsigned short, 1024> yoVariableIndex;
 		sequence<double, 128> constants;
 		AppearanceDefinitionMessage appearance;
 		string listName;
