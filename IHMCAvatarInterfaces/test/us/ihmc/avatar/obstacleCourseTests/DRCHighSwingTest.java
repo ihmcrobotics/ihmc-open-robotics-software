@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.simulationConstructionSetTools.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationConstructionSetTools.util.dataProcessors.ValueDataCheckerParameters;
 import us.ihmc.simulationConstructionSetTools.util.dataProcessors.YoVariableValueDataChecker;
-import us.ihmc.simulationconstructionset.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;

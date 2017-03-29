@@ -7,7 +7,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.DataBuffer;
 import us.ihmc.simulationconstructionset.DataBufferEntry;
-import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
+import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
 
 public class DataExporterGraphCreator
 {

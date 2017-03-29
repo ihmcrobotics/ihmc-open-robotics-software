@@ -33,6 +33,6 @@ public class AtlasPointFeedbackControllerTest extends PointFeedbackControllerTes
    protected MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
-      return new AtlasMomentumOptimizationSettings(robotModel.getJointMap());
+      return new AtlasMomentumOptimizationSettings(robotModel.getJointMap(), robotModel.getContactPointParameters().getNumberOfContactableBodies());
    }
 }

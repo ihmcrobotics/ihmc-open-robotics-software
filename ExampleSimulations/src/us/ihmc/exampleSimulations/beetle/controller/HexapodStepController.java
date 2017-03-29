@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerato
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.beetle.footContact.SimulatedPlaneContactStateUpdater;
 import us.ihmc.exampleSimulations.beetle.parameters.HexapodControllerParameters;
-import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleJointNameMap;
+import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleJointNameMapAndContactDefinition;
 import us.ihmc.exampleSimulations.beetle.planning.FootStepPlanner;
 import us.ihmc.exampleSimulations.beetle.referenceFrames.HexapodReferenceFrames;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -97,7 +97,7 @@ public class HexapodStepController
       groundClearance.set(0.03);
       inStance.set(true);
 
-      RhinoBeetleJointNameMap jointMap = new RhinoBeetleJointNameMap();
+      RhinoBeetleJointNameMapAndContactDefinition jointMap = new RhinoBeetleJointNameMapAndContactDefinition();
 
       int i = 0;
       for (RobotSextant robotSextant : RobotSextant.values)

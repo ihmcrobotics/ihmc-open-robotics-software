@@ -218,7 +218,7 @@ public class MathToolsTest
       {
          double x = randomValues[i];
          int exp = randomExponents[i];
-         double xPowedToTest = MathTools.powWithInteger(x, exp);
+         double xPowedToTest = MathTools.pow(x, exp);
          double xPowedExpected = Math.pow(x, (double) exp);
          double errorRatio = (xPowedToTest - xPowedExpected) / xPowedExpected;
          boolean isRelativeErrorLowEnough = MathTools.epsilonEquals(errorRatio, 0.0, 1.0e-15);

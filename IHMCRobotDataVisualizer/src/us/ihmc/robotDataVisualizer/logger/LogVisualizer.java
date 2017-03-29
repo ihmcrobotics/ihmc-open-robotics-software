@@ -148,12 +148,12 @@ public class LogVisualizer
       boolean useCollisionMeshes = false;
 
       RobotDescription robotDescription;
-      
-      
+
+
       if(generalizedSDFRobotModel != null)
       {
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-         robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, useCollisionMeshes);         
+         robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, null, null, useCollisionMeshes);
       }
       else
       {
@@ -201,7 +201,7 @@ public class LogVisualizer
       scs.getJFrame().setTitle(this.getClass().getSimpleName() + " - " + selectedFile);
       YoVariableLogVisualizerGUI gui = new YoVariableLogVisualizerGUI(selectedFile, logProperties, players, parser, robot, scs);
       scs.getStandardSimulationGUI().addJComponentToMainPanel(gui, BorderLayout.SOUTH);
-      
+
 //      ErrorPanel errorPanel = new ErrorPanel(scs.getRootRegistry());
 //      scs.getStandardSimulationGUI().addJComponentToMainPanel(errorPanel,  BorderLayout.EAST);
 
@@ -283,8 +283,8 @@ public class LogVisualizer
       listener.setYoVariableRegistry(scs.getRootRegistry());
       robot.addLogPlaybackListener(listener);
    }
-   
-   
+
+
    private PlaybackListener createYoGraphicsUpdater(final YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       return new PlaybackListener()

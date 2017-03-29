@@ -182,7 +182,7 @@ public class HoldPositionState extends AbstractFootControlState
       // Remember the previous contact normal, in case the foot leaves the ground and rotates
       holdPositionNormalContactVector.setIncludingFrame(fullyConstrainedNormalContactVector);
       holdPositionNormalContactVector.changeFrame(worldFrame);
-      controllerToolbox.setPlaneContactStateNormalContactVector(contactableFoot, holdPositionNormalContactVector);
+      controllerToolbox.setFootContactStateNormalContactVector(robotSide, holdPositionNormalContactVector);
 
       desiredSolePosition.setToZero(soleFrame);
       desiredSolePosition.changeFrame(worldFrame);
@@ -243,7 +243,7 @@ public class HoldPositionState extends AbstractFootControlState
 
          if (doFootholdAdjustments.getBooleanValue())
          {
-            YoPlaneContactState contactState = controllerToolbox.getContactState(contactableFoot);
+            YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
             boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
             if (contactStateHasChanged)
                contactState.notifyContactStateHasChanged();

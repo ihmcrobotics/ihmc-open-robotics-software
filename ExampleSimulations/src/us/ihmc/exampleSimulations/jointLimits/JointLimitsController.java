@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.jointLimits;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
+import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 public class JointLimitsController extends SimpleRobotController
 {
