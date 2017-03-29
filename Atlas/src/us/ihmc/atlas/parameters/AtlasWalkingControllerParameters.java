@@ -67,7 +67,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private final AtlasMomentumOptimizationSettings momentumOptimizationSettings;
    private final double massScale;
 
-   private ExplorationParameters explorationParameters = null;
    private Map<String, YoPIDGains> jointspaceGains = null;
    private Map<String, YoOrientationPIDGainsInterface> taskspaceAngularGains = null;
    private Map<String, YoPositionPIDGainsInterface> taskspaceLinearGains = null;
@@ -1264,6 +1263,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return Double.POSITIVE_INFINITY; //0.075;
    }
 
+//   private ExplorationParameters explorationParameters = null;
    /** {@inheritDoc} */
    @Override
    public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
