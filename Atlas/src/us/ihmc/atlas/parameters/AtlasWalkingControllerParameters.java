@@ -1268,9 +1268,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    @Override
    public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
    {
-      if (explorationParameters == null)
-         explorationParameters = new ExplorationParameters(registry);
-      return explorationParameters;
+      return null;
+
+      // GW: Disabled this for now since it creates lots of debugging yoVariables.
+//      if (explorationParameters == null)
+//         explorationParameters = new ExplorationParameters(registry);
+//      return explorationParameters;
    }
 
    /** {@inheritDoc} */
