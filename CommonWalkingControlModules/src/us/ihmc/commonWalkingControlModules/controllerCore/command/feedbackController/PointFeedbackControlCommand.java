@@ -45,8 +45,16 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    private final Vector3D desiredLinearVelocityInWorld = new Vector3D();
    private final Vector3D feedForwardLinearAccelerationInWorld = new Vector3D();
 
+   /** The 3D gains used in the PD controller for the next control tick. */
    private final PositionPIDGains gains = new PositionPIDGains();
 
+   /**
+    * Acceleration command used to save different control properties such as: the end-effector, the
+    * base, and the weight to be used in the QP optimization.
+    * <p>
+    * Should not be accessed from the user side.
+    * </p>
+    */
    private final PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
 
    /**

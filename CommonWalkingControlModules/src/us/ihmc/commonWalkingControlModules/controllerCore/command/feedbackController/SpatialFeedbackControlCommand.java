@@ -58,8 +58,16 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    private final Vector3D desiredAngularVelocityInWorld = new Vector3D();
    private final Vector3D feedForwardAngularAccelerationInWorld = new Vector3D();
 
+   /** The 3D gains used in the PD controller for the next control tick. */
    private final SE3PIDGains gains = new SE3PIDGains();
 
+   /**
+    * Acceleration command used to save different control properties such as: the end-effector, the
+    * base, and the weight to be used in the QP optimization.
+    * <p>
+    * Should not be accessed from the user side.
+    * </p>
+    */
    private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    /**
@@ -166,6 +174,57 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * <p>
     * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
     * </p>
+    * <p>
+    * The desired linear/angular velocity and feed-forward linear/angular acceleration are set to
+    * zero.
+    * </p>
+    * 
+    * @param desiredPose describes the pose that the {@code controlFrame} should reach. It does NOT
+    *           describe the desired pose of {@code endEffector.getBodyFixedFrame()}. Not modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@link ReferenceFrame#getWorldFrame()}.
+    */
+   public void set(FramePose desiredPose)
+   {
+      desiredPose.checkReferenceFrameMatch(worldFrame);
+
+      desiredPose.getPosition(desiredPositionInWorld);
+      desiredPose.getOrientation(desiredOrientationInWorld);
+      desiredLinearVelocityInWorld.setToZero();
+      desiredAngularVelocityInWorld.setToZero();
+      feedForwardLinearAccelerationInWorld.setToZero();
+      feedForwardAngularAccelerationInWorld.setToZero();
+   }
+
+   /**
+    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * <p>
+    * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
+    * </p>
+    * <p>
+    * The desired linear velocity and feed-forward linear acceleration are set to zero.
+    * </p>
+    * 
+    * @param desiredPosition describes the position that the {@code controlFrame} should reach. It
+    *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}.
+    *           Not modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@link ReferenceFrame#getWorldFrame()}.
+    */
+   public void set(FramePoint desiredPosition)
+   {
+      desiredPosition.checkReferenceFrameMatch(worldFrame);
+
+      desiredPosition.get(desiredPositionInWorld);
+      desiredLinearVelocityInWorld.setToZero();
+      feedForwardLinearAccelerationInWorld.setToZero();
+   }
+
+   /**
+    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * <p>
+    * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
+    * </p>
     * 
     * @param desiredPosition describes the position that the {@code controlFrame} should reach. It
     *           does NOT describe the desired position of {@code endEffector.getBodyFixedFrame()}.
@@ -190,6 +249,30 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       desiredPosition.get(desiredPositionInWorld);
       desiredLinearVelocity.get(desiredLinearVelocityInWorld);
       feedForwardLinearAcceleration.get(feedForwardLinearAccelerationInWorld);
+   }
+
+   /**
+    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * <p>
+    * WARNING: The information provided has to be relevant to the {@code controlFrame} provided.
+    * </p>
+    * <p>
+    * The desired angular velocity and feed-forward angular acceleration are set to zero.
+    * </p>
+    * 
+    * @param desiredOrientation describes the orientation that the {@code controlFrame} should
+    *           reach. It does NOT describe the desired orientation of
+    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@link ReferenceFrame#getWorldFrame()}.
+    */
+   public void set(FrameOrientation desiredOrientation)
+   {
+      desiredOrientation.checkReferenceFrameMatch(worldFrame);
+
+      desiredOrientation.getQuaternion(desiredOrientationInWorld);
+      desiredAngularVelocityInWorld.setToZero();
+      feedForwardAngularAccelerationInWorld.setToZero();
    }
 
    /**
