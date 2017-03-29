@@ -37,18 +37,17 @@ public class RobotBox implements RobotCollisionModelInterface
       this.translationToCenter = translationToCenter;
       
       this.referenceFrame = referenceFrame;
-      
-      
+            
       this.sizeX = sizeX;
       this.sizeY = sizeY;
       this.sizeZ = sizeZ;
       
       this.graphicObject = new Graphics3DObject();
-      
-      
-      update();
+            
+      updateRighdBodyTransform();
       
       create();
+      updateCollisionShape();
    }
    
    @Override
@@ -60,7 +59,7 @@ public class RobotBox implements RobotCollisionModelInterface
    }
 
    @Override
-   public void update()
+   public void updateRighdBodyTransform()
    {
       RigidBodyTransform rigidbodyTransform = referenceFrame.getTransformToWorldFrame();
       rigidbodyTransform.appendTranslation(translationToCenter);
@@ -89,6 +88,12 @@ public class RobotBox implements RobotCollisionModelInterface
       graphicObject.addCube(sizeX, sizeY, sizeZ, app);
       
       return graphicObject;
+   }
+
+   @Override
+   public void updateCollisionShape()
+   {
+      collisionShape.setTransformToWorld(transform);
    }
 
 }

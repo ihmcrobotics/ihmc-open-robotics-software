@@ -6,7 +6,8 @@ import us.ihmc.simulationconstructionset.physics.CollisionShape;
 public interface RobotCollisionModelInterface
 {
    public abstract void create();
-   public abstract void update();
+   public abstract void updateCollisionShape();
+   public abstract void updateRighdBodyTransform();
    public abstract CollisionShape getCollisionShape();
    public abstract Graphics3DObject getGraphicObject();
 }

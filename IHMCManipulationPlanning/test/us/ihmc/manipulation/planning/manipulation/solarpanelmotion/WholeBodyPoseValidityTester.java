@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
-public abstract class WholeBodyPoseValidityTester implements ValidityTester
+public abstract class WholeBodyPoseValidityTester
 {
    private KinematicsToolboxController ikToolboxController;
    public FullHumanoidRobotModel ikFullRobotModel;
@@ -24,8 +24,7 @@ public abstract class WholeBodyPoseValidityTester implements ValidityTester
    
    
    
-   public ArrayList<RigidBodyTransform> debugAxis = new ArrayList<RigidBodyTransform>();
-      
+   public ArrayList<RigidBodyTransform> debugAxis = new ArrayList<RigidBodyTransform>();      
  
    public WholeBodyPoseValidityTester(KinematicsToolboxController ikToolboxController, WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
@@ -64,7 +63,6 @@ public abstract class WholeBodyPoseValidityTester implements ValidityTester
       
    }
    
-   @Override
    public boolean isValid()
    {
       if(collisionFree == false || jointlimitFree == false)

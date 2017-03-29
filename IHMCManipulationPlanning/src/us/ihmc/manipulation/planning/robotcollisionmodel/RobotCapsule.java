@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisio
 
 public class RobotCapsule implements RobotCollisionModelInterface
 {
-   private OneDoFJoint currentJoint;
+   public OneDoFJoint currentJoint;
    private OneDoFJoint nextJoint;
    
    private SimpleCollisionShapeFactory shapeFactory;
@@ -44,12 +44,13 @@ public class RobotCapsule implements RobotCollisionModelInterface
       
       this.graphicObject = new Graphics3DObject();
             
-      update();
+      updateRighdBodyTransform();
       
       this.radius = radius;
       this.height = currentLocation.distance(nextLocation) + radius*2;
       
       create();
+      updateCollisionShape();
    }
    
    public void create()
@@ -58,7 +59,7 @@ public class RobotCapsule implements RobotCollisionModelInterface
       collisionShape = shapeFactory.addShape(collisionShapeDescription);       
    }
    
-   public void update()
+   public void updateRighdBodyTransform()
    {        
       RigidBodyTransform currentTransform =  currentJoint.getFrameAfterJoint().getTransformToWorldFrame();
       RigidBodyTransform nextTransform =  nextJoint.getFrameAfterJoint().getTransformToWorldFrame();
@@ -74,17 +75,17 @@ public class RobotCapsule implements RobotCollisionModelInterface
       if(rotationAxis.getX() == 1)
       {
          currentTransform.getRotationMatrix().getColumn(0, centerXAxis);         
-         PrintTools.info("centerXAxis "+centerXAxis.getX()+" "+centerXAxis.getY()+" "+centerXAxis.getZ());
+         PrintTools.info("getX centerXAxis "+centerXAxis.getX()+" "+centerXAxis.getY()+" "+centerXAxis.getZ());
       }
       if(rotationAxis.getY() == 1)
       {
          currentTransform.getRotationMatrix().getColumn(1, centerXAxis);         
-         PrintTools.info("centerXAxis "+centerXAxis.getX()+" "+centerXAxis.getY()+" "+centerXAxis.getZ());
+         PrintTools.info("getY centerXAxis "+centerXAxis.getX()+" "+centerXAxis.getY()+" "+centerXAxis.getZ());
       }
       if(rotationAxis.getZ() == 1)
       {
          currentTransform.getRotationMatrix().getColumn(2, centerXAxis);
-         PrintTools.info("centerXAxis "+centerXAxis.getX()+" "+centerXAxis.getY()+" "+centerXAxis.getZ());
+         PrintTools.info("getZ centerXAxis "+centerXAxis.getX()+" "+centerXAxis.getY()+" "+centerXAxis.getZ());
       }
       
       
@@ -100,9 +101,9 @@ public class RobotCapsule implements RobotCollisionModelInterface
       centerRotationMatrix.setAndNormalize(centerXAxis.getX(), centerYAxis.getX(), centerZAxis.getX()
                                            ,centerXAxis.getY(), centerYAxis.getY(), centerZAxis.getY()
                                            ,centerXAxis.getZ(), centerYAxis.getZ(), centerZAxis.getZ());
-            
+      
       transform.setTranslation(centerLocation);
-      transform.setRotation(centerRotationMatrix);
+      transform.setRotation(centerRotationMatrix);    
    }
    
    public double getRadius()
@@ -127,5 +128,11 @@ public class RobotCapsule implements RobotCollisionModelInterface
       
       
       return graphicObject;
+   }
+
+   @Override
+   public void updateCollisionShape()
+   {
+      collisionShape.setTransformToWorld(transform);      
    }
 }
