@@ -39,8 +39,8 @@ public class DynamicReachabilityCalculator
 
    private static final boolean USE_HIGHER_ORDER_STEPS = false;
    private static final boolean VISUALIZE = true;
-   private static final double transferTwiddleSize = 0.2;
-   private static final double swingTwiddleSize = 0.2;
+   private static final double transferTwiddleSizeDuration = 0.2;
+   private static final double swingTwiddleSizeDuration = 0.2;
    private static final double MAXIMUM_DESIRED_KNEE_BEND = 0.2;
 
    private static final int MAXIMUM_NUMBER_OF_ADJUSTMENTS = 3;
@@ -70,32 +70,33 @@ public class DynamicReachabilityCalculator
    private final IntegerYoVariable numberOfBackwardAdjustments = new IntegerYoVariable("numberOfBackwardAdjustments", registry);
    private final IntegerYoVariable maximumNumberOfAdjustments = new IntegerYoVariable("maximumNumberOfAdjustments", registry);
 
-   private final DoubleYoVariable currentTransferTotalAdjustment = new DoubleYoVariable("currentTransferTotalAdjustment", registry);
-   private final DoubleYoVariable swingTotalAdjustment = new DoubleYoVariable("swingTotalAdjustment", registry);
-   private final DoubleYoVariable nextTransferTotalAdjustment = new DoubleYoVariable("nextTransferTotalAdjustment", registry);
-   private final DoubleYoVariable currentTransferAdjustment = new DoubleYoVariable("currentTransferAdjustment", registry);
-   private final DoubleYoVariable swingAdjustment = new DoubleYoVariable("swingAdjustment", registry);
-   private final DoubleYoVariable nextTransferAdjustment = new DoubleYoVariable("nextTransferAdjustment", registry);
+   private final DoubleYoVariable yoCurrentTransferAdjustment = new DoubleYoVariable("currentTransferAdjustment", registry);
+   private final DoubleYoVariable yoCurrentSwingAdjustment = new DoubleYoVariable("currentSwingAdjustment", registry);
+   private final DoubleYoVariable yoNextTransferAdjustment = new DoubleYoVariable("nextTransferAdjustment", registry);
+
+   private double currentTransferAdjustment;
+   private double currentSwingAdjustment;
+   private double nextTransferAdjustment;
 
    private final DoubleYoVariable currentTransferAlpha = new DoubleYoVariable("currentTransferAlpha", registry);
    private final DoubleYoVariable currentSwingAlpha = new DoubleYoVariable("currentSwingAlpha", registry);
    private final DoubleYoVariable nextTransferAlpha = new DoubleYoVariable("nextTransferAlpha", registry);
 
-   private final DoubleYoVariable requiredAdjustment = new DoubleYoVariable("requiredAdjustment", registry);
+   private final ArrayList<DoubleYoVariable> requiredAdjustments = new ArrayList<>();
 
-   private final YoFrameVector2d currentInitialTransferGradient = new YoFrameVector2d("currentInitialTransferGradient", worldFrame, registry);
-   private final YoFrameVector2d currentEndTransferGradient = new YoFrameVector2d("currentEndTransferGradient", worldFrame, registry);
+   private final FrameVector2d currentInitialTransferGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2d currentEndTransferGradient = new FrameVector2d(worldFrame);
 
-   private final YoFrameVector2d nextInitialTransferGradient = new YoFrameVector2d("nextInitialTransferGradient", worldFrame, registry);
-   private final YoFrameVector2d nextEndTransferGradient = new YoFrameVector2d("nextEndTransferGradient", worldFrame, registry);
+   private final FrameVector2d currentInitialSwingGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2d currentEndSwingGradient = new FrameVector2d(worldFrame);
 
-   private final YoFrameVector2d initialSwingGradient = new YoFrameVector2d("initialSwingGradient", worldFrame, registry);
-   private final YoFrameVector2d endSwingGradient = new YoFrameVector2d("endSwingGradient", worldFrame, registry);
+   private final FrameVector2d nextInitialTransferGradient = new FrameVector2d(worldFrame);
+   private final FrameVector2d nextEndTransferGradient = new FrameVector2d(worldFrame);
 
    private final BooleanYoVariable isInTransfer = new BooleanYoVariable("isInTransfer", registry);
 
-   private final ArrayList<YoFrameVector2d> higherSwingGradients = new ArrayList<>();
-   private final ArrayList<YoFrameVector2d> higherTransferGradients = new ArrayList<>();
+   private final ArrayList<FrameVector2d> higherSwingGradients = new ArrayList<>();
+   private final ArrayList<FrameVector2d> higherTransferGradients = new ArrayList<>();
 
    private final ArrayList<DoubleYoVariable> higherSwingAdjustments = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> higherTransferAdjustments = new ArrayList<>();
@@ -167,8 +168,8 @@ public class DynamicReachabilityCalculator
       int numberOfFootstepsToConsider = icpPlanner.getNumberOfFootstepsToConsider();
       for (int i = 0; i < numberOfFootstepsToConsider - 3; i++)
       {
-         YoFrameVector2d higherSwingGradient = new YoFrameVector2d("higherSwingGradient" + i, worldFrame, registry);
-         YoFrameVector2d higherTransferGradient = new YoFrameVector2d("higherTransferGradient" + i, worldFrame, registry);
+         FrameVector2d higherSwingGradient = new FrameVector2d(worldFrame);
+         FrameVector2d higherTransferGradient = new FrameVector2d(worldFrame);
          higherSwingGradients.add(higherSwingGradient);
          higherTransferGradients.add(higherTransferGradient);
 
@@ -177,6 +178,12 @@ public class DynamicReachabilityCalculator
          higherSwingAdjustments.add(higherSwingAdjustment);
          higherTransferAdjustments.add(higherTransferAdjustment);
       }
+
+      for (int i = 0; i < MAXIMUM_NUMBER_OF_ADJUSTMENTS; i++)
+      {
+         requiredAdjustments.add(new DoubleYoVariable("requiredAdjustment" + i, registry));
+      }
+
 
       // compute leg segment lengths
       ReferenceFrame hipPitchFrame = fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH).getFrameAfterJoint();
@@ -406,12 +413,24 @@ public class DynamicReachabilityCalculator
       numberOfForwardAdjustments.set(0);
       numberOfBackwardAdjustments.set(0);
 
-      currentTransferTotalAdjustment.set(0.0);
-      swingTotalAdjustment.set(0.0);
-      nextTransferTotalAdjustment.set(0.0);
-      currentTransferAdjustment.set(0.0);
-      swingAdjustment.set(0.0);
-      nextTransferAdjustment.set(0.0);
+      yoCurrentTransferAdjustment.set(0.0);
+      yoCurrentSwingAdjustment.set(0.0);
+      yoNextTransferAdjustment.set(0.0);
+
+      currentTransferAdjustment = 0.0;
+      currentSwingAdjustment = 0.0;
+      nextTransferAdjustment = 0.0;
+
+      currentTransferAlpha.setToNaN();
+      currentSwingAlpha.setToNaN();
+      nextTransferAlpha.setToNaN();
+
+      currentInitialTransferGradient.setToNaN();
+      currentEndTransferGradient.setToNaN();
+      currentInitialSwingGradient.setToNaN();
+      currentEndSwingGradient.setToNaN();
+      nextInitialTransferGradient.setToNaN();
+      nextEndTransferGradient.setToNaN();
 
       for (int i = 0; i < higherSwingAdjustments.size(); i++)
       {
@@ -421,6 +440,9 @@ public class DynamicReachabilityCalculator
          higherSwingAdjustments.get(i).setToNaN();
          higherTransferAdjustments.get(i).setToNaN();
       }
+
+      for (int i = 0; i < requiredAdjustments.size(); i++)
+         requiredAdjustments.get(i).setToNaN();
    }
 
 
@@ -445,12 +467,12 @@ public class DynamicReachabilityCalculator
 
       while (!isStepReachable)
       {
+         if (numberOfAdjustments.getIntegerValue() >= maximumNumberOfAdjustments.getIntegerValue() )
+            break;
+
          boolean needToMoveCoMBackward = (stanceHeightLine.getMaxPoint() <= stepHeightLine.getMinPoint());
          double requiredAdjustment = computeRequiredAdjustment(needToMoveCoMBackward);
-         this.requiredAdjustment.set(requiredAdjustment);
-
-         if (numberOfAdjustments.getIntegerValue() > maximumNumberOfAdjustments.getIntegerValue())
-            break;
+         requiredAdjustments.get(numberOfAdjustments.getIntegerValue()).set(requiredAdjustment);
 
          int numberOfHigherSteps = computeNumberOfHigherSteps();
 
@@ -632,10 +654,10 @@ public class DynamicReachabilityCalculator
       extractGradient(currentEndTransferGradient, stanceSide, tempGradient);
       solver.setCurrentEndTransferGradient(tempGradient);
 
-      extractGradient(initialSwingGradient, stanceSide, tempGradient);
+      extractGradient(currentInitialSwingGradient, stanceSide, tempGradient);
       solver.setCurrentInitialSwingGradient(tempGradient);
 
-      extractGradient(endSwingGradient, stanceSide, tempGradient);
+      extractGradient(currentEndSwingGradient, stanceSide, tempGradient);
       solver.setCurrentEndSwingGradient(tempGradient);
 
       extractGradient(nextInitialTransferGradient, stanceSide, tempGradient);
@@ -692,7 +714,7 @@ public class DynamicReachabilityCalculator
 
       currentInitialTransferDuration += currentInitialTransferAdjustment;
       currentEndTransferDuration += currentEndTransferAdjustment;
-      currentTransferAdjustment.set(currentInitialTransferAdjustment + currentEndTransferAdjustment);
+      currentTransferAdjustment = currentInitialTransferAdjustment + currentEndTransferAdjustment;
       this.currentTransferAlpha.set(currentInitialTransferDuration / (currentInitialTransferDuration + currentEndTransferDuration));
 
       // handle current swing
@@ -706,7 +728,7 @@ public class DynamicReachabilityCalculator
 
       swingInitialDuration += initialSwingAdjustment;
       swingEndDuration += endSwingAdjustment;
-      swingAdjustment.set(initialSwingAdjustment + endSwingAdjustment);
+      currentSwingAdjustment = initialSwingAdjustment + endSwingAdjustment;
       this.currentSwingAlpha.set(swingInitialDuration / (swingInitialDuration + swingEndDuration));
 
       // handle next transfer
@@ -720,7 +742,7 @@ public class DynamicReachabilityCalculator
 
       nextInitialTransferDuration += nextInitialTransferAdjustment;
       nextEndTransferDuration += nextEndTransferAdjustment;
-      nextTransferAdjustment.set(nextInitialTransferAdjustment + nextEndTransferAdjustment);
+      nextTransferAdjustment = nextInitialTransferAdjustment + nextEndTransferAdjustment;
       this.nextTransferAlpha.set(nextInitialTransferDuration / (nextInitialTransferDuration + nextEndTransferDuration));
 
       // handle higher values
@@ -739,30 +761,27 @@ public class DynamicReachabilityCalculator
       int numberOfFootstepsRegistered = icpPlanner.getNumberOfFootstepsRegistered();
 
       double currentTransferDuration = icpPlanner.getTransferDuration(0);
-      double currentTransferDurationAdjustment = currentTransferAdjustment.getDoubleValue();
-      currentTransferTotalAdjustment.add(currentTransferDurationAdjustment);
-      icpPlanner.setTransferDuration(0, currentTransferDuration + currentTransferDurationAdjustment);
+      yoCurrentTransferAdjustment.add(currentTransferAdjustment);
+      icpPlanner.setTransferDuration(0, currentTransferDuration + currentTransferAdjustment);
       icpPlanner.setTransferDurationAlpha(0, currentTransferAlpha.getDoubleValue());
 
       double currentSwingDuration = icpPlanner.getSwingDuration(0);
-      double currentSwingDurationAdjustment = swingAdjustment.getDoubleValue();
-      swingTotalAdjustment.add(currentSwingDurationAdjustment);
-      icpPlanner.setSwingDuration(0, currentSwingDuration + currentSwingDurationAdjustment);
+      yoCurrentSwingAdjustment.add(currentSwingAdjustment);
+      icpPlanner.setSwingDuration(0, currentSwingDuration + currentSwingAdjustment);
       icpPlanner.setSwingDurationAlpha(0, currentSwingAlpha.getDoubleValue());
 
       boolean isThisTheFinalTransfer = (numberOfFootstepsRegistered == 1);
 
       double nextTransferDuration = icpPlanner.getTransferDuration(1);
-      double nextTransferDurationAdjustment = nextTransferAdjustment.getDoubleValue();
-      nextTransferTotalAdjustment.add(nextTransferDurationAdjustment);
+      yoNextTransferAdjustment.add(nextTransferAdjustment);
       if (isThisTheFinalTransfer)
       {
-         icpPlanner.setFinalTransferDuration(nextTransferDuration + nextTransferDurationAdjustment);
+         icpPlanner.setFinalTransferDuration(nextTransferDuration + nextTransferAdjustment);
          icpPlanner.setFinalTransferDurationAlpha(nextTransferAlpha.getDoubleValue());
       }
       else
       {
-         icpPlanner.setTransferDuration(1, nextTransferDuration + nextTransferDurationAdjustment);
+         icpPlanner.setTransferDuration(1, nextTransferDuration + nextTransferAdjustment);
          icpPlanner.setTransferDurationAlpha(1, nextTransferAlpha.getDoubleValue());
       }
 
@@ -794,7 +813,7 @@ public class DynamicReachabilityCalculator
       double currentEndTransferDuration = (1.0 - currentTransferDurationAlpha) * currentTransferDuration;
 
       // compute initial transfer duration gradient
-      double variation = transferTwiddleSize * currentInitialTransferDuration;
+      double variation = transferTwiddleSizeDuration * currentInitialTransferDuration;
       double modifiedTransferDurationAlpha = (currentInitialTransferDuration + variation) / (currentTransferDuration + variation);
 
       applyTransferVariation(stepNumber, currentTransferDuration + variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
@@ -802,7 +821,7 @@ public class DynamicReachabilityCalculator
       currentInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
-      variation = transferTwiddleSize * currentEndTransferDuration;
+      variation = transferTwiddleSizeDuration * currentEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (currentEndTransferDuration + variation) / (currentTransferDuration + variation);
 
       applyTransferVariation(stepNumber, currentTransferDuration + variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
@@ -824,7 +843,7 @@ public class DynamicReachabilityCalculator
       double nextEndTransferDuration = (1.0 - nextTransferDurationAlpha) * nextTransferDuration;
 
       // compute initial transfer duration gradient
-      double variation = transferTwiddleSize * nextInitialTransferDuration;
+      double variation = transferTwiddleSizeDuration * nextInitialTransferDuration;
       double modifiedTransferDurationAlpha = (nextInitialTransferDuration + variation) / (nextTransferDuration + variation);
 
       applyTransferVariation(stepNumber, nextTransferDuration + variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
@@ -832,7 +851,7 @@ public class DynamicReachabilityCalculator
       nextInitialTransferGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end transfer duration gradient
-      variation = transferTwiddleSize * nextEndTransferDuration;
+      variation = transferTwiddleSizeDuration * nextEndTransferDuration;
       modifiedTransferDurationAlpha = 1.0 - (nextEndTransferDuration + variation) / (nextTransferDuration + variation);
 
       applyTransferVariation(stepNumber, nextTransferDuration + variation, modifiedTransferDurationAlpha, adjustedCoMPosition);
@@ -847,7 +866,7 @@ public class DynamicReachabilityCalculator
    {
       boolean isThisTheFinalTransfer = icpPlanner.getNumberOfFootstepsRegistered() == stepIndex;
 
-      double variation = transferTwiddleSize * icpPlanner.getTransferDuration(stepIndex);
+      double variation = transferTwiddleSizeDuration * icpPlanner.getTransferDuration(stepIndex);
       double originalDuration = icpPlanner.getTransferDuration(stepIndex);
 
       applyTransferVariation(isThisTheFinalTransfer, stepIndex, originalDuration + variation, adjustedCoMPosition);
@@ -900,21 +919,21 @@ public class DynamicReachabilityCalculator
 
       // compute initial swing duration gradient
       double currentDuration = icpPlanner.getSwingDuration(stepNumber);
-      double variation = swingTwiddleSize * currentInitialSwingDuration;
+      double variation = swingTwiddleSizeDuration * currentInitialSwingDuration;
       double modifiedSwingDurationAlpha = (currentInitialSwingDuration + variation) / (currentSwingDuration + variation);
 
       applySwingVariation(stepNumber, currentDuration + variation, modifiedSwingDurationAlpha, adjustedCoMPosition);
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      initialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentInitialSwingGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // compute end swing duration gradient
       icpPlanner.setSwingDuration(stepNumber, currentSwingDuration);
-      variation = swingTwiddleSize * currentEndSwingDuration;
+      variation = swingTwiddleSizeDuration * currentEndSwingDuration;
       modifiedSwingDurationAlpha = 1.0 - (currentEndSwingDuration + variation) / (currentSwingDuration + variation);
 
       applySwingVariation(stepNumber, currentDuration + variation, modifiedSwingDurationAlpha, adjustedCoMPosition);
       computeGradient(predictedCoMPosition, adjustedCoMPosition, variation, tempGradient);
-      endSwingGradient.setByProjectionOntoXYPlane(tempGradient);
+      currentEndSwingGradient.setByProjectionOntoXYPlane(tempGradient);
 
       // reset everything to normal
       applySwingVariation(stepNumber, currentDuration, currentSwingDurationAlpha, adjustedCoMPosition);
@@ -923,7 +942,7 @@ public class DynamicReachabilityCalculator
    private void computeHigherSwingGradient(int stepIndex)
    {
       double duration = icpPlanner.getSwingDuration(stepIndex);
-      double variation = swingTwiddleSize * duration;
+      double variation = swingTwiddleSizeDuration * duration;
 
       applySwingVariation(stepIndex, duration + variation, adjustedCoMPosition);
 
@@ -966,11 +985,10 @@ public class DynamicReachabilityCalculator
       gradientToPack.scale(1.0 / variation);
    }
 
-   private void extractGradient(YoFrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector gradientToPack)
+   private void extractGradient(FrameVector2d gradientToExtract, RobotSide stanceSide, FrameVector gradientToPack)
    {
       gradientToPack.setToZero(worldFrame);
-      gradientToExtract.getFrameTuple2d(tempVector2d);
-      gradientToPack.setXY(tempVector2d);
+      gradientToPack.setXY(gradientToExtract);
       gradientToPack.changeFrame(stepDirectionFrames.get(stanceSide));
    }
 
