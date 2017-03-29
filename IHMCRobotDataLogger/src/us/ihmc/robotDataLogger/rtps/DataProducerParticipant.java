@@ -16,6 +16,7 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.attributes.DurabilityKind;
 import us.ihmc.pubsub.attributes.HistoryQosPolicy.HistoryQosPolicyKind;
 import us.ihmc.pubsub.attributes.ParticipantAttributes;
+import us.ihmc.pubsub.attributes.PublishModeKind;
 import us.ihmc.pubsub.attributes.PublisherAttributes;
 import us.ihmc.pubsub.attributes.ReliabilityKind;
 import us.ihmc.pubsub.attributes.SubscriberAttributes;
@@ -38,7 +39,6 @@ import us.ihmc.robotDataLogger.TimestampPubSubType;
 import us.ihmc.robotDataLogger.VariableChangeRequest;
 import us.ihmc.robotDataLogger.VariableChangeRequestPubSubType;
 import us.ihmc.robotDataLogger.listeners.VariableChangedListener;
-import us.ihmc.rtps.impl.fastRTPS.Time_t;
 import us.ihmc.rtps.impl.fastRTPS.WriterTimes;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -50,25 +50,26 @@ import us.ihmc.tools.thread.ThreadTools;
  */
 public class DataProducerParticipant
 {
-   private final String name;
    private final Domain domain = DomainFactory.getDomain(PubSubImplementation.FAST_RTPS);
    private final Participant participant;
-   private final Timestamp timestamp = new Timestamp();
-   private Publisher timestampPublisher;
    private final String guidString;
-   private boolean activated = false;
-   
-   private Handshake handshake;
-   private LogModelProvider logModelProvider;
+   private volatile boolean activated = false;
+
    private ArrayList<CameraAnnouncement> cameras = new ArrayList<>();
    private InetAddress dataAddress;
    private int dataPort;
    private boolean log = false;
 
-   private VariableChangedListener dataProducerListener = null;
-   
-   
-   
+   private Handshake handshake;
+   private final Announcement announcement = new Announcement();
+   private final Timestamp timestamp = new Timestamp();
+
+   private final Publisher timestampPublisher;
+   private final Publisher announcementPublisher;
+   private final Publisher handshakePublisher;
+
+   private final VariableChangedListener dataProducerListener;
+
    private class VariableChangeSubscriberListener implements SubscriberListener
    {
 
@@ -79,9 +80,9 @@ public class DataProducerParticipant
          SampleInfo info = new SampleInfo();
          try
          {
-            if(subscriber.takeNextData(msg, info))
+            if (subscriber.takeNextData(msg, info))
             {
-               if(dataProducerListener != null)
+               if (dataProducerListener != null && activated)
                {
                   dataProducerListener.changeVariable(msg.getVariableID(), msg.getRequestedValue());
                }
@@ -96,24 +97,79 @@ public class DataProducerParticipant
       @Override
       public void onSubscriptionMatched(Subscriber subscriber, MatchingInfo info)
       {
-         
+
       }
-      
+
    }
-   
-   
-   public DataProducerParticipant(String name) throws IOException
+
+   public DataProducerParticipant(String name, LogModelProvider logModelProvider, VariableChangedListener variableChangedListener) throws IOException
    {
-      this.name = name;
-      
+      announcement.setName(name);
+      this.dataProducerListener = variableChangedListener;
+
       domain.setLogLevel(LogLevel.ERROR);
       ParticipantAttributes att = domain.createParticipantAttributes(LogParticipantSettings.domain, name);
       participant = domain.createParticipant(att);
 
       guidString = LogParticipantTools.createGuidString(participant.getGuid());
-      
+
+      String partition = getUniquePartition();
+      handshakePublisher = createPersistentPublisher(partition, LogParticipantSettings.handshakeTopic, new HandshakePubSubType());
+      announcementPublisher = createPersistentPublisher(LogParticipantSettings.partition, LogParticipantSettings.annoucementTopic,
+                                                        new AnnouncementPubSubType());
+
+      if (logModelProvider != null)
+      {
+         byte[] model = logModelProvider.getModel();
+         ByteBufferPubSubType modelFilePubSubType = new ByteBufferPubSubType(LogParticipantSettings.modelFileTypeName, model.length);
+         announcement.getModelFileDescription().setHasModel(true);
+         announcement.getModelFileDescription().setName(logModelProvider.getModelName());
+         announcement.getModelFileDescription().setModelLoaderClass(logModelProvider.getLoader().getCanonicalName());
+         announcement.getModelFileDescription().setModelFileSize(model.length);
+         for (String resourceDirectory : logModelProvider.getResourceDirectories())
+         {
+            announcement.getModelFileDescription().getResourceDirectories().add(resourceDirectory);
+         }
+
+         ByteBuffer modelBuffer = ByteBuffer.wrap(model);
+         Publisher logModelFilePublisher = createPersistentPublisher(partition, LogParticipantSettings.modelFileTopic, modelFilePubSubType);
+         logModelFilePublisher.write(modelBuffer);
+
+         byte[] resourceZip = logModelProvider.getResourceZip();
+         if (resourceZip != null && resourceZip.length > 0)
+         {
+            ByteBufferPubSubType resourcesPubSubType = new ByteBufferPubSubType(LogParticipantSettings.resourceBundleTypeName, resourceZip.length);
+            ByteBuffer resourcesBuffer = ByteBuffer.wrap(resourceZip);
+            Publisher resourcesPublisher = createPersistentPublisher(partition, LogParticipantSettings.resourceBundleTopic, resourcesPubSubType);
+            resourcesPublisher.write(resourcesBuffer);
+
+            announcement.getModelFileDescription().setHasResourceZip(true);
+            announcement.getModelFileDescription().setResourceZipSize(resourceZip.length);
+
+         }
+      }
+      else
+      {
+         announcement.getModelFileDescription().setHasModel(false);
+      }
+
+      TimestampPubSubType timestampPubSubType = new TimestampPubSubType();
+      PublisherAttributes timestampPublisherAttributes = domain.createPublisherAttributes(participant, timestampPubSubType,
+                                                                                          LogParticipantSettings.timestampTopic, ReliabilityKind.BEST_EFFORT,
+                                                                                          partition);
+      timestampPublisher = domain.createPublisher(participant, timestampPublisherAttributes);
+
+      if (dataProducerListener != null)
+      {
+         VariableChangeRequestPubSubType variableChangeRequestPubSubType = new VariableChangeRequestPubSubType();
+         SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, variableChangeRequestPubSubType,
+                                                                                       LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE,
+                                                                                       partition);
+         subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
+         domain.createSubscriber(participant, subscriberAttributes, new VariableChangeSubscriberListener());
+      }
    }
-   
+
    /**
     * Deactivate the data producer. 
     * 
@@ -159,19 +215,7 @@ public class DataProducerParticipant
    {
       return this.dataPort;
    }
-   
-   /**
-    * Add a callback listener for variable change requests
-    * 
-    * Required
-    * 
-    * @param listener
-    */
-   public void setDataProducerListener(VariableChangedListener listener)
-   {
-      this.dataProducerListener = listener;
-   }
-   
+
    /**
     * Set the handshake data
     * 
@@ -189,39 +233,30 @@ public class DataProducerParticipant
       return LogParticipantSettings.partition + LogParticipantSettings.namespaceSeperator + guidString;
    }
 
-   private <T> void publishPersistentData(String partition, String topicName, TopicDataType<T> topicDataType, T data) throws IOException
+   private <T> Publisher createPersistentPublisher(String partition, String topicName, TopicDataType<T> topicDataType) throws IOException
    {
       PublisherAttributes publisherAttributes = domain.createPublisherAttributes(participant, topicDataType, topicName, ReliabilityKind.RELIABLE, partition);
-      
+
       publisherAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
       publisherAttributes.getQos().setDurabilityKind(DurabilityKind.TRANSIENT_LOCAL_DURABILITY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setKind(HistoryQosPolicyKind.KEEP_LAST_HISTORY_QOS);
       publisherAttributes.getTopic().getHistoryQos().setDepth(1);
+
       WriterTimes times = publisherAttributes.getTimes();
       times.getHeartbeatPeriod().setSeconds(0);
       times.getHeartbeatPeriod().setFraction(4294967 * 100);
-      
-//      publisherAttributes.getThroughputController().setBytesPerPeriod(625000);
-//      publisherAttributes.getThroughputController().setPeriodMillisecs(100);
-      
+
+      if (publisherAttributes.getQos().getPublishMode() == PublishModeKind.ASYNCHRONOUS_PUBLISH_MODE)
+      {
+         publisherAttributes.getThroughputController().setBytesPerPeriod(65000);
+         publisherAttributes.getThroughputController().setPeriodMillisecs(1);
+      }
+
       PublisherAttributes att = publisherAttributes;
-      Publisher publisher = domain.createPublisher(participant, att);
-      publisher.write(data);
+      return domain.createPublisher(participant, att);
+
    }
 
-   /**
-    * Set a model provider for this logger
-    * 
-    * Optional
-    * 
-    * @param provider
-    * @throws IOException
-    */
-   public void setModelFileProvider(LogModelProvider provider)
-   {
-      this.logModelProvider = provider;
-   }
-   
    /** 
     * Add cameras to log 
     * 
@@ -238,94 +273,42 @@ public class DataProducerParticipant
       cameraAnnouncement.setIdentifier(cameraId);
       cameras.add(cameraAnnouncement);
    }
-   
-   
 
    /**
     * Activate the producer. This will publish the model, handshake and logger announcement to the logger dds network
     * 
     * @throws IOException
     */
-   public void activate() throws IOException
+   public void announce() throws IOException
    {
       if (activated)
       {
          throw new IOException("This participant is already activated.");
       }
-      if(dataAddress == null || dataPort < 1024)
+      if (dataAddress == null || dataPort < 1024)
       {
          throw new RuntimeException("No data address and valid port (>=1024) provided");
       }
-      if(handshake == null)
+      if (handshake == null)
       {
          throw new RuntimeException("No handshake provided");
       }
-      
-      String partition = getUniquePartition();
 
-      AnnouncementPubSubType announcementPubSubType = new AnnouncementPubSubType();
-      Announcement announcement = new Announcement();
-      
-      announcement.setName(name);
       announcement.setHostName(InetAddress.getLocalHost().getHostName());
       announcement.setIdentifier(guidString);
       System.arraycopy(dataAddress.getAddress(), 0, announcement.getDataIP(), 0, 4);
       announcement.setDataPort((short) dataPort);
       announcement.setLog(log);
 
-      HandshakePubSubType handshakePubSubType = new HandshakePubSubType();
-      publishPersistentData(partition, LogParticipantSettings.handshakeTopic, handshakePubSubType, handshake);
-      
-      if (logModelProvider != null)
-      {
-         ByteBufferPubSubType modelFilePubSubType = new ByteBufferPubSubType(LogParticipantSettings.modelFileTypeName, logModelProvider.getModel().length);
-         announcement.getModelFileDescription().setHasModel(true);
-         announcement.getModelFileDescription().setName(logModelProvider.getModelName());
-         announcement.getModelFileDescription().setModelLoaderClass(logModelProvider.getLoader().getCanonicalName());
-         announcement.getModelFileDescription().setModelFileSize(logModelProvider.getModel().length);
-         for (String resourceDirectory : logModelProvider.getResourceDirectories())
-         {
-            announcement.getModelFileDescription().getResourceDirectories().add(resourceDirectory);
-         }
-
-         ByteBuffer modelBuffer = ByteBuffer.wrap(logModelProvider.getModel());
-         publishPersistentData(partition, LogParticipantSettings.modelFileTopic, modelFilePubSubType, modelBuffer);
-
-         if (logModelProvider.getResourceZip() != null && logModelProvider.getResourceZip().length > 0)
-         {
-            ByteBufferPubSubType resourcesPubSubType = new ByteBufferPubSubType(LogParticipantSettings.resourceBundleTypeName, logModelProvider.getResourceZip().length);
-            ByteBuffer resourceBuffer = ByteBuffer.wrap(logModelProvider.getResourceZip());
-            publishPersistentData(partition, LogParticipantSettings.resourceBundleTopic, resourcesPubSubType, resourceBuffer);
-
-            announcement.getModelFileDescription().setHasResourceZip(true);
-            announcement.getModelFileDescription().setResourceZipSize(logModelProvider.getResourceZip().length);
-         }
-      }
-      else
-      {
-         announcement.getModelFileDescription().setHasModel(false);
-      }
-      
-      for(CameraAnnouncement camera : cameras)
+      for (CameraAnnouncement camera : cameras)
       {
          announcement.getCameras().add().set(camera);
       }
-      
-      if(dataProducerListener != null)
-      {
-         VariableChangeRequestPubSubType variableChangeRequestPubSubType = new VariableChangeRequestPubSubType();
-         domain.registerType(participant, variableChangeRequestPubSubType);
-         SubscriberAttributes subscriberAttributes = domain.createSubscriberAttributes(participant, variableChangeRequestPubSubType, LogParticipantSettings.variableChangeTopic, ReliabilityKind.RELIABLE, partition);
-         subscriberAttributes.getQos().setReliabilityKind(ReliabilityKind.RELIABLE);
-         domain.createSubscriber(participant, subscriberAttributes, new VariableChangeSubscriberListener());
 
-      }
+      handshakePublisher.write(handshake);
+      announcementPublisher.write(announcement);
       
-      TimestampPubSubType timestampPubSubType = new TimestampPubSubType();
-      PublisherAttributes timestampPublisherAttributes = domain.createPublisherAttributes(participant, timestampPubSubType, LogParticipantSettings.timestampTopic, ReliabilityKind.BEST_EFFORT, partition);
-      timestampPublisher = domain.createPublisher(participant, timestampPublisherAttributes);
-      
-      publishPersistentData(LogParticipantSettings.partition, LogParticipantSettings.annoucementTopic, announcementPubSubType, announcement);
+      activated = true;
 
    }
 
@@ -339,7 +322,6 @@ public class DataProducerParticipant
       this.log = log;
    }
 
-   
    /** 
     * Publisher a timestamp update
     * @param timestamp
@@ -350,30 +332,27 @@ public class DataProducerParticipant
       this.timestamp.setTimestamp(timestamp);
       timestampPublisher.write(this.timestamp);
    }
-   
+
    public static void main(String[] args) throws IOException
    {
-      DataProducerParticipant participant = new DataProducerParticipant("testParticipant");
       InputStream testStream = DataProducerParticipant.class.getClassLoader().getResourceAsStream("Models/unitBox.sdf");
       String[] resourcesDirectories = {"Models"};
       LogModelProvider logModelProvider = new SDFLogModelProvider("testModel", testStream, resourcesDirectories);
-
-      
-      participant.setDataAddress(Inet4Address.getLocalHost());
-      participant.setPort(2048);
-      participant.setModelFileProvider(logModelProvider);
-      participant.setHandshake(new Handshake());
-      participant.setDataProducerListener(new VariableChangedListener()
+      DataProducerParticipant participant = new DataProducerParticipant("testParticipant", logModelProvider, new VariableChangedListener()
       {
-         
+
          @Override
          public void changeVariable(int id, double newValue)
          {
             System.out.println("Required change for " + id + " to " + newValue);
          }
       });
-      
-      participant.activate();
+
+      participant.setDataAddress(Inet4Address.getLocalHost());
+      participant.setPort(2048);
+      participant.setHandshake(new Handshake());
+
+      participant.announce();
 
       ThreadTools.sleepForever();
    }

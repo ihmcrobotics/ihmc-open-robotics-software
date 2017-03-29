@@ -279,6 +279,11 @@ public class YoVariableHandShakeBuilder
          System.err.println(e.getMessage());
       }
 
+      if(obj.getVariables().length > objectMessage.getYoVariableIndex().capacity())
+      {
+         throw new RuntimeException(obj.getName() + " has too many variables. It has " + obj.getVariables().length + " variables");
+      }
+      
       for (YoVariable<?> yoVar : obj.getVariables())
       {
          if (!this.yoVariableIndices.containsKey(yoVar))

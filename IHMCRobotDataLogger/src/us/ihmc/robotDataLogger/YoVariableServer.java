@@ -89,11 +89,9 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       
       try
       {
-         this.dataProducerParticipant = new DataProducerParticipant(mainClazz);
+         this.dataProducerParticipant = new DataProducerParticipant(mainClazz, logModelProvider, this);
          dataProducerParticipant.setDataAddress(bindAddress);
          dataProducerParticipant.setPort(getRandomPort());
-         dataProducerParticipant.setDataProducerListener(this);
-         dataProducerParticipant.setModelFileProvider(logModelProvider);
          dataProducerParticipant.setLog(logSettings.isLog());
          addCameras(logSettings);
          
@@ -175,7 +173,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       try
       {
          dataProducerParticipant.setHandshake(handshakeBuilder.getHandShake());
-         dataProducerParticipant.activate();
+         dataProducerParticipant.announce();
       }
       catch (IOException e)
       {
