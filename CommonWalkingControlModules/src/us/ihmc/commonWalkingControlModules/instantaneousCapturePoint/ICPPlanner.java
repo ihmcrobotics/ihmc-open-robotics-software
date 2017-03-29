@@ -1254,7 +1254,7 @@ public class ICPPlanner
    public void setTransferDuration(int stepNumber, double duration)
    {
       int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      if (stepNumber < numberOfFootstepRegistered)
+      if (stepNumber < numberOfFootstepRegistered + 1)
          transferDurations.get(stepNumber).set(duration);
    }
 
@@ -1267,20 +1267,12 @@ public class ICPPlanner
 
    public double getTransferDuration(int stepNumber)
    {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      if (stepNumber < numberOfFootstepRegistered)
-         return transferDurations.get(stepNumber).getDoubleValue();
-      else
-         return 0.0;
+      return transferDurations.get(stepNumber).getDoubleValue();
    }
 
    public double getSwingDuration(int stepNumber)
    {
-      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
-      if (stepNumber < numberOfFootstepRegistered)
-         return swingDurations.get(stepNumber).getDoubleValue();
-      else
-         return 0.0;
+      return swingDurations.get(stepNumber).getDoubleValue();
    }
 
    /**
@@ -1293,7 +1285,7 @@ public class ICPPlanner
     */
    public void setFinalTransferDuration(double duration)
    {
-      finalTransferDuration.set(duration);
+      defaultFinalTransferDuration.set(duration);
    }
 
    public void setFinalTransferDurationAlpha(double durationAlpha)

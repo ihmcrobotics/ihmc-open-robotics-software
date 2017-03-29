@@ -30,12 +30,13 @@ import java.util.ArrayList;
 
 public class DynamicReachabilityCalculator
 {
-   //// TODO: 3/21/17 cleanup
    //// TODO: 3/21/17 disable checks on swing leg bending if the upcoming step is a step up
    //// TODO: 3/21/17 disable checks on stance leg bending if the upcoming step is a step down 
    //// TODO: 3/21/17 add in the ability to angle the hip forward for reachability
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
    //// TODO: 3/25/17 explore for step up and step down for sphere intersection
+   //// TODO: 3/29/17 examine the location of required adjustment by setting it at the actual conservative minmimum (center of the ellipse)
+              // rather than closest point on the ellipse.
 
    private static final boolean USE_HIGHER_ORDER_STEPS = false;
    private static final boolean VISUALIZE = true;
@@ -64,6 +65,7 @@ public class DynamicReachabilityCalculator
    private final BooleanYoVariable reachableWRTStanceFoot = new BooleanYoVariable("reachableWRTStanceFoot", registry);
    private final BooleanYoVariable reachableWRTFootstep = new BooleanYoVariable("reachableWRTFootstep", registry);
    private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
+   private final BooleanYoVariable isModifiedStepReachable = new BooleanYoVariable("isModifiedStepReachable", registry);
 
    private final IntegerYoVariable numberOfAdjustments = new IntegerYoVariable("numberOfAdjustments", registry);
    private final IntegerYoVariable numberOfForwardAdjustments = new IntegerYoVariable("numberOfForwardAdjustments", registry);
@@ -129,13 +131,11 @@ public class DynamicReachabilityCalculator
    private final FrameOrientation footstepOrientation = new FrameOrientation();
 
    private final FrameVector tempGradient = new FrameVector();
+   private final FrameVector tempVector = new FrameVector();
 
    private final FramePoint tempPoint = new FramePoint();
    private final FramePoint2d tempPoint2d = new FramePoint2d();
    private final FramePoint2d tempFinalCoM = new FramePoint2d();
-
-   private final FrameVector tempVector = new FrameVector();
-   private final FrameVector2d tempVector2d = new FrameVector2d();
 
    private final double thighLength;
    private final double shinLength;
@@ -277,6 +277,9 @@ public class DynamicReachabilityCalculator
       RobotSide stanceSide = swingSide.getOppositeSide();
 
       icpPlanner.getFinalDesiredCenterOfMassPosition(tempFinalCoM);
+      if (tempFinalCoM.containsNaN())
+         throw new RuntimeException("Final CoM Contains NaN!");
+
       predictedCoMPosition.setToZero(worldFrame);
       predictedCoMPosition.setXY(tempFinalCoM);
 
@@ -454,7 +457,8 @@ public class DynamicReachabilityCalculator
    {
       this.nextFootstep = nextFootstep;
    }
-   
+
+   private boolean caughtError = false;
    /**
     * Checks whether the current footstep is reachable given the desired footstep timing. If it is, does nothing. If it is not, modifies the
     * ICP Plan timing to make sure that is is.
@@ -463,7 +467,12 @@ public class DynamicReachabilityCalculator
    {
       reset();
 
-      boolean isStepReachable = checkReachabilityOfStep();
+      boolean isStepReachable = checkReachabilityInternal();
+
+      this.reachableWRTStanceFoot.set(stanceHeightLine.length() > 0.0);
+      this.reachableWRTFootstep.set(stepHeightLine.length() > 0.0);
+      this.isStepReachable.set(isStepReachable);
+      this.isModifiedStepReachable.set(isStepReachable);
 
       while (!isStepReachable)
       {
@@ -482,12 +491,17 @@ public class DynamicReachabilityCalculator
          try
          {
             solver.compute();
+            caughtError = false;
          }
          catch (NoConvergenceException e)
          {
             e.printStackTrace();
             PrintTools.warn(this, "Only showing the stack trace of the first " + e.getClass().getSimpleName() + ". This may be happening more than once.");
+            caughtError = true;
          }
+
+         if (caughtError)
+            break;
 
          extractSolution(numberOfHigherSteps);
          applyAdjustments(numberOfHigherSteps);
@@ -498,7 +512,8 @@ public class DynamicReachabilityCalculator
          else
             icpPlanner.initializeForSingleSupport(initialTime);
 
-         isStepReachable = checkReachabilityOfStep();
+         isStepReachable = checkReachabilityInternal();
+         isModifiedStepReachable.set(isStepReachable);
          numberOfAdjustments.increment();
       }
    }
@@ -526,6 +541,17 @@ public class DynamicReachabilityCalculator
     */
    public boolean checkReachabilityOfStep()
    {
+      boolean isStepReachable = checkReachabilityInternal();
+
+      this.reachableWRTStanceFoot.set(stanceHeightLine.length() > 0.0);
+      this.reachableWRTFootstep.set(stepHeightLine.length() > 0.0);
+      this.isStepReachable.set(isStepReachable);
+
+      return isStepReachable;
+   }
+
+   private boolean checkReachabilityInternal()
+   {
       RobotSide supportSide = nextFootstep.getRobotSide().getOppositeSide();
 
       updateFrames(nextFootstep);
@@ -534,11 +560,7 @@ public class DynamicReachabilityCalculator
       computeHeightLineFromStance(supportSide);
       computeHeightLineFromStep(nextFootstep);
 
-      this.reachableWRTStanceFoot.set(stanceHeightLine.length() > 0.0);
-      this.reachableWRTFootstep.set(stepHeightLine.length() > 0.0);
-      this.isStepReachable.set(stanceHeightLine.isOverlappingExclusive(stepHeightLine));
-
-      return isStepReachable.getBooleanValue();
+      return stanceHeightLine.isOverlappingExclusive(stepHeightLine);
    }
 
 
@@ -860,6 +882,9 @@ public class DynamicReachabilityCalculator
 
       // reset everything to normal
       applyTransferVariation(stepNumber, nextTransferDuration, nextTransferDurationAlpha, adjustedCoMPosition);
+
+      if (nextInitialTransferGradient.containsNaN() || nextEndTransferGradient.containsNaN())
+         throw new RuntimeException("Next Transfer Gradients Contains NaN.");
    }
 
    private void computeHigherTransferGradient(int stepIndex)
