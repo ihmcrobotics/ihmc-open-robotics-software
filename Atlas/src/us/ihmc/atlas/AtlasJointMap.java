@@ -45,7 +45,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.NewRobotPhysicalProperties;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -62,7 +61,6 @@ import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
-import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasJointMap implements DRCRobotJointMap
 {
@@ -108,7 +106,6 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<>(SpineJointName.class);
    private final EnumMap<NeckJointName, String> neckJointStrings = new EnumMap<>(NeckJointName.class);
 
-   private final AtlasContactPointParameters contactPointParameters;
    private final AtlasRobotVersion atlasVersion;
    private final NewRobotPhysicalProperties atlasPhysicalProperties;
 
@@ -118,11 +115,6 @@ public class AtlasJointMap implements DRCRobotJointMap
    private final String[] jointNamesBeforeFeet = new String[2];
 
    public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties)
-   {
-      this(atlasVersion, atlasPhysicalProperties, null);
-   }
-
-   public AtlasJointMap(AtlasRobotVersion atlasVersion, NewRobotPhysicalProperties atlasPhysicalProperties, FootContactPoints simulationContactPoints)
    {
       this.atlasVersion = atlasVersion;
       this.atlasPhysicalProperties = atlasPhysicalProperties;
@@ -197,9 +189,6 @@ public class AtlasJointMap implements DRCRobotJointMap
          neckJointStrings.put(neckJointNames.get(neckJointString), neckJointString);
          jointRoles.put(neckJointString, JointRole.NECK);
       }
-
-      boolean createFootContactPoints = true;
-      contactPointParameters = new AtlasContactPointParameters(this, atlasVersion, createFootContactPoints, simulationContactPoints);
 
       for (RobotSide robtSide : RobotSide.values)
       {
@@ -332,18 +321,6 @@ public class AtlasJointMap implements DRCRobotJointMap
    public String getJointBeforeHandName(RobotSide robotSide)
    {
       return nameOfJointsBeforeHands.get(robotSide);
-   }
-
-   @Override
-   public AtlasContactPointParameters getContactPointParameters()
-   {
-      return contactPointParameters;
-   }
-
-   @Override
-   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
-   {
-      return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
    @Override

@@ -300,6 +300,11 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), fullRobotModel.getElevator());
 
       SideDependentList<ContactableFoot> feet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
+      List<ContactablePlaneBody> addidionalContacts = contactableBodiesFactory.createAdditionalContactPoints(fullRobotModel);
+      List<ContactablePlaneBody> contactablePlaneBodies = new ArrayList<>();
+      for (RobotSide robotSide : RobotSide.values)
+         contactablePlaneBodies.add(feet.get(robotSide));
+      contactablePlaneBodies.addAll(addidionalContacts);
 
       double gravityZ = Math.abs(gravity);
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
@@ -310,20 +315,14 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
-      // Setup the different ContactablePlaneBodies ///////////////////////////////////////////////
-
-      RigidBody rootBody = fullRobotModel.getRootJoint().getSuccessor();
-      SideDependentList<ContactablePlaneBody> handContactableBodies = contactableBodiesFactory.createHandContactableBodies(rootBody);
-
-      /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder,
-                                                                 wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, handContactableBodies,
-                                                                 controlDT, updatables, yoGraphicsListRegistry, jointsToIgnore);
+            wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry,
+            jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
@@ -356,7 +355,6 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       // Setup the WholeBodyInverseDynamicsControlCore ////////////////////////////////////////////
       RigidBody[] controlledBodies = {fullRobotModel.getPelvis(), fullRobotModel.getFoot(RobotSide.LEFT), fullRobotModel.getFoot(RobotSide.RIGHT)};
       InverseDynamicsJoint[] jointsToOptimizeFor = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel, jointsToIgnore);
-      List<? extends ContactablePlaneBody> contactablePlaneBodies = controllerToolbox.getContactablePlaneBodyList();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, controlledBodies, jointsToOptimizeFor, momentumOptimizationSettings,
                                                                             jointPrivilegedConfigurationParameters, referenceFrames, controlDT, gravityZ,
                                                                             geometricJacobianHolder, twistCalculator, contactablePlaneBodies,

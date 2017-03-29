@@ -1,6 +1,8 @@
 package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -22,6 +24,8 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
    private final FrameVector jointAngularAcceleration;
    private final FrameVector jointAngularAccelerationDesired;
    private FrameVector jointTorque;
+
+   private List<Twist> unitTwists;
 
    public SphericalJoint(String name, RigidBody predecessor, ReferenceFrame beforeJointFrame)
    {
@@ -225,8 +229,18 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
          previousFrame = frame;
       }
 
-      this.motionSubspace = new GeometricJacobian(this, unitTwistsInBodyFrame, afterJointFrame);
+      unitTwists = Collections.unmodifiableList(unitTwistsInBodyFrame);
+
+      this.motionSubspace = new GeometricJacobian(this, afterJointFrame);
       this.motionSubspace.compute();
+   }
+
+   @Override
+   public void getUnitTwist(int dofIndex, Twist unitTwistToPack)
+   {
+      if (dofIndex < 0 || dofIndex >= getDegreesOfFreedom())
+         throw new ArrayIndexOutOfBoundsException("Illegal index: " + dofIndex + ", was expecting dofIndex in [0, " + getDegreesOfFreedom() + "[.");
+      unitTwistToPack.set(unitTwists.get(dofIndex));
    }
 
    @Override
@@ -250,13 +264,12 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
       jointAngularVelocity.setZ(matrix.get(rowStart + 2, 0));
    }
 
-
    @Override
    public int getConfigurationMatrixSize()
    {
       return RotationTools.QUATERNION_SIZE;
    }
-   
+
    private SphericalJoint checkAndGetAsSphericalJoint(InverseDynamicsJoint originalJoint)
    {
       if (originalJoint instanceof SphericalJoint)
@@ -268,21 +281,21 @@ public class SphericalJoint extends AbstractInverseDynamicsJoint
          throw new RuntimeException("Cannot set " + getClass().getSimpleName() + " to " + originalJoint.getClass().getSimpleName());
       }
    }
-   
+
    @Override
    public void setJointPositionVelocityAndAcceleration(InverseDynamicsJoint originalJoint)
    {
-         SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
-         setRotation(originalSphericalJoint.jointRotation);
-         jointAngularVelocity.set(originalSphericalJoint.jointAngularVelocity.getVector());
-         jointAngularAcceleration.set(originalSphericalJoint.jointAngularAcceleration.getVector());
+      SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
+      setRotation(originalSphericalJoint.jointRotation);
+      jointAngularVelocity.set(originalSphericalJoint.jointAngularVelocity.getVector());
+      jointAngularAcceleration.set(originalSphericalJoint.jointAngularAcceleration.getVector());
    }
 
    @Override
    public void setQddDesired(InverseDynamicsJoint originalJoint)
    {
       SphericalJoint originalSphericalJoint = checkAndGetAsSphericalJoint(originalJoint);
-      jointAngularAccelerationDesired.set(originalSphericalJoint.jointAngularAccelerationDesired.getVector()); 
+      jointAngularAccelerationDesired.set(originalSphericalJoint.jointAngularAccelerationDesired.getVector());
    }
 
    @Override

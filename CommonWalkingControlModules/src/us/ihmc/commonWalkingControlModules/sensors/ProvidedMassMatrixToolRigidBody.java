@@ -11,7 +11,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -25,7 +24,6 @@ import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.RigidBodyInertia;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SixDoFJoint;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -52,7 +50,6 @@ public class ProvidedMassMatrixToolRigidBody
 
    private final DoubleYoVariable objectMass;
 
-   private final FullRobotModel fullRobotModel;
    private final double gravity;
    private InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SixDoFJoint toolJoint;
@@ -67,7 +64,6 @@ public class ProvidedMassMatrixToolRigidBody
    {
       String name = robotSide.getCamelCaseNameForStartOfExpression() + "Tool";
       this.registry = new YoVariableRegistry(name);
-      this.fullRobotModel = fullRobotModel;
       this.gravity = gravity;
 
       this.handFixedFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
@@ -109,18 +105,14 @@ public class ProvidedMassMatrixToolRigidBody
       hasBeenInitialized = true;
 
       TwistCalculator twistCalculator = new TwistCalculator(ReferenceFrame.getWorldFrame(), toolBody);
-
-      boolean doVelocityTerms = true;
-      boolean useDesireds = false;
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, ReferenceFrame.getWorldFrame(),
-            ScrewTools.createGravitationalSpatialAcceleration(fullRobotModel.getElevator(), gravity), twistCalculator, doVelocityTerms, useDesireds);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(toolBody, twistCalculator, gravity, false);
 
       ArrayList<InverseDynamicsJoint> jointsToIgnore = new ArrayList<InverseDynamicsJoint>();
       jointsToIgnore.addAll(twistCalculator.getRootBody().getChildrenJoints());
       jointsToIgnore.remove(toolJoint);
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(ReferenceFrame.getWorldFrame(), new LinkedHashMap<RigidBody, Wrench>(), jointsToIgnore,
-            spatialAccelerationCalculator, twistCalculator, doVelocityTerms);
+                                                                spatialAccelerationCalculator, twistCalculator);
    }
 
    private final FramePoint toolFramePoint = new FramePoint();

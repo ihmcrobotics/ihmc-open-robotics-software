@@ -170,18 +170,11 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       tempVector.cross(twistOfCurrentWithRespectToNew.angularPart, twistOfBodyWithRespectToBase.angularPart); // omega_1 x omega_2
       angularPart.add(tempVector);
 
-      // second step: essentially premultiply the Adjoint operator, Ad_H = [R, 0; tilde(p) * R, R] (Matlab notation), but without creating a 6x6 matrix
-      expressedInFrame.getTransformToDesiredFrame(tempTransform, newReferenceFrame);
-      tempTransform.getTranslation(tempVector); // translational part of the transform
-
-      // transform the velocities so that they are expressed in newReferenceFrame
-      tempTransform.transform(angularPart); // only performs a rotation, since we're passing in a vector
-      tempTransform.transform(linearPart);
-      tempVector.cross(tempVector, angularPart);
-      linearPart.add(tempVector);
-
-      // change this spatial motion vector's expressedInFrame to newReferenceFrame
-      this.expressedInFrame = newReferenceFrame;
+      /*
+       * The relative motion being dealt with the acceleration can be now transformed as if there
+       * was no relative motion.
+       */
+      changeFrameNoRelativeMotion(newReferenceFrame);
    }
 
    /**
@@ -201,7 +194,7 @@ public class SpatialAccelerationVector extends SpatialMotionVector
       expressedInFrame.getTransformToDesiredFrame(tempTransform, newReferenceFrame);
       tempTransform.getTranslation(tempVector); // translational part of the transform
 
-      // transform the velocities so that they are expressed in newReferenceFrame
+      // transform the accelerations so that they are expressed in newReferenceFrame
       tempTransform.transform(angularPart); // only performs a rotation, since we're passing in a vector
       tempTransform.transform(linearPart);
       tempVector.cross(tempVector, angularPart);

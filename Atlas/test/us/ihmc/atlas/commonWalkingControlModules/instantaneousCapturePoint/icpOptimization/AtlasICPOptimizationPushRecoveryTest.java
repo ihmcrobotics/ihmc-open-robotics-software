@@ -20,7 +20,7 @@ public class AtlasICPOptimizationPushRecoveryTest extends ICPOptimizationPushRec
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap())
+            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
                public boolean useOptimizationBasedICPController()

@@ -39,7 +39,7 @@ public class DoNothingBehavior extends HighLevelBehavior
       for (RobotSide robotSide : RobotSide.values)
       {
          ContactablePlaneBody contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
-         footContactStates.put(robotSide, controllerToolbox.getContactState(contactableFoot));
+         footContactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
       }
 
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(allRobotJoints.length);
