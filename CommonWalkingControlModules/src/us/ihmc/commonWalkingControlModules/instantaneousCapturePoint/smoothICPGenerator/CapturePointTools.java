@@ -166,6 +166,13 @@ public class CapturePointTools
          YoFramePoint cornerPoint = cornerPointsToPack.get(i);
          YoFramePoint initialCMP = constantCMPs.get(i);
 
+         if (Double.isNaN(stepTime))
+         {
+            cornerPointsToPack.get(i).setToNaN();
+            nextCornerPoint = constantCMPs.get(i);
+            continue;
+         }
+
          cornerPoint.interpolate(initialCMP, nextCornerPoint, exponentialTerm);
 
          nextCornerPoint = cornerPoint;
@@ -208,6 +215,13 @@ public class CapturePointTools
          double nextTransferTime = transferTimes.get(i).getDoubleValue();
          stepTime += (1.0 - doubleSupportSplitFraction) * transferTime;
          stepTime += nextDoubleSupportSplitFraction * nextTransferTime;
+
+         if (Double.isNaN(nextTransferTime))
+         {
+            cornerPointsToPack.get(i).setToNaN();
+            nextCornerPoint = constantCMPs.get(i);
+            continue;
+         }
 
          double exponentialTerm = Math.exp(-omega0 * stepTime);
 
@@ -410,6 +424,14 @@ public class CapturePointTools
          YoFramePoint exitCMP = exitCMPs.get(i);
          YoFramePoint entryCMP = entryCMPs.get(i);
 
+         if (Double.isNaN(nextTransferTime))
+         {
+            nextEntryCornerPoint = entryCMPs.get(i);
+            exitCornerPoint.setToNaN();
+            entryCornerPoint.setToNaN();
+            continue;
+         }
+
          exitCornerPoint.interpolate(exitCMP, nextEntryCornerPoint, exitExponentialTerm);
          entryCornerPoint.interpolate(entryCMP, exitCornerPoint, entryExponentialTerm);
 
@@ -446,8 +468,9 @@ public class CapturePointTools
     *           biped.
     */
    public static void computeDesiredCornerPointsDoubleSupport(List<? extends YoFramePoint> entryCornerPointsToPack,
-         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs, List<DoubleYoVariable> swingTimes,
-         List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions, double omega0)
+         List<? extends YoFramePoint> exitCornerPointsToPack, List<YoFramePoint> entryCMPs, List<YoFramePoint> exitCMPs,
+         List<DoubleYoVariable> swingTimes, List<DoubleYoVariable> transferTimes, List<DoubleYoVariable> swingSplitFractions,
+         List<DoubleYoVariable> transferSplitFractions, double omega0)
    {
       YoFramePoint nextEntryCornerPoint = entryCMPs.get(entryCornerPointsToPack.size());
 
@@ -460,6 +483,14 @@ public class CapturePointTools
          double upcomingSwingTime = swingTimes.get(i - 1).getDoubleValue();
          double transferTime = transferTimes.get(i - 1).getDoubleValue();
          double nextTransferTime = transferTimes.get(i).getDoubleValue();
+
+         if (Double.isNaN(nextTransferTime) || Double.isNaN(nextTransferSplitFraction))
+         {
+            exitCornerPointsToPack.get(i).setToNaN();
+            entryCornerPointsToPack.get(i).setToNaN();
+            nextEntryCornerPoint = entryCMPs.get(i);
+            continue;
+         }
 
          double timeSpentOnEntryCMP = upcomingSwingTime * swingSplitFraction + transferTime * (1.0 - upcomingTransferSplitFraction);
          double timeSpentOnExitCMP = upcomingSwingTime * (1.0 - swingSplitFraction) + nextTransferTime * nextTransferSplitFraction;
