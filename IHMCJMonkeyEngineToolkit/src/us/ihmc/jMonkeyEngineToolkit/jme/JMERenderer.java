@@ -125,7 +125,7 @@ public class JMERenderer extends SimpleApplication implements Graphics3DAdapter,
    public static final SkyboxToUse skyboxToUse = SkyboxToUse.BLUE_SKY;
 
    public final static boolean USE_PBO = true;
-   public final static boolean USE_GPU_LIDAR_PARALLEL_SCENE = false; // Disable: this is super slow
+   public static boolean USE_GPU_LIDAR_PARALLEL_SCENE = false; // Disable: this is super slow
    public final static boolean DEBUG_GPU_LIDAR_PARALLEL_SCENE = false;
    private final RenderType renderType;
    public static boolean tickUpdated = false;
