@@ -18,10 +18,8 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
 /**
  * Motion constraint between {@link Link Links} and physics simulation.<p>
  *
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
  * @author Jerry Pratt
  * @version Beta 1.0
  */

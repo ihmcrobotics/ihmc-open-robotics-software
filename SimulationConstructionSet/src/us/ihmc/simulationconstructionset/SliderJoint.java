@@ -8,12 +8,11 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.SliderJointPhysics;
 
 /**
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms.  A translational joint with a single degree of freedom.
  * This joint allows motion up and down the specified joint axis.  This is a fundamental joint type which is currently used in
  * the implementation of cylinder joint.<p>
  * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
  * @author Jerry Pratt
  * @version Beta 1.0
  */

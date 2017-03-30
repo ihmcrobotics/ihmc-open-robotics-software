@@ -217,7 +217,6 @@ import us.ihmc.tools.thread.ThreadTools;
  * <p/>
  * <p>Copyright: Copyright (c) 2005</p>
  * <p/>
- * <p>Company: Yobotics, Inc.</p>
  *
  * @author Jerry Pratt
  * @version 1.0

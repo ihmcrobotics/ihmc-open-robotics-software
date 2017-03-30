@@ -7,10 +7,8 @@ import us.ihmc.simulationconstructionset.SpatialVector;
 import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
 /**
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
  * @author Jerry Pratt
  * @version Beta 1.0
  */
