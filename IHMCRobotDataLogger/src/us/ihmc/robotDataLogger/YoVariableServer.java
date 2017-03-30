@@ -165,7 +165,7 @@ public class YoVariableServer implements RobotVisualizer, TickAndUpdatable, Vari
       }
       
       handshakeBuilder = new YoVariableHandShakeBuilder(mainBodies, dt);
-
+      handshakeBuilder.setSummaryProvider(summaryProvider);
       registerVariablesAndCreateBuffers();
       
       

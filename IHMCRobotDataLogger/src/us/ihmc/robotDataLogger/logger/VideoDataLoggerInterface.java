@@ -8,8 +8,8 @@ import us.ihmc.robotDataLogger.LogProperties;
 
 public abstract class VideoDataLoggerInterface
 {
-   public static final String timestampDataPostfix = "Timestamps.dat";
-   public static final String videoPostfix = "Video.mov";
+   public static final String timestampDataPostfix = "_Timestamps.dat";
+   public static final String videoPostfix = "_Video.mov";
    
    protected final String videoFile;
    protected final String timestampData;
@@ -24,6 +24,7 @@ public abstract class VideoDataLoggerInterface
       newCamera.setVideoFile(videoFilename);
       String timestampDataFilename = description + timestampDataPostfix;
       newCamera.setTimestampFile(timestampDataFilename);
+      newCamera.setName(description);
       
       timestampData = logPath.getAbsolutePath() + File.separator + timestampDataFilename;
       videoFile = logPath.getAbsolutePath() + File.separator + videoFilename;

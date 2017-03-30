@@ -317,4 +317,19 @@ public class YoVariableHandShakeBuilder
       return handshake;
    }
 
+   public void setSummaryProvider(SummaryProvider summaryProvider)
+   {
+      handshake.getSummary().setCreateSummary(summaryProvider.isSummarize());
+      if(summaryProvider.isSummarize())
+      {
+         handshake.getSummary().setSummaryTriggerVariable(summaryProvider.getSummaryTriggerVariable());
+         String[] summarizedVariables = summaryProvider.getSummarizedVariables();
+         for(int i = 0; i < summarizedVariables.length; i++)
+         {
+            String var = summarizedVariables[i];
+            handshake.getSummary().getSummarizedVariables().add(var);
+         }
+      }
+   }
+
 }
