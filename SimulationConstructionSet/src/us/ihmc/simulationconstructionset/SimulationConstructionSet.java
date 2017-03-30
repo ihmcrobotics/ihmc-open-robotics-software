@@ -101,7 +101,7 @@ import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisua
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.simulationconstructionset.util.graphics.YoGraphicCheckBoxMenuItem;
+import us.ihmc.simulationconstructionset.gui.YoGraphicCheckBoxMenuItem;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
 import us.ihmc.tools.thread.ThreadTools;
