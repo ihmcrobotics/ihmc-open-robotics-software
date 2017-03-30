@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.graphics;
+package us.ihmc.simulationconstructionset.gui;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
