@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.gui;
+package us.ihmc.simulationConstructionSetTools.util.gui;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;

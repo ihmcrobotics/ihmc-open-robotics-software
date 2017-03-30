@@ -18,7 +18,7 @@ import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.gui.GUIMessageFrame;
+import us.ihmc.simulationConstructionSetTools.util.gui.GUIMessageFrame;
 import us.ihmc.tools.FormattingTools;
 
 public class BambooTools
