@@ -8,7 +8,7 @@ public enum LogSettings
    VALKYRIE_JSC(true, "ValkyrieJSCGUI"),
    VALKYRIE_NO_CAMERAS(true),
    STEPPR_IHMC(true, "StepprIHMCGUI"),
-   SIMULATION(true, "SimulationGUI"),
+   SIMULATION(false, "SimulationGUI"),
    TEST_LOGGER(true),
    BEHAVIOR(true),
    TOOLBOX(false),
