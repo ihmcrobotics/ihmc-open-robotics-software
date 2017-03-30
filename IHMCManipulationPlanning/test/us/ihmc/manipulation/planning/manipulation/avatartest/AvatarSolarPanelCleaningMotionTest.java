@@ -19,7 +19,6 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.rotationConversion.AxisAngleConversion;
@@ -30,7 +29,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WholeBodyInverseKinematicsBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
@@ -40,13 +38,13 @@ import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPoseValidityTest;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPoseValidityTester;
+import us.ihmc.manipulation.planning.rrttimedomain.RRT1DNodeTimeDomain;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -173,43 +171,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       fullRobotModel = drcBehaviorTestHelper.getControllerFullRobotModel();
       setupKinematicsToolboxModule();
    }
-   
-   @ContinuousIntegrationTest(estimatedDuration = 30.0) 
-   //@Test(timeout = 160000)
-   public void testSolvingForBothHandPoses() throws SimulationExceededMaximumTimeException, IOException
-   {
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      PrintTools.info("a"+drcBehaviorTestHelper.getYoTime());
-      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();
-      setupCamera(scs);
-      drcBehaviorTestHelper.updateRobotModel();
-
-      WholeBodyInverseKinematicsBehavior ik = new WholeBodyInverseKinematicsBehavior(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
-                                                                                     drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                     getRobotModel().createFullRobotModel());
-
-      ReferenceFrame handControlFrameR = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.RIGHT);
-      ReferenceFrame handControlFrameL = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(RobotSide.LEFT);
-
-      FramePose desiredHandPoseR = new FramePose(handControlFrameR);
-      desiredHandPoseR.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseR.translate(0.20, 0.0, 0.0);      
-      ik.setTrajectoryTime(3.0);
-      ik.setDesiredHandPose(RobotSide.RIGHT, desiredHandPoseR);
-      FramePose desiredHandPoseL = new FramePose(handControlFrameL);
-      desiredHandPoseL.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPoseL.translate(0.20, 0.0, 0.0);
-      ik.setTrajectoryTime(3.0);
-      ik.setDesiredHandPose(RobotSide.LEFT, desiredHandPoseL);
-      drcBehaviorTestHelper.dispatchBehavior(ik);
       
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(5.0);
-      assertTrue(success);
-
-   }
-   
    //@Test(timeout = 160000)
    public void testHalfCircleMotion() throws SimulationExceededMaximumTimeException, IOException
    {
@@ -457,7 +419,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
    }
    
-   @Test
+   //@Test
    public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -490,26 +452,16 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       // ***************************************************** //
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();      
       wholeBodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-      
-      toolboxCommunicator.send(wholeBodyTrajectoryMessage);
-      SolarPanelPoseValidityTest solarPanelValidityTest = new SolarPanelPoseValidityTest(solarPanel, kinematicsToolBoxController, wholeBodyTrajectoryMessage);
-      
-      solarPanelValidityTest.getInverseKienamticsModule();
-      
+            
+      SolarPanelPoseValidityTester solarPanelValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
+            
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
       
-      solarPanelValidityTest.getResult();
-
-      for (int i=0;i<solarPanelValidityTest.debugAxis.size();i++)
-      {
-         scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.debugAxis.get(i), 0.25, 0.01));
-      }
+      PrintTools.info("the pose is "+solarPanelValidityTester.isValid());
       
-      scs.addStaticLinkGraphics(solarPanelValidityTest.robotCollisionModel.getCollisionGraphics());
-      
-//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getChest().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
-//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelValidityTest.ikFullRobotModel.getPelvis().getBodyFixedFrame().getTransformToWorldFrame(), 0.4, 0.02));
-      
+      scs.addStaticLinkGraphics(solarPanelValidityTester.getRobotCollisionModel().getCollisionGraphics());
+   
       
       for (int i=0;i<kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints().length;i++)
       {
@@ -530,6 +482,30 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       
       
+
+
+   }
+   
+   @Test
+   public void testRRTTimeDomainTest() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+      setupCamera(scs);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      
+      KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController(); 
+      
+      RRT1DNodeTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      RRT1DNodeTimeDomain nodeOne = new RRT1DNodeTimeDomain(0.1, 10);
+      RRT1DNodeTimeDomain nodeTwo = new RRT1DNodeTimeDomain(-0.1, 20);
+      
+      PrintTools.info("Node One "+nodeOne.getNodeData(0)+" "+nodeOne.getNodeData(1));
+      PrintTools.info("Node One "+nodeOne.isValidNode());      
+      PrintTools.info("Node Two "+nodeTwo.getNodeData(0)+" "+nodeTwo.getNodeData(1));
+      PrintTools.info("Node Two "+nodeTwo.isValidNode());
 
 
    }

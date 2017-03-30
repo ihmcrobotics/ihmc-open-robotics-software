@@ -26,24 +26,24 @@ public class RobotCollisionModel
 
    private SimpleCollisionShapeFactory shapeFactory;
    
-   private RobotBox chestBody;
-   private RobotBox pelvisBody;
+   private CollisionModelBox chestBody;
+   private CollisionModelBox pelvisBody;
    
-   private RobotCapsule rightUpperArm;
-   private RobotCapsule rightLowerArm;
-   private RobotBox rightHand;
+   private CollisionModelCapsule rightUpperArm;
+   private CollisionModelCapsule rightLowerArm;
+   private CollisionModelBox rightHand;
    
-   private RobotCapsule leftUpperArm;
-   private RobotCapsule leftLowerArm;
-   private RobotBox leftHand;
+   private CollisionModelCapsule leftUpperArm;
+   private CollisionModelCapsule leftLowerArm;
+   private CollisionModelBox leftHand;
    
-   private RobotCapsule rightUpperLeg;
-   private RobotCapsule rightLowerLeg; 
-   private RobotBox rightFoot;
+   private CollisionModelCapsule rightUpperLeg;
+   private CollisionModelCapsule rightLowerLeg; 
+   private CollisionModelBox rightFoot;
    
-   private RobotCapsule leftUpperLeg;
-   private RobotCapsule leftLowerLeg;
-   private RobotBox leftFoot;
+   private CollisionModelCapsule leftUpperLeg;
+   private CollisionModelCapsule leftLowerLeg;
+   private CollisionModelBox leftFoot;
    
 
    
@@ -53,39 +53,41 @@ public class RobotCollisionModel
       
       this.shapeFactory = (SimpleCollisionShapeFactory) collisionDetector.getShapeFactory();
       
+      this.getCollisionShape();      
+      this.setCollisionMaskAndGroup();
    }
    
-   public void getCollisionShape()
+   private void getCollisionShape()
    {
       Point3D translationChest = new Point3D(-0.03, 0, -0.12);
-      chestBody = new RobotBox(shapeFactory, fullRobotModel.getChest().getBodyFixedFrame(), translationChest, 0.55, 0.38, 0.5);
+      chestBody = new CollisionModelBox(shapeFactory, fullRobotModel.getChest().getBodyFixedFrame(), translationChest, 0.55, 0.38, 0.5);
       Point3D translationPelvis = new Point3D(-0.0, 0, -0.0);
-      pelvisBody = new RobotBox(shapeFactory, fullRobotModel.getPelvis().getBodyFixedFrame(), translationPelvis, 0.35, 0.35, 0.2);
+      pelvisBody = new CollisionModelBox(shapeFactory, fullRobotModel.getPelvis().getBodyFixedFrame(), translationPelvis, 0.35, 0.35, 0.2);
       
-      rightUpperArm = new RobotCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL), fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL), 0.06);
-      rightLowerArm = new RobotCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL), fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.WRIST_ROLL), 0.06);      
-      Point3D translationRHand = new Point3D(-0.0, 0.03, -0.0);
-      rightHand = new RobotBox(shapeFactory, fullRobotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame(), translationRHand, 0.1, 0.10, 0.1);
+      rightUpperArm = new CollisionModelCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL), fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL), 0.06);
+      rightLowerArm = new CollisionModelCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL), fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.WRIST_ROLL), 0.06);      
+      Point3D translationRHand = new Point3D(-0.0, -0.03, -0.0);
+      rightHand = new CollisionModelBox(shapeFactory, fullRobotModel.getHand(RobotSide.RIGHT).getBodyFixedFrame(), translationRHand, 0.1, 0.10, 0.1);
       
-      leftUpperArm = new RobotCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL), fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL), 0.06);
-      leftLowerArm = new RobotCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL), fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL), 0.06);      
+      leftUpperArm = new CollisionModelCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL), fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL), 0.06);
+      leftLowerArm = new CollisionModelCapsule(shapeFactory, fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.ELBOW_ROLL), fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.WRIST_ROLL), 0.06);      
       Point3D translationLHand = new Point3D(-0.0, 0.03, -0.0);
-      leftHand = new RobotBox(shapeFactory, fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame(), translationLHand, 0.1, 0.1, 0.1);
+      leftHand = new CollisionModelBox(shapeFactory, fullRobotModel.getHand(RobotSide.LEFT).getBodyFixedFrame(), translationLHand, 0.1, 0.1, 0.1);
       
-      rightUpperLeg = new RobotCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH), fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH), 0.06);
-      rightLowerLeg = new RobotCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH), fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH), 0.06);
+      rightUpperLeg = new CollisionModelCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH), fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH), 0.06);
+      rightLowerLeg = new CollisionModelCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH), fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH), 0.06);
       Point3D translationRFoot = new Point3D(0.02, 0, 0.01);
-      rightFoot = new RobotBox(shapeFactory, fullRobotModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame(), translationRFoot, 0.26, 0.135, 0.06);
+      rightFoot = new CollisionModelBox(shapeFactory, fullRobotModel.getFoot(RobotSide.RIGHT).getBodyFixedFrame(), translationRFoot, 0.26, 0.135, 0.06);
       
-      leftUpperLeg = new RobotCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH), fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH), 0.06);
-      leftLowerLeg = new RobotCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH), fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH), 0.06);
+      leftUpperLeg = new CollisionModelCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.HIP_PITCH), fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH), 0.06);
+      leftLowerLeg = new CollisionModelCapsule(shapeFactory, fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH), fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH), 0.06);
       Point3D translationLFoot = new Point3D(0.02, 0, 0.01);
-      leftFoot = new RobotBox(shapeFactory, fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame(), translationLFoot, 0.26, 0.135, 0.06);      
+      leftFoot = new CollisionModelBox(shapeFactory, fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame(), translationLFoot, 0.26, 0.135, 0.06);      
       
       PrintTools.info("CollisionShape Define Finished");
    }
    
-   public void setCollisionMaskAndGroup()
+   private void setCollisionMaskAndGroup()
    {
       PrintTools.info("setCollisionMaskAndGroup Started");
       
@@ -182,13 +184,10 @@ public class RobotCollisionModel
       PrintTools.info("update Finished");
    }
    
-   public void getCollisionResult()
+   public boolean getCollisionResult()
    {       
       collisionDetectionResult.clear();
       collisionDetector.performCollisionDetection(collisionDetectionResult);
-      
-      
-      
       
       if(collisionDetectionResult.getNumberOfCollisions() > 0)
       {
@@ -198,7 +197,9 @@ public class RobotCollisionModel
             
          }
          PrintTools.info("Collid! "+collisionDetectionResult.getNumberOfCollisions());
+         return false;
       }
+      return true;
    }
    
    public ArrayList<Graphics3DObject> getCollisionGraphics()
@@ -223,6 +224,11 @@ public class RobotCollisionModel
       ret.add(leftFoot.getGraphicObject());
       
       return ret;
+   }
+   
+   public SimpleCollisionShapeFactory getCollisionShapeFactory()
+   {
+      return shapeFactory;
    }
    
 }
