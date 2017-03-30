@@ -46,7 +46,7 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<GraphicObje
    @Override
    public int getTypeSize()
    {
-      return GraphicObjectMessage.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(GraphicObjectMessage.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class GraphicObjectMessagePubSubType implements TopicDataType<GraphicObje
    public GraphicObjectMessage createData()
    {
       return new GraphicObjectMessage();
+   }
+   
+   @Override
+   public GraphicObjectMessagePubSubType newInstance()
+   {
+   	  return new GraphicObjectMessagePubSubType();
    }
 }

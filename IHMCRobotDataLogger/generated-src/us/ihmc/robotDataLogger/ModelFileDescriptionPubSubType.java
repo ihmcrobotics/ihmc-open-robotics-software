@@ -46,7 +46,7 @@ public class ModelFileDescriptionPubSubType implements TopicDataType<ModelFileDe
    @Override
    public int getTypeSize()
    {
-      return ModelFileDescription.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(ModelFileDescription.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class ModelFileDescriptionPubSubType implements TopicDataType<ModelFileDe
    public ModelFileDescription createData()
    {
       return new ModelFileDescription();
+   }
+   
+   @Override
+   public ModelFileDescriptionPubSubType newInstance()
+   {
+   	  return new ModelFileDescriptionPubSubType();
    }
 }

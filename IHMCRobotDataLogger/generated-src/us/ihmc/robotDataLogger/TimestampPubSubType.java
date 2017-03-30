@@ -46,7 +46,7 @@ public class TimestampPubSubType implements TopicDataType<Timestamp>
    @Override
    public int getTypeSize()
    {
-      return Timestamp.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Timestamp.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class TimestampPubSubType implements TopicDataType<Timestamp>
    public Timestamp createData()
    {
       return new Timestamp();
+   }
+   
+   @Override
+   public TimestampPubSubType newInstance()
+   {
+   	  return new TimestampPubSubType();
    }
 }

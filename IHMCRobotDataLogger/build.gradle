@@ -11,7 +11,7 @@ buildscript {
   dependencies {
     classpath "gradle.plugin.us.ihmc.gradle:ihmc-build:0.0.19"
     classpath "org.hidetake:gradle-ssh-plugin:2.1.1"
-    classpath group: 'us.ihmc', name: 'IHMCPubSubGenerator', version: '0.2.2'
+    classpath group: 'us.ihmc', name: 'IHMCPubSubGenerator', version: '0.2.4'
   }
 }
 
@@ -71,8 +71,8 @@ dependencies {
    compile group: 'us.ihmc', name: 'IHMCJavaDecklinkCapture', version: '0.1.8'
    compile group: 'commons-io', name: 'commons-io', version: '2.4'
    compile group: 'org.tukaani', name: 'xz', version: '1.5'
-   compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.2.1'
-   compile group: 'us.ihmc', name: 'IHMCPubSubSerializersExtra', version: '0.2'
+   compile group: 'us.ihmc', name: 'IHMCPubSub', version: '0.2.4'
+   compile group: 'us.ihmc', name: 'IHMCPubSubSerializersExtra', version: '0.2.4'
    
    compile ihmc.getProjectDependency(":ModelFileLoader")
    compile ihmc.getProjectDependency(":IHMCCommunication")

@@ -46,7 +46,7 @@ public class VariableChangeRequestPubSubType implements TopicDataType<VariableCh
    @Override
    public int getTypeSize()
    {
-      return VariableChangeRequest.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(VariableChangeRequest.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class VariableChangeRequestPubSubType implements TopicDataType<VariableCh
    public VariableChangeRequest createData()
    {
       return new VariableChangeRequest();
+   }
+   
+   @Override
+   public VariableChangeRequestPubSubType newInstance()
+   {
+   	  return new VariableChangeRequestPubSubType();
    }
 }

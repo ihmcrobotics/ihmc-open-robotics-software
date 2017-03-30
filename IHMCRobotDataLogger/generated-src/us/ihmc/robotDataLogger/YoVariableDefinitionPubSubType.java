@@ -46,7 +46,7 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<YoVariableD
    @Override
    public int getTypeSize()
    {
-      return YoVariableDefinition.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(YoVariableDefinition.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class YoVariableDefinitionPubSubType implements TopicDataType<YoVariableD
    public YoVariableDefinition createData()
    {
       return new YoVariableDefinition();
+   }
+   
+   @Override
+   public YoVariableDefinitionPubSubType newInstance()
+   {
+   	  return new YoVariableDefinitionPubSubType();
    }
 }

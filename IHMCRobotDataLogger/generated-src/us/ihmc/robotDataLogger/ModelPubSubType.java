@@ -46,7 +46,7 @@ public class ModelPubSubType implements TopicDataType<Model>
    @Override
    public int getTypeSize()
    {
-      return Model.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Model.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class ModelPubSubType implements TopicDataType<Model>
    public Model createData()
    {
       return new Model();
+   }
+   
+   @Override
+   public ModelPubSubType newInstance()
+   {
+   	  return new ModelPubSubType();
    }
 }

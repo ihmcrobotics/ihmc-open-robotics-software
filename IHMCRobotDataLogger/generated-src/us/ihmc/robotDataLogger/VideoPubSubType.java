@@ -46,7 +46,7 @@ public class VideoPubSubType implements TopicDataType<Video>
    @Override
    public int getTypeSize()
    {
-      return Video.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Video.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class VideoPubSubType implements TopicDataType<Video>
    public Video createData()
    {
       return new Video();
+   }
+   
+   @Override
+   public VideoPubSubType newInstance()
+   {
+   	  return new VideoPubSubType();
    }
 }

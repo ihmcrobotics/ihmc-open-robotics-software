@@ -46,7 +46,7 @@ public class LogDataPubSubType implements TopicDataType<LogData>
    @Override
    public int getTypeSize()
    {
-      return LogData.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(LogData.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class LogDataPubSubType implements TopicDataType<LogData>
    public LogData createData()
    {
       return new LogData();
+   }
+   
+   @Override
+   public LogDataPubSubType newInstance()
+   {
+   	  return new LogDataPubSubType();
    }
 }

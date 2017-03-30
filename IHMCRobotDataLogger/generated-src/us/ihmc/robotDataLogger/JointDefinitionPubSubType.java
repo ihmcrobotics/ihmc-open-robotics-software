@@ -46,7 +46,7 @@ public class JointDefinitionPubSubType implements TopicDataType<JointDefinition>
    @Override
    public int getTypeSize()
    {
-      return JointDefinition.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(JointDefinition.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class JointDefinitionPubSubType implements TopicDataType<JointDefinition>
    public JointDefinition createData()
    {
       return new JointDefinition();
+   }
+   
+   @Override
+   public JointDefinitionPubSubType newInstance()
+   {
+   	  return new JointDefinitionPubSubType();
    }
 }
