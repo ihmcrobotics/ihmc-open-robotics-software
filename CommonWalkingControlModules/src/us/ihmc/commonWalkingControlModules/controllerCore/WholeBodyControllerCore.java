@@ -66,7 +66,14 @@ public class WholeBodyControllerCore
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
-      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
+      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
+
+      // When running only the inverse kinematics solver, there is no notion of contact.
+      if (inverseDynamicsSolver != null || virtualModelControlSolver != null)
+         desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
+      else
+         desiredCenterOfPressureDataHolder = null;
+
       controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints);
 
       parentRegistry.addChild(registry);
