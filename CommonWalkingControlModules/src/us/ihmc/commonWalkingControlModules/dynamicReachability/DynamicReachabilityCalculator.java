@@ -86,6 +86,7 @@ public class DynamicReachabilityCalculator
    private final DoubleYoVariable currentTransferAlpha = new DoubleYoVariable("currentTransferAlpha", registry);
    private final DoubleYoVariable currentSwingAlpha = new DoubleYoVariable("currentSwingAlpha", registry);
    private final DoubleYoVariable nextTransferAlpha = new DoubleYoVariable("nextTransferAlpha", registry);
+
    private final FrameVector2d currentInitialTransferGradient = new FrameVector2d(worldFrame);
    private final FrameVector2d currentEndTransferGradient = new FrameVector2d(worldFrame);
 
@@ -142,10 +143,16 @@ public class DynamicReachabilityCalculator
    public DynamicReachabilityCalculator(ICPPlanner icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
          YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this(icpPlanner, fullRobotModel, centerOfMassFrame, MAXIMUM_DESIRED_KNEE_BEND, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public DynamicReachabilityCalculator(ICPPlanner icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
+         double maximumDesiredKneeBend, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
       this.icpPlanner = icpPlanner;
       this.fullRobotModel = fullRobotModel;
 
-      maximumDesiredKneeBend.set(MAXIMUM_DESIRED_KNEE_BEND);
+      this.maximumDesiredKneeBend.set(maximumDesiredKneeBend);
       maximumNumberOfAdjustments.set(MAXIMUM_NUMBER_OF_ADJUSTMENTS);
 
       solver = new TimeAdjustmentSolver(icpPlanner.getNumberOfFootstepsToConsider(), USE_HIGHER_ORDER_STEPS, registry);
