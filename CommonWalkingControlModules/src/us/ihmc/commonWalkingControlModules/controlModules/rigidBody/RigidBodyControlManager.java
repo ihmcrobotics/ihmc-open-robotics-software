@@ -126,7 +126,7 @@ public class RigidBodyControlManager
    public void setWeights(TObjectDoubleHashMap<String> jointspaceWeights, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight,
          TObjectDoubleHashMap<String> userModeWeights)
    {
-      jointspaceControlState.setWeights(jointspaceWeights);
+      jointspaceControlState.setDefaultWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       userControlState.setWeights(userModeWeights);
       if (loadBearingControlState != null)
