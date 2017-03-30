@@ -14,6 +14,7 @@ import us.ihmc.idl.serializers.extra.YAMLSerializer;
 import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.CameraAnnouncement;
 import us.ihmc.robotDataLogger.Handshake;
+import us.ihmc.robotDataLogger.HandshakeFileType;
 import us.ihmc.robotDataLogger.HandshakePubSubType;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
@@ -27,7 +28,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
    private static final int FLUSH_EVERY_N_PACKETS = 250;
    
    public static final String propertyFile = "robotData.log";
-   private static final String handshakeFilename = "handshake.proto";
+   private static final String handshakeFilename = "handshake.yaml";
    private static final String dataFilename = "robotData.bsz";
    private static final String modelFilename = "model.sdf";
    private static final String modelResourceBundle = "resources.zip";
@@ -77,6 +78,7 @@ public class YoVariableLoggerListener implements YoVariablesUpdatedListener
       logProperties.getVariables().setCompressed(true);
       logProperties.getVariables().setTimestamped(true);
       logProperties.getVariables().setIndex(indexFilename);
+      logProperties.getVariables().setHandshakeFileType(HandshakeFileType.IDL_YAML);
 
       logProperties.setName(request.getNameAsString());
       logProperties.setTimestamp(timestamp);
