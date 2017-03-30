@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.perturbance;
+package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 

@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.perturbance;
+package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;

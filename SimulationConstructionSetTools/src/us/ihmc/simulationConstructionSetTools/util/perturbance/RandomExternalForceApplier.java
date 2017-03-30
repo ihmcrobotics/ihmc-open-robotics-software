@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.perturbance;
+package us.ihmc.simulationConstructionSetTools.util.perturbance;
 
 import java.util.Random;
 
