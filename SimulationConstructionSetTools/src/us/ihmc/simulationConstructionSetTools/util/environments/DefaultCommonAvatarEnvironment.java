@@ -89,6 +89,11 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
 
    public DefaultCommonAvatarEnvironment()
    {
+      this(true);
+   }
+   
+   public DefaultCommonAvatarEnvironment(boolean setUpGround)
+   {
       combinedTerrainObject3D = new CombinedTerrainObject3D("DRCDemo01NavigationEnvironment");
 
       addCalibrationCube();
@@ -107,8 +112,10 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       combinedTerrainObject3D.addTerrainObject(setUpPath7Stairs("Path7 Stairs"));
       combinedTerrainObject3D.addTerrainObject(setUpPath8RampsWithSteppingStones("Path8 Ramps with Stepping Stones"));
 
-
-      combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
+      if (setUpGround)
+      {
+         combinedTerrainObject3D.addTerrainObject(setUpGround("Ground"));
+      }
 
       //Soccer Ball
       if (ADD_SOCCER_BALL)

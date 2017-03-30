@@ -60,7 +60,7 @@ public class Joystick
       
       initializeIdentifiers();
       
-      joystickUpdater = new JoystickUpdater(joystickController, statusListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
@@ -88,7 +88,7 @@ public class Joystick
       
       initializeIdentifiers();
       
-      joystickUpdater = new JoystickUpdater(joystickController, statusListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
@@ -108,7 +108,7 @@ public class Joystick
       
       initializeIdentifiers();
       
-      joystickUpdater = new JoystickUpdater(joystickController, statusListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
@@ -180,9 +180,9 @@ public class Joystick
       }
    }
    
-   public void setComponentFilter(JoystickComponentFilter componentFilter)
+   public void setCustomizationFilter(JoystickCustomizationFilter componentFilter)
    {
-      joystickUpdater.setComponentFilter(componentFilter);
+      joystickUpdater.setCustomizationFilter(componentFilter);
    }
 
    public JoystickModel getModel()
