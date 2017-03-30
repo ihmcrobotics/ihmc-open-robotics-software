@@ -26,9 +26,7 @@ import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
  * Controls body pitch through hip torque, velocity through ankle torque. </p>
  *
  * <p>Copyright: Copyright (c) 2001</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
+ * *
  * @author not attributable
  * @version 1.0
  */
