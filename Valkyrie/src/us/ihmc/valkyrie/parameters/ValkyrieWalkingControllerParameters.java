@@ -1299,12 +1299,4 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       // As there is no real need for it in sim, I'm leaving it on only for the real robot. (Sylvain)
       return target == RobotTarget.REAL_ROBOT;
    }
-
-   /** {@inheritDoc} */
-   @Override
-   public boolean useSwingTrajectoryOptimizer()
-   {
-      return true;
-   }
-
 }
