@@ -202,4 +202,15 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
    {
       return controllerCoreMode;
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = "Request control mode: " + controllerCoreMode + "\n";
+      ret += "ID commands: " + inverseDynamicsCommandList + "\n";
+      ret += "IK commands: " + inverseKinematicsCommandList + "\n";
+      ret += "VMC commands: " + virtualModelControlCommandList + "\n";
+      ret += "Low-level command: " + lowLevelOneDoFJointDesiredDataHolder;
+      return ret;
+   }
 }
