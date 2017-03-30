@@ -283,6 +283,11 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.setLinearWeightsToZero();
    }
 
+   public void getIncludingFrame(FrameOrientation desiredOrientationToPack)
+   {
+      desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
+   }
+
    public void getIncludingFrame(FrameOrientation desiredOrientationToPack, FrameVector desiredAngularVelocityToPack,
                                  FrameVector feedForwardAngularAccelerationToPack)
    {
