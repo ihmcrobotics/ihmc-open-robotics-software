@@ -1,6 +1,7 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 
@@ -28,12 +29,12 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class DRCPushRecoveryTest
@@ -43,10 +44,10 @@ public abstract class DRCPushRecoveryTest
    {
       simulationTestingParameters.setRunMultiThreaded(false);
    }
+   
+   private static String defaultScript = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
-
-   private static String script = "scripts/ExerciseAndJUnitScripts/walkingPushTestScript.xml";
 
    private static double simulationTime = 6.0;
 
@@ -91,7 +92,7 @@ public abstract class DRCPushRecoveryTest
    @Test(timeout = 120000)
    public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(script, true, false);
+      setupTest(getScriptFilePath(), true, false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -111,12 +112,13 @@ public abstract class DRCPushRecoveryTest
    @Test(timeout = 120000)
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(script, true, false);
+      setupTest(getScriptFilePath(), true, false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
       StateTransitionCondition pushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
-      double delay = 0.5 * swingTime;
+      double delayMultiplier = getPushWhileInSwingDelayMultiplier();
+      double delay = delayMultiplier * swingTime;
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
@@ -130,7 +132,7 @@ public abstract class DRCPushRecoveryTest
    @Test(timeout = 110000)
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(script, false, false);
+      setupTest(getScriptFilePath(), false, false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -149,7 +151,7 @@ public abstract class DRCPushRecoveryTest
    @Test(timeout = 110000)
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
-      setupTest(script, true, false);
+      setupTest(getScriptFilePath(), true, false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -336,7 +338,8 @@ public abstract class DRCPushRecoveryTest
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
       drcSimulationTestHelper = new DRCSimulationTestHelper(flatGround, "DRCSimpleFlatGroundScriptTest", selectedLocation, simulationTestingParameters, getRobotModel());
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
-      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
+//      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
+      pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, getPushPositionZHeightInChestFrame()));
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
 
@@ -426,5 +429,20 @@ public abstract class DRCPushRecoveryTest
    public double getForceScale()
    {
       return 1.0;
+   }
+   
+   public double getPushPositionZHeightInChestFrame()
+   {
+      return 0.3;
+   }
+   
+   public String getScriptFilePath()
+   {
+     return defaultScript;
+   }
+   
+   public double getPushWhileInSwingDelayMultiplier()
+   {
+      return 0.5;
    }
 }

@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyCon
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
@@ -49,7 +50,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
@@ -66,6 +66,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
@@ -75,8 +76,6 @@ import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateChangedLis
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 {
@@ -215,6 +214,19 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       OneDoFJoint[] jointsWithRestrictiveLimit = ScrewTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints, jointNamesRestrictiveLimits), OneDoFJoint.class);
       for (OneDoFJoint joint : jointsWithRestrictiveLimit)
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
+
+      if (walkingControllerParameters.enableJointAccelerationIntegrationForAllJoints())
+      {
+         JointAccelerationIntegrationCommand accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+
+         for (InverseDynamicsJoint joint : controllerToolbox.getControlledJoints())
+         {
+            if (joint instanceof OneDoFJoint)
+               accelerationIntegrationCommand.addJointToComputeDesiredPositionFor((OneDoFJoint) joint);
+         }
+
+         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+      }
    }
 
    private void setupStateMachine()
