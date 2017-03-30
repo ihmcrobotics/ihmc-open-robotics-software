@@ -1,11 +1,11 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client.gui;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHost;
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHostList;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.DispatchHost;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.DispatchHostList;
 
 public class AliveDispatchHostPanel extends DispatchHostPanel
 {

@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructor;

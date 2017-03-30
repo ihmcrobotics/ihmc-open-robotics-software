@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.SimulationConstructor;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationDescription;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.RemoteSimulationDescription;
 
 public class DispatchedSimulationDescription implements RemoteSimulationDescription, SimulationDoneListener
 {

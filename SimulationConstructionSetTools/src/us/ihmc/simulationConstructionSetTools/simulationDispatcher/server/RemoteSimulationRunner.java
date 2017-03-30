@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.server;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.server;
 
 import java.net.InetAddress;
 import java.rmi.Naming;
@@ -8,8 +8,8 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 
-import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationDescription;
-import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.RemoteSimulationDescription;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
 
 public class RemoteSimulationRunner extends UnicastRemoteObject implements RemoteSimulationRunnerInterface

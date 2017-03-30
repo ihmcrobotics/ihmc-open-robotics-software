@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.interfaces;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client.gui;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -10,9 +10,9 @@ import javax.swing.ImageIcon;
 
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.Simulation;
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHost;
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
-import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.DispatchHost;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.SimulationToDispatch;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
 
 public class ShowSelectedAction extends AbstractAction implements Runnable

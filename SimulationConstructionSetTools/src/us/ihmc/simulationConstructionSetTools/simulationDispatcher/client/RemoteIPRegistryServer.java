@@ -1,9 +1,9 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 
-import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteIPRegistryInterface;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.RemoteIPRegistryInterface;
 
 @SuppressWarnings("serial")
 public class RemoteIPRegistryServer extends UnicastRemoteObject implements RemoteIPRegistryInterface
