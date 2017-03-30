@@ -60,4 +60,10 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    {
       return ControllerCoreCommandType.COMMAND_LIST;
    }
+
+   @Override
+   public String toString()
+   {
+      return "Nb of commands: " + getNumberOfCommands() + "\n" + commandList;
+   }
 }
