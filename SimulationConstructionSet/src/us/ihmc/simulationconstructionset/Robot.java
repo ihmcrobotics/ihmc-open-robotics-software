@@ -38,9 +38,6 @@ import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterf
  * Link masses, center of mass locations, and moments of inertia.  Each root joint has children
  * </p>
  *
- * <p>Copyright: Copyright (c) 2000-2005</p>
- *
- * <p>Company: Yobotics, Inc.</p>
  * @author Jerry Pratt
  * @version 1.0
  */

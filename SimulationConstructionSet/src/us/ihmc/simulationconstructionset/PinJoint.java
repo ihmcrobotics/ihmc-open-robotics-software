@@ -19,8 +19,6 @@ import us.ihmc.simulationconstructionset.torqueSpeedCurve.TorqueSpeedCurve;
  *
  * <p>Copyright: Copyright (c) 2000</p>
  *
- * <p>Company: Yobotics, Inc.</p>
- *
  * @author not attributable
  * @version 1.0
  * @see Joint Joint
