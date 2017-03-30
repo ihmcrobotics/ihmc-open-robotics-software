@@ -35,10 +35,11 @@ public class DynamicReachabilityCalculator
    //// TODO: 3/21/17 add in the ability to angle the hip forward for reachability
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
    //// TODO: 3/25/17 explore for step up and step down for sphere intersection
-   //// TODO: 3/29/17 examine the location of required adjustment by setting it at the actual conservative minmimum (center of the ellipse)
+   //// TODO: 3/29/17 examine the location of required adjustment by setting it at the actual conservative minimimum (center of the ellipse)
               // rather than closest point on the ellipse.
 
    private static final boolean USE_HIGHER_ORDER_STEPS = true;
+   private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
    private static final boolean VISUALIZE = true;
    private static final double MAXIMUM_DESIRED_KNEE_BEND = 0.2;
    private static final double transferTwiddleSizeDuration = 0.2;
@@ -600,10 +601,21 @@ public class DynamicReachabilityCalculator
       double stepHeight = tempVector.getZ();
       double stepDistance = tempVector.getX();
 
-      double minimumHipPosition = SphereIntersectionTools.computeMinimumDistanceToIntersectingPlane(stepDistance, stepHeight, minimumLegLength.getDoubleValue(),
-            maximumLegLength.getDoubleValue());
-      double maximumHipPosition = SphereIntersectionTools.computeMinimumDistanceToIntersectingPlane(stepDistance, stepHeight, maximumLegLength.getDoubleValue(),
-            minimumLegLength.getDoubleValue());
+      double minimumHipPosition, maximumHipPosition;
+      if (USE_CONSERVATIVE_REQUIRED_ADJUSTMENT)
+      {
+         minimumHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight, minimumLegLength.getDoubleValue(),
+               maximumLegLength.getDoubleValue());
+         maximumHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight, maximumLegLength.getDoubleValue(),
+               minimumLegLength.getDoubleValue());
+      }
+      else
+      {
+         minimumHipPosition = SphereIntersectionTools.computeDistanceToNearEdgeOfIntersectionEllipse(stepDistance, stepHeight,
+               minimumLegLength.getDoubleValue(), maximumLegLength.getDoubleValue());
+         maximumHipPosition = SphereIntersectionTools.computeDistanceToFarEdgeOfIntersectionEllipse(stepDistance, stepHeight,
+               maximumLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
+      }
 
       tempPoint.setToZero(predictedCoMFrame);
       tempPoint.changeFrame(worldFrame);
