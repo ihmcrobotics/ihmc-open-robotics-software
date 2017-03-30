@@ -151,7 +151,7 @@ public class TimeAdjustmentSolver
    {
       int problemSize = 6;
 
-      if (numberOfFootstepsToConsider > 3 & numberOfFootstepsRegistered > 2 && useHigherOrderSteps)
+      if (numberOfFootstepsToConsider > 3 & numberOfFootstepsRegistered > 1 && useHigherOrderSteps)
       {
          numberOfHigherSteps = computeHigherOrderSteps();
          problemSize += 2 * numberOfHigherSteps;
