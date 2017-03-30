@@ -215,8 +215,6 @@ import us.ihmc.tools.thread.ThreadTools;
  * <p>In the first example, the 11 variables are specified by name.  The second example specifies some variables by name as well as including an array of regular expressions to be used in finding
  * additional variables.</p>
  * <p/>
- * <p>Copyright: Copyright (c) 2005</p>
- * <p/>
  *
  * @author Jerry Pratt
  * @version 1.0

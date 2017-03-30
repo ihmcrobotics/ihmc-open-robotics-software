@@ -12,7 +12,6 @@ import us.ihmc.simulationconstructionset.physics.engine.featherstone.SliderJoint
  * Description:  Package for Simulating Dynamic Robots and Mechanisms.  A translational joint with a single degree of freedom.
  * This joint allows motion up and down the specified joint axis.  This is a fundamental joint type which is currently used in
  * the implementation of cylinder joint.<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
  * @author Jerry Pratt
  * @version Beta 1.0
  */

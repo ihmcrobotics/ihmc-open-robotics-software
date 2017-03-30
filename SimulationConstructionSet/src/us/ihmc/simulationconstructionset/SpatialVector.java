@@ -8,7 +8,6 @@ import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 /**
  * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
  * @author Jerry Pratt
  * @version Beta 1.0
  */

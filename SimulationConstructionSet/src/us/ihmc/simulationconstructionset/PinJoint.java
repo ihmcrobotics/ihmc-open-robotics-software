@@ -17,8 +17,6 @@ import us.ihmc.simulationconstructionset.torqueSpeedCurve.TorqueSpeedCurve;
  * axis specified upon creation.  There are several joint types which extend this joint: universal, gimbal and cylinder joints.  These
  * joints are either multiple pin joints grouped together or a combination of pin and slider joints.</p>
  *
- * <p>Copyright: Copyright (c) 2000</p>
- *
  * @author not attributable
  * @version 1.0
  * @see Joint Joint
