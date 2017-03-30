@@ -1297,13 +1297,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    /** {@inheritDoc} */
    @Override
-   public boolean useSwingTrajectoryOptimizer()
-   {
-      return true;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public boolean useSupportState()
    {
       return true;
