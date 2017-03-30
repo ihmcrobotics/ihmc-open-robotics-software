@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.tracks;
+package us.ihmc.simulationConstructionSetTools.util.tracks;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
