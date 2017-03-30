@@ -31,7 +31,7 @@ public class TimeAdjustmentSolver
 
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
 
-   private static final double perpendicularWeight = 0.0;
+   private static final double perpendicularWeight = 0.1;
    private static final double swingAdjustmentWeight = 10.0;
    private static final double transferAdjustmentWeight = 1.0;
    private static final double constraintWeight = 1000.0;
@@ -121,21 +121,37 @@ public class TimeAdjustmentSolver
       parallelObjective_h = new DenseMatrix64F(problemSize, 1);
    }
 
+   /**
+    * Sets the number of footsteps to consider, which reflects the number considered in the
+    * {@link us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner}. This is used to set whether or not higher steps will be considered.
+    *
+    * @param numberOfFootstepsToConsider
+    */
    public void setNumberOfFootstepsToConsider(int numberOfFootstepsToConsider)
    {
       this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
    }
 
+   /**
+    * Sets the number of footsteps that have been submitted to the planner. This is used to determine whether or not adjusting the timing of higher steps
+    * will be considered.
+    *
+    * @param numberOfFootstepsRegistered
+    */
    public void setNumberOfFootstepsRegistered(int numberOfFootstepsRegistered)
    {
       this.numberOfFootstepsRegistered = numberOfFootstepsRegistered;
    }
 
+   /**
+    * Resets the size of the problem. Before using this, {@link #numberOfFootstepsRegistered} and {@link #numberOfFootstepsToConsider} must be called,
+    * as this determines the problem size.
+    */
    public void reshape()
    {
       int problemSize = 6;
 
-      if (numberOfFootstepsToConsider > 3 & numberOfFootstepsRegistered > 2)
+      if (numberOfFootstepsToConsider > 3 & numberOfFootstepsRegistered > 2 && useHigherOrderSteps)
       {
          numberOfHigherSteps = computeHigherOrderSteps();
          problemSize += 2 * numberOfHigherSteps;
@@ -193,41 +209,94 @@ public class TimeAdjustmentSolver
       }
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the current transfer phase that is spent on the previous exit CMP.
+    * This represents the time spent loading the current foot.
+    *
+    * @param gradient gradient of time segment. Not Modified.
+    */
    public void setCurrentInitialTransferGradient(FrameVector gradient)
    {
       setGradient(currentInitialTransferIndex, gradient);
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the current transfer phase that is spent on the rear CMP of the upcoming stance foot.
+    * This represents the time of transfer spent moving the CoP from the rear of the foot to the front of the foot.
+    *
+    * @param gradient gradient of the time segment. Not Modified.
+    */
    public void setCurrentEndTransferGradient(FrameVector gradient)
    {
       setGradient(currentEndTransferIndex, gradient);
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the current swing phase that is spent on the rear CMP of the stance foot.
+    * This represents the time of swing spent moving the CoP from the rear of the foot to the front of the foot.
+    *
+    * @param gradient gradient of the time segment. Not Modified.
+    */
    public void setCurrentInitialSwingGradient(FrameVector gradient)
    {
       setGradient(currentInitialSwingIndex, gradient);
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the current swing phase that is spent on the front CMP of the stance foot.
+    * This represents the time of swing spent with the CoP in the front of the foot.
+    *
+    * @param gradient gradient of the time segment. Not Modified.
+    */
    public void setCurrentEndSwingGradient(FrameVector gradient)
    {
       setGradient(currentEndSwingIndex, gradient);
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the next transfer phase that is spent on the current stance foot's toe CMP.
+    * This represents the time spent moving the robot weight from the current stance foot to the next stance foot.
+    *
+    * @param gradient gradient of the time segment. Not Modified.
+    */
    public void setNextInitialTransferGradient(FrameVector gradient)
    {
       setGradient(nextInitialTransferIndex, gradient);
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the next transfer phase that is spent on the next foot's heel CMP.
+    *
+    * @param gradient gradient of the time segment. Not Modified.
+    */
    public void setNextEndTransferGradient(FrameVector gradient)
    {
       setGradient(nextEndTransferIndex, gradient);
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the swing duration of upcoming steps.
+    * In this case, {@param higherIndex} 0 represents the second swing phase, as that is the current swing index, and is set using
+    * {@link #setCurrentInitialSwingGradient(FrameVector)} and {@link @setCurrentEndSwingGradient(FrameVector)}.
+    *
+    * @param higherIndex index of the swing phase to modify.
+    * @param swingGradient gradient of the swing time. Not Modified.
+    */
    public void setHigherSwingGradient(int higherIndex, FrameVector swingGradient)
    {
       setGradient(6 + 2 * higherIndex, swingGradient);
    }
 
+   /**
+    * Sets the gradient of adjusting the time of the transfer duration of upcoming steps.
+    * In this case, {@param higherIndex} of 0 represents the third transfer phase. Transfer phase 0 is addressed using
+    * {@link #setCurrentInitialTransferGradient(FrameVector)} and {@link #setCurrentEndTransferGradient(FrameVector)},
+    * and transfer phase 1 is addressed using {@link #setNextInitialTransferGradient(FrameVector)} and
+    * {@link #setNextEndTransferGradient(FrameVector)}.
+    *
+    * @param higherIndex index of the transfer phase to modify.
+    * @param transferGradient gradient of the transfer time. Not Modified.
+    */
    public void setHigherTransferGradient(int higherIndex, FrameVector transferGradient)
    {
       setGradient(7 + 2 * higherIndex, transferGradient);
@@ -242,11 +311,21 @@ public class TimeAdjustmentSolver
       perpendicular_J.set(0, colIndex, perpendicular);
    }
 
+   /**
+    * Sets the desired CoM parallel adjustment to be achieved by adjusting the timing.
+    * @param adjustment desired adjustment in the direction of the step (m). Not Modified.
+    */
    public void setDesiredParallelAdjustment(double adjustment)
    {
       desiredParallelAdjustment = adjustment;
    }
 
+   /**
+    * Sets the duration of the current transfer phase, as well as the ratio of the time spent on the initial phase.
+    *
+    * @param duration time in transfer phase.
+    * @param alpha ratio of time spent on initial portion.
+    */
    public void setCurrentTransferDuration(double duration, double alpha)
    {
       double initialDuration = alpha * duration;
@@ -259,6 +338,12 @@ public class TimeAdjustmentSolver
       solverInput_bin.set(3, 0, yoMaximumTransferDuration.getDoubleValue() - duration);
    }
 
+   /**
+    * Sets the duration of the current swing phase, as well as the ratio of the time spent on the initial phase.
+    *
+    * @param duration time in swing phase.
+    * @param alpha ratio of time spent on initial portion.
+    */
    public void setCurrentSwingDuration(double duration, double alpha)
    {
       double initialDuration = alpha * duration;
@@ -271,6 +356,12 @@ public class TimeAdjustmentSolver
       solverInput_bin.set(4, 0, yoMaximumSwingDuration.getDoubleValue() - duration);
    }
 
+   /**
+    * Sets the duration of the next transfer phase, as well as the ratio of the time spent on the initial phase.
+    *
+    * @param duration time in transfer phase.
+    * @param alpha ratio of time spent on initial portion.
+    */
    public void setNextTransferDuration(double duration, double alpha)
    {
       double initialDuration = alpha * duration;
@@ -283,16 +374,44 @@ public class TimeAdjustmentSolver
       solverInput_bin.set(5, 0, yoMaximumTransferDuration.getDoubleValue() - duration);
    }
 
+   /**
+    * Sets the duration of the swing phase of step {@param higherIndex}. In this case, {@param higherIndex} of 0 represents the
+    * duration of the second step, as the first swing is handled by {@link #setCurrentSwingDuration(double, double)}.
+    *
+    * @param higherIndex step number to set.
+    * @param duration swing duration to set.
+    */
    public void setHigherSwingDuration(int higherIndex, double duration)
    {
       solverInput_Lb.set(6 + 2 * higherIndex, 0, yoMinimumSwingDuration.getDoubleValue() - duration);
    }
 
+   /**
+    * Sets the duration of the transfer phase of step {@param higherIndex}. In this case, {@param higherIndex} of 0 represents the
+    * duration of the third transfer phase, as the first transfer is handled by {@link #setCurrentTransferDuration(double, double)}
+    * and the second transfer is handled by {@link #setNextTransferDuration(double, double)}.
+    *
+    * @param higherIndex step number to set.
+    * @param duration swing duration to set.
+    */
    public void setHigherTransferDuration(int higherIndex, double duration)
    {
       solverInput_Lb.set(7 + 2 * higherIndex, 0, yoMinimumTransferDuration.getDoubleValue() - duration);
    }
 
+   /**
+    * <p>
+    * Computes the desired step phase timing adjustment using the QP. If it fails, the adjustment reverts to 0.
+    * </p>
+    * <p>
+    * Before calling this, {@link #reshape()} must first be called.
+    * </p>
+    * <p>
+    *    After calling {@link #reshape()}, all the step timings and gradients must be submitted. These include:
+    * </p>
+    *
+    * @throws NoConvergenceException
+    */
    public void compute() throws NoConvergenceException
    {
       // compute objectives
@@ -389,41 +508,88 @@ public class TimeAdjustmentSolver
       solverInput_Ain.set(5, 5, 1.0);
    }
 
+   /**
+    * Returns the adjustment to the initial portion of the current transfer phase.
+    *
+    * @return timing adjustment (s).
+    */
    public double getCurrentInitialTransferAdjustment()
    {
       return solution.get(currentInitialTransferIndex, 0);
    }
 
+   /**
+    * Returns the adjustment to the ending portion of the current transfer phase.
+    *
+    * @return timing adjustment (s).
+    */
    public double getCurrentEndTransferAdjustment()
    {
       return solution.get(currentEndTransferIndex, 0);
    }
 
+   /**
+    * Returns the adjustment to the initial portion of the current swing phase.
+    *
+    * @return timing adjustment (s).
+    */
    public double getCurrentInitialSwingAdjustment()
    {
       return solution.get(currentInitialSwingIndex, 0);
    }
 
+   /**
+    * Returns the adjustment to the ending portion of the current swing phase.
+    *
+    * @return timing adjustment (s).
+    */
    public double getCurrentEndSwingAdjustment()
    {
       return solution.get(currentEndSwingIndex, 0);
    }
 
+   /**
+    * Returns the adjustment to the initial portion of the next transfer phase.
+    *
+    * @return timing adjustment (s).
+    */
    public double getNextInitialTransferAdjustment()
    {
       return solution.get(nextInitialTransferIndex, 0);
    }
 
+   /**
+    * Returns the adjustment to the ending portion of the next transfer phase.
+    *
+    * @return timing adjustment (s).
+    */
    public double getNextEndTransferAdjustment()
    {
       return solution.get(nextEndTransferIndex, 0);
    }
 
+   /**
+    * Returns the adjustment of the higher swing phases. In this case, {@param higherIndex} of 0 represents the second swing phase,
+    * as the first swing phase is handled by {@link #getCurrentInitialSwingAdjustment()} and {@link #getCurrentEndSwingAdjustment()}.
+    *
+    * @param higherIndex swing phase to query.
+    *
+    * @return timing adjustment (s).
+    */
    public double getHigherSwingAdjustment(int higherIndex)
    {
       return solution.get(nextEndTransferIndex + 2 * (higherIndex + 1) - 1, 0);
    }
 
+   /**
+    * Returns the adjustment of the higher transfer phases. In this case, {@param higherIndex} of 0 represents the third transfer phase,
+    * as the first transfer phase is handled by {@link #getCurrentInitialTransferAdjustment()} and {@link #getCurrentEndTransferAdjustment()},
+    * and the second transfer phase is handled by {@link #getNextInitialTransferAdjustment()} and {@link #getNextEndTransferAdjustment()}.
+    *
+    * @param higherIndex transfer phase to query.
+    *
+    * @return timing adjustment (s).
+    */
    public double getHigherTransferAdjustment(int higherIndex)
    {
       return solution.get(nextEndTransferIndex + 2 * (higherIndex + 1), 0);
