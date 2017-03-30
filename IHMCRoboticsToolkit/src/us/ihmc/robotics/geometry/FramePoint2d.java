@@ -18,16 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * Description: A FramePoint2d is a normal point associated with a specified reference frame
  * </p>
  *
- * <p>
- * Copyright: Copyright (c) 2006
- * </p>
- *
- * <p>
- * Company: IHMC
- * </p>
- *
  * @author Learning Locomotion Team
- * @version 2.0
  */
 public class FramePoint2d extends FrameTuple2d<FramePoint2d, Point2D> implements FramePoint2dReadOnly
 {

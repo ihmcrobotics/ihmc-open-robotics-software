@@ -10,18 +10,6 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.tools.thread.ThreadTools;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class BlockingSimulationRunner
 {
    private static final long CLOSING_SLEEP_TIME = 1000;
