@@ -53,7 +53,6 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public class BalanceManager
 {
-   private static final boolean EDIT_RECHABILITY = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -79,6 +78,8 @@ public class BalanceManager
    // TODO It seems that the achieved CMP can be off sometimes.
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
+
+   private final BooleanYoVariable editStepTimingForReachability = new BooleanYoVariable("editStepTimingForReachability", registry);
 
    private final DoubleYoVariable yoTime;
 
@@ -171,6 +172,7 @@ public class BalanceManager
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
+      editStepTimingForReachability.set(walkingControllerParameters.editStepTimingForReachability());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
@@ -482,7 +484,7 @@ public class BalanceManager
 
       dynamicReachabilityCalculator.setInSwing();
 
-      if (EDIT_RECHABILITY)
+      if (editStepTimingForReachability.getBooleanValue())
          dynamicReachabilityCalculator.verifyAndEnsureReachability();
       else
          dynamicReachabilityCalculator.checkReachabilityOfStep();
@@ -517,7 +519,7 @@ public class BalanceManager
 
       dynamicReachabilityCalculator.setInTransfer();
 
-      if (EDIT_RECHABILITY)
+      if (editStepTimingForReachability.getBooleanValue())
          dynamicReachabilityCalculator.verifyAndEnsureReachability();
       else
          dynamicReachabilityCalculator.checkReachabilityOfStep();
