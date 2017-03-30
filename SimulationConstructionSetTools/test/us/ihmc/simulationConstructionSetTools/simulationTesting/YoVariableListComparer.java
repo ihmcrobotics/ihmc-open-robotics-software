@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.simulationTesting;
+package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;

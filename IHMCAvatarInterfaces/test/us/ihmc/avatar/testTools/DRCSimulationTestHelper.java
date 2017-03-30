@@ -54,7 +54,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class DRCSimulationTestHelper

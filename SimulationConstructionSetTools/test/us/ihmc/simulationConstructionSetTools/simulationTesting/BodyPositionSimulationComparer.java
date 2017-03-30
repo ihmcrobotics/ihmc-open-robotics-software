@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.simulationTesting;
+package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
