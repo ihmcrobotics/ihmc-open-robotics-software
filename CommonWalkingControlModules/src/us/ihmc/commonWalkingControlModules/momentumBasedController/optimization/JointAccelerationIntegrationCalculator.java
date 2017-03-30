@@ -14,6 +14,11 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointAccelerationIntegrationCalculator
 {
+   public static final double DEFAUTL_ALPHA_POSITION = 0.9996;
+   public static final double DEFAULT_ALPHA_VELOCITY = 0.95;
+   public static final double DEFAULT_MAX_POSITION_ERROR = 0.2;
+   public static final double DEFAULT_MAX_VELOCITY = 2.0;
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final List<OneDoFJoint> jointsToComputeDesiredPositionFor = new ArrayList<>();
@@ -32,10 +37,10 @@ public class JointAccelerationIntegrationCalculator
    public JointAccelerationIntegrationCalculator(double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
-      defaultAlphaPositionIntegration.set(0.9996);
-      defaultAlphaVelocityIntegration.set(0.95);
-      defaultIntegrationMaxPositionError.set(0.2);
-      defaultIntegrationMaxVelocity.set(2.0);
+      defaultAlphaPositionIntegration.set(DEFAUTL_ALPHA_POSITION);
+      defaultAlphaVelocityIntegration.set(DEFAULT_ALPHA_VELOCITY);
+      defaultIntegrationMaxPositionError.set(DEFAULT_MAX_POSITION_ERROR);
+      defaultIntegrationMaxVelocity.set(DEFAULT_MAX_VELOCITY);
 
       parentRegistry.addChild(registry);
    }

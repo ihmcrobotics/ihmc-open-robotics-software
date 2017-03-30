@@ -10,7 +10,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
-import us.ihmc.tools.inputDevices.joystick.JoystickComponentFilter;
+import us.ihmc.tools.inputDevices.joystick.JoystickCustomizationFilter;
 import us.ihmc.tools.inputDevices.joystick.JoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.mapping.XBoxOneMapping;
 
@@ -29,12 +29,12 @@ public class HexapodGamePadManager implements JoystickEventListener
    
    public HexapodGamePadManager(Joystick device, YoVariableRegistry registry)
    {
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1, 1.0));
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1, 1.0));
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));
-      device.setComponentFilter(new JoystickComponentFilter(XBoxOneMapping.RIGHT_STICK_Y, true, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_TRIGGER, false, 0.05, 1, 1.0));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_TRIGGER, false, 0.05, 1, 1.0));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_X, true, 0.1, 1));
+      device.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_Y, true, 0.1, 1));
       
       device.setPollInterval(10);
       

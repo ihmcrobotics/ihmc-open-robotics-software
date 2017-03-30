@@ -29,6 +29,21 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 {
    protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
+   /**
+    * Specifies if the controller should by default compute for all the robot joints desired
+    * position and desired velocity from the desired acceleration.
+    * <p>
+    * It is {@code false} by default and this method should be overridden to return otherwise.
+    * </p>
+    * 
+    * @return {@code true} if the desired acceleration should be integrated into desired velocity
+    *         and position for all the joints.
+    */
+   public boolean enableJointAccelerationIntegrationForAllJoints()
+   {
+      return false;
+   }
+
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
 
    public abstract String[] getDefaultChestOrientationControlJointNames();
@@ -416,14 +431,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * @return
     */
    public boolean minimizeAngularMomentumRateZDuringSwing()
-   {
-      return false;
-   }
-
-   /**
-    * Determines whether the swing trajectory should be optimized (new feature to be tested with Atlas)
-    */
-   public boolean useSwingTrajectoryOptimizer()
    {
       return false;
    }
