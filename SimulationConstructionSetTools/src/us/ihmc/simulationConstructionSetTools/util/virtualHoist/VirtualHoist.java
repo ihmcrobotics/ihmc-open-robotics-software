@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.virtualHoist;
+package us.ihmc.simulationConstructionSetTools.util.virtualHoist;
 
 import java.util.ArrayList;
 import java.util.List;
