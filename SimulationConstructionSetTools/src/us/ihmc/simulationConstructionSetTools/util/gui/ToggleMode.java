@@ -1,3 +1,3 @@
-package us.ihmc.simulationconstructionset.util.gui;
+package us.ihmc.simulationConstructionSetTools.util.gui;
 
 public enum ToggleMode {NO_CHANGE, SET_TRUE, SET_FALSE}

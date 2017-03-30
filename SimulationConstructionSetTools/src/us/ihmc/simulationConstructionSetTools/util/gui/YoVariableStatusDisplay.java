@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.gui;
+package us.ihmc.simulationConstructionSetTools.util.gui;
 
 import java.awt.Color;
 import java.net.URL;
