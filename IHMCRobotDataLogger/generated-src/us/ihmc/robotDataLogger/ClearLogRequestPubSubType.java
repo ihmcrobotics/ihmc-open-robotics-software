@@ -46,7 +46,7 @@ public class ClearLogRequestPubSubType implements TopicDataType<ClearLogRequest>
    @Override
    public int getTypeSize()
    {
-      return ClearLogRequest.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(ClearLogRequest.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class ClearLogRequestPubSubType implements TopicDataType<ClearLogRequest>
    public ClearLogRequest createData()
    {
       return new ClearLogRequest();
+   }
+   
+   @Override
+   public ClearLogRequestPubSubType newInstance()
+   {
+   	  return new ClearLogRequestPubSubType();
    }
 }

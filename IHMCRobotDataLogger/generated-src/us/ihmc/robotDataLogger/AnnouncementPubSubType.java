@@ -46,7 +46,7 @@ public class AnnouncementPubSubType implements TopicDataType<Announcement>
    @Override
    public int getTypeSize()
    {
-      return Announcement.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Announcement.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class AnnouncementPubSubType implements TopicDataType<Announcement>
    public Announcement createData()
    {
       return new Announcement();
+   }
+   
+   @Override
+   public AnnouncementPubSubType newInstance()
+   {
+   	  return new AnnouncementPubSubType();
    }
 }

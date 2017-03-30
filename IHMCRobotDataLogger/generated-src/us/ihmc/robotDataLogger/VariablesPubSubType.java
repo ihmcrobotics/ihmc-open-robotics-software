@@ -46,7 +46,7 @@ public class VariablesPubSubType implements TopicDataType<Variables>
    @Override
    public int getTypeSize()
    {
-      return Variables.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Variables.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class VariablesPubSubType implements TopicDataType<Variables>
    public Variables createData()
    {
       return new Variables();
+   }
+   
+   @Override
+   public VariablesPubSubType newInstance()
+   {
+   	  return new VariablesPubSubType();
    }
 }

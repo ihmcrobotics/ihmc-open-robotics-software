@@ -46,7 +46,7 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<Appe
    @Override
    public int getTypeSize()
    {
-      return AppearanceDefinitionMessage.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(AppearanceDefinitionMessage.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class AppearanceDefinitionMessagePubSubType implements TopicDataType<Appe
    public AppearanceDefinitionMessage createData()
    {
       return new AppearanceDefinitionMessage();
+   }
+   
+   @Override
+   public AppearanceDefinitionMessagePubSubType newInstance()
+   {
+   	  return new AppearanceDefinitionMessagePubSubType();
    }
 }

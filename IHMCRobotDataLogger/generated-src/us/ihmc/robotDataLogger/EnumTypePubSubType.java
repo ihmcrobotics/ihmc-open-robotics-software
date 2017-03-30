@@ -46,7 +46,7 @@ public class EnumTypePubSubType implements TopicDataType<EnumType>
    @Override
    public int getTypeSize()
    {
-      return EnumType.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(EnumType.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class EnumTypePubSubType implements TopicDataType<EnumType>
    public EnumType createData()
    {
       return new EnumType();
+   }
+   
+   @Override
+   public EnumTypePubSubType newInstance()
+   {
+   	  return new EnumTypePubSubType();
    }
 }

@@ -46,7 +46,7 @@ public class CameraPubSubType implements TopicDataType<Camera>
    @Override
    public int getTypeSize()
    {
-      return Camera.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Camera.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class CameraPubSubType implements TopicDataType<Camera>
    public Camera createData()
    {
       return new Camera();
+   }
+   
+   @Override
+   public CameraPubSubType newInstance()
+   {
+   	  return new CameraPubSubType();
    }
 }

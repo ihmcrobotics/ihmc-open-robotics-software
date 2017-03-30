@@ -46,7 +46,7 @@ public class CameraAnnouncementPubSubType implements TopicDataType<CameraAnnounc
    @Override
    public int getTypeSize()
    {
-      return CameraAnnouncement.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(CameraAnnouncement.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class CameraAnnouncementPubSubType implements TopicDataType<CameraAnnounc
    public CameraAnnouncement createData()
    {
       return new CameraAnnouncement();
+   }
+   
+   @Override
+   public CameraAnnouncementPubSubType newInstance()
+   {
+   	  return new CameraAnnouncementPubSubType();
    }
 }

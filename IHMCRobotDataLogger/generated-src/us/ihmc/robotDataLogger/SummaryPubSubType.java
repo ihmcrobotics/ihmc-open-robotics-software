@@ -46,7 +46,7 @@ public class SummaryPubSubType implements TopicDataType<Summary>
    @Override
    public int getTypeSize()
    {
-      return Summary.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Summary.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class SummaryPubSubType implements TopicDataType<Summary>
    public Summary createData()
    {
       return new Summary();
+   }
+   
+   @Override
+   public SummaryPubSubType newInstance()
+   {
+   	  return new SummaryPubSubType();
    }
 }

@@ -46,7 +46,7 @@ public class LogPropertiesPubSubType implements TopicDataType<LogProperties>
    @Override
    public int getTypeSize()
    {
-      return LogProperties.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(LogProperties.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class LogPropertiesPubSubType implements TopicDataType<LogProperties>
    public LogProperties createData()
    {
       return new LogProperties();
+   }
+   
+   @Override
+   public LogPropertiesPubSubType newInstance()
+   {
+   	  return new LogPropertiesPubSubType();
    }
 }

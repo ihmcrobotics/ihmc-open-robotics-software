@@ -46,7 +46,7 @@ public class YoRegistryDefinitionPubSubType implements TopicDataType<YoRegistryD
    @Override
    public int getTypeSize()
    {
-      return YoRegistryDefinition.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(YoRegistryDefinition.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class YoRegistryDefinitionPubSubType implements TopicDataType<YoRegistryD
    public YoRegistryDefinition createData()
    {
       return new YoRegistryDefinition();
+   }
+   
+   @Override
+   public YoRegistryDefinitionPubSubType newInstance()
+   {
+   	  return new YoRegistryDefinitionPubSubType();
    }
 }

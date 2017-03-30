@@ -46,7 +46,7 @@ public class HandshakePubSubType implements TopicDataType<Handshake>
    @Override
    public int getTypeSize()
    {
-      return Handshake.getMaxCdrSerializedSize();
+      return CDR.getTypeSize(Handshake.getMaxCdrSerializedSize());
    }
 
    @Override
@@ -59,5 +59,11 @@ public class HandshakePubSubType implements TopicDataType<Handshake>
    public Handshake createData()
    {
       return new Handshake();
+   }
+   
+   @Override
+   public HandshakePubSubType newInstance()
+   {
+   	  return new HandshakePubSubType();
    }
 }

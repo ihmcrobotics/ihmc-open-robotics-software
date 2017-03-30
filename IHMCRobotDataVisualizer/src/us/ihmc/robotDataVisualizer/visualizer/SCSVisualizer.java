@@ -34,6 +34,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
+/**
+ * Main entry point for the visualizer. 
+ * 
+ * To make a custom visualizer for your robot, do NOT copy, instead extend. 
+ *  
+ * @author jesper
+ *
+ */
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
    protected YoVariableRegistry registry;
