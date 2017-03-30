@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -8,7 +8,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
-import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.RemoteSimulationRunnerInterface;
 
 @ContinuousIntegrationPlan(categories = IntegrationCategory.MANUAL)
 public class SimulationDispatcherClientTest

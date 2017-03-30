@@ -1,6 +1,6 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
-import us.ihmc.simulationconstructionset.simulationDispatcher.interfaces.RemoteSimulationDescription;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.interfaces.RemoteSimulationDescription;
 
 @SuppressWarnings("serial")
 public class TestDescription implements RemoteSimulationDescription

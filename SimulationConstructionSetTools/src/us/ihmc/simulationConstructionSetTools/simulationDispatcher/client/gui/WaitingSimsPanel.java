@@ -1,10 +1,10 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client.gui;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
 
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcher;
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.SimulationDispatcher;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.SimulationToDispatch;
 
 
 public class WaitingSimsPanel extends SimulationToDispatchPanel

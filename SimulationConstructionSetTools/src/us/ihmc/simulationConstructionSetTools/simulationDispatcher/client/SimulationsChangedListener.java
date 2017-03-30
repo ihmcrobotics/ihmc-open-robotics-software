@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client;
 
 
 public interface SimulationsChangedListener

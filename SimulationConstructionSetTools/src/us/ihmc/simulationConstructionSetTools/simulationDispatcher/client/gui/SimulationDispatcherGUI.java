@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.simulationDispatcher.client.gui;
+package us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -36,9 +36,9 @@ import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.gui.ViewportPanel;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariableListPanel;
 import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanelJPopupMenu;
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.DispatchHostList;
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationDispatcher;
-import us.ihmc.simulationconstructionset.simulationDispatcher.client.SimulationToDispatch;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.DispatchHostList;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.SimulationDispatcher;
+import us.ihmc.simulationConstructionSetTools.simulationDispatcher.client.SimulationToDispatch;
 
 public class SimulationDispatcherGUI
 {
