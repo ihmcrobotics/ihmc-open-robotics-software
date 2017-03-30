@@ -569,4 +569,14 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    {
       return ControllerCoreCommandType.TASKSPACE;
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": ";
+      ret += "base = " + spatialAccelerationCommand.getBaseName() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffectorName() + ", ";
+      ret += "position = " + desiredPositionInWorld + ", orientation = " + desiredOrientationInWorld.toStringAsYawPitchRoll();
+      return ret;
+   }
 }
