@@ -1,6 +1,7 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -22,12 +23,12 @@ import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -44,11 +45,35 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private BooleanYoVariable allowUpperBodyMomentumInDoubleSupport;
    private BooleanYoVariable allowUsingHighMomentumWeight;
 
-   private static final double doubleSupportPushMagnitude = 1000.0;
-   private static final double doubleSupportPushDuration = 0.05;
+   protected double getDoubleSupportPushMagnitude()
+   {
+      return 1000.0;
+   }
 
-   private static final double singleSupportPushMagnitude = 600.0;
-   private static final double singleSupportPushDuration = 0.05;
+   protected double getDoubleSupportPushDuration()
+   {
+      return 0.05;
+   }
+
+   protected double getSingleSupportPushMagnitude()
+   {
+      return 600.0;
+   }
+
+   protected double getSingleSupportPushDuration()
+   {
+      return 0.05;
+   }
+   
+   protected double getXOffsetForSteps()
+   {
+      return 0.6;
+   }
+
+   protected double getYOffsetForSteps()
+   {
+      return 0.15;
+   }
 
    @ContinuousIntegrationTest(estimatedDuration = 30.6)
    @Test(timeout = 150000)
@@ -129,11 +154,14 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       enableMomentum();
       ControllerSpy controllerSpy = new ControllerSpy(drcSimulationTestHelper);
 
+      double yOffset = getYOffsetForSteps();
+      double xOffset = getXOffsetForSteps();
+      
       FootstepDataListMessage message = new FootstepDataListMessage();
-      addFootstep(new Point3D(0.3, 0.15, -0.02), RobotSide.LEFT, message);
-      addFootstep(new Point3D(0.6, -0.15, -0.02), RobotSide.RIGHT, message);
-      addFootstep(new Point3D(0.6, 0.3, -0.02), RobotSide.LEFT, message);
-      addFootstep(new Point3D(0.6, 0.0, -0.02), RobotSide.RIGHT, message);
+      addFootstep(new Point3D(xOffset / 2.0, yOffset, -0.02), RobotSide.LEFT, message);
+      addFootstep(new Point3D(xOffset, -yOffset, -0.02), RobotSide.RIGHT, message);
+      addFootstep(new Point3D(xOffset, yOffset * 2.0, -0.02), RobotSide.LEFT, message);
+      addFootstep(new Point3D(xOffset, 0.0, -0.02), RobotSide.RIGHT, message);
 
       drcSimulationTestHelper.send(message);
       double simulationTime = 1.0 * message.footstepDataList.size() + 2.0;
@@ -156,7 +184,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
    private boolean standAndPush() throws SimulationExceededMaximumTimeException
    {
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-      pushController.applyForce(new Vector3D(1.0, 0.0, 0.0), doubleSupportPushMagnitude, doubleSupportPushDuration);
+      pushController.applyForce(new Vector3D(1.0, 0.0, 0.0), getDoubleSupportPushMagnitude(), getDoubleSupportPushDuration());
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10.0);
    }
 
@@ -168,6 +196,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       FootstepDataMessage footstepData = new FootstepDataMessage();
       RobotSide stepSide = RobotSide.LEFT;
 
+      double xOffset = getXOffsetForSteps();
       ReferenceFrame soleFrame = drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(stepSide);
       FramePoint placeToStepInWorld = new FramePoint(soleFrame, 0.3, 0.0, 0.0);
       placeToStepInWorld.changeFrame(worldFrame);
@@ -182,7 +211,7 @@ public abstract class HumanoidMomentumRecoveryTest implements MultiRobotTestInte
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
 
       // push the robot
-      pushController.applyForce(new Vector3D(0.0, -1.0, 0.0), singleSupportPushMagnitude, singleSupportPushDuration);
+      pushController.applyForce(new Vector3D(0.0, -1.0, 0.0), getSingleSupportPushMagnitude(), getSingleSupportPushDuration());
       return drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
    }
 

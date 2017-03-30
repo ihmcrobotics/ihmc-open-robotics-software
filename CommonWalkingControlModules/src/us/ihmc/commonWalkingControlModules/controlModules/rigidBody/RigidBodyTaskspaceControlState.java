@@ -347,7 +347,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          PrintTools.warn(warningPrefix + "Was executing in " + trajectoryFrame.getName() + " can't switch to " + command.getTrajectoryFrame() + " without override");
          return false;
       }
-      
+
       command.getTrajectoryPointList().changeFrame(trajectoryFrame);
       for (int i = 0; i < command.getNumberOfTrajectoryPoints(); i++)
       {
@@ -485,7 +485,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       trajectoryPoint.getOrientation(desiredOrientation);
       desiredAngularVelocity.setToNaN(trajectoryPoint.getReferenceFrame());
       trajectoryPoint.getAngularVelocity(desiredAngularVelocity);
-      
+
       FrameSE3TrajectoryPoint point = pointQueue.addLast();
       point.setToZero(trajectoryPoint.getReferenceFrame());
       point.setOrientation(desiredOrientation);
@@ -524,7 +524,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       return false;
    }
 
-   private void clear()
+   public void clear()
    {
       orientationTrajectoryGenerator.clear();
       positionTrajectoryGenerator.clear();
