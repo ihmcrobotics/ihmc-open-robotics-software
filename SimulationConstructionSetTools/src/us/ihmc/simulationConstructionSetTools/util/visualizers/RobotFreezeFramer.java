@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.visualizers;
+package us.ihmc.simulationConstructionSetTools.util.visualizers;
 
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
