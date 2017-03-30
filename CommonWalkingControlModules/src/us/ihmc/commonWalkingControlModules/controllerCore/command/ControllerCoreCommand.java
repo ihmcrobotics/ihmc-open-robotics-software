@@ -210,6 +210,7 @@ public class ControllerCoreCommand implements ControllerCoreCommandInterface
       ret += "ID commands: " + inverseDynamicsCommandList + "\n";
       ret += "IK commands: " + inverseKinematicsCommandList + "\n";
       ret += "VMC commands: " + virtualModelControlCommandList + "\n";
+      ret += "Feedback commands: " + feedbackControlCommandList + "\n";
       ret += "Low-level command: " + lowLevelOneDoFJointDesiredDataHolder;
       return ret;
    }

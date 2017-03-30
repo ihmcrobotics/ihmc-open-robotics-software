@@ -316,4 +316,14 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    {
       return gains;
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": ";
+      ret += "base = " + spatialAccelerationCommand.getBaseName() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffectorName() + ", ";
+      ret += "orientation = " + desiredOrientationInWorld.toStringAsYawPitchRoll();
+      return ret;
+   }
 }

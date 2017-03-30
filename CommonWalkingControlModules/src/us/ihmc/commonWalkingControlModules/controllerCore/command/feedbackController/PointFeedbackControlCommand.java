@@ -315,4 +315,14 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    {
       return ControllerCoreCommandType.POINT;
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": ";
+      ret += "base = " + pointAccelerationCommand.getBaseName() + ", ";
+      ret += "endEffector = " + pointAccelerationCommand.getEndEffectorName() + ", ";
+      ret += "position = " + desiredPositionInWorld;
+      return ret;
+   }
 }
