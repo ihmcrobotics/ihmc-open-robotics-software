@@ -562,6 +562,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       spatialAccelerationCommand.setWeights(angular, linear);
    }
 
+   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameOrientation desiredOrientationToPack)
+   {
+      desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
+      desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
+   }
+
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
