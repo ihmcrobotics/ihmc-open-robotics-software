@@ -1,4 +1,4 @@
-package us.ihmc.simulationconstructionset.util.visualizers;
+package us.ihmc.simulationConstructionSetTools.util.visualizers;
 
 import java.util.List;
 
