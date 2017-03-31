@@ -9,7 +9,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -18,7 +17,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFramePoint;
-import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -30,29 +28,28 @@ import java.util.ArrayList;
 
 public class DynamicReachabilityCalculator
 {
-   //// TODO: 3/21/17 disable checks on swing leg bending if the upcoming step is a step up
-   //// TODO: 3/21/17 disable checks on stance leg bending if the upcoming step is a step down 
    //// TODO: 3/21/17 add in the ability to angle the hip forward for reachability
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
-   //// TODO: 3/25/17 explore for step up and step down for sphere intersection
-   //// TODO: 3/29/17 examine the location of required adjustment by setting it at the actual conservative minimimum (center of the ellipse)
-              // rather than closest point on the ellipse.
 
    private static final boolean USE_HIGHER_ORDER_STEPS = true;
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
    private static final boolean VISUALIZE = true;
    private static final double MAXIMUM_DESIRED_KNEE_BEND = 0.2;
+   private static final double MAXIMUM_KNEE_BEND = 1.7;
+   private static final double STEP_UP_THRESHOLD = 0.05;
+   private static final double STEP_DOWN_THRESHOLD = -0.05;
+   private static final int MAXIMUM_NUMBER_OF_ADJUSTMENTS = 3;
+
    private static final double transferTwiddleSizeDuration = 0.2;
    private static final double swingTwiddleSizeDuration = 0.2;
 
-   private static final int MAXIMUM_NUMBER_OF_ADJUSTMENTS = 3;
-
-   private static final double requiredAdjustmentSafetyFactor = 1.0;
+   private static final double requiredAdjustmentSF = 1.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final DoubleYoVariable requiredAdjustmentSafetyFactor = new DoubleYoVariable("requiredAdjustmentSafetyFactor", registry);
    private final DoubleYoVariable minimumLegLength = new DoubleYoVariable("minimumLegLength", registry);
    private final DoubleYoVariable maximumLegLength = new DoubleYoVariable("maximumLegLength", registry);
 
@@ -152,6 +149,7 @@ public class DynamicReachabilityCalculator
       this.icpPlanner = icpPlanner;
       this.fullRobotModel = fullRobotModel;
 
+      this.requiredAdjustmentSafetyFactor.set(requiredAdjustmentSF);
       this.maximumDesiredKneeBend.set(maximumDesiredKneeBend);
       maximumNumberOfAdjustments.set(MAXIMUM_NUMBER_OF_ADJUSTMENTS);
 
@@ -312,13 +310,19 @@ public class DynamicReachabilityCalculator
    {
       this.maximumLegLength.set(thighLength + shinLength);
 
-      double minimumLegLength = Math.pow(thighLength, 2.0) + Math.pow(shinLength, 2.0) +
-            2 * thighLength * shinLength * Math.cos(maximumDesiredKneeBend.getDoubleValue());
-      minimumLegLength = Math.sqrt(minimumLegLength);
+      double minimumLegLength = computeLegLength(thighLength, shinLength, maximumDesiredKneeBend.getDoubleValue());
       this.minimumLegLength.set(minimumLegLength);
    }
 
-   private void computeHeightLineFromStance(RobotSide supportSide)
+   private static double computeLegLength(double thighLength, double shinLength, double kneeAngle)
+   {
+      double minimumLegLength = Math.pow(thighLength, 2.0) + Math.pow(shinLength, 2.0) + 2.0 * thighLength * shinLength * Math.cos(kneeAngle);
+      minimumLegLength = Math.sqrt(minimumLegLength);
+
+      return minimumLegLength;
+   }
+
+   private void computeHeightLineFromStance(RobotSide supportSide, double minimumStanceLegLength, double maximumStanceLegLength)
    {
       FramePoint ankleLocation = ankleLocations.get(supportSide);
       ankleLocation.changeFrame(worldFrame);
@@ -342,7 +346,7 @@ public class DynamicReachabilityCalculator
       }
       else
       {
-         minimumHeight = Math.sqrt(Math.pow(minimumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+         minimumHeight = Math.sqrt(Math.pow(minimumStanceLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          minimumHeight += ankleLocation.getZ();
       }
       if (planarDistance >= maximumLegLength.getDoubleValue())
@@ -351,7 +355,7 @@ public class DynamicReachabilityCalculator
       }
       else
       {
-         maximumHeight = Math.sqrt(Math.pow(maximumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+         maximumHeight = Math.sqrt(Math.pow(maximumStanceLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          maximumHeight += ankleLocation.getZ();
       }
 
@@ -363,7 +367,7 @@ public class DynamicReachabilityCalculator
       stanceHeightLine.set(minimumHeight, maximumHeight);
    }
 
-   private void computeHeightLineFromStep(Footstep nextFootstep)
+   private void computeHeightLineFromStep(Footstep nextFootstep, double minimumStepLegLength, double maximumStepLegLength)
    {
       RobotSide swingSide = nextFootstep.getRobotSide();
 
@@ -390,7 +394,7 @@ public class DynamicReachabilityCalculator
       }
       else
       {
-         minimumHeight = Math.sqrt(Math.pow(minimumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+         minimumHeight = Math.sqrt(Math.pow(minimumStepLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          minimumHeight += ankleLocation.getZ();
       }
       if (planarDistance >= maximumLegLength.getDoubleValue())
@@ -399,7 +403,7 @@ public class DynamicReachabilityCalculator
       }
       else
       {
-         maximumHeight = Math.sqrt(Math.pow(maximumLegLength.getDoubleValue(), 2.0) - Math.pow(planarDistance, 2.0));
+         maximumHeight = Math.sqrt(Math.pow(maximumStepLegLength, 2.0) - Math.pow(planarDistance, 2.0));
          maximumHeight += ankleLocation.getZ();
       }
 
@@ -556,10 +560,41 @@ public class DynamicReachabilityCalculator
       updateFrames(nextFootstep);
       updateLegLengthLimits();
 
-      computeHeightLineFromStance(supportSide);
-      computeHeightLineFromStep(nextFootstep);
+      double heightChange = computeChangeInHeight(nextFootstep);
+
+      double minimumStanceLegLength, minimumStepLegLength;
+      if (heightChange > STEP_UP_THRESHOLD)
+      {
+         minimumStepLegLength = computeLegLength(thighLength, shinLength, MAXIMUM_KNEE_BEND);
+         minimumStanceLegLength = minimumLegLength.getDoubleValue();
+      }
+      else if (heightChange < STEP_DOWN_THRESHOLD)
+      {
+         minimumStanceLegLength = computeLegLength(thighLength, shinLength, MAXIMUM_KNEE_BEND);
+         minimumStepLegLength = minimumLegLength.getDoubleValue();
+      }
+      else
+      {
+         minimumStanceLegLength = minimumLegLength.getDoubleValue();
+         minimumStepLegLength = minimumLegLength.getDoubleValue();
+      }
+
+      computeHeightLineFromStance(supportSide, minimumStanceLegLength, maximumLegLength.getDoubleValue());
+      computeHeightLineFromStep(nextFootstep, minimumStepLegLength, maximumLegLength.getDoubleValue());
 
       return stanceHeightLine.isOverlappingExclusive(stepHeightLine);
+   }
+
+   private double computeChangeInHeight(Footstep footstep)
+   {
+      RobotSide stanceSide = footstep.getRobotSide().getOppositeSide();
+
+      FramePoint stanceAnkleLocation = ankleLocations.get(stanceSide);
+      FramePoint stepAnkleLocation = ankleLocations.get(stanceSide.getOppositeSide());
+      stanceAnkleLocation.changeFrame(worldFrame);
+      stepAnkleLocation.changeFrame(worldFrame);
+
+      return stepAnkleLocation.getZ() - stanceAnkleLocation.getZ();
    }
 
 
@@ -608,20 +643,38 @@ public class DynamicReachabilityCalculator
       double stepHeight = tempVector.getZ();
       double stepDistance = tempVector.getX();
 
-      double minimumHipPosition, maximumHipPosition;
-      if (USE_CONSERVATIVE_REQUIRED_ADJUSTMENT)
+      // compute the minimum leg lengths
+      double minimumStanceLegLength, minimumStepLegLength;
+      if (stepHeight > STEP_UP_THRESHOLD)
       {
-         minimumHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight, minimumLegLength.getDoubleValue(),
-               maximumLegLength.getDoubleValue());
-         maximumHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight, maximumLegLength.getDoubleValue(),
-               minimumLegLength.getDoubleValue());
+         minimumStepLegLength = computeLegLength(thighLength, shinLength, MAXIMUM_KNEE_BEND);
+         minimumStanceLegLength = minimumLegLength.getDoubleValue();
+      }
+      else if (stepHeight < STEP_DOWN_THRESHOLD)
+      {
+         minimumStanceLegLength = computeLegLength(thighLength, shinLength, MAXIMUM_KNEE_BEND);
+         minimumStepLegLength = minimumLegLength.getDoubleValue();
       }
       else
       {
-         minimumHipPosition = SphereIntersectionTools.computeDistanceToNearEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               minimumLegLength.getDoubleValue(), maximumLegLength.getDoubleValue());
-         maximumHipPosition = SphereIntersectionTools.computeDistanceToFarEdgeOfIntersectionEllipse(stepDistance, stepHeight,
-               maximumLegLength.getDoubleValue(), minimumLegLength.getDoubleValue());
+         minimumStanceLegLength = minimumLegLength.getDoubleValue();
+         minimumStepLegLength = minimumLegLength.getDoubleValue();
+      }
+
+      double minimumStanceHipPosition, maximumStepHipPosition;
+      if (USE_CONSERVATIVE_REQUIRED_ADJUSTMENT)
+      {
+         minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
+               minimumStanceLegLength, maximumLegLength.getDoubleValue());
+         maximumStepHipPosition = SphereIntersectionTools.computeDistanceToCenterOfIntersectionEllipse(stepDistance, stepHeight,
+               maximumLegLength.getDoubleValue(), minimumStepLegLength);
+      }
+      else
+      {
+         minimumStanceHipPosition = SphereIntersectionTools.computeDistanceToNearEdgeOfIntersectionEllipse(stepDistance, stepHeight,
+               minimumStanceLegLength, maximumLegLength.getDoubleValue());
+         maximumStepHipPosition = SphereIntersectionTools.computeDistanceToFarEdgeOfIntersectionEllipse(stepDistance, stepHeight,
+               maximumLegLength.getDoubleValue(), minimumStepLegLength);
       }
 
       tempPoint.setToZero(predictedCoMFrame);
@@ -630,9 +683,9 @@ public class DynamicReachabilityCalculator
       tempPoint.changeFrame(stepDirectionFrame);
 
       if (needToMoveCoMBackward)
-         return requiredAdjustmentSafetyFactor * (maximumHipPosition - tempPoint.getX());
+         return requiredAdjustmentSafetyFactor.getDoubleValue() * (maximumStepHipPosition - tempPoint.getX());
       else
-         return requiredAdjustmentSafetyFactor * (minimumHipPosition - tempPoint.getX());
+         return requiredAdjustmentSafetyFactor.getDoubleValue() * (minimumStanceHipPosition - tempPoint.getX());
    }
 
    private int computeNumberOfHigherSteps()

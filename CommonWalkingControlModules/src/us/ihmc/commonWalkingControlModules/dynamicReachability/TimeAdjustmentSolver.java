@@ -144,8 +144,8 @@ public class TimeAdjustmentSolver
    }
 
    /**
-    * Resets the size of the problem. Before using this, {@link #numberOfFootstepsRegistered} and {@link #numberOfFootstepsToConsider} must be called,
-    * as this determines the problem size.
+    * Resets the size of the problem. Before using this, {@link #setNumberOfFootstepsToConsider(int)} ()} and {@link #setNumberOfFootstepsRegistered(int)} must
+    * be called, as this determines the problem size.
     */
    public void reshape()
    {
