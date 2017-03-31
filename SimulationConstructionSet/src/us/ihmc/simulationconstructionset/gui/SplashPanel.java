@@ -22,7 +22,7 @@ public class SplashPanel extends JPanel
    {
       super();
       setBackground(new Color(0, 255, 0, 0));
-      URL imageURL = SplashPanel.class.getClassLoader().getResource("images/SplashScreen.png");
+      URL imageURL = SplashPanel.class.getClassLoader().getResource("images/SplashScreen_AprilFools.png");
 
       Toolkit toolkit = Toolkit.getDefaultToolkit();
       splashImage = toolkit.getImage(imageURL);
