@@ -1,10 +1,10 @@
 package us.ihmc.simulationconstructionset.physics.engine.featherstone;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.SpatialVector;
-import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
 /**
  * Title:        Simulation Construction Set<p>
@@ -97,7 +97,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       D.sub(M1.D, M2.D);
    }
 
-   public void getMatrix(Matrix M)
+   public void getMatrix(DenseMatrix64F M)
    {
       for (int i = 0; i < 3; i++)
       {
@@ -112,7 +112,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
 
    }
 
-   public void getPlanarXYMatrix(Matrix M)
+   public void getPlanarXYMatrix(DenseMatrix64F M)
    {
       M.set(0, 0, A.getElement(0, 2));
       M.set(0, 1, B.getElement(0, 0));
@@ -125,7 +125,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       M.set(2, 2, D.getElement(2, 1));
    }
 
-   public void getPlanarXZMatrix(Matrix M)
+   public void getPlanarXZMatrix(DenseMatrix64F M)
    {
       M.set(0, 0, A.getElement(0, 1));
       M.set(0, 1, B.getElement(0, 0));
@@ -138,7 +138,7 @@ public final class SpatialInertiaMatrix implements java.io.Serializable
       M.set(2, 2, D.getElement(1, 2));
    }
 
-   public void getPlanarYZMatrix(Matrix M)
+   public void getPlanarYZMatrix(DenseMatrix64F M)
    {
       M.set(0, 0, A.getElement(1, 0));
       M.set(0, 1, B.getElement(1, 1));
