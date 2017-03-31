@@ -5,6 +5,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3HybridJointSpaceTaskSpaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
@@ -30,11 +32,16 @@ public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyCon
       taskspaceControlState.doAction();
    }
 
-
-   public boolean handleTrajectoryCommand(JointspaceTrajectoryCommand<?, ?> command, double[] initialJointPositions)
+   public boolean handleTrajectoryCommand(AbstractSE3HybridJointSpaceTaskSpaceTrajectoryMessage<?, ?, ?> command, double[] initialJointPositions)
    {
       return false;
    }
+   
+   public boolean handleTrajectoryCommand(AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage<?, ?, ?> command, double[] initialJointPositions)
+   {
+      return false;
+   }
+
 
    @Override
    public double getLastTrajectoryPointTime()
@@ -79,5 +86,4 @@ public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyCon
       feedbackControlCommandList.addCommand(taskspaceControlState.getFeedbackControlCommand());
       return feedbackControlCommandList;
    }
-
 }
