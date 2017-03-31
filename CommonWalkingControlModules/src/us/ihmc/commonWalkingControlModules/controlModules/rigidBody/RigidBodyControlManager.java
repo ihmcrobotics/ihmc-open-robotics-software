@@ -22,6 +22,8 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3HybridJointSpaceTaskSpaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -52,6 +54,7 @@ public class RigidBodyControlManager
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
+   private final RigidBodyHybridTaskSpaceJointspaceControlState hybridControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
    private final double[] initialJointPositions;
@@ -91,6 +94,7 @@ public class RigidBodyControlManager
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
+      hybridControlState = new RigidBodyHybridTaskSpaceJointspaceControlState(bodyName, jointspaceControlState, taskspaceControlState, yoTime, registry);
 
       if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, graphicsListRegistry, registry);
@@ -110,6 +114,7 @@ public class RigidBodyControlManager
       states.add(jointspaceControlState);
       states.add(taskspaceControlState);
       states.add(userControlState);
+      states.add(hybridControlState);
       if (loadBearingControlState != null)
          states.add(loadBearingControlState);
 
@@ -223,6 +228,36 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         holdInJointspace();
+      }
+   }
+   
+   public void handleHybridTrajectoryCommand(AbstractSE3HybridJointSpaceTaskSpaceTrajectoryMessage<?, ?, ?> command)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+
+      if (hybridControlState.handleTrajectoryCommand(command, initialJointPositions))
+      {
+         requestState(hybridControlState.getStateEnum());
+      }
+      else
+      {
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         holdInJointspace();
+      }
+   }
+   
+   public void handleHybridTrajectoryCommand(AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage<?, ?, ?> command)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+      
+      if (hybridControlState.handleTrajectoryCommand(command, initialJointPositions))
+      {
+         requestState(hybridControlState.getStateEnum());
+      }
+      else
+      {
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
          holdInJointspace();
       }
    }
