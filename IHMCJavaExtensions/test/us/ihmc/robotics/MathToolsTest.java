@@ -858,18 +858,6 @@ public class MathToolsTest
 //      assertEquals(p.getY(), proj.getY(), Double.MIN_VALUE);
 //      assertEquals(0.1, proj.getZ(), 10e-10);
 //   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testApplyDeadband()
-   {
-      assertEquals(MathTools.applyDeadband(1.0, 0.0), 1.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(1.0, 5.0), 0.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(5.0, 5.0), 0.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(-5.0, 5.0), 0.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(10.0, 5.0), 5.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(-10.0, 5.0), -5.0, 1e-12);
-   }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

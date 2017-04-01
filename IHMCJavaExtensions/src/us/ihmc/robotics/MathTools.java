@@ -86,11 +86,15 @@ public class MathTools
    }
 
    /**
-    * True if value |(a-b)| <= epsilon
-    * True if {@code a} and b are Positive Infinity
-    * True if a and b are Negative Infinity
-    * False if a or b is Double.NaN
-    * false if not
+    * <p>Compare {@code a} and {@code b} with epsilon. If either {@code a} or
+    * {@code b} is NaN, returns {@code false}.</p>
+    * 
+    * <li>If Double.compare(a, b) == 0, return {@code true}.</li>
+    * <li>If value |({@code a} - {@code b})| <= epsilon, return {@code true}.</li>
+    * <li>If either {@code a} or {@code b} is NaN, returns {@code false}.</li>
+    * 
+    * <p>See {@link MathTools#epsilonCompare(double, double, double) epsilonCompare
+    * for NaNs to return {@code true}.</p>
     *
     * @param a double
     * @param b double
@@ -122,11 +126,14 @@ public class MathTools
    }
 
    /**
-    * True if value |(a-b)| <= epsilon
-    * True if a and b are Positive Infinity
-    * True if a and b are Negative Infinity
-    * True if a and b are Double.NaN
-    * false if not
+    * <p>Compare {@code a} and {@code b} with epsilon. NaNs compare to {@code true}.</p>
+    * 
+    * <li>If Double.compare(a, b) == 0, return {@code true}.</li>
+    * <li>If value |({@code a} - {@code b})| <= epsilon, return {@code true}.</li>
+    * <li>If {@code a} and {@code b} are NaN, returns {@code true}.</li>
+    * 
+    * <p>See {@link MathTools#epsilonEquals(double, double, double) epsilonEquals
+    * for NaNs to return {@code false}.</p>
     *
     * @param a double
     * @param b double
@@ -154,8 +161,8 @@ public class MathTools
    }
 
    /**
-    * True if b is within given percent of a.
-    * False otherwise. Uses {@link MathTools#epsilonEquals(double, double, double)}
+    * If b is within given percent of a, return {@code true}.
+    * Uses {@link MathTools#epsilonEquals(double, double, double) MathTools.epsilonEquals}.
     * 
     * @see {@link MathTools#epsilonEquals(double, double, double)}
     *
@@ -802,6 +809,13 @@ public class MathTools
       return roundToPrecision(a, precision) <= roundToPrecision(b, precision);
    }
    
+   /**
+    * Greatest common divisor of {@code a} and {@code b}.
+    * 
+    * @param a
+    * @param b
+    * @return The greatest common divisor.
+    */
    public static long gcd(long a, long b)
    {
       while(b > 0)
@@ -814,53 +828,42 @@ public class MathTools
       return a;
    }
    
+   /**
+    * Least common multiple of {@code a, b, c...}
+    * 
+    * @param a
+    * @return The least common multiple.
+    */
    public static long lcm(long... a)
    {
-      if(a.length < 2)
+      if (a.length < 2)
       {
          throw new RuntimeException("Need at least two arguments");
       }
-      
-      if(a.length == 2)
+
+      if (a.length == 2)
       {
-         return Math.abs(a[0] * a[1])/gcd(a[0], a[1]);         
+         return Math.abs(a[0] * a[1]) / gcd(a[0], a[1]);
       }
-      
+
       long[] b = new long[a.length - 1];
       System.arraycopy(a, 1, b, 0, b.length);
-      
+
       return lcm(a[0], lcm(b));
    }
 
+   /**
+    * <p>Order of magnitude of {@code number}.</p>
+    * 
+    * <p>For example:</br>
+    * Order of magnitude of 100.0 is 2.</br>
+    * Order of magnitude of 0.005 is -3.</p>
+    * 
+    * @param number
+    * @return Order of magnitude.
+    */
    public static int orderOfMagnitude(double number)
    {
       return (int) Math.floor(Math.log10(Math.abs(number)));
-   }
-
-   /**
-    * Returns value - |deadband| if value is greater than |deadband|
-    * Returns value + |deadband| if value is less than -|deadband|
-    * Returns 0 if value is in the range [-deadband, deadband]
-    *
-    * @param value double
-    * @param deadband double
-    * @return double
-    */
-   public static double applyDeadband(double value, double deadband)
-   {
-      deadband = Math.abs(deadband);
-
-      if (value > deadband)
-      {
-         return value - deadband;
-      }
-      else if (value < -deadband)
-      {
-         return value + deadband;
-      }
-      else
-      {
-         return 0.0;
-      }
    }
 }
