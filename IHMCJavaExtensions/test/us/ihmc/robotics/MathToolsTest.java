@@ -510,7 +510,6 @@ public class MathToolsTest
 
       assertEquals(expectedReturn2[0], actualReturn2[0], 1e-12);
       assertEquals(expectedReturn2[1], actualReturn2[1], 1e-12);
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -527,9 +526,9 @@ public class MathToolsTest
       v1 = Double.NaN;
       v2 = Double.NaN;
       epsilon = 3.0;
-      expectedReturn = true;
+      expectedReturn = false;
       actualReturn = MathTools.epsilonEquals(v1, v2, epsilon);
-      assertTrue(actualReturn);
+      assertEquals("Not equals", expectedReturn, actualReturn);
 
       /** @todo fill in the test code */
 
@@ -539,7 +538,34 @@ public class MathToolsTest
       boolean expectedReturn2 = false;
       boolean actualReturn2 = MathTools.epsilonEquals(v3, v4, epsi);
       assertEquals(expectedReturn2, actualReturn2);
+   }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testEpsilonCompare()
+   {
+      double v1 = 2.0;
+      double v2 = 1.0;
+      double epsilon = 3.0;
+      boolean expectedReturn = true;
+      boolean actualReturn = MathTools.epsilonCompare(v1, v2, epsilon);
+      assertEquals(expectedReturn, actualReturn);
+
+      v1 = Double.NaN;
+      v2 = Double.NaN;
+      epsilon = 3.0;
+      expectedReturn = true;
+      actualReturn = MathTools.epsilonCompare(v1, v2, epsilon);
+      assertEquals("Not equals", expectedReturn, actualReturn);
+
+      /** @todo fill in the test code */
+
+      double v3 = 1.0;
+      double v4 = 0.0;
+      double epsi = 0.0;
+      boolean expectedReturn2 = false;
+      boolean actualReturn2 = MathTools.epsilonCompare(v3, v4, epsi);
+      assertEquals(expectedReturn2, actualReturn2);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -590,7 +616,14 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testCheckIsEqualNaN()
    {
-      MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12);
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12);
+         }
+      });
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
