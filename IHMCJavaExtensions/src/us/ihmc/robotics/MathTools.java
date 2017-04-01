@@ -86,10 +86,10 @@ public class MathTools
    }
 
    /**
-    * True if value |(v1-v2)| <= epsilon
-    * True if {@code v1} and v2 are Positive Infinity
-    * True if v1 and v2 are Negative Infinity
-    * False if v1 or v2 is Double.NaN
+    * True if value |(a-b)| <= epsilon
+    * True if {@code a} and b are Positive Infinity
+    * True if a and b are Negative Infinity
+    * False if a or b is Double.NaN
     * false if not
     *
     * @param a double
@@ -122,30 +122,30 @@ public class MathTools
    }
 
    /**
-    * True if value |(v1-v2)| <= epsilon
-    * True if v1 and v2 are Positive Infinity
-    * True if v1 and v2 are Negative Infinity
-    * True if v1 and v2 are Double.NaN
+    * True if value |(a-b)| <= epsilon
+    * True if a and b are Positive Infinity
+    * True if a and b are Negative Infinity
+    * True if a and b are Double.NaN
     * false if not
     *
-    * @param v1 double
-    * @param v2 double
+    * @param a double
+    * @param b double
     * @param epsilon double
     * @return boolean
     * @throws RuntimeException is epsilon is less than zero.
     */
-   public static boolean epsilonCompare(double v1, double v2, double epsilon)
+   public static boolean epsilonCompare(double a, double b, double epsilon)
    {
       if (epsilon < 0.0)
       {
          throw new RuntimeException("epilson is less than 0.0");
       }
       
-      if (Double.compare(v1, v2) == 0)
+      if (Double.compare(a, b) == 0)
       {
          return true;
       }
-      if (Math.abs(v1 - v2) <= epsilon)
+      if (Math.abs(a - b) <= epsilon)
       {
          return true;
       }
@@ -154,19 +154,19 @@ public class MathTools
    }
 
    /**
-    * True if v2 is within given percent of v1.
+    * True if b is within given percent of a.
     * False otherwise. Uses {@link MathTools#epsilonEquals(double, double, double)}
     * 
     * @see {@link MathTools#epsilonEquals(double, double, double)}
     *
-    * @param v1 double
-    * @param v2 double
+    * @param a double
+    * @param b double
     * @param percent double
     * @return boolean
     */
-   public static boolean percentEquals(double v1, double v2, double percent)
+   public static boolean percentEquals(double a, double b, double percent)
    {
-      return epsilonEquals(v1, v2, Math.abs(percent * v1));
+      return epsilonEquals(a, b, Math.abs(percent * a));
    }
 
    /**
