@@ -699,51 +699,107 @@ public class MathTools
    }
 
    /**
-    * Compares
+    * Compares {@code a} > {@code b} after rounding to significant figures.
     * 
-    * @param numberOne
-    * @param numberTwo
+    * @param a
+    * @param b
     * @param significantFigures
-    * @return
+    * @return {@code a} > {@code b} after rounding to significant figures.
     */
-   public static boolean isGreaterThanWithSignificantFigures(double numberOne, double numberTwo, int significantFigures)
+   public static boolean isGreaterThanWithSignificantFigures(double a, double b, int significantFigures)
    {
-      return roundToSignificantFigures(numberOne, significantFigures) > roundToSignificantFigures(numberTwo, significantFigures);
+      return roundToSignificantFigures(a, significantFigures) > roundToSignificantFigures(b, significantFigures);
    }
    
-   public static boolean isGreaterThanWithPrecision(double numberOne, double numberTwo, double precision)
+   /**
+    * Compares {@code a} > {@code b} after rounding to precision.
+    * 
+    * @param a
+    * @param b
+    * @param precision
+    * @return {@code a} > {@code b} after rounding to precision.
+    */
+   public static boolean isGreaterThanWithPrecision(double a, double b, double precision)
    {
-      return roundToPrecision(numberOne, precision) > roundToPrecision(numberTwo, precision);
+      return roundToPrecision(a, precision) > roundToPrecision(b, precision);
    }
    
-   public static boolean isGreaterThanOrEqualToWithSignificantFigures(double numberOne, double numberTwo, int significantFigures)
+   /**
+    * Compares {@code a} >= {@code b} after rounding to significant figures.
+    * 
+    * @param a
+    * @param b
+    * @param significantFigures
+    * @return {@code a} >= {@code b} after rounding to significant figures.
+    */
+   public static boolean isGreaterThanOrEqualToWithSignificantFigures(double a, double b, int significantFigures)
    {
-      return roundToSignificantFigures(numberOne, significantFigures) >= roundToSignificantFigures(numberTwo, significantFigures);
+      return roundToSignificantFigures(a, significantFigures) >= roundToSignificantFigures(b, significantFigures);
    }
    
-   public static boolean isGreaterThanOrEqualToWithPrecision(double numberOne, double numberTwo, double precision)
+   /**
+    * Compares {@code a} >= {@code b} after rounding to precision.
+    * 
+    * @param a
+    * @param b
+    * @param precision
+    * @return {@code a} >= {@code b} after rounding to precision.
+    */
+   public static boolean isGreaterThanOrEqualToWithPrecision(double a, double b, double precision)
    {
-      return roundToPrecision(numberOne, precision) >= roundToPrecision(numberTwo, precision);
+      return roundToPrecision(a, precision) >= roundToPrecision(b, precision);
    }
 
-   public static boolean isLessThanWithSignificantFigures(double numberOne, double numberTwo, int significantFigures)
+   /**
+    * Compares {@code a} < {@code b} after rounding to significant figures.
+    * 
+    * @param a
+    * @param b
+    * @param significantFigures
+    * @return {@code a} < {@code b} after rounding to significant figures.
+    */
+   public static boolean isLessThanWithSignificantFigures(double a, double b, int significantFigures)
    {
-      return roundToSignificantFigures(numberOne, significantFigures) < roundToSignificantFigures(numberTwo, significantFigures);
+      return roundToSignificantFigures(a, significantFigures) < roundToSignificantFigures(b, significantFigures);
    }
    
-   public static boolean isLessThanWithPrecision(double numberOne, double numberTwo, double precision)
+   /**
+    * Compares {@code a} < {@code b} after rounding to precision.
+    * 
+    * @param a
+    * @param b
+    * @param precision
+    * @return {@code a} < {@code b} after rounding to precision.
+    */
+   public static boolean isLessThanWithPrecision(double a, double b, double precision)
    {
-      return roundToPrecision(numberOne, precision) < roundToPrecision(numberTwo, precision);
+      return roundToPrecision(a, precision) < roundToPrecision(b, precision);
    }
    
-   public static boolean isLessThanOrEqualToWithSignificantFigures(double numberOne, double numberTwo, int significantFigures)
+   /**
+    * Compares {@code a} <= {@code b} after rounding to significant figures.
+    * 
+    * @param a
+    * @param b
+    * @param significantFigures
+    * @return {@code a} <= {@code b} after rounding to significant figures.
+    */
+   public static boolean isLessThanOrEqualToWithSignificantFigures(double a, double b, int significantFigures)
    {
-      return roundToSignificantFigures(numberOne, significantFigures) <= roundToSignificantFigures(numberTwo, significantFigures);
+      return roundToSignificantFigures(a, significantFigures) <= roundToSignificantFigures(b, significantFigures);
    }
    
-   public static boolean isLessThanOrEqualToWithPrecision(double numberOne, double numberTwo, double precision)
+   /**
+    * Compares {@code a} <= {@code b} after rounding to precision.
+    * 
+    * @param a
+    * @param b
+    * @param precision
+    * @return {@code a} <= {@code b} after rounding to precision.
+    */
+   public static boolean isLessThanOrEqualToWithPrecision(double a, double b, double precision)
    {
-      return roundToPrecision(numberOne, precision) <= roundToPrecision(numberTwo, precision);
+      return roundToPrecision(a, precision) <= roundToPrecision(b, precision);
    }
    
    public static long gcd(long a, long b)
