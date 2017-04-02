@@ -31,6 +31,8 @@ public class DynamicReachabilityCalculator
    //// TODO: 3/21/17 add in the ability to angle the hip forward for reachability
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
 
+   private static final boolean COMPUTE_ACHIEVED_ADJUSTMENT = true;
+
    private static final boolean USE_HIGHER_ORDER_STEPS = true;
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
    private static final boolean VISUALIZE = true;
@@ -79,6 +81,7 @@ public class DynamicReachabilityCalculator
    private final SideDependentList<YoFramePoint> hipMaximumLocations = new SideDependentList<>();
 
    private final ArrayList<DoubleYoVariable> requiredParallelCoMAdjustments = new ArrayList<>();
+   private final ArrayList<DoubleYoVariable> achievedParallelCoMAdjustments = new ArrayList<>();
 
    private final DoubleYoVariable currentTransferAlpha = new DoubleYoVariable("currentTransferAlpha", registry);
    private final DoubleYoVariable currentSwingAlpha = new DoubleYoVariable("currentSwingAlpha", registry);
@@ -184,6 +187,7 @@ public class DynamicReachabilityCalculator
       for (int i = 0; i < MAXIMUM_NUMBER_OF_ADJUSTMENTS; i++)
       {
          requiredParallelCoMAdjustments.add(new DoubleYoVariable("requiredParallelCoMAdjustment" + i, registry));
+         achievedParallelCoMAdjustments.add(new DoubleYoVariable("achievedParallelCoMAdjustment" + i, registry));
       }
 
 
@@ -448,7 +452,10 @@ public class DynamicReachabilityCalculator
       }
 
       for (int i = 0; i < requiredParallelCoMAdjustments.size(); i++)
+      {
          requiredParallelCoMAdjustments.get(i).setToNaN();
+         achievedParallelCoMAdjustments.get(i).setToNaN();
+      }
    }
 
 
@@ -486,6 +493,8 @@ public class DynamicReachabilityCalculator
          double requiredAdjustment = computeRequiredAdjustment(needToMoveCoMBackward);
          requiredParallelCoMAdjustments.get(numberOfAdjustments.getIntegerValue()).set(requiredAdjustment);
 
+         requiredAdjustment *= requiredAdjustmentSafetyFactor.getDoubleValue();
+
          int numberOfHigherSteps = computeNumberOfHigherSteps();
 
          computeGradients(numberOfHigherSteps);
@@ -518,6 +527,12 @@ public class DynamicReachabilityCalculator
          isStepReachable = checkReachabilityInternal();
          isModifiedStepReachable.set(isStepReachable);
          numberOfAdjustments.increment();
+
+         if (COMPUTE_ACHIEVED_ADJUSTMENT)
+         {
+            double newRequiredAdjustment = computeRequiredAdjustment(needToMoveCoMBackward);
+            achievedParallelCoMAdjustments.get(numberOfAdjustments.getIntegerValue() - 1).set(requiredAdjustment - newRequiredAdjustment);
+         }
       }
    }
 
@@ -683,9 +698,9 @@ public class DynamicReachabilityCalculator
       tempPoint.changeFrame(stepDirectionFrame);
 
       if (needToMoveCoMBackward)
-         return requiredAdjustmentSafetyFactor.getDoubleValue() * (maximumStepHipPosition - tempPoint.getX());
+         return (maximumStepHipPosition - tempPoint.getX());
       else
-         return requiredAdjustmentSafetyFactor.getDoubleValue() * (minimumStanceHipPosition - tempPoint.getX());
+         return (minimumStanceHipPosition - tempPoint.getX());
    }
 
    private int computeNumberOfHigherSteps()

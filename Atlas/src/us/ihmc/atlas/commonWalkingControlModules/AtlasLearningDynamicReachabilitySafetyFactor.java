@@ -31,6 +31,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.math.frames.YoFrameConvexPolygon2d;
 import us.ihmc.robotics.math.frames.YoFramePose;
+import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -51,27 +52,27 @@ import java.util.List;
 
 public class AtlasLearningDynamicReachabilitySafetyFactor
 {
+   private static final double stepWidth = 0.25;
+   private static final double stepLength = 0.4;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
-   public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
-
-   private DoubleYoVariable yoInitialTransferDuration;
-   private DoubleYoVariable yoTransferDuration;
-   private DoubleYoVariable yoSwingDuration;
+   private final DoubleYoVariable yoInitialTransferDuration;
+   private final DoubleYoVariable yoTransferDuration;
+   private final DoubleYoVariable yoSwingDuration;
    private static final double initialTransferDuration = 1.0;
    private static final double transferDuration = 0.8;
    private static final double swingDuration = 1.2;
 
-   private SideDependentList<ContactableFoot> contactableFeet;
+   private final SideDependentList<ContactableFoot> contactableFeet;
 
-   private final SideDependentList<FramePose> footPosesAtTouchdown = new SideDependentList<FramePose>(new FramePose(), new FramePose());
-   private final SideDependentList<YoFramePose> currentFootPoses = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
 
-   private DoubleYoVariable yoTime;
+   private final DoubleYoVariable yoTime;
 
    private final ArrayList<Footstep> plannedFootsteps = new ArrayList<>();
+   private final ArrayList<Footstep> originalFootsteps = new ArrayList<>();
+   private final YoFrameVector2d plannedFootstepDelta;
 
    private YoFramePose yoNextFootstepPlan;
    private YoFramePose yoNextNextFootstepPlan;
@@ -85,14 +86,27 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
    private YoFrameConvexPolygon2d yoNextNextNextFootstepPolygon;
 
    private BipedSupportPolygons bipedSupportPolygons;
-   private FootstepTestHelper footstepTestHelper;
+   private final FootstepTestHelper footstepTestHelper;
 
-   private ICPPlanner icpPlanner;
-   private DynamicReachabilityCalculator dynamicReachabilityCalculator;
+   private final ICPPlanner icpPlanner;
+   private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
-   private FullHumanoidRobotModel fullRobotModel;
-   private CommonHumanoidReferenceFrames referenceFrames;
-   private DRCRobotModel robotModel;
+   private final DRCRobotModel robotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
+   private final CommonHumanoidReferenceFrames referenceFrames;
+
+   private final DoubleYoVariable requiredAdjustment;
+   private final DoubleYoVariable achievedAdjustment;
+
+   private final DoubleYoVariable currentTransferDuration;
+   private final DoubleYoVariable currentSwingDuration;
+   private final DoubleYoVariable nextTransferDuration;
+
+   private final DoubleYoVariable currentTransferAlpha;
+   private final DoubleYoVariable currentSwingAlpha;
+   private final DoubleYoVariable nextTransferAlpha;
+
+   private final DoubleYoVariable requiredAdjustmentSafetyFactor;
 
    public AtlasLearningDynamicReachabilitySafetyFactor()
    {
@@ -116,6 +130,9 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
             };
          }
       };
+      plannedFootstepDelta = new YoFrameVector2d("plannedFootstep", null, robotRegistry);
+      plannedFootstepDelta.setX(stepLength);
+      plannedFootstepDelta.setY(stepWidth);
 
       fullRobotModel = robotModel.createFullRobotModel();
       RobotContactPointParameters contactPointParameters = robotModel.getContactPointParameters();
@@ -125,9 +142,18 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       contactableFeet = contactableBodiesFactory.createFootContactableBodies(fullRobotModel, referenceFrames);
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
 
-
       setupFeetFrames(robotRegistry, yoGraphicsListRegistry);
+      footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
+
       createAdjustmentGraphics(robotRegistry, yoGraphicsListRegistry);
+
+      RobotSide currentSide = RobotSide.LEFT;
+      for (int i = 0; i < 6; i++)
+      {
+         currentSide = currentSide.getOppositeSide();
+         plannedFootsteps.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide, contactableFeet.get(currentSide).getSoleFrame()));
+         originalFootsteps.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide, contactableFeet.get(currentSide).getSoleFrame()));
+      }
 
       yoInitialTransferDuration = new DoubleYoVariable("initialTransferDuration", robotRegistry);
       yoSwingDuration = new DoubleYoVariable("swingDuration", robotRegistry);
@@ -136,13 +162,25 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       yoSwingDuration.set(swingDuration);
       yoTransferDuration.set(transferDuration);
 
-
       icpPlanner = new ICPPlanner(bipedSupportPolygons, contactableFeet, capturePointPlannerParameters, robotRegistry, yoGraphicsListRegistry);
       icpPlanner.setOmega0(3.0);
       icpPlanner.setFinalTransferDuration(1.0);
 
       dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, referenceFrames.getCenterOfMassFrame(), robotRegistry,
             yoGraphicsListRegistry);
+
+      requiredAdjustment = (DoubleYoVariable) robotRegistry.getVariable("requiredParallelCoMAdjustment0");
+      achievedAdjustment = (DoubleYoVariable) robotRegistry.getVariable("achievedParallelCoMAdjustment0");
+
+      currentTransferDuration = (DoubleYoVariable) robotRegistry.getVariable("icpPlannerTransferDuration0");
+      currentSwingDuration = (DoubleYoVariable) robotRegistry.getVariable("icpPlannerSwingDuration0");
+      nextTransferDuration = (DoubleYoVariable) robotRegistry.getVariable("icpPlannerTransferDuration1");
+
+      currentTransferAlpha = (DoubleYoVariable) robotRegistry.getVariable("icpPlannerTransferDurationAlpha0");
+      currentSwingAlpha = (DoubleYoVariable) robotRegistry.getVariable("icpPlannerSwingDurationAlpha0");
+      nextTransferAlpha = (DoubleYoVariable) robotRegistry.getVariable("icpPlannerTransferDurationAlpha1");
+
+      requiredAdjustmentSafetyFactor = (DoubleYoVariable) robotRegistry.getVariable("requiredAdjustmentSafetyFactor");
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
@@ -192,9 +230,6 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
       double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionPoint().getZ();
 
-      // Hardcoded for gazebo integration
-      //      double pelvisToFoot = 0.887;
-
       positionInWorld.setZ(groundZ + pelvisToFoot);
       positionInWorld.add(offset);
 
@@ -231,10 +266,11 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       referenceFrames.updateFrames();
 
       int index = 0;
-      for (Footstep footstep : footstepTestHelper.createFootsteps(0.25, 0.4, 4))
+      for (Footstep footstep : footstepTestHelper.createFootsteps(stepWidth, stepLength, 4))
       {
          footstep.getPose(footstepPose);
          plannedFootsteps.get(index).setPose(footstepPose);
+         originalFootsteps.get(index).setPose(footstepPose);
 
          index++;
       }
@@ -261,17 +297,28 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       updateAdjustmentViz();
    }
 
+   public void updatePlannedFootsteps()
+   {
+      Footstep originalFootstep = originalFootsteps.get(0);
+      Footstep plannedFootstep = plannedFootsteps.get(0);
+
+      RobotSide stanceSide = originalFootstep.getRobotSide().getOppositeSide();
+      originalFootstep.getPose(footstepPose);
+      footstepPose.changeFrame(ankleFrames.get(stanceSide));
+
+      double desiredForward = plannedFootstepDelta.getX();
+      double desiredLateral = stanceSide.negateIfLeftSide(plannedFootstepDelta.getY());
+      footstepPose.setX(desiredForward);
+      footstepPose.setY(desiredLateral);
+
+      footstepPose.changeFrame(worldFrame);
+      plannedFootstep.setPose(footstepPose);
+   }
+
    private boolean firstTick = true;
 
    public void updateAdjustmentGraphic()
    {
-      if (firstTick)
-      {
-         initializeAtlasPose();
-         initializeAdjustmentTest();
-         firstTick = false;
-      }
-
       icpPlanner.clearPlan();
       firstTiming.setTimings(swingDuration, initialTransferDuration);
       secondTiming.setTimings(swingDuration, transferDuration);
@@ -376,32 +423,16 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       FramePose nextNextNextFootstepPose = new FramePose(plannedFootsteps.get(2).getSoleReferenceFrame());
       yoNextNextNextFootstepPose.setAndMatchFrame(nextNextNextFootstepPose);
 
-      //// FIXME: 3/30/17
-      /*
-      RobotSide supportSide = plannedFootsteps.get(0).getRobotSide().getOppositeSide();
-      ContactableFoot contactableFoot = contactableFeet.get(supportSide.getOppositeSide());
-      FramePose nextSupportPose = footPosesAtTouchdown.get(supportSide.getOppositeSide());
-      nextSupportPose.setToZero(plannedFootsteps.get(0).getSoleReferenceFrame());
-      nextSupportPose.changeFrame(ReferenceFrame.getWorldFrame());
-      footSpoof.setSoleFrame(nextSupportPose);
-      */
    }
 
    private void setupFeetFrames(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
 
-      SideDependentList<ReferenceFrame> ankleFrames = new SideDependentList<>();
       SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         // // TODO: 3/30/17  is this strictly necessary?
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         FramePose startingPose = footPosesAtTouchdown.get(robotSide);
-         startingPose.setToZero(worldFrame);
-         startingPose.setY(robotSide.negateIfRightSide(0.25 / 2.0));
-
-         currentFootPoses.put(robotSide, new YoFramePose(sidePrefix + "FootPose", worldFrame, registry));
 
          ContactableFoot contactableFoot = contactableFeet.get(robotSide);
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
@@ -419,15 +450,6 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
-
-      footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
-
-      RobotSide currentSide = RobotSide.LEFT;
-      for (int i = 0; i < 6; i++)
-      {
-         currentSide = currentSide.getOppositeSide();
-         plannedFootsteps.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide, contactableFeet.get(currentSide).getSoleFrame()));
-      }
    }
 
    private void createAdjustmentGraphics(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -478,6 +500,15 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       public void update()
       {
          super.update();
+
+         if (firstTick)
+         {
+            initializeAtlasPose();
+            initializeAdjustmentTest();
+            firstTick = false;
+         }
+
+         updatePlannedFootsteps();
          updateAdjustmentGraphic();
          updateDynamicReachabilityCalculation();
       }
