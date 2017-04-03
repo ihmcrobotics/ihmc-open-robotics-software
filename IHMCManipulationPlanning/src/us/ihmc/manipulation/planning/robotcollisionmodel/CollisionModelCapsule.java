@@ -68,17 +68,17 @@ public class CollisionModelCapsule extends AbstractCollisionModel
       if (rotationAxis.getX() == 1)
       {
          currentTransform.getRotationMatrix().getColumn(0, centerXAxis);
-         PrintTools.info("getX centerXAxis " + centerXAxis.getX() + " " + centerXAxis.getY() + " " + centerXAxis.getZ());
+         //PrintTools.info("getX centerXAxis " + centerXAxis.getX() + " " + centerXAxis.getY() + " " + centerXAxis.getZ());
       }
       if (rotationAxis.getY() == 1)
       {
          currentTransform.getRotationMatrix().getColumn(1, centerXAxis);
-         PrintTools.info("getY centerXAxis " + centerXAxis.getX() + " " + centerXAxis.getY() + " " + centerXAxis.getZ());
+         //PrintTools.info("getY centerXAxis " + centerXAxis.getX() + " " + centerXAxis.getY() + " " + centerXAxis.getZ());
       }
       if (rotationAxis.getZ() == 1)
       {
          currentTransform.getRotationMatrix().getColumn(2, centerXAxis);
-         PrintTools.info("getZ centerXAxis " + centerXAxis.getX() + " " + centerXAxis.getY() + " " + centerXAxis.getZ());
+         //PrintTools.info("getZ centerXAxis " + centerXAxis.getX() + " " + centerXAxis.getY() + " " + centerXAxis.getZ());
       }
 
       double norm = currentLocation.distance(nextLocation);

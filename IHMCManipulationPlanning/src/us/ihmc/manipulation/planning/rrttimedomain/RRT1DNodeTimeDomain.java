@@ -21,8 +21,8 @@ public class RRT1DNodeTimeDomain extends RRTNode
       super(2);
       super.setNodeData(0, timeK);
       super.setNodeData(1, pelvisYawK);
-   }
-
+   }   
+   
    @Override
    public boolean isValidNode()
    {
