@@ -15,7 +15,7 @@ public class RRTPiecewisePath
 {
    private ArrayList<RRTNode> linearPath = new ArrayList<RRTNode>();
    private ArrayList<RRTNode> piecewisePath = new ArrayList<RRTNode>();
-   ArrayList<RRTNode> shortcutPath = new ArrayList<RRTNode>();
+   private ArrayList<RRTNode> shortcutPath = new ArrayList<RRTNode>();
    private int[] pieceIndex;
    private int sizeOfPiecewisePath;
 
@@ -243,6 +243,11 @@ public class RRTPiecewisePath
    public ArrayList<RRTNode> getPiecewisePath()
    {
       return piecewisePath;
+   }
+   
+   public ArrayList<RRTNode> getShortCutPath()
+   {
+      return shortcutPath;
    }
 
 }
