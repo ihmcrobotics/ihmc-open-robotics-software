@@ -30,11 +30,16 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       return isValid();   
    }
    
-   public double tempNodeData;
-   public void setTemporaryNodeData(double tempNodeData)
-   {
-      this.tempNodeData =tempNodeData;
-      isValid = true;
+   public void setSolarPanelWholeBodyPose(double tempNodeData0, double tempNodeData1)
+   {      
+      if(tempNodeData0 > 1.5 && tempNodeData0 < 2.5 && tempNodeData1 < Math.PI*0.1 && tempNodeData1 > -Math.PI*0.1)
+      {
+         isValid = false;         
+      }
+      else
+      {
+         isValid = true;         
+      }      
    }
 
    @Override

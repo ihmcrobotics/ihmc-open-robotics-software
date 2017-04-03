@@ -36,8 +36,10 @@ public class RRTTree
    protected RRTNode upperBoundNode;
    protected RRTNode lowerBoundNode;
    protected ArrayList<RRTNode> pathNode = new ArrayList<RRTNode>();
+   
+   protected ArrayList<RRTNode> wholeNodes = new ArrayList<RRTNode>();
 
-   private RRTNode nodeCreator;
+   protected RRTNode nodeCreator;
    
    // numberOfNodes, ArrayList<RRTNode> nodes. every node of the nodes has its parent node.
 
@@ -45,6 +47,7 @@ public class RRTTree
    {
       this.rootNode = rootNode;
       nodeCreator = rootNode.createNode();
+      wholeNodes.add(this.rootNode);
    }
 
    public void setStepLength(double length)
@@ -67,6 +70,7 @@ public class RRTTree
       this.lowerBoundNode = lowerBoundNode;
    }
 
+   // User can override
    public double getMatric(RRTNode nodeOne, RRTNode nodeTwo)
    {
       return nodeOne.getDistance(nodeTwo);
@@ -89,6 +93,7 @@ public class RRTTree
    public boolean expandTree()
    {
       RRTNode node = getRandomNode();
+      //updateNearNodeForTargetNodeOld(node);
       updateNearNodeForTargetNode(node);
       this.newNode = getNewNode(node);
 
@@ -97,12 +102,35 @@ public class RRTTree
 
    public boolean expandTree(RRTNode node)
    {
+      //updateNearNodeForTargetNodeOld(node);
       updateNearNodeForTargetNode(node);
       this.newNode = getNewNode(node);
       return addNewNode();
    }
 
    public void updateNearNodeForTargetNode(RRTNode targetNode)
+   {
+      RRTNode optNode = this.wholeNodes.get(0);
+      RRTNode curNode;
+
+      double optMatric = Double.MAX_VALUE;
+      double curMatric;
+      
+      for(int i=0;i<this.wholeNodes.size();i++)
+      {
+         curNode = this.wholeNodes.get(i);
+         curMatric = getMatric(curNode, targetNode);
+         if (curMatric < optMatric)
+         {
+            optMatric = curMatric;
+            optNode = curNode;
+         }         
+      }
+      
+      this.nearNode = optNode;
+   }
+   
+   public void updateNearNodeForTargetNodeOld(RRTNode targetNode)
    {
       RRTNode[] nodeOnCurrentLevel;
       RRTNode[] nodeOnFutureLevel;
@@ -194,10 +222,11 @@ public class RRTTree
    {
       if (this.newNode.isValidNode() == true)
       {
-         RRTPiecewiseNode nodeConnectionTest = new RRTPiecewiseNode(this.nearNode, this.newNode);
-         if (nodeConnectionTest.isValidConnection())
+         RRTValidConnection rrtValidConnection = new RRTValidConnection(this.nearNode, this.newNode);
+         if (rrtValidConnection.isValidConnection())
          {
             nearNode.addChildNode(this.newNode);
+            wholeNodes.add(newNode);
             return true;
          }
       }
@@ -262,5 +291,10 @@ public class RRTTree
    public ArrayList<RRTNode> getPathNode()
    {
       return pathNode;
+   }
+   
+   public ArrayList<RRTNode> getWholeNode()
+   {
+      return wholeNodes;
    }
 }
