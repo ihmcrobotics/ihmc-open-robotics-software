@@ -136,7 +136,7 @@ public class WholeBodyControllerCore
          break;
       case INVERSE_KINEMATICS:
          if (inverseKinematicsSolver != null)
-            inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
+            inverseKinematicsSolver.submitInverseKinematicsCommandList(controllerCoreCommand.getInverseKinematicsCommandList());
          else
             throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
          break;

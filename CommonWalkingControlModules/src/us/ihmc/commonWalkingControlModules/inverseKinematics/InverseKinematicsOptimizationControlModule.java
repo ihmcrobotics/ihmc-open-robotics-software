@@ -6,8 +6,6 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
@@ -140,66 +138,33 @@ public class InverseKinematicsOptimizationControlModule
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   public void submitInverseKinematicsCommand(InverseKinematicsCommand<?> command)
-   {
-      switch (command.getCommandType())
-      {
-      case TASKSPACE:
-         submitSpatialVelocityCommand((SpatialVelocityCommand) command);
-         return;
-      case JOINTSPACE:
-         submitJointspaceVelocityCommand((JointspaceVelocityCommand) command);
-         return;
-      case MOMENTUM:
-         submitMomentumCommand((MomentumCommand) command);
-         return;
-      case PRIVILEGED_CONFIGURATION:
-         submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
-         break;
-      case LIMIT_REDUCTION:
-         submitJointLimitReductionCommand((JointLimitReductionCommand) command);
-         break;
-      case COMMAND_LIST:
-         submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
-         return;
-      default:
-         throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
-      }
-   }
-
-   private void submitSpatialVelocityCommand(SpatialVelocityCommand command)
+   public void submitSpatialVelocityCommand(SpatialVelocityCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialVelocityCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitJointspaceVelocityCommand(JointspaceVelocityCommand command)
+   public void submitJointspaceVelocityCommand(JointspaceVelocityCommand command)
    {
       boolean success = motionQPInputCalculator.convertJointspaceVelocityCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitMomentumCommand(MomentumCommand command)
+   public void submitMomentumCommand(MomentumCommand command)
    {
       boolean success = motionQPInputCalculator.convertMomentumCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitInverseKinematicsCommandList(InverseKinematicsCommandList command)
-   {
-      while (command.getNumberOfCommands() > 0)
-         submitInverseKinematicsCommand(command.pollCommand());
-   }
-
-   private void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
+   public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
       motionQPInputCalculator.updatePrivilegedConfiguration(command);
    }
 
-   private void submitJointLimitReductionCommand(JointLimitReductionCommand command)
+   public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
    {
       boundCalculator.submitJointLimitReductionCommand(command);
    }
