@@ -39,11 +39,16 @@ public class RRTTreeTimeDomain extends RRTTree
       this.timeScaleForMatric = timeScaleForMatric;
    }
    
+   public double getMotionTime()
+   {
+      return motionTime;
+   }
+      
    public double getTime(RRTNode node)
    {
       return node.getNodeData(0);
    }
-   
+      
    public double getDisplacement(RRTNode predecessorNode, RRTNode successorNode)
    {
       double squaredDisplacement = 0;
@@ -177,8 +182,7 @@ public class RRTTreeTimeDomain extends RRTTree
          double iDisplacement = (targetNode.getNodeData(i) - nearNode.getNodeData(i))/displacement*expandingDisplacement;
          newNode.setNodeData(i, nearNode.getNodeData(i) + iDisplacement);
          //PrintTools.info("expandingDisplacement "+expandingTimeGap + " " + expandingDisplacement + " " + iDisplacement);
-      }
-     
+      }     
       
       for (int i = 0; i < targetNode.getDimensionOfNodeData(); i++)
       {

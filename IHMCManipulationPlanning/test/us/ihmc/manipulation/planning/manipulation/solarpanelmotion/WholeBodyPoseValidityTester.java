@@ -31,6 +31,9 @@ public abstract class WholeBodyPoseValidityTester
       collisionFree = robotCollisionModel.getCollisionResult();
 
       // joint limit tester
+      /*
+       * joint limit should be added. 170401
+       */
       jointlimitFree = true;
    }
 

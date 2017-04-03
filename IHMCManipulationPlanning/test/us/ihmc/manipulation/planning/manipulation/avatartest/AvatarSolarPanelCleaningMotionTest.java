@@ -533,7 +533,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       plannerTimeDomain.getTree().setMaximumDisplacementOfStep(maximumDisplacement);      
       plannerTimeDomain.getTree().setMaximumTimeGapOfStep(maximumTimeGap);
       
-      plannerTimeDomain.expandTreeWhole(500);
+      //plannerTimeDomain.expandTreeWhole(500);
+      plannerTimeDomain.expandTreeGoal(500);
       ArrayList<RRTNode> wholeNode = plannerTimeDomain.getTree().getWholeNode();
       for(int i=0;i<wholeNode.size();i++)
       {
@@ -595,6 +596,14 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          branch(g, 2.5, Math.PI*0.1, 2.5, -Math.PI*0.1, 4);
          branch(g, 2.5, -Math.PI*0.1, 1.5, -Math.PI*0.1, 4);
          
+         g.setColor(Color.BLUE);
+         ArrayList<RRTNode> nodePath = plannerTimeDomain.getTree().getPathNode();
+         for(int i =1;i<nodePath.size();i++)
+         {
+            RRTNode rrtNode1 = nodePath.get(i);
+            RRTNode rrtNode2 = rrtNode1.getParentNode();
+            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+         }
          //if(tempNodeData0 > 1.5 && tempNodeData0 < 2.5 && tempNodeData1 < Math.PI*0.2 && tempNodeData1 > -Math.PI*0.2)
       }
       
