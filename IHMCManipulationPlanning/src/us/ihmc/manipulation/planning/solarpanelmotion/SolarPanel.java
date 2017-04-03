@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.transformables.Pose;

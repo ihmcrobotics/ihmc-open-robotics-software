@@ -1,10 +1,12 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+
 import java.util.ArrayList;
 
 public abstract class SolarPanelAbstractPath
 {
-   protected SolarPanel solarPanel;   
+   protected SolarPanel solarPanel;
    protected double motionTime;   
    protected int numberOfWayPoints;   
    protected ArrayList<SolarPanelCleaningPose> poses = new ArrayList<SolarPanelCleaningPose>();
