@@ -2,9 +2,15 @@ package us.ihmc.manipulation.planning.manipulation.avatartest;
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +45,9 @@ import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCle
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPoseValidityTester;
+import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrttimedomain.RRT1DNodeTimeDomain;
+import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerTimeDomain;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
@@ -507,8 +515,117 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       PrintTools.info("Node Two "+nodeTwo.getNodeData(0)+" "+nodeTwo.getNodeData(1));
       PrintTools.info("Node Two "+nodeTwo.isValidNode());
 
+      
+      
+      double motionTime = 5.0;
+      double maximumDisplacement = 0.1;
+      double maximumTimeGap = 0.1;
+      
+      RRT1DNodeTimeDomain nodeRoot = new RRT1DNodeTimeDomain(0.0, 0.0);
+      RRT1DNodeTimeDomain nodeLowerBound = new RRT1DNodeTimeDomain(0.0, -Math.PI*0.4);
+      RRT1DNodeTimeDomain nodeUpperBound = new RRT1DNodeTimeDomain(motionTime*1.5, Math.PI*0.4);
+      
+      RRTPlannerTimeDomain plannerTimeDomain = new RRTPlannerTimeDomain(nodeRoot);
+      
+      plannerTimeDomain.getTree().setMotionTime(motionTime);
+      plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
+      plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
+      plannerTimeDomain.getTree().setMaximumDisplacementOfStep(maximumDisplacement);      
+      plannerTimeDomain.getTree().setMaximumTimeGapOfStep(maximumTimeGap);
+      
+      plannerTimeDomain.expandTreeWhole(500);
+      ArrayList<RRTNode> wholeNode = plannerTimeDomain.getTree().getWholeNode();
+      for(int i=0;i<wholeNode.size();i++)
+      {
+         //PrintTools.info(" ");
+         //PrintTools.info(""+i+" data ");
+         for(int j=0;j<wholeNode.get(i).getDimensionOfNodeData();j++)
+         {  
+            //PrintTools.info(""+wholeNode.get(i).getNodeData(j));
+         }
+      }
+      
+   // ************************************* //
+      // show
+   // ************************************* //
+      JFrame frame;
+      DrawPanel drawPanel;
+      Dimension dim;
+      
 
+      frame = new JFrame("RRTTest");
+      drawPanel = new DrawPanel(plannerTimeDomain);
+      dim = new Dimension(1600, 800);
+      frame.setPreferredSize(dim);
+      frame.setLocation(200, 100);
+
+      frame.add(drawPanel);
+      frame.pack();
+      frame.setVisible(true);
+      
    }
+   
+   // ************************************* //
+   class DrawPanel extends JPanel
+   {
+      int scale = 300;
+      RRTPlannerTimeDomain plannerTimeDomain;
+      
+      DrawPanel(RRTPlannerTimeDomain plannerTimeDomain)
+      {
+         this.plannerTimeDomain = plannerTimeDomain;
+      }
+
+      public void paint(Graphics g)
+      {
+         super.paint(g);
+         g.setColor(Color.BLACK);
+         
+         ArrayList<RRTNode> wholeNode = plannerTimeDomain.getTree().getWholeNode();
+         for(int i =1;i<wholeNode.size();i++)
+         {
+            RRTNode rrtNode1 = wholeNode.get(i);
+            RRTNode rrtNode2 = rrtNode1.getParentNode();
+            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+         }
+         
+         g.setColor(Color.red);
+         branch(g, 1.5, -Math.PI*0.1, 1.5, Math.PI*0.1, 4);
+         branch(g, 1.5, Math.PI*0.1, 2.5, Math.PI*0.1, 4);
+         branch(g, 2.5, Math.PI*0.1, 2.5, -Math.PI*0.1, 4);
+         branch(g, 2.5, -Math.PI*0.1, 1.5, -Math.PI*0.1, 4);
+         
+         //if(tempNodeData0 > 1.5 && tempNodeData0 < 2.5 && tempNodeData1 < Math.PI*0.2 && tempNodeData1 > -Math.PI*0.2)
+      }
+      
+      public int t2u(double time)
+      {
+         return (int) Math.round((time * scale) + 50);
+      }
+
+      public int y2v(double yaw)
+      {
+         return (int) Math.round(((-yaw)) * scale + 400);
+      }
+      
+      public void point(Graphics g, double time, double yaw, int size)
+      {
+         int diameter = size;
+         g.drawOval(t2u(time) - diameter / 2, y2v(yaw) - diameter / 2, diameter, diameter);
+      }
+      
+      public void branch(Graphics g, double time1, double yaw1, double time2, double yaw2, int size)
+      {
+         point(g, time1, yaw1, size);
+         point(g, time2, yaw2, size);
+         
+         g.drawLine(t2u(time1), y2v(yaw1), t2u(time2), y2v(yaw2));
+      }
+   }
+   
+   // ************************************* //
+   
+   
    
    private void setUpSolarPanel()
    {

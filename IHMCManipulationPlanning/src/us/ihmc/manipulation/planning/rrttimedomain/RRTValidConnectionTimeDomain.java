@@ -1,10 +1,10 @@
-package us.ihmc.manipulation.planning.rrt;
+package us.ihmc.manipulation.planning.rrttimedomain;
 
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.manipulation.planning.rrt.RRTNode;
 
-public class RRTPiecewiseNode
+public class RRTValidConnectionTimeDomain
 {
    private RRTNode parentNode;
    private RRTNode childNode;
@@ -14,7 +14,7 @@ public class RRTPiecewiseNode
 
    public static int numberOfPiece = 20;
 
-   public RRTPiecewiseNode(RRTNode parentNode, RRTNode childNode)
+   public RRTValidConnectionTimeDomain(RRTNode parentNode, RRTNode childNode)
    {
       this.parentNode = parentNode;
       this.childNode = childNode;
@@ -56,7 +56,6 @@ public class RRTPiecewiseNode
       {
          if (nodes.get(i).isValidNode() == false)
          {
-            PrintTools.info("aa");
             return false;
          }
       }
