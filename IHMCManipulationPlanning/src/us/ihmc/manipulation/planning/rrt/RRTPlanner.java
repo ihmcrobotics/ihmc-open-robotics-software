@@ -64,7 +64,7 @@ public class RRTPlanner
 
          if (rrtPiecewisePath.updateShortCutPath() == true)
          {
-            optimalPath = rrtPiecewisePath.shortcutPath;
+            optimalPath = rrtPiecewisePath.getShortCutPath();
          }
       }
       else

@@ -40,14 +40,14 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMe
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.forwaypoint.EuclideanTrajectoryQuaternionCalculator;
 import us.ihmc.manipulation.planning.forwaypoint.FrameEuclideanTrajectoryQuaternion;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPoseValidityTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrttimedomain.RRT1DNodeTimeDomain;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerTimeDomain;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPoseValidityTester;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
@@ -427,7 +427,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
    }
    
-   //@Test
+   @Test
    public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -438,7 +438,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.updateRobotModel();
       
       
-      //ThreadTools.sleep(20000);
+      ThreadTools.sleep(20000);
       
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
@@ -447,7 +447,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
       wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
-      wholeBodyTrajectoryMessage.clear();
+      //wholeBodyTrajectoryMessage.clear();
 
       
       
@@ -455,7 +455,9 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       
       
-      //drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      
+      //success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       
       // ***************************************************** //
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();      
@@ -481,11 +483,11 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       }
       
       
-//      while (true)
-//      {
-//         ThreadTools.sleep(100);
-//         toolboxCommunicator.send(wholeBodyTrajectoryMessage);
-//      }
+      while (true)
+      {
+         ThreadTools.sleep(100);
+         toolboxCommunicator.send(wholeBodyTrajectoryMessage);
+      }
       
       
       
@@ -494,7 +496,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
    }
    
-   @Test
+   //@Test
    public void testRRTTimeDomainTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -533,18 +535,10 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       plannerTimeDomain.getTree().setMaximumDisplacementOfStep(maximumDisplacement);      
       plannerTimeDomain.getTree().setMaximumTimeGapOfStep(maximumTimeGap);
       
-      //plannerTimeDomain.expandTreeWhole(500);
       plannerTimeDomain.expandTreeGoal(500);
-      ArrayList<RRTNode> wholeNode = plannerTimeDomain.getTree().getWholeNode();
-      for(int i=0;i<wholeNode.size();i++)
-      {
-         //PrintTools.info(" ");
-         //PrintTools.info(""+i+" data ");
-         for(int j=0;j<wholeNode.get(i).getDimensionOfNodeData();j++)
-         {  
-            //PrintTools.info(""+wholeNode.get(i).getNodeData(j));
-         }
-      }
+      plannerTimeDomain.updateOptimalPath(101, 100);
+      
+      PrintTools.info(""+plannerTimeDomain.getOptimalPath().size());
       
    // ************************************* //
       // show
@@ -604,7 +598,15 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
             RRTNode rrtNode2 = rrtNode1.getParentNode();
             branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
          }
-         //if(tempNodeData0 > 1.5 && tempNodeData0 < 2.5 && tempNodeData1 < Math.PI*0.2 && tempNodeData1 > -Math.PI*0.2)
+         
+         g.setColor(Color.CYAN);
+         ArrayList<RRTNode> nodeShort = plannerTimeDomain.getOptimalPath();
+         for(int i =1;i<nodeShort.size();i++)
+         {
+            RRTNode rrtNode1 = nodeShort.get(i);
+            RRTNode rrtNode2 = nodeShort.get(i-1);
+            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+         }
       }
       
       public int t2u(double time)
