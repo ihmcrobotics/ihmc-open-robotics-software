@@ -268,7 +268,7 @@ public class BipedalFootstepPlannerNode
 
    public boolean isPartialFoothold()
    {
-      return MathTools.isPreciselyLessThan(percentageOfFoothold, 1.0, 1e-3);
+      return MathTools.isLessThanWithPrecision(percentageOfFoothold, 1.0, 1e-3);
    }
 
    public double getPercentageOfFoothold()

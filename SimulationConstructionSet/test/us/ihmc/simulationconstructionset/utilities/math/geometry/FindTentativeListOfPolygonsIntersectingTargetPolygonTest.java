@@ -23,18 +23,6 @@ import us.ihmc.robotics.geometry.ConvexPolygon2dIntersectionSetCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.simulationconstructionset.util.ground.steppingStones.SteppingStones;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2006</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class FindTentativeListOfPolygonsIntersectingTargetPolygonTest
 {
    private static final boolean VERBOSE = false;

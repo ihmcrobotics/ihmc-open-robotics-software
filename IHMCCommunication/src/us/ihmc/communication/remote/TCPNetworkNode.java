@@ -14,12 +14,7 @@ import java.net.Socket;
  * <p>Description: Represents either a simple client or server, provides utilities for connecting over tcp to other nodes (or anything else that uses tcp),
  * and creates streams for communicating between nodes.</p>
  *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: IHMC</p>
- *
  * @author jrebula
- * @version 1.0
  */
 public class TCPNetworkNode
 {

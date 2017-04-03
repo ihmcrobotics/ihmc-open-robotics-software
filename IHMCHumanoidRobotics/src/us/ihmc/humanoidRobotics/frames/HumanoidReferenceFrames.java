@@ -24,18 +24,6 @@ import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.containers.ContainerTools;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 {
    private final FullHumanoidRobotModel fullRobotModel;

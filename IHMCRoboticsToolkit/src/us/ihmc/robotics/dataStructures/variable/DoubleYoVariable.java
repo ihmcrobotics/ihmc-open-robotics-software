@@ -8,7 +8,7 @@ import org.apache.commons.math3.util.Precision;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 /**
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
  *
  * <p>YoVariables provide a simple, convenient mechanism for storing and manipulating robot data.  While each

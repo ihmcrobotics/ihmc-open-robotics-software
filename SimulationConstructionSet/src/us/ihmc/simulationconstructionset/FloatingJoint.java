@@ -12,14 +12,6 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.simulationconstructionset.physics.engine.featherstone.FloatingJointPhysics;
 
-/**
- * Title:        Yobotics! Simulation Construction Set<p>
- * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
- * @author Jerry Pratt
- * @version Beta 1.0
- */
 public class FloatingJoint extends Joint implements FloatingSCSJoint
 {
    private static final long serialVersionUID = 6863566500545068060L;

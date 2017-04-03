@@ -29,18 +29,6 @@ import com.jgraph.layout.tree.JGraphTreeLayout;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 
-/**
- * <p>Title: SimulationConstructionSet</p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class StateMachinesJPanel<E extends Enum<E>> extends JPanel implements StateChangedListener<E>
 {
    private static final long serialVersionUID = 2453853798153829891L;
