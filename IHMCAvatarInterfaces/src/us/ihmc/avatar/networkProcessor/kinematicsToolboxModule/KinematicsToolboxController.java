@@ -194,7 +194,7 @@ public class KinematicsToolboxController extends ToolboxController
       consumeCommands();
 
       wholeBodyInverseKinematicsSolver.reset();
-      wholeBodyInverseKinematicsSolver.submitInverseKinematicsCommand(computeInverseKinematicsCommands());
+      wholeBodyInverseKinematicsSolver.submitInverseKinematicsCommandList(computeInverseKinematicsCommands());
       wholeBodyInverseKinematicsSolver.compute();
 
       updateDesiredFullRobotModelState();
