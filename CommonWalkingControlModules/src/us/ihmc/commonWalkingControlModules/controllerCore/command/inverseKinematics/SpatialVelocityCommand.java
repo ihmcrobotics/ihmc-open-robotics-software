@@ -6,6 +6,8 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -154,6 +156,64 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       optionalPrimaryBaseName = other.optionalPrimaryBaseName;
    }
 
+   /**
+    * Copies all the fields of the given {@link SpatialAccelerationCommand} into this except for the
+    * spatial acceleration.
+    * 
+    * @param command the command to copy the properties from. Not modified.
+    */
+   public void setProperties(SpatialAccelerationCommand command)
+   {
+      hasWeight = command.getHasWeight();
+      setWeights(command.getWeightVector());
+
+      selectionMatrix.set(command.getSelectionMatrix());
+      base = command.getBase();
+      endEffector = command.getEndEffector();
+      baseName = command.getBaseName();
+      endEffectorName = command.getEndEffectorName();
+
+      optionalPrimaryBase = command.getPrimaryBase();
+      optionalPrimaryBaseName = command.getPrimaryBaseName();
+   }
+
+   /**
+    * Matrix used to convert the n-by-3 selection matrix of a {@link PointAccelerationCommand} into
+    * a n-by-6 selection matrix usable for this spatial command.
+    */
+   private DenseMatrix64F tempConversionMatrix = null;
+
+   /**
+    * Copies all the fields of the given {@link SpatialAccelerationCommand} into this except for the
+    * spatial acceleration.
+    * 
+    * @param command the command to copy the properties from. Not modified.
+    */
+   public void setProperties(PointAccelerationCommand command)
+   {
+      hasWeight = command.getHasWeight();
+      setWeight(0.0);
+      for (int i = 0; i < 3; i++)
+         weightVector.set(i + 3, command.getWeightVector().get(i));
+
+      if (tempConversionMatrix == null)
+         tempConversionMatrix = new DenseMatrix64F(3, Twist.SIZE);
+
+      // Convert the n-by-3 selection matrix into a n-by-6 matrix.
+      setSelectionMatrixForLinearControl();
+      tempConversionMatrix.reshape(command.getSelectionMatrix().getNumRows(), Twist.SIZE);
+      CommonOps.mult(command.getSelectionMatrix(), selectionMatrix, tempConversionMatrix);
+      selectionMatrix.set(tempConversionMatrix);
+
+      base = command.getBase();
+      endEffector = command.getEndEffector();
+      baseName = command.getBaseName();
+      endEffectorName = command.getEndEffectorName();
+
+      optionalPrimaryBase = command.getPrimaryBase();
+      optionalPrimaryBaseName = command.getPrimaryBaseName();
+   }
+
    public void setSelectionMatrixToIdentity()
    {
       selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
@@ -277,8 +337,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + "endEffector = " + endEffector.getName() + ", spatialVelocity = "
-            + spatialVelocity;
+      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
+            + spatialVelocity.getLinearPartCopy() + ", angular = " + spatialVelocity.getAngularPartCopy();
       return ret;
    }
 }
