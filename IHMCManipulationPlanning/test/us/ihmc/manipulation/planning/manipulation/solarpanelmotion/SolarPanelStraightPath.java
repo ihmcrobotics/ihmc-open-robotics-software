@@ -1,5 +1,7 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+
 public class SolarPanelStraightPath extends SolarPanelAbstractPath
 {   
    private SolarPanelCleaningPose startPose;

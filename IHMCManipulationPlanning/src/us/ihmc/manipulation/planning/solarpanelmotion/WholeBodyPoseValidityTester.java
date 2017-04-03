@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;

@@ -1,7 +1,7 @@
 package us.ihmc.manipulation.planning.rrttimedomain;
 
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPoseValidityTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPoseValidityTester;
 
 public class RRT1DNodeTimeDomain extends RRTNode
 {
