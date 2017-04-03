@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
