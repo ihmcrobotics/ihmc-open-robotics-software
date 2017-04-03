@@ -8,9 +8,9 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
@@ -44,7 +44,7 @@ public class WholeBodyControlCoreToolbox
    private final ReferenceFrame centerOfMassFrame;
    private final TwistCalculator twistCalculator;
    private final GeometricJacobianHolder geometricJacobianHolder;
-   private final MomentumOptimizationSettings momentumOptimizationSettings;
+   private final ControllerCoreOptimizationSettings optimizationSettings;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final JointIndexHandler jointIndexHandler;
@@ -120,7 +120,7 @@ public class WholeBodyControlCoreToolbox
     */
    public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, InverseDynamicsJoint[] controlledJoints,
                                       ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
-                                      MomentumOptimizationSettings momentumOptimizationSettings, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      ControllerCoreOptimizationSettings momentumOptimizationSettings, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
@@ -129,7 +129,7 @@ public class WholeBodyControlCoreToolbox
       this.centerOfMassFrame = centerOfMassFrame;
       this.twistCalculator = twistCalculator;
       this.geometricJacobianHolder = geometricJacobianHolder;
-      this.momentumOptimizationSettings = momentumOptimizationSettings;
+      this.optimizationSettings = momentumOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       jointIndexHandler = new JointIndexHandler(controlledJoints);
@@ -271,9 +271,9 @@ public class WholeBodyControlCoreToolbox
       return wrenchMatrixCalculator;
    }
 
-   public MomentumOptimizationSettings getMomentumOptimizationSettings()
+   public ControllerCoreOptimizationSettings getOptimizationSettings()
    {
-      return momentumOptimizationSettings;
+      return optimizationSettings;
    }
 
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
@@ -435,21 +435,21 @@ public class WholeBodyControlCoreToolbox
 
    public int getNumberOfBasisVectorsPerContactPoint()
    {
-      return momentumOptimizationSettings.getNumberOfBasisVectorsPerContactPoint();
+      return optimizationSettings.getNumberOfBasisVectorsPerContactPoint();
    }
 
    public int getNumberOfContactPointsPerContactableBody()
    {
-      return momentumOptimizationSettings.getNumberOfContactPointsPerContactableBody();
+      return optimizationSettings.getNumberOfContactPointsPerContactableBody();
    }
 
    public int getNumberOfContactableBodies()
    {
-      return momentumOptimizationSettings.getNumberOfContactableBodies();
+      return optimizationSettings.getNumberOfContactableBodies();
    }
 
    public int getRhoSize()
    {
-      return momentumOptimizationSettings.getRhoSize();
+      return optimizationSettings.getRhoSize();
    }
 }
