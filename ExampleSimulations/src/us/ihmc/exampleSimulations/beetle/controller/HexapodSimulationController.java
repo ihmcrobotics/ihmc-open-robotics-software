@@ -31,6 +31,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSextant;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -158,9 +159,15 @@ public class HexapodSimulationController implements RobotController
       MomentumOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
 
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(fullRobotModel, controlledBodies, controlledJoints,
-            momentumOptimizationSettings, jointPrivilegedConfigurationParameters, referenceFrames, controllerDt, -gravity,
-            geometricJacobianHolder, twistCalculator, footContactableBodies, yoGraphicsListRegistry, registry);
+      FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
+      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerDt, -gravity, rootJoint, controlledJoints, centerOfMassFrame,
+                                                                            twistCalculator, geometricJacobianHolder, momentumOptimizationSettings,
+                                                                            yoGraphicsListRegistry, registry);
+      toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
+      toolbox.setupForInverseDynamicsSolver(footContactableBodies);
+      toolbox.setupForInverseKinematicsSolver();
+      toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controlledBodies, footContactableBodies);
 
       return toolbox;
    }

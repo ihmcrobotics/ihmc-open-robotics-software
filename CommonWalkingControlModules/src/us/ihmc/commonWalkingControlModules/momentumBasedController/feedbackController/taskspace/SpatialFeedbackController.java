@@ -246,4 +246,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          throw new RuntimeException("This controller is disabled.");
       return output;
    }
+
+   @Override
+   public String toString()
+   {
+      return getClass().getSimpleName() + ": endEffector = " + endEffector;
+   }
 }

@@ -42,30 +42,24 @@ public class WholeBodyControllerCore
 
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
    {
-      this(toolbox, allPossibleCommands, true, true, true, parentRegistry);
-   }
-
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, boolean setupInverseDynamics,
-                                  boolean setupInverseKinematics, boolean setupVirtualModelControl, YoVariableRegistry parentRegistry)
-   {
       feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
 
-      if (setupInverseDynamics)
+      if (toolbox.isEnableInverseDynamicsModule())
          inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
       else
          inverseDynamicsSolver = null;
-      if (setupInverseKinematics)
+      if (toolbox.isEnableInverseKinematicsModule())
          inverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
       else
          inverseKinematicsSolver = null;
-      if (setupVirtualModelControl)
+      if (toolbox.isEnableVirtualModelControlModule())
          virtualModelControlSolver = new WholeBodyVirtualModelControlSolver(toolbox, registry);
       else
          virtualModelControlSolver = null;
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      FloatingInverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
+      FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
@@ -142,7 +136,7 @@ public class WholeBodyControllerCore
          break;
       case INVERSE_KINEMATICS:
          if (inverseKinematicsSolver != null)
-            inverseKinematicsSolver.submitInverseKinematicsCommand(controllerCoreCommand.getInverseKinematicsCommandList());
+            inverseKinematicsSolver.submitInverseKinematicsCommandList(controllerCoreCommand.getInverseKinematicsCommandList());
          else
             throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
          break;
