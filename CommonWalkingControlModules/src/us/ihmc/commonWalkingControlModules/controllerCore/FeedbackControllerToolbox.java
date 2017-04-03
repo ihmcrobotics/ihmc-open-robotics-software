@@ -26,7 +26,7 @@ public class FeedbackControllerToolbox
 
    public enum Type
    {
-      DESIRED("Desired"), CURRENT("Current"), FEEDFORWARD("FeedForward"), ACHIEVED("Achieved"), ERROR("Error");
+      DESIRED("Desired"), CURRENT("Current"), FEEDFORWARD("FeedForward"), FEEDBACK("Feedback"), ACHIEVED("Achieved"), ERROR("Error");
 
       private final String name;
 
