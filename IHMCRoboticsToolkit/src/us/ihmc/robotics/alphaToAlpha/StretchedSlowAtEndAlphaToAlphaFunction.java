@@ -8,12 +8,7 @@ package us.ihmc.robotics.alphaToAlpha;
  * b) f'(1) = 0, f'(0) = slopeAtStart
  * c) f''(0) = 0 </p>
  *
- * <p>Copyright (c) 2007</p>
- *
- * <p>Company: IHMC </p>
- *
  * @author IHMC LearningLocomotion Team
- * @version 1.0
  */
 public class StretchedSlowAtEndAlphaToAlphaFunction implements AlphaToAlphaFunction
 {

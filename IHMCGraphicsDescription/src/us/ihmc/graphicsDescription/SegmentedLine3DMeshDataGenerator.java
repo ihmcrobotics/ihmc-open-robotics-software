@@ -23,7 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolynomial3D;
  * allocation, i.e. no garbage generation such that it does not show up when tracking down garbage
  * generation in the controller.
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  *
  */
@@ -46,7 +46,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * The line radius is set to 1 meter but can be changed later via the method
     * {@link #setLineRadius(double)}.
     * </p>
-    * 
+    *
     * @param numberOfWaypoints the number of waypoints this segmented line will have to go through.
     *           Necessary to evaluate the number of meshes needed for this generator.
     * @param radialResolution refers to the quality of the cylinder rendering of the line section. A
@@ -61,7 +61,7 @@ public final class SegmentedLine3DMeshDataGenerator
    /**
     * Create a new mesh generator given the properties necessary to initialize the meshes and the
     * radius to use for the line.
-    * 
+    *
     * @param numberOfWaypoints the number of waypoints this segmented line will have to go through.
     *           Necessary to evaluate the number of meshes necessary.
     * @param radialResolution refers to the quality of the cylinder rendering of the line section. A
@@ -88,7 +88,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * <p>
     * The resulting meshes can be obtained using {@link #getMeshDataHolders()}.
     * </p>
-    * 
+    *
     * @param waypointPositions the positions through which the segmented line 3D has to go through.
     * @throws RuntimeException if {@code waypointPositions.length != this.getNumberOfWaypoints()}.
     */
@@ -112,7 +112,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * waypoints. If it is {@code null}, it is computed internally based on the waypoint positions
     * and spacing.
     * </p>
-    * 
+    *
     * @param waypointPositions the positions through which the segmented line 3D has to go through.
     * @param waypointDirections the positions through which the segmented line 3D has to go through.
     * @throws RuntimeException if {@code waypointPositions.length != this.getNumberOfWaypoints()} or
@@ -154,7 +154,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * One of the compute methods has to be called before the change is effective on the output
     * meshes.
     * </p>
-    * 
+    *
     * @param radius the new radius to be used when rendering the 3D line.
     */
    public void setLineRadius(double radius)
@@ -165,7 +165,7 @@ public final class SegmentedLine3DMeshDataGenerator
    /**
     * Gets the number of waypoints the segmented line 3D goes through (including the origin and the
     * end of the line).
-    * 
+    *
     * @return the number of waypoints.
     */
    public int getNumberOfWaypoints()
@@ -179,7 +179,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * WARNING: the meshes are part of the internal memory of this generator and are updated when
     * calling one of the compute methods.
     * </p>
-    * 
+    *
     * @return the reference to the output meshes of this generator.
     */
    public MeshDataHolder[] getMeshDataHolders()
@@ -189,7 +189,7 @@ public final class SegmentedLine3DMeshDataGenerator
 
    /**
     * Gets the line radius currently used by this generator.
-    * 
+    *
     * @return the line radius.
     */
    public double getLineRadius()
@@ -199,7 +199,7 @@ public final class SegmentedLine3DMeshDataGenerator
 
    /**
     * Gets the radial resolution currently used by this generator.
-    * 
+    *
     * @return the radial resolution.
     */
    public int getRadialResolution()
@@ -214,7 +214,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * instances for the vertices and normals, such that this generator actually modifies the meshes
     * by simply updating the circles. This is for improved performance.
     * </p>
-    * 
+    *
     * @param circles the circles from which the output meshes will be created. Not modified, but
     *           references to the vertices and normals are stored in the resulting meshes.
     * @return the array of {@code MeshDataHolder} that this generator will update.
@@ -279,7 +279,7 @@ public final class SegmentedLine3DMeshDataGenerator
     * <p>
     * If the two sections are parallel, {@code rotationToPack} is set to {@code previousRotation}.
     * </p>
-    * 
+    *
     * @param previousDirection the direction of the previous section. Not modified.
     * @param sectionDirection the direction of the section to compute the rotation of. Not modified.
     * @param previousRotation the rotation of the previous section. Not modified.
@@ -290,7 +290,7 @@ public final class SegmentedLine3DMeshDataGenerator
       xAxis.cross(previousDirection, sectionDirection);
       double length = xAxis.length();
 
-      if (length < 1.0e-10)
+      if (length < 1.0e-8)
       {
          rotationToPack.set(previousRotation);
          return;

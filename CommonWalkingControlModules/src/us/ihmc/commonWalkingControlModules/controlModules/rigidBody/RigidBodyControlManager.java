@@ -190,6 +190,7 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid orientation trajectory command.");
+         taskspaceControlState.clear();
          holdInJointspace();
       }
    }
@@ -206,6 +207,7 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
+         taskspaceControlState.clear();
          holdInJointspace();
       }
    }

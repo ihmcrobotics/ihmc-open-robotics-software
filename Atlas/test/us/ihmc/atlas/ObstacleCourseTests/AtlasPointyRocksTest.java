@@ -2,20 +2,27 @@ package us.ihmc.atlas.ObstacleCourseTests;
 
 import org.junit.Test;
 
+import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.HumanoidPointyRocksTest;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
 {
-   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
+   private final DRCRobotModel robotModel = new TestModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, DRCRobotModel.RobotTarget.SCS, false);
 
    @ContinuousIntegrationTest(estimatedDuration = 45.9, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 230000)
@@ -115,6 +122,43 @@ public class AtlasPointyRocksTest extends HumanoidPointyRocksTest
 
       return (DoubleYoVariable) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
                                                 "pelvisRotationErrorInBodyZ");
+   }
+
+   private class TestModel extends AtlasRobotModel
+   {
+      private final TestWalkingParameters walkingParameters;
+
+      public TestModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless)
+      {
+         super(atlasVersion, target, headless);
+         walkingParameters = new TestWalkingParameters(target, getJointMap(), getContactPointParameters());
+      }
+
+      @Override
+      public WalkingControllerParameters getWalkingControllerParameters()
+      {
+         return walkingParameters;
+      }
+
+   }
+
+   private class TestWalkingParameters extends AtlasWalkingControllerParameters
+   {
+      private ExplorationParameters explorationParameters = null;
+
+      public TestWalkingParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
+      {
+         super(target, jointMap, contactPointParameters);
+      }
+
+      @Override
+      public ExplorationParameters getOrCreateExplorationParameters(YoVariableRegistry registry)
+      {
+         if (explorationParameters == null)
+            explorationParameters = new ExplorationParameters(registry);
+         return explorationParameters;
+      }
+
    }
 
 }

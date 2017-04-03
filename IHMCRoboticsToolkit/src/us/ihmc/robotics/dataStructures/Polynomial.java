@@ -8,22 +8,10 @@ import us.ihmc.robotics.MathTools;
 
 /**
  * <p>
- * Polynomial
- * </p>
- *
- * <p>
  * Polynomial Function with real coefficients. Immuatable.
  * </p>
  *
- * <p>
- * Copyright (c) 2008
- * </p>
- *
- * <p>
- * IHMC-Yobotics
- * </p>
- *
- * @author IHMC-Yobotics Biped Team
+ * @author IHMC Biped Team
  * @version 1.0
  */
 public class Polynomial

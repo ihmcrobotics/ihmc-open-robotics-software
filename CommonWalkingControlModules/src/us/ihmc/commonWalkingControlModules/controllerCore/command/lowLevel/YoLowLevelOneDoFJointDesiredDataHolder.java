@@ -196,7 +196,7 @@ public class YoLowLevelOneDoFJointDesiredDataHolder implements LowLevelOneDoFJoi
 
    public YoLowLevelJointData getYoLowLevelJointData(OneDoFJoint joint)
    {
-      return lowLevelJointDataMap.get(joint);
+      return lowLevelJointDataMap.get(joint.getName());
    }
 
    @Override
