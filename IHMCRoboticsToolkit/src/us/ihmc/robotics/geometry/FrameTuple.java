@@ -228,11 +228,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       return tuple.getZ();
    }
 
-   public double distanceFromZero()
-   {
-      return Math.sqrt(tuple.getX() * tuple.getX() + tuple.getY() * tuple.getY() + tuple.getZ() * tuple.getZ());
-   }
-
    /**
     * Returns a Point3D copy of the tuple in this FrameTuple.
     *
