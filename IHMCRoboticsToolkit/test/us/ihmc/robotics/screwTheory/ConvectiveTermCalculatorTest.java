@@ -53,7 +53,8 @@ public class ConvectiveTermCalculatorTest
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(accelerationBack, acceleration, 1e-12);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
    public void testWithJointAccelerations() throws Exception
    {
       Random random = new Random(345345L);
