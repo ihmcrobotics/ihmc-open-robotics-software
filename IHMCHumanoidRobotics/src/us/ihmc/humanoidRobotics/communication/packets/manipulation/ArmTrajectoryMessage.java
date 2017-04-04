@@ -55,6 +55,20 @@ public class ArmTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<Ar
       super(trajectoryTime, desiredJointPositions);
       this.robotSide = robotSide;
    }
+   
+   /**
+    * Use this constructor to go straight to the given end points using the specified qp weights.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param robotSide is used to define which arm is performing the trajectory.
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the number of arm joints.
+    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that joint will use the controller default weight
+    */
+   public ArmTrajectoryMessage(RobotSide robotSide, double trajectoryTime, double[] desiredJointPositions, double[] weights)
+   {
+      super(trajectoryTime, desiredJointPositions, weights);
+      this.robotSide = robotSide;
+   }
 
    /**
     * Create a message using the given joint trajectory points.
