@@ -1,9 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceMessage;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-public class HeadHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCommand<HeadHybridJointspaceTaskspaceTrajectoryCommand, HeadHybridJointspaceTaskspaceMessage>
+public class HeadHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCommand<HeadHybridJointspaceTaskspaceTrajectoryCommand, HeadHybridJointspaceTaskspaceMessage>  implements FrameBasedCommand<HeadHybridJointspaceTaskspaceMessage>
 {
    private final NeckTrajectoryCommand jointspaceTrajectoryCommand = new NeckTrajectoryCommand();
    private final HeadTrajectoryCommand taskspaceTrajectoryCommand = new HeadTrajectoryCommand();
@@ -38,6 +40,13 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
       jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getHeadTrajectoryMessage());
    }
+   
+   @Override
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, HeadHybridJointspaceTaskspaceMessage message)
+   {
+      jointspaceTrajectoryCommand.set(message.getNeckTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(dataFrame, trajectoryFrame, message.getHeadTrajectoryMessage());
+   }
 
    @Override
    public boolean isCommandValid()
@@ -68,5 +77,4 @@ public class HeadHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCom
    {
       return taskspaceTrajectoryCommand;
    }
-   
 }
