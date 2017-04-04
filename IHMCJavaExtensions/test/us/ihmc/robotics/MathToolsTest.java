@@ -510,7 +510,6 @@ public class MathToolsTest
 
       assertEquals(expectedReturn2[0], actualReturn2[0], 1e-12);
       assertEquals(expectedReturn2[1], actualReturn2[1], 1e-12);
-
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -527,9 +526,9 @@ public class MathToolsTest
       v1 = Double.NaN;
       v2 = Double.NaN;
       epsilon = 3.0;
-      expectedReturn = true;
+      expectedReturn = false;
       actualReturn = MathTools.epsilonEquals(v1, v2, epsilon);
-      assertTrue(actualReturn);
+      assertEquals("Not equals", expectedReturn, actualReturn);
 
       /** @todo fill in the test code */
 
@@ -539,7 +538,34 @@ public class MathToolsTest
       boolean expectedReturn2 = false;
       boolean actualReturn2 = MathTools.epsilonEquals(v3, v4, epsi);
       assertEquals(expectedReturn2, actualReturn2);
+   }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test(timeout = 30000)
+   public void testEpsilonCompare()
+   {
+      double v1 = 2.0;
+      double v2 = 1.0;
+      double epsilon = 3.0;
+      boolean expectedReturn = true;
+      boolean actualReturn = MathTools.epsilonCompare(v1, v2, epsilon);
+      assertEquals(expectedReturn, actualReturn);
+
+      v1 = Double.NaN;
+      v2 = Double.NaN;
+      epsilon = 3.0;
+      expectedReturn = true;
+      actualReturn = MathTools.epsilonCompare(v1, v2, epsilon);
+      assertEquals("Not equals", expectedReturn, actualReturn);
+
+      /** @todo fill in the test code */
+
+      double v3 = 1.0;
+      double v4 = 0.0;
+      double epsi = 0.0;
+      boolean expectedReturn2 = false;
+      boolean actualReturn2 = MathTools.epsilonCompare(v3, v4, epsi);
+      assertEquals(expectedReturn2, actualReturn2);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -550,28 +576,28 @@ public class MathToolsTest
       double v2 = 1.099;
       double percent = 0.1;
       boolean expectedReturn = true;
-      boolean actualReturn = MathTools.withinPercentEquals(v1, v2, percent);
+      boolean actualReturn = MathTools.percentEquals(v1, v2, percent);
       assertEquals(expectedReturn, actualReturn);
 
       v1 = 1.0;
       v2 = -1.0;
       percent = 0.01;
       expectedReturn = false;
-      actualReturn = MathTools.withinPercentEquals(v1, v2, percent);
+      actualReturn = MathTools.percentEquals(v1, v2, percent);
       assertEquals(expectedReturn, actualReturn);
 
       v1 = 1.0;
       v2 = 1.009999;
       percent = 0.01;
       expectedReturn = true;
-      actualReturn = MathTools.withinPercentEquals(v1, v2, percent);
+      actualReturn = MathTools.percentEquals(v1, v2, percent);
       assertEquals(expectedReturn, actualReturn);
 
       v1 = 1.0;
       v2 = 1.099;
       percent = 0.01;
       expectedReturn = false;
-      actualReturn = MathTools.withinPercentEquals(v1, v2, percent);
+      actualReturn = MathTools.percentEquals(v1, v2, percent);
       assertEquals(expectedReturn, actualReturn);
    }
 
@@ -590,7 +616,14 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testCheckIsEqualNaN()
    {
-      MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12);
+      Assertions.assertExceptionThrown(RuntimeException.class, new RunnableThatThrows()
+      {
+         @Override
+         public void run() throws Throwable
+         {
+            MathTools.checkEpsilonEquals(Double.NaN, Double.NaN, 1e-12);
+         }
+      });
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -604,42 +637,42 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsGreaterThan()
    {
-      assertTrue(MathTools.isSignificantlyGreaterThan(2.00011000, 2.00010000, 8));
-      assertFalse(MathTools.isSignificantlyGreaterThan(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isGreaterThanWithSignificantFigures(2.00011000, 2.00010000, 8));
+      assertFalse(MathTools.isGreaterThanWithSignificantFigures(2.00011000, 2.00010000, 4));
       
-      assertTrue(MathTools.isPreciselyGreaterThan(2.00011000, 2.00010000, 1e-8));
-      assertFalse(MathTools.isPreciselyGreaterThan(2.00011000, 2.00010000, 1e-3));
+      assertTrue(MathTools.isGreaterThanWithPrecision(2.00011000, 2.00010000, 1e-8));
+      assertFalse(MathTools.isGreaterThanWithPrecision(2.00011000, 2.00010000, 1e-3));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsGreaterThanOrEqualTo()
    {
-      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00011000, 2.00010000, 8));
-      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00011000, 2.00010000, 4));
-      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00019000, 2.00020000, 4));
-      assertTrue(MathTools.isSignificantlyGreaterThanOrEqualTo(2.00019000, 2.00020000, 5));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithSignificantFigures(2.00011000, 2.00010000, 8));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithSignificantFigures(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithSignificantFigures(2.00019000, 2.00020000, 4));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithSignificantFigures(2.00019000, 2.00020000, 5));
       
-      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00011000, 2.00010000, 1e-8));
-      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00011000, 2.00010000, 1e-3));
-      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00019000, 2.00020000, 1e-3));
-      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00019000, 2.00020000, 1e-4));
-      assertTrue(MathTools.isPreciselyGreaterThanOrEqualTo(2.00020000, 2.00019000, 1e-5));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithPrecision(2.00011000, 2.00010000, 1e-8));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithPrecision(2.00011000, 2.00010000, 1e-3));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithPrecision(2.00019000, 2.00020000, 1e-3));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithPrecision(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isGreaterThanOrEqualToWithPrecision(2.00020000, 2.00019000, 1e-5));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)
    public void testIsLessThan()
    {
-      assertFalse(MathTools.isPreciselyLessThan(2.00011000, 2.00010000, 1e-8));
-      assertFalse(MathTools.isPreciselyLessThan(2.00011000, 2.00010000, 1e-4));
-      assertFalse(MathTools.isPreciselyLessThan(2.00019000, 2.00020000, 1e-4));
-      assertTrue(MathTools.isPreciselyLessThan(2.00019000, 2.00020000, 1e-5));
+      assertFalse(MathTools.isLessThanWithPrecision(2.00011000, 2.00010000, 1e-8));
+      assertFalse(MathTools.isLessThanWithPrecision(2.00011000, 2.00010000, 1e-4));
+      assertFalse(MathTools.isLessThanWithPrecision(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isLessThanWithPrecision(2.00019000, 2.00020000, 1e-5));
       
-      assertFalse(MathTools.isSignificantlyLessThan(2.00011000, 2.00010000, 1));
-      assertFalse(MathTools.isSignificantlyLessThan(2.00011000, 2.00010000, 5));
-      assertFalse(MathTools.isSignificantlyLessThan(2.00019000, 2.00020000, 5));
-      assertTrue(MathTools.isSignificantlyLessThan(2.00019000, 2.00020000, 6));
+      assertFalse(MathTools.isLessThanWithSignificantFigures(2.00011000, 2.00010000, 1));
+      assertFalse(MathTools.isLessThanWithSignificantFigures(2.00011000, 2.00010000, 5));
+      assertFalse(MathTools.isLessThanWithSignificantFigures(2.00019000, 2.00020000, 5));
+      assertTrue(MathTools.isLessThanWithSignificantFigures(2.00019000, 2.00020000, 6));
    }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.1)
@@ -709,15 +742,15 @@ public class MathToolsTest
    @Test(timeout = 30000)
    public void testIsLessThanOrEqualTo()
    {
-      assertFalse(MathTools.isSignificantlyLessThanOrEqualTo(2.00011000, 2.00010000, 8));
-      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00011000, 2.00010000, 4));
-      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00019000, 2.00020000, 4));
-      assertTrue(MathTools.isSignificantlyLessThanOrEqualTo(2.00019000, 2.00020000, 5));
+      assertFalse(MathTools.isLessThanOrEqualToWithSignificantFigures(2.00011000, 2.00010000, 8));
+      assertTrue(MathTools.isLessThanOrEqualToWithSignificantFigures(2.00011000, 2.00010000, 4));
+      assertTrue(MathTools.isLessThanOrEqualToWithSignificantFigures(2.00019000, 2.00020000, 4));
+      assertTrue(MathTools.isLessThanOrEqualToWithSignificantFigures(2.00019000, 2.00020000, 5));
       
-      assertFalse(MathTools.isPreciselyLessThanOrEqualTo(2.00011000, 2.00010000, 1e-8));
-      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00011000, 2.00010000, 1e-4));
-      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00019000, 2.00020000, 1e-4));
-      assertTrue(MathTools.isPreciselyLessThanOrEqualTo(2.00019000, 2.00020000, 1e-6));
+      assertFalse(MathTools.isLessThanOrEqualToWithPrecision(2.00011000, 2.00010000, 1e-8));
+      assertTrue(MathTools.isLessThanOrEqualToWithPrecision(2.00011000, 2.00010000, 1e-4));
+      assertTrue(MathTools.isLessThanOrEqualToWithPrecision(2.00019000, 2.00020000, 1e-4));
+      assertTrue(MathTools.isLessThanOrEqualToWithPrecision(2.00019000, 2.00020000, 1e-6));
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -858,18 +891,6 @@ public class MathToolsTest
 //      assertEquals(p.getY(), proj.getY(), Double.MIN_VALUE);
 //      assertEquals(0.1, proj.getZ(), 10e-10);
 //   }
-
-   @ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout = 30000)
-   public void testApplyDeadband()
-   {
-      assertEquals(MathTools.applyDeadband(1.0, 0.0), 1.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(1.0, 5.0), 0.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(5.0, 5.0), 0.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(-5.0, 5.0), 0.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(10.0, 5.0), 5.0, 1e-12);
-      assertEquals(MathTools.applyDeadband(-10.0, 5.0), -5.0, 1e-12);
-   }
    
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
    @Test(timeout = 30000)

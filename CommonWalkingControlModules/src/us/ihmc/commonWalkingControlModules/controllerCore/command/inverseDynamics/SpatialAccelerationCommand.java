@@ -6,7 +6,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -86,7 +86,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       }
    }
 
-   public void setAngularWeights(Vector3D angular)
+   public void setAngularWeights(Vector3DReadOnly angular)
    {
       weightVector.set(0, 0, angular.getX());
       weightVector.set(1, 0, angular.getY());
@@ -95,7 +95,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
       hasWeight = angular.getX() != HARD_CONSTRAINT && angular.getY() != HARD_CONSTRAINT && angular.getZ() != HARD_CONSTRAINT;
    }
 
-   public void setWeights(Vector3D angular, Vector3D linear)
+   public void setWeights(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       weightVector.set(0, 0, angular.getX());
       weightVector.set(1, 0, angular.getY());
@@ -255,8 +255,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    @Override
    public String toString()
    {
-      String ret = getClass().getSimpleName() + ": base = " + base.getName() + "endEffector = " + endEffector.getName() + ", spatialAcceleration = "
-            + spatialAcceleration;
+      String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
+            + spatialAcceleration.getLinearPartCopy() + ", angular = " + spatialAcceleration.getAngularPartCopy();
       return ret;
    }
 }

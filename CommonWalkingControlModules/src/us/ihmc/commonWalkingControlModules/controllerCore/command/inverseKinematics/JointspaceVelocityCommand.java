@@ -1,31 +1,45 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.HARD_CONSTRAINT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
+import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointspaceVelocityCommand implements InverseKinematicsCommand<JointspaceVelocityCommand>
 {
-   private double weight;
-
    private final int initialCapacity = 15;
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
    private final List<InverseDynamicsJoint> joints = new ArrayList<>(initialCapacity);
    private final DenseMatrixArrayList desiredVelocities = new DenseMatrixArrayList(initialCapacity);
 
+   private final RecyclingArrayList<MutableDouble> weights = new RecyclingArrayList<>(initialCapacity, MutableDouble.class);
+
    public JointspaceVelocityCommand()
    {
       clear();
+   }
+
+   public JointspaceVelocityCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredVelocity)
+   {
+      this(joint, desiredVelocity, HARD_CONSTRAINT);
+   }
+
+   public JointspaceVelocityCommand(InverseDynamicsJoint joint, DenseMatrix64F desiredVelocity, double weight)
+   {
+      this();
+      addJoint(joint, desiredVelocity);
+      setWeight(weight);
    }
 
    public void clear()
@@ -33,16 +47,17 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       joints.clear();
       jointNames.clear();
       desiredVelocities.clear();
-      removeWeight();
+      weights.clear();
    }
 
    public void addJoint(OneDoFJoint joint, double desiredVelocity)
    {
       joints.add(joint);
       jointNames.add(joint.getName());
-      DenseMatrix64F jointDesiredAcceleration = desiredVelocities.add();
-      jointDesiredAcceleration.reshape(1, 1);
-      jointDesiredAcceleration.set(0, 0, desiredVelocity);
+      weights.add().setValue(HARD_CONSTRAINT);
+      DenseMatrix64F jointDesiredVelocity = desiredVelocities.add();
+      jointDesiredVelocity.reshape(1, 1);
+      jointDesiredVelocity.set(0, 0, desiredVelocity);
    }
 
    public void addJoint(InverseDynamicsJoint joint, DenseMatrix64F desiredVelocity)
@@ -53,14 +68,14 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       desiredVelocities.add().set(desiredVelocity);
    }
 
-   public void setOneDoFJointDesiredAcceleration(int jointIndex, double desiredVelocity)
+   public void setOneDoFJointDesiredVelocity(int jointIndex, double desiredVelocity)
    {
       MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
       desiredVelocities.get(jointIndex).reshape(1, 1);
       desiredVelocities.get(jointIndex).set(0, 0, desiredVelocity);
    }
 
-   public void setDesiredAcceleration(int jointIndex, DenseMatrix64F desiredVelocity)
+   public void setDesiredVelocity(int jointIndex, DenseMatrix64F desiredVelocity)
    {
       checkConsistency(joints.get(jointIndex), desiredVelocity);
       desiredVelocities.get(jointIndex).set(desiredVelocity);
@@ -74,14 +89,21 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       }
    }
 
-   public void removeWeight()
+   public void makeHardConstraint()
    {
-      setWeight(HARD_CONSTRAINT);
+      for (int jointIdx = 0; jointIdx < joints.size(); jointIdx++)
+         setWeight(jointIdx, HARD_CONSTRAINT);
+   }
+
+   public void setWeight(int jointIndex, double weight)
+   {
+      weights.get(jointIndex).setValue(weight);
    }
 
    public void setWeight(double weight)
    {
-      this.weight = weight;
+      for (int jointIdx = 0; jointIdx < joints.size(); jointIdx++)
+         weights.get(jointIdx).setValue(weight);
    }
 
    @Override
@@ -92,9 +114,9 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       {
          joints.add(other.joints.get(i));
          jointNames.add(other.jointNames.get(i));
+         weights.add().setValue(other.getWeight(i));
       }
       desiredVelocities.set(other.desiredVelocities);
-      weight = other.weight;
    }
 
    private void checkConsistency(InverseDynamicsJoint joint, DenseMatrix64F desiredVelocity)
@@ -104,12 +126,28 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
 
    public boolean isHardConstraint()
    {
-      return weight == HARD_CONSTRAINT;
+      if (getNumberOfJoints() == 0)
+         return true;
+
+      boolean isHardConstraint = getWeight(0) == HARD_CONSTRAINT;
+      if (getNumberOfJoints() == 1)
+         return isHardConstraint;
+
+      // If there are multiple joints, make sure they are consistent.
+      for (int jointIdx = 1; jointIdx < joints.size(); jointIdx++)
+      {
+         boolean isJointHardConstraint = getWeight(jointIdx) == HARD_CONSTRAINT;
+         if (isJointHardConstraint != isHardConstraint)
+            throw new RuntimeException("Inconsistent weights in " + getClass().getSimpleName() + ": some joint velocity "
+                  + "desireds have weights, others are hard constraints. This is not supported in a single message.");
+      }
+
+      return isHardConstraint;
    }
 
-   public double getWeight()
+   public double getWeight(int jointIndex)
    {
-      return weight;
+      return weights.get(jointIndex).doubleValue();
    }
 
    public int getNumberOfJoints()
@@ -148,7 +186,6 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       return ControllerCoreCommandType.JOINTSPACE;
    }
 
-   @Override
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": ";

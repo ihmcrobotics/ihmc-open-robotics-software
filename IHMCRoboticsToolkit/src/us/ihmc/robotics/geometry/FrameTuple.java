@@ -228,11 +228,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       return tuple.getZ();
    }
 
-   public double distanceFromZero()
-   {
-      return Math.sqrt(tuple.getX() * tuple.getX() + tuple.getY() * tuple.getY() + tuple.getZ() * tuple.getZ());
-   }
-
    /**
     * Returns a Point3D copy of the tuple in this FrameTuple.
     *
@@ -578,9 +573,40 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       referenceFrame = frameTuple1.getReferenceFrame();
    }
 
-   public final void getInMatrixColumn(DenseMatrix64F matrix, int startRow)
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * its first row index.
+    *
+    * @param tupleMatrixToPack the array in which this tuple is frame stored. Modified.
+    */
+   public final void get(DenseMatrix64F tupleMatrixToPack)
    {
-      tuple.get(startRow, matrix);
+      tuple.get(tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param tupleMatrixToPack the column vector in which this frame tuple is stored. Modified.
+    */
+   public final void get(int startRow, DenseMatrix64F tupleMatrixToPack)
+   {
+      tuple.get(startRow, tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow} at the column index {@code column}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param column the column index to write in the dense-matrix.
+    * @param tupleMatrixToPack the matrix in which this frame tuple is stored. Modified.
+    */
+   public final void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
+   {
+      tuple.get(startRow, column, tupleMatrixToPack);
    }
 
    public final void clipToMinMax(double minValue, double maxValue)
