@@ -858,6 +858,26 @@ public class ScrewTools
       }
    }
 
+   public static void computeIndexForJoint(List<InverseDynamicsJoint> jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
+   {
+      int startIndex = 0;
+      for (int i = 0; i < jointsInOrder.size(); i++)
+      {
+         InverseDynamicsJoint joint = jointsInOrder.get(i);
+         int nDegreesOfFreedom = joint.getDegreesOfFreedom();
+
+         if (joint == jointToComputeIndicesFor)
+         {
+            for (int k = startIndex; k < startIndex + nDegreesOfFreedom; k++)
+            {
+               listToPackIndices.add(k);
+            }
+         }
+
+         startIndex += nDegreesOfFreedom;
+      }
+   }
+
    public static void computeIndexForJoint(InverseDynamicsJoint[] jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
    {
       int startIndex = 0;
