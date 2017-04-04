@@ -59,15 +59,17 @@ public class InverseDynamicsCommandDataCopier
       for (int i = 0; i < pointAccelerationCommands.size(); i++)
       {
          PointAccelerationCommand command = pointAccelerationCommands.get(i);
-         command.setBase(nameToRigidBodyMap.get(command.getBaseName()));
-         command.setEndEffector(nameToRigidBodyMap.get(command.getEndEffectorName()));
+         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         command.set(base, endEffector);
       }
 
       for (int i = 0; i < spatialAccelerationCommands.size(); i++)
       {
          SpatialAccelerationCommand command = spatialAccelerationCommands.get(i);
-         command.setBase(nameToRigidBodyMap.get(command.getBaseName()));
-         command.setEndEffector(nameToRigidBodyMap.get(command.getEndEffectorName()));
+         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         command.set(base, endEffector);
       }
    }
 
