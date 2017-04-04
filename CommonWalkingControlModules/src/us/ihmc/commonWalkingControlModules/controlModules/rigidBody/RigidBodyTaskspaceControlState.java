@@ -370,7 +370,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       if (command.useCustomControlFrame())
       {
-         command.getTransformFromBodyToControlFrame(controlFrameTransform);
+         command.packControlFramePose(controlFrameTransform);
          setControlFramePose(controlFrameTransform);
       }
 
@@ -419,6 +419,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       {
          PrintTools.warn(warningPrefix + "Was tracking orientation only. Can not queue pose trajectory.");
          return false;
+      }
+
+      if (command.useCustomControlFrame())
+      {
+         command.packControlFramePose(controlFrameTransform);
+         setControlFramePose(controlFrameTransform);
       }
 
       if (override || isEmpty())
