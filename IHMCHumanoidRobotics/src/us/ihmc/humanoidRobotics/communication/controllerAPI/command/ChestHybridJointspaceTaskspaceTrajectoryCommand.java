@@ -2,11 +2,11 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
-import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceTrajectoryMessage;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class ChestHybridJointspaceTaskspaceTrajectoryCommand
-      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceMessage> implements FrameBasedCommand<ChestHybridJointspaceTaskspaceMessage>
+      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceTrajectoryMessage> implements FrameBasedCommand<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
    private final SpineTrajectoryCommand jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
    private final ChestTrajectoryCommand taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
@@ -30,14 +30,14 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public void set(ChestHybridJointspaceTaskspaceMessage message)
+   public void set(ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
       taskspaceTrajectoryCommand.set(message.getChestTrajectoryMessage());
    }
    
    @Override
-   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, ChestHybridJointspaceTaskspaceMessage message)
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, ChestHybridJointspaceTaskspaceTrajectoryMessage message)
    {
       jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
       taskspaceTrajectoryCommand.set(dataFrame, trajectoryFrame, message.getChestTrajectoryMessage());
@@ -74,8 +74,8 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand
    }
 
    @Override
-   public Class<ChestHybridJointspaceTaskspaceMessage> getMessageClass()
+   public Class<ChestHybridJointspaceTaskspaceTrajectoryMessage> getMessageClass()
    {
-      return ChestHybridJointspaceTaskspaceMessage.class;
+      return ChestHybridJointspaceTaskspaceTrajectoryMessage.class;
    }
 }
