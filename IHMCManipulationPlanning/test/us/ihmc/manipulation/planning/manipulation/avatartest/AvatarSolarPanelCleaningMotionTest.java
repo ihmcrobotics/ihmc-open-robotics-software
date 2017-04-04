@@ -353,7 +353,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    }
    
    
-   //@Test(timeout = 160000)
+   @Test(timeout = 160000)
    public void testSolarPanelMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -369,7 +369,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
 
       motionTime = 3.0;
-      //solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose, motionTime);
+      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
       wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
       drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
@@ -377,7 +377,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       motionTime = 5.0;
-      //solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion, motionTime);
+      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion);
       
       for(int i=0;i<solarPanelPlanner.debugPose.size();i++)
       {
@@ -397,37 +397,11 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       
       
-      
-            
-//      // hand
-//      SolarPanelCleaningPose aCleaningPoseOne = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.1);
-//      scs.addStaticLinkGraphics(createXYZAxis(aCleaningPoseOne.getPose()));
-//             
-//      //pelvis
-//      FramePose desiredPelvisPose = new FramePose(drcBehaviorTestHelper.getReferenceFrames().getPelvisFrame());
-//      Quaternion desiredPelvisOrientation = new Quaternion();
-//      desiredPelvisOrientation.appendYawRotation(Math.PI*0.1);
-//      desiredPelvisPose.setPosition(new Point3D());
-//      desiredPelvisPose.setOrientation(desiredPelvisOrientation);      
-//      desiredPelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-//      Point3D desiredPosition = new Point3D(desiredPelvisPose.getPosition());
-//      Quaternion desiredOrientation = new Quaternion(desiredPelvisPose.getOrientation());
-//      PrintTools.info("desiredPosition "+desiredPosition.getX()+" "+desiredPosition.getY()+" "+desiredPosition.getZ()+" ");
-//      PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage(motionTime, desiredPosition, desiredOrientation);      
-//      
-//      
-//      wholeBodyTrajectoryMessage.clear();
-//      wholeBodyTrajectoryMessage.setHandTrajectoryMessage(aCleaningPoseOne.getHandTrajectoryMessage(motionTime));
-//      wholeBodyTrajectoryMessage.setPelvisTrajectoryMessage(pelvisTrajectoryMessage);
-//      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
-      
-      //PrintTools.info("l_arm_shx "+ drcBehaviorTestHelper.getRobot().getOneDegreeOfFreedomJoint("l_arm_shx").getQ());
-      
+
       
    }
    
-   @Test
+   //@Test
    public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -438,7 +412,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.updateRobotModel();
       
       
-      ThreadTools.sleep(20000);
+      //ThreadTools.sleep(20000);
       
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
@@ -483,11 +457,11 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       }
       
       
-      while (true)
-      {
-         ThreadTools.sleep(100);
-         toolboxCommunicator.send(wholeBodyTrajectoryMessage);
-      }
+//      while (true)
+//      {
+//         ThreadTools.sleep(100);
+//         toolboxCommunicator.send(wholeBodyTrajectoryMessage);
+//      }
       
       
       
