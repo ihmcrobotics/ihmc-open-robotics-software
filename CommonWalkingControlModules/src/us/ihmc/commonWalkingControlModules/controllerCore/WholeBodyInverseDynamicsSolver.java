@@ -170,11 +170,14 @@ public class WholeBodyInverseDynamicsSolver
       inverseDynamicsCalculator.compute();
       updateLowLevelData();
 
-      rootJoint.getWrench(residualRootJointWrench);
-      residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
-      residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
-      yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
-      yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      if (rootJoint != null)
+      {
+         rootJoint.getWrench(residualRootJointWrench);
+         residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
+         residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+         yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
+         yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      }
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
@@ -188,7 +191,8 @@ public class WholeBodyInverseDynamicsSolver
 
    private void updateLowLevelData()
    {
-      rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
+      if (rootJoint != null)
+         rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
 

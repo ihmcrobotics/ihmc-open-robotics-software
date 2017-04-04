@@ -114,7 +114,8 @@ public class InverseDynamicsOptimizationControlModule
       
       momentumModuleSolution = new MomentumModuleSolution();
 
-      qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
+      boolean hasFloatingBase = toolbox.getRootJoint() != null;
+      qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, hasFloatingBase, registry);
       qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
       qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
 
