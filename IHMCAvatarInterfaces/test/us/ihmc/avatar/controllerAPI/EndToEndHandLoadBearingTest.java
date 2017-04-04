@@ -146,13 +146,10 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getRobotModel().createFullRobotModel());
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ReferenceFrame chestFrame = referenceFrames.getChestFrame();
-
       RobotSide robotSide = RobotSide.RIGHT;
 
-      // position the cane on the ground
-      // TODO: change this to control the end point of the cane.
+      // position the contact point on the ground
       Quaternion handOrientation = new Quaternion();
       handOrientation.appendYawRotation(Math.PI / 4.0);
       handOrientation.appendPitchRotation(-Math.PI / 2.0);
@@ -161,8 +158,11 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
       handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
       handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.2, -0.15, 0.4), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.2, -0.15, 0.2), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setUseCustomControlFrame(true);
+      handTrajectoryMessage.setControlFramePosition(new Vector3D(-0.307, -0.027, -0.022)); // hard coded to be at the simulation contact point.
+
+      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.275, -0.125, 0.1), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.275, -0.125, -0.1), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
