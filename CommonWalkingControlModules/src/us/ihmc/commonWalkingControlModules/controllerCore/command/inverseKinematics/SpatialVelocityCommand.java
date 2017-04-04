@@ -164,7 +164,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
-      hasWeight = command.getHasWeight();
+      hasWeight = !command.isHardConstraint();
       setWeights(command.getWeightVector());
 
       selectionMatrix.set(command.getSelectionMatrix());

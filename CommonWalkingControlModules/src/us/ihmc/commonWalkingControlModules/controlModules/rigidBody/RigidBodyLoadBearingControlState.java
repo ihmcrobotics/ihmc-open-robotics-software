@@ -164,8 +164,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       // assemble zero acceleration command
       bodyAcceleration.setToZero(contactFrame, elevatorFrame, contactFrame);
       bodyAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFrame);
-      bodyAcceleration.changeFrameNoRelativeMotion(bodyFrame);
-      spatialAccelerationCommand.setSpatialAcceleration(bodyAcceleration);
+      spatialAccelerationCommand.setSpatialAcceleration(contactFrame, bodyAcceleration);
       spatialAccelerationCommand.setSelectionMatrix(accelerationSelectionMatrix);
 
       // assemble feedback control command

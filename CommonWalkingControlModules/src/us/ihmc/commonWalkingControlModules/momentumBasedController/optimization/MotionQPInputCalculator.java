@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.List;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -20,9 +22,10 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.ConvectiveTermCalculator;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
+import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.PointJacobian;
@@ -37,9 +40,14 @@ import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class MotionQPInputCalculator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleYoVariable nullspaceProjectionAlpha = new DoubleYoVariable("nullspaceProjectionAlpha", registry);
    private final DoubleYoVariable secondaryTaskJointsWeight = new DoubleYoVariable("secondaryTaskJointsWeight", registry);
+
+   private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
+   private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
    private final GeometricJacobianHolder geometricJacobianHolder;
 
@@ -54,8 +62,6 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
 
-   private final SpatialAccelerationVector convectiveTerm = new SpatialAccelerationVector();
-   private final ConvectiveTermCalculator convectiveTermCalculator = new ConvectiveTermCalculator();
 
    private final CentroidalMomentumHandler centroidalMomentumHandler;
 
@@ -294,8 +300,8 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
-      if (commandToConvert.getHasWeight())
+      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      if (!commandToConvert.isHardConstraint())
       {
          // Compute the weight: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
@@ -306,27 +312,31 @@ public class MotionQPInputCalculator
          CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
-      SpatialAccelerationVector spatialAcceleration = commandToConvert.getSpatialAcceleration();
       RigidBody base = commandToConvert.getBase();
       RigidBody endEffector = commandToConvert.getEndEffector();
-      long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, spatialAcceleration.getExpressedInFrame());
-      GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
+
+      commandToConvert.getControlFrame(controlFrame);
+
+      jacobianCalculator.clear();
+      jacobianCalculator.setKinematicChain(base, endEffector);
+      jacobianCalculator.setJacobianFrame(controlFrame);
+      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.computeConvectiveTerm();
 
       // Compute the task Jacobian: J = S * J
-      tempTaskJacobian.reshape(taskSize, jacobian.getNumberOfColumns());
-      CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), tempTaskJacobian);
+      jacobianCalculator.getJacobianMatrix(selectionMatrix, tempTaskJacobian);
 
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
-      InverseDynamicsJoint[] jointsUsedInTask = jacobian.getJointsInOrder();
+      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
       if (primaryBase != null)
       {
-         tempPrimaryTaskJacobian.reshape(taskSize, jointsUsedInTask.length);
+         tempPrimaryTaskJacobian.reshape(taskSize, jointsUsedInTask.size());
          tempPrimaryTaskJacobian.set(tempTaskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
-         for (int i = jointsUsedInTask.length - 1; i >= 0; i--)
+         for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            InverseDynamicsJoint joint = jointsUsedInTask[i];
+            InverseDynamicsJoint joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;
@@ -350,9 +360,8 @@ public class MotionQPInputCalculator
       jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
 
       // Compute the task objective: p = S * ( TDot - JDot qDot )
-      convectiveTermCalculator.computeJacobianDerivativeTerm(jacobian, convectiveTerm);
-      convectiveTerm.getMatrix(convectiveTermMatrix, 0);
-      spatialAcceleration.getMatrix(tempTaskObjective, 0);
+      jacobianCalculator.getConvectiveTerm(convectiveTermMatrix);
+      commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
       CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
