@@ -29,7 +29,8 @@ public class SolarPanelMotionPlanner
       ReadyPose,
       LinearCleaningMotion,
       LinearCleaningMotionWhole,
-      RRTPlanningMotion
+      RRTTimeDomainLinearMotion,
+      RRTTimeDomainLinearWhole,
    }
    
    public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
@@ -134,6 +135,7 @@ public class SolarPanelMotionPlanner
          debugPoseOne = readyPose.getPose();
          
          break;
+         
       case LinearCleaningMotion:
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.LinearCleaningMotion);
          
@@ -147,6 +149,20 @@ public class SolarPanelMotionPlanner
          
          break;
          
+      case RRTTimeDomainLinearMotion:
+         
+         
+         
+         
+         break;
+         
+      case RRTTimeDomainLinearWhole:
+         
+         
+         
+         
+         break;
+         
       default:
          PrintTools.info("setTrajectoryMessage -> NONE");
          
@@ -154,6 +170,7 @@ public class SolarPanelMotionPlanner
          
       }
       
+      this.wholeBodyTrajectoryMessage.clear();
       this.wholeBodyTrajectoryMessage = wholeBodyTrajectoryMessage;
    }
    
