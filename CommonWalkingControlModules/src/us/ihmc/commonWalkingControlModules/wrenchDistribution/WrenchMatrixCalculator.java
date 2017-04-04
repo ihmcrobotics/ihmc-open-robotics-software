@@ -11,7 +11,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -57,7 +57,6 @@ public class WrenchMatrixCalculator
    private final DenseMatrix64F desiredCoPWeightMatrix;
    private final DenseMatrix64F copRateWeightMatrix;
 
-   private final ReferenceFrame centerOfMassFrame;
    private final Map<RigidBody, Wrench> wrenchesFromRho = new HashMap<>();
 
    private final List<RigidBody> rigidBodies = new ArrayList<>();
@@ -98,8 +97,6 @@ public class WrenchMatrixCalculator
       if (contactablePlaneBodies.size() > nContactableBodies)
          throw new RuntimeException("Unexpected number of contactable plane bodies: " + contactablePlaneBodies.size());
 
-      this.centerOfMassFrame = centerOfMassFrame;
-
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
       {
          ContactablePlaneBody contactablePlaneBody = contactablePlaneBodies.get(i);
@@ -120,13 +117,13 @@ public class WrenchMatrixCalculator
          wrenchesFromRho.put(rigidBody, wrench);
       }
 
-      MomentumOptimizationSettings momentumOptimizationSettings = toolbox.getMomentumOptimizationSettings();
-      rhoWeight.set(momentumOptimizationSettings.getRhoWeight());
-      rhoRateDefaultWeight.set(momentumOptimizationSettings.getRhoRateDefaultWeight());
-      rhoRateHighWeight.set(momentumOptimizationSettings.getRhoRateHighWeight());
-      desiredCoPWeight.set(momentumOptimizationSettings.getCoPWeight());
-      copRateDefaultWeight.set(momentumOptimizationSettings.getCoPRateDefaultWeight());
-      copRateHighWeight.set(momentumOptimizationSettings.getCoPRateHighWeight());
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
+      rhoWeight.set(optimizationSettings.getRhoWeight());
+      rhoRateDefaultWeight.set(optimizationSettings.getRhoRateDefaultWeight());
+      rhoRateHighWeight.set(optimizationSettings.getRhoRateHighWeight());
+      desiredCoPWeight.set(optimizationSettings.getCoPWeight());
+      copRateDefaultWeight.set(optimizationSettings.getCoPRateDefaultWeight());
+      copRateHighWeight.set(optimizationSettings.getCoPRateHighWeight());
 
       parentRegistry.addChild(registry);
    }

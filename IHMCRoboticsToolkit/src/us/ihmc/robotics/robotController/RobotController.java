@@ -5,8 +5,7 @@ package us.ihmc.robotics.robotController;
  * Has a name and a YoVariableRegistry. This registry should not be attached to a 
  * parent before it is added to a robot. It will be added to the robots registry.
  *  
- * Copyright:    Copyright (c) 2000-2011
- * Company:      IHMC and Yobotics, Inc. 
+ * Company: IHMC
  */
 public interface RobotController extends RobotControlElement
 {

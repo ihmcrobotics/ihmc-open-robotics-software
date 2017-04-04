@@ -24,7 +24,7 @@ public class HandUserControlModeState extends HandControlState
    private final DoubleYoVariable yoTime;
    private final JointspaceAccelerationCommand jointspaceAccelerationCommand = new JointspaceAccelerationCommand();
 
-   public HandUserControlModeState(String namePrefix, OneDoFJoint[] userControlledJoints, HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
+   public HandUserControlModeState(String namePrefix, OneDoFJoint[] userControlledJoints, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       super(HandControlMode.USER_CONTROL_MODE);
 
@@ -45,7 +45,7 @@ public class HandUserControlModeState extends HandControlState
       timeOfLastUserMesage = new DoubleYoVariable(namePrefix + "TimeOfLastUserMesage", registry);
       timeSinceLastUserMesage = new DoubleYoVariable(namePrefix + "TimeSinceLastUserMesage", registry);
       abortUserControlMode = new BooleanYoVariable(namePrefix + "AbortUserControlMode", registry);
-      yoTime = momentumBasedController.getYoTime();
+      yoTime = controllerToolbox.getYoTime();
    }
 
    public void setWeight(double weight)
@@ -56,7 +56,7 @@ public class HandUserControlModeState extends HandControlState
    public boolean handleArmDesiredAccelerationsMessage(ArmDesiredAccelerationsCommand command)
    {
       for (int i = 0; i < userControlledJoints.length; i++)
-         userDesiredJointAccelerations[i].set(command.getArmDesiredJointAcceleration(i));
+         userDesiredJointAccelerations[i].set(command.getDesiredJointAcceleration(i));
       timeSinceLastUserMesage.set(0.0);
       timeOfLastUserMesage.set(yoTime.getDoubleValue());
 

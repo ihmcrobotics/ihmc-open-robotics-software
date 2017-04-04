@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.createSimpleMovingAverageFilteredYoFrameVector;
+import static us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector.*;
 
 import java.util.EnumMap;
 

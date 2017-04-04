@@ -60,6 +60,7 @@ dependencies {
 
 	testCompile ihmc.getProjectTestDependency(":IHMCRoboticsToolkit")
 	testCompile ihmc.getProjectTestDependency(":IHMCJavaExtensions")
+    testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 
     compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
     compile group: 'commons-io', name: 'commons-io', version: '2.4'
@@ -69,9 +70,10 @@ dependencies {
     compile group: 'us.ihmc.thirdparty.jinput', name: 'jinput', version: '160414'
     compile group: 'org.xerial.snappy', name: 'snappy-java', version: '1.1.1-M1'
     compile group: 'com.google.guava', name: 'guava', version: '18.0'
-    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.2'
+    compile group: 'us.ihmc', name: 'euclid-core', version: '0.4.3'
     
 	compile ihmc.getProjectDependency(":IHMCJavaExtensions")
+    compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
 }
 
 test.finalizedBy jacocoTestReport

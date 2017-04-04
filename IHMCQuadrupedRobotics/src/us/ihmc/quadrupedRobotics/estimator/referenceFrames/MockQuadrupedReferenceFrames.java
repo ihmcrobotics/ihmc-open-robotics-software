@@ -1,6 +1,7 @@
 package us.ihmc.quadrupedRobotics.estimator.referenceFrames;
 
 import us.ihmc.robotics.partNames.LegJointName;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
@@ -189,6 +190,13 @@ public class MockQuadrupedReferenceFrames extends CommonQuadrupedReferenceFrames
 
    @Override
    public ReferenceFrame getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   @Override
+   public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
       // TODO Auto-generated method stub
       return null;

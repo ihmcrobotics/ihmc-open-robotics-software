@@ -32,7 +32,7 @@ public class YoGraphicCylinder extends YoGraphic implements RemoteYoGraphic
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!frameVector.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicCylinder. startPoint = " + startPoint + ", frameVector = "
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicCylinder. startPoint = " + startPoint + ", frameVector = "
                + frameVector);
       }
    }

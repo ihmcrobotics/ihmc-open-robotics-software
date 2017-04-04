@@ -29,7 +29,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
  */
 public class AlphaFilteredYoVariable extends DoubleYoVariable implements ProcessingYoVariable
 {
-   private double alpha;
    private final DoubleYoVariable alphaVariable;
 
    private final DoubleYoVariable position;
@@ -37,45 +36,45 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha)
    {
-      this(name, "", registry, alpha, null, null);
-   }
-
-   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable)
-   {
-      this(name, "", registry, 0.0, alphaVariable, null);
-   }
-
-   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleYoVariable alphaVariable)
-   {
-      this(name, description, registry, 0.0, alphaVariable, null);
+      this(name, registry, alpha, null);
    }
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, double alpha, DoubleYoVariable positionVariable)
    {
-      this(name, "", registry, alpha, null, positionVariable);
+      super(name,registry);
+      this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", registry);
+      this.alphaVariable = new DoubleYoVariable(name + "AlphaVariable", registry);
+      this.alphaVariable.set(alpha);
+      this.position = positionVariable;
+      reset();
    }
+
+   public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable)
+   {
+      this(name, "", registry, alphaVariable, null);
+   }
+
+   public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleYoVariable alphaVariable)
+   {
+      this(name, description, registry, alphaVariable, null);
+   }
+
 
    public AlphaFilteredYoVariable(String name, YoVariableRegistry registry, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable)
    {
-      this(name, "", registry, 0.0, alphaVariable, positionVariable);
+      this(name, "", registry, alphaVariable, positionVariable);
    }
 
    public AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable)
    {
-      this(name, description, registry, 0.0, alphaVariable, positionVariable);
-   }
-
-   private AlphaFilteredYoVariable(String name, String description, YoVariableRegistry registry, double alpha, DoubleYoVariable alphaVariable, DoubleYoVariable positionVariable)
-   {
       super(name, description, registry);
       this.hasBeenCalled = new BooleanYoVariable(name + "HasBeenCalled", description, registry);
-      position = positionVariable;
+      this.position = positionVariable;
       this.alphaVariable = alphaVariable;
-
-      this.alpha = alpha;
 
       reset();
    }
+
 
    public void reset()
    {
@@ -101,26 +100,14 @@ public class AlphaFilteredYoVariable extends DoubleYoVariable implements Process
          set(currentPosition);
       }
 
-      if (alphaVariable == null)
-      {
-         set(alpha * getDoubleValue() + (1.0 - alpha) * currentPosition);
-      }
-      else
-      {
-         set(alphaVariable.getDoubleValue() * getDoubleValue() + (1.0 - alphaVariable.getDoubleValue()) * currentPosition);
-      }
+
+      set(alphaVariable.getDoubleValue() * getDoubleValue() + (1.0 - alphaVariable.getDoubleValue()) * currentPosition);
+
    }
 
    public void setAlpha(double alpha)
    {
-      if (alphaVariable == null)
-      {
-         this.alpha = alpha;
-      }
-      else
-      {
-         alphaVariable.set(alpha);
-      }
+      this.alphaVariable.set(alpha);
    }
 
    /**

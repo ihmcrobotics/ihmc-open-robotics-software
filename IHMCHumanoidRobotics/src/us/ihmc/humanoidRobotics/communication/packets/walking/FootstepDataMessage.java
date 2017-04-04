@@ -19,7 +19,6 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.TransformTools;
@@ -66,31 +65,19 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-
    @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
          + "The waypoints specify the sole position in the world frame.")
    public Point3D[] trajectoryWaypoints = new Point3D[0];
-
    @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
          + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
    public double swingHeight = 0.0;
 
-   @RosExportedField(documentation = "Boolean that determines whether the controller should use swing and transfer times specifies in this message (if true) or"
-         + "if the default swing and transfer times from the FootstepDataListMessage should be used (if false).")
-   public boolean hasTimings = false;
-   @RosExportedField(documentation = "Specifies the swing time for this footstep.")
-   public double swingTime = Double.NaN;
-   @RosExportedField(documentation = "Specifies the transfer time before this step.")
-   public double transferTime = Double.NaN;
-
-   @RosExportedField(documentation = "Boolean that determines whether the controller should attemp at keeping absolute timings for the execution of this footstep."
-         + " This means that a time for foot lift-off (end of toe off) needs to be specified. The timing is set with respect to the start of the execution of the"
-         + " FootstepDataList that this footstep is part of. Note, that if you choose to use absolute timings transfer times you set in this message will be ignored.")
-   public boolean hasAbsoluteTime = false;
-   @RosExportedField(documentation = "If using absolute timings this is the time at which the controller will start the swing. The time is with respect to the time"
-         + " at which the controller recieves the walking command. The value of this time must be increasing throughout a FootstepDataListMessage, otherwise it is"
-         + " ignored.")
-   public double swingStartTime = 0.0;
+   @RosExportedField(documentation = "The swingDuration is the time a foot is not in ground contact during a step."
+         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default swingDuration.")
+   public double swingDuration = -1.0;
+   @RosExportedField(documentation = "The transferDuration is the time spent with the feet in ground contact before a step."
+         + "\nIf the value of this field is invalid (not positive) it will be replaced by a default transferDuration.")
+   public double transferDuration = -1.0;
 
    /**
     * Empty constructor for serialization.
@@ -99,12 +86,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
-   
+
    public FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
    {
       this(robotSide, new Point3D(location), new Quaternion(orientation), null);
    }
-   
+
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation)
    {
       this(robotSide, location, orientation, null);
@@ -164,11 +151,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
             trajectoryWaypoints[i] = new Point3D(footstepData.trajectoryWaypoints[i]);
       }
 
-      this.hasTimings = footstepData.hasTimings;
-      this.swingTime = footstepData.swingTime;
-      this.transferTime = footstepData.transferTime;
-      this.hasAbsoluteTime = footstepData.hasAbsoluteTime;
-      this.swingStartTime = footstepData.swingStartTime;
+      this.swingDuration = footstepData.swingDuration;
+      this.transferDuration = footstepData.transferDuration;
    }
 
    @Override
@@ -178,11 +162,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    }
 
    public FootstepDataMessage(Footstep footstep)
-   {
-      this(footstep, null);
-   }
-
-   public FootstepDataMessage(Footstep footstep, FootstepTiming timing)
    {
       origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
@@ -219,13 +198,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          trajectoryWaypoints = new Point3D[footstep.getSwingWaypoints().size()];
          for (int i = 0; i < footstep.getSwingWaypoints().size(); i++)
             trajectoryWaypoints[i] = new Point3D(footstep.getSwingWaypoints().get(i));
-      }
-
-      if (timing != null)
-      {
-         hasTimings = true;
-         swingTime = timing.getSwingTime();
-         transferTime = timing.getTransferTime();
       }
    }
 
@@ -321,48 +293,30 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.trajectoryWaypoints = trajectoryWaypoints;
    }
 
-   public void setTimings(double swingTime, double transferTime)
+   public void setTimings(double swingDuration, double transferDuration)
    {
-      hasTimings = true;
-      this.swingTime = swingTime;
-      this.transferTime = transferTime;
+      setSwingDuration(swingDuration);
+      setTransferDuration(transferDuration);
    }
 
-   public boolean hasTimings()
+   public void setSwingDuration(double swingDuration)
    {
-      return hasTimings;
+      this.swingDuration = swingDuration;
    }
 
-   public double getSwingTime()
+   public void setTransferDuration(double transferDuration)
    {
-      return swingTime;
+      this.transferDuration = transferDuration;
    }
 
-   public double getTransferTime()
+   public double getSwingDuration()
    {
-      return transferTime;
+      return swingDuration;
    }
 
-   public void setAbsoluteTime(double swingStartTime)
+   public double getTransferDuration()
    {
-      hasAbsoluteTime = true;
-      this.swingStartTime = swingStartTime;
-   }
-
-   public boolean hasAbsoluteTime()
-   {
-      return hasAbsoluteTime;
-   }
-
-   public void removeAbsoluteTime()
-   {
-      hasAbsoluteTime = false;
-      this.swingStartTime = 0.0;
-   }
-
-   public double getSwingStartTime()
-   {
-      return swingStartTime;
+      return transferDuration;
    }
 
    @Override
@@ -460,18 +414,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
          }
       }
 
-      boolean sameTimings = hasTimings == footstepData.hasTimings;
-      if (hasTimings)
-      {
-         sameTimings = sameTimings && MathTools.epsilonEquals(swingTime, footstepData.swingTime, epsilon);
-         sameTimings = sameTimings && MathTools.epsilonEquals(transferTime, footstepData.transferTime, epsilon);
-      }
+      boolean sameTimings = MathTools.epsilonEquals(swingDuration, footstepData.swingDuration, epsilon);
+      sameTimings = sameTimings && MathTools.epsilonEquals(transferDuration, footstepData.transferDuration, epsilon);
 
-      boolean sameAbsoluteTime = hasAbsoluteTime == footstepData.hasAbsoluteTime;
-      if (hasAbsoluteTime)
-         sameAbsoluteTime = sameAbsoluteTime && MathTools.epsilonEquals(swingStartTime, footstepData.swingStartTime, epsilon);
-
-      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings && sameAbsoluteTime;
+      return robotSideEquals && locationEquals && orientationEquals && contactPointsEqual && trajectoryWaypointsEqual && sameTimings;
    }
 
    @Override
@@ -515,18 +461,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.trajectoryType = trajectoryTypes[randomOrdinal];
       this.swingHeight = RandomNumbers.nextDoubleWithEdgeCases(random, 0.05);
 
-      if (random.nextBoolean())
-      {
-         hasTimings = true;
-         this.swingTime = RandomNumbers.nextDouble(random, 0.05, 2.0);
-         this.transferTime = RandomNumbers.nextDouble(random, 0.05, 2.0);
-      }
-
-      if (random.nextBoolean())
-      {
-         hasAbsoluteTime = true;
-         this.swingStartTime = RandomNumbers.nextDouble(random, 0.0, 50.0);
-      }
+      this.swingDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
+      this.transferDuration = RandomNumbers.nextDouble(random, -1.0, 2.0);
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {

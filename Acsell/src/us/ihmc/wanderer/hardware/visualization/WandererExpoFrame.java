@@ -291,7 +291,7 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    private void manageWalkChanged(boolean nowWalking)
    {
       if(nowWalking)
-         lastStartWalkTime = Conversions.nanoSecondstoSeconds(nanosecondstime.getLongValue());
+         lastStartWalkTime = Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue());
       else
          internalPriorWalkingDuration = walking_time.getDoubleValue();      
    }
@@ -315,12 +315,12 @@ public class WandererExpoFrame extends JFrame implements PlaybackListener
    {
       if(!init_complete)
       {
-         initTime = Conversions.nanoSecondstoSeconds(nanosecondstime.getLongValue());
+         initTime = Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue());
          init_complete = true;
       }
       if(expo_isWalking.getBooleanValue())
-         walking_time.set(Conversions.nanoSecondstoSeconds(nanosecondstime.getLongValue())-lastStartWalkTime+internalPriorWalkingDuration);
-      total_time.set(Conversions.nanoSecondstoSeconds(nanosecondstime.getLongValue())-initTime+startTime.getDoubleValue());
+         walking_time.set(Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue())-lastStartWalkTime+internalPriorWalkingDuration);
+      total_time.set(Conversions.nanosecondsToSeconds(nanosecondstime.getLongValue())-initTime+startTime.getDoubleValue());
 
       walking_time_value.setText(displayTime((int)walking_time.getDoubleValue()+(int)priorWalkingDuration.getDoubleValue()));
       operating_time_value.setText(displayTime((int)total_time.getDoubleValue()));

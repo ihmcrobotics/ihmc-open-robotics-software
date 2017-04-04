@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.CompilableCommand;
 import us.ihmc.communication.controllerAPI.command.MultipleCommandHolder;
@@ -15,7 +16,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.robotics.lists.RecyclingArrayList;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * CommandInputManager is used to generate a thread-safe input API for a controller.
@@ -64,6 +64,9 @@ public class CommandInputManager
 
    /** List of the listeners that should get notified when receiving a new valid command. */
    private final List<HasReceivedInputListener> hasReceivedInputListeners = new ArrayList<>();
+   
+   /** command converter, helps converts packets to commands **/
+   private CommandConversionInterface commandConverter = null;
 
 
    /**
@@ -89,6 +92,16 @@ public class CommandInputManager
       registerNewCommands(commandsToRegister);
    }
 
+   /**
+    * Registers a converter that helps convert a packet to a command. Currently only supports one converter
+    * @param commandConversionHelper
+    */
+   public void registerConversionHelper(CommandConversionInterface commandConversionHelper)
+   {
+      //update this to be a collection or map when you need more than one CommandConverter
+      this.commandConverter = commandConversionHelper;
+   }
+   
    /**
     * This method has to remain private.
     * It is used to register in the API a list of commands.
@@ -166,8 +179,15 @@ public class CommandInputManager
          PrintTools.warn(this, printStatementPrefix + "The buffer for the message: " + message.getClass().getSimpleName() + " is full. Message ignored.");
          return;
       }
-      nextCommand.set(message);
+      
       Class<?> commandClass = nextCommand.getClass();
+      if (commandConverter != null && commandConverter.isConvertible(nextCommand, message))
+      {
+         commandConverter.process(nextCommand, message);
+      }
+      else
+         nextCommand.set(message);
+         
       buffer.commit();
 
       for (int i = 0; i < hasReceivedInputListeners.size(); i++)

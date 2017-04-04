@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.groundContactForce.GroundContactForceOptimizationControlModule;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControlSolution;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -28,7 +29,6 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.Wrench;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class VirtualModelControlOptimizationControlModule
 {
@@ -59,17 +59,16 @@ public class VirtualModelControlOptimizationControlModule
 
    private final boolean useMomentumQP;
 
-   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, InverseDynamicsJoint rootJoint, boolean useMomentumQP,
-         YoVariableRegistry parentRegistry)
+   public VirtualModelControlOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, boolean useMomentumQP, YoVariableRegistry parentRegistry)
    {
       this.useMomentumQP = useMomentumQP;
       jointsToOptimizeFor = toolbox.getJointIndexHandler().getIndexedJoints();
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
-      WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
+      WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       groundContactForceOptimization = new GroundContactForceOptimizationControlModule(wrenchMatrixCalculator, contactablePlaneBodies,
-            toolbox.getMomentumOptimizationSettings(), parentRegistry, toolbox.getYoGraphicsListRegistry());
+            toolbox.getOptimizationSettings(), parentRegistry, toolbox.getYoGraphicsListRegistry());
 
       double gravityZ = toolbox.getGravityZ();
 
@@ -91,7 +90,7 @@ public class VirtualModelControlOptimizationControlModule
          achievedAngularMomentumRate = null;
       }
 
-      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
+      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       parentRegistry.addChild(registry);
    }

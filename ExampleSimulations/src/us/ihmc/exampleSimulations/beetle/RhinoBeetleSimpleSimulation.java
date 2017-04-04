@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.exampleSimulations.beetle.controller.HexapodSimulationController;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleGroundContactParameters;
 import us.ihmc.exampleSimulations.beetle.parameters.RhinoBeetleInverseDynamicsParameters;
@@ -18,15 +19,14 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.dataExporter.TorqueSpeedDataExporter;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporter;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
 import us.ihmc.tools.inputDevices.joystick.JoystickModel;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class RhinoBeetleSimpleSimulation
 {

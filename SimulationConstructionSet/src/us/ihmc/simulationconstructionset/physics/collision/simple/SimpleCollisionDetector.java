@@ -3,6 +3,8 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -10,8 +12,6 @@ import us.ihmc.geometry.polytope.ExpandingPolytopeAlgorithm;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SimplexPolytope;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
-import us.ihmc.robotics.geometry.BoundingBox3d;
-import us.ihmc.robotics.geometry.LineSegment3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShape;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeFactory;
@@ -60,8 +60,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       this.useSimpleSpeedupMethod = true;
    }
 
-   private final BoundingBox3d boundingBoxOne = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-   private final BoundingBox3d boundingBoxTwo = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   private final BoundingBox3D boundingBoxOne = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   private final BoundingBox3D boundingBoxTwo = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
    @Override
    public void performCollisionDetection(CollisionDetectionResult result)
@@ -110,7 +110,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             objectTwo.getBoundingBox(boundingBoxTwo);
 
             boundingBoxChecks++;
-            if (!boundingBoxOne.intersects(boundingBoxTwo))
+            if (!boundingBoxOne.intersectsInclusive(boundingBoxTwo))
             {
                continue;
             }
@@ -289,8 +289,8 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
       return false;
    }
 
-   private final LineSegment3d lineSegmentOne = new LineSegment3d();
-   private final LineSegment3d lineSegmentTwo = new LineSegment3d();
+   private final LineSegment3D lineSegmentOne = new LineSegment3D();
+   private final LineSegment3D lineSegmentTwo = new LineSegment3D();
    private final Point3D closestPointOnOne = new Point3D();
    private final Point3D closestPointOnTwo = new Point3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -452,7 +452,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
             polytopeSmoothingRadius, result);
    }
 
-   private final LineSegment3d tempLineSegment = new LineSegment3d();
+   private final LineSegment3D tempLineSegment = new LineSegment3D();
    private final Vector3D tempSegmentPointVector = new Vector3D();
 
    private boolean doCapsulePolytopeCollisionDetection(CollisionShape objectOne, CapsuleShapeDescription<?> descriptionOne, CollisionShape objectTwo,
@@ -711,7 +711,7 @@ public class SimpleCollisionDetector implements ScsCollisionDetector
    private final Vector3D vVector = new Vector3D();
    private final Vector3D w0Vector = new Vector3D();
 
-   public void getClosestPointsOnLineSegments(LineSegment3d segmentOne, LineSegment3d segmentTwo, Point3D closestPointOnOneToPack,
+   public void getClosestPointsOnLineSegments(LineSegment3D segmentOne, LineSegment3D segmentTwo, Point3D closestPointOnOneToPack,
          Point3D closestPointOnTwoToPack)
    {
       Point3D p0 = segmentOne.getFirstEndpoint();

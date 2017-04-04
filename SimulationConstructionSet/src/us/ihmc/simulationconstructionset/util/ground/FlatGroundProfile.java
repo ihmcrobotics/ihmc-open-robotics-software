@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class FlatGroundProfile extends GroundProfileFromHeightMap
 {
    private final double zHeight;
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    public FlatGroundProfile()
    {
@@ -27,7 +27,7 @@ public class FlatGroundProfile extends GroundProfileFromHeightMap
    {
       this.zHeight = zHeight;
 
-      this.boundingBox = new BoundingBox3d(xMin, yMin, zHeight - 1.0, xMax, yMax, zHeight + 0.01);
+      this.boundingBox = new BoundingBox3D(xMin, yMin, zHeight - 1.0, xMax, yMax, zHeight + 0.01);
    }
 
    @Override
@@ -53,7 +53,7 @@ public class FlatGroundProfile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

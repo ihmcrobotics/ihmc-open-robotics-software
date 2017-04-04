@@ -81,7 +81,7 @@ public class IntermediateWaypointVelocityGenerator
       {
          for (int j = 0; j < 3; j++)
          {
-            timeMatrix.setElement(i, j, MathTools.powWithInteger(time.get(i), 2 - j));
+            timeMatrix.setElement(i, j, MathTools.pow(time.get(i), 2 - j));
          }
       }
 

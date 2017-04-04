@@ -34,7 +34,7 @@ public class GeometricJacobianHolder
    }
 
    /**
-    * Find or create a Jacobian and register it in the MomentumBasedController.
+    * Find or create a Jacobian and register it in the {@link HighLevelHumanoidControllerToolbox}.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
     * @param ancestor
     * @param descendant
@@ -48,7 +48,7 @@ public class GeometricJacobianHolder
    }
 
    /**
-    * Find or create a Jacobian and register it in the MomentumBasedController.
+    * Find or create a Jacobian and register it in the {@link HighLevelHumanoidControllerToolbox}.
     * It returns an jacobianId with which it is possible to find the Jacobian later with the method getJacobian(int jacobianId).
     * If the array of joints is empty, it returns -1.
     * @param joints
@@ -86,10 +86,10 @@ public class GeometricJacobianHolder
          }
          jacobian.compute(); // Compute in case you need it right away
          geometricJacobians.add(jacobian);
-         nameBasedHashCodeToJacobianMap.put(jacobian.nameBasedHashCode(), jacobian);
+         nameBasedHashCodeToJacobianMap.put(jacobian.getNameBasedHashCode(), jacobian);
       }
 
-      return jacobian.nameBasedHashCode();
+      return jacobian.getNameBasedHashCode();
    }
 
    /**

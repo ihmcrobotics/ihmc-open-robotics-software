@@ -264,8 +264,8 @@ public class SpatialForceVector
 
    public void set(ReferenceFrame expressedInFrame, DenseMatrix64F matrix)
    {
-      MathTools.checkIfEqual(matrix.getNumRows(), SIZE);
-      MathTools.checkIfEqual(matrix.getNumCols(), 1);
+      MathTools.checkEquals(matrix.getNumRows(), SIZE);
+      MathTools.checkEquals(matrix.getNumCols(), 1);
 
       this.expressedInFrame = expressedInFrame;
       angularPart.set(matrix.get(0, 0), matrix.get(1, 0), matrix.get(2, 0));
@@ -274,7 +274,7 @@ public class SpatialForceVector
 
    public void set(ReferenceFrame expressedInFrame, double[] doubleArray)
    {
-      MathTools.checkIfEqual(doubleArray.length, SIZE);
+      MathTools.checkEquals(doubleArray.length, SIZE);
 
       this.expressedInFrame = expressedInFrame;
       angularPart.set(doubleArray[0], doubleArray[1], doubleArray[2]);

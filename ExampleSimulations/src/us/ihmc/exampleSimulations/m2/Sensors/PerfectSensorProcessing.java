@@ -24,10 +24,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
  * </p>
  *
  * <p>
- * Copyright: Copyright (c) 2010
- * </p>
- *
- * <p>
  * Company: IHMC
  * </p>
  *

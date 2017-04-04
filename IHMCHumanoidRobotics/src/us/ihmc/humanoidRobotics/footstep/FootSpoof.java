@@ -3,8 +3,8 @@ package us.ihmc.humanoidRobotics.footstep;
 import java.util.ArrayList;
 import java.util.List;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -49,7 +49,7 @@ public class FootSpoof implements ContactablePlaneBody
 
 //    if(FootstepUtilsTest.DEBUG_TESTS)
 //       System.out.println("FootSpoof: making transform from plane to ankle equal to "+transformToAnkle);
-      
+
       shinFrame = new PoseReferenceFrame(name + "ShinFrame", ReferenceFrame.getWorldFrame());
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
@@ -64,7 +64,7 @@ public class FootSpoof implements ContactablePlaneBody
       }
 
       totalNumberOfContactPoints = contactPoints.size();
-      
+
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
@@ -76,7 +76,7 @@ public class FootSpoof implements ContactablePlaneBody
 
 //    if(FootstepUtilsTest.DEBUG_TESTS)
 //       System.out.println("FootSpoof: making transform from plane to ankle equal to "+transformToAnkle);
-      
+
       shinFrame = new PoseReferenceFrame(name + "ShinFrame", ReferenceFrame.getWorldFrame());
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = ScrewTools.addRevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
@@ -96,7 +96,7 @@ public class FootSpoof implements ContactablePlaneBody
       contactPoints2d.add(point4.toFramePoint2d());
 
       totalNumberOfContactPoints = contactPoints.size();
-      
+
       this.coefficientOfFriction = coefficientOfFriction;
    }
 
@@ -179,5 +179,11 @@ public class FootSpoof implements ContactablePlaneBody
    public int getTotalNumberOfContactPoints()
    {
       return totalNumberOfContactPoints;
+   }
+
+   @Override
+   public void setSoleFrameTransformFromParentJoint(RigidBodyTransform transform)
+   {
+      throw new NotImplementedException();
    }
 }

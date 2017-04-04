@@ -17,7 +17,7 @@
  */
 package us.ihmc.jMonkeyEngineToolkit.stlLoader;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;

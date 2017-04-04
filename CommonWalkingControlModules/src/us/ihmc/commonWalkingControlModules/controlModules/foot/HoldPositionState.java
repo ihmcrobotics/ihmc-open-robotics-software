@@ -98,7 +98,7 @@ public class HoldPositionState extends AbstractFootControlState
       soleFrame = contactableFoot.getSoleFrame();
       fullyConstrainedNormalContactVector = footControlHelper.getFullyConstrainedNormalContactVector();
       this.partialFootholdControlModule = partialFootholdControlModule;
-      footSwitch = momentumBasedController.getFootSwitches().get(robotSide);
+      footSwitch = controllerToolbox.getFootSwitches().get(robotSide);
       footPolygon.setIncludingFrameAndUpdate(contactableFoot.getContactPoints2d());
       String namePrefix = contactableFoot.getName();
       desiredHoldOrientation = new YoFrameOrientation(namePrefix + "DesiredHoldOrientation", worldFrame, registry);
@@ -144,10 +144,10 @@ public class HoldPositionState extends AbstractFootControlState
 
       if (VISUALIZE)
       {
-         YoGraphicsListRegistry dynamicGraphicObjectsListRegistry = footControlHelper.getMomentumBasedController().getDynamicGraphicObjectsListRegistry();
+         YoGraphicsListRegistry YoGraphicsListRegistry = footControlHelper.getHighLevelHumanoidControllerToolbox().getYoGraphicsListRegistry();
          YoGraphicPosition desiredPositionViz = new YoGraphicPosition(namePrefix + "DesiredHoldPosition", desiredHoldPosition, 0.005, YoAppearance.DarkGray(), GraphicType.CROSS);
-         dynamicGraphicObjectsListRegistry.registerYoGraphic("HoldPosition", desiredPositionViz);
-         dynamicGraphicObjectsListRegistry.registerArtifact("HoldPosition", desiredPositionViz.createArtifact());
+         YoGraphicsListRegistry.registerYoGraphic("HoldPosition", desiredPositionViz);
+         YoGraphicsListRegistry.registerArtifact("HoldPosition", desiredPositionViz.createArtifact());
       }
    }
 
@@ -182,7 +182,7 @@ public class HoldPositionState extends AbstractFootControlState
       // Remember the previous contact normal, in case the foot leaves the ground and rotates
       holdPositionNormalContactVector.setIncludingFrame(fullyConstrainedNormalContactVector);
       holdPositionNormalContactVector.changeFrame(worldFrame);
-      momentumBasedController.setPlaneContactStateNormalContactVector(contactableFoot, holdPositionNormalContactVector);
+      controllerToolbox.setFootContactStateNormalContactVector(robotSide, holdPositionNormalContactVector);
 
       desiredSolePosition.setToZero(soleFrame);
       desiredSolePosition.changeFrame(worldFrame);
@@ -214,7 +214,7 @@ public class HoldPositionState extends AbstractFootControlState
    public void doSpecificAction()
    {
       footSwitch.computeAndPackCoP(cop);
-      momentumBasedController.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
+      controllerToolbox.getDesiredCenterOfPressure(contactableFoot, desiredCoP);
 
       if (desiredCoP.containsNaN())
       {
@@ -243,7 +243,7 @@ public class HoldPositionState extends AbstractFootControlState
 
          if (doFootholdAdjustments.getBooleanValue())
          {
-            YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+            YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
             boolean contactStateHasChanged = partialFootholdControlModule.applyShrunkPolygon(contactState);
             if (contactStateHasChanged)
                contactState.notifyContactStateHasChanged();

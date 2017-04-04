@@ -55,4 +55,12 @@ public class YoPIDGains extends YoPDGains
    {
       return integralLeakRatio;
    }
+
+   public void set(YoPIDGains other)
+   {
+      super.set(other);
+      ki.set(other.ki.getDoubleValue());
+      maxIntegralError.set(other.maxIntegralError.getDoubleValue());
+      integralLeakRatio.set(other.integralLeakRatio.getDoubleValue());
+   }
 }

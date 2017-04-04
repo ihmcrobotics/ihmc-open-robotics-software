@@ -203,10 +203,9 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
          {
             if (supportingJoints.contains(inverseDynamicsJoint))
             {
-               GeometricJacobian motionSubspace = inverseDynamicsJoint.getMotionSubspace();
-               for (Twist twist : motionSubspace.getAllUnitTwists())
+               for (int dofIndex = 0; dofIndex < inverseDynamicsJoint.getDegreesOfFreedom(); dofIndex++)
                {
-                  tempTwist.set(twist);
+                  inverseDynamicsJoint.getUnitTwist(dofIndex, tempTwist);
                   tempTwist.changeFrame(rootJoint.getFrameAfterJoint());
                   tempTwist.getMatrix(tempTwistMatrix, 0);
                   tempJacobianPart.reshape(selectionMatrix.getNumRows(), 1);

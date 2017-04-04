@@ -1,17 +1,13 @@
 package us.ihmc.quadrupedRobotics.geometry.supportPolygon;
 
-import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_LEFT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_RIGHT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_LEFT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_RIGHT;
-import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrant;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
 
 import java.io.Serializable;
 
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameLineSegment2d;
@@ -840,13 +836,13 @@ public class QuadrupedSupportPolygon implements Serializable
       if (size() == 1)
       {
          FramePoint footstep = getFootstep(getFirstSupportingQuadrant());
-         return -GeometryTools.distanceBetweenPoints(x, y, footstep.getX(), footstep.getY());
+         return -EuclidGeometryTools.distanceBetweenPoint2Ds(x, y, footstep.getX(), footstep.getY());
       }
       else if (size() == 2)
       {
          FramePoint pointOne = getFootstep(getFirstSupportingQuadrant());
          FramePoint pointTwo = getFootstep(getLastSupportingQuadrant());
-         return -Math.abs(GeometryTools.distanceFromPointToLine(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX() - pointOne.getX(), pointTwo.getY() - pointOne.getY()));
+         return -Math.abs(EuclidGeometryTools.distanceFromPoint2DToLine2D(x, y, pointOne.getX(), pointOne.getY(), pointTwo.getX() - pointOne.getX(), pointTwo.getY() - pointOne.getY()));
       }
       else
       {
@@ -898,7 +894,7 @@ public class QuadrupedSupportPolygon implements Serializable
       if (size() == 1)
       {
          FramePoint footstep = getFootstep(getFirstSupportingQuadrant());
-         return GeometryTools.distanceBetweenPoints(x, y, footstep.getX(), footstep.getY());
+         return EuclidGeometryTools.distanceBetweenPoint2Ds(x, y, footstep.getX(), footstep.getY());
       }
       else if (size() == 2)
       {
@@ -1727,7 +1723,7 @@ public class QuadrupedSupportPolygon implements Serializable
             double cornerToB = cornerPoint.distance(pointB);
             double aToB = pointA.distance(pointB);
    
-            double theta = GeometryTools.getUnknownTriangleAngleByLawOfCosine(cornerToA, cornerToB, aToB);
+            double theta = EuclidGeometryTools.unknownTriangleAngleByLawOfCosine(cornerToA, cornerToB, aToB);
             
             Point2D tempCorner = tempPointsForCornerCircle[0];
             Point2D tempA = tempPointsForCornerCircle[1];
@@ -1741,7 +1737,7 @@ public class QuadrupedSupportPolygon implements Serializable
    
             double radiusOffsetAlongBisector = cornerCircleRadius * (Math.sin(Math.PI / 2.0) / Math.sin(bisectTheta));
             Point2D adjacentBisector = tempPointsForCornerCircle[3];
-            GeometryTools.getTriangleBisector(tempA, tempCorner, tempB, adjacentBisector);
+            EuclidGeometryTools.triangleBisector2D(tempA, tempCorner, tempB, adjacentBisector);
    
             Vector2D bisectorVector = tempVectorForCornerCircle;
             bisectorVector.set(adjacentBisector.getX() - cornerPoint.getX(), adjacentBisector.getY() - cornerPoint.getY());

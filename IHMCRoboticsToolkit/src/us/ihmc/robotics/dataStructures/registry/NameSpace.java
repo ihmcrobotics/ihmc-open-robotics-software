@@ -3,18 +3,6 @@ package us.ihmc.robotics.dataStructures.registry;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-/**
- * <p>Title: SimulationConstructionSet</p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class NameSpace implements Serializable
 {
    private static final long serialVersionUID = -2584260031738121095L;

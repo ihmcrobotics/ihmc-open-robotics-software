@@ -71,14 +71,14 @@ public class ThreeDoFAngularAccelerationCalculatorTest
       spatialAccelerationCalculator.compute();
 
       SpatialAccelerationVector endEffectorAcceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.getAccelerationOfBody(endEffectorAcceleration, endEffector);
+      spatialAccelerationCalculator.getAccelerationOfBody(endEffector, endEffectorAcceleration);
       Twist endEffectorTwist = new Twist();
-      twistCalculator.getTwistOfBody(endEffectorTwist, endEffector);
+      twistCalculator.getTwistOfBody(endEffector, endEffectorTwist);
 
       SpatialAccelerationVector baseAcceleration = new SpatialAccelerationVector();
-      spatialAccelerationCalculator.getAccelerationOfBody(baseAcceleration, base);
+      spatialAccelerationCalculator.getAccelerationOfBody(base, baseAcceleration);
       Twist baseTwist = new Twist();
-      twistCalculator.getTwistOfBody(baseTwist, base);
+      twistCalculator.getTwistOfBody(base, baseTwist);
 
       endEffectorTwist.changeFrame(baseAcceleration.getExpressedInFrame());
       baseTwist.changeFrame(baseAcceleration.getExpressedInFrame());

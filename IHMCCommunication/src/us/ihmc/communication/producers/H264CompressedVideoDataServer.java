@@ -81,7 +81,7 @@ public class H264CompressedVideoDataServer implements NetStateListener, Compress
       {
          initialTimestamp = timeStamp;
       }
-      else if ((timeStamp - prevTimeStamp) < Conversions.secondsToNanoSeconds(1.0 / ((double) fps)))
+      else if ((timeStamp - prevTimeStamp) < Conversions.secondsToNanoseconds(1.0 / ((double) fps)))
       {
          return;
       }

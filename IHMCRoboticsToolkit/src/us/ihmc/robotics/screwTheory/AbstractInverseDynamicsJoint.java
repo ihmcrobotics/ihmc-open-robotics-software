@@ -162,7 +162,7 @@ public abstract class AbstractInverseDynamicsJoint implements InverseDynamicsJoi
    }
 
    @Override
-   public long nameBasedHashCode()
+   public long getNameBasedHashCode()
    {
       return nameBasedHashCode;
    }

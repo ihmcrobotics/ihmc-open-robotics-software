@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Foo
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -38,7 +39,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class ICPOptimizationControllerTest
 {
@@ -86,7 +86,7 @@ public class ICPOptimizationControllerTest
       FootstepTestHelper footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
       List<Footstep> footsteps = footstepTestHelper.createFootsteps(stepWidth, stepLength, 3);
       FootstepTiming defaultTiming = new FootstepTiming(singleSupportDuration, doubleSupportDuration);
-      icpPlanner.setFinalTransferTime(doubleSupportDuration);
+      icpPlanner.setFinalTransferDuration(doubleSupportDuration);
 
       for (int i = 0; i < footsteps.size(); i++)
       {
@@ -105,7 +105,9 @@ public class ICPOptimizationControllerTest
       FramePoint2d desiredICP = new FramePoint2d();
       FrameVector2d desiredICPVelocity = new FrameVector2d();
       FramePoint2d perfectCMP = new FramePoint2d();
-      icpPlanner.getDesiredCapturePointPositionAndVelocity(desiredICP, desiredICPVelocity, currentTime);
+      icpPlanner.compute(currentTime);
+      icpPlanner.getDesiredCapturePointPosition(desiredICP);
+      icpPlanner.getDesiredCapturePointVelocity(desiredICPVelocity);
       icpPlanner.getDesiredCentroidalMomentumPivotPosition(perfectCMP);
       icpOptimizationController.compute(currentTime, desiredICP, desiredICPVelocity, desiredICP, omega0);
 

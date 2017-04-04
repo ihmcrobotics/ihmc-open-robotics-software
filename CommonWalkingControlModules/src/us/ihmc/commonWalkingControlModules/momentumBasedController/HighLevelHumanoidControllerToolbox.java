@@ -6,6 +6,7 @@ import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArr
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -64,6 +65,7 @@ import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
 
@@ -82,17 +84,16 @@ public class HighLevelHumanoidControllerToolbox
    private final TwistCalculator twistCalculator;
 
    protected final SideDependentList<ContactableFoot> feet;
-   private final SideDependentList<ContactablePlaneBody> hands;
-
+   protected final List<ContactablePlaneBody> contactableBodies;
    private final SideDependentList<YoPlaneContactState> footContactStates = new SideDependentList<>();
    private final SideDependentList<FrameConvexPolygon2d> defaultFootPolygons = new SideDependentList<>();
+   
+   private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
+   private final Collection<ReferenceFrame> trajectoryFrames;
 
-   private final List<ContactablePlaneBody> contactablePlaneBodyList;
-   private final List<YoPlaneContactState> yoPlaneContactStateList = new ArrayList<YoPlaneContactState>();
    protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2d> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final DoubleYoVariable desiredCoPAlpha;
    private final LinkedHashMap<ContactablePlaneBody, AlphaFilteredYoFramePoint2d> filteredFootDesiredCenterOfPressures = new LinkedHashMap<>();
-   private final LinkedHashMap<ContactablePlaneBody, YoPlaneContactState> yoPlaneContactStates = new LinkedHashMap<ContactablePlaneBody, YoPlaneContactState>();
 
    private final ArrayList<Updatable> updatables = new ArrayList<Updatable>();
    private final DoubleYoVariable yoTime;
@@ -156,17 +157,17 @@ public class HighLevelHumanoidControllerToolbox
 
    public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, GeometricJacobianHolder robotJacobianHolder,
          CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-         CenterOfMassDataHolderReadOnly centerOfMassDataHolder,
-         SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime, double gravityZ, double omega0,
-         TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, SideDependentList<ContactablePlaneBody> hands, double controlDT,
-         ArrayList<Updatable> updatables, YoGraphicsListRegistry yoGraphicsListRegistry, InverseDynamicsJoint... jointsToIgnore)
+         CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime,
+         double gravityZ, double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, double controlDT,
+         ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+         InverseDynamicsJoint... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       this.robotJacobianHolder = robotJacobianHolder;
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-
+      
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = referenceFrames.getSoleZUpFrames();
@@ -174,6 +175,10 @@ public class HighLevelHumanoidControllerToolbox
 
       this.footSwitches = footSwitches;
       this.wristForceSensors = wristForceSensors;
+      
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+      trajectoryFrames = new ArrayList<ReferenceFrame>();
+      trajectoryFrames.addAll(referenceFrameHashCodeResolver.getAllReferenceFrames());
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -197,7 +202,7 @@ public class HighLevelHumanoidControllerToolbox
 
       // Initialize the contactable bodies
       this.feet = feet;
-      this.hands = hands;
+      this.contactableBodies = contactableBodies;
 
       RigidBody elevator = fullRobotModel.getElevator();
       double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
@@ -222,34 +227,17 @@ public class HighLevelHumanoidControllerToolbox
 
       double coefficientOfFriction = 1.0; // TODO: magic number...
 
-      // TODO: get rid of the null checks
-      this.contactablePlaneBodyList = new ArrayList<ContactablePlaneBody>();
-
-      if (feet != null)
-      {
-         this.contactablePlaneBodyList.addAll(feet.values()); // leftSole and rightSole
-      }
-
-      if (hands != null)
-      {
-         this.contactablePlaneBodyList.addAll(hands.values());
-      }
-
-      for (ContactablePlaneBody contactablePlaneBody : this.contactablePlaneBodyList)
-      {
-         RigidBody rigidBody = contactablePlaneBody.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(contactablePlaneBody.getSoleFrame().getName(), rigidBody,
-               contactablePlaneBody.getSoleFrame(), contactablePlaneBody.getContactPoints2d(), coefficientOfFriction, registry);
-         yoPlaneContactStates.put(contactablePlaneBody, contactState);
-         yoPlaneContactStateList.add(contactState);
-      }
-
       for (RobotSide robotSide : RobotSide.values)
       {
-         footContactStates.put(robotSide, yoPlaneContactStates.get(feet.get(robotSide)));
-         previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(feet.get(robotSide).getContactPoints2d());
+         ContactableFoot contactableFoot = feet.get(robotSide);
+         RigidBody rigidBody = contactableFoot.getRigidBody();
+         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody,
+               contactableFoot.getSoleFrame(), contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
 
-         FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(feet.get(robotSide).getContactPoints2d());
+         footContactStates.put(robotSide, contactState);
+         previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(contactableFoot.getContactPoints2d());
+
+         FrameConvexPolygon2d defaultFootPolygon = new FrameConvexPolygon2d(contactableFoot.getContactPoints2d());
          defaultFootPolygons.put(robotSide, defaultFootPolygon);
       }
 
@@ -257,8 +245,10 @@ public class HighLevelHumanoidControllerToolbox
 
       if (yoGraphicsListRegistry != null)
       {
-         ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(new ArrayList<YoPlaneContactState>(yoPlaneContactStateList),
-               yoGraphicsListRegistry, registry);
+         ArrayList<YoPlaneContactState> planeContactStateList = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            planeContactStateList.add(footContactStates.get(robotSide));
+         ContactPointVisualizer contactPointVisualizer = new ContactPointVisualizer(planeContactStateList, yoGraphicsListRegistry, registry);
          addUpdatable(contactPointVisualizer);
       }
 
@@ -726,7 +716,7 @@ public class HighLevelHumanoidControllerToolbox
    private void resetFootPlaneContactPoint(RobotSide robotSide)
    {
       ContactablePlaneBody foot = feet.get(robotSide);
-      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      YoPlaneContactState footContactState = footContactStates.get(robotSide);
       List<FramePoint2d> defaultContactPoints = foot.getContactPoints2d();
       previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(defaultContactPoints);
       footContactState.setContactFramePoints(defaultContactPoints);
@@ -734,61 +724,45 @@ public class HighLevelHumanoidControllerToolbox
 
    private void setFootPlaneContactPoints(RobotSide robotSide, List<Point2D> predictedContactPoints)
    {
-      ContactablePlaneBody foot = feet.get(robotSide);
-      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      YoPlaneContactState footContactState = footContactStates.get(robotSide);
       footContactState.getContactFramePoint2dsInContact(previousFootContactPoints.get(robotSide));
       footContactState.setContactPoints(predictedContactPoints);
    }
 
    public void restorePreviousFootContactPoints(RobotSide robotSide)
    {
-      ContactablePlaneBody foot = feet.get(robotSide);
-      YoPlaneContactState footContactState = yoPlaneContactStates.get(foot);
+      YoPlaneContactState footContactState = footContactStates.get(robotSide);
       footContactState.setContactFramePoints(previousFootContactPoints.get(robotSide));
    }
 
-   public void setPlaneContactCoefficientOfFriction(ContactablePlaneBody contactableBody, double coefficientOfFriction)
+   public void setFootContactCoefficientOfFriction(RobotSide robotSide, double coefficientOfFriction)
    {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      YoPlaneContactState yoPlaneContactState = footContactStates.get(robotSide);
       yoPlaneContactState.setCoefficientOfFriction(coefficientOfFriction);
    }
 
-   public void setPlaneContactStateNormalContactVector(ContactablePlaneBody contactableBody, FrameVector normalContactVector)
+   public void setFootContactStateNormalContactVector(RobotSide robotSide, FrameVector normalContactVector)
    {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      YoPlaneContactState yoPlaneContactState = footContactStates.get(robotSide);
       yoPlaneContactState.setContactNormalVector(normalContactVector);
    }
 
-   public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates)
+   public void setFootContactState(RobotSide robotSide, boolean[] newContactPointStates, FrameVector normalContactVector)
    {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
-      yoPlaneContactState.setContactPointsInContact(newContactPointStates);
-   }
-
-   public void setPlaneContactState(ContactablePlaneBody contactableBody, boolean[] newContactPointStates, FrameVector normalContactVector)
-   {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      YoPlaneContactState yoPlaneContactState = footContactStates.get(robotSide);
       yoPlaneContactState.setContactPointsInContact(newContactPointStates);
       yoPlaneContactState.setContactNormalVector(normalContactVector);
    }
 
-   public void setPlaneContactStateFullyConstrained(ContactablePlaneBody contactableBody)
+   public void setFootContactStateFullyConstrained(RobotSide robotSide)
    {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      YoPlaneContactState yoPlaneContactState = footContactStates.get(robotSide);
       yoPlaneContactState.setFullyConstrained();
    }
 
-   public void setPlaneContactStateFullyConstrained(ContactablePlaneBody contactableBody, double coefficientOfFriction, FrameVector normalContactVector)
+   public void setFootContactStateFree(RobotSide robotSide)
    {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
-      yoPlaneContactState.setFullyConstrained();
-      yoPlaneContactState.setCoefficientOfFriction(coefficientOfFriction);
-      yoPlaneContactState.setContactNormalVector(normalContactVector);
-   }
-
-   public void setPlaneContactStateFree(ContactablePlaneBody contactableBody)
-   {
-      YoPlaneContactState yoPlaneContactState = yoPlaneContactStates.get(contactableBody);
+      YoPlaneContactState yoPlaneContactState = footContactStates.get(robotSide);
       if (yoPlaneContactState != null)
          yoPlaneContactState.clear();
    }
@@ -843,32 +817,23 @@ public class HighLevelHumanoidControllerToolbox
       return feet;
    }
 
-   public SideDependentList<ContactablePlaneBody> getContactableHands()
+   public ContactablePlaneBody getContactableBody(RigidBody body)
    {
-      return hands;
+      for (ContactablePlaneBody contactableBody : contactableBodies)
+         if (contactableBody.getRigidBody().getName().equals(body.getName()))
+            return contactableBody;
+      return null;
    }
 
-   public void getContactPoints(ContactablePlaneBody contactablePlaneBody, List<FramePoint> contactPointListToPack)
+   public YoPlaneContactState getFootContactState(RobotSide robotSide)
    {
-      yoPlaneContactStates.get(contactablePlaneBody).getContactFramePointsInContact(contactPointListToPack);
-   }
-
-   public YoPlaneContactState getContactState(ContactablePlaneBody contactablePlaneBody)
-   {
-      return yoPlaneContactStates.get(contactablePlaneBody);
-   }
-
-   public List<ContactablePlaneBody> getContactablePlaneBodyList()
-   {
-      return contactablePlaneBodyList;
+      return footContactStates.get(robotSide);
    }
 
    public void clearContacts()
    {
-      for (int i = 0; i < yoPlaneContactStateList.size(); i++)
-      {
-         yoPlaneContactStateList.get(i).clear();
-      }
+      for (RobotSide robotSide : RobotSide.values)
+         footContactStates.get(robotSide).clear();
    }
 
    public long getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
@@ -916,7 +881,7 @@ public class HighLevelHumanoidControllerToolbox
       return bipedSupportPolygons;
    }
 
-   public YoGraphicsListRegistry getDynamicGraphicObjectsListRegistry()
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
       return yoGraphicsListRegistry;
    }
@@ -1037,6 +1002,16 @@ public class HighLevelHumanoidControllerToolbox
    public void getUpperBodyAngularMomentum(FrameVector upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
+   }
+
+   public ReferenceFrameHashCodeResolver getReferenceFrameHashCodeResolver()
+   {
+      return referenceFrameHashCodeResolver;
+   }
+   
+   public Collection<ReferenceFrame> getTrajectoryFrames()
+   {
+      return trajectoryFrames;
    }
 
 }

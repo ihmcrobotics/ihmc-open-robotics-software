@@ -66,8 +66,8 @@ public class BenchmarkFieldOrArrayAccess
             System.out.println("Test " + i + " returned " + testValue);
          }
          
-         res += "Writing " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanoSecondstoSeconds(writeTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
-         res += "Reading " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanoSecondstoSeconds(readTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
+         res += "Writing " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanosecondsToSeconds(writeTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
+         res += "Reading " + ITERATIONS + " of " + clazz.getSimpleName() + " averaged " + Conversions.nanosecondsToSeconds(readTime/(TESTS - TESTS/2)) + "s" + System.lineSeparator();
          
       }
       

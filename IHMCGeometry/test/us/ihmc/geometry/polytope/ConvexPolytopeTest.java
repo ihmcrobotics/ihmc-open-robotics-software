@@ -1,7 +1,6 @@
 package us.ihmc.geometry.polytope;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 
@@ -9,11 +8,11 @@ import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class ConvexPolytopeTest
 {
@@ -120,15 +119,15 @@ public class ConvexPolytopeTest
    public void testBoundingBoxes()
    {
       ConvexPolytope polytope = new ConvexPolytope();
-      BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      BoundingBox3D boundingBox = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       polytope.getBoundingBox(boundingBox);
 
-      assertTrue(boundingBox.getXMin() == Double.NEGATIVE_INFINITY);
-      assertTrue(boundingBox.getYMin() == Double.NEGATIVE_INFINITY);
-      assertTrue(boundingBox.getZMin() == Double.NEGATIVE_INFINITY);
-      assertTrue(boundingBox.getXMax() == Double.POSITIVE_INFINITY);
-      assertTrue(boundingBox.getYMax() == Double.POSITIVE_INFINITY);
-      assertTrue(boundingBox.getZMax() == Double.POSITIVE_INFINITY);
+      assertTrue(boundingBox.getMinX() == Double.NEGATIVE_INFINITY);
+      assertTrue(boundingBox.getMinY() == Double.NEGATIVE_INFINITY);
+      assertTrue(boundingBox.getMinZ() == Double.NEGATIVE_INFINITY);
+      assertTrue(boundingBox.getMaxX() == Double.POSITIVE_INFINITY);
+      assertTrue(boundingBox.getMaxY() == Double.POSITIVE_INFINITY);
+      assertTrue(boundingBox.getMaxZ() == Double.POSITIVE_INFINITY);
       
       PolytopeVertex vertexOne = polytope.addVertex(0.0, 0.0, 0.0);
       PolytopeVertex vertexTwo = polytope.addVertex(1.0, 0.0, 0.0);

@@ -6,6 +6,7 @@ import java.util.Collection;
 
 import javax.xml.bind.JAXBException;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
@@ -14,7 +15,6 @@ import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFromDescription;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
 {
@@ -23,13 +23,13 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
 
    private JaxbSDFLoader loader;
 
-   private final LLAQuadrupedJointNameMap jointMap;
+   private final LLAQuadrupedJointNameMapAndContactDefinition jointMapAndContactInfo;
 
    private final RobotDescription robotDescription;
 
    public LLAQuadrupedModelFactory()
    {
-      jointMap = new LLAQuadrupedJointNameMap(new LLAQuadrupedPhysicalProperties());
+      jointMapAndContactInfo = new LLAQuadrupedJointNameMapAndContactDefinition(new LLAQuadrupedPhysicalProperties());
 
       try
       {
@@ -52,7 +52,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-      robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useCollisionMeshes);
+      robotDescription = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMapAndContactInfo, jointMapAndContactInfo, useCollisionMeshes);
    }
 
    private GeneralizedSDFRobotModel getGeneralizedRobotModel()
@@ -72,7 +72,7 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
       GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
       String[] sensorLinksToTrack = new String[] {};
 
-      FullQuadrupedRobotModel sdfFullRobotMdoel = new FullQuadrupedRobotModelFromDescription(robotDescription, jointMap, sensorLinksToTrack);
+      FullQuadrupedRobotModel sdfFullRobotMdoel = new FullQuadrupedRobotModelFromDescription(robotDescription, jointMapAndContactInfo, sensorLinksToTrack);
 
       return sdfFullRobotMdoel;
    }
@@ -80,13 +80,13 @@ public class LLAQuadrupedModelFactory extends QuadrupedModelFactory
    @Override
    public Collection<QuadrupedJointName> getQuadrupedJointNames()
    {
-      return jointMap.getQuadrupedJointNames();
+      return jointMapAndContactInfo.getQuadrupedJointNames();
    }
 
    @Override
    public String getSDFNameForJointName(QuadrupedJointName quadrupedJointName)
    {
-      return jointMap.getSDFNameForJointName(quadrupedJointName);
+      return jointMapAndContactInfo.getSDFNameForJointName(quadrupedJointName);
    }
 
    @Override

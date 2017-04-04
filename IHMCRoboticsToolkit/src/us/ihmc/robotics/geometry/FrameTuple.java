@@ -68,6 +68,36 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       set(x, y, z);
    }
 
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startIndex, double[] tupleArray)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startIndex, tupleArray);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(tupleDenseMatrix);
+   }
+
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, tupleDenseMatrix);
+   }
+   
+   public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, int column, DenseMatrix64F tupleDenseMatrix)
+   {
+      this.referenceFrame = referenceFrame;
+      tuple.set(startRow, column, tupleDenseMatrix);
+   }
+
    public final void set(FrameTuple<?, ?> frameTuple)
    {
       checkReferenceFrameMatch(frameTuple);
@@ -196,11 +226,6 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    public final double getZ()
    {
       return tuple.getZ();
-   }
-
-   public double distanceFromZero()
-   {
-      return Math.sqrt(tuple.getX() * tuple.getX() + tuple.getY() * tuple.getY() + tuple.getZ() * tuple.getZ());
    }
 
    /**
@@ -548,9 +573,40 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       referenceFrame = frameTuple1.getReferenceFrame();
    }
 
-   public final void getInMatrixColumn(DenseMatrix64F matrix, int startRow)
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * its first row index.
+    *
+    * @param tupleMatrixToPack the array in which this tuple is frame stored. Modified.
+    */
+   public final void get(DenseMatrix64F tupleMatrixToPack)
    {
-      tuple.get(startRow, matrix);
+      tuple.get(tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param tupleMatrixToPack the column vector in which this frame tuple is stored. Modified.
+    */
+   public final void get(int startRow, DenseMatrix64F tupleMatrixToPack)
+   {
+      tuple.get(startRow, tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow} at the column index {@code column}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param column the column index to write in the dense-matrix.
+    * @param tupleMatrixToPack the matrix in which this frame tuple is stored. Modified.
+    */
+   public final void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
+   {
+      tuple.get(startRow, column, tupleMatrixToPack);
    }
 
    public final void clipToMinMax(double minValue, double maxValue)

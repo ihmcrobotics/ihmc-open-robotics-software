@@ -8,6 +8,7 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList implements Command<OneDoFJointTrajectoryCommand, OneDoFJointTrajectoryMessage>
 {
    private long commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
+   private double weight;
 
    public OneDoFJointTrajectoryCommand()
    {
@@ -17,6 +18,7 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    {
       super.clear();
       commandId = Packet.VALID_MESSAGE_DEFAULT_ID;
+      setWeight(Double.NaN);
    }
 
    @Override
@@ -24,6 +26,7 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    {
       super.set(other);
       commandId = other.commandId;
+      setWeight(other.getWeight());
    }
 
    @Override
@@ -31,6 +34,7 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
    {
       message.getTrajectoryPoints(this);
       commandId = message.getUniqueId();
+      setWeight(message.getWeight());
    }
 
    public void setCommandId(long commandId)
@@ -49,9 +53,25 @@ public class OneDoFJointTrajectoryCommand extends SimpleTrajectoryPoint1DList im
       return OneDoFJointTrajectoryMessage.class;
    }
 
+   public double getWeight()
+   {
+      return weight;
+   }
+
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
+   }
+   
    @Override
    public boolean isCommandValid()
    {
-      return getNumberOfTrajectoryPoints() > 0;
+      boolean numberOfTrajectoryPointsIsPositive = getNumberOfTrajectoryPoints() > 0;
+      boolean weightIsValid = !Double.isInfinite(getWeight());
+      if(Double.isFinite(weight))
+      {
+         weightIsValid &= weight >= 0;
+      }
+      return numberOfTrajectoryPointsIsPositive && weightIsValid;
    }
 }

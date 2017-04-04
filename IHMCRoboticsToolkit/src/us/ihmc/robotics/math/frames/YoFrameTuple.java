@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.frames;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,7 +24,7 @@ import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends AbstractReferenceFrameHolder
+public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends AbstractReferenceFrameHolder implements Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -198,6 +199,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
     * Sets x, y, and z with no checks for reference frame matches.
     * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.
     */
+   @Deprecated
    public final void setWithoutChecks(FrameTuple<?, ?> frameTuple)
    {
       x.set(frameTuple.getX());
@@ -337,6 +339,13 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.add(frameTuple1, frameTuple2);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void add(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.add(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
       getYoValuesFromFrameTuple();
    }
 
@@ -550,12 +559,14 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       frameTuple.checkForNaN();
    }
 
+   @Override
    public final boolean containsNaN()
    {
       putYoValuesIntoFrameTuple();
       return frameTuple.containsNaN();
    }
 
+   @Override
    public final void setToZero()
    {
       setToZero(false);
@@ -567,6 +578,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple(notifyListeners);
    }
 
+   @Override
    public final void setToNaN()
    {
       frameTuple.setToNaN(getReferenceFrame());

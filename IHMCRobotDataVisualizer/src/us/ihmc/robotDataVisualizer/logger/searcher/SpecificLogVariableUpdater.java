@@ -136,7 +136,7 @@ public class SpecificLogVariableUpdater
          }
 
          timestamp.set(logLongArray.get());
-         robotTime.set(Conversions.nanoSecondstoSeconds(timestamp.getLongValue() - initialTimestamp));
+         robotTime.set(Conversions.nanosecondsToSeconds(timestamp.getLongValue() - initialTimestamp));
 
          for (int i = 0; i < variablesToUpdate.length; i++)
          {

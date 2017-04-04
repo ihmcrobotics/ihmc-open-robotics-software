@@ -1,10 +1,16 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -12,6 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -21,6 +28,21 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
    protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+
+   /**
+    * Specifies if the controller should by default compute for all the robot joints desired
+    * position and desired velocity from the desired acceleration.
+    * <p>
+    * It is {@code false} by default and this method should be overridden to return otherwise.
+    * </p>
+    * 
+    * @return {@code true} if the desired acceleration should be integrated into desired velocity
+    *         and position for all the joints.
+    */
+   public boolean enableJointAccelerationIntegrationForAllJoints()
+   {
+      return false;
+   }
 
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
 
@@ -135,10 +157,80 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract YoOrientationPIDGainsInterface createChestControlGains(YoVariableRegistry registry);
 
-   /** The gains used when the spine joints are controlled directly instead of the chest orientation */
-   public YoPIDGains createSpineControlGains(YoVariableRegistry registry)
+   /**
+    * The map returned contains all controller gains for tracking jointspace trajectories. The key of
+    * the map is the joint name as defined in the robot joint map. If a joint is not contained in the
+    * map, jointspace control is not supported for that joint.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing jointspace PID gains by joint name
+    */
+   public Map<String, YoPIDGains> getOrCreateJointSpaceControlGains(YoVariableRegistry registry)
    {
-      return null;
+      return new HashMap<String, YoPIDGains>();
+   }
+
+   /**
+    * The map returned contains all controller gains for tracking taskspace orientation trajectories
+    * (or the orientation part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * orientation or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace orientation PID gains by rigid body name
+    */
+   public Map<String, YoOrientationPIDGainsInterface> getOrCreateTaskspaceOrientationControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoOrientationPIDGainsInterface>();
+   }
+
+   /**
+    * The map returned contains all controller gains for tracking taskspace position trajectories
+    * (or the position part of a pose trajectory) for a rigid body. The key of the map is the rigid
+    * body name as defined in the robot joint map. If a joint is not contained in the map, taskspace
+    * position or pose control is not supported for that rigid body.
+    *
+    * @param registry used to create the gains the first time this function is called during a run
+    * @return map containing taskspace position PID gains by rigid body name
+    */
+   public Map<String, YoPositionPIDGainsInterface> getOrCreateTaskspacePositionControlGains(YoVariableRegistry registry)
+   {
+      return new HashMap<String, YoPositionPIDGainsInterface>();
+   }
+
+   /**
+    * The map returned contains the default home joint angles. The key of the map is the joint name
+    * as defined in the robot joint map.
+    *
+    * @return map containing home joint angles by joint name
+    */
+   public TObjectDoubleHashMap<String> getOrCreateJointHomeConfiguration()
+   {
+      return new TObjectDoubleHashMap<String>();
+   }
+
+   /**
+    * The list of strings returned contains all joint names that are position controlled. The names
+    * of the joints are defined in the robots joint map.
+    *
+    * @return list of position controlled joint names
+    */
+   public List<String> getOrCreatePositionControlledJoints()
+   {
+      return new ArrayList<String>();
+   }
+
+   /**
+    * The map returned contains the integration settings for position controlled joints. The settings
+    * define how the controller core integrated desired accelerations to find desired joint positions
+    * and velocities. The key of the map is the joint name as defined in the robot joint map. If a
+    * joint is not contained in the map, position control is not supported for that joint.
+    *
+    * @return map containing acceleration integration settings by joint name
+    */
+   public Map<String, JointAccelerationIntegrationSettings> getOrCreateIntegrationSettings()
+   {
+      return new HashMap<String, JointAccelerationIntegrationSettings>();
    }
 
    public abstract YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry);
@@ -344,14 +436,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Determines whether the swing trajectory should be optimized (new feature to be tested with Atlas)
-    */
-   public boolean useSwingTrajectoryOptimizer()
-   {
-      return false;
-   }
-
-   /**
     * Determined whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
     */
    public boolean useSupportState()
@@ -444,11 +528,12 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * In transfer, this is the maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * In transfer, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
+    * This distance is determined by finding the stance length, and multiplying it by the returned variable.
     * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
-    * @return ICP proximity in meters
+    * @return percent of stance length for proximity
     */
-   public double getICPProximityToLeadingFootForToeOff()
+   public double getICPPercentOfStanceForDSToeOff()
    {
       return 0.0;
    }

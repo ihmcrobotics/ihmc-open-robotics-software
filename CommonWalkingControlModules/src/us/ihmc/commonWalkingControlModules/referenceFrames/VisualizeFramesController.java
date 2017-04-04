@@ -13,7 +13,7 @@ public class VisualizeFramesController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry("VisualizeFramesController");
 
-   private final ArrayList<YoGraphicReferenceFrame> dynamicGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
+   private final ArrayList<YoGraphicReferenceFrame> yoGraphicReferenceFrames = new ArrayList<YoGraphicReferenceFrame>();
 
    private final YoGraphicsList yoGraphicsList = new YoGraphicsList("TestFramesController");
 
@@ -21,9 +21,9 @@ public class VisualizeFramesController implements RobotController
    {
       for (ReferenceFrame frame : referenceFrames)
       {
-         YoGraphicReferenceFrame dynamicGraphicReferenceFrame = new YoGraphicReferenceFrame(frame, registry, coordinateSystemLength);
-         dynamicGraphicReferenceFrames.add(dynamicGraphicReferenceFrame);
-         yoGraphicsList.add(dynamicGraphicReferenceFrame);
+         YoGraphicReferenceFrame yoGraphicReferenceFrame = new YoGraphicReferenceFrame(frame, registry, coordinateSystemLength);
+         yoGraphicReferenceFrames.add(yoGraphicReferenceFrame);
+         yoGraphicsList.add(yoGraphicReferenceFrame);
       }
 
       yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicsList);
@@ -31,7 +31,7 @@ public class VisualizeFramesController implements RobotController
 
    public void doControl()
    {
-      updateDynamicGraphicReferenceFrames();
+      updateYoGraphicReferenceFrames();
    }
 
    public YoVariableRegistry getYoVariableRegistry()
@@ -53,9 +53,9 @@ public class VisualizeFramesController implements RobotController
       return getName();
    }
 
-   private void updateDynamicGraphicReferenceFrames()
+   private void updateYoGraphicReferenceFrames()
    {
-      for (YoGraphicReferenceFrame frame : dynamicGraphicReferenceFrames)
+      for (YoGraphicReferenceFrame frame : yoGraphicReferenceFrames)
       {
          frame.update();
       }

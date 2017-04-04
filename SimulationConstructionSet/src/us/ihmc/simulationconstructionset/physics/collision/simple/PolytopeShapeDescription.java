@@ -1,12 +1,12 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.geometry.polytope.ConvexPolytope;
 import us.ihmc.geometry.polytope.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.geometry.polytope.SupportingVertexHolder;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.physics.CollisionShapeDescription;
 
 public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> implements CollisionShapeDescription<T>
@@ -56,7 +56,7 @@ public class PolytopeShapeDescription<T extends PolytopeShapeDescription<T>> imp
    }
 
    @Override
-   public void getBoundingBox(BoundingBox3d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox3D boundingBoxToPack)
    {
       polytope.getBoundingBox(boundingBoxToPack);
    }
