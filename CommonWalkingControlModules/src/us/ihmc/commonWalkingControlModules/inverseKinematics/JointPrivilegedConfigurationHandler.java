@@ -340,7 +340,7 @@ public class JointPrivilegedConfigurationHandler
 
    /**
     * This weight is the respective priority placed on the privileged command in the optimization.
-    * @return vector of weights for the privileged command in the optimization.
+    * @return matrix of weights for the privileged command in the optimization.
     */
    public DenseMatrix64F getWeights()
    {

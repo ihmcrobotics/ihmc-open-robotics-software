@@ -180,7 +180,6 @@ public class MotionQPInputCalculator
 
       nullspaceCalculator.projectOntoNullspace(motionQPInputToPack.taskJacobian, allTaskJacobian);
 
-
       return true;
    }
 
