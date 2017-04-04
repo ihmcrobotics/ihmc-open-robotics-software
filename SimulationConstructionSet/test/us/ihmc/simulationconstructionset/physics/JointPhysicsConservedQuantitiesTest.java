@@ -28,7 +28,7 @@ import java.util.Random;
 import static junit.framework.TestCase.fail;
 
 @ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
-public class JointPhysicsTest
+public class JointPhysicsConservedQuantitiesTest
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -74,8 +74,8 @@ public class JointPhysicsTest
    }
 
    @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1000.0)
-   @Test(timeout=30000)
-   public void testCenterOfMassIsConstantInZeroGravity()
+   @Test(timeout=3000000)
+   public void testLinearAndAngularMomentumAreConverved()
    {
       int numberOfRobotsToTest = 5;
       int minNumberOfAxes = 2;
