@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox.*;
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -140,12 +138,14 @@ public class KinematicsToolboxController extends ToolboxController
       elevatorFrame = elevator.getBodyFixedFrame();
 
       geometricJacobianHolder = new GeometricJacobianHolder();
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
       MomentumOptimizationSettings momentumOptimizationSettings = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings();
-      toolbox = createForInverseKinematicsOnly(desiredFullRobotModel, controlledJoints, jointPrivilegedConfigurationParameters, referenceFrames, updateDT,
-            geometricJacobianHolder, twistCalculator, momentumOptimizationSettings);
-      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
+      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       desiredRootJoint = desiredFullRobotModel.getRootJoint();
+      toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, desiredRootJoint, controlledJoints, centerOfMassFrame, twistCalculator, geometricJacobianHolder,
+                                                momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+      toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
+      toolbox.setupForInverseKinematicsSolver();
+      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
 
       wholeBodyInverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
 
@@ -194,7 +194,7 @@ public class KinematicsToolboxController extends ToolboxController
       consumeCommands();
 
       wholeBodyInverseKinematicsSolver.reset();
-      wholeBodyInverseKinematicsSolver.submitInverseKinematicsCommand(computeInverseKinematicsCommands());
+      wholeBodyInverseKinematicsSolver.submitInverseKinematicsCommandList(computeInverseKinematicsCommands());
       wholeBodyInverseKinematicsSolver.compute();
 
       updateDesiredFullRobotModelState();

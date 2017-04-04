@@ -102,12 +102,12 @@ public class YoMinimumJerkTrajectoryTest
       minimumJerkTrajectory.setParams(0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.5);
       minimumJerkTrajectory.findMaxVelocityAndAccel(t, maximums);
 
-      if (!MathTools.withinPercentEquals(maxVexpected, maximums[0], percent))
+      if (!MathTools.percentEquals(maxVexpected, maximums[0], percent))
       {
          throw new RuntimeException("TestMinimumJerkTrajectory.testFindMaxVals: Max velocity is wrong: expected=" + maxVexpected + ", actual=" + maximums[0]);
       }
 
-      if (!MathTools.withinPercentEquals(maxAexpected, maximums[1], percent))
+      if (!MathTools.percentEquals(maxAexpected, maximums[1], percent))
       {
          throw new RuntimeException("TestMinimumJerkTrajectory.testFindMaxVals: Max accel is wrong: expected=" + maxAexpected + ", actual=" + maximums[1]);
       }
@@ -128,7 +128,7 @@ public class YoMinimumJerkTrajectoryTest
       double expectedTime = 0.930605;
       minimumJerkTrajectory.setParams(0.0, 0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0);
       double newTime = minimumJerkTrajectory.timeExtension(t, maxV, maxA, true);
-      if (!MathTools.withinPercentEquals(expectedTime, newTime, 0.01))
+      if (!MathTools.percentEquals(expectedTime, newTime, 0.01))
       {
          throw new RuntimeException("TestMinimumJerkTrajectory.testTimeExtension: Returned desired time= " + newTime + ", expected= " + expectedTime);
       }

@@ -288,7 +288,7 @@ public class HeadOrientationManager
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      if (inverseDynamicsCommandList.isEmpty())
+      if (inverseDynamicsCommandList.isCommandEmpty())
          return null;
       else
          return inverseDynamicsCommandList;
