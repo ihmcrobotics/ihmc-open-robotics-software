@@ -3,9 +3,8 @@ package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMa
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
 
@@ -13,8 +12,12 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMes
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_chest_trajectory")
-public class ChestHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage<ChestHybridJointspaceTaskspaceMessage, ChestTrajectoryMessage, SpineTrajectoryMessage> implements VisualizablePacket
+public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<ChestHybridJointspaceTaskspaceMessage>
 {
+   
+   private ChestTrajectoryMessage chestTrajectoryMessage; 
+   private SpineTrajectoryMessage spineTrajectoryMessage;
+   
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -30,7 +33,7 @@ public class ChestHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJoin
     */
    public ChestHybridJointspaceTaskspaceMessage(Random random)
    {
-      super(new ChestTrajectoryMessage(random), new SpineTrajectoryMessage(random));
+      this(new ChestTrajectoryMessage(random), new SpineTrajectoryMessage(random));
    }
 
    /**
@@ -39,7 +42,7 @@ public class ChestHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJoin
     */
    public ChestHybridJointspaceTaskspaceMessage(ChestHybridJointspaceTaskspaceMessage chestHybridJointspaceTaskspaceMessage)
    {
-      super(chestHybridJointspaceTaskspaceMessage);
+      this(chestHybridJointspaceTaskspaceMessage.getChestTrajectoryMessage(), chestHybridJointspaceTaskspaceMessage.getSpineTrajectoryMessage());
    }
    
    /**
@@ -50,6 +53,27 @@ public class ChestHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJoin
     */
    public ChestHybridJointspaceTaskspaceMessage(ChestTrajectoryMessage chestTrajectoryMessage, SpineTrajectoryMessage spineTrajectoryMessage)
    {
-      super(chestTrajectoryMessage, spineTrajectoryMessage);
+      this.chestTrajectoryMessage = chestTrajectoryMessage;
+      this.spineTrajectoryMessage = spineTrajectoryMessage;
+   }
+
+   public ChestTrajectoryMessage getChestTrajectoryMessage()
+   {
+      return chestTrajectoryMessage;
+   }
+
+   public void setChestTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage)
+   {
+      this.chestTrajectoryMessage = chestTrajectoryMessage;
+   }
+
+   public SpineTrajectoryMessage getSpineTrajectoryMessage()
+   {
+      return spineTrajectoryMessage;
+   }
+
+   public void setSpineTrajectoryMessage(SpineTrajectoryMessage spineTrajectoryMessage)
+   {
+      this.spineTrajectoryMessage = spineTrajectoryMessage;
    }
 }

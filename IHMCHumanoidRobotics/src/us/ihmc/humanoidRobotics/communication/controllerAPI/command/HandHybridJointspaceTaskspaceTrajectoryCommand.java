@@ -1,31 +1,71 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
 
-public class HandHybridJointspaceTaskspaceTrajectoryCommand extends
-      HybridSE3JointspaceTaskspaceTrajectoryCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage, HandTrajectoryCommand, HandTrajectoryMessage, ArmTrajectoryCommand, ArmTrajectoryMessage>
+public class HandHybridJointspaceTaskspaceTrajectoryCommand extends QueueableCommand<HandHybridJointspaceTaskspaceTrajectoryCommand, HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
+   private final ArmTrajectoryCommand jointspaceTrajectoryCommand = new ArmTrajectoryCommand();
+   private final HandTrajectoryCommand taskspaceTrajectoryCommand = new HandTrajectoryCommand();
+   
    public HandHybridJointspaceTaskspaceTrajectoryCommand()
    {
-      super();
-      jointspaceTrajectoryCommand = new ArmTrajectoryCommand();
-      taskspaceTrajectoryCommand = new HandTrajectoryCommand();
    }
    
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(ArmTrajectoryCommand armTrajectoryCommand, HandTrajectoryCommand handTrajectoryCommand)
+   public HandHybridJointspaceTaskspaceTrajectoryCommand(HandTrajectoryCommand taskspaceTrajectoryCommand, ArmTrajectoryCommand jointspaceTrajectoryCommand)
    {
       super();
-      jointspaceTrajectoryCommand = new ArmTrajectoryCommand();
-      taskspaceTrajectoryCommand = new HandTrajectoryCommand();
-      jointspaceTrajectoryCommand.set(armTrajectoryCommand);
-      taskspaceTrajectoryCommand.set(handTrajectoryCommand);
+      this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
+      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
-   
+
    @Override
    public Class<HandHybridJointspaceTaskspaceTrajectoryMessage> getMessageClass()
    {
       return HandHybridJointspaceTaskspaceTrajectoryMessage.class;
+   }
+
+   @Override
+   public void clear()
+   {
+      jointspaceTrajectoryCommand.clear();
+      taskspaceTrajectoryCommand.clear();
+   }
+
+   @Override
+   public void set(HandHybridJointspaceTaskspaceTrajectoryMessage message)
+   {
+      jointspaceTrajectoryCommand.set(message.getArmTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(message.getHandTrajectoryMessage());
+   }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid();
+   }
+
+   @Override
+   public void set(HandHybridJointspaceTaskspaceTrajectoryCommand other)
+   {
+      taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
+      jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
+   }
+
+   @Override
+   public void addTimeOffset(double timeOffset)
+   {
+      taskspaceTrajectoryCommand.addTimeOffset(timeOffset);
+      jointspaceTrajectoryCommand.addTimeOffset(timeOffset);
+   }
+
+   public ArmTrajectoryCommand getJointspaceTrajectoryCommand()
+   {
+      return jointspaceTrajectoryCommand;
+   }
+
+   public HandTrajectoryCommand getTaskspaceTrajectoryCommand()
+   {
+      return taskspaceTrajectoryCommand;
    }
 }

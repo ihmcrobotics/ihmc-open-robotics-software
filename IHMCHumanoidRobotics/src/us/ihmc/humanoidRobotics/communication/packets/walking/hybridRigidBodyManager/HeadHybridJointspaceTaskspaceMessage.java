@@ -3,9 +3,8 @@ package us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyMa
 import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.packets.VisualizablePacket;
+import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HeadTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMessage;
 
@@ -13,8 +12,11 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.NeckTrajectoryMess
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_head_trajectory")
-public class HeadHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage<HeadHybridJointspaceTaskspaceMessage, HeadTrajectoryMessage, NeckTrajectoryMessage> implements VisualizablePacket
+public class HeadHybridJointspaceTaskspaceMessage extends QueueableMessage<HeadHybridJointspaceTaskspaceMessage>
 {
+   private HeadTrajectoryMessage headTrajectoryMessage; 
+   private NeckTrajectoryMessage neckTrajectoryMessage;
+   
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -30,7 +32,7 @@ public class HeadHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJoint
     */
    public HeadHybridJointspaceTaskspaceMessage(Random random)
    {
-      super(new HeadTrajectoryMessage(random), new NeckTrajectoryMessage(random));
+      this(new HeadTrajectoryMessage(random), new NeckTrajectoryMessage(random));
    }
 
    /**
@@ -39,7 +41,7 @@ public class HeadHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJoint
     */
    public HeadHybridJointspaceTaskspaceMessage(HeadHybridJointspaceTaskspaceMessage hybridJointspaceTaskspaceMessage)
    {
-      super(hybridJointspaceTaskspaceMessage);
+      this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getNeckTrajectoryMessage());
    }
    
    /**
@@ -50,6 +52,27 @@ public class HeadHybridJointspaceTaskspaceMessage extends AbstractSO3HybridJoint
     */
    public HeadHybridJointspaceTaskspaceMessage(HeadTrajectoryMessage headTrajectoryMessage, NeckTrajectoryMessage neckTrajectoryMessage)
    {
-      super(headTrajectoryMessage, neckTrajectoryMessage);
+      this.headTrajectoryMessage = headTrajectoryMessage;
+      this.neckTrajectoryMessage = neckTrajectoryMessage;
+   }
+
+   public HeadTrajectoryMessage getHeadTrajectoryMessage()
+   {
+      return headTrajectoryMessage;
+   }
+
+   public void setHeadTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage)
+   {
+      this.headTrajectoryMessage = headTrajectoryMessage;
+   }
+
+   public NeckTrajectoryMessage getNeckTrajectoryMessage()
+   {
+      return neckTrajectoryMessage;
+   }
+
+   public void setNeckTrajectoryMessage(NeckTrajectoryMessage neckTrajectoryMessage)
+   {
+      this.neckTrajectoryMessage = neckTrajectoryMessage;
    }
 }
