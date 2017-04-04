@@ -26,6 +26,18 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
             return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
             {
                @Override
+               public double getMaxICPErrorBeforeSingleSupportX()
+               {
+                  return 0.05 * getJointMap().getModelScale();
+               }
+
+               @Override
+               public double getMaxICPErrorBeforeSingleSupportY()
+               {
+                  return 0.03 * getJointMap().getModelScale();
+               }
+
+               @Override
                public boolean doToeOffIfPossibleInSingleSupport()
                {
                   return true;
@@ -52,13 +64,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.2;
+                  return 0.10;
                }
 
                @Override
                public boolean checkECMPLocationToTriggerToeOff()
                {
-                  return true;
+                  return false;
+               }
+
+               @Override
+               public double getECMPProximityForToeOff()
+               {
+                  return getJointMap().getModelScale() * 0.04;
                }
 
                @Override

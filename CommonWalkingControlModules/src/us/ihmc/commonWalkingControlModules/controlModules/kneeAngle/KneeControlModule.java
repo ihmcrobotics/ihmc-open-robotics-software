@@ -169,6 +169,12 @@ public class KneeControlModule
       private double timeUntilStraight;
       private double straighteningSpeed;
 
+      private double dwellTime;
+      private double desiredPrivilegedPosition;
+
+      private double previousTime;
+      private double previousPosition;
+
       public StraighteningKneeControlState(KneeControlType stateEnum, OneDoFJoint kneeJoint, DoubleYoVariable straighteningSpeed)
       {
          super(stateEnum);
@@ -182,16 +188,24 @@ public class KneeControlModule
       public boolean isDone()
       {
          //return getTimeInCurrentState() > straighteningDuration;
-         return getTimeInCurrentState() > timeUntilStraight;
+         return getTimeInCurrentState() > (timeUntilStraight + dwellTime);
       }
 
       @Override
       public void doAction()
       {
-         double desiredPrivilegedPosition = startingPosition + getTimeInCurrentState() * straighteningSpeed;
+         double estimatedDT = estimateDT();
+         double currentPosition = kneeJoint.getQ();
+
+         if (currentPosition > previousPosition) // the knee is bending
+            dwellTime += estimatedDT;
+         else
+            desiredPrivilegedPosition += estimatedDT * straighteningSpeed;
 
          privilegedConfigurationCommand.clear();
          privilegedConfigurationCommand.addJoint(kneeJoint, desiredPrivilegedPosition);
+
+         previousPosition = currentPosition;
 
          if (isDone())
             transitionToDefaultNextState();
@@ -205,11 +219,27 @@ public class KneeControlModule
          straighteningSpeed = yoStraighteningSpeed.getDoubleValue();
          timeUntilStraight = (startingPosition - desiredAngleWhenStraight.getDoubleValue()) / straighteningSpeed;
          timeUntilStraight = Math.max(timeUntilStraight, 0.0);
+
+         desiredPrivilegedPosition = startingPosition;
+         previousPosition = startingPosition;
+
+         previousTime = 0.0;
+         dwellTime = 0.0;
       }
 
       @Override
       public void doTransitionOutOfAction()
       {
+      }
+
+      private double estimateDT()
+      {
+         double currentTime = getTimeInCurrentState();
+
+         double estimatedDT = currentTime - previousTime;
+         previousTime = currentTime;
+
+         return estimatedDT;
       }
    }
 
