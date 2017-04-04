@@ -11,6 +11,9 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -133,7 +136,14 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
       for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
       {
          YoGraphic yoGraphic = graphics.get(graphicsIdx);
-         yoGraphic.hideGraphicObject();
+         if (yoGraphic instanceof YoGraphicReferenceFrame)
+            ((YoGraphicReferenceFrame) yoGraphic).hide();
+         else if (yoGraphic instanceof YoGraphicPosition)
+            ((YoGraphicPosition) yoGraphic).setPositionToNaN();
+         else if (yoGraphic instanceof YoGraphicVector)
+            ((YoGraphicVector) yoGraphic).hide();
+         else
+            throw new RuntimeException("Implement hiding this.");
       }
    }
 }
