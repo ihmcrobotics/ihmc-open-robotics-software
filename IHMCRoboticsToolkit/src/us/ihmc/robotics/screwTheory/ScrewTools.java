@@ -666,6 +666,17 @@ public class ScrewTools
       }
    }
 
+   public static void getDesiredJointAccelerationsMatrix(Iterable<? extends InverseDynamicsJoint> joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
+   {
+      int rowStart = 0;
+      for (InverseDynamicsJoint joint : joints)
+      {
+         int dof = joint.getDegreesOfFreedom();
+         joint.getDesiredAccelerationMatrix(desiredJointAccelerationsMatrixToPack, rowStart);
+         rowStart += dof;
+      }
+   }
+
    public static void getDesiredJointAccelerationsMatrix(InverseDynamicsJoint[] joints, DenseMatrix64F desiredJointAccelerationsMatrixToPack)
    {
       int rowStart = 0;
