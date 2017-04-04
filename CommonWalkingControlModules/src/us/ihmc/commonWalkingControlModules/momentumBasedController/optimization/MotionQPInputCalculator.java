@@ -9,7 +9,6 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
@@ -19,8 +18,6 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FramePoint;
-import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -28,8 +25,6 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
-import us.ihmc.robotics.screwTheory.PointJacobian;
-import us.ihmc.robotics.screwTheory.PointJacobianConvectiveTermCalculator;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
@@ -51,17 +46,10 @@ public class MotionQPInputCalculator
 
    private final GeometricJacobianHolder geometricJacobianHolder;
 
-   private final PointJacobian pointJacobian = new PointJacobian();
-   private final PointJacobianConvectiveTermCalculator pointJacobianConvectiveTermCalculator;
-
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final OneDoFJoint[] oneDoFJoints;
 
-   private final FramePoint tempBodyFixedPoint = new FramePoint();
-   private final FrameVector pPointVelocity = new FrameVector();
-   private final DenseMatrix64F tempPPointMatrixVelocity = new DenseMatrix64F(3, 1);
    private final DenseMatrix64F convectiveTermMatrix = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-
 
    private final CentroidalMomentumHandler centroidalMomentumHandler;
 
@@ -84,13 +72,13 @@ public class MotionQPInputCalculator
    private final int numberOfDoFs;
 
    public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-         JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
+                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+                                  YoVariableRegistry parentRegistry)
    {
       this.geometricJacobianHolder = geometricJacobianHolder;
       this.jointIndexHandler = jointIndexHandler;
       this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      pointJacobianConvectiveTermCalculator = new PointJacobianConvectiveTermCalculator(twistCalculator);
       centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, registry);
 
       if (jointPrivilegedConfigurationParameters != null)
@@ -189,106 +177,11 @@ public class MotionQPInputCalculator
       return true;
    }
 
-   /**
-    * Converts a {@link PointAccelerationCommand} into a {@link MotionQPInput}.
-    * @return true if the command was successfully converted.
-    */
-   public boolean convertPointAccelerationCommand(PointAccelerationCommand commandToConvert, MotionQPInput motionQPInputToPack)
-   {
-      DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
-      int taskSize = selectionMatrix.getNumRows();
-
-      if (taskSize == 0)
-         return false;
-
-      motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
-      if (commandToConvert.getHasWeight())
-      {
-         // Compute the weight: W = S * W * S^T
-         motionQPInputToPack.setUseWeightScalar(false);
-         tempTaskWeight.reshape(3, 3);
-         commandToConvert.getWeightMatrix(tempTaskWeight);
-         tempTaskWeightSubspace.reshape(taskSize, 3);
-         CommonOps.mult(selectionMatrix, tempTaskWeight, tempTaskWeightSubspace);
-         CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
-      }
-
-      RigidBody base = commandToConvert.getBase();
-      RigidBody endEffector = commandToConvert.getEndEffector();
-      long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, base.getBodyFixedFrame());
-      GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
-
-      commandToConvert.getBodyFixedPointIncludingFrame(tempBodyFixedPoint);
-      FrameVector desiredAccelerationWithRespectToBase = commandToConvert.getDesiredAcceleration();
-
-      pointJacobian.set(jacobian, tempBodyFixedPoint);
-      pointJacobian.compute();
-
-      desiredAccelerationWithRespectToBase.changeFrame(jacobian.getBaseFrame());
-
-      DenseMatrix64F pointJacobianMatrix = pointJacobian.getJacobianMatrix();
-
-      boolean success = true;
-      tempTaskJacobian.reshape(selectionMatrix.getNumRows(), pointJacobianMatrix.getNumCols());
-      CommonOps.mult(selectionMatrix, pointJacobianMatrix, tempTaskJacobian);
-
-      RigidBody primaryBase = commandToConvert.getPrimaryBase();
-      InverseDynamicsJoint[] jointsUsedInTask = jacobian.getJointsInOrder();
-      if (primaryBase != null)
-      {
-         tempPrimaryTaskJacobian.reshape(taskSize, tempTaskJacobian.getNumCols());
-         tempPrimaryTaskJacobian.set(tempTaskJacobian);
-
-         boolean isJointUpstreamOfPrimaryBase = false;
-
-         for (int i = jointsUsedInTask.length - 1; i >= 0; i--)
-         {
-            InverseDynamicsJoint joint = jointsUsedInTask[i];
-
-            if (joint.getSuccessor() == primaryBase)
-               isJointUpstreamOfPrimaryBase = true;
-
-            if (isJointUpstreamOfPrimaryBase)
-            {
-               tempJointIndices.reset();
-               ScrewTools.computeIndexForJoint(jointsUsedInTask, tempJointIndices, joint);
-               for (int upstreamJointIndex = 0; upstreamJointIndex < tempJointIndices.size(); upstreamJointIndex++)
-               {
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(upstreamJointIndex), tempTaskJacobian);
-                  MatrixTools.zeroColumn(tempJointIndices.get(upstreamJointIndex), tempPrimaryTaskJacobian);
-               }
-            }
-         }
-
-         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
-         success = jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
-      }
-
-      success = success && jointIndexHandler.compactBlockToFullBlock(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
-
-      if (!success)
-         return false;
-
-      if (commandToConvert.getPrimaryBase() != null)
-         recordTaskJacobian(tempFullPrimaryTaskJacobian);
-      else
-         recordTaskJacobian(motionQPInputToPack.taskJacobian);
-
-      // Compute the task objective: p = S * ( TDot - JDot qDot )
-      pointJacobianConvectiveTermCalculator.compute(pointJacobian, pPointVelocity);
-      pPointVelocity.scale(-1.0);
-      pPointVelocity.add(desiredAccelerationWithRespectToBase);
-      pPointVelocity.getVector().get(tempPPointMatrixVelocity);
-      CommonOps.mult(selectionMatrix, tempPPointMatrixVelocity, motionQPInputToPack.taskObjective);
-
-      return true;
-   }
-
    private final TIntArrayList tempJointIndices = new TIntArrayList();
 
    /**
     * Converts a {@link SpatialAccelerationCommand} into a {@link MotionQPInput}.
+    * 
     * @return true if the command was successfully converted.
     */
    public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, MotionQPInput motionQPInputToPack)
@@ -375,6 +268,7 @@ public class MotionQPInputCalculator
 
    /**
     * Converts a {@link SpatialVelocityCommand} into a {@link MotionQPInput}.
+    * 
     * @return true if the command was successfully converted.
     */
    public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, MotionQPInput motionQPInputToPack)
@@ -455,6 +349,7 @@ public class MotionQPInputCalculator
 
    /**
     * Converts a {@link MomentumRateCommand} into a {@link MotionQPInput}.
+    * 
     * @return true if the command was successfully converted.
     */
    public boolean convertMomentumRateCommand(MomentumRateCommand commandToConvert, MotionQPInput motionQPInputToPack)
@@ -504,6 +399,7 @@ public class MotionQPInputCalculator
 
    /**
     * Converts a {@link MomentumCommand} into a {@link MotionQPInput}.
+    * 
     * @return true if the command was successfully converted.
     */
    public boolean convertMomentumCommand(MomentumCommand commandToConvert, MotionQPInput motionQPInputToPack)
@@ -541,6 +437,7 @@ public class MotionQPInputCalculator
 
    /**
     * Converts a {@link JointspaceAccelerationCommand} into a {@link MotionQPInput}.
+    * 
     * @return true if the command was successfully converted.
     */
    public boolean convertJointspaceAccelerationCommand(JointspaceAccelerationCommand commandToConvert, MotionQPInput motionQPInputToPack)
@@ -580,6 +477,7 @@ public class MotionQPInputCalculator
 
    /**
     * Converts a {@link JointspaceVelocityCommand} into a {@link MotionQPInput}.
+    * 
     * @return true if the command was successfully converted.
     */
    public boolean convertJointspaceVelocityCommand(JointspaceVelocityCommand commandToConvert, MotionQPInput motionQPInputToPack)
