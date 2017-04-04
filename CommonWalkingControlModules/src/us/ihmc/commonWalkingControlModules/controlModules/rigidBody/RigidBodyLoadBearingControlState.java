@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -14,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -76,8 +73,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    private final FrameOrientation desiredContactOrientation = new FrameOrientation(worldFrame);
    private final FramePoint currentContactPosition = new FramePoint(worldFrame);
    private final FrameOrientation currentContactOrientation = new FrameOrientation(worldFrame);
-
-   private final ArrayList<YoGraphic> graphics = new ArrayList<>();
 
    public RigidBodyLoadBearingControlState(RigidBody bodyToControl, ContactablePlaneBody contactableBody, RigidBody elevator, DoubleYoVariable yoTime,
          YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
@@ -285,21 +280,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    {
       // this control mode does not support command queuing
       return 0.0;
-   }
-
-   private void updateGraphics()
-   {
-      for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
-         graphics.get(graphicsIdx).update();
-   }
-
-   private void hideGraphics()
-   {
-      for (int graphicsIdx = 0; graphicsIdx < graphics.size(); graphicsIdx++)
-      {
-         YoGraphic yoGraphic = graphics.get(graphicsIdx);
-         yoGraphic.hideGraphicObject();
-      }
    }
 
 }
