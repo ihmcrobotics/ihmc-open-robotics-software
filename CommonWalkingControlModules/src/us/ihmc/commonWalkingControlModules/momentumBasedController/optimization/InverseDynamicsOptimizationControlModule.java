@@ -83,7 +83,7 @@ public class InverseDynamicsOptimizationControlModule
 
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
-      MomentumOptimizationSettings momentumOptimizationSettings = toolbox.getMomentumOptimizationSettings();
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
 
       wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
 
@@ -110,13 +110,14 @@ public class InverseDynamicsOptimizationControlModule
          jointMinimumAccelerations.put(joint, new DoubleYoVariable("qdd_min_qp_" + joint.getName(), registry));
       }
 
-      rhoMin.set(momentumOptimizationSettings.getRhoMin());
+      rhoMin.set(optimizationSettings.getRhoMin());
       
       momentumModuleSolution = new MomentumModuleSolution();
 
-      qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
-      qpSolver.setAccelerationRegularizationWeight(momentumOptimizationSettings.getJointAccelerationWeight());
-      qpSolver.setJerkRegularizationWeight(momentumOptimizationSettings.getJointJerkWeight());
+      boolean hasFloatingBase = toolbox.getRootJoint() != null;
+      qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, hasFloatingBase, registry);
+      qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
+      qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
 
       parentRegistry.addChild(registry);
    }

@@ -68,7 +68,7 @@ public class VirtualModelControlOptimizationControlModule
 
       WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       groundContactForceOptimization = new GroundContactForceOptimizationControlModule(wrenchMatrixCalculator, contactablePlaneBodies,
-            toolbox.getMomentumOptimizationSettings(), parentRegistry, toolbox.getYoGraphicsListRegistry());
+            toolbox.getOptimizationSettings(), parentRegistry, toolbox.getYoGraphicsListRegistry());
 
       double gravityZ = toolbox.getGravityZ();
 
