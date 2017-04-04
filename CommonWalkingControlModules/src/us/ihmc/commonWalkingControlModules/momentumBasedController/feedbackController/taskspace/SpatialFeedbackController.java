@@ -240,12 +240,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                   feedForwardAngularAcceleration, base);
       accelerationControlModule.getAcceleration(desiredSpatialAcceleration);
       desiredSpatialAcceleration.changeBodyFrameNoRelativeAcceleration(endEffectorFrame);
-      desiredSpatialAcceleration.changeFrameNoRelativeMotion(endEffectorFrame);
 
       updatePositionVisualization();
       updateOrientationVisualization();
 
-      inverseDynamicsOutput.setSpatialAcceleration(desiredSpatialAcceleration);
+      inverseDynamicsOutput.setSpatialAcceleration(controlFrame, desiredSpatialAcceleration);
    }
 
    @Override
