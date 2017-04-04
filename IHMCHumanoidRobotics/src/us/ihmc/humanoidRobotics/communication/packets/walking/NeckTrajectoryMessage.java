@@ -53,6 +53,18 @@ public class NeckTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<N
    {
       super(trajectoryTime, desiredJointPositions);
    }
+   
+   /**
+    * Use this constructor to go straight to the given end points.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the number of joints.
+    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that joint will use the controller default weight
+    */
+   public NeckTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions, double[] weights)
+   {
+      super(trajectoryTime, desiredJointPositions, weights);
+   }
 
    /**
     * Create a message using the given joint trajectory points.
