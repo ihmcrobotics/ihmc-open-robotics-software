@@ -50,12 +50,14 @@ public class ScrewTools
       return joint;
    }
 
-   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis, boolean isPartOfClosedKinematicLoop)
+   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis,
+                                                              boolean isPartOfClosedKinematicLoop)
    {
       return addPassiveRevoluteJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis, isPartOfClosedKinematicLoop);
    }
 
-   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis, boolean isPartOfClosedKinematicLoop)
+   public static PassiveRevoluteJoint addPassiveRevoluteJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis,
+                                                              boolean isPartOfClosedKinematicLoop)
    {
       String beforeJointName = "before" + jointName;
 
@@ -387,12 +389,15 @@ public class ScrewTools
    }
 
    /**
-    * Compute and pack the joint path between two RigidBody in the jointPathToPack.
-    * Use the method {@link #computeDistanceToAncestor(RigidBody, RigidBody)} to get the size of the Array to provide.
+    * Compute and pack the joint path between two RigidBody in the jointPathToPack. Use the method
+    * {@link #computeDistanceToAncestor(RigidBody, RigidBody)} to get the size of the Array to
+    * provide.
+    * 
     * @param jointPathToPack
     * @param start
     * @param end
-    * @return the length of the joint path, returns -1 if the the given jointPathToPack is too small.
+    * @return the length of the joint path, returns -1 if the the given jointPathToPack is too
+    *         small.
     */
    public static int createJointPath(InverseDynamicsJoint[] jointPathToPack, RigidBody start, RigidBody end)
    {
@@ -526,12 +531,14 @@ public class ScrewTools
       return cloned;
    }
 
-   public static <T extends InverseDynamicsJoint> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix, ReferenceFrame rootBodyFrame)
+   public static <T extends InverseDynamicsJoint> T[] cloneJointPathDisconnectedFromOriginalRobot(T[] joints, Class<T> clazz, String suffix,
+                                                                                                  ReferenceFrame rootBodyFrame)
    {
       return filterJoints(cloneJointPathDisconnectedFromOriginalRobot(joints, suffix, rootBodyFrame), clazz);
    }
 
-   public static InverseDynamicsJoint[] cloneJointPathDisconnectedFromOriginalRobot(InverseDynamicsJoint[] inverseDynamicsJoints, String suffix, ReferenceFrame rootBodyFrame)
+   public static InverseDynamicsJoint[] cloneJointPathDisconnectedFromOriginalRobot(InverseDynamicsJoint[] inverseDynamicsJoints, String suffix,
+                                                                                    ReferenceFrame rootBodyFrame)
    {
       InverseDynamicsJoint[] cloned = new InverseDynamicsJoint[inverseDynamicsJoints.length];
 
@@ -579,7 +586,7 @@ public class ScrewTools
          clone = ScrewTools.addPrismaticJoint(jointNameOriginal + cloneSuffix, clonePredecessor, jointTransform, jointAxisCopy);
       else
          throw new RuntimeException("Unhandled type of " + OneDoFJoint.class.getSimpleName() + ": " + original.getClass().getSimpleName());
-         
+
       clone.setJointLimitLower(original.getJointLimitLower());
       clone.setJointLimitUpper(original.getJointLimitUpper());
       return clone;
@@ -594,13 +601,14 @@ public class ScrewTools
       Matrix3D massMomentOfInertiaPartCopy = original.getInertia().getMassMomentOfInertiaPartCopy();
       double mass = original.getInertia().getMass();
       Vector3D comOffsetCopy = comOffset.getVectorCopy();
-      RigidBody clone = ScrewTools.addRigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy,
-                                                        mass, comOffsetCopy);
+      RigidBody clone = ScrewTools.addRigidBody(nameOriginal + cloneSuffix, parentJointOfClone, massMomentOfInertiaPartCopy, mass, comOffsetCopy);
       return clone;
    }
 
    /**
-    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking to see if each parent body is the ancestor in question.
+    * Traverses up the kinematic chain from the candidate descendant towards the root body, checking
+    * to see if each parent body is the ancestor in question.
+    * 
     * @param candidateDescendant
     * @param ancestor
     * @return
@@ -705,7 +713,8 @@ public class ScrewTools
    {
       Vector3D gravitationalAcceleration = new Vector3D(0.0, 0.0, gravity);
       Vector3D zero = new Vector3D();
-      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(), rootBody.getBodyFixedFrame(), gravitationalAcceleration, zero);
+      SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
+                                                                                 rootBody.getBodyFixedFrame(), gravitationalAcceleration, zero);
 
       return rootAcceleration;
    }
@@ -794,7 +803,8 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndicesForJoint(InverseDynamicsJoint[] jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint... jointsToComputeIndicesFor)
+   public static void computeIndicesForJoint(InverseDynamicsJoint[] jointsInOrder, TIntArrayList listToPackIndices,
+                                             InverseDynamicsJoint... jointsToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.length; i++)
@@ -973,7 +983,8 @@ public class ScrewTools
          return jointsHashCode;
    }
 
-   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
+   public static long computeGeometricJacobianNameBasedHashCode(InverseDynamicsJoint joints[], int firstIndex, int lastIndex, ReferenceFrame jacobianFrame,
+                                                                boolean allowChangeFrame)
    {
       long jointsHashCode = NameBasedHashCodeTools.computeSubArrayHashCode(joints, firstIndex, lastIndex);
       if (!allowChangeFrame)
