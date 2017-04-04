@@ -18,15 +18,18 @@ public class SolarPanelWholeBodyPose
    {
       this.cleaningPose = cleaningPose;      
       this.desiredPelvisYaw = pelvisYaw;
-      this.deisredPelvisHeight = pelvisHeight;   
+      this.deisredPelvisHeight = pelvisHeight;          
    }
    
    public void getWholeBodyTrajectoryMessage(WholeBodyTrajectoryMessage wholeBodyMessage, double motionTime)
    {
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(motionTime, deisredPelvisHeight);
+      //HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      HandTrajectoryMessage handTrajectoryMessage = cleaningPose.getHandTrajectoryMessage(motionTime);
+      
+      //PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = new PelvisHeightTrajectoryMessage(motionTime, deisredPelvisHeight);
+      
       Quaternion desiredChestOrientation = new Quaternion();
-      desiredChestOrientation.appendYawRotation(desiredPelvisYaw);
+      desiredChestOrientation.appendYawRotation(desiredPelvisYaw);      
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(motionTime, desiredChestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       
       wholeBodyMessage.setHandTrajectoryMessage(handTrajectoryMessage);

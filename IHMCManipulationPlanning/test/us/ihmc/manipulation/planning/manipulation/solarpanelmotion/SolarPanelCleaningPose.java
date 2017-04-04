@@ -1,6 +1,5 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -18,9 +17,7 @@ public class SolarPanelCleaningPose
    private double wCoordinate;
    private double zRotation;
    private Pose pose;
-   
-   private boolean isValidPose = true;
-   
+      
    public SolarPanelCleaningPose(SolarPanel solarPanel)
    {
       this.solarPanel = solarPanel;
@@ -87,6 +84,12 @@ public class SolarPanelCleaningPose
       this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
    }
    
+   public void setZRotation(double zRotation)
+   {
+      this.zRotation = zRotation;      
+      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
+   }
+
    public Pose getPose()
    {
       return this.pose;
@@ -116,26 +119,13 @@ public class SolarPanelCleaningPose
       
       return pose;
    }
-      
-   public void setZRotation(double zRotation)
-   {
-      this.zRotation = zRotation;
-      
-      this.pose = getPose(uCoordinate, vCoordinate, wCoordinate, this.zRotation);
-   }
    
    public HandTrajectoryMessage getHandTrajectoryMessage(double motionTime)
-   {      
-      RigidBodyTransform handPoseTransform = new RigidBodyTransform(this.pose.getOrientation(), this.pose.getPosition());
-      
-      handPoseTransform.appendPitchRotation(-Math.PI/2);
-      handPoseTransform.appendRollRotation(Math.PI/2);
-      
-      Point3D positionToWorld = new Point3D(this.pose.getPosition());
-      
-      Quaternion orientationToWorld = new Quaternion(handPoseTransform.getRotationMatrix());
+   {            
+      Point3D positionToWorld = new Point3D(getDesiredHandPosition());      
+      Quaternion orientationToWorld = new Quaternion(getDesiredHandOrientation());
             
-      PrintTools.info(""+positionToWorld.getX()+" "+positionToWorld.getY()+" "+positionToWorld.getZ()+" ");
+      // PrintTools.info(""+positionToWorld.getX()+" "+positionToWorld.getY()+" "+positionToWorld.getZ()+" ");
       
       HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
             
@@ -175,15 +165,5 @@ public class SolarPanelCleaningPose
    public double getZRotation()
    {
       return zRotation;
-   }   
-   
-   public void setValidity(boolean isValid)
-   {
-      isValidPose = isValid;
-   }
-   
-   public boolean isValid()
-   {
-      return isValidPose;
-   }
+   }  
 }

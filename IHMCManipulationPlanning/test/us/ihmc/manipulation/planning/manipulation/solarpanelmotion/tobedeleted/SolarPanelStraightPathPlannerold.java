@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.manipulation.solarpanelmotion.tobedeleted;
 
 import java.util.ArrayList;
 
@@ -8,37 +8,38 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class SolarPanelStraightPathPlanner
+public class SolarPanelStraightPathPlannerold
 {
-   private ArrayList<SolarPanelStraightPath> straightPaths = new ArrayList<SolarPanelStraightPath>();
+   private ArrayList<SolarPanelStraightPathold> straightPaths = new ArrayList<SolarPanelStraightPathold>();
    private ArrayList<Double> zRotation = new ArrayList<Double>();
    private ArrayList<Double> pelvisYaw = new ArrayList<Double>();
    
    
-   public SolarPanelStraightPathPlanner()
+   public SolarPanelStraightPathPlannerold()
    {
             
    }
    
-   public SolarPanelStraightPathPlanner(ArrayList<SolarPanelStraightPath> straightPaths)
+   public SolarPanelStraightPathPlannerold(ArrayList<SolarPanelStraightPathold> straightPaths)
    {
       this.straightPaths = straightPaths;      
    }
    
-   public SolarPanelStraightPathPlanner(SolarPanelStraightPath straightPath)
+   public SolarPanelStraightPathPlannerold(SolarPanelStraightPathold straightPath)
    {
       this.straightPaths.add(straightPath);
    }
    
-   public void addPath(SolarPanelStraightPath straightPath)
+   public void addPath(SolarPanelStraightPathold straightPath)
    {
       this.straightPaths.add(straightPath);
    }
    
-   public ArrayList<SolarPanelStraightPath> getPaths()
+   public ArrayList<SolarPanelStraightPathold> getPaths()
    {
       return straightPaths;
    }
