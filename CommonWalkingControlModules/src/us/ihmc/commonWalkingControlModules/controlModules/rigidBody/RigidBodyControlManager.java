@@ -29,8 +29,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -56,9 +54,6 @@ public class RigidBodyControlManager
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
    private final double[] initialJointPositions;
-   private final FrameOrientation initialOrientation = new FrameOrientation();
-   private final FramePose initialPose = new FramePose();
-   private final ReferenceFrame controlFrame;
 
    private final OneDoFJoint[] jointsOriginal;
 
@@ -76,7 +71,6 @@ public class RigidBodyControlManager
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
       registry = new YoVariableRegistry(namePrefix);
-      this.controlFrame = controlFrame;
 
       stateMachine = new GenericStateMachine<>(namePrefix + "State", namePrefix + "SwitchTime", RigidBodyControlMode.class, yoTime, registry);
       requestedState = new EnumYoVariable<>(namePrefix + "RequestedControlMode", registry, RigidBodyControlMode.class, true);
@@ -183,10 +177,7 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> command)
    {
-      initialOrientation.setToZero(controlFrame);
-      initialOrientation.changeFrame(command.getDataFrame());
-
-      if (taskspaceControlState.handleOrientationTrajectoryCommand(command, initialOrientation))
+      if (taskspaceControlState.handleOrientationTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getStateEnum());
       }
@@ -200,10 +191,7 @@ public class RigidBodyControlManager
 
    public void handleTaskspaceTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> command)
    {
-      initialPose.setToZero(controlFrame);
-      initialPose.changeFrame(command.getDataFrame());
-
-      if (taskspaceControlState.handlePoseTrajectoryCommand(command, initialPose))
+      if (taskspaceControlState.handlePoseTrajectoryCommand(command))
       {
          requestState(taskspaceControlState.getStateEnum());
       }
@@ -229,15 +217,12 @@ public class RigidBodyControlManager
          holdInJointspace();
       }
    }
-   
+
    public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointSpaceCommand)
    {
       computeDesiredJointPositions(initialJointPositions);
-      
-      initialPose.setToZero(controlFrame);
-      initialPose.changeFrame(taskspaceCommand.getDataFrame());
 
-      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions, initialPose))
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
       {
          requestState(hybridControlState.getStateEnum());
       }
@@ -247,15 +232,12 @@ public class RigidBodyControlManager
          holdInJointspace();
       }
    }
-   
+
    public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
    {
-      initialOrientation.setToZero(controlFrame);
-      initialOrientation.changeFrame(taskspaceCommand.getDataFrame());
-      
       computeDesiredJointPositions(initialJointPositions);
-      
-      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions, initialOrientation))
+
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions))
       {
          requestState(hybridControlState.getStateEnum());
       }
