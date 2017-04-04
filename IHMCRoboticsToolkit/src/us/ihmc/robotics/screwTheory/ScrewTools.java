@@ -677,6 +677,38 @@ public class ScrewTools
       }
    }
 
+   /**
+    * Calculates the number of degrees of freedom of the kinematic chain that starts from
+    * {@code ancestor} to end to {@code descendant}.
+    * 
+    * @param ancestor the base of the kinematic chain.
+    * @param descendant the end-effector of the kinematic chain.
+    * @return the number of degrees of freedom.
+    * @throws RuntimeException if the given ancestor and descendant are swapped, or if the do not
+    *            belong to the same system.
+    * @throws RuntimeException this method does not support in kinematic trees to go through
+    *            different branches.
+    */
+   public static int computeDegreesOfFreedom(RigidBody ancestor, RigidBody descendant)
+   {
+      int nDoFs = 0;
+
+      RigidBody currentBody = descendant;
+
+      while (currentBody != ancestor)
+      {
+         InverseDynamicsJoint parentJoint = currentBody.getParentJoint();
+
+         if (parentJoint == null)
+            throw new RuntimeException("Could not find the ancestor: " + ancestor.getName() + ", to the descendant: " + descendant.getName());
+
+         nDoFs += parentJoint.getDegreesOfFreedom();
+         currentBody = parentJoint.getPredecessor();
+      }
+
+      return nDoFs;
+   }
+
    public static int computeDegreesOfFreedom(InverseDynamicsJoint[] jointList)
    {
       int ret = 0;
