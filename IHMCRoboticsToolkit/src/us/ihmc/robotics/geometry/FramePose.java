@@ -5,6 +5,7 @@ import java.util.Random;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -368,10 +369,32 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       pose.translate(x, y, z);
    }
    
-   public void translateLocally(Vector3DBasics translation)
+   /**
+    * <p>Translate the pose with a translation in local frame.</p>
+    * 
+    * <p>Not thread safe. Will transform transform to world frame and back.</p>
+    * 
+    * @param localTranslation translation in local pose frame
+    */
+   public void translateLocally(Vector3DBasics localTranslation)
    {
-      pose.transformToWorld(translation);
-      pose.translate(translation);
+      pose.transformToWorld(localTranslation);
+      pose.translate(localTranslation);
+      pose.transformToLocal(localTranslation);
+   }
+   
+   /**
+    * <p>Rotate the pose with a translation in local frame.</p>
+    * 
+    * <p>Not thread safe. Will transform transform to world frame and back.</p>
+    * 
+    * @param localRotation translation in local pose frame
+    */
+   public void rotateLocally(QuaternionBasics localRotation)
+   {
+      pose.transformToWorld(localRotation);
+      pose.rotate(localRotation);
+      pose.transformToLocal(localRotation);
    }
 
    public double getX()
@@ -512,7 +535,7 @@ public class FramePose extends AbstractFrameObject<FramePose, Pose>
       }
       else
       {
-         GeometryTools.getTopVertexOfIsoscelesTriangle(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle,
+         EuclidGeometryTools.topVertex3DOfIsoscelesTriangle3D(pose.getPoint(), otherPose.pose.getPoint(), rotationAxis.getVector(), rotationAngle,
                                                        originToPack.getPoint());
       }
    }

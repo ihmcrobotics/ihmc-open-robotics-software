@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.utilities.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,14 +35,7 @@ import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.FloatingJoint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.util.robotExplorer.RobotExplorer;
+import us.ihmc.simulationconstructionset.*;
 
 /**
  * This currently needs to be here because it uses SCS classes to test the inverse dynamics calculator, and SCS isn't on the IHMCUtilities build path
@@ -625,5 +618,127 @@ public class InverseDynamicsCalculatorSCSTest
       ReferenceFrame beforeJointFrame = ReferenceFrame.constructBodyFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
 
       return beforeJointFrame;
+   }
+
+   private static class RobotExplorer
+   {
+      private final Robot robot;
+
+      public RobotExplorer(Robot robot)
+      {
+         this.robot = robot;
+      }
+
+      public void getRobotInformationAsStringBuffer(StringBuffer buffer)
+      {
+         ArrayList<Joint> rootJoints = robot.getRootJoints();
+
+         for (Joint rootJoint : rootJoints)
+         {
+            buffer.append("Found Root Joint.\n");
+            printJointInformation(rootJoint, buffer);
+         }
+      }
+
+      private void printJointInformation(Joint joint, StringBuffer buffer)
+      {
+         String jointName = joint.getName();
+
+         buffer.append("Joint name = " + jointName + "\n");
+
+         Vector3D offset = new Vector3D();
+         joint.getOffset(offset);
+
+         buffer.append("Joint offset = " + offset + "\n");
+
+         Vector3D jointAxis = new Vector3D();
+         joint.getJointAxis(jointAxis);
+
+         buffer.append("Joint axis = " + jointAxis + "\n");
+
+         if (joint instanceof PinJoint)
+         {
+            printPinJointInformation((OneDegreeOfFreedomJoint) joint, buffer);
+         }
+
+         else if (joint instanceof SliderJoint)
+         {
+            printSliderJointInformation((SliderJoint) joint, buffer);
+         }
+
+         else if (joint instanceof FloatingJoint)
+         {
+            printFloatingJointInformation((FloatingJoint) joint, buffer);
+         }
+
+         else if (joint instanceof FloatingPlanarJoint)
+         {
+            printFloatingPlanarJointInformation((FloatingPlanarJoint) joint, buffer);
+         }
+
+         else
+         {
+            throw new RuntimeException("Only Pin and Slider implemented right now");
+         }
+
+         Link link = joint.getLink();
+         printLinkInformation(link, buffer);
+
+         ArrayList<Joint> childrenJoints = joint.getChildrenJoints();
+
+         for (Joint childJoint : childrenJoints)
+         {
+            buffer.append("Found Child Joint of " + jointName + ".\n");
+            printJointInformation(childJoint, buffer);
+         }
+
+      }
+
+      private void printPinJointInformation(OneDegreeOfFreedomJoint pinJoint, StringBuffer buffer)
+      {
+         buffer.append("Joint is a Pin Joint.\n");
+         DoubleYoVariable q = pinJoint.getQYoVariable();
+         buffer.append("Its q variable is named " + q.getName() + "\n");
+      }
+
+      private void printSliderJointInformation(SliderJoint sliderJoint, StringBuffer buffer)
+      {
+         buffer.append("Joint is a Slider Joint.\n");
+         DoubleYoVariable q = sliderJoint.getQYoVariable();
+         buffer.append("Its q variable is named " + q.getName() + "\n");
+      }
+
+      private void printFloatingJointInformation(FloatingJoint floatingJoint, StringBuffer buffer)
+      {
+         buffer.append("Joint is a Floating Joint.\n");
+      }
+
+      private void printFloatingPlanarJointInformation(FloatingPlanarJoint floatingPlanarJoint, StringBuffer buffer)
+      {
+         buffer.append("Joint is a Floating Planar Joint.\n");
+      }
+
+      private void printLinkInformation(Link link, StringBuffer buffer)
+      {
+         double mass = link.getMass();
+
+         Vector3D comOffset = new Vector3D();
+         link.getComOffset(comOffset);
+
+         Matrix3D momentOfInertia = new Matrix3D();
+         link.getMomentOfInertia(momentOfInertia);
+
+         buffer.append("Mass = " + mass + "\n");
+         buffer.append("comOffset = " + comOffset + "\n");
+         buffer.append("momentOfInertia = \n" + momentOfInertia + "\n");
+      }
+
+      @Override
+      public String toString()
+      {
+         StringBuffer buffer = new StringBuffer();
+         getRobotInformationAsStringBuffer(buffer);
+         return buffer.toString();
+      }
    }
 }

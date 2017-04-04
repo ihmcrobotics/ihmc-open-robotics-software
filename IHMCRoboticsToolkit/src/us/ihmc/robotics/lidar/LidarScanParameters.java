@@ -101,6 +101,7 @@ public class LidarScanParameters
      pointsPerSweep = random.nextInt();
    }
 
+   @Override
    public String toString()
    {
       return "PolarLidarScanParameters{" + "\n sweepYawMax=" + sweepYawMax + ",\n sweepYawMin=" + sweepYawMin + ",\n angleIncrement=" + ",\n timeIncrement="
@@ -166,6 +167,67 @@ public class LidarScanParameters
    public int getScanHeight()
    {
       return scanHeight;
+   }
+
+   public void setTimestamp(long timestamp)
+   {
+      this.timestamp = timestamp;
+   }
+
+   public void setSweepYawMax(double sweepYawMax)
+   {
+      this.sweepYawMax = (float) sweepYawMax;
+   }
+
+   public void setSweepYawMin(double sweepYawMin)
+   {
+      this.sweepYawMin = (float) sweepYawMin;
+   }
+
+   public void setHeightPitchMax(double heightPitchMax)
+   {
+      this.heightPitchMax = (float) heightPitchMax;
+   }
+
+   public void setHeightPitchMin(double heightPitchMin)
+   {
+      this.heightPitchMin = (float) heightPitchMin;
+   }
+
+   public void setTimeIncrement(double timeIncrement)
+   {
+      this.timeIncrement = (float) timeIncrement;
+   }
+
+   public void setScanTime(double scanTime)
+   {
+      this.scanTime = (float) scanTime;
+   }
+
+   public void setMinRange(double minRange)
+   {
+      this.minRange = (float) minRange;
+   }
+
+   public void setMaxRange(double maxRange)
+   {
+      this.maxRange = (float) maxRange;
+   }
+
+   public void setPointsPerSweep(int pointsPerSweep)
+   {
+      this.pointsPerSweep = pointsPerSweep;
+   }
+
+   public void setScanHeight(int scanHeight)
+   {
+      this.scanHeight = scanHeight;
+   }
+
+   public void setFieldOfView(double fieldOfView)
+   {
+      this.sweepYawMin = (float) (- (fieldOfView / 2.0f));
+      this.sweepYawMax = (float) (fieldOfView / 2.0f);
    }
 
    @Override

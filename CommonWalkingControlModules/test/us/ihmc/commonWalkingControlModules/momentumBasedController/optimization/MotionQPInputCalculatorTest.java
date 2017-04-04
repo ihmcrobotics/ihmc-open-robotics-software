@@ -97,7 +97,7 @@ public class MotionQPInputCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);
          spatialAccelerationCalculator.compute();
          FrameVector actualLinearAcceleration = new FrameVector();
-         spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
+         spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(elevator, endEffector, bodyFixedPointToControl, actualLinearAcceleration);
 
          desiredLinearAcceleration.checkReferenceFrameMatch(actualLinearAcceleration);
          EuclidCoreTestTools.assertTuple3DEquals(desiredLinearAcceleration.getVector(), actualLinearAcceleration.getVector(), 1.0e-7);
@@ -164,7 +164,7 @@ public class MotionQPInputCalculatorTest
          SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, twistCalculator, 0.0, true);
          spatialAccelerationCalculator.compute();
          FrameVector actualLinearAcceleration = new FrameVector();
-         spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(actualLinearAcceleration, elevator, endEffector, bodyFixedPointToControl);
+         spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(elevator, endEffector, bodyFixedPointToControl, actualLinearAcceleration);
 
          assertTrue(actualLinearAcceleration.epsilonEquals(desiredLinearAcceleration, 1.0e-7));
       }

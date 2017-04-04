@@ -1,13 +1,13 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 
 public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
 {
-   private BoundingBox3d boundingBox;
+   private BoundingBox3D boundingBox;
    
    private static final double defaultXMin = -10.0, defaultXMax = 10.0, defaultYMin = -10.0, defaultYMax = 10.0;
 
@@ -22,7 +22,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
    public AlternatingSlopesGroundProfile(double[][] xSlopePairs, double xMin, double xMax, double yMin, double yMax)
    {
       this.xSlopePairs = xSlopePairs;
-      boundingBox = new BoundingBox3d(new Point3D(xMin, yMin, Double.NEGATIVE_INFINITY), new Point3D(xMax, yMax, Double.MAX_VALUE));
+      boundingBox = new BoundingBox3D(new Point3D(xMin, yMin, Double.NEGATIVE_INFINITY), new Point3D(xMax, yMax, Double.MAX_VALUE));
 
       modifyXMinMaxIfNecessary();
 
@@ -33,8 +33,8 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
 
    private void modifyXMinMaxIfNecessary()
    {
-      double xMin = boundingBox.getXMin();
-      double xMax = boundingBox.getXMax();
+      double xMin = boundingBox.getMinX();
+      double xMax = boundingBox.getMaxX();
       
       boolean changed = false;
       
@@ -52,13 +52,13 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       
       if (changed)
       {
-         boundingBox = new BoundingBox3d(xMin, boundingBox.getYMin(), boundingBox.getZMin(), xMax, boundingBox.getYMax(), boundingBox.getZMax());
+         boundingBox = new BoundingBox3D(xMin, boundingBox.getMinY(), boundingBox.getMinZ(), xMax, boundingBox.getMaxY(), boundingBox.getMaxZ());
       }
    }
 
    private void verifyXOrdering()
    {
-      double x = boundingBox.getXMin();
+      double x = boundingBox.getMinX();
 
       for (int i=0; i<xSlopePairs.length; i++)
       {
@@ -69,7 +69,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
          x = xSlopePairs[i][0];
       }
 
-      if (x > boundingBox.getXMax())
+      if (x > boundingBox.getMaxX())
       {
          throw new RuntimeException("Bad x ordering of points in AlternatingSlopesGroundProfile. Last Point is greater than xMax!");
       }
@@ -89,10 +89,10 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
       double x = 0.0;
       double z = 0.0;
 
-      double previousX = boundingBox.getXMin();
+      double previousX = boundingBox.getMinX();
       double previousSlope = 0.0;
 
-      ret[0][0] = boundingBox.getXMin();
+      ret[0][0] = boundingBox.getMinX();
       ret[0][1] = 0.0;
 
       for (int i = 0; i < numPairs - 2; i++)
@@ -111,9 +111,9 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
          previousX = x;
       }
 
-      ret[numPairs - 1][0] = boundingBox.getXMax();
+      ret[numPairs - 1][0] = boundingBox.getMaxX();
 
-      double run = boundingBox.getXMax() - previousX;
+      double run = boundingBox.getMaxX() - previousX;
       double rise = previousSlope * run;
 
       z = z + rise;
@@ -195,7 +195,7 @@ public class AlternatingSlopesGroundProfile extends GroundProfileFromHeightMap
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

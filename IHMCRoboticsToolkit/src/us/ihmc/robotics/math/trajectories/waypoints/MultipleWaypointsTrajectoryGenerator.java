@@ -241,6 +241,14 @@ public class MultipleWaypointsTrajectoryGenerator implements DoubleTrajectoryGen
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
    }
 
+   public void getLastWaypoint(OneDoFTrajectoryPointInterface<?> pointToPack)
+   {
+      YoOneDoFTrajectoryPoint lastWaypoint = waypoints.get(numberOfWaypoints.getIntegerValue() - 1);
+      pointToPack.setPosition(lastWaypoint.getPosition());
+      pointToPack.setVelocity(lastWaypoint.getVelocity());
+      pointToPack.setTime(lastWaypoint.getTime());
+   }
+
    @Override
    public String toString()
    {

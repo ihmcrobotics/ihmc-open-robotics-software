@@ -6,7 +6,13 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
@@ -40,7 +46,7 @@ public class WholeBodyInverseKinematicsSolver
 
    public WholeBodyInverseKinematicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
-      rootJoint = toolbox.getRobotRootJoint();
+      rootJoint = toolbox.getRootJoint();
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
@@ -111,9 +117,36 @@ public class WholeBodyInverseKinematicsSolver
       }
    }
 
-   public void submitInverseKinematicsCommand(InverseKinematicsCommand<?> inverseKinematicsCommand)
+   public void submitInverseKinematicsCommandList(InverseKinematicsCommandList inverseKinematicsCommandList)
    {
-      optimizationControlModule.submitInverseKinematicsCommand(inverseKinematicsCommand);
+      while (inverseKinematicsCommandList.getNumberOfCommands() > 0)
+      {
+         InverseKinematicsCommand<?> command = inverseKinematicsCommandList.pollCommand();
+
+         switch (command.getCommandType())
+         {
+         case TASKSPACE:
+            optimizationControlModule.submitSpatialVelocityCommand((SpatialVelocityCommand) command);
+            break;
+         case JOINTSPACE:
+            optimizationControlModule.submitJointspaceVelocityCommand((JointspaceVelocityCommand) command);
+            break;
+         case MOMENTUM:
+            optimizationControlModule.submitMomentumCommand((MomentumCommand) command);
+            break;
+         case PRIVILEGED_CONFIGURATION:
+            optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
+            break;
+         case LIMIT_REDUCTION:
+            optimizationControlModule.submitJointLimitReductionCommand((JointLimitReductionCommand) command);
+            break;
+         case COMMAND_LIST:
+            submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
+            break;
+         default:
+            throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
+         }
+      }
    }
 
    public LowLevelOneDoFJointDesiredDataHolder getOutput()

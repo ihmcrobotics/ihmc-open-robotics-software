@@ -2,8 +2,10 @@ package us.ihmc.humanoidRobotics.communication.packets.manipulation;
 
 import java.util.Random;
 
+import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.humanoidRobotics.communication.packets.Abstract1DTrajectoryMessage;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
 @RosMessagePacket(documentation =
@@ -12,6 +14,9 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class OneDoFJointTrajectoryMessage extends Abstract1DTrajectoryMessage<OneDoFJointTrajectoryMessage>
 {
+   @RosExportedField(documentation = "QP Weight, if Too low, in the event the qp can't achieve all of the objectives it may stop trying to achieve the desireds, if too high, it will favor this joint over other objectives. If set to NaN it will use the default weight for that joint")
+   public double weight = Double.NaN;
+   
    /**
     * Empty constructor for serialization.
     */
@@ -39,6 +44,18 @@ public class OneDoFJointTrajectoryMessage extends Abstract1DTrajectoryMessage<On
    {
       super(trajectoryTime, desiredPosition);
    }
+   
+   /**
+    * Use this constructor to go straight to the given end point.
+    * @param trajectoryTime how long it takes to reach the desired position.
+    * @param desiredPosition desired end point position.
+    * @param weight the weight for the qp
+    */
+   public OneDoFJointTrajectoryMessage(double trajectoryTime, double desiredPosition, double weight)
+   {
+      super(trajectoryTime, desiredPosition);
+      this.weight = weight;
+   }
 
    /**
     * Use this constructor to build a message with more than one trajectory points.
@@ -54,12 +71,28 @@ public class OneDoFJointTrajectoryMessage extends Abstract1DTrajectoryMessage<On
    public void set(OneDoFJointTrajectoryMessage other)
    {
       super.set(other);
+      weight = other.weight;
    }
 
    @Override
    public boolean epsilonEquals(OneDoFJointTrajectoryMessage other, double epsilon)
    {
-      return super.epsilonEquals(other, epsilon);
+      boolean equals = super.epsilonEquals(other, epsilon);
+      if(!Double.isNaN(weight) || !Double.isNaN(other.weight))
+      {
+         equals &= MathTools.epsilonEquals(weight, other.weight, 0.0003);
+      }
+      return equals;
+   }
+   
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
+   }
+   
+   public double getWeight()
+   {
+      return weight;
    }
 
    public OneDoFJointTrajectoryMessage(Random random)

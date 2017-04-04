@@ -17,10 +17,6 @@ import us.ihmc.simulationconstructionset.Robot;
  * </p>
  *
  * <p>
- * Copyright: Copyright (c) 2010
- * </p>
- *
- * <p>
  * Company: IHMC
  * </p>
  *

@@ -74,7 +74,7 @@ public class SelfStablePlanarRunner_Simulation implements SimulationDoneListener
 
 	// Add a dynamic graphics representation to the push forces
 	YoGraphicsListRegistry registries = new YoGraphicsListRegistry();
-	YoGraphicsList yoGraphicsList = new YoGraphicsList("DynamicGraphicObjectsList");
+	YoGraphicsList yoGraphicsList = new YoGraphicsList("YoGraphicsList");
 
 	for (SelfStablePlanarRunner_Robot robot: robots) {
 	    ArrayList<GroundContactPoint> ef_point_list = robot.getAllGroundContactPoints();

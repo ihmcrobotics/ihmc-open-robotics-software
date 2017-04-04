@@ -1,5 +1,8 @@
 package us.ihmc.tools.inputDevices.joystick.mapping;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.SystemUtils;
 
 import com.google.common.collect.BiMap;
@@ -8,6 +11,7 @@ import com.google.common.collect.HashBiMap;
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Event;
+import us.ihmc.tools.inputDevices.joystick.JoystickCompatibilityFilter;
 
 /**
  * OS X Mappings based on the following driver: https://github.com/360Controller/360Controller
@@ -80,6 +84,19 @@ public enum XBoxOneMapping implements JoystickMapping
       windowsBiMap.put(windowsIdentifier, mapping);
       macBiMap.put(macIdentifier, mapping);
       linuxBiMap.put(linuxIdentifier, mapping);
+   }
+
+   public static List<JoystickCompatibilityFilter> getCompatibilityFilters()
+   {
+      ArrayList<JoystickCompatibilityFilter> compatibilityFilters = new ArrayList<>();
+      
+      if (SystemUtils.IS_OS_LINUX)
+      {
+         compatibilityFilters.add(new JoystickCompatibilityFilter(LEFT_TRIGGER, false, 1.0, 0.5));
+         compatibilityFilters.add(new JoystickCompatibilityFilter(RIGHT_TRIGGER, false, 1.0, 0.5));
+      }
+      
+      return compatibilityFilters;
    }
 
    @Override

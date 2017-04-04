@@ -2,13 +2,13 @@ package us.ihmc.simulationconstructionset.util.ground;
 
 import java.util.Arrays;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.MathTools;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
 {
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
 
    private final double[] stepStartXValues;
    private final double[] groundHeights;
@@ -21,13 +21,13 @@ public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
       if (stepRises.length != stepTreads.length + 1)
          throw new RuntimeException("stepHeights.length != stepTreads.length + 1");
       
-      double[] xCumulativeSum = MathTools.cumulativeSumDoubles(stepTreads);
+      double[] xCumulativeSum = MathTools.cumulativeSum(stepTreads);
       stepStartXValues = new double[xCumulativeSum.length + 1];
       System.arraycopy(xCumulativeSum, 0, stepStartXValues, 1, xCumulativeSum.length);
       for (int i = 0; i < stepStartXValues.length; i++)
          stepStartXValues[i] = stepStartXValues[i] + startX;
 
-      double[] heightCumulativeSum = MathTools.cumulativeSumDoubles(stepRises);
+      double[] heightCumulativeSum = MathTools.cumulativeSum(stepRises);
       groundHeights = new double[heightCumulativeSum.length + 1];
       System.arraycopy(heightCumulativeSum, 0, groundHeights, 1, heightCumulativeSum.length);
       for (int i = 0; i < groundHeights.length; i++)
@@ -44,7 +44,7 @@ public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
       double zMin = Double.NEGATIVE_INFINITY;
       double zMax = Double.POSITIVE_INFINITY;
       
-      boundingBox = new BoundingBox3d(xMin, yMin, zMin, xMax, yMax, zMax);
+      boundingBox = new BoundingBox3D(xMin, yMin, zMin, xMax, yMax, zMax);
    }
 
    @Override
@@ -96,7 +96,7 @@ public class VaryingStairGroundProfile extends GroundProfileFromHeightMap
    }
    
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

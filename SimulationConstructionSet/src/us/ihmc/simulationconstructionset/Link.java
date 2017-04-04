@@ -20,9 +20,8 @@ import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFram
 /**
  * Describes physical properties of a rigid body. Can attach graphics to it.<p>
  *
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Yobotics, Inc. 2000-2005 <p>
  * @author Jerry Pratt
  * @version 1.0
  */
@@ -347,6 +346,19 @@ public class Link implements java.io.Serializable
 
       setMomentOfInertia(Ixx, Iyy, Izz);
 
+   }
+
+   /**
+    * Sets the mass and moment of inertia of this link. The moments of inertia are computed as
+    * Ixx = mass * (radiusOfGyrationY * radiusOfGyrationY + radiusOfGyrationZ * radiusOfGyrationY), etc.
+    * This is equivalent to the mass being concentrated on the surface of a thin ellipsoid with the given radii of gyration.
+    * 
+    * @param mass Mass of the link.
+    * @param radiiOfGyration Radii of gyration in the x, y, and z directions.
+    */
+   public void setMassAndRadiiOfGyration(double mass, Vector3D radiiOfGyration)
+   {
+      setMassAndRadiiOfGyration(mass, radiiOfGyration.getX(), radiiOfGyration.getY(), radiiOfGyration.getZ());
    }
 
    /**

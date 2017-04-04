@@ -18,12 +18,8 @@
 
 package us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper;
 
-import georegression.struct.point.Point3D_F64;
-import georegression.struct.shapes.Box3D_F64;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ApproximateSurfaceNormals;
-import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.ddogleg.fitting.modelset.ModelFitter;
 import org.ddogleg.fitting.modelset.ModelManager;
@@ -31,8 +27,12 @@ import org.ddogleg.fitting.modelset.ransac.RansacMulti;
 import org.ddogleg.struct.FastQueue;
 import org.ddogleg.struct.GrowQueue_B;
 
-import java.util.ArrayList;
-import java.util.List;
+import georegression.struct.point.Point3D_F64;
+import georegression.struct.shapes.Box3D_F64;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.ApproximateSurfaceNormals;
+import us.ihmc.sensorProcessing.bubo.clouds.detect.alg.PointVectorNN;
 
 /**
  * Uses RANSAC to find a best fit shape using the entire point cloud.  Approximate normals are first computed.

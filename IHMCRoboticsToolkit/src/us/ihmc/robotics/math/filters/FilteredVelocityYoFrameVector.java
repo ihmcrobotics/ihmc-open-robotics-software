@@ -15,11 +15,9 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  *
  * <p>Differentiates and Filters a YoFrameVector to get its derivative. </p>
  *
- * <p>Copyright (c) 2008</p>
+ * <p>IHMC </p>
  *
- * <p>IHMC and Yobotics </p>
- *
- * @author IHMC-Yobotics Biped Team
+ * @author IHMC Biped Team
  * @version 1.0
  */
 public class FilteredVelocityYoFrameVector extends YoFrameVector

@@ -12,8 +12,8 @@ public interface CommonHumanoidReferenceFrames extends ReferenceFrames
    public abstract ReferenceFrame getABodyAttachedZUpFrame();
 
    public abstract ReferenceFrame getMidFeetZUpFrame();
-   public abstract ReferenceFrame getMidFeetUnderPelvisFrame();
 
+   public abstract ReferenceFrame getMidFeetUnderPelvisFrame();
 
    public abstract SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames();
 
@@ -33,8 +33,6 @@ public interface CommonHumanoidReferenceFrames extends ReferenceFrames
 
    public abstract ReferenceFrame getIMUFrame();
 
-   public abstract ReferenceFrame getCenterOfMassFrame();
-
    public abstract ReferenceFrame getPelvisZUpFrame();
 
    public abstract ReferenceFrame getSoleFrame(RobotSide robotSide);
@@ -42,4 +40,11 @@ public interface CommonHumanoidReferenceFrames extends ReferenceFrames
    public abstract ReferenceFrame getSoleZUpFrame(RobotSide robotSide);
 
    public abstract SideDependentList<ReferenceFrame> getSoleZUpFrames();
+
+   public abstract ReferenceFrame getChestFrame();
+
+   public default ReferenceFrame getMidFeetZUpAverageYawFrame()
+   {
+      return null;
+   }
 }

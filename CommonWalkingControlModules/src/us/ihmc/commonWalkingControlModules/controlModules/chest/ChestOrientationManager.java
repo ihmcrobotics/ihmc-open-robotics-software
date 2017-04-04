@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.HandControlModule;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
@@ -65,13 +64,13 @@ public class ChestOrientationManager
       initialJointPositions = new double[jointsOriginal.length];
 
       YoOrientationPIDGainsInterface taskspaceGains = walkingControllerParameters.createChestControlGains(registry);
-      YoPIDGains jointspaceGains = walkingControllerParameters.createSpineControlGains(registry);
+      YoPIDGains jointspaceGains = walkingControllerParameters.getOrCreateJointSpaceControlGains(registry).get(jointsOriginal[0].getName());
 
       taskspaceChestControlState = new TaskspaceChestControlState(humanoidControllerToolbox, taskspaceGains, registry);
       jointspaceChestControlState = new JointspaceChestControlState(jointsOriginal, jointspaceGains, yoTime, registry);
 
       taskspaceChestControlState.setWeights(walkingControllerParameters.getMomentumOptimizationSettings().getChestAngularWeight());
-      jointspaceChestControlState.setWeight(walkingControllerParameters.getMomentumOptimizationSettings().getSpineJointspaceWeight());
+      jointspaceChestControlState.setWeight(walkingControllerParameters.getMomentumOptimizationSettings().getJointspaceWeights().get(jointsOriginal[0].getName()));
 
       setupStateMachine();
       parentRegistry.addChild(registry);

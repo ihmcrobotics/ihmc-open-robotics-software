@@ -8,14 +8,14 @@ import us.ihmc.affinity.Processor;
 import us.ihmc.realtime.MonotonicTime;
 import us.ihmc.realtime.PriorityParameters;
 import us.ihmc.realtime.RealtimeThread;
-import us.ihmc.simulationconstructionset.robotController.MultiThreadedRobotControlElement;
+import us.ihmc.simulationConstructionSetTools.robotController.MultiThreadedRobotControlElement;
 
 public class MultiThreadedRealTimeRobotController implements MultiThreadedRobotControlElementCoordinator
 {
    private final MultiThreadedRobotControlElement sensorReader;
    private final ArrayList<ImmutableTriple<MultiThreadedRobotControlElement, PriorityParameters, Processor>> robotControllers = new ArrayList<>();
    private final MonotonicTime triggerTime = new MonotonicTime();   
-   private final MonotonicTime monotonicTime = new MonotonicTime();
+   private final MonotonicTime defaultTriggerTime = new MonotonicTime(0, 100000);
       
    public MultiThreadedRealTimeRobotController(MultiThreadedRobotControlElement sensorReader)
    {
@@ -77,13 +77,20 @@ public class MultiThreadedRealTimeRobotController implements MultiThreadedRobotC
          {
             controller.read(RealtimeThread.getCurrentMonotonicClockTime());
             controller.run();
-            controller.write(RealtimeThread.getCurrentMonotonicClockTime());
+            long currentTime = RealtimeThread.getCurrentMonotonicClockTime();
+            controller.write(currentTime);
             
-            if(controller.nextWakeupTime() != Long.MIN_VALUE)
+            // Checks if there is a non-zero sleep duration. If not, sleep for 0.1ms. This avoids busy waits and preempting kernel tasks.
+            if(controller.nextWakeupTime() != Long.MIN_VALUE && controller.nextWakeupTime() >= currentTime)
             {
                triggerTime.set(0, controller.nextWakeupTime());
-               waitUntil(triggerTime);               
             }
+            else
+            {
+               triggerTime.setToCurrentTime();
+               triggerTime.add(defaultTriggerTime);
+            }
+            waitUntil(triggerTime);               
          }
       }
       

@@ -3,13 +3,12 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * Computes Jacobian derivative times velocity vector
- * Useful for dealing with task space accelerations, since:
+ * Computes Jacobian derivative times velocity vector Useful for dealing with task space
+ * accelerations, since:
  *
  * J * v = T
  *
- * differentiate:
- * \dot{J} * v + J * \dot{v} = \dot{T}
+ * differentiate: \dot{J} * v + J * \dot{v} = \dot{T}
  *
  * This class computes \dot{J} * v (the convective term in this equation)
  */

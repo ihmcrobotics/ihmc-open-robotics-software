@@ -1,75 +1,47 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
+import us.ihmc.euclid.interfaces.Clearable;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.YoAxisAngleOrientationGains;
+import us.ihmc.robotics.controllers.YoEuclideanPositionGains;
+import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
+import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class FeedbackControllerToolbox
+public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public enum Type
-   {
-      DESIRED("Desired"),
-      CURRENT("Current"),
-      FEEDFORWARD("FeedForward"),
-      ACHIEVED("Achieved"),
-      ERROR("Error");
-
-      private final String name;
-
-      private Type(String name)
-      {
-         this.name = name;
-      }
-
-      public String getName()
-      {
-         return name;
-      }
-   };
-
-   public enum Space
-   {
-      POSITION("Position"),
-      ORIENTATION("Orientation"),
-      ROTATION_VECTOR("RotationVector"),
-      LINEAR_VELOCITY("LinearVelocity"),
-      ANGULAR_VELOCITY("AngularVelocity"),
-      LINEAR_ACCELERATION("LinearAcceleration"),
-      ANGULAR_ACCELERATION("AngularAcceleration");
-
-      private final String name;
-
-      private Space(String name)
-      {
-         this.name = name;
-      }
-
-      public String getName()
-      {
-         return name;
-      }
-
-      @Override
-      public String toString()
-      {
-         return name;
-      }
-   }
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
+   private final List<Clearable> clearableData = new ArrayList<>();
 
    private final Map<RigidBody, EnumMap<Type, YoFramePoint>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, YoFrameQuaternion>> endEffectorOrientations = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, EnumMap<Space, YoFrameVector>>> endEffectorDataVectors = new HashMap<>();
+
+   private final Map<RigidBody, YoOrientationPIDGainsInterface> endEffectorOrientationGains = new HashMap<>();
+   private final Map<RigidBody, YoPositionPIDGainsInterface> endEffectorPositionGains = new HashMap<>();
+
+   private final Map<RigidBody, YoSE3OffsetFrame> endEffectorControlFrames = new HashMap<>();
 
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
@@ -95,6 +67,7 @@ public class FeedbackControllerToolbox
          namePrefix += Space.POSITION.getName();
          yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
          typeDependentPositions.put(type, yoFramePoint);
+         clearableData.add(yoFramePoint);
       }
 
       return yoFramePoint;
@@ -119,6 +92,7 @@ public class FeedbackControllerToolbox
          namePrefix += Space.ORIENTATION.getName();
          yoFrameQuaternion = new YoFrameQuaternion(namePrefix, worldFrame, registry);
          typeDependentOrientations.put(type, yoFrameQuaternion);
+         clearableData.add(yoFrameQuaternion);
       }
 
       return yoFrameQuaternion;
@@ -151,8 +125,155 @@ public class FeedbackControllerToolbox
          namePrefix += space.getName();
          yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
          dataVectorStep2.put(space, yoFrameVector);
+         clearableData.add(yoFrameVector);
       }
 
       return yoFrameVector;
+   }
+
+   public YoOrientationPIDGainsInterface getOrientationGains(RigidBody endEffector)
+   {
+      YoOrientationPIDGainsInterface gains = endEffectorOrientationGains.get(endEffector);
+
+      if (gains == null)
+      {
+         gains = new YoAxisAngleOrientationGains(endEffector.getName(), registry);
+         endEffectorOrientationGains.put(endEffector, gains);
+      }
+      return gains;
+   }
+
+   public YoPositionPIDGainsInterface getPositionGains(RigidBody endEffector)
+   {
+      YoPositionPIDGainsInterface gains = endEffectorPositionGains.get(endEffector);
+
+      if (gains == null)
+      {
+         gains = new YoEuclideanPositionGains(endEffector.getName(), registry);
+         endEffectorPositionGains.put(endEffector, gains);
+      }
+      return gains;
+   }
+
+   public YoSE3PIDGainsInterface getSE3PIDGains(RigidBody endEffector)
+   {
+      YoPositionPIDGainsInterface positionGains = getPositionGains(endEffector);
+      YoOrientationPIDGainsInterface orientationGains = getOrientationGains(endEffector);
+
+      return new YoSE3PIDGainsInterface()
+      {
+         @Override
+         public void set(PositionPIDGainsInterface positionGains)
+         {
+            positionGains.set(positionGains);
+         }
+
+         @Override
+         public void set(OrientationPIDGainsInterface orientationGains)
+         {
+            orientationGains.set(orientationGains);
+         }
+
+         @Override
+         public void set(SE3PIDGainsInterface gains)
+         {
+            positionGains.set(gains.getPositionGains());
+            orientationGains.set(gains.getOrientationGains());
+         }
+
+         @Override
+         public YoPositionPIDGainsInterface getPositionGains()
+         {
+            return positionGains;
+         }
+
+         @Override
+         public YoOrientationPIDGainsInterface getOrientationGains()
+         {
+            return orientationGains;
+         }
+      };
+   }
+
+   public YoSE3OffsetFrame getControlFrame(RigidBody endEffector)
+   {
+      YoSE3OffsetFrame controlFrame = endEffectorControlFrames.get(endEffector);
+
+      if (controlFrame == null)
+      {
+         controlFrame = new YoSE3OffsetFrame(endEffector.getName() + "BodyFixedControlFrame", endEffector.getBodyFixedFrame(), registry);
+         endEffectorControlFrames.put(endEffector, controlFrame);
+      }
+
+      return controlFrame;
+   }
+
+   /**
+    * Calls {@link Clearable#setToNaN()} to all the register objects used by the feedback
+    * controllers.
+    * <p>
+    * The method should be called at the beginning of the controller core tick such that the unused
+    * part of the data will be {@link Double#NaN} making it clear what it is used and what is not.
+    * </p>
+    */
+   public void clearData()
+   {
+      for (int i = 0; i < clearableData.size(); i++)
+         clearableData.get(i).setToNaN();
+   }
+
+   @Override
+   public boolean getPositionData(RigidBody endEffector, FramePoint positionDataToPack, Type type)
+   {
+      EnumMap<Type, YoFramePoint> endEffectorData = endEffectorPositions.get(endEffector);
+
+      if (endEffectorData == null)
+         return false;
+
+      YoFramePoint positionData = endEffectorData.get(type);
+
+      if (positionData == null)
+         return false;
+
+      positionData.getFrameTupleIncludingFrame(positionDataToPack);
+      return true;
+   }
+
+   @Override
+   public boolean getOrientationData(RigidBody endEffector, FrameOrientation orientationDataToPack, Type type)
+   {
+      EnumMap<Type, YoFrameQuaternion> endEffectorData = endEffectorOrientations.get(endEffector);
+
+      if (endEffectorData == null)
+         return false;
+
+      YoFrameQuaternion orientationData = endEffectorData.get(type);
+
+      if (orientationData == null)
+         return false;
+
+      orientationData.getFrameOrientationIncludingFrame(orientationDataToPack);
+      return true;
+   }
+
+   @Override
+   public boolean getVectorData(RigidBody endEffector, FrameVector vectorDataToPack, Type type, Space space)
+   {
+      EnumMap<Type, EnumMap<Space, YoFrameVector>> endEffectorData = endEffectorDataVectors.get(endEffector);
+
+      if (endEffectorData == null)
+         return false;
+
+      EnumMap<Space, YoFrameVector> endEffectorDataTyped = endEffectorData.get(type);
+
+      if (endEffectorDataTyped == null)
+         return false;
+
+      YoFrameVector vectorData = endEffectorDataTyped.get(space);
+
+      if (vectorData == null)
+         return false;
+
+      return false;
    }
 }

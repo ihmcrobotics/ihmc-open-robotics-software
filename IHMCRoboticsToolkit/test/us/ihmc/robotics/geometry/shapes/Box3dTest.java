@@ -643,7 +643,7 @@ public class Box3dTest
          weightings[j] = random.nextDouble();
       }
 
-      double sum = MathTools.sumDoubles(weightings);
+      double sum = MathTools.sum(weightings);
       for (int j = 0; j < weightings.length; j++)
       {
          weightings[j] /= sum;

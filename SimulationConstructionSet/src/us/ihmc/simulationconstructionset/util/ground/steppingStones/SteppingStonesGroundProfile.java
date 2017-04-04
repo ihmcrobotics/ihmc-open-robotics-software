@@ -2,15 +2,15 @@ package us.ihmc.simulationconstructionset.util.ground.steppingStones;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 import us.ihmc.simulationconstructionset.util.ground.GroundProfileFromHeightMap;
 
 public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
 {
    private final SteppingStones steppingStones;
 
-   private final BoundingBox3d boundingBox = new BoundingBox3d(-10.0, -10.0, -10.0, 10.0, 10.0, 10.0);
+   private final BoundingBox3D boundingBox = new BoundingBox3D(-10.0, -10.0, -10.0, 10.0, 10.0, 10.0);
    
    public SteppingStonesGroundProfile(SteppingStones steppingStones)
    {
@@ -63,7 +63,7 @@ public class SteppingStonesGroundProfile extends GroundProfileFromHeightMap
    }
    
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

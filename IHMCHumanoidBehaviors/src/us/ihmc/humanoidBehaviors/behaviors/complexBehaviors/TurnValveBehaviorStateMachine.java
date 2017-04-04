@@ -73,7 +73,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       searchForValveBehavior = new SearchForValveBehavior(communicationBridge);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
-      graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, referenceFrames, communicationBridge, atlasPrimitiveActions);
+      graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(yoTime, communicationBridge, atlasPrimitiveActions);
       userValidationExampleBehavior = new GetUserValidationBehavior(communicationBridge);
 
       setupStateMachine();

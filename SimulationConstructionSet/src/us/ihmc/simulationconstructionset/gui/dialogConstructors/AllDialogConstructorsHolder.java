@@ -11,6 +11,7 @@ public interface AllDialogConstructorsHolder
    public abstract LoadConfigurationDialogConstructor getLoadConfigurationDialogConstructor();
    public abstract MediaCaptureDialogConstructor getMediaCaptureDialogConstructor();
    public abstract PlaybackPropertiesDialogConstructor getPlaybackPropertiesDialogConstructor();
+   public abstract YoGraphicsPropertiesDialogConstructor getYoGraphicsPropertiesDialogConstructor();
    public abstract PrintGraphsDialogConstructor getPrintGraphsDialogConstructor();
    public abstract ExportGraphsToFileConstructor getExportGraphsToFileConstructor();
    public abstract ResizeViewportDialogConstructor getResizeViewportDialogConstructor();

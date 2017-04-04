@@ -111,6 +111,11 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       position.add(x, y, z);
    }
 
+   public void rotate(QuaternionReadOnly rotation)
+   {
+      orientation.multiply(rotation);
+   }
+   
    public Point3DReadOnly getPoint()
    {
       return position;

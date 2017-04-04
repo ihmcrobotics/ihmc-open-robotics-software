@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.frames;
 
+import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.rotationConversion.QuaternionConversion;
@@ -18,7 +19,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly
 //since they contain YoVariables.
-public class YoFrameOrientation extends AbstractReferenceFrameHolder
+public class YoFrameOrientation extends AbstractReferenceFrameHolder implements Clearable
 {
    private final DoubleYoVariable yaw, pitch, roll; // This is where the data is stored. All operations must act on these numbers.
    private final ReferenceFrame referenceFrame;
@@ -215,6 +216,7 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
       setFromReferenceFrame(referenceFrame, true);
    }
 
+   @Override
    public void setToNaN()
    {
       yaw.set(Double.NaN);
@@ -222,6 +224,7 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
       roll.set(Double.NaN);
    }
 
+   @Override
    public void setToZero()
    {
       yaw.set(0.0);
@@ -319,6 +322,7 @@ public class YoFrameOrientation extends AbstractReferenceFrameHolder
       tempFrameOrientation.setYawPitchRoll(yaw.getDoubleValue(), pitch.getDoubleValue(), roll.getDoubleValue());
    }
 
+   @Override
    public boolean containsNaN()
    {
       return Double.isNaN(yaw.getDoubleValue()) || Double.isNaN(pitch.getDoubleValue()) || Double.isNaN(roll.getDoubleValue());

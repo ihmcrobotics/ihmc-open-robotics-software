@@ -13,12 +13,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.OrientationFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.PointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.SpatialFeedbackController;
-import us.ihmc.robotics.controllers.PDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -27,7 +27,9 @@ import us.ihmc.robotics.time.ExecutionTimer;
 public class WholeBodyFeedbackController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final InverseDynamicsCommandList output = new InverseDynamicsCommandList();
+   private final InverseDynamicsCommandList inverseDynamicsOutput = new InverseDynamicsCommandList();
+   private final InverseKinematicsCommandList inverseKinematicsOutput = new InverseKinematicsCommandList();
+   private final InverseDynamicsCommandList virtualModelControlOutput = new InverseDynamicsCommandList();
 
    private final List<FeedbackControllerInterface> allControllers = new ArrayList<>();
 
@@ -42,7 +44,8 @@ public class WholeBodyFeedbackController
    private final ExecutionTimer feedbackControllerTimer = new ExecutionTimer("wholeBodyFeedbackControllerTimer", 1.0, registry);
    private final ExecutionTimer achievedComputationTimer = new ExecutionTimer("achievedComputationTimer", 1.0, registry);
 
-   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
+   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControlCommandList allPossibleCommands,
+                                      YoVariableRegistry parentRegistry)
    {
       this.coreToolbox = coreToolbox;
       this.feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
@@ -128,7 +131,12 @@ public class WholeBodyFeedbackController
          if (oneDoFJointFeedbackControllerMap.containsKey(joint))
             continue;
 
-         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox.getControlDT(), registry);
+         double controlDT = coreToolbox.getControlDT();
+         boolean inverseDynamicsEnabled = coreToolbox.isEnableInverseDynamicsModule();
+         boolean inverseKinematicsEnabled = coreToolbox.isEnableInverseKinematicsModule();
+         boolean virtualModelControlEnabled = coreToolbox.isEnableVirtualModelControlModule();
+         OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, controlDT, inverseDynamicsEnabled, inverseKinematicsEnabled,
+                                                                                      virtualModelControlEnabled, registry);
          oneDoFJointFeedbackControllerMap.put(joint, controller);
          allControllers.add(controller);
       }
@@ -145,6 +153,9 @@ public class WholeBodyFeedbackController
 
    public void reset()
    {
+      // FIXME This results into discontinuities in the remote visualizer, need to change it such as the YoVariables change only once per tick.
+//      feedbackControllerToolbox.clearData();
+
       for (int i = 0; i < allControllers.size(); i++)
       {
          FeedbackControllerInterface controller = allControllers.get(i);
@@ -152,18 +163,52 @@ public class WholeBodyFeedbackController
       }
    }
 
-   public void compute()
+   public void computeInverseDynamics()
    {
       feedbackControllerTimer.startMeasurement();
-      output.clear();
+      inverseDynamicsOutput.clear();
 
       for (int i = 0; i < allControllers.size(); i++)
       {
          FeedbackControllerInterface controller = allControllers.get(i);
          if (controller.isEnabled())
          {
-            controller.compute();
-            output.addCommand(controller.getOutput());
+            controller.computeInverseDynamics();
+            inverseDynamicsOutput.addCommand(controller.getInverseDynamicsOutput());
+         }
+      }
+      feedbackControllerTimer.stopMeasurement();
+   }
+
+   public void computeInverseKinematics()
+   {
+      feedbackControllerTimer.startMeasurement();
+      inverseKinematicsOutput.clear();
+
+      for (int i = 0; i < allControllers.size(); i++)
+      {
+         FeedbackControllerInterface controller = allControllers.get(i);
+         if (controller.isEnabled())
+         {
+            controller.computeInverseKinematics();
+            inverseKinematicsOutput.addCommand(controller.getInverseKinematicsOutput());
+         }
+      }
+      feedbackControllerTimer.stopMeasurement();
+   }
+
+   public void computeVirtualModelControl()
+   {
+      feedbackControllerTimer.startMeasurement();
+      virtualModelControlOutput.clear();
+
+      for (int i = 0; i < allControllers.size(); i++)
+      {
+         FeedbackControllerInterface controller = allControllers.get(i);
+         if (controller.isEnabled())
+         {
+            controller.computeVirtualModelControl();
+            virtualModelControlOutput.addCommand(controller.getVirtualModelControlOutput());
          }
       }
       feedbackControllerTimer.stopMeasurement();
@@ -238,8 +283,6 @@ public class WholeBodyFeedbackController
 
    private void submitJointspaceFeedbackControlCommand(JointspaceFeedbackControlCommand feedbackControlCommand)
    {
-      PDGainsInterface gains = feedbackControlCommand.getGains();
-
       for (int i = 0; i < feedbackControlCommand.getNumberOfJoints(); i++)
       {
          OneDoFJoint joint = feedbackControlCommand.getJoint(i);
@@ -248,15 +291,25 @@ public class WholeBodyFeedbackController
          double feedForwardAcceleration = feedbackControlCommand.getFeedForwardAcceleration(i);
 
          OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
-         controller.setGains(gains);
+         controller.setGains(feedbackControlCommand.getGains(i));
          controller.setDesireds(desiredPosition, desiredVelocity, feedForwardAcceleration);
-         controller.setWeightForSolver(feedbackControlCommand.getWeightForSolver());
+         controller.setWeightForSolver(feedbackControlCommand.getWeightForSolver(i));
          controller.setEnabled(true);
       }
    }
 
-   public InverseDynamicsCommandList getOutput()
+   public InverseDynamicsCommandList getInverseDynamicsOutput()
    {
-      return output;
+      return inverseDynamicsOutput;
+   }
+
+   public InverseKinematicsCommandList getInverseKinematicsOutput()
+   {
+      return inverseKinematicsOutput;
+   }
+
+   public InverseDynamicsCommandList getVirtualModelControlOutput()
+   {
+      return virtualModelControlOutput;
    }
 }

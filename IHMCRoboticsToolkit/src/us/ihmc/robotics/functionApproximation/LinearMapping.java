@@ -10,10 +10,6 @@ import java.util.Arrays;
  * <p>Description: Defines a mapping from an n dimensional input space to an n dimensional output space, where the
  * transformation between the two is a simple scaling of each dimension.</p>
  *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: IHMC</p>
- *
  * @author jrebula
  * @version 1.0
  */

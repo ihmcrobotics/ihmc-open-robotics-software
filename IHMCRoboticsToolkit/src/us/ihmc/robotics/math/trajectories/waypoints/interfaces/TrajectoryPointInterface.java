@@ -1,8 +1,9 @@
 package us.ihmc.robotics.math.trajectories.waypoints.interfaces;
 
 import us.ihmc.euclid.interfaces.GeometryObject;
+import us.ihmc.robotics.lists.Settable;
 
-public interface TrajectoryPointInterface<T extends TrajectoryPointInterface<T>> extends GeometryObject<T>
+public interface TrajectoryPointInterface<T extends TrajectoryPointInterface<T>> extends GeometryObject<T>, Settable<T>
 {
    public abstract void setTime(double time);
 

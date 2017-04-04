@@ -87,7 +87,7 @@ public abstract class SpatialMotionVector
     */
    public SpatialMotionVector(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame, double[] array)
    {
-      MathTools.checkIfEqual(SIZE, array.length);
+      MathTools.checkEquals(SIZE, array.length);
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.expressedInFrame = expressedInFrame;
@@ -383,19 +383,37 @@ public abstract class SpatialMotionVector
    }
    
    /**
-    * Packs an existing matrix based on this spatial motion vector ([angular part; linear part]).
-    * @param matrix matrix to pack
+    * Packs the components of this spatial motion vector {@code angularPart}, {@code linearPart} in
+    * order in the first column of the given {@code matrix} starting at the
+    * {@code startRow}<sup>th</sup> row.
+    * 
+    * @param matrixToPack the matrix in which this vector is packed. Modified.
+    * @param rowStart the first row index to start writing in the dense-matrix.
     */
-   
-   public void getMatrix(DenseMatrix64F matrix, int rowStart)
-   {
-      matrix.set(rowStart + 0, 0, angularPart.getX());
-      matrix.set(rowStart + 1, 0, angularPart.getY());
-      matrix.set(rowStart + 2, 0, angularPart.getZ());
 
-      matrix.set(rowStart + 3, 0, linearPart.getX());
-      matrix.set(rowStart + 4, 0, linearPart.getY());
-      matrix.set(rowStart + 5, 0, linearPart.getZ());
+   public void getMatrix(DenseMatrix64F matrixToPack, int rowStart)
+   {
+      getMatrix(matrixToPack, rowStart, 0);
+   }
+
+   /**
+    * Packs the components of this spatial motion vector {@code angularPart}, {@code linearPart} in
+    * order in the {@code columnIndex}<sup>th</sup> column of the given {@code matrix} starting at
+    * the {@code startRow}<sup>th</sup> row.
+    * 
+    * @param matrixToPack the matrix in which this vector is packed. Modified.
+    * @param rowStart the first row index to start writing in the dense-matrix.
+    * @param columnIndex the column index to write in the dense-matrix.
+    */
+   public void getMatrix(DenseMatrix64F matrixToPack, int rowStart, int columnIndex)
+   {
+      matrixToPack.set(rowStart + 0, columnIndex, angularPart.getX());
+      matrixToPack.set(rowStart + 1, columnIndex, angularPart.getY());
+      matrixToPack.set(rowStart + 2, columnIndex, angularPart.getZ());
+
+      matrixToPack.set(rowStart + 3, columnIndex, linearPart.getX());
+      matrixToPack.set(rowStart + 4, columnIndex, linearPart.getY());
+      matrixToPack.set(rowStart + 5, columnIndex, linearPart.getZ());
    }
    
    public void getArray(double[] array, int offset)
@@ -552,9 +570,13 @@ public abstract class SpatialMotionVector
    
    public void checkReferenceFramesMatch(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
    {
-      if (this.bodyFrame != bodyFrame) throw new ReferenceFrameMismatchException("this.bodyFrame != bodyFrame");
-      if (this.baseFrame != baseFrame) throw new ReferenceFrameMismatchException("this.baseFrame != baseFrame");
-      if (this.expressedInFrame != expressedInFrame) throw new ReferenceFrameMismatchException("this.expressedInFrame != expressedInFrame");
+      if (this.bodyFrame != bodyFrame)
+         throw new ReferenceFrameMismatchException("bodyFrame mismatch: this.bodyFrame = " + this.bodyFrame + ", other bodyFrame = " + bodyFrame);
+      if (this.baseFrame != baseFrame)
+         throw new ReferenceFrameMismatchException("baseFrame mismatch: this.baseFrame = " + this.baseFrame + ", other baseFrame = " + baseFrame);
+      if (this.expressedInFrame != expressedInFrame)
+         throw new ReferenceFrameMismatchException("expressedInFrame mismatch: this.expressedInFrame = " + this.expressedInFrame + ", other expressedInFrame = "
+               + expressedInFrame);
    }
 
    public boolean containsNaN(SpatialMotionVector spatialMotionVector)

@@ -21,7 +21,6 @@ import java.util.Set;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -61,12 +60,10 @@ public class BonoJointMap implements DRCRobotJointMap
    private final SideDependentList<EnumMap<ArmJointName, String>> armJointStrings = SideDependentList.createListOfEnumMaps(ArmJointName.class);
    private final EnumMap<SpineJointName, String> spineJointStrings = new EnumMap<SpineJointName, String>(SpineJointName.class);
 
-   private final BonoContactPointParameters contactPointParameters;
-
    private final SideDependentList<String> nameOfJointsBeforeThighs = new SideDependentList<String>();
 
    private final String[] jointNamesBeforeFeet = new String[2];
-   
+
    public BonoJointMap()
    {
       super();
@@ -103,13 +100,11 @@ public class BonoJointMap implements DRCRobotJointMap
          jointRoles.put(spineJointString, JointRole.SPINE);
       }
 
-      contactPointParameters = new BonoContactPointParameters(this);
-
       for (RobotSide robtSide : RobotSide.values)
       {
          nameOfJointsBeforeThighs.put(robtSide, legJointStrings.get(robtSide).get(LegJointName.HIP_PITCH));
       }
-      
+
       jointNamesBeforeFeet[0] = getJointBeforeFootName(RobotSide.LEFT);
       jointNamesBeforeFeet[1] = getJointBeforeFootName(RobotSide.RIGHT);
    }
@@ -142,18 +137,6 @@ public class BonoJointMap implements DRCRobotJointMap
    public SpineJointName[] getSpineJointNames()
    {
       return spineJoints;
-   }
-
-   @Override
-   public BonoContactPointParameters getContactPointParameters()
-   {
-      return contactPointParameters;
-   }
-
-   @Override
-   public List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
-   {
-      return contactPointParameters.getJointNameGroundContactPointMap();
    }
 
    @Override public List<ImmutablePair<String, YoPDGains>> getPassiveJointNameWithGains(YoVariableRegistry registry)
@@ -279,7 +262,7 @@ public class BonoJointMap implements DRCRobotJointMap
    {
       return null;
    }
-   
+
    @Override
    public String getJointBeforeHandName(RobotSide robotSide)
    {
@@ -320,13 +303,13 @@ public class BonoJointMap implements DRCRobotJointMap
    {
       return null;
    }
-   
+
    @Override
    public String getUnsanitizedRootJointInSdf()
    {
       return pelvisName;
    }
-   
+
    @Override
    public String[] getJointNamesBeforeFeet()
    {
@@ -338,7 +321,7 @@ public class BonoJointMap implements DRCRobotJointMap
    {
       return RobotSide.values;
    }
-   
+
    @Override
    public Enum<?> getEndEffectorsRobotSegment(String joineNameBeforeEndEffector)
    {

@@ -28,17 +28,23 @@ public class CommonHumanoidReferenceFramesVisualizer
       YoGraphicReferenceFrame midFeetFrame = new YoGraphicReferenceFrame(referenceFrames.getMidFeetZUpFrame(), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, midFeetFrame);
       referenceFramesVisualizers.add(midFeetFrame);
+
+      YoGraphicReferenceFrame midFeetAverageYawFrame = new YoGraphicReferenceFrame(referenceFrames.getMidFeetZUpAverageYawFrame(), registry, 0.2);
+      yoGraphicsListRegistry.registerYoGraphic(vizName, midFeetAverageYawFrame);
+      referenceFramesVisualizers.add(midFeetAverageYawFrame);
+
       YoGraphicReferenceFrame comFrame = new YoGraphicReferenceFrame(referenceFrames.getCenterOfMassFrame(), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, comFrame);
       referenceFramesVisualizers.add(comFrame);
+
       YoGraphicReferenceFrame pelvisFrame = new YoGraphicReferenceFrame(referenceFrames.getPelvisFrame(), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, pelvisFrame);
       referenceFramesVisualizers.add(pelvisFrame);
-      
+
       YoGraphicReferenceFrame leftSoleFrmae = new YoGraphicReferenceFrame(referenceFrames.getSoleFrame(RobotSide.LEFT), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, leftSoleFrmae);
       referenceFramesVisualizers.add(leftSoleFrmae);
-      
+
       YoGraphicReferenceFrame rightSoleFrame = new YoGraphicReferenceFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, rightSoleFrame);
       referenceFramesVisualizers.add(rightSoleFrame);

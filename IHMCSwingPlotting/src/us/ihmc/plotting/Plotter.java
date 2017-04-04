@@ -22,6 +22,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -44,7 +45,6 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.FormattingTools;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
  * TODO Deprecate archaic methods
@@ -339,7 +339,9 @@ public class Plotter implements PlotterInterface
             {
                graphics2d.setColor(plotterColors.getLabelColor());
                gridLinePencil.changeFrame(metersFrame);
-               String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getX(), 2);
+               gridSize.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToPrecision(gridLinePencil.getX(), gridSize.getX(), 2);
+               gridSize.changeFrame(pixelsFrame);
                gridLinePencil.changeFrame(pixelsFrame);
                origin.changeFrame(pixelsFrame);
                if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getY() > upperLeftCorner.getY() - 14)
@@ -385,7 +387,9 @@ public class Plotter implements PlotterInterface
             {
                graphics2d.setColor(plotterColors.getLabelColor());
                gridLinePencil.changeFrame(metersFrame);
-               String labelString = FormattingTools.getFormattedToSignificantFigures(gridLinePencil.getY(), 2);
+               gridSize.changeFrame(metersFrame);
+               String labelString = FormattingTools.getFormattedToPrecision(gridLinePencil.getY(), gridSize.getY(), 2);
+               gridSize.changeFrame(pixelsFrame);
                gridLinePencil.changeFrame(pixelsFrame);
                origin.changeFrame(pixelsFrame);
                if (MathTools.epsilonEquals(screenRotation, 0.0, 1e-3) && origin.getX() > lowerRightCorner.getX() - 30)

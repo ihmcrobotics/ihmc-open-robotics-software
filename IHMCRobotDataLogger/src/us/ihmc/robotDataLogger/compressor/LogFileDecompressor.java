@@ -104,7 +104,7 @@ public class LogFileDecompressor extends YoVariableLogReader
 
       copyMetaData(targetFile);
       
-      out.println("Decompression took " + Conversions.nanoSecondstoSeconds(System.nanoTime() - startTime));
+      out.println("Decompression took " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
       checkChecksums(properties);
       incrementProgress();
       
