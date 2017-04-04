@@ -22,8 +22,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTr
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3HybridJointSpaceTaskSpaceTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -232,11 +230,14 @@ public class RigidBodyControlManager
       }
    }
    
-   public void handleHybridTrajectoryCommand(AbstractSE3HybridJointSpaceTaskSpaceTrajectoryMessage<?, ?, ?> command)
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointSpaceCommand)
    {
       computeDesiredJointPositions(initialJointPositions);
+      
+      initialPose.setToZero(controlFrame);
+      initialPose.changeFrame(taskspaceCommand.getDataFrame());
 
-      if (hybridControlState.handleTrajectoryCommand(command, initialJointPositions))
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions, initialPose))
       {
          requestState(hybridControlState.getStateEnum());
       }
@@ -247,17 +248,20 @@ public class RigidBodyControlManager
       }
    }
    
-   public void handleHybridTrajectoryCommand(AbstractSO3HybridJointSpaceTaskSpaceTrajectoryMessage<?, ?, ?> command)
+   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
    {
+      initialOrientation.setToZero(controlFrame);
+      initialOrientation.changeFrame(taskspaceCommand.getDataFrame());
+      
       computeDesiredJointPositions(initialJointPositions);
       
-      if (hybridControlState.handleTrajectoryCommand(command, initialJointPositions))
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions, initialOrientation))
       {
          requestState(hybridControlState.getStateEnum());
       }
       else
       {
-         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
          holdInJointspace();
       }
    }

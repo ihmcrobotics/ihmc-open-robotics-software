@@ -1,26 +1,67 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceMessage;
 
-public class ChestHybridJointspaceTaskspaceTrajectoryCommand extends
-      HybridSO3JointspaceTaskspaceTrajectoryCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceMessage, ChestTrajectoryCommand, ChestTrajectoryMessage, SpineTrajectoryCommand, SpineTrajectoryMessage>
+public class ChestHybridJointspaceTaskspaceTrajectoryCommand
+      extends QueueableCommand<ChestHybridJointspaceTaskspaceTrajectoryCommand, ChestHybridJointspaceTaskspaceMessage>
 {
+   private final SpineTrajectoryCommand jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
+   private final ChestTrajectoryCommand taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
+
    public ChestHybridJointspaceTaskspaceTrajectoryCommand()
    {
-      super();
-      jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
-      taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
    }
-   
+
    public ChestHybridJointspaceTaskspaceTrajectoryCommand(ChestTrajectoryCommand taskspaceTrajectoryCommand, SpineTrajectoryCommand jointspaceTrajectoryCommand)
    {
       super();
-      jointspaceTrajectoryCommand = new SpineTrajectoryCommand();
-      taskspaceTrajectoryCommand = new ChestTrajectoryCommand();
-      jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
-      taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
+      this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
+      this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
+   }
+
+   @Override
+   public void clear()
+   {
+      jointspaceTrajectoryCommand.clear();
+      taskspaceTrajectoryCommand.clear();
+   }
+
+   @Override
+   public void set(ChestHybridJointspaceTaskspaceMessage message)
+   {
+      jointspaceTrajectoryCommand.set(message.getSpineTrajectoryMessage());
+      taskspaceTrajectoryCommand.set(message.getChestTrajectoryMessage());
+   }
+
+   @Override
+   public boolean isCommandValid()
+   {
+      return jointspaceTrajectoryCommand.isCommandValid() && taskspaceTrajectoryCommand.isCommandValid();
+   }
+
+   @Override
+   public void set(ChestHybridJointspaceTaskspaceTrajectoryCommand other)
+   {
+      taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
+      jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
+   }
+
+   @Override
+   public void addTimeOffset(double timeOffset)
+   {
+      taskspaceTrajectoryCommand.addTimeOffset(timeOffset);
+      jointspaceTrajectoryCommand.addTimeOffset(timeOffset);
+   }
+
+   public SpineTrajectoryCommand getJointspaceTrajectoryCommand()
+   {
+      return jointspaceTrajectoryCommand;
+   }
+
+   public ChestTrajectoryCommand getTaskspaceTrajectoryCommand()
+   {
+      return taskspaceTrajectoryCommand;
    }
 
    @Override
@@ -28,4 +69,5 @@ public class ChestHybridJointspaceTaskspaceTrajectoryCommand extends
    {
       return ChestHybridJointspaceTaskspaceMessage.class;
    }
+
 }
