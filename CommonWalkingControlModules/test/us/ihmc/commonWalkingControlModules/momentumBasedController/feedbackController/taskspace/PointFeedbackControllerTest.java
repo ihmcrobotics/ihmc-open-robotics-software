@@ -14,7 +14,7 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
@@ -114,9 +114,9 @@ public final class PointFeedbackControllerTest
          geometricJacobianHolder.compute();
 
          pointFeedbackController.computeInverseDynamics();
-         PointAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
 
-         motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
+         motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
          CommonOps.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
@@ -226,8 +226,8 @@ public final class PointFeedbackControllerTest
          geometricJacobianHolder.compute();
 
          pointFeedbackController.computeInverseDynamics();
-         PointAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
-         motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
+         motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
 
          MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
          CommonOps.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J
