@@ -1,17 +1,19 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
 import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyOrientationControlModule;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -37,7 +39,11 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final YoFrameVector yoDesiredAngularVelocity;
    private final YoFrameVector yoCurrentAngularVelocity;
 
+   private final YoFrameVector yoFeedForwardAngularVelocity;
    private final YoFrameVector yoFeedForwardAngularAcceleration;
+
+   private final YoFrameVector yoFeedbackAngularVelocity;
+
    private final YoFrameVector yoDesiredAngularAcceleration;
    private final YoFrameVector yoAchievedAngularAcceleration;
 
@@ -47,11 +53,13 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final FrameOrientation tempOrientation = new FrameOrientation();
    private final FrameVector tempAngularVelocity = new FrameVector();
    private final FrameVector feedForwardAngularAcceleration = new FrameVector();
+   private final FrameVector desiredAngularVelocity = new FrameVector();
    private final FrameVector desiredAngularAcceleration = new FrameVector();
 
    private final AxisAngle tempAxisAngle = new AxisAngle();
 
-   private final SpatialAccelerationCommand output = new SpatialAccelerationCommand();
+   private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
+   private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
 
    private final YoOrientationPIDGainsInterface gains;
    private final RigidBodyOrientationControlModule accelerationControlModule;
@@ -64,7 +72,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final ReferenceFrame endEffectorFrame;
 
    public OrientationFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
-         YoVariableRegistry parentRegistry)
+                                        YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
@@ -74,7 +82,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       TwistCalculator twistCalculator = toolbox.getTwistCalculator();
       double dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getOrientationGains(endEffector);
-      accelerationControlModule = new RigidBodyOrientationControlModule(endEffectorName, endEffector, twistCalculator, dt, gains, registry);
 
       endEffectorFrame = endEffector.getBodyFixedFrame();
 
@@ -88,11 +95,36 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoCurrentRotationVector = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.ROTATION_VECTOR);
 
       yoDesiredAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_VELOCITY);
-      yoCurrentAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.ANGULAR_VELOCITY);
 
-      yoFeedForwardAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
-      yoDesiredAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_ACCELERATION);
-      yoAchievedAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.ANGULAR_ACCELERATION);
+      if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
+      {
+         yoCurrentAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.ANGULAR_VELOCITY);
+
+         accelerationControlModule = new RigidBodyOrientationControlModule(endEffectorName, endEffector, twistCalculator, dt, gains, registry);
+         yoFeedForwardAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
+         yoDesiredAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_ACCELERATION);
+         yoAchievedAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.ANGULAR_ACCELERATION);
+      }
+      else
+      {
+         yoCurrentAngularVelocity = null;
+
+         accelerationControlModule = null;
+         yoFeedForwardAngularAcceleration = null;
+         yoDesiredAngularAcceleration = null;
+         yoAchievedAngularAcceleration = null;
+      }
+
+      if (toolbox.isEnableInverseKinematicsModule())
+      {
+         yoFeedForwardAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
+         yoFeedbackAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDBACK, Space.ANGULAR_VELOCITY);
+      }
+      else
+      {
+         yoFeedForwardAngularVelocity = null;
+         yoFeedbackAngularVelocity = null;
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -105,13 +137,17 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       base = command.getBase();
       baseFrame = base.getBodyFixedFrame();
 
-      output.set(command.getSpatialAccelerationCommand());
+      inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
+      inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
       command.getIncludingFrame(tempOrientation, tempAngularVelocity, feedForwardAngularAcceleration);
       yoDesiredOrientation.setAndMatchFrame(tempOrientation);
       yoDesiredAngularVelocity.setAndMatchFrame(tempAngularVelocity);
-      yoFeedForwardAngularAcceleration.setAndMatchFrame(feedForwardAngularAcceleration);
+      if (yoFeedForwardAngularVelocity != null)
+         yoFeedForwardAngularVelocity.setAndMatchFrame(tempAngularVelocity);
+      if (yoFeedForwardAngularAcceleration != null)
+         yoFeedForwardAngularAcceleration.setAndMatchFrame(feedForwardAngularAcceleration);
    }
 
    @Override
@@ -127,7 +163,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public void compute()
+   public void computeInverseDynamics()
    {
       if (!isEnabled())
          return;
@@ -154,7 +190,48 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoCurrentRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
       yoCurrentRotationVector.scale(tempAxisAngle.getAngle());
 
-      output.setAngularAcceleration(endEffectorFrame, baseFrame, desiredAngularAcceleration);
+      inverseDynamicsOutput.setAngularAcceleration(endEffectorFrame, baseFrame, desiredAngularAcceleration);
+   }
+
+   @Override
+   public void computeInverseKinematics()
+   {
+      if (!isEnabled())
+         return;
+
+      yoDesiredOrientation.getFrameOrientationIncludingFrame(tempOrientation);
+      yoFeedForwardAngularVelocity.getFrameTuple(tempAngularVelocity);
+      tempAngularVelocity.changeFrame(endEffectorFrame);
+
+      tempOrientation.changeFrame(endEffectorFrame);
+      tempOrientation.getAxisAngle(tempAxisAngle);
+      double[] kp = gains.getProportionalGains();
+      desiredAngularVelocity.setToZero(endEffectorFrame);
+      desiredAngularVelocity.set(kp[0] * tempAxisAngle.getX(), kp[1] * tempAxisAngle.getY(), kp[2] * tempAxisAngle.getZ());
+      desiredAngularVelocity.scale(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
+      yoFeedbackAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+
+      desiredAngularVelocity.add(tempAngularVelocity);
+      yoDesiredAngularVelocity.setAndMatchFrame(desiredAngularVelocity);
+
+      tempOrientation.setToZero(endEffectorFrame);
+      yoCurrentOrientation.setAndMatchFrame(tempOrientation);
+
+      yoDesiredOrientation.get(tempAxisAngle);
+      yoDesiredRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
+      yoDesiredRotationVector.scale(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
+
+      yoCurrentOrientation.get(tempAxisAngle);
+      yoCurrentRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
+      yoCurrentRotationVector.scale(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
+
+      inverseKinematicsOutput.setAngularVelocity(endEffectorFrame, baseFrame, desiredAngularVelocity);
+   }
+
+   @Override
+   public void computeVirtualModelControl()
+   {
+      computeInverseDynamics();
    }
 
    @Override
@@ -173,10 +250,24 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    }
 
    @Override
-   public SpatialAccelerationCommand getOutput()
+   public SpatialAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
-      return output;
+      return inverseDynamicsOutput;
+   }
+
+   @Override
+   public SpatialVelocityCommand getInverseKinematicsOutput()
+   {
+      if (!isEnabled())
+         throw new RuntimeException("This controller is disabled.");
+      return inverseKinematicsOutput;
+   }
+
+   @Override
+   public SpatialAccelerationCommand getVirtualModelControlOutput()
+   {
+      return getInverseDynamicsOutput();
    }
 }

@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
@@ -57,13 +58,23 @@ public class WholeBodyControllerCore
       else
          virtualModelControlSolver = null;
 
+      if (inverseDynamicsSolver == null && inverseKinematicsSolver == null && virtualModelControlSolver == null)
+         throw new RuntimeException("Controller core is not properly setup, none of the control modes is enabled.");
+
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
       yoRootJointDesiredConfigurationData = new YoRootJointDesiredConfigurationData(rootJoint, registry);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
 
-      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
+      CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
+
+      // When running only the inverse kinematics solver, there is no notion of contact.
+      if (inverseDynamicsSolver != null || virtualModelControlSolver != null)
+         desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
+      else
+         desiredCenterOfPressureDataHolder = null;
+
       controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints);
 
       parentRegistry.addChild(registry);
@@ -136,9 +147,14 @@ public class WholeBodyControllerCore
          break;
       case INVERSE_KINEMATICS:
          if (inverseKinematicsSolver != null)
+         {
+            feedbackController.submitFeedbackControlCommandList(controllerCoreCommand.getFeedbackControlCommandList());
             inverseKinematicsSolver.submitInverseKinematicsCommandList(controllerCoreCommand.getInverseKinematicsCommandList());
+         }
          else
+         {
             throw new RuntimeException("The controller core mode: " + currentMode.getEnumValue() + " is not handled.");
+         }
          break;
       case VIRTUAL_MODEL:
          if (virtualModelControlSolver != null)
@@ -203,8 +219,8 @@ public class WholeBodyControllerCore
 
    private void doInverseDynamics()
    {
-      feedbackController.compute();
-      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
+      feedbackController.computeInverseDynamics();
+      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getInverseDynamicsOutput();
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
       inverseDynamicsSolver.submitInverseDynamicsCommandList(feedbackControllerOutput);
       inverseDynamicsSolver.compute();
@@ -218,7 +234,10 @@ public class WholeBodyControllerCore
 
    private void doInverseKinematics()
    {
-      numberOfFBControllerEnabled.set(0);
+      feedbackController.computeInverseKinematics();
+      InverseKinematicsCommandList feedbackControllerOutput = feedbackController.getInverseKinematicsOutput();
+      numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
+      inverseKinematicsSolver.submitInverseKinematicsCommandList(feedbackControllerOutput);
       inverseKinematicsSolver.compute();
       LowLevelOneDoFJointDesiredDataHolder inverseKinematicsOutput = inverseKinematicsSolver.getOutput();
       RootJointDesiredConfigurationDataReadOnly inverseKinematicsOutputForRootJoint = inverseKinematicsSolver.getOutputForRootJoint();
@@ -228,8 +247,8 @@ public class WholeBodyControllerCore
 
    private void doVirtualModelControl()
    {
-      feedbackController.compute();
-      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getOutput();
+      feedbackController.computeVirtualModelControl();
+      InverseDynamicsCommandList feedbackControllerOutput = feedbackController.getVirtualModelControlOutput();
       numberOfFBControllerEnabled.set(feedbackControllerOutput.getNumberOfCommands());
       virtualModelControlSolver.submitVirtualModelControlCommandList(feedbackControllerOutput);
       virtualModelControlSolver.compute();
