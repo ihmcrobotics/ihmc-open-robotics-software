@@ -3,12 +3,12 @@ package us.ihmc.commonWalkingControlModules.configurations;
 public class StraightLegWalkingParameters
 {
    /**
-    * This is the duration used to straighten the desire privileged configuration of the stance leg's knee.
-    * @return time in seconds for straightening
+    * This is the speed used to straighten the desire privileged configuration of the stance leg's knee.
+    * @return rad/second for straightening
     */
-   public double getDurationForStanceLegStraightening()
+   public double getSpeedForStanceLegStraightening()
    {
-      return 1.3;
+      return 0.25;
    }
 
    /**

@@ -58,6 +58,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       balanceManager.initializeICPPlanForTransfer(defaultSwingTime, defaultTransferTime, finalTransferTime);
+
+      kneeAngleManager.beginStraightening(transferToSide);
    }
 
    @Override
@@ -71,7 +73,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          kneeAngleManager.collapseLegDuringTransfer(transferToSide);
       }
-
    }
 
    /**

@@ -67,8 +67,8 @@ public class KneeAngleManager
       if (kneeControlModules.get(swingSide).getCurrentKneeControlState() != KneeControlType.STRAIGHTEN_TO_STRAIGHT &&
             kneeControlModules.get(swingSide).getCurrentKneeControlState() != KneeControlType.STRAIGHT)
       {
-         beginStraightening(swingSide);
-         //setStraight(swingSide);
+         //beginStraightening(swingSide);
+         setStraight(swingSide);
       }
    }
 
