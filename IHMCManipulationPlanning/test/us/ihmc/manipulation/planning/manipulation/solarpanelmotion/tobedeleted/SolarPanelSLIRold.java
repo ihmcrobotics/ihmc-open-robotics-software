@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.manipulation.solarpanelmotion.tobedeleted;
 
 import java.util.Random;
 
@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -19,9 +20,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
    ********************************************************************************************************* //
  */
 
-public class SolarPanelSLIR
+public class SolarPanelSLIRold
 {
-   private SolarPanelStraightPath straightPath;
+   private SolarPanelStraightPathold straightPath;
    private Random random = new Random(564574L);
    
    private static Point2D limitPelvisYaw = new Point2D(-Math.PI * 0.1, Math.PI * 0.4);
@@ -38,7 +39,7 @@ public class SolarPanelSLIR
    
    private double motionTime;
    
-   public SolarPanelSLIR(SolarPanelStraightPath solarPanelStraightPath)
+   public SolarPanelSLIRold(SolarPanelStraightPathold solarPanelStraightPath)
    {
       this.straightPath = solarPanelStraightPath;
       this.motionTime = this.straightPath.getMotionTime(); 

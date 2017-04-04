@@ -1,10 +1,11 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.manipulation.solarpanelmotion.tobedeleted;
 
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 
 import java.util.ArrayList;
 
-public abstract class SolarPanelAbstractPath
+public abstract class SolarPanelAbstractPathold
 {
    protected SolarPanel solarPanel;
    protected double motionTime;   
@@ -13,7 +14,7 @@ public abstract class SolarPanelAbstractPath
    protected ArrayList<SolarPanelCleaningPose> piecewisePoses = new ArrayList<SolarPanelCleaningPose>();
    protected int numberOfPiecewise;
    
-   public SolarPanelAbstractPath(SolarPanel solarPanel, double motionTime, int numberOfWayPoints)
+   public SolarPanelAbstractPathold(SolarPanel solarPanel, double motionTime, int numberOfWayPoints)
    {
       this.solarPanel = solarPanel;
       this.motionTime = motionTime;
@@ -42,10 +43,7 @@ public abstract class SolarPanelAbstractPath
    {
       for(int i =0;i<piecewisePoses.size();i++)
       {
-         if(piecewisePoses.get(i).isValid() == false)
-         {
-            return false;
-         }
+
       }
       
       return true;

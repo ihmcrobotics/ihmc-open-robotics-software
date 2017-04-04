@@ -1,13 +1,14 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.manipulation.solarpanelmotion.tobedeleted;
 
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 
-public class SolarPanelStraightPath extends SolarPanelAbstractPath
+public class SolarPanelStraightPathold extends SolarPanelAbstractPathold
 {   
    private SolarPanelCleaningPose startPose;
    private SolarPanelCleaningPose endPose;
    
-   public SolarPanelStraightPath(SolarPanel solarPanel, double motionTime, SolarPanelCleaningPose startPose, SolarPanelCleaningPose endPose, int numberOfWayPoints)
+   public SolarPanelStraightPathold(SolarPanel solarPanel, double motionTime, SolarPanelCleaningPose startPose, SolarPanelCleaningPose endPose, int numberOfWayPoints)
    {
       super(solarPanel, motionTime, numberOfWayPoints);      
       this.startPose = startPose;

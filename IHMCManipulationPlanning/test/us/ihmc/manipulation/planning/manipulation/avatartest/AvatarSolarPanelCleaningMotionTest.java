@@ -363,36 +363,38 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       drcBehaviorTestHelper.updateRobotModel();
 
-      double motionTime;
+      double motionTime = 0;
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
       // ********** Planning *** //
       SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
 
-      motionTime = 3.0;
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
-      wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
-      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose) == true)
+      {
+         wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
+         motionTime = solarPanelPlanner.getMotionTime();
+         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);   
+      }
+      
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      motionTime = 5.0;
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion);
+      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion))
+      {
+         wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
+         motionTime = solarPanelPlanner.getMotionTime();
+         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      }
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      
+      
+      
       
       for(int i=0;i<solarPanelPlanner.debugPose.size();i++)
       {
-         //scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPose.get(i)));
+         scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPose.get(i)));
       }
-      
-      wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();      
-      
-      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
-      
-      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
-      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseTwo));
-      
-      
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       
