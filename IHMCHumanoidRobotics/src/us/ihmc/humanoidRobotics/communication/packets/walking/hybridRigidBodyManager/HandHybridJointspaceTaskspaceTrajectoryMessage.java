@@ -6,14 +6,16 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_hand_trajectory")
-public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HandHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket
+public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HandHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
 {
    
    private HandTrajectoryMessage handTrajectoryMessage;
@@ -55,6 +57,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    {
       handTrajectoryMessage = new HandTrajectoryMessage(taskspaceTrajectoryMessage);
       armTrajectoryMessage = new ArmTrajectoryMessage(jointspaceTrajectoryMessage);
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public HandTrajectoryMessage getHandTrajectoryMessage()
@@ -75,5 +78,41 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public void setArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage)
    {
       this.armTrajectoryMessage = armTrajectoryMessage;
+   }
+   
+   @Override
+   public long getTrajectoryReferenceFrameId()
+   {
+      return handTrajectoryMessage.getTrajectoryReferenceFrameId();
+   }
+
+   @Override
+   public long getDataReferenceFrameId()
+   {
+      return handTrajectoryMessage.getDataReferenceFrameId();
+   }
+
+   @Override
+   public void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId)
+   {
+      handTrajectoryMessage.setTrajectoryReferenceFrameId(trajedtoryReferenceFrameId);
+   }
+
+   @Override
+   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
+   {
+      handTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryReferenceFrame);
+   }
+
+   @Override
+   public void setDataReferenceFrameId(long expressedInReferenceFrameId)
+   {
+      handTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrameId);
+   }
+
+   @Override
+   public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
+   {
+      handTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrame);
    }
 }

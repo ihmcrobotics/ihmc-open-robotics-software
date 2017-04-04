@@ -4,15 +4,18 @@ import java.util.Random;
 
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.QueueableMessage;
+import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
+import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMessage;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 @RosMessagePacket(documentation =
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_chest_trajectory")
-public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<ChestHybridJointspaceTaskspaceMessage>
+public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<ChestHybridJointspaceTaskspaceMessage> implements VisualizablePacket, FrameBasedMessage
 {
    
    private ChestTrajectoryMessage chestTrajectoryMessage; 
@@ -55,6 +58,7 @@ public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<Ches
    {
       this.chestTrajectoryMessage = chestTrajectoryMessage;
       this.spineTrajectoryMessage = spineTrajectoryMessage;
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public ChestTrajectoryMessage getChestTrajectoryMessage()
@@ -75,5 +79,41 @@ public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<Ches
    public void setSpineTrajectoryMessage(SpineTrajectoryMessage spineTrajectoryMessage)
    {
       this.spineTrajectoryMessage = spineTrajectoryMessage;
+   }
+
+   @Override
+   public long getTrajectoryReferenceFrameId()
+   {
+      return chestTrajectoryMessage.getTrajectoryReferenceFrameId();
+   }
+
+   @Override
+   public long getDataReferenceFrameId()
+   {
+      return chestTrajectoryMessage.getDataReferenceFrameId();
+   }
+
+   @Override
+   public void setTrajectoryReferenceFrameId(long trajedtoryReferenceFrameId)
+   {
+      chestTrajectoryMessage.setTrajectoryReferenceFrameId(trajedtoryReferenceFrameId);
+   }
+
+   @Override
+   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
+   {
+      chestTrajectoryMessage.setTrajectoryReferenceFrameId(trajectoryReferenceFrame);
+   }
+
+   @Override
+   public void setDataReferenceFrameId(long expressedInReferenceFrameId)
+   {
+      chestTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrameId);
+   }
+
+   @Override
+   public void setDataReferenceFrameId(ReferenceFrame expressedInReferenceFrame)
+   {
+      chestTrajectoryMessage.setDataReferenceFrameId(expressedInReferenceFrame);
    }
 }
