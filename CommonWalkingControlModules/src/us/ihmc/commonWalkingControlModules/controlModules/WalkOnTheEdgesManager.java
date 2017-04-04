@@ -35,7 +35,10 @@ public class WalkOnTheEdgesManager
    private static final boolean DO_TOEOFF_FOR_SIDE_STEPS = false;
    private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
 
-   private final BooleanYoVariable doToeOffIfPossible = new BooleanYoVariable("doToeOffIfPossible", registry);
+   private static final int largeGlitchWindowSize = 10;
+   private static final int smallGlitchWindowSize = 5;
+
+   private final BooleanYoVariable doToeOffIfPossibleInDoubleSupport = new BooleanYoVariable("doToeOffIfPossibleInDoubleSupport", registry);
    private final BooleanYoVariable doToeOffIfPossibleInSingleSupport = new BooleanYoVariable("doToeOffIfPossibleInSingleSupport", registry);
    private final BooleanYoVariable doToeOffWhenHittingAnkleLimit = new BooleanYoVariable("doToeOffWhenHittingAnkleLimit", registry);
    private final BooleanYoVariable doToeOff = new BooleanYoVariable("doToeOff", registry);
@@ -45,11 +48,23 @@ public class WalkOnTheEdgesManager
    private final DoubleYoVariable icpProximityToLeadingFootForSSToeOff = new DoubleYoVariable("icpProximityToLeadingFootForSSToeOff", registry);
    private final DoubleYoVariable icpPercentOfStanceForDSToeOff = new DoubleYoVariable("icpPercentOfStanceForDSToeOff", registry);
    private final DoubleYoVariable icpPercentOfStanceForSSToeOff = new DoubleYoVariable("icpPercentOfStanceForSSToeOff", registry);
+   private final DoubleYoVariable ecmpProximityForToeOff = new DoubleYoVariable("ecmpProximityForToeOff", registry);
 
    private final BooleanYoVariable isDesiredICPOKForToeOff = new BooleanYoVariable("isDesiredICPOKForToeOff", registry);
    private final BooleanYoVariable isCurrentICPOKForToeOff = new BooleanYoVariable("isCurrentICPOKForToeOff", registry);
    private final BooleanYoVariable isDesiredECMPOKForToeOff = new BooleanYoVariable("isDesiredECMPOKForToeOff", registry);
    private final BooleanYoVariable needToSwitchToToeOffForAnkleLimit = new BooleanYoVariable("needToSwitchToToeOffForAnkleLimit", registry);
+   private final BooleanYoVariable isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
+
+   private final GlitchFilteredBooleanYoVariable isDesiredICPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isDesiredICPOKForToeOffFilt",
+         registry, isDesiredICPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredBooleanYoVariable isCurrentICPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isCurrentICPOKForToeOffFilt",
+         registry, isCurrentICPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredBooleanYoVariable isDesiredECMPOKForToeOffFilt = new GlitchFilteredBooleanYoVariable("isDesiredECMPOKForToeOffFilt",
+         registry, isDesiredECMPOKForToeOff, smallGlitchWindowSize);
+
+   private final GlitchFilteredBooleanYoVariable isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt",
+         registry, isRearAnklePitchHittingLimit, largeGlitchWindowSize);
 
    private final BooleanYoVariable isInSingleSupport = new BooleanYoVariable("isInSingleSupport", registry);
 
@@ -77,9 +92,6 @@ public class WalkOnTheEdgesManager
 
    private final WalkingControllerParameters walkingControllerParameters;
 
-   private final BooleanYoVariable isRearAnklePitchHittingLimit;
-   private final GlitchFilteredBooleanYoVariable isRearAnklePitchHittingLimitFilt;
-
    private final FullHumanoidRobotModel fullRobotModel;
    private final ToeOffHelper toeOffHelper;
 
@@ -96,13 +108,15 @@ public class WalkOnTheEdgesManager
          SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<YoPlaneContactState> footContactStates,
          YoVariableRegistry parentRegistry)
    {
-      this.doToeOffIfPossible.set(walkingControllerParameters.doToeOffIfPossible());
+      this.doToeOffIfPossibleInDoubleSupport.set(walkingControllerParameters.doToeOffIfPossible());
       this.doToeOffIfPossibleInSingleSupport.set(walkingControllerParameters.doToeOffIfPossibleInSingleSupport());
       this.doToeOffWhenHittingAnkleLimit.set(walkingControllerParameters.doToeOffWhenHittingAnkleLimit());
 
       this.ankleLowerLimitToTriggerToeOff.set(walkingControllerParameters.getAnkleLowerLimitToTriggerToeOff());
       this.icpPercentOfStanceForDSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForDSToeOff());
       this.icpPercentOfStanceForSSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForSSToeOff());
+
+      this.ecmpProximityForToeOff.set(0.04);
 
       this.toeOffHelper = toeOffHelper;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -119,8 +133,6 @@ public class WalkOnTheEdgesManager
       minStepLengthForToeOff.set(walkingControllerParameters.getMinStepLengthForToeOff());
       minStepHeightForToeOff.set(walkingControllerParameters.getMinStepHeightForToeOff());
 
-      isRearAnklePitchHittingLimit = new BooleanYoVariable("isRearAnklePitchHittingLimit", registry);
-      isRearAnklePitchHittingLimitFilt = new GlitchFilteredBooleanYoVariable("isRearAnklePitchHittingLimitFilt", registry, isRearAnklePitchHittingLimit, 10);
 
       footDefaultPolygons = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
@@ -177,7 +189,7 @@ public class WalkOnTheEdgesManager
     * These checks include:
     * </p>
     * <ol>
-    *   <li>doToeOffIfPossible</li>
+    *   <li>doToeOffIfPossibleInDoubleSupport</li>
     *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link WalkingControllerParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
     *   <li>desiredICP location being within the leading foot base of support.</li>
     *   <li>currentICP location being within the leading foot base of support.</li>
@@ -220,10 +232,13 @@ public class WalkOnTheEdgesManager
 
    private void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP)
    {
-      if (!doToeOffIfPossible.getBooleanValue())
+      if (!doToeOffIfPossibleInDoubleSupport.getBooleanValue())
       {
          doToeOff.set(false);
          isDesiredECMPOKForToeOff.set(false);
+         needToSwitchToToeOffForAnkleLimit.set(false);
+
+         isDesiredECMPOKForToeOffFilt.set(false);
          return;
       }
 
@@ -248,6 +263,7 @@ public class WalkOnTheEdgesManager
       {
          doToeOff.set(false);
          isDesiredECMPOKForToeOff.set(false);
+         isDesiredECMPOKForToeOffFilt.set(false);
          return;
       }
 
@@ -277,11 +293,13 @@ public class WalkOnTheEdgesManager
       if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
       {
          desiredECMP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.isPointInside(desiredECMP));
+         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.distance(desiredECMP) < ecmpProximityForToeOff.getDoubleValue());
+         isDesiredECMPOKForToeOffFilt.update();
       }
       else
       {
          isDesiredECMPOKForToeOff.set(true);
+         isDesiredECMPOKForToeOffFilt.update();
       }
    }
 
@@ -312,6 +330,8 @@ public class WalkOnTheEdgesManager
 
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
+      this.isCurrentICPOKForToeOffFilt.update();
+      this.isDesiredICPOKForToeOffFilt.update();
    }
 
    private double computeRequiredICPProximity(RobotSide trailingLeg)
@@ -352,7 +372,7 @@ public class WalkOnTheEdgesManager
 
    private boolean evaluateToeOffConditions(RobotSide trailingLeg)
    {
-      if (!this.isDesiredICPOKForToeOff.getBooleanValue() || !this.isCurrentICPOKForToeOff.getBooleanValue())
+      if (!this.isDesiredICPOKForToeOffFilt.getBooleanValue() || !this.isCurrentICPOKForToeOffFilt.getBooleanValue())
       {
          doToeOff.set(false);
          return true;
@@ -365,7 +385,7 @@ public class WalkOnTheEdgesManager
          return true;
       }
 
-      if (!isDesiredECMPOKForToeOff.getBooleanValue())
+      if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
       {
          doToeOff.set(false);
          return true;
@@ -384,7 +404,7 @@ public class WalkOnTheEdgesManager
       if (!doToeOffWhenHittingAnkleLimit.getBooleanValue())
          return false;
 
-      if (!isDesiredICPOKForToeOff.getBooleanValue() || !isCurrentICPOKForToeOff.getBooleanValue())
+      if (!isDesiredICPOKForToeOffFilt.getBooleanValue() || !isCurrentICPOKForToeOffFilt.getBooleanValue())
          return false;
 
       return isRearAnklePitchHittingLimitFilt.getBooleanValue();
@@ -452,7 +472,7 @@ public class WalkOnTheEdgesManager
 
    public boolean willDoToeOff(Footstep nextFootstep, RobotSide transferToSide)
    {
-      if (!doToeOffIfPossible.getBooleanValue())
+      if (!doToeOffIfPossibleInDoubleSupport.getBooleanValue())
          return false;
 
       RobotSide nextTrailingLeg = transferToSide.getOppositeSide();
@@ -472,9 +492,9 @@ public class WalkOnTheEdgesManager
       return doToeOff.getBooleanValue();
    }
 
-   public boolean doToeOffIfPossible()
+   public boolean doToeOffIfPossibleInDoubleSupport()
    {
-      return doToeOffIfPossible.getBooleanValue();
+      return doToeOffIfPossibleInDoubleSupport.getBooleanValue();
    }
 
    public boolean doToeOffIfPossibleInSingleSupport()
@@ -484,7 +504,7 @@ public class WalkOnTheEdgesManager
 
    public void setDoToeOffIfPossible(boolean value)
    {
-      doToeOffIfPossible.set(value);
+      doToeOffIfPossibleInDoubleSupport.set(value);
    }
 
    public double getExtraCoMMaxHeightWithToes()
@@ -495,10 +515,16 @@ public class WalkOnTheEdgesManager
    public void reset()
    {
       isDesiredECMPOKForToeOff.set(false);
-      isDesiredICPOKForToeOff.set(false);
+      isDesiredECMPOKForToeOffFilt.set(false);
 
       isRearAnklePitchHittingLimit.set(false);
       isRearAnklePitchHittingLimitFilt.set(false);
+
+      isDesiredICPOKForToeOff.set(false);
+      isDesiredICPOKForToeOffFilt.set(false);
+
+      isCurrentICPOKForToeOff.set(false);
+      isCurrentICPOKForToeOffFilt.set(false);
 
       doToeOff.set(false);
    }

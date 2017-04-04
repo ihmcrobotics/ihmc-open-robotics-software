@@ -52,13 +52,19 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.15;
+                  return 0.2;
+               }
+
+               @Override
+               public boolean checkECMPLocationToTriggerToeOff()
+               {
+                  return true;
                }
 
                @Override
                public boolean useOptimizationBasedICPController()
                {
-                  return true; // // TODO: 4/4/17 false? 
+                  return false; // // TODO: 4/4/17 false?
                }
 
                @Override
@@ -66,6 +72,18 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                {
                   return new AtlasStraightLegWalkingParameters()
                   {
+                     @Override
+                     public double getPercentOfSwingToStraightenLeg()
+                     {
+                        return 0.8;
+                     }
+
+                     @Override
+                     public double getPercentOfTransferToCollapseLeg()
+                     {
+                        return 0.9;
+                     }
+
                      @Override
                      public boolean attemptToStraightenLegs()
                      {

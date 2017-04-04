@@ -30,6 +30,15 @@ public class StraightLegWalkingParameters
    }
 
    /**
+    * Returns a percent of the transfer state to switch the privileged configuration to having bent knees
+    * @return ratio of transfer state (0.0 to 1.0)
+    */
+   public double getPercentOfTransferToCollapseLeg()
+   {
+      return 0.9;
+   }
+
+   /**
     * Determines whether or not to attempt to use straight legs when controlling the height in the nullspace.
     * This will not do anything noticeable unless {@link WalkingControllerParameters#controlHeightWithMomentum()} returns true.
     * @return boolean (true = try and straighten, false = do not try and straighten)
