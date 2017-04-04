@@ -1,18 +1,17 @@
 package us.ihmc.simulationconstructionset.physics;
 
-import jme3dae.utilities.Tuple3;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.controllers.ControllerFailureException;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.robotController.RobotController;
@@ -26,8 +25,9 @@ import us.ihmc.tools.thread.ThreadTools;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.fail;
 
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.FAST)
 public class JointPhysicsTest
 {
    private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -73,8 +73,8 @@ public class JointPhysicsTest
       return randomFloatingChain;
    }
 
-   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 0.0)
-   @Test(timeout=300000)
+   @ContinuousIntegrationAnnotations.ContinuousIntegrationTest(estimatedDuration = 1000.0)
+   @Test(timeout=30000)
    public void testCenterOfMassIsConstantInZeroGravity()
    {
       int numberOfRobotsToTest = 5;
@@ -94,20 +94,17 @@ public class JointPhysicsTest
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robots);
       scs.startOnAThread();
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 30.0);
 
-      ThreadTools.sleepForever();
-
-//      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 30.0);
-//
-//      try
-//      {
-//         blockingSimulationRunner.simulateAndBlock(8.0);
-//      }
-//      catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException | ControllerFailureException e)
-//      {
-//         e.printStackTrace();
-//         fail();
-//      }
+      try
+      {
+         blockingSimulationRunner.simulateAndBlock(8.0);
+      }
+      catch(BlockingSimulationRunner.SimulationExceededMaximumTimeException | ControllerFailureException e)
+      {
+         e.printStackTrace();
+         fail();
+      }
    }
 
    private class ConservedQuantitiesChecker implements RobotController
@@ -115,7 +112,7 @@ public class JointPhysicsTest
       private final Robot robot;
       private final YoVariableRegistry registry;
       private final FloatingJoint rootJoint;
-      private final double epsilon = 1e-6;
+      private final double epsilon = 1e-5;
 
       private final Vector3D initialLinearMomentum = new Vector3D();
       private final Vector3D initialAngularMomentum = new Vector3D();
