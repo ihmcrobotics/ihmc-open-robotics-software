@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.kneeAngle;
 
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -35,6 +33,8 @@ public class KneeControlModule
    private final DoubleYoVariable desiredAngle;
    private final DoubleYoVariable desiredAngleWhenStraight;
 
+   private final DoubleYoVariable straighteningSpeed;
+
    public KneeControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
          YoVariableRegistry parentRegistry)
    {
@@ -48,8 +48,8 @@ public class KneeControlModule
       desiredAngleWhenStraight = new DoubleYoVariable(namePrefix + "DesiredAngleWhenStraight", registry);
       desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
 
-      DoubleYoVariable durationForStraightening = new DoubleYoVariable(namePrefix + "DurationForStraightening", registry);
-      durationForStraightening.set(straightLegWalkingParameters.getDurationForStanceLegStraightening());
+      straighteningSpeed = new DoubleYoVariable(namePrefix + "StraighteningSpeed", registry);
+      straighteningSpeed.set(straightLegWalkingParameters.getSpeedForStanceLegStraightening());
 
       // set up states and state machine
       DoubleYoVariable time = controllerToolbox.getYoTime();
@@ -61,13 +61,13 @@ public class KneeControlModule
 
       List<AbstractKneeControlState> states = new ArrayList<>();
 
-      AbstractKneeControlState straighteningToStraightState = new StraightenToStraightControlState(kneeJoint, durationForStraightening);
+      AbstractKneeControlState straighteningToStraightState = new StraightenToStraightControlState(kneeJoint, straighteningSpeed);
       states.add(straighteningToStraightState);
       AbstractKneeControlState straightState = new StraightKneeControlState(kneeJoint);
       states.add(straightState);
       AbstractKneeControlState bentState = new BentKneeControlState(kneeJoint);
       states.add(bentState);
-      AbstractKneeControlState straighteningToControlState = new StraightenToControllableControlState(kneeJoint, durationForStraightening);
+      AbstractKneeControlState straighteningToControlState = new StraightenToControllableControlState(kneeJoint, straighteningSpeed);
       states.add(straighteningToControlState);
       AbstractKneeControlState controlledState = new ControllableKneeControlState(kneeJoint);
       states.add(controlledState);
@@ -144,47 +144,51 @@ public class KneeControlModule
 
    private class StraightenToStraightControlState extends StraighteningKneeControlState
    {
-      public StraightenToStraightControlState(OneDoFJoint kneeJoint, DoubleYoVariable durationForStraightening)
+      public StraightenToStraightControlState(OneDoFJoint kneeJoint, DoubleYoVariable straighteningSpeed)
       {
-         super(KneeControlType.STRAIGHTEN_TO_STRAIGHT, kneeJoint, durationForStraightening);
+         super(KneeControlType.STRAIGHTEN_TO_STRAIGHT, kneeJoint, straighteningSpeed);
       }
    }
 
    private class StraightenToControllableControlState extends StraighteningKneeControlState
    {
-      public StraightenToControllableControlState(OneDoFJoint kneeJoint, DoubleYoVariable durationForStraightening)
+      public StraightenToControllableControlState(OneDoFJoint kneeJoint, DoubleYoVariable straighteningSpeed)
       {
-         super(KneeControlType.STRAIGHTEN_TO_CONTROLLABLE, kneeJoint, durationForStraightening);
+         super(KneeControlType.STRAIGHTEN_TO_CONTROLLABLE, kneeJoint, straighteningSpeed);
       }
    }
 
    private class StraighteningKneeControlState extends AbstractKneeControlState
    {
       private final OneDoFJoint kneeJoint;
-      private final DoubleYoVariable durationForStraightening;
+
+      private final DoubleYoVariable yoStraighteningSpeed;
 
       private double startingPosition;
-      private double straighteningDuration;
 
-      public StraighteningKneeControlState(KneeControlType stateEnum, OneDoFJoint kneeJoint, DoubleYoVariable durationForStraightening)
+      private double timeUntilStraight;
+      private double straighteningSpeed;
+
+      public StraighteningKneeControlState(KneeControlType stateEnum, OneDoFJoint kneeJoint, DoubleYoVariable straighteningSpeed)
       {
          super(stateEnum);
 
          this.kneeJoint = kneeJoint;
-         this.durationForStraightening = durationForStraightening;
+
+         this.yoStraighteningSpeed = straighteningSpeed;
       }
 
       @Override
       public boolean isDone()
       {
-         return getTimeInCurrentState() > straighteningDuration;
+         //return getTimeInCurrentState() > straighteningDuration;
+         return getTimeInCurrentState() > timeUntilStraight;
       }
 
       @Override
       public void doAction()
       {
-         double phase = (straighteningDuration - getTimeInCurrentState()) / straighteningDuration;
-         double desiredPrivilegedPosition = phase * startingPosition + (1.0 - phase) * desiredAngleWhenStraight.getDoubleValue();
+         double desiredPrivilegedPosition = startingPosition + getTimeInCurrentState() * straighteningSpeed;
 
          privilegedConfigurationCommand.clear();
          privilegedConfigurationCommand.addJoint(kneeJoint, desiredPrivilegedPosition);
@@ -197,7 +201,10 @@ public class KneeControlModule
       public void doTransitionIntoAction()
       {
          startingPosition = kneeJoint.getQ();
-         straighteningDuration = durationForStraightening.getDoubleValue();
+
+         straighteningSpeed = yoStraighteningSpeed.getDoubleValue();
+         timeUntilStraight = (startingPosition - desiredAngleWhenStraight.getDoubleValue()) / straighteningSpeed;
+         timeUntilStraight = Math.max(timeUntilStraight, 0.0);
       }
 
       @Override
