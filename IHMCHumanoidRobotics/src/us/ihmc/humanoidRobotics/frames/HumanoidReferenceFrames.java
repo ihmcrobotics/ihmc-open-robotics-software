@@ -187,17 +187,23 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
       
       // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
-      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME.getHashId(), getMidFeetZUpFrame());
-      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.PELVIS_ZUP_FRAME.getHashId(), getPelvisZUpFrame());
-      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.PELVIS_FRAME.getHashId(), getPelvisFrame());
-      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME.getHashId(), getCenterOfMassFrame());
-      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.LEFT_SOLE_FRAME.getHashId(), getSoleFrame(RobotSide.LEFT));
-      nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.RIGHT_SOLE_FRAME.getHashId(), getSoleFrame(RobotSide.RIGHT));
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME, getMidFeetZUpFrame());
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.PELVIS_ZUP_FRAME, getPelvisZUpFrame());
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.PELVIS_FRAME, getPelvisFrame());
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME, getCenterOfMassFrame());
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.LEFT_SOLE_FRAME, getSoleFrame(RobotSide.LEFT));
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.RIGHT_SOLE_FRAME, getSoleFrame(RobotSide.RIGHT));
       RigidBody chest = fullRobotModel.getChest();
       if(chest != null)
       {
-         nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.CHEST_FRAME.getHashId(), chest.getBodyFixedFrame());
+         addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CHEST_FRAME, chest.getBodyFixedFrame());
       }
+   }
+   
+   private void addDefaultIDToReferenceFrame(CommonReferenceFrameIds commonId, ReferenceFrame referenceFrame)
+   {
+      referenceFrame.setAdditionalNameBasedHashCode(commonId.getHashId());
+      nameBasedHashCodeToReferenceFrameMap.put(commonId.getHashId(), referenceFrame);
    }
 
    @Override

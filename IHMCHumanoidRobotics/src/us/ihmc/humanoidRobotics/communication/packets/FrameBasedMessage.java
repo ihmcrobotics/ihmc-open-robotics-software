@@ -15,7 +15,7 @@ public interface FrameBasedMessage
    
    default void checkIfTrajectoryFrameIdsMatch(long frameId, ReferenceFrame referenceFrame)
    {
-      if(frameId != referenceFrame.getNameBasedHashCode())
+      if(frameId != referenceFrame.getNameBasedHashCode() && frameId != referenceFrame.getAdditionalNameBasedHashCode())
       {
          String msg = "Argument's hashcode " + referenceFrame + " " +  referenceFrame.getNameBasedHashCode() + " does not match " + frameId;
          throw new ReferenceFrameMismatchException(msg);
