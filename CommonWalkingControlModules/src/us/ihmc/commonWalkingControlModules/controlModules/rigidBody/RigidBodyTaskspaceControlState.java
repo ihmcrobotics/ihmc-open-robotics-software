@@ -12,7 +12,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
@@ -30,6 +31,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayDeque;
+import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
@@ -90,6 +92,11 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
    private final FramePose controlFramePose = new FramePose();
 
+   private final FramePoint controlPoint = new FramePoint();
+   private final YoFramePoint yoControlPoint;
+   private final FramePoint desiredPoint = new FramePoint();
+   private final YoFramePoint yoDesiredPoint;
+
    public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
          ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoGraphicsListRegistry graphicsListRegistry,
          YoVariableRegistry parentRegistry)
@@ -120,6 +127,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", null, registry);
+      yoControlPoint = new YoFramePoint(prefix + "ControlPoint", worldFrame, registry);
+      yoDesiredPoint = new YoFramePoint(prefix + "DesiredPoint", worldFrame, registry);
 
       positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
       orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator(bodyName, maxPointsInGenerator, true, worldFrame, registry);
@@ -152,9 +161,16 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
          return;
 
       String listName = getClass().getSimpleName();
-      YoGraphicReferenceFrame contactFrameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.1);
-      graphicsListRegistry.registerYoGraphic(listName, contactFrameViz);
-      graphics.add(contactFrameViz);
+
+      YoGraphicPosition controlPoint = new YoGraphicPosition(bodyName + "ControlPoint", yoControlPoint, 0.01, YoAppearance.Red());
+      graphicsListRegistry.registerYoGraphic(listName, controlPoint);
+      graphics.add(controlPoint);
+
+      YoGraphicPosition desiredPoint = new YoGraphicPosition(bodyName + "DesiredPoint", yoDesiredPoint, 0.005, YoAppearance.Blue());
+      graphicsListRegistry.registerYoGraphic(listName, desiredPoint);
+      graphics.add(desiredPoint);
+
+      hideGraphics();
    }
 
    public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
@@ -253,6 +269,20 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
 
       updateGraphics();
+   }
+
+   @Override
+   public void updateGraphics()
+   {
+      controlPoint.setToZero(controlFrame);
+      controlPoint.changeFrame(worldFrame);
+      yoControlPoint.set(controlPoint);
+
+      desiredPoint.setIncludingFrame(desiredPosition);
+      desiredPoint.changeFrame(worldFrame);
+      yoDesiredPoint.set(desiredPoint);
+
+      super.updateGraphics();
    }
 
    private void fillAndReinitializeTrajectories()
@@ -371,8 +401,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (command.useCustomControlFrame())
       {
          command.packControlFramePose(controlFrameTransform);
-         setControlFramePose(controlFrameTransform);
       }
+      else
+      {
+         controlFrameTransform.setToZero();
+      }
+      setControlFramePose(controlFrameTransform);
 
       if (override || isEmpty())
       {
@@ -424,8 +458,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (command.useCustomControlFrame())
       {
          command.packControlFramePose(controlFrameTransform);
-         setControlFramePose(controlFrameTransform);
       }
+      else
+      {
+         controlFrameTransform.setToZero();
+      }
+      setControlFramePose(controlFrameTransform);
 
       if (override || isEmpty())
       {

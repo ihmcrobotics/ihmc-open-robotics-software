@@ -109,14 +109,6 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
 
       String listName = getClass().getSimpleName();
 
-//      YoGraphicReferenceFrame contactFrameViz = new YoGraphicReferenceFrame(contactFrame, registry, 0.14);
-//      graphicsListRegistry.registerYoGraphic(listName, contactFrameViz);
-//      graphics.add(contactFrameViz);
-
-//      YoGraphicReferenceFrame desiredContactFrameViz = new YoGraphicReferenceFrame(desiredContactFrame, registry, 0.07);
-//      graphicsListRegistry.registerYoGraphic(listName, desiredContactFrameViz);
-//      graphics.add(desiredContactFrameViz);
-
       YoGraphicVector surfaceNormal = new YoGraphicVector(bodyName + "ContactNormal", contactPointInWorld, contactNormal, 0.1, YoAppearance.Black());
       graphicsListRegistry.registerYoGraphic(listName, surfaceNormal);
       graphics.add(surfaceNormal);
@@ -124,6 +116,8 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
       YoGraphicPosition contactPoint = new YoGraphicPosition(bodyName + "ContactPoint", contactPointInWorld, 0.01, YoAppearance.Black());
       graphicsListRegistry.registerYoGraphic(listName, contactPoint);
       graphics.add(contactPoint);
+
+      hideGraphics();
    }
 
    public void setWeights(Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight)
