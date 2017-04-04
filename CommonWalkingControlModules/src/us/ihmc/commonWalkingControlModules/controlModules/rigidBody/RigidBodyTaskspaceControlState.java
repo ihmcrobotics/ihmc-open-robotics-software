@@ -12,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
@@ -89,7 +91,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    private final FramePose controlFramePose = new FramePose();
 
    public RigidBodyTaskspaceControlState(RigidBody bodyToControl, RigidBody baseBody, RigidBody elevator, Collection<ReferenceFrame> trajectoryFrames,
-         ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoVariableRegistry parentRegistry)
+         ReferenceFrame controlFrame, ReferenceFrame baseFrame, DoubleYoVariable yoTime, YoGraphicsListRegistry graphicsListRegistry,
+         YoVariableRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
       String bodyName = bodyToControl.getName();
@@ -139,6 +142,19 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       hasLinearWeight = new BooleanYoVariable(prefix + "HasLinearWeights", registry);
 
       pointQueue.clear();
+
+      setupViz(graphicsListRegistry, bodyName);
+   }
+
+   private void setupViz(YoGraphicsListRegistry graphicsListRegistry, String bodyName)
+   {
+      if (graphicsListRegistry == null)
+         return;
+
+      String listName = getClass().getSimpleName();
+      YoGraphicReferenceFrame contactFrameViz = new YoGraphicReferenceFrame(controlFrame, registry, 0.1);
+      graphicsListRegistry.registerYoGraphic(listName, contactFrameViz);
+      graphics.add(contactFrameViz);
    }
 
    public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
@@ -235,6 +251,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       numberOfPointsInQueue.set(pointQueue.size());
       numberOfPointsInGenerator.set(orientationTrajectoryGenerator.getCurrentNumberOfWaypoints());
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
+
+      updateGraphics();
    }
 
    private void fillAndReinitializeTrajectories()
@@ -284,8 +302,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    {
       trackingOrientation.set(false);
       trackingPosition.set(false);
-
       clear();
+      hideGraphics();
    }
 
    public void holdOrientation()
