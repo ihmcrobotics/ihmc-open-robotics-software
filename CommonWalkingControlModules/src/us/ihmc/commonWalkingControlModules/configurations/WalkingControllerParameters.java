@@ -80,7 +80,22 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
+   /**
+    * Whether or not the location of the ECMP must be close enough to the support polygon before allowing toe off.
+    *
+    * @return whether or not to check the ECMP location.
+    */
    public abstract boolean checkECMPLocationToTriggerToeOff();
+
+   /**
+    * Maximum distance of the ECMP to the toe off support polygon before allowing toe off.
+    *
+    * @return ECMP distance (m).
+    */
+   public double getECMPProximityForToeOff()
+   {
+      return 0.0;
+   }
 
    /**
     * Minimum stance length in double support to enable toe off.

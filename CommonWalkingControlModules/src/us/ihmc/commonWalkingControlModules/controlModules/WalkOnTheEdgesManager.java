@@ -116,7 +116,7 @@ public class WalkOnTheEdgesManager
       this.icpPercentOfStanceForDSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForDSToeOff());
       this.icpPercentOfStanceForSSToeOff.set(walkingControllerParameters.getICPPercentOfStanceForSSToeOff());
 
-      this.ecmpProximityForToeOff.set(0.04);
+      this.ecmpProximityForToeOff.set(walkingControllerParameters.getECMPProximityForToeOff());
 
       this.toeOffHelper = toeOffHelper;
       this.walkingControllerParameters = walkingControllerParameters;
