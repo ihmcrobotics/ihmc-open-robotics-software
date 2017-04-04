@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_head_trajectory")
-public class HeadHybridJointspaceTaskspaceMessage extends QueueableMessage<HeadHybridJointspaceTaskspaceMessage>  implements VisualizablePacket, FrameBasedMessage
+public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
 {
    private HeadTrajectoryMessage headTrajectoryMessage; 
    private NeckTrajectoryMessage neckTrajectoryMessage;
@@ -24,7 +24,7 @@ public class HeadHybridJointspaceTaskspaceMessage extends QueueableMessage<HeadH
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
-   public HeadHybridJointspaceTaskspaceMessage()
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
    }
@@ -33,7 +33,7 @@ public class HeadHybridJointspaceTaskspaceMessage extends QueueableMessage<HeadH
     * Random constructor for unit testing this packet
     * @param random seed
     */
-   public HeadHybridJointspaceTaskspaceMessage(Random random)
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
       this(new HeadTrajectoryMessage(random), new NeckTrajectoryMessage(random));
    }
@@ -42,7 +42,7 @@ public class HeadHybridJointspaceTaskspaceMessage extends QueueableMessage<HeadH
     * Clone constructor.
     * @param message to clone.
     */
-   public HeadHybridJointspaceTaskspaceMessage(HeadHybridJointspaceTaskspaceMessage hybridJointspaceTaskspaceMessage)
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadHybridJointspaceTaskspaceTrajectoryMessage hybridJointspaceTaskspaceMessage)
    {
       this(hybridJointspaceTaskspaceMessage.getHeadTrajectoryMessage(), hybridJointspaceTaskspaceMessage.getNeckTrajectoryMessage());
    }
@@ -53,7 +53,7 @@ public class HeadHybridJointspaceTaskspaceMessage extends QueueableMessage<HeadH
     * @param headTrajectoryMessage
     * @param neckTrajectoryMessage
     */
-   public HeadHybridJointspaceTaskspaceMessage(HeadTrajectoryMessage headTrajectoryMessage, NeckTrajectoryMessage neckTrajectoryMessage)
+   public HeadHybridJointspaceTaskspaceTrajectoryMessage(HeadTrajectoryMessage headTrajectoryMessage, NeckTrajectoryMessage neckTrajectoryMessage)
    {
       this.headTrajectoryMessage = headTrajectoryMessage;
       this.neckTrajectoryMessage = neckTrajectoryMessage;

@@ -15,7 +15,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
       "This message commands the controller to move the chest in both taskspace amd jointspace to the desired orientation and joint angles while going through the specified trajectory points.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
                   topic = "/control/hybrid_chest_trajectory")
-public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<ChestHybridJointspaceTaskspaceMessage> implements VisualizablePacket, FrameBasedMessage
+public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<ChestHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
 {
    
    private ChestTrajectoryMessage chestTrajectoryMessage; 
@@ -25,7 +25,7 @@ public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<Ches
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     */
-   public ChestHybridJointspaceTaskspaceMessage()
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage()
    {
       super();
    }
@@ -34,7 +34,7 @@ public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<Ches
     * Random constructor for unit testing this packet
     * @param random seed
     */
-   public ChestHybridJointspaceTaskspaceMessage(Random random)
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage(Random random)
    {
       this(new ChestTrajectoryMessage(random), new SpineTrajectoryMessage(random));
    }
@@ -43,7 +43,7 @@ public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<Ches
     * Clone constructor.
     * @param message to clone.
     */
-   public ChestHybridJointspaceTaskspaceMessage(ChestHybridJointspaceTaskspaceMessage chestHybridJointspaceTaskspaceMessage)
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestHybridJointspaceTaskspaceTrajectoryMessage chestHybridJointspaceTaskspaceMessage)
    {
       this(chestHybridJointspaceTaskspaceMessage.getChestTrajectoryMessage(), chestHybridJointspaceTaskspaceMessage.getSpineTrajectoryMessage());
    }
@@ -54,7 +54,7 @@ public class ChestHybridJointspaceTaskspaceMessage extends QueueableMessage<Ches
     * @param chestTrajectoryMessage
     * @param spineTrajectoryMessage
     */
-   public ChestHybridJointspaceTaskspaceMessage(ChestTrajectoryMessage chestTrajectoryMessage, SpineTrajectoryMessage spineTrajectoryMessage)
+   public ChestHybridJointspaceTaskspaceTrajectoryMessage(ChestTrajectoryMessage chestTrajectoryMessage, SpineTrajectoryMessage spineTrajectoryMessage)
    {
       this.chestTrajectoryMessage = chestTrajectoryMessage;
       this.spineTrajectoryMessage = spineTrajectoryMessage;
