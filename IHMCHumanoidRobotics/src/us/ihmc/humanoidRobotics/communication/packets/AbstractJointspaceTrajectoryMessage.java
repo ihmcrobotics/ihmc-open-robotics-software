@@ -141,6 +141,12 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
       rangeCheck(jointIndex);
       jointTrajectoryMessages[jointIndex].setTrajectoryPoint(trajectoryPointIndex, time, position, velocity);
    }
+   
+   public void setQPWeight(int jointIndex, double weight)
+   {
+      rangeCheck(jointIndex);
+      jointTrajectoryMessages[jointIndex].setWeight(weight);
+   }
 
    public int getNumberOfJoints()
    {
