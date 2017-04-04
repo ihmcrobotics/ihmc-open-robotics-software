@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -90,6 +91,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
+   private final KneeAngleManager kneeAngleManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
@@ -154,6 +156,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
+      this.kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
       RigidBody head = fullRobotModel.getHead();
       RigidBody chest = fullRobotModel.getChest();
@@ -630,6 +633,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
             isRecoveringFromPush, feetManager));
 
       feetManager.compute();
+      kneeAngleManager.compute();
 
       boolean bodyManagerIsLoadBearing = false;
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
@@ -668,6 +672,9 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          controllerCoreCommand.addFeedbackControlCommand(feetManager.getFeedbackControlCommand(robotSide));
          controllerCoreCommand.addInverseDynamicsCommand(feetManager.getInverseDynamicsCommand(robotSide));
+
+         controllerCoreCommand.addFeedbackControlCommand(kneeAngleManager.getFeedbackControlCommand(robotSide));
+         controllerCoreCommand.addInverseDynamicsCommand(kneeAngleManager.getInverseDynamicsCommand(robotSide));
 
          YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
          PlaneContactStateCommand planeContactStateCommand = planeContactStateCommandPool.add();

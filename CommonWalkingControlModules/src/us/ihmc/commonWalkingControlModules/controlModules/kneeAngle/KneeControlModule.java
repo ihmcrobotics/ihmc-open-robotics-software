@@ -1,5 +1,9 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.kneeAngle;
 
+import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -11,13 +15,16 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.FinishableState;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.GenericStateMachine;
+import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateMachineTools;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KneeControlModule
 {
-   private static final double STRAIGHT_KNEE_ANGLE = 0.2;
    public enum KneeControlType
    {
-      STRAIGHTENING, STRAIGHT, BENT, CONTROLLABLE
+      STRAIGHTEN_TO_STRAIGHT, STRAIGHT, STRAIGHTEN_TO_CONTROLLABLE, BENT, CONTROLLABLE
    }
 
    private final YoVariableRegistry registry;
@@ -28,16 +35,21 @@ public class KneeControlModule
    private final DoubleYoVariable desiredAngle;
    private final DoubleYoVariable desiredAngleWhenStraight;
 
-   public KneeControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public KneeControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
+         YoVariableRegistry parentRegistry)
    {
       String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Knee";
       registry = new YoVariableRegistry(sidePrefix + getClass().getSimpleName());
 
       desiredAngle = new DoubleYoVariable(namePrefix + "DesiredAngle", registry);
+      desiredAngle.set(straightLegWalkingParameters.getStraightKneeAngle());
+
       desiredAngleWhenStraight = new DoubleYoVariable(namePrefix + "DesiredAngleWhenStraight", registry);
-      desiredAngle.set(STRAIGHT_KNEE_ANGLE);
-      desiredAngleWhenStraight.set(STRAIGHT_KNEE_ANGLE);
+      desiredAngleWhenStraight.set(straightLegWalkingParameters.getStraightKneeAngle());
+
+      DoubleYoVariable durationForStraightening = new DoubleYoVariable(namePrefix + "DurationForStraightening", registry);
+      durationForStraightening.set(straightLegWalkingParameters.getDurationForStanceLegStraightening());
 
       // set up states and state machine
       DoubleYoVariable time = controllerToolbox.getYoTime();
@@ -47,18 +59,47 @@ public class KneeControlModule
 
       OneDoFJoint kneeJoint = controllerToolbox.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 
-      AbstractKneeControlState straighteningState = new StraighteningKneeControlState(kneeJoint);
+      List<AbstractKneeControlState> states = new ArrayList<>();
+
+      AbstractKneeControlState straighteningToStraightState = new StraightenToStraightControlState(kneeJoint, durationForStraightening);
+      states.add(straighteningToStraightState);
       AbstractKneeControlState straightState = new StraightKneeControlState(kneeJoint);
+      states.add(straightState);
       AbstractKneeControlState bentState = new BentKneeControlState(kneeJoint);
+      states.add(bentState);
+      AbstractKneeControlState straighteningToControlState = new StraightenToControllableControlState(kneeJoint, durationForStraightening);
+      states.add(straighteningToControlState);
       AbstractKneeControlState controlledState = new ControllableKneeControlState(kneeJoint);
+      states.add(controlledState);
 
-      stateMachine.addState(straighteningState);
-      stateMachine.addState(straightState);
-      stateMachine.addState(bentState);
+      straighteningToStraightState.setDefaultNextState(KneeControlType.STRAIGHT);
+      straighteningToControlState.setDefaultNextState(KneeControlType.CONTROLLABLE);
 
-      //// TODO: 4/2/17  setup states 
+      setupStateMachine(states, straightLegWalkingParameters.attemptToStraightenLegs());
 
       parentRegistry.addChild(registry);
+   }
+
+   private void setupStateMachine(List<AbstractKneeControlState> states, boolean attemptToStraightenLegs)
+   {
+      for (AbstractKneeControlState fromState : states)
+      {
+         for (AbstractKneeControlState toState : states)
+         {
+            StateMachineTools.addRequestedStateTransition(requestedState, false, fromState, toState);
+         }
+      }
+
+      for (AbstractKneeControlState state : states)
+      {
+         stateMachine.addState(state);
+      }
+
+      if (attemptToStraightenLegs)
+         stateMachine.setCurrentState(KneeControlType.STRAIGHT);
+      else
+         stateMachine.setCurrentState(KneeControlType.BENT);
+
    }
 
    public void initialize()
@@ -67,7 +108,23 @@ public class KneeControlModule
 
    public void doControl()
    {
+      stateMachine.checkTransitionConditions();
       stateMachine.getCurrentState().doAction();
+   }
+
+   public void setKneeAngleState(KneeControlType controlType)
+   {
+      requestedState.set(controlType);
+   }
+
+   public KneeControlType getCurrentKneeControlState()
+   {
+      return stateMachine.getCurrentStateEnum();
+   }
+
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
+   {
+      return stateMachine.getCurrentState().getPrivilegedConfigurationCommand();
    }
 
    private abstract class AbstractKneeControlState extends FinishableState<KneeControlType>
@@ -85,18 +142,36 @@ public class KneeControlModule
       }
    }
 
+   private class StraightenToStraightControlState extends StraighteningKneeControlState
+   {
+      public StraightenToStraightControlState(OneDoFJoint kneeJoint, DoubleYoVariable durationForStraightening)
+      {
+         super(KneeControlType.STRAIGHTEN_TO_STRAIGHT, kneeJoint, durationForStraightening);
+      }
+   }
+
+   private class StraightenToControllableControlState extends StraighteningKneeControlState
+   {
+      public StraightenToControllableControlState(OneDoFJoint kneeJoint, DoubleYoVariable durationForStraightening)
+      {
+         super(KneeControlType.STRAIGHTEN_TO_CONTROLLABLE, kneeJoint, durationForStraightening);
+      }
+   }
+
    private class StraighteningKneeControlState extends AbstractKneeControlState
    {
-      private static final double straighteningDuration = 1.0;
       private final OneDoFJoint kneeJoint;
+      private final DoubleYoVariable durationForStraightening;
 
       private double startingPosition;
+      private double straighteningDuration;
 
-      public StraighteningKneeControlState(OneDoFJoint kneeJoint)
+      public StraighteningKneeControlState(KneeControlType stateEnum, OneDoFJoint kneeJoint, DoubleYoVariable durationForStraightening)
       {
-         super(KneeControlType.STRAIGHTENING);
+         super(stateEnum);
 
          this.kneeJoint = kneeJoint;
+         this.durationForStraightening = durationForStraightening;
       }
 
       @Override
@@ -113,12 +188,16 @@ public class KneeControlModule
 
          privilegedConfigurationCommand.clear();
          privilegedConfigurationCommand.addJoint(kneeJoint, desiredPrivilegedPosition);
+
+         if (isDone())
+            transitionToDefaultNextState();
       }
 
       @Override
       public void doTransitionIntoAction()
       {
          startingPosition = kneeJoint.getQ();
+         straighteningDuration = durationForStraightening.getDoubleValue();
       }
 
       @Override
@@ -162,12 +241,14 @@ public class KneeControlModule
       }
    }
 
-   private class BentKneeControlState extends  AbstractKneeControlState
+   private class BentKneeControlState extends AbstractKneeControlState
    {
+      private final OneDoFJoint kneeJoint;
       public BentKneeControlState(OneDoFJoint kneeJoint)
       {
          super(KneeControlType.BENT);
 
+         this.kneeJoint = kneeJoint;
          privilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
@@ -180,6 +261,8 @@ public class KneeControlModule
       @Override
       public void doAction()
       {
+         privilegedConfigurationCommand.clear();
+         privilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
       @Override

@@ -12,6 +12,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.atlas.AtlasJointMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.YoFootOrientationGains;
@@ -75,6 +76,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private Map<String, JointAccelerationIntegrationSettings> integrationSettings = null;
 
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   private final StraightLegWalkingParameters straightLegWalkingParameters;
 
    public AtlasWalkingControllerParameters(DRCRobotModel.RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
@@ -94,6 +96,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
+      straightLegWalkingParameters = new AtlasStraightLegWalkingParameters();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -1349,6 +1352,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
+   }
+
+   /** {@inheritDoc} */
+   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   {
+      return straightLegWalkingParameters;
    }
 
    /** {@inheritDoc} */
