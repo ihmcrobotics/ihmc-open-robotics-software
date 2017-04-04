@@ -247,7 +247,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       {
          double minimumTransferTime = walkingControllerParameters.getMinimumTransferTime();
          TransferToWalkingSingleSupportState transferState = new TransferToWalkingSingleSupportState(transferToSide, walkingMessageHandler,
-               controllerToolbox, managerFactory, failureDetectionControlModule, minimumTransferTime, registry);
+               controllerToolbox, managerFactory, walkingControllerParameters, failureDetectionControlModule, minimumTransferTime, registry);
          walkingTransferStates.put(transferToSide, transferState);
          stateMachine.addState(transferState);
       }

@@ -335,9 +335,9 @@ public class FeetManager
       walkOnTheEdgesManager.reset();
    }
 
-   public boolean doToeOffIfPossible()
+   public boolean doToeOffIfPossibleInDoubleSupport()
    {
-      return walkOnTheEdgesManager.doToeOffIfPossible();
+      return walkOnTheEdgesManager.doToeOffIfPossibleInDoubleSupport();
    }
 
    public boolean doToeOffIfPossibleInSingleSupport()
