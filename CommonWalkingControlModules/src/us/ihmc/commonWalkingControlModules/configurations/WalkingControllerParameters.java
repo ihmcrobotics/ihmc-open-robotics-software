@@ -27,6 +27,8 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
+   private StraightLegWalkingParameters straightLegWalkingParameters;
+
    protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
 
    /**
@@ -497,6 +499,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the parameters used for straight leg walking
+    */
+   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   {
+      if (straightLegWalkingParameters == null)
+         straightLegWalkingParameters = new StraightLegWalkingParameters();
+
+      return straightLegWalkingParameters;
+   }
+
+   /**
     * Determines whether or not to attempt to directly control the height.
     * If true, the height will be controlled by controlling either the pelvis or the center of mass height.
     * If false, the height will be controlled inside the nullspace by trying to achieve the desired
@@ -506,25 +519,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public boolean controlHeightWithMomentum()
    {
       return true;
-   }
-
-   /**
-    * Determines whether or not to attempt to use straight legs when controlling the height in the nullspace.
-    * This will not do anything noticeable unless {@link WalkingControllerParameters#controlHeightWithMomentum()} returns true.
-    * @return boolean (true = try and straighten, false = do not try and straighten)
-    */
-   public boolean attemptToStraightenLegs()
-   {
-      return false;
-   }
-
-   /**
-    * Returns a percent of the swing state to switch the privileged configuration to having straight knees
-    * @return ratio of swing state (0.0 to 1.0)
-    */
-   public double getPercentOfSwingToStraightenLeg()
-   {
-      return 0.8;
    }
 
    /**
@@ -547,24 +541,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getICPPercentOfStanceForSSToeOff()
    {
       return 0.0;
-   }
-
-   /**
-    * This is the duration used to straighten the desire privileged configuration of the stance leg's knee.
-    * @return time in seconds for straightening
-    */
-   public double getDurationForStanceLegStraightening()
-   {
-      return 1.3;
-   }
-
-   /**
-    * Angle used by the privileged configuration that is defined as straight for the knees.
-    * @return angle in radians
-    */
-   public double getStraightKneeAngle()
-   {
-      return 0.05;
    }
 
    /**

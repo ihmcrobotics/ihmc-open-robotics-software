@@ -15,10 +15,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajecto
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
-import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -51,8 +48,6 @@ public class FeetManager
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final BooleanYoVariable attemptToStraightenLegs = new BooleanYoVariable("attemptToStraightenLegs", registry);
-
    // TODO Needs to be cleaned up someday... (Sylvain)
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
@@ -82,20 +77,9 @@ public class FeetManager
       {
          FootControlModule footControlModule = new FootControlModule(robotSide, toeOffHelper, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, controllerToolbox, registry);
-         footControlModule.setAttemptToStraightenLegs(walkingControllerParameters.attemptToStraightenLegs());
 
          footControlModules.put(robotSide, footControlModule);
       }
-
-      attemptToStraightenLegs.set(walkingControllerParameters.attemptToStraightenLegs());
-      attemptToStraightenLegs.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override public void variableChanged(YoVariable<?> v)
-         {
-            for (RobotSide robotSide : RobotSide.values)
-               footControlModules.get(robotSide).setAttemptToStraightenLegs(attemptToStraightenLegs.getBooleanValue());
-         }
-      });
 
       parentRegistry.addChild(registry);
    }

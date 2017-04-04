@@ -343,11 +343,6 @@ public class ExploreFootPolygonState extends AbstractFootControlState
          inverseDynamicsCommandList.addCommand(centerOfPressureCommand);
       }
 
-      if (attemptToStraightenLegs)
-         inverseDynamicsCommandList.addCommand(straightLegsPrivilegedConfigurationCommand);
-      else
-         inverseDynamicsCommandList.addCommand(bentLegsPrivilegedConfigurationCommand);
-
       return inverseDynamicsCommandList;
    }
 

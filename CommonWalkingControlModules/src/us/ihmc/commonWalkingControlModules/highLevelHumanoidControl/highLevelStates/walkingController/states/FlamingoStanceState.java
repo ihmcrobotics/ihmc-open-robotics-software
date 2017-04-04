@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.CenterOfMassHeightManager;
@@ -32,6 +33,7 @@ public class FlamingoStanceState extends SingleSupportState
    private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
+   private final KneeAngleManager kneeAngleManager;
 
    private final FootstepTiming footstepTiming = new FootstepTiming();
 
@@ -47,6 +49,7 @@ public class FlamingoStanceState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+      kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
 
       String namePrefix = supportSide.getOppositeSide().getLowerCaseName();
       loadFoot = new BooleanYoVariable(namePrefix + "LoadFoot", registry);
@@ -136,6 +139,8 @@ public class FlamingoStanceState extends SingleSupportState
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
       loadFoot.set(false);
+
+      kneeAngleManager.startSwing(swingSide);
    }
 
    @Override

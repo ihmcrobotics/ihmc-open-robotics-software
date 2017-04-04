@@ -474,28 +474,6 @@ public class FootControlModule
       return swingState.requestSwingSpeedUp(speedUpFactor);
    }
 
-   /**
-    * Set whether or not the privileged configuration will attempt to straighten the legs.
-    * Unless {@link WalkingControllerParameters#controlHeightWithMomentum()} is disabled to allow the height to change
-    * Linked to the variable {@link WalkingControllerParameters#attemptToStraightenLegs()}.
-    * in the nullspace, it will not be apparent that the controller will try and straighten the legs.
-    * @param attemptToStraightenLegs
-    */
-   public void setAttemptToStraightenLegs(boolean attemptToStraightenLegs)
-   {
-      swingState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      moveViaWaypointsState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      onToesState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      if (supportState != null)
-         supportState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      if (supportStateNew != null)
-         supportStateNew.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      if (holdPositionState != null)
-         holdPositionState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-      if (exploreFootPolygonState != null)
-         exploreFootPolygonState.setAttemptToStraightenLegs(attemptToStraightenLegs);
-   }
-
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       return stateMachine.getCurrentState().getInverseDynamicsCommand();
