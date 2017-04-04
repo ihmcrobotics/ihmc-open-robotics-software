@@ -18,7 +18,7 @@
 <Title>
 Desireds
 </Title>
-<Entry Boxes>root.RobotArm.RobotArmController.handTargetX,root.RobotArm.RobotArmController.handTargetY,root.RobotArm.RobotArmController.handTargetZ,root.RobotArm.RobotArmController.handTargetYaw,root.RobotArm.RobotArmController.handTargetPitch,root.RobotArm.RobotArmController.handTargetRoll,root.RobotArm.RobotArmController.goToTarget</Entry Boxes>
+<Entry Boxes>root.RobotArm.RobotArmController.handTargetX,root.RobotArm.RobotArmController.handTargetY,root.RobotArm.RobotArmController.handTargetZ,root.RobotArm.RobotArmController.handTargetYaw,root.RobotArm.RobotArmController.handTargetPitch,root.RobotArm.RobotArmController.handTargetRoll,root.RobotArm.RobotArmController.goToTarget,root.RobotArm.RobotArmController.feedbackControlToUse</Entry Boxes>
 </EntryBoxTab>
 <EntryBoxTab>
 <Title>
