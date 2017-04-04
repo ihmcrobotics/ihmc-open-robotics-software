@@ -8,7 +8,7 @@ public interface FrameBasedCommand<M extends Packet<M>>
 {
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message);
 
-   default public void getTransformFromBodyToControlFrame(RigidBodyTransform transformToPack)
+   default public void packControlFramePose(RigidBodyTransform transformToPack)
    {
       transformToPack.setToNaN();
    }

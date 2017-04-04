@@ -12,7 +12,6 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -24,12 +23,21 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
    @RosIgnoredField
    public float[] selectionMatrixDiagonal;
-   
+
    @RosExportedField(documentation = "The ID of the reference frame to execute the trajectory in")
    public long trajectoryReferenceFrameId;
-   
+
    @RosExportedField(documentation = "The Id of the reference frame defining which frame the taskspaceTrajectoryPoints are expressed in")
    public long dataReferenceFrameId;
+
+   @RosExportedField(documentation = "Flag that tells the controller whether the use of a custom control frame is requested.")
+   public boolean useCustomControlFrame = false;
+
+   @RosExportedField(documentation = "Position of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
+   public final Vector3D controlFramePosition = new Vector3D();
+
+   @RosExportedField(documentation = "Orientation of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
+   public final Quaternion controlFrameOrientation = new Quaternion();
 
    /**
     * Empty constructor for serialization.
@@ -51,7 +59,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       {
          taskspaceTrajectoryPoints[i] = new SO3TrajectoryPointMessage(random);
       }
-      
+
       trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
       dataReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
    }
@@ -77,7 +85,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       trajectoryReferenceFrameId = trajectoryFrame.getNameBasedHashCode();
       dataReferenceFrameId = dataFrame.getNameBasedHashCode();
    }
-   
+
    public AbstractSO3TrajectoryMessage(double trajectoryTime, Quaternion desiredOrientation, long dataFrameId, long trajectoryReferenceFrameId)
    {
       Vector3D zeroAngularVelocity = new Vector3D();
@@ -86,7 +94,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
       this.dataReferenceFrameId = dataFrameId;
    }
-   
+
    public AbstractSO3TrajectoryMessage(int numberOfTrajectoryPoints)
    {
       taskspaceTrajectoryPoints = new SO3TrajectoryPointMessage[numberOfTrajectoryPoints];
@@ -249,12 +257,12 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       {
          return false;
       }
-      
+
       if(trajectoryReferenceFrameId != other.getTrajectoryReferenceFrameId())
       {
          return false;
       }
-      
+
       if (getNumberOfTrajectoryPoints() != other.getNumberOfTrajectoryPoints())
          return false;
 
@@ -266,7 +274,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
 
       return super.epsilonEquals(other, epsilon);
    }
-   
+
    @Override
    public long getTrajectoryReferenceFrameId()
    {
@@ -278,28 +286,61 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    {
       this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
    }
-   
+
    @Override
    public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
    {
       trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
    }
-   
+
    @Override
    public long getDataReferenceFrameId()
    {
       return dataReferenceFrameId;
    }
-   
+
    @Override
    public void setDataReferenceFrameId(long dataReferenceFrameId)
    {
       this.dataReferenceFrameId = dataReferenceFrameId;
    }
-   
+
    @Override
    public void setDataReferenceFrameId(ReferenceFrame dataReferenceFrame)
    {
       this.dataReferenceFrameId = dataReferenceFrame.getNameBasedHashCode();
+   }
+
+   public void setUseCustomControlFrame(boolean useCustomControlFrame)
+   {
+      this.useCustomControlFrame = useCustomControlFrame;
+   }
+
+   public void setControlFramePosition(Vector3D controlFramePosition)
+   {
+      this.controlFramePosition.set(controlFramePosition);
+   }
+
+   public void setControlFrameOrientation(Quaternion controlFrameOrientation)
+   {
+      this.controlFrameOrientation.set(controlFrameOrientation);
+   }
+
+   @Override
+   public boolean useCustomControlFrame()
+   {
+      return useCustomControlFrame;
+   }
+
+   @Override
+   public Vector3D getControlFramePosition()
+   {
+      return controlFramePosition;
+   }
+
+   @Override
+   public Quaternion getControlFrameOrientation()
+   {
+      return controlFrameOrientation;
    }
 }
