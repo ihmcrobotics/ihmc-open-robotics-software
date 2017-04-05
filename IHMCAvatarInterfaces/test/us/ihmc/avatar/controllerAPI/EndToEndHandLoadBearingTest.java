@@ -219,7 +219,9 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       HandTrajectoryMessage liftHand = new HandTrajectoryMessage(robotSide, 1);
       liftHand.setTrajectoryReferenceFrameId(chestFrame);
       liftHand.setDataReferenceFrameId(worldFrame);
-      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      liftHand.setUseCustomControlFrame(true);
+      liftHand.setControlFrameOrientation(handOrientation);
+      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(liftHand);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
    }
