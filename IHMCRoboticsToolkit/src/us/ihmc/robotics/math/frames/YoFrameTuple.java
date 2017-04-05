@@ -342,6 +342,13 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple();
    }
 
+   public final void add(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.add(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
+      getYoValuesFromFrameTuple();
+   }
+
    public final void sub(Tuple3DReadOnly tuple)
    {
       putYoValuesIntoFrameTuple();

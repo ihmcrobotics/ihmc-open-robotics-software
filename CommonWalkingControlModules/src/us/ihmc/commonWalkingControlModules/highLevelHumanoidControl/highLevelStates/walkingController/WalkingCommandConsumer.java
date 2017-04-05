@@ -21,14 +21,17 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootst
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandComplianceControlParametersCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
@@ -121,27 +124,51 @@ public class WalkingCommandConsumer
    public void consumeHeadCommands()
    {
       if (commandInputManager.isNewCommandAvailable(HeadTrajectoryCommand.class))
+      {
          headManager.handleTaskspaceTrajectoryCommand(commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class));
+      }
       if (commandInputManager.isNewCommandAvailable(NeckTrajectoryCommand.class))
+      {
          headManager.handleJointspaceTrajectoryCommand(commandInputManager.pollNewestCommand(NeckTrajectoryCommand.class));
+      }
       if (commandInputManager.isNewCommandAvailable(NeckDesiredAccelerationsCommand.class))
+      {
          headManager.handleDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(NeckDesiredAccelerationsCommand.class));
+      }
+      if (commandInputManager.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
+      {
+         HeadHybridJointspaceTaskspaceTrajectoryCommand command = commandInputManager.pollNewestCommand(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
+         headManager.handleHybridTrajectoryCommand(command.getTaskspaceTrajectoryCommand(), command.getJointspaceTrajectoryCommand());
+      }
    }
 
    public void consumeChestCommands()
    {
       if (commandInputManager.isNewCommandAvailable(ChestTrajectoryCommand.class))
+      {
          chestManager.handleTaskspaceTrajectoryCommand(commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class));
+      }
       if (commandInputManager.isNewCommandAvailable(SpineTrajectoryCommand.class))
+      {
          chestManager.handleJointspaceTrajectoryCommand(commandInputManager.pollNewestCommand(SpineTrajectoryCommand.class));
+      }
       if (commandInputManager.isNewCommandAvailable(SpineDesiredAccelerationCommand.class))
+      {
          chestManager.handleDesiredAccelerationsCommand(commandInputManager.pollNewestCommand(SpineDesiredAccelerationCommand.class));
+      }
+      if (commandInputManager.isNewCommandAvailable(ChestHybridJointspaceTaskspaceTrajectoryCommand.class))
+      {
+         ChestHybridJointspaceTaskspaceTrajectoryCommand command = commandInputManager.pollNewestCommand(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
+         chestManager.handleHybridTrajectoryCommand(command.getTaskspaceTrajectoryCommand(), command.getJointspaceTrajectoryCommand());
+      }
    }
 
    public void consumePelvisHeightCommands()
    {
       if (commandInputManager.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
+      {
          comHeightManager.handlePelvisHeightTrajectoryCommand(commandInputManager.pollNewestCommand(PelvisHeightTrajectoryCommand.class));
+      }
    }
 
    public void consumeGoHomeMessages()
@@ -199,6 +226,7 @@ public class WalkingCommandConsumer
          commandInputManager.flushCommands(ArmTrajectoryCommand.class);
          commandInputManager.flushCommands(ArmDesiredAccelerationsCommand.class);
          commandInputManager.flushCommands(HandComplianceControlParametersCommand.class);
+         commandInputManager.flushCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
          return;
       }
 
@@ -206,6 +234,7 @@ public class WalkingCommandConsumer
       List<ArmTrajectoryCommand> armTrajectoryCommands = commandInputManager.pollNewCommands(ArmTrajectoryCommand.class);
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandInputManager.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandComplianceControlParametersCommand> handComplianceCommands = commandInputManager.pollNewCommands(HandComplianceControlParametersCommand.class);
+      List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandInputManager.pollNewCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
 
       if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands())
       {
@@ -223,6 +252,14 @@ public class WalkingCommandConsumer
             RobotSide robotSide = command.getRobotSide();
             if (handManagers.get(robotSide) != null)
                handManagers.get(robotSide).handleJointspaceTrajectoryCommand(command);
+         }
+         
+         for (int i = 0; i < handHybridCommands.size(); i++)
+         {
+            HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
+            RobotSide robotSide = command.getJointspaceTrajectoryCommand().getRobotSide();
+            if (handManagers.get(robotSide) != null)
+               handManagers.get(robotSide).handleHybridTrajectoryCommand(command.getTaskspaceTrajectoryCommand(), command.getJointspaceTrajectoryCommand());
          }
 
          for (int i = 0; i < armDesiredAccelerationCommands.size(); i++)

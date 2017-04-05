@@ -7,27 +7,9 @@ import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 
 /**
- * <p>
- * Title:
- * </p>
- * BoundingBoxKDTree2D
- * <p>
- * Description:
- * </p>
  * This class searches for bounding boxes present in a user-defined rectangular
  * region by constructing a KDTree for bounding boxes and then applying range
  * search to the KDTree.
- *
- * <p>
- * Copyright: Copyright (c) 2006
- * </p>
- *
- * <p>
- * Company:
- * </p>
- *
- * @author not attributable
- * @version 1.0
  */
 
 public class BoundingBoxKDTree2D

@@ -1,8 +1,13 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.*;
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint2d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint3d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
+import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
 import java.util.Random;
 
@@ -40,8 +45,8 @@ import us.ihmc.robotics.math.trajectories.waypoints.SimpleSE3TrajectoryPoint;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -393,7 +398,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          }
 
          double simulationTime = timeInState - previousTimeInState;
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime + getRobotModel().getControllerDT());
          assertTrue(success);
          previousTimeInState = timeInState;
          if (!isDone)
@@ -412,7 +417,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          }
       }
 
-      
+
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
 
@@ -615,7 +620,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
          String timeName = pelvisPrefix + "Time";
          String orientationName = pelvisPrefix + "Orientation";
          String angularVelocityName = pelvisPrefix + "AngularVelocity";
-         
+
          simpleSE3TrajectoryPoint.setTime(scs.getVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
          simpleSE3TrajectoryPoint.setOrientation(findQuat4d(orientationTrajectoryName, orientationName, suffix, scs));
          simpleSE3TrajectoryPoint.setAngularVelocity(findVector3d(orientationTrajectoryName, angularVelocityName, suffix, scs));
@@ -663,7 +668,7 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       Point2D desiredControllerXY = findControllerDesiredPositionXY(scs);
       assertEquals(desiredPosition.getX(), desiredControllerXY.getX(), EPSILON_FOR_DESIREDS);
       assertEquals(desiredPosition.getY(), desiredControllerXY.getY(), EPSILON_FOR_DESIREDS);
-      
+
       Quaternion desiredControllerOrientation = findControllerDesiredOrientation(scs);
       EuclidCoreTestTools.assertQuaternionEquals(desiredOrientation, desiredControllerOrientation, EPSILON_FOR_DESIREDS);
 

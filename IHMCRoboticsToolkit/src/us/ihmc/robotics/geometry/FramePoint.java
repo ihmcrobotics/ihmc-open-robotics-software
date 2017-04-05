@@ -206,6 +206,16 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
       return this.tuple.distanceSquared(framePoint.tuple);
    }
 
+   public double distanceFromOrigin()
+   {
+      return tuple.distanceFromOrigin();
+   }
+
+   public double distanceFromOriginSquared()
+   {
+      return tuple.distanceFromOriginSquared();
+   }
+
    /**
     * Creates a new FramePoint2d based on the x and y components of this FramePoint
     */
@@ -326,10 +336,5 @@ public class FramePoint extends FrameTuple<FramePoint, Point3D> implements Point
    public void setFromReferenceFrame(ReferenceFrame referenceFrame)
    {
       super.setFromReferenceFrame(referenceFrame);
-   }
-
-   public double getDistanceFromOrigin()
-   {
-      return this.tuple.distanceFromOrigin();
    }
 }

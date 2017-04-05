@@ -52,6 +52,7 @@ public class RigidBodyControlManager
    private final RigidBodyJointspaceControlState jointspaceControlState;
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final RigidBodyUserControlState userControlState;
+   private final RigidBodyHybridTaskSpaceJointspaceControlState hybridControlState;
    private final RigidBodyLoadBearingControlState loadBearingControlState;
 
    private final double[] initialJointPositions;
@@ -91,6 +92,7 @@ public class RigidBodyControlManager
       jointspaceControlState = new RigidBodyJointspaceControlState(bodyName, jointsOriginal, homeConfiguration, yoTime, registry);
       taskspaceControlState = new RigidBodyTaskspaceControlState(bodyToControl, baseBody, elevator, trajectoryFrames, controlFrame, baseFrame, yoTime, registry);
       userControlState = new RigidBodyUserControlState(bodyName, jointsToControl, yoTime, registry);
+      hybridControlState = new RigidBodyHybridTaskSpaceJointspaceControlState(bodyName, jointspaceControlState, taskspaceControlState, yoTime, registry);
 
       if (!positionControlHelper.hasPositionControlledJoints() && contactableBody != null)
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl, contactableBody, elevator, yoTime, graphicsListRegistry, registry);
@@ -110,6 +112,7 @@ public class RigidBodyControlManager
       states.add(jointspaceControlState);
       states.add(taskspaceControlState);
       states.add(userControlState);
+      states.add(hybridControlState);
       if (loadBearingControlState != null)
          states.add(loadBearingControlState);
 
@@ -126,7 +129,7 @@ public class RigidBodyControlManager
    public void setWeights(TObjectDoubleHashMap<String> jointspaceWeights, Vector3D taskspaceAngularWeight, Vector3D taskspaceLinearWeight,
          TObjectDoubleHashMap<String> userModeWeights)
    {
-      jointspaceControlState.setWeights(jointspaceWeights);
+      jointspaceControlState.setDefaultWeights(jointspaceWeights);
       taskspaceControlState.setWeights(taskspaceAngularWeight, taskspaceLinearWeight);
       userControlState.setWeights(userModeWeights);
       if (loadBearingControlState != null)
@@ -223,6 +226,42 @@ public class RigidBodyControlManager
       else
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
+         holdInJointspace();
+      }
+   }
+   
+   public void handleHybridTrajectoryCommand(SE3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointSpaceCommand)
+   {
+      computeDesiredJointPositions(initialJointPositions);
+      
+      initialPose.setToZero(controlFrame);
+      initialPose.changeFrame(taskspaceCommand.getDataFrame());
+
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions, initialPose))
+      {
+         requestState(hybridControlState.getStateEnum());
+      }
+      else
+      {
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SE3 trajectory command.");
+         holdInJointspace();
+      }
+   }
+   
+   public void handleHybridTrajectoryCommand(SO3TrajectoryControllerCommand<?, ?> taskspaceCommand, JointspaceTrajectoryCommand<?, ?> jointspaceCommand)
+   {
+      initialOrientation.setToZero(controlFrame);
+      initialOrientation.changeFrame(taskspaceCommand.getDataFrame());
+      
+      computeDesiredJointPositions(initialJointPositions);
+      
+      if (hybridControlState.handleTrajectoryCommand(taskspaceCommand, jointspaceCommand, initialJointPositions, initialOrientation))
+      {
+         requestState(hybridControlState.getStateEnum());
+      }
+      else
+      {
+         PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid hybrid SO3 trajectory command.");
          holdInJointspace();
       }
    }
