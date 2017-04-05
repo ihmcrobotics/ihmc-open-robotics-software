@@ -88,6 +88,7 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
 
    private final ReferenceFrame baseFrame;
    private final ReferenceFrame bodyFrame;
+   private final ReferenceFrame defaultControlFrame;
    private final PoseReferenceFrame controlFrame;
    private ReferenceFrame trajectoryFrame;
 
@@ -127,7 +128,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       spatialFeedbackControlCommand.set(elevator, bodyToControl);
       spatialFeedbackControlCommand.setPrimaryBase(baseBody);
       spatialFeedbackControlCommand.setSelectionMatrixToIdentity();
-      setControlFrame(controlFrame);
+      defaultControlFrame = controlFrame;
+      setControlFrame(defaultControlFrame);
 
       yoAngularWeight = new YoFrameVector(prefix + "AngularWeight", null, registry);
       yoLinearWeight = new YoFrameVector(prefix + "LinearWeight", null, registry);
@@ -414,12 +416,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (command.useCustomControlFrame())
       {
          command.packControlFramePose(controlFrameTransform);
+         setControlFramePose(controlFrameTransform);
       }
       else
       {
-         controlFrameTransform.setToZero();
+         setControlFrame(defaultControlFrame);
       }
-      setControlFramePose(controlFrameTransform);
 
       if (override || isEmpty())
       {
@@ -471,12 +473,12 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       if (command.useCustomControlFrame())
       {
          command.packControlFramePose(controlFrameTransform);
+         setControlFramePose(controlFrameTransform);
       }
       else
       {
-         controlFrameTransform.setToZero();
+         setControlFrame(defaultControlFrame);
       }
-      setControlFramePose(controlFrameTransform);
 
       if (override || isEmpty())
       {
