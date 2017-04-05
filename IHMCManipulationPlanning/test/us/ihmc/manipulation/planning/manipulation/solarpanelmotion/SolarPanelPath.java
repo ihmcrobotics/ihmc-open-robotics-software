@@ -2,6 +2,7 @@ package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -16,7 +17,6 @@ public class SolarPanelPath
    private ArrayList<SolarPanelCleaningPose> wayPoses = new ArrayList<SolarPanelCleaningPose>();   
    private ArrayList<Double> arrivalTime = new ArrayList<Double>();
    private ArrayList<SolarPanelLinearPath> linearPath = new ArrayList<SolarPanelLinearPath>();
-   
    
    private WholeBodyTrajectoryMessage wholebodyMessageForPath;
    
@@ -39,8 +39,6 @@ public class SolarPanelPath
       this.arrivalTime.add(timeToGo);
    }
       
-   // from rrt needed.
-   
    public WholeBodyTrajectoryMessage getWholeBodyMessage()
    {
       return wholebodyMessageForPath;
@@ -50,6 +48,7 @@ public class SolarPanelPath
    {
       WholeBodyTrajectoryMessage message = new WholeBodyTrajectoryMessage();
       SolarPanelCleaningPose cleaningPose = getCleaningPose(time);
+      cleaningPose.setZRotation(zRotation);
       
       double defaultMotionTime = 3.0;
       
@@ -65,7 +64,8 @@ public class SolarPanelPath
       message.setHandTrajectoryMessage(handTrajectoryMessage);
       message.setChestTrajectoryMessage(chestTrajectoryMessage);
       //message.setPelvisTrajectoryMessage(pelvisHeightTrajectoryMessage);      
-            
+      
+      
       return message;
    }
    

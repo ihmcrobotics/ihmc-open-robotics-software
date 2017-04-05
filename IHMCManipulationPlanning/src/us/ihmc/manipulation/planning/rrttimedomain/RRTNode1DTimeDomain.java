@@ -1,22 +1,23 @@
 package us.ihmc.manipulation.planning.rrttimedomain;
 
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPoseValidityTester;
 
-public class RRT1DNodeTimeDomain extends RRTNode
+public class RRTNode1DTimeDomain extends RRTNode
 {
    public static SolarPanelPoseValidityTester nodeValidityTester;
-
+   public static SolarPanelPath cleaningPath;
    /*
     * getNodeData(0) = time getNodeData(1) = pelvisYaw
     */
 
-   public RRT1DNodeTimeDomain()
+   public RRTNode1DTimeDomain()
    {
       super(2);
    }
 
-   public RRT1DNodeTimeDomain(double timeK, double pelvisYawK)
+   public RRTNode1DTimeDomain(double timeK, double pelvisYawK)
    {
       super(2);
       super.setNodeData(0, timeK);
@@ -26,7 +27,7 @@ public class RRT1DNodeTimeDomain extends RRTNode
    @Override
    public boolean isValidNode()
    {
-      nodeValidityTester.setSolarPanelWholeBodyPose(getNodeData(0), getNodeData(1));
+      nodeValidityTester.setSolarPanelWholeBodyPose(cleaningPath, getNodeData(0), getNodeData(1));
 
       return nodeValidityTester.isValid;
    }
@@ -34,6 +35,6 @@ public class RRT1DNodeTimeDomain extends RRTNode
    @Override
    public RRTNode createNode()
    {
-      return new RRT1DNodeTimeDomain();
+      return new RRTNode1DTimeDomain();
    }
 }

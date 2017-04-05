@@ -46,10 +46,10 @@ class DrawPanel extends JPanel
       this.numOfPoints = allPoints.length / 4;
 
       //pathPoints = pointInfoOfPath;
-      boxInfo[0] = RRT2DNode.boxCenterX;
-      boxInfo[1] = RRT2DNode.boxCenterY;
-      boxInfo[2] = RRT2DNode.boxSizeX;
-      boxInfo[3] = RRT2DNode.boxSizeY;
+      boxInfo[0] = RRTNode2D.boxCenterX;
+      boxInfo[1] = RRTNode2D.boxCenterY;
+      boxInfo[2] = RRTNode2D.boxSizeX;
+      boxInfo[3] = RRTNode2D.boxSizeY;
       this.info = info;
    }
 
@@ -161,12 +161,12 @@ public class RRTTestProject
    {
       PrintTools.info("Start!!! ");
 
-      RRTNode startNode = new RRT2DNode(0.0, 0.0);
-      RRTNode goalNode = new RRT2DNode(3.0, 2.0);
-      RRT2DPlanner rrtPlanner = new RRT2DPlanner(startNode, goalNode, 0.3);
+      RRTNode startNode = new RRTNode2D(0.0, 0.0);
+      RRTNode goalNode = new RRTNode2D(3.0, 2.0);
+      RRTPlanner2D rrtPlanner = new RRTPlanner2D(startNode, goalNode, 0.3);
 
-      RRTNode upperBoundNode = new RRT2DNode(5.0, 4.0);
-      RRTNode lowerBoundNode = new RRT2DNode(-5.0, -4.0);
+      RRTNode upperBoundNode = new RRTNode2D(5.0, 4.0);
+      RRTNode lowerBoundNode = new RRTNode2D(-5.0, -4.0);
       rrtPlanner.getRRTTree().setUpperBound(upperBoundNode);
       rrtPlanner.getRRTTree().setLowerBound(lowerBoundNode);
 

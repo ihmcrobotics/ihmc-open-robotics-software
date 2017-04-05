@@ -42,9 +42,11 @@ import us.ihmc.manipulation.planning.forwaypoint.EuclideanTrajectoryQuaternionCa
 import us.ihmc.manipulation.planning.forwaypoint.FrameEuclideanTrajectoryQuaternion;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelWholeBodyPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.rrttimedomain.RRT1DNodeTimeDomain;
+import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
+import us.ihmc.manipulation.planning.rrttimedomain.RRTPlanner1DTimeDomain;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerTimeDomain;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPoseValidityTester;
@@ -353,7 +355,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    }
    
    
-   @Test(timeout = 160000)
+   //@Test(timeout = 160000)
    public void testSolarPanelMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -414,7 +416,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       drcBehaviorTestHelper.updateRobotModel();
       
       
-      //ThreadTools.sleep(20000);
+      ThreadTools.sleep(20000);
       
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
@@ -431,7 +433,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       
       
-      drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      //drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       
       //success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       
@@ -442,21 +444,38 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       SolarPanelPoseValidityTester solarPanelValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
       solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
             
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       
       PrintTools.info("the pose is "+solarPanelValidityTester.isValid());
       
-      scs.addStaticLinkGraphics(solarPanelValidityTester.getRobotCollisionModel().getCollisionGraphics());
-   
+      ThreadTools.sleep(5000);
+      PrintTools.info("Go second message");
+      wholeBodyTrajectoryMessage.clear();
+      SolarPanelCleaningPose readyPose2 = new SolarPanelCleaningPose(solarPanel, 0.3, 0.1, -0.1, -Math.PI*0.2);      
+      SolarPanelWholeBodyPose wholebodyReadyPose2 = new SolarPanelWholeBodyPose(readyPose2, 0.0, 0.0);
+      wholebodyReadyPose2.getWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage, 3.0);
       
-      for (int i=0;i<kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints().length;i++)
-      {
-         PrintTools.info("");
-         OneDoFJoint aJoint = kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints()[i];
-         PrintTools.info(""+aJoint.getName()+" "+aJoint.getQ());
-         OneDoFJoint bJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getOneDoFJoints()[i];
-         PrintTools.info(""+bJoint.getName()+" "+bJoint.getQ());         
-      }
+      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+      ThreadTools.sleep(5000);      
+      PrintTools.info("Go third message");
+      wholeBodyTrajectoryMessage.clear();
+      SolarPanelCleaningPose readyPose3 = new SolarPanelCleaningPose(solarPanel, 0.6, 0.1, -0.1, -Math.PI*0.2);      
+      SolarPanelWholeBodyPose wholebodyReadyPose3 = new SolarPanelWholeBodyPose(readyPose3, 0.0, 0.0);
+      wholebodyReadyPose3.getWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage, 3.0);
+      
+      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
+      
+//      scs.addStaticLinkGraphics(solarPanelValidityTester.getRobotCollisionModel().getCollisionGraphics());
+         
+//      for (int i=0;i<kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints().length;i++)
+//      {
+//         PrintTools.info("");
+//         OneDoFJoint aJoint = kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints()[i];
+//         PrintTools.info(""+aJoint.getName()+" "+aJoint.getQ());
+//         OneDoFJoint bJoint = drcBehaviorTestHelper.getControllerFullRobotModel().getOneDoFJoints()[i];
+//         PrintTools.info(""+bJoint.getName()+" "+bJoint.getQ());         
+//      }
       
       
 //      while (true)
@@ -481,29 +500,27 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
+      ThreadTools.sleep(20000);
+      
       
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController(); 
       
-      RRT1DNodeTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
-      RRT1DNodeTimeDomain nodeOne = new RRT1DNodeTimeDomain(0.1, 10);
-      RRT1DNodeTimeDomain nodeTwo = new RRT1DNodeTimeDomain(-0.1, 20);
+      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      RRTNode1DTimeDomain nodeOne = new RRTNode1DTimeDomain(0.1, Math.PI*0.2);
       
       PrintTools.info("Node One "+nodeOne.getNodeData(0)+" "+nodeOne.getNodeData(1));
-      PrintTools.info("Node One "+nodeOne.isValidNode());      
-      PrintTools.info("Node Two "+nodeTwo.getNodeData(0)+" "+nodeTwo.getNodeData(1));
-      PrintTools.info("Node Two "+nodeTwo.isValidNode());
-
+      PrintTools.info("Node One "+nodeOne.isValidNode()); 
       
       
       double motionTime = 5.0;
       double maximumDisplacement = 0.1;
       double maximumTimeGap = 0.1;
       
-      RRT1DNodeTimeDomain nodeRoot = new RRT1DNodeTimeDomain(0.0, 0.0);
-      RRT1DNodeTimeDomain nodeLowerBound = new RRT1DNodeTimeDomain(0.0, -Math.PI*0.4);
-      RRT1DNodeTimeDomain nodeUpperBound = new RRT1DNodeTimeDomain(motionTime*1.5, Math.PI*0.4);
+      RRTNode1DTimeDomain nodeRoot = new RRTNode1DTimeDomain(0.0, 0.0);
+      RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(0.0, -Math.PI*0.4);
+      RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(motionTime*1.5, Math.PI*0.4);
       
-      RRTPlannerTimeDomain plannerTimeDomain = new RRTPlannerTimeDomain(nodeRoot);
+      RRTPlanner1DTimeDomain plannerTimeDomain = new RRTPlanner1DTimeDomain(nodeRoot);
       
       plannerTimeDomain.getTree().setMotionTime(motionTime);
       plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
@@ -532,14 +549,100 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       frame.add(drawPanel);
       frame.pack();
+      frame.setVisible(true);      
+   }
+   
+   
+   @Test
+   public void testRRTAndMotion() throws SimulationExceededMaximumTimeException, IOException
+   {
+      SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
+      setupCamera(scs);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      assertTrue(success);
+
+      drcBehaviorTestHelper.updateRobotModel();
+      ThreadTools.sleep(20000);
+      
+      
+      KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController(); 
+      
+      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      
+      // ********** Planning *** //
+      
+      
+
+      
+
+      
+      
+      
+      
+      
+      
+      
+      double motionTime = 0;
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+     
+      SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
+
+      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose) == true)
+      {
+         wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
+         motionTime = solarPanelPlanner.getMotionTime();
+         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);   
+      }
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+
+      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion))
+      {
+         wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
+         //motionTime = solarPanelPlanner.getMotionTime();
+         //drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+      }
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      
+      
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      
+      
+      
+      
+      
+      // ************************************* //
+      // show
+      // ************************************* //
+      JFrame frame;
+      DrawPanel drawPanel;
+      Dimension dim;
+      
+
+      frame = new JFrame("RRTTest");
+      drawPanel = new DrawPanel(solarPanelPlanner.plannerTimeDomain);
+      dim = new Dimension(1600, 800);
+      frame.setPreferredSize(dim);
+      frame.setLocation(200, 100);
+
+      frame.add(drawPanel);
+      frame.pack();
       frame.setVisible(true);
       
+      // ************************************* //
+      // show
+      // ************************************* //
+      PrintTools.info("END");
    }
    
    // ************************************* //
    class DrawPanel extends JPanel
    {
-      int scale = 300;
+      int timeScale = 300;
+      int pelvisYawScale = 300;
       RRTPlannerTimeDomain plannerTimeDomain;
       
       DrawPanel(RRTPlannerTimeDomain plannerTimeDomain)
@@ -587,12 +690,12 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       public int t2u(double time)
       {
-         return (int) Math.round((time * scale) + 50);
+         return (int) Math.round((time * timeScale) + 50);
       }
 
       public int y2v(double yaw)
       {
-         return (int) Math.round(((-yaw)) * scale + 400);
+         return (int) Math.round(((-yaw)) * pelvisYawScale + 400);
       }
       
       public void point(Graphics g, double time, double yaw, int size)
