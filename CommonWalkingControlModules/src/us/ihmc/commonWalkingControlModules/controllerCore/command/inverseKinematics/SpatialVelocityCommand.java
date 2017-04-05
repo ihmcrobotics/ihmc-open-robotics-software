@@ -8,7 +8,11 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
@@ -16,7 +20,9 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
-   private final Twist spatialVelocity = new Twist();
+   private final FramePose controlFramePose = new FramePose();
+   private final Vector3D desiredLinearVelocity = new Vector3D();
+   private final Vector3D desiredAngularVelocity = new Vector3D();
    private final DenseMatrix64F weightVector = new DenseMatrix64F(Twist.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(Twist.SIZE);
 
@@ -38,7 +44,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       setWeights(other.getWeightVector());
 
-      spatialVelocity.set(other.getSpatialVelocity());
       selectionMatrix.set(other.getSelectionMatrix());
       base = other.getBase();
       endEffector = other.getEndEffector();
@@ -47,6 +52,10 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
       optionalPrimaryBase = other.optionalPrimaryBase;
       optionalPrimaryBaseName = other.optionalPrimaryBaseName;
+
+      controlFramePose.setPoseIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
+      desiredAngularVelocity.set(other.desiredAngularVelocity);
+      desiredLinearVelocity.set(other.desiredLinearVelocity);
    }
 
    /**
@@ -84,22 +93,57 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       optionalPrimaryBaseName = primaryBase.getName();
    }
 
-   public void setSpatialVelocity(Twist spatialVelocity)
+   public void setSpatialVelocityToZero(ReferenceFrame controlFrame)
    {
-      this.spatialVelocity.set(spatialVelocity);
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
+      desiredAngularVelocity.setToZero();
+      desiredLinearVelocity.setToZero();
    }
 
-   public void setAngularVelocity(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularVelocity)
+   public void setSpatialVelocity(ReferenceFrame controlFrame, Twist desiredSpatialVelocity)
    {
-      spatialVelocity.setToZero(bodyFrame, baseFrame, desiredAngularVelocity.getReferenceFrame());
-      spatialVelocity.setAngularPart(desiredAngularVelocity.getVector());
+      desiredSpatialVelocity.getBodyFrame().checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      desiredSpatialVelocity.getBaseFrame().checkReferenceFrameMatch(base.getBodyFixedFrame());
+      desiredSpatialVelocity.getExpressedInFrame().checkReferenceFrameMatch(controlFrame);
+
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
+      desiredSpatialVelocity.getAngularPart(desiredAngularVelocity);
+      desiredSpatialVelocity.getLinearPart(desiredLinearVelocity);
    }
 
-   public void setLinearVelocity(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredLinearVelocity)
+   public void setSpatialVelocity(ReferenceFrame controlFrame, FrameVector desiredAngularVelocity, FrameVector desiredLinearVelocity)
    {
-      spatialVelocity.setToZero(bodyFrame, baseFrame, desiredLinearVelocity.getReferenceFrame());
-      spatialVelocity.setLinearPart(desiredLinearVelocity.getVector());
-      spatialVelocity.changeFrame(bodyFrame);
+      controlFrame.checkReferenceFrameMatch(desiredAngularVelocity);
+      controlFrame.checkReferenceFrameMatch(desiredLinearVelocity);
+
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
+      desiredAngularVelocity.get(this.desiredAngularVelocity);
+      desiredLinearVelocity.get(this.desiredLinearVelocity);
+   }
+
+   public void setAngularVelocity(ReferenceFrame controlFrame, FrameVector desiredAngularVelocity)
+   {
+      controlFrame.checkReferenceFrameMatch(desiredAngularVelocity);
+
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
+
+      desiredAngularVelocity.get(this.desiredAngularVelocity);
+      desiredLinearVelocity.setToZero();
+   }
+
+   public void setLinearVelocity(ReferenceFrame controlFrame, FrameVector desiredLinearVelocity)
+   {
+      controlFrame.checkReferenceFrameMatch(desiredLinearVelocity);
+
+      controlFramePose.setToZero(controlFrame);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
+
+      desiredLinearVelocity.get(this.desiredLinearVelocity);
+      desiredAngularVelocity.setToZero();
    }
 
    public void setSelectionMatrixToIdentity()
@@ -226,9 +270,36 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       return weightVector;
    }
 
-   public Twist getSpatialVelocity()
+   public void getDesiredSpatialVelocity(PoseReferenceFrame controlFrameToPack, Twist desiredSpatialVelocityToPack)
    {
-      return spatialVelocity;
+      getControlFrame(controlFrameToPack);
+      desiredSpatialVelocityToPack.set(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredLinearVelocity,
+                                       desiredAngularVelocity);
+   }
+
+   public void getDesiredSpatialVelocity(DenseMatrix64F desiredSpatialVelocityToPack)
+   {
+      desiredSpatialVelocityToPack.reshape(6, 1);
+      desiredAngularVelocity.get(0, desiredSpatialVelocityToPack);
+      desiredLinearVelocity.get(3, desiredSpatialVelocityToPack);
+   }
+
+   public void getControlFrame(PoseReferenceFrame controlFrameToPack)
+   {
+      controlFramePose.changeFrame(controlFrameToPack.getParent());
+      controlFrameToPack.setPoseAndUpdate(controlFramePose);
+      controlFramePose.changeFrame(endEffector.getBodyFixedFrame());
+   }
+
+   public void getControlFramePoseIncludingFrame(FramePose controlFramePoseToPack)
+   {
+      controlFramePoseToPack.setIncludingFrame(controlFramePose);
+   }
+
+   public void getControlFramePoseIncludingFrame(FramePoint positionToPack, FrameOrientation orientationToPack)
+   {
+      controlFramePose.getPositionIncludingFrame(positionToPack);
+      controlFramePose.getOrientationIncludingFrame(orientationToPack);
    }
 
    public DenseMatrix64F getSelectionMatrix()
@@ -276,7 +347,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": base = " + base.getName() + ", endEffector = " + endEffector.getName() + ", linear = "
-            + spatialVelocity.getLinearPartCopy() + ", angular = " + spatialVelocity.getAngularPartCopy();
+            + desiredLinearVelocity + ", angular = " + desiredAngularVelocity;
       return ret;
    }
 }

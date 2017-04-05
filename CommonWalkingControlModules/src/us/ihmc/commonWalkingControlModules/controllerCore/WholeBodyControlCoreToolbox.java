@@ -249,8 +249,8 @@ public class WholeBodyControlCoreToolbox
    {
       if (motionQPInputCalculator == null)
       {
-         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler,
-                                                               jointPrivilegedConfigurationParameters, registry);
+         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, jointIndexHandler, jointPrivilegedConfigurationParameters,
+                                                               registry);
       }
       return motionQPInputCalculator;
    }
