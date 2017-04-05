@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -13,7 +14,12 @@ public class RobotArmSimulation
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       RobotArm robotArm = new RobotArm();
-      RobotArmController robotArmController = new RobotArmController(robotArm, controlDT, yoGraphicsListRegistry);
+      WholeBodyControllerCoreMode controlMode = WholeBodyControllerCoreMode.INVERSE_DYNAMICS;
+
+      if (controlMode == WholeBodyControllerCoreMode.INVERSE_KINEMATICS)
+         robotArm.setDynamic(false);
+
+      RobotArmController robotArmController = new RobotArmController(robotArm, controlDT, controlMode, yoGraphicsListRegistry);
       robotArm.setController(robotArmController);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
