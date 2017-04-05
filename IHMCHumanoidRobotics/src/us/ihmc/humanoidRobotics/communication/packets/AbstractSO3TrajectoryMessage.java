@@ -10,6 +10,7 @@ import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosIgnoredField;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -34,7 +35,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    public boolean useCustomControlFrame = false;
 
    @RosExportedField(documentation = "Position of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public final Vector3D controlFramePosition = new Vector3D();
+   public final Point3D controlFramePosition = new Point3D();
 
    @RosExportedField(documentation = "Orientation of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
    public final Quaternion controlFrameOrientation = new Quaternion();
@@ -333,7 +334,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
    }
 
    @Override
-   public Vector3D getControlFramePosition()
+   public Point3D getControlFramePosition()
    {
       return controlFramePosition;
    }
