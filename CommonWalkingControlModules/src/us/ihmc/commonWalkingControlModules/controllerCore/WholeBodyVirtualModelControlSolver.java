@@ -373,6 +373,8 @@ public class WholeBodyVirtualModelControlSolver
       RigidBody controlledBody = command.getEndEffector();
       command.getDesiredSpatialAcceleration(controlFrame, tmpAcceleration);
       tmpAcceleration.changeBaseFrameNoRelativeAcceleration(ReferenceFrame.getWorldFrame());
+   // Watch for this one, it is correct except when the orientation is only partially controlled. It should be expressed at the command's controlFrame. (Sylvain)
+      tmpAcceleration.changeFrameNoRelativeMotion(controlledBody.getBodyFixedFrame());
 
       twistCalculator.getTwistOfBody(controlledBody, tmpTwist);
 
