@@ -265,4 +265,39 @@ public class RobotArm extends Robot
    {
       return gravity;
    }
+
+   public RevoluteJoint getShoulderYaw()
+   {
+      return shoulderYaw;
+   }
+
+   public RevoluteJoint getShoulderRoll()
+   {
+      return shoulderRoll;
+   }
+
+   public RevoluteJoint getShoulderPitch()
+   {
+      return shoulderPitch;
+   }
+
+   public RevoluteJoint getElbowPitch()
+   {
+      return elbowPitch;
+   }
+
+   public RevoluteJoint getWristPitch()
+   {
+      return wristPitch;
+   }
+
+   public RevoluteJoint getWristRoll()
+   {
+      return wristRoll;
+   }
+
+   public RevoluteJoint getWristYaw()
+   {
+      return wristYaw;
+   }
 }

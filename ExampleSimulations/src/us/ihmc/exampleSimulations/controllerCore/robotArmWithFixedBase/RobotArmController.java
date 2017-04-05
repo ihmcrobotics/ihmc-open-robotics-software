@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -13,9 +14,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
@@ -34,9 +39,11 @@ import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 
 public class RobotArmController implements RobotController
 {
@@ -69,12 +76,13 @@ public class RobotArmController implements RobotController
    private final DoubleYoVariable handWeight = new DoubleYoVariable("handWeight", registry);
    private final YoSymmetricSE3PIDGains handGains = new YoSymmetricSE3PIDGains("hand", registry);
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
+
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
    private final BooleanYoVariable goToTarget = new BooleanYoVariable("goToTarget", registry);
    private final DoubleYoVariable trajectoryDuration = new DoubleYoVariable("handTrajectoryDuration", registry);
    private final DoubleYoVariable trajectoryStartTime = new DoubleYoVariable("handTrajectoryStartTime", registry);
 
-   private final StraightLinePoseTrajectoryGenerator trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", worldFrame, registry);
+   private final StraightLinePoseTrajectoryGenerator trajectory;
 
    private final BooleanYoVariable controlLinearX = new BooleanYoVariable("controlLinearX", registry);
    private final BooleanYoVariable controlLinearY = new BooleanYoVariable("controlLinearY", registry);
@@ -82,6 +90,9 @@ public class RobotArmController implements RobotController
    private final BooleanYoVariable controlAngularX = new BooleanYoVariable("controlAngularX", registry);
    private final BooleanYoVariable controlAngularY = new BooleanYoVariable("controlAngularY", registry);
    private final BooleanYoVariable controlAngularZ = new BooleanYoVariable("controlAngularZ", registry);
+
+   private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+   private final RobotJointLimitWatcher robotJointLimitWatcher;
 
    public RobotArmController(RobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -98,6 +109,7 @@ public class RobotArmController implements RobotController
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
                                                                                        twistCalculator, geometricJacobianHolder, optimizationSettings,
                                                                                        yoGraphicsListRegistry, registry);
+      controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       controlCoreToolbox.setupForInverseDynamicsSolver(new ArrayList<>());
       FeedbackControlCommandList allPossibleCommands = new FeedbackControlCommandList();
 
@@ -109,6 +121,17 @@ public class RobotArmController implements RobotController
       allPossibleCommands.addCommand(handSpatialCommand);
 
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, allPossibleCommands, registry);
+
+      yoGraphicsListRegistry.registerYoGraphic("desireds", new YoGraphicCoordinateSystem("targetFrame", handTargetPosition, handTargetOrientation, 0.15,
+                                                                                         YoAppearance.Red()));
+
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_ZERO);
+      privilegedConfigurationCommand.addJoint(robotArm.getElbowPitch(), Math.PI / 3.0);
+
+      trajectory = new StraightLinePoseTrajectoryGenerator("handTrajectory", false, worldFrame, registry, true, yoGraphicsListRegistry);
+
+      robotJointLimitWatcher = new RobotJointLimitWatcher(ScrewTools.filterJoints(controlledJoints, OneDoFJoint.class));
+      registry.addChild(robotJointLimitWatcher.getYoVariableRegistry());
 
       initialize();
    }
@@ -142,6 +165,7 @@ public class RobotArmController implements RobotController
       controlAngularX.set(true);
       controlAngularY.set(true);
       controlAngularZ.set(true);
+      trajectory.showVisualization();
    }
 
    private final FramePoint position = new FramePoint();
@@ -170,10 +194,13 @@ public class RobotArmController implements RobotController
          controllerCoreCommand.addFeedbackControlCommand(handPointCommand);
          controllerCoreCommand.addFeedbackControlCommand(handOrientationCommand);
       }
+      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
       robotArm.updateSCSRobot();
+
+      robotJointLimitWatcher.doControl();
    }
 
    public void updateFeedbackCommands()
@@ -296,5 +323,20 @@ public class RobotArmController implements RobotController
    public String getDescription()
    {
       return name;
+   }
+
+   public YoFramePoint getHandTargetPosition()
+   {
+      return handTargetPosition;
+   }
+
+   public YoFrameOrientation getHandTargetOrientation()
+   {
+      return handTargetOrientation;
+   }
+
+   public BooleanYoVariable getGoToTarget()
+   {
+      return goToTarget;
    }
 }
