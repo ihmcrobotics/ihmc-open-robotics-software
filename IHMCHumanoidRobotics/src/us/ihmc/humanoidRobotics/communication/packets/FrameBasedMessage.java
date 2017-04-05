@@ -1,7 +1,7 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,7 +33,7 @@ public interface FrameBasedMessage
       }
    }
 
-   abstract public Vector3D getControlFramePosition();
+   abstract public Point3D getControlFramePosition();
 
    abstract public Quaternion getControlFrameOrientation();
 

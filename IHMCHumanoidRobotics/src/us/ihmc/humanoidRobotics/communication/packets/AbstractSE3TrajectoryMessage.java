@@ -34,7 +34,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    public boolean useCustomControlFrame = false;
 
    @RosExportedField(documentation = "Position of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
-   public final Vector3D controlFramePosition = new Vector3D();
+   public final Point3D controlFramePosition = new Point3D();
 
    @RosExportedField(documentation = "Orientation of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.")
    public final Quaternion controlFrameOrientation = new Quaternion();
@@ -325,7 +325,7 @@ public abstract class AbstractSE3TrajectoryMessage<T extends AbstractSE3Trajecto
    }
 
    @Override
-   public Vector3D getControlFramePosition()
+   public Point3D getControlFramePosition()
    {
       return controlFramePosition;
    }
