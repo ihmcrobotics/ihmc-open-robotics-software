@@ -317,7 +317,7 @@ public abstract class AbstractSO3TrajectoryMessage<T extends AbstractSO3Trajecto
       this.useCustomControlFrame = useCustomControlFrame;
    }
 
-   public void setControlFramePosition(Vector3D controlFramePosition)
+   public void setControlFramePosition(Point3D controlFramePosition)
    {
       this.controlFramePosition.set(controlFramePosition);
    }
