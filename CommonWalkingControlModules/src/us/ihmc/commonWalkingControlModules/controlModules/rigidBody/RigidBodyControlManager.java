@@ -329,6 +329,11 @@ public class RigidBodyControlManager
          requestedState.set(state);
    }
 
+   public RigidBodyControlMode getActiveControlMode()
+   {
+      return stateMachine.getCurrentStateEnum();
+   }
+
    private void checkForDisabledJoints()
    {
       boolean isAtLeastOneJointDisabled = checkIfAtLeastOneJointIsDisabled();
