@@ -1,18 +1,18 @@
 package us.ihmc.manipulation.planning.rrt;
 
-public class RRT2DNode extends RRTNode
+public class RRTNode2D extends RRTNode
 {
    static double boxCenterX = 2.0;
    static double boxCenterY = 1.0;
    static double boxSizeX = 1.0;
    static double boxSizeY = 1.0;
    
-   public RRT2DNode()
+   public RRTNode2D()
    {
       super(2);
    }
    
-   public RRT2DNode(double px, double py)
+   public RRTNode2D(double px, double py)
    {
       super(2);
       super.setNodeData(0, px);
@@ -35,7 +35,7 @@ public class RRT2DNode extends RRTNode
    @Override
    public RRTNode createNode()
    {
-      return new RRT2DNode();
+      return new RRTNode2D();
    }
 
 }

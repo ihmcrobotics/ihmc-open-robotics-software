@@ -38,7 +38,7 @@ public class RRTPlannerTimeDomain
          {
             if (rrtTree.getTime(rrtTree.getNewNode()) == rrtTree.getMotionTime())
             {
-               PrintTools.info("Reach ");
+               PrintTools.info("Reach "+i);
                rrtTree.updatePath(rrtTree.getNewNode());
                optimalPath = rrtTree.getPathNode();
                return true;

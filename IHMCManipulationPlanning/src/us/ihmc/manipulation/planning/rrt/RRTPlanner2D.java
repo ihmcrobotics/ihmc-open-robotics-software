@@ -7,9 +7,9 @@ package us.ihmc.manipulation.planning.rrt;
  *
  */
 
-public class RRT2DPlanner extends RRTPlanner
+public class RRTPlanner2D extends RRTPlanner
 {
-   public RRT2DPlanner(RRTNode root, RRTNode goal, double stepLength)
+   public RRTPlanner2D(RRTNode root, RRTNode goal, double stepLength)
    {
       super(root, goal, stepLength);
    }
