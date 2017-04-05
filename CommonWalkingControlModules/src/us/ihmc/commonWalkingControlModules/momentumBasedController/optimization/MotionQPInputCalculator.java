@@ -122,10 +122,11 @@ public class MotionQPInputCalculator
       privilegedConfigurationHandler.computePrivilegedJointAccelerations();
 
       motionQPInputToPack.setIsMotionConstraint(false);
-      motionQPInputToPack.setUseWeightScalar(true);
-      motionQPInputToPack.setWeight(privilegedConfigurationHandler.getWeight());
+      motionQPInputToPack.setUseWeightScalar(false);
 
       nullspaceCalculator.setPseudoInverseAlpha(nullspaceProjectionAlpha.getDoubleValue());
+
+      int taskSize = 0;
 
       DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
       int robotTaskSize = selectionMatrix.getNumRows();
@@ -140,8 +141,9 @@ public class MotionQPInputCalculator
          {
             motionQPInputToPack.reshape(robotTaskSize);
             nullspaceCalculator.projectOntoNullspace(tempTaskJacobian, allTaskJacobian);
-            CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, 0, 0);
-            CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, 0, 0);
+            CommonOps.insert(tempTaskJacobian, motionQPInputToPack.taskJacobian, taskSize, 0);
+            CommonOps.insert(privilegedConfigurationHandler.getPrivilegedJointAccelerations(), motionQPInputToPack.taskObjective, taskSize, 0);
+            CommonOps.insert(privilegedConfigurationHandler.getWeights(), motionQPInputToPack.taskWeightMatrix, taskSize, taskSize);
          }
       }
 
@@ -156,8 +158,7 @@ public class MotionQPInputCalculator
       privilegedConfigurationHandler.computePrivilegedJointVelocities();
 
       motionQPInputToPack.setIsMotionConstraint(false);
-      motionQPInputToPack.setUseWeightScalar(true);
-      motionQPInputToPack.setWeight(privilegedConfigurationHandler.getWeight());
+      motionQPInputToPack.setUseWeightScalar(false);
 
       DenseMatrix64F selectionMatrix = privilegedConfigurationHandler.getSelectionMatrix();
 
@@ -169,6 +170,7 @@ public class MotionQPInputCalculator
       motionQPInputToPack.reshape(taskSize);
 
       motionQPInputToPack.setTaskObjective(privilegedConfigurationHandler.getPrivilegedJointVelocities());
+      motionQPInputToPack.setTaskWeightMatrix(privilegedConfigurationHandler.getWeights());
 
       OneDoFJoint[] joints = privilegedConfigurationHandler.getJoints();
       boolean success = jointIndexHandler.compactBlockToFullBlock(joints, selectionMatrix, motionQPInputToPack.taskJacobian);
