@@ -64,6 +64,39 @@ public class GeometricJacobianCalculatorTest
       jacobianCalculator.clear();
 
       verifyThatHasBeenCleared(jacobianCalculator);
+
+      // Do the same thing but now using setKinematicChain(OneDoFJoint[])
+      jacobianCalculator.setKinematicChain(joints.toArray(new InverseDynamicsJoint[0]));
+
+      jacobianCalculator.computeJacobianMatrix();
+      jacobianCalculator.computeConvectiveTerm();
+
+      { // Just checking the matrix sizing is correct
+         DenseMatrix64F jacobianMatrix = new DenseMatrix64F(1, 1);
+         jacobianCalculator.getJacobianMatrix(jacobianMatrix);
+         assertEquals(6, jacobianMatrix.getNumRows());
+         assertEquals(numberOfJoints, jacobianMatrix.getNumCols());
+
+         DenseMatrix64F convectiveTerm = new DenseMatrix64F(1, 1);
+         jacobianCalculator.getConvectiveTerm(convectiveTerm);
+         assertEquals(6, convectiveTerm.getNumRows());
+         assertEquals(1, convectiveTerm.getNumCols());
+
+         DenseMatrix64F selectionMatrix = CommonOps.identity(6);
+         MatrixTools.removeRow(selectionMatrix, random.nextInt(6));
+
+         jacobianCalculator.getJacobianMatrix(selectionMatrix, jacobianMatrix);
+         assertEquals(5, jacobianMatrix.getNumRows());
+         assertEquals(numberOfJoints, jacobianMatrix.getNumCols());
+
+         jacobianCalculator.getConvectiveTerm(selectionMatrix, convectiveTerm);
+         assertEquals(5, convectiveTerm.getNumRows());
+         assertEquals(1, convectiveTerm.getNumCols());
+      }
+
+      jacobianCalculator.clear();
+
+      verifyThatHasBeenCleared(jacobianCalculator);
    }
 
    public void verifyThatHasBeenCleared(GeometricJacobianCalculator jacobianCalculator)
@@ -146,6 +179,21 @@ public class GeometricJacobianCalculatorTest
          RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
+         jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
+         jacobianCalculator.computeJacobianMatrix();
+
+         compareJacobianTwistAgainstTwistCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-12);
+
+         // Do the same thing but now using setKinematicChain(OneDoFJoint[])
+         jacobianCalculator.clear();
+         jacobianCalculator.setKinematicChain(ScrewTools.createJointPath(rootBody, randomEndEffector));
+         jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
+         jacobianCalculator.computeJacobianMatrix();
+
+         compareJacobianTwistAgainstTwistCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-12);
+
+         jacobianCalculator.clear();
+         jacobianCalculator.setKinematicChain(ScrewTools.createJointPath(randomBase, randomEndEffector));
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
          jacobianCalculator.computeJacobianMatrix();
 
@@ -235,6 +283,23 @@ public class GeometricJacobianCalculatorTest
          RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
+         jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
+         jacobianCalculator.computeJacobianMatrix();
+         jacobianCalculator.computeConvectiveTerm();
+
+         compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-10);
+
+         // Do the same thing but now using setKinematicChain(OneDoFJoint[])
+         jacobianCalculator.clear();
+         jacobianCalculator.setKinematicChain(ScrewTools.createJointPath(rootBody, randomEndEffector));
+         jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
+         jacobianCalculator.computeJacobianMatrix();
+         jacobianCalculator.computeConvectiveTerm();
+
+         compareJacobianAccelerationAgainstSpatialAccelerationCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-10);
+
+         jacobianCalculator.clear();
+         jacobianCalculator.setKinematicChain(ScrewTools.createJointPath(randomBase, randomEndEffector));
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
          jacobianCalculator.computeJacobianMatrix();
          jacobianCalculator.computeConvectiveTerm();
