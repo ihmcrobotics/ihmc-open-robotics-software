@@ -115,7 +115,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.3)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorChainRobot() throws Exception
    {
@@ -125,32 +125,23 @@ public class GeometricJacobianCalculatorTest
 
       List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
-      Twist expectedTwist = new Twist();
-      Twist actualTwist = new Twist();
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
       for (int i = 0; i < 1000; i++)
       {
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random, -10.0, 10.0);
-         twistCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
+
          jacobianCalculator.clear();
          jacobianCalculator.setKinematicChain(rootBody, randomEndEffector);
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
          jacobianCalculator.computeJacobianMatrix();
 
-         DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getJointVelocitiesMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointVelocitiesMatrix);
-
-         twistCalculator.getRelativeTwist(rootBody, randomEndEffector, expectedTwist);
-         jacobianCalculator.getEndEffectorTwist(jointVelocitiesMatrix, actualTwist);
-
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         compareJacobianTwistAgainstTwistCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-12);
 
          RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          jacobianCalculator.clear();
@@ -158,13 +149,7 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
          jacobianCalculator.computeJacobianMatrix();
 
-         jointVelocitiesMatrix.reshape(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getJointVelocitiesMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointVelocitiesMatrix);
-
-         twistCalculator.getRelativeTwist(randomBase, randomEndEffector, expectedTwist);
-         jacobianCalculator.getEndEffectorTwist(jointVelocitiesMatrix, actualTwist);
-
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         compareJacobianTwistAgainstTwistCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-12);
       }
    }
 
@@ -218,7 +203,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.2)
+   @ContinuousIntegrationTest(estimatedDuration = 0.5)
    @Test(timeout = 30000)
    public void testAgainstSpatialAccelerationCalculatorChainRobot() throws Exception
    {
@@ -228,11 +213,7 @@ public class GeometricJacobianCalculatorTest
 
       List<OneDoFJoint> joints = ScrewTestTools.createRandomChainRobotWithOneDoFJoints(numberOfJoints, random);
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, twistCalculator, 0.0, true);
 
-      SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector();
-      SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
       for (int i = 0; i < 1000; i++)
@@ -240,8 +221,6 @@ public class GeometricJacobianCalculatorTest
          ScrewTestTools.setRandomPositions(joints, random);
          ScrewTestTools.setRandomVelocities(joints, random, -10.0, 10.0);
          ScrewTestTools.setRandomDesiredAccelerations(joints, random, -10.0, 10.0);
-         twistCalculator.compute();
-         spatialAccelerationCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
@@ -251,13 +230,7 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.computeJacobianMatrix();
          jacobianCalculator.computeConvectiveTerm();
 
-         DenseMatrix64F jointDesiredAccelerationsMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getDesiredJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);
-
-         spatialAccelerationCalculator.getRelativeAcceleration(rootBody, randomEndEffector, expectedAcceleration);
-         jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);
-
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-10);
+         compareJacobianAccelerationAgainstSpatialAccelerationCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-10);
 
          RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          jacobianCalculator.clear();
@@ -266,17 +239,11 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.computeJacobianMatrix();
          jacobianCalculator.computeConvectiveTerm();
 
-         jointDesiredAccelerationsMatrix.reshape(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getDesiredJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);
-
-         spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector, expectedAcceleration);
-         jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);
-
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-10);
+         compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-10);
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.35)
    @Test(timeout = 30000)
    public void testAgainstTwistCalculatorFloatingJointRobot() throws Exception
    {
@@ -290,10 +257,7 @@ public class GeometricJacobianCalculatorTest
       List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
 
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
 
-      Twist expectedTwist = new Twist();
-      Twist actualTwist = new Twist();
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
       for (int i = 0; i < 1000; i++)
@@ -302,7 +266,6 @@ public class GeometricJacobianCalculatorTest
          ScrewTestTools.setRandomVelocity(floatingJoint, random);
          ScrewTestTools.setRandomPositions(revoluteJoints, random);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
-         twistCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
@@ -311,13 +274,7 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
          jacobianCalculator.computeJacobianMatrix();
 
-         DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getJointVelocitiesMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointVelocitiesMatrix);
-
-         twistCalculator.getRelativeTwist(rootBody, randomEndEffector, expectedTwist);
-         jacobianCalculator.getEndEffectorTwist(jointVelocitiesMatrix, actualTwist);
-
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         compareJacobianTwistAgainstTwistCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-12);
 
          RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          jacobianCalculator.clear();
@@ -325,17 +282,11 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.setJacobianFrame(randomEndEffector.getBodyFixedFrame());
          jacobianCalculator.computeJacobianMatrix();
 
-         jointVelocitiesMatrix.reshape(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getJointVelocitiesMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointVelocitiesMatrix);
-
-         twistCalculator.getRelativeTwist(randomBase, randomEndEffector, expectedTwist);
-         jacobianCalculator.getEndEffectorTwist(jointVelocitiesMatrix, actualTwist);
-
-         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
+         compareJacobianTwistAgainstTwistCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-12);
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @ContinuousIntegrationTest(estimatedDuration = 0.7)
    @Test(timeout = 30000)
    public void testAgainstSpatialAccelerationCalculatorFloatingJointRobot() throws Exception
    {
@@ -349,11 +300,7 @@ public class GeometricJacobianCalculatorTest
       List<InverseDynamicsJoint> joints = floatingChain.getInverseDynamicsJoints();
 
       RigidBody rootBody = ScrewTools.getRootBody(joints.get(0).getSuccessor());
-      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, joints.get(0).getPredecessor());
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootBody, twistCalculator, 0.0, true);
 
-      SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector();
-      SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
       GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
       for (int i = 0; i < 1000; i++)
@@ -362,8 +309,6 @@ public class GeometricJacobianCalculatorTest
          ScrewTestTools.setRandomVelocity(floatingJoint, random);
          ScrewTestTools.setRandomPositions(revoluteJoints, random);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
-         twistCalculator.compute();
-         spatialAccelerationCalculator.compute();
 
          int randomEndEffectorIndex = random.nextInt(numberOfJoints);
          RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
@@ -373,13 +318,7 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.computeJacobianMatrix();
          jacobianCalculator.computeConvectiveTerm();
 
-         DenseMatrix64F jointDesiredAccelerationsMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getDesiredJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);
-
-         spatialAccelerationCalculator.getRelativeAcceleration(rootBody, randomEndEffector, expectedAcceleration);
-         jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);
-
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-10);
+         compareJacobianAccelerationAgainstSpatialAccelerationCalculator(rootBody, randomEndEffector, jacobianCalculator, 1.0e-10);
 
          RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
          jacobianCalculator.clear();
@@ -388,13 +327,48 @@ public class GeometricJacobianCalculatorTest
          jacobianCalculator.computeJacobianMatrix();
          jacobianCalculator.computeConvectiveTerm();
 
-         jointDesiredAccelerationsMatrix.reshape(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         ScrewTools.getDesiredJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);
-
-         spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector, expectedAcceleration);
-         jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);
-
-         SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, 1.0e-10);
+         compareJacobianAccelerationAgainstSpatialAccelerationCalculator(randomBase, randomEndEffector, jacobianCalculator, 1.0e-10);
       }
+   }
+
+   public static void compareJacobianTwistAgainstTwistCalculator(RigidBody base, RigidBody endEffector, GeometricJacobianCalculator jacobianCalculator,
+                                                                 double epsilon)
+         throws AssertionError
+   {
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, base);
+      twistCalculator.compute();
+
+      Twist expectedTwist = new Twist();
+      Twist actualTwist = new Twist();
+
+      DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
+      ScrewTools.getJointVelocitiesMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointVelocitiesMatrix);
+
+      twistCalculator.getRelativeTwist(base, endEffector, expectedTwist);
+      jacobianCalculator.getEndEffectorTwist(jointVelocitiesMatrix, actualTwist);
+
+      TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, epsilon);
+   }
+
+   public static void compareJacobianAccelerationAgainstSpatialAccelerationCalculator(RigidBody base, RigidBody endEffector,
+                                                                                      GeometricJacobianCalculator jacobianCalculator, double epsilon)
+         throws AssertionError
+   {
+      TwistCalculator twistCalculator = new TwistCalculator(worldFrame, base);
+      twistCalculator.compute();
+
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(base, twistCalculator, 0.0, true);
+      spatialAccelerationCalculator.compute();
+
+      SpatialAccelerationVector expectedAcceleration = new SpatialAccelerationVector();
+      SpatialAccelerationVector actualAcceleration = new SpatialAccelerationVector();
+
+      DenseMatrix64F jointDesiredAccelerationsMatrix = new DenseMatrix64F(jacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
+      ScrewTools.getDesiredJointAccelerationsMatrix(jacobianCalculator.getJointsFromBaseToEndEffector(), jointDesiredAccelerationsMatrix);
+
+      spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, expectedAcceleration);
+      jacobianCalculator.getEndEffectorAcceleration(jointDesiredAccelerationsMatrix, actualAcceleration);
+
+      SpatialAccelerationCalculatorTest.assertSpatialAccelerationVectorEquals(expectedAcceleration, actualAcceleration, epsilon);
    }
 }
