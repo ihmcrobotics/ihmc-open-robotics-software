@@ -7,19 +7,30 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<PrivilegedConfigurationCommand>, InverseDynamicsCommand<PrivilegedConfigurationCommand>
 {
+   /** Initial capacity of the internal memory. */
    private final int initialCapacity = 40;
+   /**
+    * Internal memory to save the names of the joints to be controlled. This is used when passing
+    * the command between two modules using different instances of hte same physical robot.
+    */
    private final List<String> jointNames = new ArrayList<>(initialCapacity);
+   /** internal memory to save the joints to be controlled. */
    private final List<OneDoFJoint> joints = new ArrayList<>(initialCapacity);
+   /** internal memory to save the desired configurations in */
    private final TDoubleArrayList privilegedOneDoFJointConfigurations;
+   /** internal memory to save the privileged configuration options in */
    private final TLongObjectHashMap<PrivilegedConfigurationOption> privilegedOneDoFJointConfigurationOptions;
 
+   /** sets whether or not to utilize the privileged configuration calculator */
    private boolean enable = false;
 
+   /** different options for the desired privileged configurations. Made for ease of access. */
    public enum PrivilegedConfigurationOption
    {
       AT_CURRENT, AT_MID_RANGE, AT_ZERO
@@ -38,6 +49,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
    private double defaultMaxVelocity = Double.NaN;
    private double defaultMaxAcceleration = Double.NaN;
 
+   /**
+    * Creates an empty command.
+    */
    public PrivilegedConfigurationCommand()
    {
       privilegedOneDoFJointConfigurations = new TDoubleArrayList(initialCapacity);
@@ -46,6 +60,9 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       clear();
    }
 
+   /**
+    * Clears the data contained in this command.
+    */
    public void clear()
    {
       enable = false;
@@ -71,16 +88,31 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       enable = true;
    }
 
+   /**
+    * Sets the new default weight for all privileged configurations to utilize.
+    *
+    * @param defaultWeight weight to use.
+    */
    public void setDefaultWeight(double defaultWeight)
    {
       this.defaultWeight = defaultWeight;
    }
 
+   /**
+    * Sets the new default configuration gain for all privileged configurations to utilize.
+    *
+    * @param defaultConfigurationGain position gain to use.
+    */
    public void setDefaultConfigurationGain(double defaultConfigurationGain)
    {
       this.defaultConfigurationGain = defaultConfigurationGain;
    }
 
+   /**
+    * Sets the new default velocity gain for all privileged configurations to utilize.
+    *
+    * @param defaultVelocityGain velocity gain to use.
+    */
    public void setDefaultVelocityGain(double defaultVelocityGain)
    {
       this.defaultVelocityGain = defaultVelocityGain;
@@ -127,6 +159,12 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       this.defaultOption = option;
    }
 
+   /**
+    * Adds a joint to set the privileged configuration for.
+    *
+    * @param joint the joint to set the configuration of.
+    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
+    */
    public void addJoint(OneDoFJoint joint, double privilegedConfiguration)
    {
       enable();
@@ -136,6 +174,12 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), null);
    }
 
+   /**
+    * Adds a joint to set the privileged configuration option for.
+    *
+    * @param joint the joint to set the configuration of.
+    * @param privilegedConfiguration the desired privileged configuration option for the joint to achieve.
+    */
    public void addJoint(OneDoFJoint joint, PrivilegedConfigurationOption privilegedConfiguration)
    {
       enable();
@@ -145,6 +189,39 @@ public class PrivilegedConfigurationCommand implements InverseKinematicsCommand<
       privilegedOneDoFJointConfigurationOptions.put(joint.getNameBasedHashCode(), privilegedConfiguration);
    }
 
+   /**
+    * Updates the desired privileged configuration for a joint already registered give its index.
+    *
+    * @param jointIndex index of the joint to set the configuration of.
+    * @param privilegedConfiguration the desired privileged configuration for the joint to achieve.
+    */
+   public void setOneDoFJoint(int jointIndex, double privilegedConfiguration)
+   {
+      MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
+      enable();
+      privilegedOneDoFJointConfigurations.set(jointIndex, privilegedConfiguration);
+      privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).getNameBasedHashCode(), null);
+   }
+
+   /**
+    * Updates the desired privileged configuration option for a joint already registered give its index.
+    *
+    * @param jointIndex index of the joint to set the configuration opiton of.
+    * @param privilegedConfiguration the desired privileged configuration option for the joint to achieve.
+    */
+   public void setOneDoFJoint(int jointIndex, PrivilegedConfigurationOption privilegedConfiguration)
+   {
+      MathTools.checkEquals(joints.get(jointIndex).getDegreesOfFreedom(), 1);
+      enable();
+      privilegedOneDoFJointConfigurations.set(jointIndex, Double.NaN);
+      privilegedOneDoFJointConfigurationOptions.put(joints.get(jointIndex).getNameBasedHashCode(), privilegedConfiguration);
+   }
+
+   /**
+    * Clears this command and then copies the data from {@code other} into this.
+    *
+    * @param other the other command to copy the data from. Not Modified.
+    */
    @Override
    public void set(PrivilegedConfigurationCommand other)
    {

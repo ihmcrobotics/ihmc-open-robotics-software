@@ -216,6 +216,8 @@ public class KneeControlModule
          this.kneeJoint = kneeJoint;
 
          this.yoStraighteningSpeed = straighteningSpeed;
+
+         privilegedConfigurationCommand.addJoint(kneeJoint, Double.NaN);
       }
 
       @Override
@@ -236,8 +238,7 @@ public class KneeControlModule
          else
             desiredPrivilegedPosition += estimatedDT * straighteningSpeed;
 
-         privilegedConfigurationCommand.clear();
-         privilegedConfigurationCommand.addJoint(kneeJoint, desiredPrivilegedPosition);
+         privilegedConfigurationCommand.setOneDoFJoint(0, desiredPrivilegedPosition);
          privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
 
          previousPosition = currentPosition;
@@ -281,13 +282,12 @@ public class KneeControlModule
    private class StraightKneeControlState extends AbstractKneeControlState
    {
       private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
-      private final OneDoFJoint kneeJoint;
 
       public StraightKneeControlState(OneDoFJoint kneeJoint)
       {
          super(KneeControlType.STRAIGHT);
 
-         this.kneeJoint = kneeJoint;
+         privilegedConfigurationCommand.addJoint(kneeJoint, Double.NaN);
          jointspaceFeedbackControlCommand.addJoint(kneeJoint, Double.NaN, Double.NaN, Double.NaN);
       }
 
@@ -300,8 +300,7 @@ public class KneeControlModule
       @Override
       public void doAction()
       {
-         privilegedConfigurationCommand.clear();
-         privilegedConfigurationCommand.addJoint(kneeJoint, desiredAngleWhenStraight.getDoubleValue());
+         privilegedConfigurationCommand.setOneDoFJoint(0, desiredAngleWhenStraight.getDoubleValue());
          privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
 
          jointspaceFeedbackControlCommand.setOneDoFJoint(0, desiredAngleWhenStraight.getDoubleValue(), 0.0, 0.0);
@@ -331,12 +330,10 @@ public class KneeControlModule
 
    private class BentKneeControlState extends AbstractKneeControlState
    {
-      private final OneDoFJoint kneeJoint;
       public BentKneeControlState(OneDoFJoint kneeJoint)
       {
          super(KneeControlType.BENT);
 
-         this.kneeJoint = kneeJoint;
          privilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
@@ -349,8 +346,7 @@ public class KneeControlModule
       @Override
       public void doAction()
       {
-         privilegedConfigurationCommand.clear();
-         privilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
+         privilegedConfigurationCommand.setOneDoFJoint(0, PrivilegedConfigurationOption.AT_MID_RANGE);
          privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
       }
 
@@ -367,13 +363,11 @@ public class KneeControlModule
 
    private class ControllableKneeControlState extends AbstractKneeControlState
    {
-      private final OneDoFJoint kneeJoint;
-
       public ControllableKneeControlState(OneDoFJoint kneeJoint)
       {
          super(KneeControlType.CONTROLLABLE);
 
-         this.kneeJoint = kneeJoint;
+         privilegedConfigurationCommand.addJoint(kneeJoint, PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
       @Override
@@ -385,8 +379,7 @@ public class KneeControlModule
       @Override
       public void doAction()
       {
-         privilegedConfigurationCommand.clear();
-         privilegedConfigurationCommand.addJoint(kneeJoint, desiredAngle.getDoubleValue());
+         privilegedConfigurationCommand.setOneDoFJoint(0, desiredAngle.getDoubleValue());
          privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
       }
 
