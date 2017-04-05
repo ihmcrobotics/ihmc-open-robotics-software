@@ -154,15 +154,17 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       handOrientation.appendYawRotation(Math.PI / 4.0);
       handOrientation.appendPitchRotation(-Math.PI / 2.0);
       handOrientation.appendRollRotation(Math.PI / 4.0);
+      handOrientation.inverse();
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
       handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
       handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
       handTrajectoryMessage.setUseCustomControlFrame(true);
       handTrajectoryMessage.setControlFramePosition(new Vector3D(-0.307, -0.027, -0.022)); // hard coded to be at the simulation contact point.
+      handTrajectoryMessage.setControlFrameOrientation(handOrientation);
 
-      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.275, -0.125, 0.1), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.275, -0.125, -0.1), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.275, -0.125, 0.1), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.275, -0.125, -0.1), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
