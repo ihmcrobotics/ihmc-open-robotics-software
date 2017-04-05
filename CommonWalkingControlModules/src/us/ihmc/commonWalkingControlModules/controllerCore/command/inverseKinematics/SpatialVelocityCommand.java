@@ -16,7 +16,6 @@ import us.ihmc.robotics.screwTheory.Twist;
 
 public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
-   private boolean hasWeight;
    private final Twist spatialVelocity = new Twist();
    private final DenseMatrix64F weightVector = new DenseMatrix64F(Twist.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(Twist.SIZE);
@@ -31,7 +30,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
    public SpatialVelocityCommand()
    {
-      removeWeight();
+      setAsHardConstraint();
    }
 
    public void set(RigidBody base, RigidBody endEffector)
@@ -62,7 +61,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       for (int i = 0; i < Twist.SIZE; i++)
          weightVector.set(i, 0, weight);
-      hasWeight = weight != HARD_CONSTRAINT;
    }
 
    public void setWeight(double angular, double linear)
@@ -71,18 +69,13 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
          weightVector.set(i, 0, angular);
       for (int i = 3; i < Twist.SIZE; i++)
          weightVector.set(i, 0, linear);
-      hasWeight = angular != HARD_CONSTRAINT && linear != HARD_CONSTRAINT;
    }
 
    public void setWeights(DenseMatrix64F weight)
    {
-      hasWeight = true;
-
       for (int i = 0; i < Twist.SIZE; i++)
       {
          weightVector.set(i, 0, weight.get(i, 0));
-         if (weight.get(i, 0) == HARD_CONSTRAINT)
-            hasWeight = false;
       }
    }
 
@@ -91,8 +84,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       weightVector.set(0, 0, angular.getX());
       weightVector.set(1, 0, angular.getY());
       weightVector.set(2, 0, angular.getZ());
-
-      hasWeight = angular.getX() != HARD_CONSTRAINT && angular.getY() != HARD_CONSTRAINT && angular.getZ() != HARD_CONSTRAINT;
    }
 
    public void setWeights(Vector3D angular, Vector3D linear)
@@ -103,9 +94,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       weightVector.set(3, 0, linear.getX());
       weightVector.set(4, 0, linear.getY());
       weightVector.set(5, 0, linear.getZ());
-
-      hasWeight = angular.getX() != HARD_CONSTRAINT && angular.getY() != HARD_CONSTRAINT && angular.getZ() != HARD_CONSTRAINT;
-      hasWeight = linear.getX() != HARD_CONSTRAINT && linear.getY() != HARD_CONSTRAINT && linear.getZ() != HARD_CONSTRAINT && hasWeight;
    }
 
    public void setLinearWeightsToZero()
@@ -141,7 +129,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    @Override
    public void set(SpatialVelocityCommand other)
    {
-      hasWeight = other.hasWeight;
       setWeights(other.getWeightVector());
 
       spatialVelocity.set(other.getSpatialVelocity());
@@ -163,7 +150,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
-      hasWeight = !command.isHardConstraint();
       setWeights(command.getWeightVector());
 
       selectionMatrix.set(command.getSelectionMatrix());
@@ -227,9 +213,14 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       this.selectionMatrix.set(selectionMatrix);
    }
 
-   public boolean getHasWeight()
+   public boolean isHardConstraint()
    {
-      return hasWeight;
+      for (int i = 0; i < Twist.SIZE; i++)
+      {
+         if (weightVector.get(i, 0) == HARD_CONSTRAINT)
+            return true;
+      }
+      return false;
    }
 
    public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
@@ -285,7 +276,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       return optionalPrimaryBaseName;
    }
 
-   public void removeWeight()
+   public void setAsHardConstraint()
    {
       setWeight(HARD_CONSTRAINT);
    }

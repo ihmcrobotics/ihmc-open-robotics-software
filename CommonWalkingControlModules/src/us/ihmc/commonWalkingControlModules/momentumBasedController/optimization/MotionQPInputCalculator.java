@@ -280,8 +280,8 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
-      if (commandToConvert.getHasWeight())
+      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      if (!commandToConvert.isHardConstraint())
       {
          // Compute the weight: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
