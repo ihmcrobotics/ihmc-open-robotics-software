@@ -16,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -71,7 +70,6 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
@@ -79,7 +77,7 @@ public final class PointFeedbackControllerTest
 
       
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
-                                                                            geometricJacobianHolder, null, null, registry);
+                                                                            null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -111,7 +109,6 @@ public final class PointFeedbackControllerTest
       for (int i = 0; i < 100; i++)
       {
          twistCalculator.compute();
-         geometricJacobianHolder.compute();
 
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
@@ -166,14 +163,13 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
-                                                                            geometricJacobianHolder, null, null, registry);
+                                                                            null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -223,7 +219,6 @@ public final class PointFeedbackControllerTest
       for (int i = 0; i < 100; i++)
       {
          twistCalculator.compute();
-         geometricJacobianHolder.compute();
 
          pointFeedbackController.computeInverseDynamics();
          SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
