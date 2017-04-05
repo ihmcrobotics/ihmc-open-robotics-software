@@ -34,7 +34,15 @@ public class KneeControlModule
    private final EnumYoVariable<KneeControlType> requestedState;
    private final GenericStateMachine<KneeControlType, AbstractKneeControlState> stateMachine;
 
-   private final DoubleYoVariable privilegedConfigurationMaxAccel;
+   private final DoubleYoVariable straightPrivWeight;
+   private final DoubleYoVariable straightPrivPositionGain;
+   private final DoubleYoVariable straightPrivVelocityGain;
+
+   private final DoubleYoVariable bentPrivWeight;
+   private final DoubleYoVariable bentPrivPositionGain;
+   private final DoubleYoVariable bentPrivVelocityGain;
+
+   private final DoubleYoVariable privMaxAccel;
 
    private final DoubleYoVariable desiredAngle;
    private final DoubleYoVariable desiredAngleWhenStraight;
@@ -63,8 +71,26 @@ public class KneeControlModule
       jointspaceGains.setKp(40.0);
       jointspaceGains.setKd(6.0);
 
-      privilegedConfigurationMaxAccel = new DoubleYoVariable(namePrefix + "PrivilegedConfigurationMaxAccel", registry);
-      privilegedConfigurationMaxAccel.set(20.0);
+
+      straightPrivWeight = new DoubleYoVariable(namePrefix + "Straight_Priv_Weight", registry);
+      straightPrivPositionGain = new DoubleYoVariable(namePrefix + "Straight_Priv_Kp", registry);
+      straightPrivVelocityGain = new DoubleYoVariable(namePrefix + "Straight_Priv_Kv", registry);
+
+      bentPrivWeight = new DoubleYoVariable(namePrefix + "Bent_Priv_Weight", registry);
+      bentPrivPositionGain = new DoubleYoVariable(namePrefix + "Bent_Priv_Kp", registry);
+      bentPrivVelocityGain = new DoubleYoVariable(namePrefix + "Bent_Priv_Kv", registry);
+
+      privMaxAccel = new DoubleYoVariable(namePrefix + "Priv_MaxAccel", registry);
+
+      straightPrivWeight.set(50.0);
+      straightPrivPositionGain.set(50.0);
+      straightPrivVelocityGain.set(4.0);
+
+      bentPrivWeight.set(10.0); //5.0);
+      bentPrivPositionGain.set(40.0);
+      bentPrivVelocityGain.set(4.0);
+
+      privMaxAccel.set(200.0);
 
       desiredAngle = new DoubleYoVariable(namePrefix + "DesiredAngle", registry);
       desiredAngle.set(straightLegWalkingParameters.getStraightKneeAngle());
@@ -207,7 +233,6 @@ public class KneeControlModule
       private double desiredPrivilegedPosition;
 
       private double previousTime;
-      private double previousPosition;
 
       public StraighteningKneeControlState(KneeControlType stateEnum, OneDoFJoint kneeJoint, DoubleYoVariable straighteningSpeed)
       {
@@ -233,15 +258,17 @@ public class KneeControlModule
          double estimatedDT = estimateDT();
          double currentPosition = kneeJoint.getQ();
 
-         if (currentPosition > previousPosition) // the knee is bending
+         if (currentPosition > startingPosition) // the knee is bending
             dwellTime += estimatedDT;
          else
-            desiredPrivilegedPosition += estimatedDT * straighteningSpeed;
+            desiredPrivilegedPosition -= estimatedDT * straighteningSpeed;
 
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredPrivilegedPosition);
-         privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(straightPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(straightPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(straightPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
 
-         previousPosition = currentPosition;
 
          if (isDone())
             transitionToDefaultNextState();
@@ -257,7 +284,6 @@ public class KneeControlModule
          timeUntilStraight = Math.max(timeUntilStraight, 0.0);
 
          desiredPrivilegedPosition = startingPosition;
-         previousPosition = startingPosition;
 
          previousTime = 0.0;
          dwellTime = 0.0;
@@ -301,7 +327,10 @@ public class KneeControlModule
       public void doAction()
       {
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredAngleWhenStraight.getDoubleValue());
-         privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(straightPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(straightPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(straightPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
 
          jointspaceFeedbackControlCommand.setOneDoFJoint(0, desiredAngleWhenStraight.getDoubleValue(), 0.0, 0.0);
          jointspaceFeedbackControlCommand.setGains(jointspaceGains);
@@ -347,7 +376,10 @@ public class KneeControlModule
       public void doAction()
       {
          privilegedConfigurationCommand.setOneDoFJoint(0, PrivilegedConfigurationOption.AT_MID_RANGE);
-         privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(bentPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(bentPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(bentPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
       }
 
       @Override
@@ -380,7 +412,10 @@ public class KneeControlModule
       public void doAction()
       {
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredAngle.getDoubleValue());
-         privilegedConfigurationCommand.setMaxAcceleration(privilegedConfigurationMaxAccel.getDoubleValue());
+         privilegedConfigurationCommand.setWeight(bentPrivWeight.getDoubleValue());
+         privilegedConfigurationCommand.setConfigurationGain(bentPrivPositionGain.getDoubleValue());
+         privilegedConfigurationCommand.setVelocityGain(bentPrivVelocityGain.getDoubleValue());
+         privilegedConfigurationCommand.setMaxAcceleration(privMaxAccel.getDoubleValue());
       }
 
       @Override
