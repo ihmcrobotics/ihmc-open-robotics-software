@@ -10,8 +10,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePose;
 
 public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyControlState
 {
@@ -37,33 +35,33 @@ public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyCon
       taskspaceControlState.doAction();
    }
 
-   public boolean handleTrajectoryCommand(SE3TrajectoryControllerCommand<?,?> se3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions, FramePose initialPose)
+   public boolean handleTrajectoryCommand(SE3TrajectoryControllerCommand<?,?> se3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions)
    {
-      if (!taskspaceControlState.handlePoseTrajectoryCommand(se3TaskspaceCommand, initialPose))
+      if (!taskspaceControlState.handlePoseTrajectoryCommand(se3TaskspaceCommand))
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
          taskspaceControlState.clear();
          return false;
       }
-      
+
       if (!jointspaceControlState.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
          return false;
       }
       return true;
-      
+
    }
-   
-   public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand<?,?> so3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions, FrameOrientation initialOrientation)
+
+   public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand<?,?> so3TaskspaceCommand, JointspaceTrajectoryCommand<?,?> jointspaceCommand, double[] initialJointPositions)
    {
-      if (!taskspaceControlState.handleOrientationTrajectoryCommand(so3TaskspaceCommand, initialOrientation))
+      if (!taskspaceControlState.handleOrientationTrajectoryCommand(so3TaskspaceCommand))
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid pose trajectory command.");
          taskspaceControlState.clear();
          return false;
       }
-      
+
       if (!jointspaceControlState.handleTrajectoryCommand(jointspaceCommand, initialJointPositions))
       {
          PrintTools.warn(getClass().getSimpleName() + " for " + bodyName + " recieved invalid jointspace trajectory command.");
