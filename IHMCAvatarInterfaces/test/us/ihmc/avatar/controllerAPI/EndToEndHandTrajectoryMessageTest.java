@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -247,13 +249,13 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         
+
          SE3TrajectoryPointMessage lastPoint = handTrajectoryPoints.get(robotSide).peekLast();
          FrameSE3TrajectoryPoint lastFramePoint = new FrameSE3TrajectoryPoint(worldFrame);
          lastFramePoint.set(lastPoint.time, lastPoint.position, lastPoint.orientation, lastPoint.linearVelocity, lastPoint.angularVelocity);
          lastFramePoint.changeFrame(chestFrame);
          lastTrajectoryPoints.put(robotSide, lastFramePoint);
-         
+
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertNumberOfWaypoints(handName, numberOfTrajectoryPoints + 1, scs);
 
@@ -467,7 +469,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
       fullRobotModel.updateFrames();
       assertTrue(success);
-      
+
       double timeOffset = 0.0;
       int totalNumberOfPoints = numberOfMessages * numberOfTrajectoryPoints + 1;
       boolean firstSegment = true;
@@ -496,7 +498,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             lastPointTime = Math.max(framePoint.getTime(), lastPointTime);
             lastPoint.setIncludingFrame(framePoint);
-            System.out.println(trajectoryPointIndex);
          }
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(lastPointTime - timeOffset);
@@ -729,7 +730,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             handTrajectoryMessage.setUniqueId(id);
             handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
             handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
-            
+
             if (messageIndex > 0)
                handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
