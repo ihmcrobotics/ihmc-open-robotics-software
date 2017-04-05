@@ -33,99 +33,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       setAsHardConstraint();
    }
 
-   public void set(RigidBody base, RigidBody endEffector)
-   {
-      setBase(base);
-      setEndEffector(endEffector);
-   }
-
-   public void setBase(RigidBody base)
-   {
-      this.base = base;
-      baseName = base.getName();
-   }
-
-   public void setEndEffector(RigidBody endEffector)
-   {
-      this.endEffector = endEffector;
-      endEffectorName = endEffector.getName();
-   }
-
-   public void setPrimaryBase(RigidBody primaryBase)
-   {
-      optionalPrimaryBase = primaryBase;
-      optionalPrimaryBaseName = primaryBase.getName();
-   }
-
-   public void setWeight(double weight)
-   {
-      for (int i = 0; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, weight);
-   }
-
-   public void setWeight(double angular, double linear)
-   {
-      for (int i = 0; i < 3; i++)
-         weightVector.set(i, 0, angular);
-      for (int i = 3; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, linear);
-   }
-
-   public void setWeights(DenseMatrix64F weight)
-   {
-      for (int i = 0; i < Twist.SIZE; i++)
-      {
-         weightVector.set(i, 0, weight.get(i, 0));
-      }
-   }
-
-   public void setAngularWeights(Vector3D angular)
-   {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
-   }
-
-   public void setWeights(Vector3D angular, Vector3D linear)
-   {
-      weightVector.set(0, 0, angular.getX());
-      weightVector.set(1, 0, angular.getY());
-      weightVector.set(2, 0, angular.getZ());
-      weightVector.set(3, 0, linear.getX());
-      weightVector.set(4, 0, linear.getY());
-      weightVector.set(5, 0, linear.getZ());
-   }
-
-   public void setLinearWeightsToZero()
-   {
-      for (int i = 3; i < Twist.SIZE; i++)
-         weightVector.set(i, 0, 0.0);
-   }
-
-   public void setSpatialVelocity(Twist spatialVelocity)
-   {
-      this.spatialVelocity.set(spatialVelocity);
-   }
-
-   public void setSpatialVelocity(Twist spatialVelocity, DenseMatrix64F selectionMatrix)
-   {
-      this.spatialVelocity.set(spatialVelocity);
-      this.selectionMatrix.set(selectionMatrix);
-   }
-
-   public void setAngularVelocity(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularVelocity)
-   {
-      spatialVelocity.setToZero(bodyFrame, baseFrame, desiredAngularVelocity.getReferenceFrame());
-      spatialVelocity.setAngularPart(desiredAngularVelocity.getVector());
-   }
-
-   public void setLinearVelocity(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredLinearVelocity)
-   {
-      spatialVelocity.setToZero(bodyFrame, baseFrame, desiredLinearVelocity.getReferenceFrame());
-      spatialVelocity.setLinearPart(desiredLinearVelocity.getVector());
-      spatialVelocity.changeFrame(bodyFrame);
-   }
-
    @Override
    public void set(SpatialVelocityCommand other)
    {
@@ -160,6 +67,39 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
       optionalPrimaryBase = command.getPrimaryBase();
       optionalPrimaryBaseName = command.getPrimaryBaseName();
+   }
+
+   public void set(RigidBody base, RigidBody endEffector)
+   {
+      this.base = base;
+      this.endEffector = endEffector;
+
+      baseName = base.getName();
+      endEffectorName = endEffector.getName();
+   }
+
+   public void setPrimaryBase(RigidBody primaryBase)
+   {
+      optionalPrimaryBase = primaryBase;
+      optionalPrimaryBaseName = primaryBase.getName();
+   }
+
+   public void setSpatialVelocity(Twist spatialVelocity)
+   {
+      this.spatialVelocity.set(spatialVelocity);
+   }
+
+   public void setAngularVelocity(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredAngularVelocity)
+   {
+      spatialVelocity.setToZero(bodyFrame, baseFrame, desiredAngularVelocity.getReferenceFrame());
+      spatialVelocity.setAngularPart(desiredAngularVelocity.getVector());
+   }
+
+   public void setLinearVelocity(ReferenceFrame bodyFrame, ReferenceFrame baseFrame, FrameVector desiredLinearVelocity)
+   {
+      spatialVelocity.setToZero(bodyFrame, baseFrame, desiredLinearVelocity.getReferenceFrame());
+      spatialVelocity.setLinearPart(desiredLinearVelocity.getVector());
+      spatialVelocity.changeFrame(bodyFrame);
    }
 
    public void setSelectionMatrixToIdentity()
@@ -211,6 +151,56 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
          throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
 
       this.selectionMatrix.set(selectionMatrix);
+   }
+
+   public void setAsHardConstraint()
+   {
+      setWeight(HARD_CONSTRAINT);
+   }
+
+   public void setWeight(double weight)
+   {
+      for (int i = 0; i < Twist.SIZE; i++)
+         weightVector.set(i, 0, weight);
+   }
+
+   public void setWeight(double angular, double linear)
+   {
+      for (int i = 0; i < 3; i++)
+         weightVector.set(i, 0, angular);
+      for (int i = 3; i < Twist.SIZE; i++)
+         weightVector.set(i, 0, linear);
+   }
+
+   public void setWeights(DenseMatrix64F weight)
+   {
+      for (int i = 0; i < Twist.SIZE; i++)
+      {
+         weightVector.set(i, 0, weight.get(i, 0));
+      }
+   }
+
+   public void setAngularWeights(Vector3D angular)
+   {
+      weightVector.set(0, 0, angular.getX());
+      weightVector.set(1, 0, angular.getY());
+      weightVector.set(2, 0, angular.getZ());
+   }
+
+   public void setWeights(Vector3D angular, Vector3D linear)
+   {
+      weightVector.set(0, 0, angular.getX());
+      weightVector.set(1, 0, angular.getY());
+      weightVector.set(2, 0, angular.getZ());
+      weightVector.set(3, 0, linear.getX());
+      weightVector.set(4, 0, linear.getY());
+      weightVector.set(5, 0, linear.getZ());
+   }
+
+   public void setLinearWeightsToZero()
+   {
+      for (int i = 3; i < Twist.SIZE; i++)
+         weightVector.set(i, 0, 0.0);
    }
 
    public boolean isHardConstraint()
@@ -274,11 +264,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public String getPrimaryBaseName()
    {
       return optionalPrimaryBaseName;
-   }
-
-   public void setAsHardConstraint()
-   {
-      setWeight(HARD_CONSTRAINT);
    }
 
    @Override

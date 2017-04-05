@@ -302,7 +302,8 @@ public class KinematicsToolboxController extends ToolboxController
             newSolutionQuality += handWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, hand);
-            spatialVelocityCommand.setSpatialVelocity(desiredHandTwist, selectionMatrix);
+            spatialVelocityCommand.setSpatialVelocity(desiredHandTwist);
+            spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
             spatialVelocityCommand.setWeight(handWeight.getDoubleValue());
             ret.addCommand(spatialVelocityCommand);
 
@@ -323,7 +324,8 @@ public class KinematicsToolboxController extends ToolboxController
             newSolutionQuality += footWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, foot);
-            spatialVelocityCommand.setSpatialVelocity(desiredFootTwist, selectionMatrix);
+            spatialVelocityCommand.setSpatialVelocity(desiredFootTwist);
+            spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
             spatialVelocityCommand.setWeight(footWeight.getDoubleValue());
             ret.addCommand(spatialVelocityCommand);
 
@@ -356,7 +358,8 @@ public class KinematicsToolboxController extends ToolboxController
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, chest);
          spatialVelocityCommand.setAngularVelocity(chestFrame, elevatorFrame, desiredChestAngularVelocity);
-         spatialVelocityCommand.setSpatialVelocity(desiredChestTwist, chestSelectionMatrix);
+         spatialVelocityCommand.setSpatialVelocity(desiredChestTwist);
+         spatialVelocityCommand.setSelectionMatrix(chestSelectionMatrix);
          spatialVelocityCommand.setWeight(chestWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
@@ -373,7 +376,8 @@ public class KinematicsToolboxController extends ToolboxController
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, pelvis);
          spatialVelocityCommand.setAngularVelocity(pelvisFrame, elevatorFrame, desiredPelvisAngularVelocity);
-         spatialVelocityCommand.setSpatialVelocity(desiredPelvisTwist, pelvisSelectionMatrix);
+         spatialVelocityCommand.setSpatialVelocity(desiredPelvisTwist);
+         spatialVelocityCommand.setSelectionMatrix(pelvisSelectionMatrix);
          spatialVelocityCommand.setWeight(pelvisOrientationWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
@@ -388,7 +392,8 @@ public class KinematicsToolboxController extends ToolboxController
          newSolutionQuality += pelvisHeightWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, pelvis);
-         spatialVelocityCommand.setSpatialVelocity(desiredPelvisTwist, heightSelectionMatrix);
+         spatialVelocityCommand.setSpatialVelocity(desiredPelvisTwist);
+         spatialVelocityCommand.setSelectionMatrix(heightSelectionMatrix);
          spatialVelocityCommand.setWeight(pelvisHeightWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
