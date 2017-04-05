@@ -34,7 +34,7 @@ import us.ihmc.robotics.screwTheory.Twist;
  * next control tick.
  * </p>
  * <p>
- * It is usually either result of the {@link SpatialFeedbackController} or used when the
+ * It is usually either the result of the {@link SpatialFeedbackController} or used when the
  * end-effector is in contact with the environment in which case the end-effector is usually
  * required to not accelerate so it can decently exert the wrench needed.
  * </p>
@@ -215,8 +215,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *           end-effector.
     * @param desiredSpatialAcceleration the desired end-effector acceleration with respect to the
     *           base and expressed in the control frame.
-    * @throws ReferenceFrameMismatchException if the {@code spatialAcceleration} is not setup as
-    *            follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
+    * @throws ReferenceFrameMismatchException if the {@code desiredSpatialAcceleration} is not setup
+    *            as follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
     *            {@code baseFrame = base.getBodyFixedFrame()},
     *            {@code expressedInFrame = controlFrame}.
     */
@@ -613,7 +613,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * The packed matrix is a 6-by-6 matrix independently from the selection matrix.
     * </p>
     * 
-    * @param weightMatrixToPack the weight matrix to use in the optimization.
+    * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
+    *           reshaped to ensure proper size. Modified.
     */
    public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
    {
@@ -654,7 +655,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * expressed in the control frame.
     * </p>
     * 
-    * @param controlFrameToPack the frame of interest for controlling the end-effector.
+    * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
     * @param desiredSpatialAccelerationToPack the desired spatial acceleration of the end-effector
     *           with respect to the base, expressed in the control frame. Modified.
     */
