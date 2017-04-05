@@ -17,7 +17,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -57,7 +56,6 @@ public class RobotArmController implements RobotController
    private final DoubleYoVariable yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final TwistCalculator twistCalculator;
-   private final GeometricJacobianHolder geometricJacobianHolder;
 
    public enum FeedbackControlType
    {
@@ -107,13 +105,12 @@ public class RobotArmController implements RobotController
       InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       twistCalculator = new TwistCalculator(worldFrame, elevator);
-      geometricJacobianHolder = new GeometricJacobianHolder();
 
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
-                                                                                       twistCalculator, geometricJacobianHolder, optimizationSettings,
-                                                                                       yoGraphicsListRegistry, registry);
+                                                                                       twistCalculator, optimizationSettings, yoGraphicsListRegistry,
+                                                                                       registry);
 
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
 
@@ -190,7 +187,6 @@ public class RobotArmController implements RobotController
       robotArm.updateIDRobot();
       centerOfMassFrame.update();
       twistCalculator.compute();
-      geometricJacobianHolder.compute();
 
       updateTrajectory();
       updateFeedbackCommands();
