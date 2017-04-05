@@ -97,9 +97,12 @@ public class WholeBodyInverseKinematicsSolver
       DenseMatrix64F jointConfigurations = integrator.getJointConfigurations();
       jointVelocities = integrator.getJointVelocities();
 
-      int[] rootJointIndices = jointIndexHandler.getJointIndices(rootJoint);
-      rootJointDesiredConfiguration.setDesiredConfiguration(jointConfigurations, rootJointIndices[0]);
-      rootJointDesiredConfiguration.setDesiredVelocity(jointVelocities, rootJointIndices[0]);
+      if (rootJoint != null)
+      {
+         int[] rootJointIndices = jointIndexHandler.getJointIndices(rootJoint);
+         rootJointDesiredConfiguration.setDesiredConfiguration(jointConfigurations, rootJointIndices[0]);
+         rootJointDesiredConfiguration.setDesiredVelocity(jointVelocities, rootJointIndices[0]);
+      }
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
@@ -109,7 +112,7 @@ public class WholeBodyInverseKinematicsSolver
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointVelocity(joint, desiredVelocity);
          jointVelocitiesSolution.get(joint).set(desiredVelocity);
 
-         if (jointIndex > rootJointIndices[rootJointIndices.length - 1])
+         if (rootJoint != null)
             jointIndex++; // Because of quaternion :/
          double desiredPosition = jointConfigurations.get(jointIndex, 0);
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, desiredPosition);
