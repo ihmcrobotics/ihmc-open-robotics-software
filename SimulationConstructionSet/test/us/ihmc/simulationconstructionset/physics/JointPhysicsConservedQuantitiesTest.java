@@ -92,7 +92,7 @@ public class JointPhysicsConservedQuantitiesTest
          robots[i] = robot;
       }
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(robots);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robots, simulationTestingParameters);
       scs.startOnAThread();
       BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 30.0);
 
