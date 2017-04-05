@@ -13,41 +13,29 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.CenterOfMassReferenceFrame;
+import us.ihmc.robotics.referenceFrames.MidFrameZUpAverageYawFrame;
 import us.ihmc.robotics.referenceFrames.MidFrameZUpFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.containers.ContainerTools;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 {
    private final FullHumanoidRobotModel fullRobotModel;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   
+
    private final TLongObjectHashMap<ReferenceFrame> nameBasedHashCodeToReferenceFrameMap = new TLongObjectHashMap<ReferenceFrame>();
 
    private final ReferenceFrame chestFrame;
    private final ReferenceFrame pelvisFrame;
    private final ZUpFrame pelvisZUpFrame;
-   
+
    private final EnumMap<SpineJointName, ReferenceFrame> spineReferenceFrames = ContainerTools.createEnumMap(SpineJointName.class);
    private final EnumMap<NeckJointName, ReferenceFrame> neckReferenceFrames = ContainerTools.createEnumMap(NeckJointName.class);
    private final SideDependentList<EnumMap<ArmJointName, ReferenceFrame>> armJointFrames = SideDependentList.createListOfEnumMaps(ArmJointName.class);
@@ -58,6 +46,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<ReferenceFrame>();
    private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<ReferenceFrame>();
    private final MidFrameZUpFrame midFeetZUpFrame;
+   private final MidFrameZUpAverageYawFrame midFeetZUpAverageYawFrame;
    private final ReferenceFrame midFeetZUpWalkDirectionFrame;
    private final ReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
 
@@ -126,7 +115,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
      {
          ZUpFrame ankleZUpFrame = new ZUpFrame(worldFrame, getFootFrame(robotSide), robotSide.getCamelCaseNameForStartOfExpression() + "AnkleZUp");
          ankleZUpFrames.put(robotSide, ankleZUpFrame);
-         
+
          ReferenceFrame handFrame = getHandFrame(robotSide);
          if (handFrame != null)
          {
@@ -135,12 +124,13 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          }
          ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
          soleFrames.put(robotSide, soleFrame);
-         
+
          ZUpFrame soleZUpFrame = new ZUpFrame(worldFrame, soleFrame, soleFrame.getName() + "ZUp");
          soleZUpFrames.put(robotSide, soleZUpFrame);
       }
 
       midFeetZUpFrame = new MidFrameZUpFrame("midFeetZUp", pelvisZUpFrame, getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
+      midFeetZUpAverageYawFrame = new MidFrameZUpAverageYawFrame("midFeetZUpAverageYaw", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
 
       //this is a frame that is directly between the 2 feet but faces forward instead of perpendicular to the line between the feet
       midFeetZUpWalkDirectionFrame = new ReferenceFrame("midFeetZUpWalkDirectionFrame", ReferenceFrame.getWorldFrame())
@@ -174,7 +164,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
             midFootZUpPose.getPose(transformToParent);
          }
       };
-      
+
       // this is a
       midFeetUnderPelvisWalkDirectionFrame = new ReferenceFrame("midFeetUnderPelvisWalkDirectionFrame", ReferenceFrame.getWorldFrame())
       {
@@ -197,7 +187,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
       RigidBody elevator = fullRobotModel.getElevator();
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
-      
+
       // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
       nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME.getHashId(), getMidFeetZUpFrame());
       nameBasedHashCodeToReferenceFrameMap.put(CommonReferenceFrameIds.PELVIS_ZUP_FRAME.getHashId(), getPelvisZUpFrame());
@@ -279,7 +269,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    {
       return armJointFrames.get(robotSide).get(armJointName);
    }
-   
+
    public ReferenceFrame getHandZUpFrame(RobotSide robotSide)
    {
       return handZUpFrames.get(robotSide);
@@ -333,6 +323,13 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    {
       return midFeetZUpFrame;
    }
+
+   @Override
+   public ReferenceFrame getMidFeetZUpAverageYawFrame()
+   {
+      return midFeetZUpAverageYawFrame;
+   }
+
    /**
     * Return the ReferenceFrame located between the feet (to remove robot swaying left to right)
     * but under the pelvis (to remove forward and backwards swaying)
@@ -348,7 +345,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
     * The control frame is robot specific and is meant to be located at a key position for grasping.
     * <p>
     * TODO rename the method to getHandControlFrame(RobotSide).
-    * @param robotSide from which hand the control frame has to be returned. 
+    * @param robotSide from which hand the control frame has to be returned.
     * @return the hand control frame.
     */
    public ReferenceFrame getHandFrame(RobotSide robotSide)
@@ -364,13 +361,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       pelvisZUpFrame.update();
 
       midFeetZUpFrame.update();
+      midFeetZUpAverageYawFrame.update();
       midFeetZUpWalkDirectionFrame.update();
       midFeetUnderPelvisWalkDirectionFrame.update();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          ankleZUpFrames.get(robotSide).update();
-         
+
          ReferenceFrame handZUpFrame = handZUpFrames.get(robotSide);
          if(handZUpFrame != null)
          {

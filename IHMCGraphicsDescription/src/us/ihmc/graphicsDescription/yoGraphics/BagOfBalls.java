@@ -14,7 +14,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- *
  * <p>
  * Title: BagOfBalls
  * </p>
@@ -22,17 +21,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * <p>
  * Description: Class for displaying multiple points in the SCS GUI.
  * </p>
- *
- * <p>
- * Copyright: Copyright (c) 2006-2009
- * </p>
- *
- * <p>
- * Company: IHMC
- * </p>
- *
- * @author IHMC LearningLocomotion Team
- * @version 1.0
  */
 public class BagOfBalls
 {

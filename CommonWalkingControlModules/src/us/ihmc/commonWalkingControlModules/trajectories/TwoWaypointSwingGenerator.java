@@ -45,6 +45,9 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final ArrayList<FramePoint> waypointPositions = new ArrayList<>();
    private final FramePoint stanceFootPosition = new FramePoint();
 
+   private final FrameVector initialVelocityNoTimeDimension = new FrameVector();
+   private final FrameVector finalVelocityNoTimeDiemension = new FrameVector();
+
    private final BagOfBalls waypointViz;
 
    public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -189,7 +192,13 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
          waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
       }
 
-      trajectory.setEndpointConditions(initialPosition, initialVelocity, finalPosition, finalVelocity);
+      initialVelocityNoTimeDimension.setIncludingFrame(initialVelocity);
+      finalVelocityNoTimeDiemension.setIncludingFrame(finalVelocity);
+
+      initialVelocityNoTimeDimension.scale(stepTime.getDoubleValue());
+      finalVelocityNoTimeDiemension.scale(stepTime.getDoubleValue());
+
+      trajectory.setEndpointConditions(initialPosition, initialVelocityNoTimeDimension, finalPosition, finalVelocityNoTimeDiemension);
       trajectory.setWaypoints(waypointPositions);
       trajectory.initialize();
 
@@ -273,6 +282,6 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    public double computeAndGetMaxSpeed()
    {
       trajectory.computeMaxSpeed();
-      return trajectory.getMaxSpeed();
+      return trajectory.getMaxSpeed() / stepTime.getDoubleValue();
    }
 }

@@ -4,7 +4,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import us.ihmc.simulationconstructionset.gui.tools.MultiButtonSelectionDeselectionAction;
-import us.ihmc.simulationconstructionset.util.graphics.YoGraphicCheckBoxMenuItem;
 
 public class YoGraphicMenuManager
 {

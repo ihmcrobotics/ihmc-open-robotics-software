@@ -1,6 +1,7 @@
 package us.ihmc.avatar.testTools;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,16 +46,16 @@ import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculatorListener;
-import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.simulationConstructionSetTools.simulationTesting.NothingChangedVerifier;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationTesting.NothingChangedVerifier;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class DRCSimulationTestHelper
@@ -122,6 +123,18 @@ public class DRCSimulationTestHelper
                                   boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep, boolean automaticallySpawnSimulation,
                                   HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
+      this(commonAvatarEnvironmentInterface, name, selectedLocation, simulationTestingParameters, robotModel, drcNetworkModuleParameters,
+           highLevelBehaviorFactoryToAdd, initialSetup, addFootstepMessageGenerator, useHeadingAndVelocityScript, cheatWithGroundHeightAtForFootstep,
+           automaticallySpawnSimulation, walkingScriptParameters, true);
+   }
+   
+   public DRCSimulationTestHelper(CommonAvatarEnvironmentInterface commonAvatarEnvironmentInterface, String name, DRCStartingLocation selectedLocation,
+                                  SimulationTestingParameters simulationTestingParameters, DRCRobotModel robotModel,
+                                  DRCNetworkModuleParameters drcNetworkModuleParameters, HighLevelBehaviorFactory highLevelBehaviorFactoryToAdd,
+                                  DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup, boolean addFootstepMessageGenerator,
+                                  boolean useHeadingAndVelocityScript, boolean cheatWithGroundHeightAtForFootstep, boolean automaticallySpawnSimulation,
+                                  HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters, boolean useBlockingSimulationRunner)
+   {
       this.controllerCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.CONTROLLER_PORT,
                                                                                             new IHMCCommunicationKryoNetClassList());
       this.testEnvironment = commonAvatarEnvironmentInterface;
@@ -177,8 +190,11 @@ public class DRCSimulationTestHelper
       scs = simulationStarter.getSimulationConstructionSet();
       sdfRobot = simulationStarter.getSDFRobot();
       avatarSimulation = simulationStarter.getAvatarSimulation();
-      blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
-      simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
+      if (useBlockingSimulationRunner)
+      {
+         blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+         simulationStarter.attachControllerFailureListener(blockingSimulationRunner.createControllerFailureListener());
+      }
 
       if (simulationTestingParameters.getCheckNothingChangedInSimulation())
       {
@@ -290,12 +306,18 @@ public class DRCSimulationTestHelper
 
    public void simulateAndBlock(double simulationTime) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
-      blockingSimulationRunner.simulateAndBlock(simulationTime);
+      if (blockingSimulationRunner != null)
+      {
+         blockingSimulationRunner.simulateAndBlock(simulationTime);
+      }
    }
 
    public void destroySimulation()
    {
-      blockingSimulationRunner.destroySimulation();
+      if (blockingSimulationRunner != null)
+      {
+         blockingSimulationRunner.destroySimulation();
+      }
       blockingSimulationRunner = null;
       if (avatarSimulation != null)
       {

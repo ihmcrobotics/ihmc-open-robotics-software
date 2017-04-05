@@ -11,7 +11,7 @@ import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
 /**
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
  *
  * <p>YoVariables provide a simple, convienent mechanism for storing and manipulating robot data.  While each
@@ -19,8 +19,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
  * a variable will automatically become available to the GUI for graphing, modification and other data manipulation.
  * Historical values of all registered YoVariables are stored in the DataBuffer which may be exported for later use.</p>
  *
- * Copyright:    Copyright (c) 2000-2011<p>
- * Company:      Yobotics, Inc. and IHMC <p>
  */
 public abstract class YoVariable<T extends YoVariable<T>>
 {

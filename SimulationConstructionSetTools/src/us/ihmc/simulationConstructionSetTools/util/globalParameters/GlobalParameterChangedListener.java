@@ -1,17 +1,5 @@
 package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2006</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public interface GlobalParameterChangedListener
 {
    public abstract void booleanValueChanged(GlobalParameter globalParameter, String comment, boolean previousValue, boolean newValue);

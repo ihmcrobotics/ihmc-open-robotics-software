@@ -71,4 +71,19 @@ public class MotionQPInput
    {
       return isMotionConstraint;
    }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName();
+      ret += "Jacobian:\n" + taskJacobian;
+      ret += "Objective:\n" + taskObjective;
+      if (isMotionConstraint)
+         ret += "Motion constraint.";
+      else if (useWeightScalar)
+         ret += "Weight: " + taskWeightScalar;
+      else
+         ret += "Weight:\n" + taskWeightMatrix;
+      return ret;
+   }
 }
