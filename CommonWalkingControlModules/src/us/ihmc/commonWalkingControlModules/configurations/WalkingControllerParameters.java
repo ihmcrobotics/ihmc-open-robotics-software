@@ -126,6 +126,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return -1.0;
    }
+
    /**
     * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
     * @return maximum pitch angle
