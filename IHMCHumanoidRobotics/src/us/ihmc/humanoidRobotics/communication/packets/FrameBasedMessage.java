@@ -39,7 +39,14 @@ public interface FrameBasedMessage
 
    default public void getTransformFromBodyToControlFrame(RigidBodyTransform transformToPack)
    {
-      transformToPack.set(getControlFrameOrientation(), getControlFramePosition());
+      if (getControlFrameOrientation() == null || getControlFramePosition() == null)
+      {
+         transformToPack.setToNaN();
+      }
+      else
+      {
+         transformToPack.set(getControlFrameOrientation(), getControlFramePosition());
+      }
    }
 
    default public boolean useCustomControlFrame()
