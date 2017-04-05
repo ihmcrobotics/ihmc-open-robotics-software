@@ -12,6 +12,8 @@ import us.ihmc.robotics.controllers.OrientationPIDGains;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
+import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -83,13 +85,14 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    }
 
    /**
-    * Sets the end-effector to be controlled.
+    * Specifies the rigid-body to be controlled, i.e. {@code endEffector}.
     * <p>
-    * The path from {@code base} to {@code endEffector} indicates the joints that can be used to
-    * control the end-effector.
+    * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
+    * that can be to control the end-effector.
     * </p>
     * 
-    * @param base the rigid-body from which joints are used to control the end-effector.
+    * @param base the rigid-body located right before the first joint to be used for controlling the
+    *           end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
    public void set(RigidBody base, RigidBody endEffector)
@@ -97,16 +100,74 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.set(base, endEffector);
    }
 
+   /**
+    * Intermediate base located between the {@code base} and {@code endEffector}.
+    * <p>
+    * This parameter is optional. If provided, it is used to improve singularity avoidance by
+    * applying a privileged joint configuration to the kinematic chain going from
+    * {@code primaryBase} to {@code endEffector}.
+    * </p>
+    * <p>
+    * Here is an example of application: {@code endEffector == leftHand},
+    * {@code base == rootJoint.getPredecessor()} such that to control the {@code leftHand}, the
+    * controller core uses the arm joints, the spine joints, and also the non-actuated floating
+    * joint. If {@code primaryBase == chest}, as soon as the left arm comes close to a singular
+    * configuration such as a straight elbow, the privileged configuration framework will help
+    * bending the elbow. This reduces the time needed to escape the singular configuration. It also
+    * prevents unfortunate situation where the elbow would try to bend past the joint limit.
+    * </p>
+    * 
+    * @param primaryBase
+    */
    public void setPrimaryBase(RigidBody primaryBase)
    {
       spatialAccelerationCommand.setPrimaryBase(primaryBase);
    }
 
+   /**
+    * Sets the gains to use during the next control tick.
+    * 
+    * @param gains the new set of gains to use. Not modified.
+    */
    public void setGains(OrientationPIDGainsInterface gains)
    {
       this.gains.set(gains);
    }
 
+   /**
+    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * <p>
+    * The desired angular velocity and feed-forward angular acceleration are set to zero.
+    * </p>
+    * 
+    * @param desiredOrientation describes the orientation that the
+    *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@link ReferenceFrame#getWorldFrame()}.
+    */
+   public void set(FrameOrientation desiredOrientation)
+   {
+      desiredOrientation.checkReferenceFrameMatch(worldFrame);
+
+      desiredOrientation.getQuaternion(desiredOrientationInWorld);
+      desiredAngularVelocityInWorld.setToZero();
+      feedForwardAngularAccelerationInWorld.setToZero();
+   }
+
+   /**
+    * Sets the desired data expressed in world frame to be used during the next control tick.
+    * 
+    * @param desiredOrientation describes the orientation that the
+    *           {@code endEffector.getBodyFixedFrame()} should reach. Not modified.
+    * @param desiredAngularVelocity describes the desired linear velocity of
+    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not
+    *           modified.
+    * @param feedForwardAngularAcceleration describes the desired linear acceleration of
+    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if any of the three arguments is not expressed in
+    *            {@link ReferenceFrame#getWorldFrame()}.
+    */
    public void set(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
       desiredOrientation.checkReferenceFrameMatch(worldFrame);
@@ -118,6 +179,17 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
    }
 
+   /**
+    * Change the reference frame of the given data such that it is expressed in
+    * {@link ReferenceFrame#getWorldFrame()}. The data will be used for the next control tick.
+    * 
+    * @param desiredOrientation describes the orientation that the
+    *           {@code endEffector.getBodyFixedFrame()} should reach. Modified.
+    * @param desiredAngularVelocity describes the desired linear velocity of
+    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
+    * @param feedForwardAngularAcceleration describes the desired linear acceleration of
+    *           {@code endEffector.getBodyFixedFrame()} with respect to the {@code base}. Modified.
+    */
    public void changeFrameAndSet(FrameOrientation desiredOrientation, FrameVector desiredAngularVelocity, FrameVector feedForwardAngularAcceleration)
    {
       desiredOrientation.changeFrame(worldFrame);
@@ -129,11 +201,48 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       feedForwardAngularAcceleration.get(feedForwardAngularAccelerationInWorld);
    }
 
+   /**
+    * Sets the selection matrix to be used for the next control tick to the following 3-by-6 matrix:
+    * 
+    * <pre>
+    *     / 1 0 0 0 0 0 \
+    * S = | 0 1 0 0 0 0 |
+    *     \ 0 0 1 0 0 0 /
+    * </pre>
+    * <p>
+    * This specifies that the 3 rotational degrees of freedom of the end-effector are to be
+    * controlled.
+    * </p>
+    */
    public void setSelectionMatrixToIdentity()
    {
       spatialAccelerationCommand.setSelectionMatrixToIdentity();
    }
 
+   /**
+    * Sets the selection matrix to be used for the next control tick.
+    * <p>
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
+    * that are to be controlled. Using the follwing 3-by-6 matrix will request the control of all
+    * the 3 rotational degrees of freedom:
+    * 
+    * <pre>
+    *     / 1 0 0 0 0 0 \
+    * S = | 0 1 0 0 0 0 |
+    *     \ 0 0 1 0 0 0 /
+    * </pre>
+    * </p>
+    * <p>
+    * Removing a row to the selection matrix using for instance
+    * {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a specific
+    * DoF of the end-effector.
+    * </p>
+    * <p>
+    * 
+    * @param selectionMatrix the new selection matrix to be used. Not modified.
+    * @throws RuntimeException if the selection matrix has a number of rows greater than 3 or has a
+    *            number of columns different to 6.
+    */
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
       if (selectionMatrix.getNumRows() > 3)
@@ -142,11 +251,32 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
       spatialAccelerationCommand.setSelectionMatrix(selectionMatrix);
    }
 
+   /**
+    * Sets the weight to use in the optimization problem.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param weight the weight value to use for this command.
+    */
    public void setWeightForSolver(double weight)
    {
       spatialAccelerationCommand.setWeight(weight);
    }
 
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param angular the weights to use for the angular part of this command. Not modified.
+    * @param linear the weight to use for the linear part of this command. Not modified.
+    */
    public void setWeightsForSolver(Vector3D weight)
    {
       spatialAccelerationCommand.setAngularWeights(weight);
@@ -185,5 +315,15 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
    public OrientationPIDGainsInterface getGains()
    {
       return gains;
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName() + ": ";
+      ret += "base = " + spatialAccelerationCommand.getBaseName() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffectorName() + ", ";
+      ret += "orientation = " + desiredOrientationInWorld.toStringAsYawPitchRoll();
+      return ret;
    }
 }
