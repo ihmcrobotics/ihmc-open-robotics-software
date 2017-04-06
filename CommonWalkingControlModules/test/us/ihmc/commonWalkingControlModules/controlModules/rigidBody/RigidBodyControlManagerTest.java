@@ -16,14 +16,19 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPoi
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPIDGains;
@@ -31,6 +36,9 @@ import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -106,6 +114,81 @@ public class RigidBodyControlManagerTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
+   public void testTaskspaceMessage()
+   {
+      RigidBodyControlManager manager = createManager();
+      setGainsAndWeights(manager);
+      manager.compute();
+
+      double trajectoryTime = 1.0;
+      Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
+      Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
+      Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+      Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+
+      SE3Message message = new SE3Message(1, worldFrame);
+      message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
+
+      SE3Command command = new SE3Command();
+      command.set(worldFrame, worldFrame, message);
+      manager.handleTaskspaceTrajectoryCommand(command);
+      manager.compute();
+
+      assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
+
+      FramePoint desiredPosition = new FramePoint();
+      FrameVector desiredLinearVelocity = new FrameVector();
+      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      FrameOrientation desiredOrientation = new FrameOrientation();
+      FrameVector desiredAngularVelocity = new FrameVector();
+      FrameVector feedForwardAngularAcceleration = new FrameVector();
+
+      ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
+      FramePoint initialPosition = new FramePoint(bodyFrame);
+      FrameOrientation initialOrientation = new FrameOrientation(bodyFrame);
+      initialPosition.changeFrame(worldFrame);
+      initialOrientation.changeFrame(worldFrame);
+
+      // get commands and make sure they are initialized correctly
+      {
+         FeedbackControlCommand<?> feedbackControlCommand = manager.getFeedbackControlCommand();
+         assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
+         SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
+
+         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+
+         initialPosition.checkReferenceFrameMatch(desiredPosition);
+         EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), desiredPosition.getPoint(), Double.MIN_VALUE);
+         initialOrientation.checkReferenceFrameMatch(desiredOrientation);
+         EuclidCoreTestTools.assertQuaternionEqualsSmart(initialOrientation.getQuaternion(), desiredOrientation.getQuaternion(), Double.MIN_VALUE);
+      }
+
+      // go forward to the end of the trajectory
+      yoTime.set(trajectoryTime);
+      manager.compute();
+      {
+         FeedbackControlCommand<?> feedbackControlCommand = manager.getFeedbackControlCommand();
+         assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
+         SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
+
+         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+
+         initialPosition.checkReferenceFrameMatch(desiredPosition);
+         EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition.getPoint(), Double.MIN_VALUE);
+         initialOrientation.checkReferenceFrameMatch(desiredOrientation);
+         EuclidCoreTestTools.assertQuaternionEqualsSmart(orientation, desiredOrientation.getQuaternion(), Double.MIN_VALUE);
+
+         EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity.getVector(), Double.MIN_VALUE);
+         EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity.getVector(), Double.MIN_VALUE);
+      }
+   }
+
    private RigidBodyControlManager createManager()
    {
       // create test registry
@@ -175,6 +258,6 @@ public class RigidBodyControlManagerTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForPackage(RigidBodyControlManagerTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(RigidBodyControlManager.class, RigidBodyControlManagerTest.class);
    }
 }
