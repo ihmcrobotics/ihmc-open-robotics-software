@@ -214,7 +214,8 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
 
       double timeInTrajectory = getTimeInTrajectory();
       boolean allDone = true;
-
+      
+      feedbackControlCommand.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(jointIdx);
@@ -241,9 +242,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
 
-         feedbackControlCommand.setOneDoFJoint(jointIdx, desiredPosition, desiredVelocity, feedForwardAcceleration);
-         feedbackControlCommand.setGains(jointIdx, gains.get(jointIdx));
-         feedbackControlCommand.setWeightForSolver(jointIdx, currentWeights.get(jointIdx).getDoubleValue());
+         double weight = currentWeights.get(jointIdx).getDoubleValue();
+         if(weight > 0.003)
+         {
+            OneDoFJoint joint = joints[jointIdx];
+            feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gains.get(jointIdx), weight);
+         }
 
          IntegerYoVariable numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);
          IntegerYoVariable numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(jointIdx);
