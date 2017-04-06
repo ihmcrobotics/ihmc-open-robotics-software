@@ -261,6 +261,8 @@ public class WholeBodyFeedbackController
    {
       RigidBody endEffector = feedbackControlCommand.getEndEffector();
       SpatialFeedbackController controller = spatialFeedbackControllerMap.get(endEffector);
+      if (controller.isEnabled())
+         throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
       controller.submitFeedbackControlCommand(feedbackControlCommand);
       controller.setEnabled(true);
    }
@@ -269,6 +271,8 @@ public class WholeBodyFeedbackController
    {
       RigidBody endEffector = feedbackControlCommand.getEndEffector();
       PointFeedbackController controller = pointFeedbackControllerMap.get(endEffector);
+      if (controller.isEnabled())
+         throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
       controller.submitFeedbackControlCommand(feedbackControlCommand);
       controller.setEnabled(true);
    }
@@ -277,6 +281,8 @@ public class WholeBodyFeedbackController
    {
       RigidBody endEffector = feedbackControlCommand.getEndEffector();
       OrientationFeedbackController controller = orientationFeedbackControllerMap.get(endEffector);
+      if (controller.isEnabled())
+         throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller end-effector: " + endEffector);
       controller.submitFeedbackControlCommand(feedbackControlCommand);
       controller.setEnabled(true);
    }
@@ -291,6 +297,8 @@ public class WholeBodyFeedbackController
          double feedForwardAcceleration = feedbackControlCommand.getFeedForwardAcceleration(i);
 
          OneDoFJointFeedbackController controller = oneDoFJointFeedbackControllerMap.get(joint);
+         if (controller.isEnabled())
+            throw new RuntimeException("Cannot submit more than one feedback control command to the same controller. Controller joint: " + joint.getName());
          controller.setGains(feedbackControlCommand.getGains(i));
          controller.setDesireds(desiredPosition, desiredVelocity, feedForwardAcceleration);
          controller.setWeightForSolver(feedbackControlCommand.getWeightForSolver(i));
