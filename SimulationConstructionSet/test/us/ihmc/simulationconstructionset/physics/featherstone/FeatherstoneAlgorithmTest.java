@@ -7,17 +7,20 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class PinJointPhysicsTest
+/**
+ * Tests simulation against closed-form dynamics
+ */
+public class FeatherstoneAlgorithmTest
 {
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    @Test
    public void testPendulumAgainstLagrangianCalculation()
    {
-      double epsilon = 1e-6;
+      double epsilon = 1e-5;
 
-      SimplePendulumRobot pendulumRobot = new SimplePendulumRobot("pendulum", 1.2, -0.4);
-      pendulumRobot.setController(new SimulationChecker(pendulumRobot, epsilon));
+      SimplePendulumRobot pendulumRobot = new SimplePendulumRobot("pendulum", 1.2, -0.4, 0.1);
+      pendulumRobot.setController(new DynamicsChecker(pendulumRobot, epsilon));
 
       SimulationConstructionSet scs = new SimulationConstructionSet(pendulumRobot, simulationTestingParameters);
       scs.startOnAThread();
@@ -25,16 +28,16 @@ public class PinJointPhysicsTest
       ThreadTools.sleepForever();
    }
 
-   private class SimulationChecker implements RobotController
+   private class DynamicsChecker implements RobotController
    {
       private final YoVariableRegistry registry;
-      private final RobotWithExplicitDynamics robotWithExplicitDynamics;
+      private final RobotWithClosedFormDynamics robotWithClosedFormDynamics;
       private final double epsilon;
 
-      public SimulationChecker(RobotWithExplicitDynamics robotWithExplicitDynamics, double epsilon)
+      public DynamicsChecker(RobotWithClosedFormDynamics robotWithClosedFormDynamics, double epsilon)
       {
-         registry = new YoVariableRegistry(robotWithExplicitDynamics.getName() + "Registry");
-         this.robotWithExplicitDynamics = robotWithExplicitDynamics;
+         registry = new YoVariableRegistry(robotWithClosedFormDynamics.getName() + "Registry");
+         this.robotWithClosedFormDynamics = robotWithClosedFormDynamics;
          this.epsilon = epsilon;
       }
 
@@ -53,7 +56,7 @@ public class PinJointPhysicsTest
       @Override
       public String getName()
       {
-         return robotWithExplicitDynamics.getName();
+         return robotWithClosedFormDynamics.getName();
       }
 
       @Override
@@ -65,7 +68,7 @@ public class PinJointPhysicsTest
       @Override
       public void doControl()
       {
-         robotWithExplicitDynamics.assertStateIsCloseToLagrangianCalculation(epsilon);
+         robotWithClosedFormDynamics.assertStateIsCloseToLagrangianCalculation(epsilon);
       }
    }
 }

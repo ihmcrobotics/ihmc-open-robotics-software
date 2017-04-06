@@ -2,9 +2,9 @@ package us.ihmc.simulationconstructionset.physics.featherstone;
 
 import us.ihmc.simulationconstructionset.Robot;
 
-public abstract class RobotWithExplicitDynamics extends Robot
+public abstract class RobotWithClosedFormDynamics extends Robot
 {
-   public RobotWithExplicitDynamics(String name)
+   public RobotWithClosedFormDynamics(String name)
    {
       super(name);
    }

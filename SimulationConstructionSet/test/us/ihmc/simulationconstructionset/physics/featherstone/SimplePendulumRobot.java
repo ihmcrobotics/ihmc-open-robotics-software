@@ -6,16 +6,17 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 
-public class SimplePendulumRobot extends RobotWithExplicitDynamics
+public class SimplePendulumRobot extends RobotWithClosedFormDynamics
 {
    private final double mass = 1.0;
    private final double length = 1.0;
    private final double Ixx = 0.5;
    private final Axis axis = Axis.X;
+   private final double damping;
 
    private final PinJoint pinJoint;
 
-   public SimplePendulumRobot(String name, double initialQ, double initialQd)
+   public SimplePendulumRobot(String name, double initialQ, double initialQd, double damping)
    {
       super(name);
 
@@ -27,19 +28,23 @@ public class SimplePendulumRobot extends RobotWithExplicitDynamics
       link.setComOffset(0.0, 0.0, -0.5 * length);
 
       pinJoint.setLink(link);
+      pinJoint.setDamping(damping);
       addRootJoint(pinJoint);
 
       pinJoint.setQ(initialQ);
       pinJoint.setQd(initialQd);
+
+      this.damping = damping;
    }
 
    @Override
    public void assertStateIsCloseToLagrangianCalculation(double epsilon) throws AssertionError
    {
       double q = pinJoint.getQ();
+      double qd = pinJoint.getQD();
       double qdd = pinJoint.getQDD();
 
-      double qddLagrangian = mass * getGravityZ() * (0.5 * length) * Math.sin(q) / (Ixx + mass * MathTools.square(0.5 * length));
+      double qddLagrangian = (mass * getGravityZ() * (0.5 * length) * Math.sin(q) - damping * qd) / (Ixx + mass * MathTools.square(0.5 * length));
 
       if(Math.abs(qdd - qddLagrangian) > epsilon)
       {
