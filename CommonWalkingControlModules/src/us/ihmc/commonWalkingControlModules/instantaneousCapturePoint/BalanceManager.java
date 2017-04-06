@@ -54,7 +54,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final boolean ENABLE_DYN_REACHABILITY = false;
+   private static final boolean ENABLE_DYN_REACHABILITY = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -263,7 +263,7 @@ public class BalanceManager
    public void setUpcomingFootstep(Footstep upcomingFootstep)
    {
       if (ENABLE_DYN_REACHABILITY)
-      dynamicReachabilityCalculator.setUpcomingFootstep(upcomingFootstep);
+         dynamicReachabilityCalculator.setUpcomingFootstep(upcomingFootstep);
    }
 
    /**
@@ -488,7 +488,7 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      if (ENABLE_DYN_REACHABILITY)
+      if (ENABLE_DYN_REACHABILITY && Double.isFinite(defaultSwingTime))
       {
          dynamicReachabilityCalculator.setInSwing();
          
@@ -526,7 +526,7 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      if (ENABLE_DYN_REACHABILITY)
+      if (ENABLE_DYN_REACHABILITY && Double.isFinite(defaultSwingTime))
       {
          dynamicReachabilityCalculator.setInTransfer();
          
