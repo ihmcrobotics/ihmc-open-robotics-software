@@ -114,6 +114,8 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
    public abstract boolean isEmpty();
 
    public abstract double getLastTrajectoryPointTime();
+   
+   public abstract void clear();
 
    @Override
    public boolean isDone()
