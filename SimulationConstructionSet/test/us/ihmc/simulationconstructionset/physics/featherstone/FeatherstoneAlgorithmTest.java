@@ -4,8 +4,10 @@ import org.junit.Test;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.thread.ThreadTools;
+
+import static junit.framework.TestCase.fail;
 
 /**
  * Tests simulation against closed-form dynamics
@@ -18,14 +20,26 @@ public class FeatherstoneAlgorithmTest
    public void testPendulumAgainstLagrangianCalculation()
    {
       double epsilon = 1e-5;
+      SinglePendulumRobot pendulumRobot = new SinglePendulumRobot("pendulum", 1.2, -0.4);
+      testAgainstLagrangianCalculation(pendulumRobot, epsilon);
+   }
 
-      SimplePendulumRobot pendulumRobot = new SimplePendulumRobot("pendulum", 1.2, -0.4, 0.1);
-      pendulumRobot.setController(new DynamicsChecker(pendulumRobot, epsilon));
+   private void testAgainstLagrangianCalculation(RobotWithClosedFormDynamics robotWithClosedFormDynamics, double epsilon)
+   {
+      robotWithClosedFormDynamics.setController(new DynamicsChecker(robotWithClosedFormDynamics, epsilon));
 
-      SimulationConstructionSet scs = new SimulationConstructionSet(pendulumRobot, simulationTestingParameters);
+      SimulationConstructionSet scs = new SimulationConstructionSet(robotWithClosedFormDynamics, simulationTestingParameters);
       scs.startOnAThread();
+      BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 45.0);
 
-      ThreadTools.sleepForever();
+      try
+      {
+         blockingSimulationRunner.simulateAndBlock(15.0);
+      }
+      catch(Exception e)
+      {
+         fail();
+      }
    }
 
    private class DynamicsChecker implements RobotController

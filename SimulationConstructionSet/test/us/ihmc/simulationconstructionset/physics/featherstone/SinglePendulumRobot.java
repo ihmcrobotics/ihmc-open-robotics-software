@@ -12,11 +12,11 @@ public class SimplePendulumRobot extends RobotWithClosedFormDynamics
    private final double length = 1.0;
    private final double Ixx = 0.5;
    private final Axis axis = Axis.X;
-   private final double damping;
+   private final double damping = 0.1;
 
    private final PinJoint pinJoint;
 
-   public SimplePendulumRobot(String name, double initialQ, double initialQd, double damping)
+   public SimplePendulumRobot(String name, double initialQ, double initialQd)
    {
       super(name);
 
@@ -33,8 +33,6 @@ public class SimplePendulumRobot extends RobotWithClosedFormDynamics
 
       pinJoint.setQ(initialQ);
       pinJoint.setQd(initialQd);
-
-      this.damping = damping;
    }
 
    @Override
