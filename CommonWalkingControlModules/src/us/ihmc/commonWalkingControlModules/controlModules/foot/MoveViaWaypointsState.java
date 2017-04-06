@@ -45,12 +45,11 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       footFrame = foot.getBodyFixedFrame();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
-      ReferenceFrame soleFrame = controllerToolbox.getFullRobotModel().getSoleFrame(robotSide);
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState(foot, pelvis, rootBody, trajectoryFrames, soleFrame, pelvisFrame, yoTime, graphicsListRegistry,
+      taskspaceControlState = new RigidBodyTaskspaceControlState(foot, pelvis, rootBody, trajectoryFrames, footFrame, pelvisFrame, yoTime, graphicsListRegistry,
             registry);
       taskspaceControlState.setGains(gains.getOrientationGains(), gains.getPositionGains());
    }
