@@ -268,13 +268,20 @@ public class ICPOptimizationController
    {
       if (footstep != null && !footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
       {
-         upcomingFootsteps.add(footstep);
-         footstep.getPosition2d(tmpFramePoint2d);
-         upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
-         inputHandler.addFootstepToPlan(footstep);
+         if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
+         {
+            upcomingFootsteps.add(footstep);
+            footstep.getPosition2d(tmpFramePoint2d);
+            upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            inputHandler.addFootstepToPlan(footstep);
 
-         footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
-         unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+         }
+         else
+         {
+            PrintTools.warn(this, "Received bad footstep: " + footstep);
+         }
       }
    }
 
