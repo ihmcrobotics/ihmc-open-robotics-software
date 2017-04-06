@@ -79,14 +79,8 @@ public class AtlasJointMap implements DRCRobotJointMap
    public static final String chestName = "utorso";
    public static final String pelvisName = "pelvis";
    public static final String headName = "head";
-   public static final SideDependentList<String> handNames = new SideDependentList<>();
-   static
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         handNames.put(robotSide, getRobotSidePrefix(robotSide) + "hand");
-      }
-   }
+   public static final SideDependentList<String> handNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "hand", getRobotSidePrefix(RobotSide.RIGHT) + "hand");
+   public static final SideDependentList<String> footNames = new SideDependentList<>(getRobotSidePrefix(RobotSide.LEFT) + "foot", getRobotSidePrefix(RobotSide.RIGHT) + "foot");
 
    private final LegJointName[] legJoints = {HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE_PITCH, ANKLE_PITCH, ANKLE_ROLL};
    private final ArmJointName[] armJoints;
@@ -287,6 +281,11 @@ public class AtlasJointMap implements DRCRobotJointMap
       return handNames.get(robotSide);
    }
 
+   public String getFootName(RobotSide robotSide)
+   {
+      return footNames.get(robotSide);
+   }
+
    @Override
    public LegJointName[] getLegJointNames()
    {
@@ -473,8 +472,10 @@ public class AtlasJointMap implements DRCRobotJointMap
       return atlasPhysicalProperties;
    }
 
+   @Override
    public String[] getHighInertiaForStableSimulationJoints()
    {
       return new String[] {"hokuyo_joint"};
    }
+
 }

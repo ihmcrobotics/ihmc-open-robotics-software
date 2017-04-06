@@ -31,6 +31,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -244,6 +245,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          return 0.3;
    }
 
+   @Override
    public boolean isNeckPositionControlled()
    {
       if (runningOnRealRobot)
@@ -760,6 +762,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       for (RobotSide robotSide : RobotSide.values)
          taskspaceAngularGains.put(jointMap.getHandName(robotSide), handAngularGains);
 
+      YoOrientationPIDGainsInterface footAngularGains = createSwingFootControlGains(registry).getOrientationGains();
+      for (RobotSide robotSide : RobotSide.values)
+         taskspaceAngularGains.put(jointMap.getFootName(robotSide), footAngularGains);
+
       return taskspaceAngularGains;
    }
 
@@ -775,6 +781,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       YoPositionPIDGainsInterface handLinearGains = createHandPositionControlGains(registry);
       for (RobotSide robotSide : RobotSide.values)
          taskspaceLinearGains.put(jointMap.getHandName(robotSide), handLinearGains);
+
+      YoPositionPIDGainsInterface footAngularGains = createSwingFootControlGains(registry).getPositionGains();
+      for (RobotSide robotSide : RobotSide.values)
+         taskspaceLinearGains.put(jointMap.getFootName(robotSide), footAngularGains);
 
       return taskspaceLinearGains;
    }
@@ -882,9 +892,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       return integrationSettings;
    }
 
+   private YoFootSE3Gains swingFootGains = null;
+
    @Override
    public YoSE3PIDGainsInterface createSwingFootControlGains(YoVariableRegistry registry)
    {
+      if (swingFootGains != null)
+         return swingFootGains;
+
       YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
       double kpXY = 150.0;
@@ -915,7 +930,8 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       gains.setTangentialDampingGains(kdReductionRatio, parallelDampingDeadband, positionErrorForMinimumKd);
       gains.createDerivativeGainUpdater(true);
 
-      return gains;
+      swingFootGains = gains;
+      return swingFootGains;
    }
 
    @Override
@@ -1346,6 +1362,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    /** {@inheritDoc} */
+   @Override
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
