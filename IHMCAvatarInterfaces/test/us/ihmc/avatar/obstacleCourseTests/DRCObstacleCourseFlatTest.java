@@ -16,6 +16,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.avatar.testTools.ScriptedHandstepGenerator;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.Handstep;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -37,14 +38,14 @@ import us.ihmc.robotics.math.trajectories.waypoints.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationDoneCriterion;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -427,6 +428,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
         chestTrajectoryPointList.addTrajectoryPoint(2.0, new Quaternion(-0.2, 0.0, 0.0, 1.0), new Vector3D());
         chestTrajectoryPointList.addTrajectoryPoint(3.0, new Quaternion(0.0, 0.0, 0.0, 1.0), new Vector3D());
         chestCommand.setTrajectoryPointList(chestTrajectoryPointList);
+        chestCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
         queuedControllerCommands.add(chestCommand);
 
         // Some more steps:
@@ -474,6 +476,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
 
         footTrajectoryCommand.setTrajectoryPointList(footPointList);
         footTrajectoryCommand.setRobotSide(RobotSide.RIGHT);
+        footTrajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
         queuedControllerCommands.add(footTrajectoryCommand);
 
         success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -962,7 +965,11 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
          @Override
          public boolean isSimulationDone()
          {
-            return (Math.abs(pelvisOrientationError.getDoubleValue()) > 0.1);
+            double errorMag = Math.abs(pelvisOrientationError.getDoubleValue());
+            boolean largeError = errorMag > 0.15;
+            if (largeError)
+               PrintTools.error(DRCObstacleCourseFlatTest.class, "Large pelvis orientation error, stopping sim. Error magnitude: " + errorMag);
+            return largeError;
          }
       };
 

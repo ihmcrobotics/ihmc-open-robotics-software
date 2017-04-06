@@ -190,7 +190,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoCurrentRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
       yoCurrentRotationVector.scale(tempAxisAngle.getAngle());
 
-      inverseDynamicsOutput.setAngularAcceleration(endEffectorFrame, baseFrame, desiredAngularAcceleration);
+      inverseDynamicsOutput.setAngularAcceleration(endEffectorFrame, desiredAngularAcceleration);
    }
 
    @Override

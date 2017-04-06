@@ -137,7 +137,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
-      return target != RobotTarget.REAL_ROBOT;
+      // Used to be: target != RobotTarget.REAL_ROBOT;
+      // Trying to see if that's really necessary (Sylvain)
+      // It delays the toe-off to some extent which can cause some issues.
+      return false;
    }
 
    @Override
