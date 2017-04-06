@@ -1,8 +1,11 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
-import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.*;
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint3d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
+import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findVector3d;
+import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +44,8 @@ import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -204,7 +207,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
             sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
             scs.addStaticLinkGraphics(sphere);
 
-            footTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+            footTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+                  ReferenceFrame.getWorldFrame());
          }
 
          drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -334,7 +338,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
             sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
             scs.addStaticLinkGraphics(sphere);
 
-            footTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+            footTrajectoryMessage.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity,
+                  ReferenceFrame.getWorldFrame());
          }
 
          drcSimulationTestHelper.send(footTrajectoryMessage);
@@ -384,7 +389,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          controllerTrajectoryPoint.setTime(expectedTrajectoryPoint.getTime()); // Don't want to check the time here.
          assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
 
-            // Without forgetting to put the foot back on the ground
+         // Without forgetting to put the foot back on the ground
          footPoseCloseToActual.translate(0.0, 0.0, -0.15);
          footPoseCloseToActual.getPose(desiredPosition, desiredOrientation);
          trajectoryTime = 0.5;
@@ -499,7 +504,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
                scs.addStaticLinkGraphics(sphere);
 
-               footTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+               footTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity,
+                     desiredAngularVelocity, ReferenceFrame.getWorldFrame());
                calculatorIndex++;
             }
 
@@ -663,7 +669,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
                scs.addStaticLinkGraphics(sphere);
 
-               footTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+               footTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity,
+                     desiredAngularVelocity, ReferenceFrame.getWorldFrame());
                calculatorIndex++;
             }
 
@@ -793,7 +800,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                sphere.addSphere(0.01, new YoAppearanceRGBColor(FootstepListVisualizer.defaultFeetColors.get(robotSide), 0.0));
                scs.addStaticLinkGraphics(sphere);
 
-               footTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity);
+               footTrajectoryMessage.setTrajectoryPoint(i, time - timeToSubtract, desiredPosition, desiredOrientation, desiredLinearVelocity,
+                     desiredAngularVelocity, ReferenceFrame.getWorldFrame());
                calculatorIndex++;
             }
 
