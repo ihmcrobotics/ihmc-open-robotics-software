@@ -80,7 +80,6 @@ public class SolarPanelMotionPlanner
          plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
          plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
          
-         //plannerTimeDomain.getCleaningPath(cleaningPath);
          RRTNode1DTimeDomain.cleaningPath = cleaningPath;
          plannerTimeDomain.expandTreeGoal(500);
          //plannerTimeDomain.updateOptimalPath(101, 100);

@@ -142,6 +142,7 @@ public class RRTTreeTimeDomain extends RRTTree
       }
       else
       {
+         failNodes.add(newNode);
          // PrintTools.info("The newly created node is unvalid");
       }
       return false;

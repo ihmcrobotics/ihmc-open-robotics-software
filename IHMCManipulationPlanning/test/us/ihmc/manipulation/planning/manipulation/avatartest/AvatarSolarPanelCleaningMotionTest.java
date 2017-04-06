@@ -403,7 +403,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
    }
    
-   @Test
+   //@Test
    public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -412,7 +412,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      ThreadTools.sleep(20000);
+      //ThreadTools.sleep(20000);
       
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
@@ -430,15 +430,15 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       PrintTools.info("r shz"+kinematicsToolBoxController.getSolution().getJointAngles()[12]);
       solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
       
-      ThreadTools.sleep(4000);
+      ThreadTools.sleep(2000);
       //drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
       PrintTools.info("Wake up CMD");
-      kinematicsToolboxModule.wakeUp(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
+      //kinematicsToolboxModule.wakeUp(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
       PrintTools.info("r shz"+kinematicsToolBoxController.getSolution().getJointAngles()[12]);
       
       
       
-      ThreadTools.sleep(4000);
+      ThreadTools.sleep(2000);
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage2 = new WholeBodyTrajectoryMessage();
       handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 0.2, new Point3D(0.7, -0.45, 1.1), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
@@ -547,7 +547,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    }
    
    
-   //@Test
+   @Test
    public void testRRTAndMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -556,7 +556,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      ThreadTools.sleep(20000);
+      //ThreadTools.sleep(20000);
       
       
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController(); 
@@ -657,11 +657,11 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
             branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
          }
          
-         g.setColor(Color.red);
-         branch(g, 1.5, -Math.PI*0.1, 1.5, Math.PI*0.1, 4);
-         branch(g, 1.5, Math.PI*0.1, 2.5, Math.PI*0.1, 4);
-         branch(g, 2.5, Math.PI*0.1, 2.5, -Math.PI*0.1, 4);
-         branch(g, 2.5, -Math.PI*0.1, 1.5, -Math.PI*0.1, 4);
+//         g.setColor(Color.red);
+//         branch(g, 1.5, -Math.PI*0.1, 1.5, Math.PI*0.1, 4);
+//         branch(g, 1.5, Math.PI*0.1, 2.5, Math.PI*0.1, 4);
+//         branch(g, 2.5, Math.PI*0.1, 2.5, -Math.PI*0.1, 4);
+//         branch(g, 2.5, -Math.PI*0.1, 1.5, -Math.PI*0.1, 4);
          
          g.setColor(Color.BLUE);
          ArrayList<RRTNode> nodePath = plannerTimeDomain.getTree().getPathNode();
@@ -678,6 +678,15 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          {
             RRTNode rrtNode1 = nodeShort.get(i);
             RRTNode rrtNode2 = nodeShort.get(i-1);
+            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+         }
+         
+         g.setColor(Color.RED);
+         ArrayList<RRTNode> nodeFail = plannerTimeDomain.getFailNodes();
+         for(int i =1;i<nodeFail.size();i++)
+         {
+            RRTNode rrtNode1 = nodeFail.get(i);
+            RRTNode rrtNode2 = nodeFail.get(i-1);
             branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
          }
       }
