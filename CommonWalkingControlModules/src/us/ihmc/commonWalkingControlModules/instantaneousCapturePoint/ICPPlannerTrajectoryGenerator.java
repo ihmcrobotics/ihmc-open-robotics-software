@@ -1,11 +1,14 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 
-import us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools;
+import static us.ihmc.commonWalkingControlModules.dynamicReachability.CoMIntegrationTools.*;
+
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.VelocityConstrainedPositionTrajectoryGenerator;
@@ -21,8 +24,8 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
    private final FramePoint finalPositionInSpecificFrame = new FramePoint();
    private final FrameVector finalVelocityInSpecificFrame = new FrameVector();
 
-   private final FramePoint initialCoMPositionInSpecificFrame = new FramePoint();
-   private final FramePoint desiredCoMPosition = new FramePoint();
+   private final FramePoint2d initialCoMPositionInSpecificFrame = new FramePoint2d();
+   private final FramePoint2d desiredCoMPosition = new FramePoint2d();
 
    private final DoubleYoVariable omega0;
 
@@ -45,9 +48,9 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       initialVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void setInitialCoMPosition(YoFramePoint initialCoMPosition, ReferenceFrame attachedFrame)
+   public void setInitialCoMPosition(YoFramePoint2d initialCoMPosition, ReferenceFrame attachedFrame)
    {
-      initialCoMPosition.getFrameTupleIncludingFrame(initialCoMPositionInSpecificFrame);
+      initialCoMPosition.getFrameTuple2dIncludingFrame(initialCoMPositionInSpecificFrame);
       initialCoMPositionInSpecificFrame.changeFrame(attachedFrame);
    }
    
@@ -59,7 +62,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       finalVelocityInSpecificFrame.changeFrame(attachedFrame);
    }
 
-   public void computeFinalCoMPosition(FramePoint finalCoMToPack)
+   public void computeFinalCoMPosition(FramePoint2d finalCoMToPack)
    {
       computeCoMPosition(doubleSupportCapturePointTrajectory.getTrajectoryTime(), finalCoMToPack);
    }
@@ -83,13 +86,20 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       computeCoMPosition(time, desiredCoMPosition);
    }
 
-   public void computeCoMPosition(double time, FramePoint comPositionToPack)
+   public void computeCoMPosition(double time, FramePoint2d comPositionToPack)
    {
       YoPolynomial xPolynomial = doubleSupportCapturePointTrajectory.getXPolynomial();
       YoPolynomial yPolynomial = doubleSupportCapturePointTrajectory.getYPolynomial();
 
-      CoMIntegrationTools.integrateCoMPositionUsingCubicICP(0.0, time, doubleSupportCapturePointTrajectory.getTrajectoryTime(), omega0.getDoubleValue(),
-            doubleSupportCapturePointTrajectory.getCurrentTrajectoryFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame, comPositionToPack);
+      if (Double.isNaN(doubleSupportCapturePointTrajectory.getTrajectoryTime()))
+      {
+         comPositionToPack.set(initialCoMPositionInSpecificFrame);
+      }
+      else
+      {
+         integrateCoMPositionUsingCubicICP(0.0, time, doubleSupportCapturePointTrajectory.getTrajectoryTime(), omega0.getDoubleValue(),
+               doubleSupportCapturePointTrajectory.getCurrentTrajectoryFrame(), xPolynomial, yPolynomial, initialCoMPositionInSpecificFrame, comPositionToPack);
+      }
    }
 
    @Override
@@ -143,7 +153,7 @@ public class ICPPlannerTrajectoryGenerator implements PositionTrajectoryGenerato
       doubleSupportCapturePointTrajectory.getLinearData(positionToPack, velocityToPack, accelerationToPack);
    }
 
-   public void getCoMPosition(YoFramePoint positionToPack)
+   public void getCoMPosition(YoFramePoint2d positionToPack)
    {
       positionToPack.set(desiredCoMPosition);
    }
