@@ -47,4 +47,44 @@ public class StraightLegWalkingParameters
    {
       return false;
    }
+
+   public double getStraightLegPrivilegedConfigurationGain()
+   {
+      return 40.0;
+   }
+
+   public double getStraightLegPrivilegedVelocityGain()
+   {
+      return 6.0;
+   }
+
+   public double getStraightLegPrivilegedWeight()
+   {
+      return 5.0;
+   }
+
+   public double getBentLegPrivilegedConfigurationGain()
+   {
+      return 40.0;
+   }
+
+   public double getBentLegPrivilegedVelocityGain()
+   {
+      return 6.0;
+   }
+
+   public double getBentLegPrivilegedWeight()
+   {
+      return 5.0;
+   }
+
+   public double getPrivilegedMaxVelocity()
+   {
+      return 2.0;
+   }
+
+   public double getPrivilegedMaxAcceleration()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 }

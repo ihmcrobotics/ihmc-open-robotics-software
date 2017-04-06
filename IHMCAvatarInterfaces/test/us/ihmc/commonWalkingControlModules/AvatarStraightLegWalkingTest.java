@@ -26,7 +26,7 @@ public abstract class AvatarStraightLegWalkingTest
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final String script = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
+   private static final String forwardFastScript = "scripts/ExerciseAndJUnitScripts/stepAdjustment_forwardWalkingFast.xml";
    private static final String yawScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScript.xml";
    private static final String slowStepScript = "scripts/ExerciseAndJUnitScripts/icpOptimizationPushTestScriptSlow.xml";
 
@@ -109,7 +109,7 @@ public abstract class AvatarStraightLegWalkingTest
 
    public String getScript()
    {
-      return script;
+      return forwardFastScript;
    }
 
    public String getYawscript()
