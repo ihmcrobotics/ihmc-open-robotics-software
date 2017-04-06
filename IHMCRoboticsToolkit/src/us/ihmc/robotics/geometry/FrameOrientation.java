@@ -303,6 +303,39 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
       this.quaternion.multiply(quaternion);
    }
 
+   /**
+    * Sets this {@code FrameOrientation} to the difference of {@code q1} and {@code q2}.
+    * <p>
+    * this.quaternion = q1<sup>-1</sup> * q2
+    * </p>
+    *
+    * @param q1 the first quaternion in the difference. Not modified.
+    * @param q2 the second quaternion in the difference. Not modified.
+    */
+   public void difference(QuaternionReadOnly q1, QuaternionReadOnly q2)
+   {
+      quaternion.difference(q1, q2);
+   }
+
+   /**
+    * Sets this {@code FrameOrientation} to the difference of {@code orientation1} and
+    * {@code orientation2}.
+    * <p>
+    * this.quaternion = orientation1.quaternion<sup>-1</sup> * orientation2.quaternion
+    * </p>
+    *
+    * @param orientation1 the first {@code FrameOrientation} in the difference. Not modified.
+    * @param orientation2 the second {@code FrameOrientation} in the difference. Not modified.
+    * @throws ReferenceFrameMismatchException if the reference frame of any of the two arguments is
+    *            different from the reference frame of {@code this}.
+    */
+   public void difference(FrameOrientation orientation1, FrameOrientation orientation2)
+   {
+      checkReferenceFrameMatch(orientation1);
+      checkReferenceFrameMatch(orientation2);
+      difference(orientation1.getQuaternion(), orientation2.getQuaternion());
+   }
+
    public void conjugate()
    {
       quaternion.conjugate();
@@ -356,6 +389,24 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
    public double getQs()
    {
       return quaternion.getS();
+   }
+
+   /**
+    * Computes and packs the orientation described by this {@code FrameOrientation} as a rotation
+    * vector including the reference frame it is expressed in.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
+    *           frame it is expressed in are stored. Modified.
+    */
+   public void getRotationVectorIncludingFrame(FrameVector frameRotationVectorToPack)
+   {
+      frameRotationVectorToPack.setToZero(getReferenceFrame());
+      quaternion.get(frameRotationVectorToPack.getVector());
    }
 
    @Override
