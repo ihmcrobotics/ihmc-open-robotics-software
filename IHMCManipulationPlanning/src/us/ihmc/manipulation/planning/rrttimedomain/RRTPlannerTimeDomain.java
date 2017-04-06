@@ -100,5 +100,9 @@ public class RRTPlannerTimeDomain
       return optimalPath;
    }
    
+   public ArrayList<RRTNode> getFailNodes()
+   {
+      return rrtTree.failNodes;
+   } 
    
 }

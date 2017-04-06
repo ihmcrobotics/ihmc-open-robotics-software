@@ -38,6 +38,7 @@ public class RRTTree
    protected ArrayList<RRTNode> pathNode = new ArrayList<RRTNode>();
    
    protected ArrayList<RRTNode> wholeNodes = new ArrayList<RRTNode>();
+   public ArrayList<RRTNode> failNodes = new ArrayList<RRTNode>();
 
    protected RRTNode nodeCreator;
    

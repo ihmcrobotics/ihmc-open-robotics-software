@@ -190,7 +190,6 @@ public class KinematicsToolboxController extends ToolboxController
    @Override
    protected void updateInternal()
    {
-      PrintTools.info("updateInternal");
       updateTools();
 
       consumeCommands();
@@ -583,7 +582,8 @@ public class KinematicsToolboxController extends ToolboxController
 
       desiredPelvisHeight.setToNaN();
 
-      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
+      //RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
+      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
       if (robotConfigurationData == null)
          return false;
 
