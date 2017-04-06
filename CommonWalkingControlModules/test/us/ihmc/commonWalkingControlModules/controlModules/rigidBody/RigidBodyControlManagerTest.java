@@ -39,6 +39,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -49,6 +50,7 @@ public class RigidBodyControlManagerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final Random random = new Random(94391892L);
+   private static final double epsilon = 1.0E-10;
 
    private YoVariableRegistry testRegistry;
    private DoubleYoVariable yoTime;
@@ -165,6 +167,97 @@ public class RigidBodyControlManagerTest
          EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), desiredPosition.getPoint(), Double.MIN_VALUE);
          initialOrientation.checkReferenceFrameMatch(desiredOrientation);
          EuclidCoreTestTools.assertQuaternionEqualsSmart(initialOrientation.getQuaternion(), desiredOrientation.getQuaternion(), Double.MIN_VALUE);
+      }
+
+      // go forward to the end of the trajectory
+      yoTime.set(trajectoryTime);
+      manager.compute();
+      {
+         FeedbackControlCommand<?> feedbackControlCommand = manager.getFeedbackControlCommand();
+         assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
+         SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
+
+         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+
+         initialPosition.checkReferenceFrameMatch(desiredPosition);
+         EuclidCoreTestTools.assertTuple3DEquals(position, desiredPosition.getPoint(), Double.MIN_VALUE);
+         initialOrientation.checkReferenceFrameMatch(desiredOrientation);
+         EuclidCoreTestTools.assertQuaternionEqualsSmart(orientation, desiredOrientation.getQuaternion(), Double.MIN_VALUE);
+
+         EuclidCoreTestTools.assertTuple3DEquals(linearVelocity, desiredLinearVelocity.getVector(), Double.MIN_VALUE);
+         EuclidCoreTestTools.assertTuple3DEquals(angularVelocity, desiredAngularVelocity.getVector(), Double.MIN_VALUE);
+      }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.0)
+   @Test
+   public void testTaskspaceMessageWithCustomControlFrame()
+   {
+      RigidBodyControlManager manager = createManager();
+      setGainsAndWeights(manager);
+      manager.compute();
+
+      double trajectoryTime = 1.0;
+      Point3D position = EuclidCoreRandomTools.generateRandomPoint3D(random);
+      Quaternion orientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
+      Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+      Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random);
+
+      Point3D controlFramePosition = EuclidCoreRandomTools.generateRandomPoint3D(random);
+      Quaternion controlFrameOrientation = EuclidCoreRandomTools.generateRandomQuaternion(random);
+
+      SE3Message message = new SE3Message(1, worldFrame);
+      message.setControlFramePosition(controlFramePosition);
+      message.setControlFrameOrientation(controlFrameOrientation);
+      message.setUseCustomControlFrame(true);
+      message.setTrajectoryPoint(0, trajectoryTime, position, orientation, linearVelocity, angularVelocity, worldFrame);
+
+      SE3Command command = new SE3Command();
+      command.set(worldFrame, worldFrame, message);
+      manager.handleTaskspaceTrajectoryCommand(command);
+      manager.compute();
+
+      assertEquals(RigidBodyControlMode.TASKSPACE, manager.getActiveControlMode());
+
+      FramePoint desiredPosition = new FramePoint();
+      FrameVector desiredLinearVelocity = new FrameVector();
+      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      FrameOrientation desiredOrientation = new FrameOrientation();
+      FrameVector desiredAngularVelocity = new FrameVector();
+      FrameVector feedForwardAngularAcceleration = new FrameVector();
+      FrameOrientation actualControlFrameOrientation = new FrameOrientation();
+      FramePoint actualControlFramePosition = new FramePoint();
+
+      ReferenceFrame bodyFrame = bodyToControl.getBodyFixedFrame();
+      PoseReferenceFrame controlFrame = new PoseReferenceFrame("TestControlFrame", bodyFrame);
+      controlFrame.setPoseAndUpdate(controlFramePosition, controlFrameOrientation);
+      FramePoint initialPosition = new FramePoint(controlFrame);
+      FrameOrientation initialOrientation = new FrameOrientation(controlFrame);
+      initialPosition.changeFrame(worldFrame);
+      initialOrientation.changeFrame(worldFrame);
+
+      // get commands and make sure they are initialized correctly
+      {
+         FeedbackControlCommand<?> feedbackControlCommand = manager.getFeedbackControlCommand();
+         assertEquals(ControllerCoreCommandType.TASKSPACE, feedbackControlCommand.getCommandType());
+         SpatialFeedbackControlCommand taskspaceCommand = (SpatialFeedbackControlCommand) feedbackControlCommand;
+
+         assertEquals(taskspaceCommand.getEndEffector().getNameBasedHashCode(), bodyToControl.getNameBasedHashCode());
+         taskspaceCommand.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+         taskspaceCommand.getIncludingFrame(desiredOrientation, desiredAngularVelocity, feedForwardAngularAcceleration);
+
+         initialPosition.checkReferenceFrameMatch(desiredPosition);
+         EuclidCoreTestTools.assertTuple3DEquals(initialPosition.getPoint(), desiredPosition.getPoint(), Double.MIN_VALUE);
+         initialOrientation.checkReferenceFrameMatch(desiredOrientation);
+         EuclidCoreTestTools.assertQuaternionEqualsSmart(initialOrientation.getQuaternion(), desiredOrientation.getQuaternion(), Double.MIN_VALUE);
+
+         taskspaceCommand.getControlFramePoseIncludingFrame(actualControlFramePosition, actualControlFrameOrientation);
+         actualControlFramePosition.checkReferenceFrameMatch(bodyFrame);
+         actualControlFrameOrientation.checkReferenceFrameMatch(bodyFrame);
+         EuclidCoreTestTools.assertTuple3DEquals(controlFramePosition, actualControlFramePosition.getPoint(), Double.MIN_VALUE);
+         EuclidCoreTestTools.assertQuaternionEqualsSmart(controlFrameOrientation, actualControlFrameOrientation.getQuaternion(), epsilon);
       }
 
       // go forward to the end of the trajectory
