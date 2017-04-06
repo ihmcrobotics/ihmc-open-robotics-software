@@ -32,7 +32,12 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
       jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[trajectoryMessage.getNumberOfJoints()];
 
       for (int i = 0; i < getNumberOfJoints(); i++)
-         jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(trajectoryMessage.jointTrajectoryMessages[i]);
+      {
+         if(trajectoryMessage.jointTrajectoryMessages[i] != null)
+         {
+            jointTrajectoryMessages[i] = new OneDoFJointTrajectoryMessage(trajectoryMessage.jointTrajectoryMessages[i]);
+         }
+      }
 
       setExecutionMode(trajectoryMessage.getExecutionMode(), trajectoryMessage.getPreviousMessageId());
    }
@@ -188,7 +193,13 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
    {
       double trajectoryTime = 0.0;
       for (int i = 0; i < getNumberOfJoints(); i++)
-         trajectoryTime = Math.max(trajectoryTime, jointTrajectoryMessages[i].getLastTrajectoryPoint().time);
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages[i];
+         if(oneDoFJointTrajectoryMessage != null)
+         {
+            trajectoryTime = Math.max(trajectoryTime, oneDoFJointTrajectoryMessage.getLastTrajectoryPoint().time);
+         }
+      }
       return trajectoryTime;
    }
 

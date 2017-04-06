@@ -50,8 +50,11 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
       {
          OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.add();
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
-         oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
-         oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
+         if(oneJointTrajectoryMessage != null)
+         {
+            oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
+            oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
+         }
       }
    }
 
