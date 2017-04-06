@@ -30,7 +30,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    
    public void sendWholebodyTrajectoryMessage(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
-      wholebodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      wholebodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
       toolboxCommunicator.send(wholebodyTrajectoryMessage);
    }
 
