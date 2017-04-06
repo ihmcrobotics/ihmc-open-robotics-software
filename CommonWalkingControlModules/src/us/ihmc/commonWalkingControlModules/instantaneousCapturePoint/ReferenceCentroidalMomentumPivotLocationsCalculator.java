@@ -274,8 +274,10 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
    public void addUpcomingFootstep(Footstep footstep)
    {
-      if (footstep != null)
+      if (footstep != null && !footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
+      {
          upcomingFootsteps.add(footstep);
+      }
    }
 
    public int getNumberOfFootstepRegistered()
