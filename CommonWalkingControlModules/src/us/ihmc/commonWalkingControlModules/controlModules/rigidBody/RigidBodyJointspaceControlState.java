@@ -500,4 +500,10 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       return feedbackControlCommand;
    }
 
+   @Override
+   public void clear()
+   {
+      
+   }
+
 }
