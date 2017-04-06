@@ -270,11 +270,18 @@ public class ICPPlannerSegmentedTrajectoryGenerator implements PositionTrajector
       computeDesiredCapturePointVelocity(omega0, dtFinal, finalCornerPointFinalFrame, finalCMPFinalFrame, endOfSplineICPVelocityFinalFrame);
 
       // compute CoM waypoints
-      computeCenterOfMassFirstSegment(startOfSplineTime, startOfSplineCoM);
+      if (Double.isFinite(startOfSplineTime))
+         computeCenterOfMassFirstSegment(startOfSplineTime, startOfSplineCoM);
+      else
+         startOfSplineCoM.set(startOfSingleSupportCoM);
 
       updateSplineBoundaries();
       initializeSpline();
-      computeCenterOfMassSecondSegment(splineDuration, endOfSplineCoM);
+
+      if (Double.isFinite(splineDuration))
+         computeCenterOfMassSecondSegment(splineDuration, endOfSplineCoM);
+      else
+         endOfSplineCoM.set(startOfSplineCoM);
    }
 
    public void computeFinalCoMPosition(FramePoint2d finalCoMToPack)
