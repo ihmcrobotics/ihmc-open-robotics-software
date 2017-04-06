@@ -248,11 +248,10 @@ public class SupportState extends AbstractFootControlState
       controlFrame.setPoseAndUpdate(framePosition, frameOrientation);
 
       // assemble acceleration command
-      footAcceleration.setToZero(controlFrame, rootBody.getBodyFixedFrame(), controlFrame);
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
+      footAcceleration.setToZero(bodyFixedFrame, rootBody.getBodyFixedFrame(), controlFrame);
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
-      footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-      spatialAccelerationCommand.setSpatialAcceleration(footAcceleration);
+      spatialAccelerationCommand.setSpatialAcceleration(controlFrame, footAcceleration);
 
       // assemble feedback command
       bodyFixedControlledPose.setToZero(controlFrame);
