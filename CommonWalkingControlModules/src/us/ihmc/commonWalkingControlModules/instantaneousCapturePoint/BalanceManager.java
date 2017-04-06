@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -59,6 +60,7 @@ public class BalanceManager
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPPlannerWithTimeFreezer icpPlanner;
    private final LinearMomentumRateOfChangeControlModule linearMomentumRateOfChangeControlModule;
+   private final DynamicReachabilityCalculator dynamicReachabilityCalculator;
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
    private final PushRecoveryControlModule pushRecoveryControlModule;
@@ -76,6 +78,8 @@ public class BalanceManager
    // TODO It seems that the achieved CMP can be off sometimes.
    // Need to review the computation of the achieved linear momentum rate or of the achieved CMP. (Sylvain)
    private final YoFramePoint2d yoAchievedCMP = new YoFramePoint2d("achievedCMP", worldFrame, registry);
+
+   private final BooleanYoVariable editStepTimingForReachability = new BooleanYoVariable("editStepTimingForReachability", registry);
 
    private final DoubleYoVariable yoTime;
 
@@ -167,6 +171,9 @@ public class BalanceManager
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
+      dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
+      editStepTimingForReachability.set(walkingControllerParameters.editStepTimingForReachability());
+
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
@@ -245,9 +252,24 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep);
    }
 
+   /**
+    * Sets the next footstep that the robot will take. Should be set at the beginning of transfer.
+    * @param upcomingFootstep
+    */
+   public void setUpcomingFootstep(Footstep upcomingFootstep)
+   {
+      dynamicReachabilityCalculator.setUpcomingFootstep(upcomingFootstep);
+   }
+
+   /**
+    * Sets the next footstep that the robot will take. Should be set at the beginning of swing. Modifies the momentum recovery control module, which checks
+    * the stability of the robot.
+    * @param nextFootstep
+    */
    public void setNextFootstep(Footstep nextFootstep)
    {
       momentumRecoveryControlModule.setNextFootstep(nextFootstep);
+      dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -459,6 +481,13 @@ public class BalanceManager
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
+
+      dynamicReachabilityCalculator.setInSwing();
+
+      if (editStepTimingForReachability.getBooleanValue())
+         dynamicReachabilityCalculator.verifyAndEnsureReachability();
+      else
+         dynamicReachabilityCalculator.checkReachabilityOfStep();
    }
 
    public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
@@ -487,6 +516,13 @@ public class BalanceManager
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
+
+      dynamicReachabilityCalculator.setInTransfer();
+
+      if (editStepTimingForReachability.getBooleanValue())
+         dynamicReachabilityCalculator.verifyAndEnsureReachability();
+      else
+         dynamicReachabilityCalculator.checkReachabilityOfStep();
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)
