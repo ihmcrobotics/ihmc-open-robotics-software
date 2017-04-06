@@ -1,6 +1,5 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findPoint3d;
 import static us.ihmc.avatar.controllerAPI.EndToEndHandTrajectoryMessageTest.findQuat4d;
@@ -19,6 +18,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -110,7 +110,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
-         assertSingleWaypointExecuted(robotSide, desiredPosition, desiredOrientation, scs);
+         String bodyName = fullRobotModel.getFoot(robotSide).getName();
+         EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(bodyName, desiredPosition, desiredOrientation, scs);
+//         assertSingleWaypointExecuted(robotSide, desiredPosition, desiredOrientation, scs);
 
          // Without forgetting to put the foot back on the ground
          footPoseCloseToActual.translate(0.0, 0.0, -0.15);
@@ -216,7 +218,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 * getRobotModel().getControllerDT());
          assertTrue(success);
 
-         assertNumberOfWaypoints(robotSide, numberOfTrajectoryPoints + 1, scs);
+         String bodyName = fullRobotModel.getFoot(robotSide).getName();
+         EndToEndHandTrajectoryMessageTest.assertNumberOfWaypoints(bodyName, numberOfTrajectoryPoints + 1, scs);
+//         assertNumberOfWaypoints(robotSide, numberOfTrajectoryPoints + 1, scs);
 
          for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
          {
@@ -353,7 +357,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
          while(!isDone)
          {
-            assertNumberOfWaypoints(robotSide, Math.min(defaultMaximumNumberOfWaypoints, numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1), scs);
+            String bodyName = fullRobotModel.getFoot(robotSide).getName();
+            int expectedNumberOfPoints = Math.min(defaultMaximumNumberOfWaypoints, numberOfTrajectoryPoints - expectedTrajectoryPointIndex + 1);
+            EndToEndHandTrajectoryMessageTest.assertNumberOfWaypoints(bodyName, expectedNumberOfPoints, scs);
+//            assertNumberOfWaypoints(robotSide, expectedNumberOfPoints, scs);
 
             double timeInState = 0.0;
 
@@ -524,7 +531,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          {
             double simulationTime = 0.0;
 
-            assertNumberOfWaypoints(robotSide, messages.get(messageIndex).getNumberOfTrajectoryPoints() + 1, scs);
+//            assertNumberOfWaypoints(robotSide, messages.get(messageIndex).getNumberOfTrajectoryPoints() + 1, scs);
 
             for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
             {
@@ -532,6 +539,10 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                SimpleSE3TrajectoryPoint expectedTrajectoryPoint = new SimpleSE3TrajectoryPoint();
                expectedTrajectoryPoint.set(fromMessage.time + timeOffset, fromMessage.position, fromMessage.orientation, fromMessage.linearVelocity, fromMessage.angularVelocity);
                SimpleSE3TrajectoryPoint controllerTrajectoryPoint = findTrajectoryPoint(robotSide, trajectoryPointIndex + 1, scs);
+
+               PrintTools.info("Expected: " + expectedTrajectoryPoint.toString());
+               PrintTools.info("Controller: " + controllerTrajectoryPoint.toString());
+
                assertTrue(expectedTrajectoryPoint.epsilonEquals(controllerTrajectoryPoint, EPSILON_FOR_DESIREDS));
 
                simulationTime = Math.max(fromMessage.time, simulationTime);
@@ -683,7 +694,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05 + getRobotModel().getControllerDT());
          assertTrue(success);
 
-         assertNumberOfWaypoints(robotSide, 1, scs);
+         String bodyName = fullRobotModel.getFoot(robotSide).getName();
+         EndToEndHandTrajectoryMessageTest.assertNumberOfWaypoints(bodyName, 1, scs);
+//         assertNumberOfWaypoints(robotSide, 1, scs);
 
          // Without forgetting to put the foot back on the ground
          footPoseCloseToActual.translate(0.0, 0.0, -0.15);
@@ -830,7 +843,9 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
          assertTrue(success);
 
-         assertSingleWaypointExecuted(robotSide, desiredPosition, desiredOrientation, scs);
+         String bodyName = fullRobotModel.getFoot(robotSide).getName();
+         EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(bodyName, desiredPosition, desiredOrientation, scs);
+//         assertSingleWaypointExecuted(robotSide, desiredPosition, desiredOrientation, scs);
 
          // Without forgetting to put the foot back on the ground
          footPoseCloseToActual.translate(0.0, 0.0, -0.15);
@@ -940,28 +955,6 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       simpleSE3TrajectoryPoint.setLinearVelocity(findControllerDesiredLinearVelocity(robotSide, scs));
       simpleSE3TrajectoryPoint.setAngularVelocity(findControllerDesiredAngularVelocity(robotSide, scs));
       return simpleSE3TrajectoryPoint;
-   }
-
-   public static void assertSingleWaypointExecuted(RobotSide robotSide, Point3D desiredPosition, Quaternion desiredOrientation, SimulationConstructionSet scs)
-   {
-      assertNumberOfWaypoints(robotSide, 2, scs);
-
-      Point3D controllerDesiredPosition = findControllerDesiredPosition(robotSide, scs);
-      assertEquals(desiredPosition.getX(), controllerDesiredPosition.getX(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredPosition.getY(), controllerDesiredPosition.getY(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredPosition.getZ(), controllerDesiredPosition.getZ(), EPSILON_FOR_DESIREDS);
-
-      Quaternion controllerDesiredOrientation = findControllerDesiredOrientation(robotSide, scs);
-      assertEquals(desiredOrientation.getX(), controllerDesiredOrientation.getX(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getY(), controllerDesiredOrientation.getY(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getZ(), controllerDesiredOrientation.getZ(), EPSILON_FOR_DESIREDS);
-      assertEquals(desiredOrientation.getS(), controllerDesiredOrientation.getS(), EPSILON_FOR_DESIREDS);
-   }
-
-   public static void assertNumberOfWaypoints(RobotSide robotSide, int expectedNumberOfTrajectoryPoints, SimulationConstructionSet scs)
-   {
-      assertEquals(expectedNumberOfTrajectoryPoints, findNumberOfWaypointsForPosition(robotSide, scs));
-      assertEquals(expectedNumberOfTrajectoryPoints, findNumberOfWaypointsForOrientation(robotSide, scs));
    }
 
    @Before

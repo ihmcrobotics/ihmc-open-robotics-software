@@ -1,6 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -32,8 +32,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -148,11 +148,12 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       RigidBody chest = fullRobotModel.getChest();
+      String footName = fullRobotModel.getFoot(footSide).getName();
       humanoidReferenceFrames.updateFrames();
       desiredChestOrientation.changeFrame(worldFrame);
       EndToEndChestTrajectoryMessageTest.assertSingleWaypointExecuted(desiredChestOrientation, scs, chest);
 //      EndToEndPelvisTrajectoryMessageTest.assertSingleWaypointExecuted(desiredPosition, desiredOrientation, scs);
-      EndToEndFootTrajectoryMessageTest.assertSingleWaypointExecuted(footSide, desiredFootPose.getFramePointCopy().getPoint(), desiredFootPose.getFrameOrientationCopy().getQuaternion(), scs);
+      EndToEndHandTrajectoryMessageTest.assertSingleWaypointExecuted(footName, desiredFootPose.getFramePointCopy().getPoint(), desiredFootPose.getFrameOrientationCopy().getQuaternion(), scs);
       for (RobotSide robotSide : RobotSide.values)
       {
          String handName = drcSimulationTestHelper.getControllerFullRobotModel().getHand(robotSide).getName();
@@ -175,7 +176,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
 
       ThreadTools.sleep(1000);
-      
+
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -189,10 +190,10 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       chestTrajectoryMessage.setTrajectoryPoint(2, 0.20, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());
       chestTrajectoryMessage.setTrajectoryPoint(3, 0.10, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());
       chestTrajectoryMessage.setTrajectoryPoint(4, 0.00, new Quaternion(), new Vector3D(), ReferenceFrame.getWorldFrame());
-      
-      
-      
-      
+
+
+
+
       wholeBodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);
       drcSimulationTestHelper.send(wholeBodyTrajectoryMessage);
 
