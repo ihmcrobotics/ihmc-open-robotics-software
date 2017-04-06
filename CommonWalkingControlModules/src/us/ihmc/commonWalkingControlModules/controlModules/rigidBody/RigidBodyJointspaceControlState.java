@@ -243,7 +243,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          double feedForwardAcceleration = generator.getAcceleration();
 
          double weight = currentWeights.get(jointIdx).getDoubleValue();
-         if(weight > 0.003)
+         if(weight > 0.00001)
          {
             OneDoFJoint joint = joints[jointIdx];
             feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gains.get(jointIdx), weight);
