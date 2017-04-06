@@ -266,7 +266,7 @@ public class ICPOptimizationController
    private final FramePoint2d tmpFramePoint2d = new FramePoint2d();
    public void addFootstepToPlan(Footstep footstep)
    {
-      if (footstep != null)
+      if (footstep != null && !footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
       {
          upcomingFootsteps.add(footstep);
          footstep.getPosition2d(tmpFramePoint2d);
