@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.robotics.controllers.YoPIDGains;
+import us.ihmc.robotics.controllers.YoPDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -51,7 +51,7 @@ public class KneeControlModule
 
    private final BooleanYoVariable activelyControl;
 
-   private final YoPIDGains jointspaceGains;
+   private final YoPDGains jointspaceGains;
    private final DoubleYoVariable jointspaceWeight;
 
    public KneeControlModule(RobotSide robotSide, HighLevelHumanoidControllerToolbox controllerToolbox, StraightLegWalkingParameters straightLegWalkingParameters,
@@ -67,10 +67,9 @@ public class KneeControlModule
       jointspaceWeight = new DoubleYoVariable(namePrefix + "JointspaceWeight", registry);
       jointspaceWeight.set(1.0);
 
-      jointspaceGains = new YoPIDGains(namePrefix, registry);
+      jointspaceGains = new YoPDGains(namePrefix, registry);
       jointspaceGains.setKp(40.0);
       jointspaceGains.setKd(6.0);
-
 
       straightPrivWeight = new DoubleYoVariable(namePrefix + "Straight_Priv_Weight", registry);
       straightPrivPositionGain = new DoubleYoVariable(namePrefix + "Straight_Priv_Kp", registry);
@@ -82,15 +81,15 @@ public class KneeControlModule
 
       privMaxAccel = new DoubleYoVariable(namePrefix + "Priv_MaxAccel", registry);
 
-      straightPrivWeight.set(50.0);
-      straightPrivPositionGain.set(50.0);
-      straightPrivVelocityGain.set(4.0);
+      straightPrivWeight.set(straightLegWalkingParameters.getStraightLegPrivilegedWeight());
+      straightPrivPositionGain.set(straightLegWalkingParameters.getStraightLegPrivilegedConfigurationGain());
+      straightPrivVelocityGain.set(straightLegWalkingParameters.getStraightLegPrivilegedVelocityGain());
 
-      bentPrivWeight.set(10.0); //5.0);
-      bentPrivPositionGain.set(40.0);
-      bentPrivVelocityGain.set(4.0);
+      bentPrivWeight.set(straightLegWalkingParameters.getBentLegPrivilegedWeight());
+      bentPrivPositionGain.set(straightLegWalkingParameters.getBentLegPrivilegedConfigurationGain());
+      bentPrivVelocityGain.set(straightLegWalkingParameters.getBentLegPrivilegedVelocityGain());
 
-      privMaxAccel.set(200.0);
+      privMaxAccel.set(straightLegWalkingParameters.getPrivilegedMaxAcceleration());
 
       desiredAngle = new DoubleYoVariable(namePrefix + "DesiredAngle", registry);
       desiredAngle.set(straightLegWalkingParameters.getStraightKneeAngle());
@@ -248,7 +247,6 @@ public class KneeControlModule
       @Override
       public boolean isDone()
       {
-         //return getTimeInCurrentState() > straighteningDuration;
          return getTimeInCurrentState() > (timeUntilStraight + dwellTime);
       }
 
@@ -262,6 +260,11 @@ public class KneeControlModule
             dwellTime += estimatedDT;
          else
             desiredPrivilegedPosition -= estimatedDT * straighteningSpeed;
+
+         /*
+         double absoluteError = Math.abs(kneeJoint.getQ() - desiredPrivilegedPosition) / (2.0 * Math.PI);
+         double gainModifier = 1.0 / (1.0 + absoluteError);
+         */
 
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredPrivilegedPosition);
          privilegedConfigurationCommand.setWeight(straightPrivWeight.getDoubleValue());
@@ -308,10 +311,13 @@ public class KneeControlModule
    private class StraightKneeControlState extends AbstractKneeControlState
    {
       private final JointspaceFeedbackControlCommand jointspaceFeedbackControlCommand = new JointspaceFeedbackControlCommand();
+      private final OneDoFJoint kneeJoint;
 
       public StraightKneeControlState(OneDoFJoint kneeJoint)
       {
          super(KneeControlType.STRAIGHT);
+
+         this.kneeJoint = kneeJoint;
 
          privilegedConfigurationCommand.addJoint(kneeJoint, Double.NaN);
          jointspaceFeedbackControlCommand.addJoint(kneeJoint, Double.NaN, Double.NaN, Double.NaN);
@@ -326,6 +332,11 @@ public class KneeControlModule
       @Override
       public void doAction()
       {
+         /*
+         double absoluteError = Math.abs(kneeJoint.getQ() - desiredAngleWhenStraight.getDoubleValue()) / (2.0 * Math.PI);
+         double gainModifier = 1.0 / (1.0 + absoluteError);
+         */
+
          privilegedConfigurationCommand.setOneDoFJoint(0, desiredAngleWhenStraight.getDoubleValue());
          privilegedConfigurationCommand.setWeight(straightPrivWeight.getDoubleValue());
          privilegedConfigurationCommand.setConfigurationGain(straightPrivPositionGain.getDoubleValue());
