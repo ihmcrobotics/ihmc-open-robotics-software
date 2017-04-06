@@ -42,7 +42,6 @@ import us.ihmc.manipulation.planning.forwaypoint.EuclideanTrajectoryQuaternionCa
 import us.ihmc.manipulation.planning.forwaypoint.FrameEuclideanTrajectoryQuaternion;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelWholeBodyPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
@@ -57,7 +56,6 @@ import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
@@ -405,7 +403,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
    }
    
-   //@Test
+   @Test
    public void testWholeBodyValidityTest() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
@@ -414,57 +412,53 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
-      
-      
       ThreadTools.sleep(20000);
       
       
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      // ********** Planning *** //
-      SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
 
-      solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose);
-      wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
-      //wholeBodyTrajectoryMessage.clear();
-
+      KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();      
+                  
+      SolarPanelPoseValidityTester solarPanelValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      
+      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 0.2, new Point3D(0.5, -0.35, 1.0), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
+      PrintTools.info("send first");
+      PrintTools.info("send first");
+      PrintTools.info("send first");
+      PrintTools.info("send first");
+      PrintTools.info("r shz"+kinematicsToolBoxController.getSolution().getJointAngles()[12]);
+      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
+      
+      ThreadTools.sleep(4000);
+      //drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
+      PrintTools.info("Wake up CMD");
+      kinematicsToolboxModule.wakeUp(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
+      PrintTools.info("r shz"+kinematicsToolBoxController.getSolution().getJointAngles()[12]);
       
       
       
+      ThreadTools.sleep(4000);
       
+      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage2 = new WholeBodyTrajectoryMessage();
+      handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 0.2, new Point3D(0.7, -0.45, 1.1), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      wholeBodyTrajectoryMessage2.setHandTrajectoryMessage(handTrajectoryMessage);
+      PrintTools.info("send second");
+      PrintTools.info("send second");
+      PrintTools.info("send second");
+      PrintTools.info("send second"+kinematicsToolBoxController.getSolution().getJointAngles()[12]);
+      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage2);
       
-      
+      ThreadTools.sleep(2000);
+      PrintTools.info("r shz"+kinematicsToolBoxController.getSolution().getJointAngles()[12]);
+      ThreadTools.sleep(2000);
+      PrintTools.info("r shz"+kinematicsToolBoxController.getSolution().getJointAngles()[12]);
       //drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       
       //success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(3.0);
       
       // ***************************************************** //
-      KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();      
-      wholeBodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
-            
-      SolarPanelPoseValidityTester solarPanelValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
-      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
-            
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       
-      PrintTools.info("the pose is "+solarPanelValidityTester.isValid());
-      
-      ThreadTools.sleep(5000);
-      PrintTools.info("Go second message");
-      wholeBodyTrajectoryMessage.clear();
-      SolarPanelCleaningPose readyPose2 = new SolarPanelCleaningPose(solarPanel, 0.3, 0.1, -0.1, -Math.PI*0.2);      
-      SolarPanelWholeBodyPose wholebodyReadyPose2 = new SolarPanelWholeBodyPose(readyPose2, 0.0, 0.0);
-      wholebodyReadyPose2.getWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage, 3.0);
-      
-      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.1);
-      ThreadTools.sleep(5000);      
-      PrintTools.info("Go third message");
-      wholeBodyTrajectoryMessage.clear();
-      SolarPanelCleaningPose readyPose3 = new SolarPanelCleaningPose(solarPanel, 0.6, 0.1, -0.1, -Math.PI*0.2);      
-      SolarPanelWholeBodyPose wholebodyReadyPose3 = new SolarPanelWholeBodyPose(readyPose3, 0.0, 0.0);
-      wholebodyReadyPose3.getWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage, 3.0);
-      
-      solarPanelValidityTester.sendWholebodyTrajectoryMessage(wholeBodyTrajectoryMessage);
       
 //      scs.addStaticLinkGraphics(solarPanelValidityTester.getRobotCollisionModel().getCollisionGraphics());
          
@@ -553,7 +547,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    }
    
    
-   @Test
+   //@Test
    public void testRRTAndMotion() throws SimulationExceededMaximumTimeException, IOException
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
