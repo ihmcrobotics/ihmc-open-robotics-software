@@ -17,10 +17,18 @@ public class FeatherstoneAlgorithmTest
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
 
    @Test
-   public void testPendulumAgainstLagrangianCalculation()
+   public void testSinglePendulumAgainstLagrangianCalculation()
    {
       double epsilon = 1e-5;
       SinglePendulumRobot pendulumRobot = new SinglePendulumRobot("pendulum", 1.2, -0.4);
+      testAgainstLagrangianCalculation(pendulumRobot, epsilon);
+   }
+
+   @Test
+   public void testDoublePendulumAgainstLagrangianCalculation()
+   {
+      double epsilon = 1e-5;
+      DoublePendulumRobot pendulumRobot = new DoublePendulumRobot("doublePendulum", 1.2, -0.4, -0.2, 0.5);
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
 

@@ -6,7 +6,7 @@ import us.ihmc.robotics.MathTools;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 
-public class SimplePendulumRobot extends RobotWithClosedFormDynamics
+public class SinglePendulumRobot extends RobotWithClosedFormDynamics
 {
    private final double mass = 1.0;
    private final double length = 1.0;
@@ -16,7 +16,7 @@ public class SimplePendulumRobot extends RobotWithClosedFormDynamics
 
    private final PinJoint pinJoint;
 
-   public SimplePendulumRobot(String name, double initialQ, double initialQd)
+   public SinglePendulumRobot(String name, double initialQ, double initialQd)
    {
       super(name);
 
