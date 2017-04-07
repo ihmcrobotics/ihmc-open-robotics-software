@@ -27,7 +27,7 @@ public class FeatherstoneAlgorithmTest
    @Test
    public void testDoublePendulumAgainstLagrangianCalculation()
    {
-      double epsilon = 1e-5;
+      double epsilon = 1e-4;
       DoublePendulumRobot pendulumRobot = new DoublePendulumRobot("doublePendulum", 1.2, -0.4, -0.2, 0.5);
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
