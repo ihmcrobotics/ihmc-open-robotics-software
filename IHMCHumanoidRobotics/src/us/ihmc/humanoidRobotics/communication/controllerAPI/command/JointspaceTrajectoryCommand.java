@@ -58,6 +58,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
          else
          {
             oneDoFJointTrajectoryCommand.clear();
+            oneDoFJointTrajectoryCommand.setWeight(0.0);
          }
       }
    }
