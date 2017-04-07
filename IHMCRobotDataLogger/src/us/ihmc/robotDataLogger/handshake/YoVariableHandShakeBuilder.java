@@ -205,6 +205,11 @@ public class YoVariableHandShakeBuilder
          {
             enumType = "null";
          }
+         if(enumType.length() > 255)
+         {
+            enumType = enumType.substring(0, 255);
+         }
+         
          enumTypeDescription.getEnumValues().add(enumType);
       }
       
