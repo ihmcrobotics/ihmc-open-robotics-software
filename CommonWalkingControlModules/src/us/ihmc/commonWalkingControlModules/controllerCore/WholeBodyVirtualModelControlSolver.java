@@ -39,6 +39,7 @@ import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
@@ -72,6 +73,8 @@ public class WholeBodyVirtualModelControlSolver
    private final TwistCalculator twistCalculator;
    private final Wrench tmpWrench = new Wrench();
    private final Twist tmpTwist = new Twist();
+   private final SpatialAccelerationVector tmpAcceleration = new SpatialAccelerationVector();
+   private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", ReferenceFrame.getWorldFrame());
 
    private final OneDoFJoint[] controlledOneDoFJoints;
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
@@ -111,8 +114,7 @@ public class WholeBodyVirtualModelControlSolver
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
       controlRootBody = toolbox.getVirtualModelControlMainBody();
-      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controlRootBody, controlledOneDoFJoints, registry,
-                                                          toolbox.getYoGraphicsListRegistry());
+      virtualModelController = new VirtualModelController(controlRootBody, controlledOneDoFJoints, registry, toolbox.getYoGraphicsListRegistry());
 
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
       yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
@@ -368,14 +370,16 @@ public class WholeBodyVirtualModelControlSolver
    private void handleSpatialAccelerationCommand(SpatialAccelerationCommand command)
    {
       RigidBody controlledBody = command.getEndEffector();
-      SpatialAccelerationVector accelerationVector = command.getSpatialAcceleration();
-      accelerationVector.changeBaseFrameNoRelativeAcceleration(ReferenceFrame.getWorldFrame());
+      command.getDesiredSpatialAcceleration(controlFrame, tmpAcceleration);
+      tmpAcceleration.changeBaseFrameNoRelativeAcceleration(ReferenceFrame.getWorldFrame());
+   // Watch for this one, it is correct except when the orientation is only partially controlled. It should be expressed at the command's controlFrame. (Sylvain)
+      tmpAcceleration.changeFrameNoRelativeMotion(controlledBody.getBodyFixedFrame());
 
       twistCalculator.getTwistOfBody(controlledBody, tmpTwist);
 
-      tmpWrench.setToZero(accelerationVector.getBodyFrame(), accelerationVector.getExpressedInFrame());
+      tmpWrench.setToZero(tmpAcceleration.getBodyFrame(), tmpAcceleration.getExpressedInFrame());
 
-      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(accelerationVector, tmpTwist, tmpWrench);
+      conversionInertias.get(controlledBody).computeDynamicWrenchInBodyCoordinates(tmpAcceleration, tmpTwist, tmpWrench);
 
       tmpWrench.changeBodyFrameAttachedToSameBody(controlledBody.getBodyFixedFrame());
       tmpWrench.changeFrame(ReferenceFrame.getWorldFrame());

@@ -256,7 +256,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       combinedTerrainObject.addBox(landingStartX, rampYStart, landingEndX, rampYEnd, 0.0, landingHeight, YoAppearance.Gray());
       combinedTerrainObject.addRamp(rampEndX, rampYStart, landingEndX, rampYEnd, landingHeight, appearance);
 
-      combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 2.0, rampYEnd, -0.05, 0.0);
+      combinedTerrainObject.addBox(rampXStart0 - 2.0, rampYStart, rampEndX + 6.0, rampYEnd, -0.05, 0.0);
 
       return new ImmutablePair<CombinedTerrainObject3D, Double>(combinedTerrainObject, rampEndX);
    }

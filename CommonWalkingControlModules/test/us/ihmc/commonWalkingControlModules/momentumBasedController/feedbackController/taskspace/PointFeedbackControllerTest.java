@@ -14,9 +14,8 @@ import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -71,7 +70,6 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
@@ -79,7 +77,7 @@ public final class PointFeedbackControllerTest
 
       
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
-                                                                            geometricJacobianHolder, null, null, registry);
+                                                                            null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -111,12 +109,11 @@ public final class PointFeedbackControllerTest
       for (int i = 0; i < 100; i++)
       {
          twistCalculator.compute();
-         geometricJacobianHolder.compute();
 
          pointFeedbackController.computeInverseDynamics();
-         PointAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
 
-         motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
+         motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
          CommonOps.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
@@ -166,14 +163,13 @@ public final class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
-                                                                            geometricJacobianHolder, null, null, registry);
+                                                                            null, null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
@@ -223,11 +219,10 @@ public final class PointFeedbackControllerTest
       for (int i = 0; i < 100; i++)
       {
          twistCalculator.compute();
-         geometricJacobianHolder.compute();
 
          pointFeedbackController.computeInverseDynamics();
-         PointAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
-         motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
+         motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
 
          MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
          CommonOps.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J

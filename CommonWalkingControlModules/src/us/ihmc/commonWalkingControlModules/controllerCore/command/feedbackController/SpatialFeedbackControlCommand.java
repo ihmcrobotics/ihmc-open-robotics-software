@@ -24,7 +24,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
- * {@link SpatialFeedbackControlCommand} is a command meant to be submit to the
+ * {@link SpatialFeedbackControlCommand} is a command meant to be submitted to the
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
  * The objective of a {@link SpatialFeedbackControlCommand} is to notify the feedback controller
@@ -103,7 +103,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * Specifies the rigid-body to be controlled, i.e. {@code endEffector}.
     * <p>
     * The joint path going from the {@code base} to the {@code endEffector} specifies the joints
-    * that can be to control the end-effector.
+    * that can be used to control the end-effector.
     * </p>
     * 
     * @param base the rigid-body located right before the first joint to be used for controlling the
@@ -393,6 +393,28 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
+    * Sets the position of the {@code controlFrame}'s origin with respect to the
+    * {@code endEffector.getBodyFixedFrame()}. The {@code controlFrame} will have the same
+    * orientation as the end-effector body-fixed frame.
+    * <p>
+    * The {@code controlFrame} describes on what the feedback control is applied, such that the
+    * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
+    * to the given desired position and orientation.
+    * </p>
+    * 
+    * @param position the position of the {@code controlFrame}'s origin. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the {@code position} is not expressed in
+    *            {@code endEffector.getBodyFixedFrame()}.
+    */
+   public void setControlFrameFixedInEndEffector(FramePoint position)
+   {
+      RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
+      position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      position.get(controlFrameOriginInEndEffectorFrame);
+      controlFrameOrientationInEndEffectorFrame.setToZero();
+   }
+
+   /**
     * Sets the position and orientation of the {@code controlFrame} with respect to the
     * {@code endEffector.getBodyFixedFrame()}.
     * <p>
@@ -499,7 +521,6 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
     * specific DoF of the end-effector.
     * </p>
-    * <p>
     * 
     * @param selectionMatrix the new selection matrix to be used. Not modified.
     * @throws RuntimeException if the selection matrix has a number of rows greater than 6 or has a
@@ -534,7 +555,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
     * </p>
     * 
     * @param angular the weights to use for the angular part of this command. Not modified.
-    * @param linear the weight to use for the linear part of this command. Not modified.
+    * @param linear the weights to use for the linear part of this command. Not modified.
     */
    public void setWeightsForSolver(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
