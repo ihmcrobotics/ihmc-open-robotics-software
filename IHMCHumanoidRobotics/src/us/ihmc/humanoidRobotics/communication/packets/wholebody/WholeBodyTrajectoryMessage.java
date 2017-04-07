@@ -402,21 +402,21 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
    public List<Packet<?>> getPackets()
    {
       ArrayList<Packet<?>> wholeBodyPackets = new ArrayList<>();
-      if(leftHandTrajectoryMessage !=null)
+      if (leftHandTrajectoryMessage != null)
          wholeBodyPackets.add(leftHandTrajectoryMessage);
-      if(rightHandTrajectoryMessage !=null)
+      if (rightHandTrajectoryMessage != null)
          wholeBodyPackets.add(rightHandTrajectoryMessage);
-      if(leftArmTrajectoryMessage !=null)
+      if (leftArmTrajectoryMessage != null)
          wholeBodyPackets.add(leftArmTrajectoryMessage);
-      if(rightArmTrajectoryMessage !=null)
+      if (rightArmTrajectoryMessage != null)
          wholeBodyPackets.add(rightArmTrajectoryMessage);
-      if(chestTrajectoryMessage !=null)
+      if (chestTrajectoryMessage != null)
          wholeBodyPackets.add(chestTrajectoryMessage);
-      if(pelvisTrajectoryMessage !=null)
+      if (pelvisTrajectoryMessage != null)
          wholeBodyPackets.add(pelvisTrajectoryMessage);
-      if(leftFootTrajectoryMessage !=null)
+      if (leftFootTrajectoryMessage != null)
          wholeBodyPackets.add(leftFootTrajectoryMessage);
-      if(rightFootTrajectoryMessage !=null)
+      if (rightFootTrajectoryMessage != null)
          wholeBodyPackets.add(rightFootTrajectoryMessage);
       return wholeBodyPackets;
    }
