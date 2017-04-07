@@ -19,8 +19,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
                   topic = "/control/hybrid_head_trajectory")
 public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HeadHybridJointspaceTaskspaceTrajectoryMessage>  implements VisualizablePacket, FrameBasedMessage
 {
-   private HeadTrajectoryMessage headTrajectoryMessage; 
-   private NeckTrajectoryMessage neckTrajectoryMessage;
+   public HeadTrajectoryMessage headTrajectoryMessage; 
+   public NeckTrajectoryMessage neckTrajectoryMessage;
    
    /**
     * Empty constructor for serialization.
@@ -128,5 +128,11 @@ public class HeadHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public Quaternion getControlFrameOrientation()
    {
       return headTrajectoryMessage.getControlFrameOrientation();
+   }
+   
+   @Override
+   public boolean useCustomControlFrame()
+   {
+      return headTrajectoryMessage.useCustomControlFrame();
    }
 }

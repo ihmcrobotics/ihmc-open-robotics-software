@@ -20,8 +20,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<HandHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
 {
    
-   private HandTrajectoryMessage handTrajectoryMessage;
-   private ArmTrajectoryMessage armTrajectoryMessage;
+   public HandTrajectoryMessage handTrajectoryMessage;
+   public ArmTrajectoryMessage armTrajectoryMessage;
    /**
     * Empty constructor for serialization.
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
@@ -128,5 +128,11 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMes
    public Quaternion getControlFrameOrientation()
    {
       return handTrajectoryMessage.getControlFrameOrientation();
+   }
+   
+   @Override
+   public boolean useCustomControlFrame()
+   {
+      return handTrajectoryMessage.useCustomControlFrame();
    }
 }
