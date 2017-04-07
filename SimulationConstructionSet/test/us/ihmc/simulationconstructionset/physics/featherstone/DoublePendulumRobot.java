@@ -88,7 +88,7 @@ public class DoublePendulumRobot extends RobotWithClosedFormDynamics
       double qd2 = pinJoint2.getQD();
       double qdd2 = pinJoint2.getQDD();
 
-      double g = gravityZ.getDoubleValue();
+      double g = Math.abs(gravityZ.getDoubleValue());
       double Ixx1 = mass1 * MathTools.square(lengthCoM1) + Ixx1CoM;
       double Ixx2 = mass2 * MathTools.square(lengthCoM2) + Ixx2CoM;
 
