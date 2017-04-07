@@ -5,6 +5,7 @@ import java.util.Collection;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -30,28 +31,37 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    private final SoftTouchdownPositionTrajectoryGenerator positionTrajectoryForDisturbanceRecovery;
 
    private final RigidBodyTaskspaceControlState taskspaceControlState;
+   private final SpatialFeedbackControlCommand spatialFeedbackControlCommandForTouchdown = new SpatialFeedbackControlCommand();
+
+   private final Vector3D tempAngularWeightVector = new Vector3D();
+   private final Vector3D tempLinearWeightVector = new Vector3D();
 
    public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.MOVE_VIA_WAYPOINTS, footControlHelper, gains, registry);
 
-      String namePrefix = footControlHelper.getRobotSide().getCamelCaseNameForStartOfExpression() + "FootMoveViaWaypoints";
+      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+      String namePrefix = foot.getName() + "MoveViaWaypoints";
 
       isPerformingTouchdown = new BooleanYoVariable(namePrefix + "IsPerformingTouchdown", registry);
       positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame, currentDesiredFootPosition,
             touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
 
-      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       footFrame = foot.getBodyFixedFrame();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       Collection<ReferenceFrame> trajectoryFrames = controllerToolbox.getTrajectoryFrames();
       ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
+      ReferenceFrame controlFrame = foot.getParentJoint().getFrameAfterJoint();
 
-      taskspaceControlState = new RigidBodyTaskspaceControlState(foot, pelvis, rootBody, trajectoryFrames, footFrame, pelvisFrame, yoTime, graphicsListRegistry,
-            registry);
+      taskspaceControlState = new RigidBodyTaskspaceControlState(foot, pelvis, rootBody, trajectoryFrames, controlFrame, pelvisFrame, yoTime,
+            graphicsListRegistry, registry);
       taskspaceControlState.setGains(gains.getOrientationGains(), gains.getPositionGains());
+
+      spatialFeedbackControlCommandForTouchdown.set(rootBody, foot);
+      spatialFeedbackControlCommandForTouchdown.setPrimaryBase(pelvis);
+      spatialFeedbackControlCommandForTouchdown.setGains(gains);
    }
 
    @Override
@@ -82,20 +92,14 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    }
 
    @Override
-   protected void initializeTrajectory()
+   public void doTransitionIntoAction()
    {
+      taskspaceControlState.doTransitionIntoAction();
+      isPerformingTouchdown.set(false);
    }
 
    @Override
-   public void doTransitionIntoAction()
-   {
-      super.doTransitionIntoAction();
-      taskspaceControlState.doTransitionIntoAction();
-      isPerformingTouchdown.set(false);
-   };
-
-   @Override
-   protected void computeAndPackTrajectory()
+   public void doSpecificAction()
    {
       if (isPerformingTouchdown.getBooleanValue())
       {
@@ -103,6 +107,8 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
          positionTrajectoryForDisturbanceRecovery.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
          desiredAngularVelocity.setToZero();
          desiredAngularAcceleration.setToZero();
+
+         packCommandForTouchdown();
       }
       else
       {
@@ -113,20 +119,28 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       }
    }
 
+   private void packCommandForTouchdown()
+   {
+      spatialFeedbackControlCommandForTouchdown.set(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      spatialFeedbackControlCommandForTouchdown.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      angularWeight.get(tempAngularWeightVector);
+      linearWeight.get(tempLinearWeightVector);
+      spatialFeedbackControlCommandForTouchdown.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
+   }
+
    public void requestTouchdownForDisturbanceRecovery()
    {
       if (isPerformingTouchdown.getBooleanValue())
          return;
 
       desiredPosition.setToZero(footFrame);
+      desiredOrientation.setToZero(footFrame);
       desiredPosition.changeFrame(worldFrame);
+      desiredOrientation.changeFrame(worldFrame);
 
       currentDesiredFootPosition.set(desiredPosition);
       touchdownInitialTimeProvider.setValue(getTimeInCurrentState());
       positionTrajectoryForDisturbanceRecovery.initialize();
-
-      desiredOrientation.setToZero(footFrame);
-      desiredOrientation.changeFrame(worldFrame);
 
       isPerformingTouchdown.set(true);
    }
@@ -139,17 +153,14 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      if (isPerformingTouchdown.getBooleanValue())
-         return super.getInverseDynamicsCommand();
-
-      return taskspaceControlState.getInverseDynamicsCommand();
+      return null;
    }
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       if (isPerformingTouchdown.getBooleanValue())
-         return super.getFeedbackControlCommand();
+         return spatialFeedbackControlCommandForTouchdown;
 
       return taskspaceControlState.getFeedbackControlCommand();
    }
@@ -157,7 +168,18 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    @Override
    public void doTransitionOutOfAction()
    {
-      super.doTransitionOutOfAction();
       taskspaceControlState.doTransitionOutOfAction();
+   }
+
+   @Override
+   protected void computeAndPackTrajectory()
+   {
+
+   }
+
+   @Override
+   protected void initializeTrajectory()
+   {
+
    }
 }
