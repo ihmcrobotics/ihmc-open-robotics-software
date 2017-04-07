@@ -92,6 +92,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    private String optionalPrimaryBaseName;
 
    /**
+    * Flag to indicate whether or not to use the intermediate base {@code optionalPrimaryBase} to
+    * control against, as opposed to using the {@code base}.
+    */
+   private boolean useOptionalPrimaryBaseForControl = false;
+
+   /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
     * core.
     */
@@ -185,6 +191,18 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       optionalPrimaryBase = primaryBase;
       optionalPrimaryBaseName = primaryBase.getName();
+   }
+
+   /**
+    * Indicates that we would like to use only the joints in the kinematic chain between the
+    * {@code primaryBase} and the {@code endEffector} for controlling the {@code endEffector}.
+    * This is counter to allowing the {@code base} to move to move the {@code endEffector}.
+    *
+    * @param usePrimaryBaseForController whether or not to use the primary base for control. Optional.
+    */
+   public void setUsePrimaryBaseForControl(boolean usePrimaryBaseForController)
+   {
+      useOptionalPrimaryBaseForControl = usePrimaryBaseForController;
    }
 
    /**
@@ -871,6 +889,24 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public String getPrimaryBaseName()
    {
       return optionalPrimaryBaseName;
+   }
+
+   /**
+    * Gets whether or not to control the {@code endEffector} using only the {@code primaryBase}
+    * or the full {@code base}.
+    *
+    * <p>
+    *    This parameter is optional. If provided, it is only uses those joints in the kinematic
+    *    chain between the {@code primaryBase} and the {@code endEffector} to control the
+    *    {@code endEffector}.
+    * </p>
+    *
+    * @return whether or not to control against the {@code primaryBase} (true) or the regular
+    * base (false and default).
+    */
+   public boolean usePrimaryBaseForControl()
+   {
+      return useOptionalPrimaryBaseForControl;
    }
 
    /**
