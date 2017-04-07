@@ -20,9 +20,8 @@ import us.ihmc.simulationconstructionset.robotdefinition.LinkDefinitionFixedFram
 /**
  * Describes physical properties of a rigid body. Can attach graphics to it.<p>
  *
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Yobotics, Inc. 2000-2005 <p>
  * @author Jerry Pratt
  * @version 1.0
  */

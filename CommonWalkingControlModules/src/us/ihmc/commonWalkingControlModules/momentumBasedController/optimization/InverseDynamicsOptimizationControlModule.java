@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
@@ -74,7 +73,6 @@ public class InverseDynamicsOptimizationControlModule
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
-      InverseDynamicsJoint rootJoint = toolbox.getRobotRootJoint();
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
@@ -84,7 +82,7 @@ public class InverseDynamicsOptimizationControlModule
 
       List<? extends ContactablePlaneBody> contactablePlaneBodies = toolbox.getContactablePlaneBodies();
 
-      MomentumOptimizationSettings momentumOptimizationSettings = toolbox.getMomentumOptimizationSettings();
+      ControllerCoreOptimizationSettings optimizationSettings = toolbox.getOptimizationSettings();
 
       wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
 
@@ -95,7 +93,7 @@ public class InverseDynamicsOptimizationControlModule
          basisVectorVisualizer = null;
 
       motionQPInput = new MotionQPInput(numberOfDoFs);
-      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, rootJoint, contactablePlaneBodies);
+      externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       boundCalculator = toolbox.getQPBoundCalculator();
@@ -111,13 +109,14 @@ public class InverseDynamicsOptimizationControlModule
          jointMinimumAccelerations.put(joint, new DoubleYoVariable("qdd_min_qp_" + joint.getName(), registry));
       }
 
-      rhoMin.set(momentumOptimizationSettings.getRhoMin());
+      rhoMin.set(optimizationSettings.getRhoMin());
       
       momentumModuleSolution = new MomentumModuleSolution();
 
-      qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, registry);
-      qpSolver.setAccelerationRegularizationWeight(momentumOptimizationSettings.getJointAccelerationWeight());
-      qpSolver.setJerkRegularizationWeight(momentumOptimizationSettings.getJointJerkWeight());
+      boolean hasFloatingBase = toolbox.getRootJoint() != null;
+      qpSolver = new InverseDynamicsQPSolver(numberOfDoFs, rhoSize, hasFloatingBase, registry);
+      qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
+      qpSolver.setJerkRegularizationWeight(optimizationSettings.getJointJerkWeight());
 
       parentRegistry.addChild(registry);
    }
@@ -252,13 +251,6 @@ public class InverseDynamicsOptimizationControlModule
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
-      if (success)
-         qpSolver.addMotionInput(motionQPInput);
-   }
-
-   public void submitPointAccelerationCommand(PointAccelerationCommand command)
-   {
-      boolean success = motionQPInputCalculator.convertPointAccelerationCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }

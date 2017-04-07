@@ -11,7 +11,6 @@ import org.junit.After;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotLegs;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
@@ -560,7 +559,7 @@ public class VirtualModelControllerTest
       CommonOps.invert(transposeJacobianMatrix);
 
       YoVariableRegistry registry = new YoVariableRegistry(this.getClass().getSimpleName());
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), pelvis, null, registry, null);
+      VirtualModelController virtualModelController = new VirtualModelController(pelvis, null, registry, null);
       virtualModelController.registerControlledBody(endEffector, pelvis);
 
       VirtualWrenchCommand virtualWrenchCommand = new VirtualWrenchCommand();
@@ -776,7 +775,7 @@ public class VirtualModelControllerTest
       CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
       CommonOps.invert(transposeJacobianMatrix);
 
-      VirtualModelController virtualModelController = new VirtualModelController(new GeometricJacobianHolder(), base, null, registry, null);
+      VirtualModelController virtualModelController = new VirtualModelController(base, null, registry, null);
       virtualModelController.registerControlledBody(endEffector, base);
 
       desiredWrench.changeFrame(base.getBodyFixedFrame());

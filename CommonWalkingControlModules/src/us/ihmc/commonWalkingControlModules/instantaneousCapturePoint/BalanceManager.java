@@ -54,6 +54,7 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 public class BalanceManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean ENABLE_DYN_REACHABILITY = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -171,7 +172,10 @@ public class BalanceManager
       icpPlanner.setOmega0(controllerToolbox.getOmega0());
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
-      dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
+      if (ENABLE_DYN_REACHABILITY)
+         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
+      else
+         dynamicReachabilityCalculator = null;
       editStepTimingForReachability.set(walkingControllerParameters.editStepTimingForReachability());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
@@ -258,7 +262,8 @@ public class BalanceManager
     */
    public void setUpcomingFootstep(Footstep upcomingFootstep)
    {
-      dynamicReachabilityCalculator.setUpcomingFootstep(upcomingFootstep);
+      if (ENABLE_DYN_REACHABILITY)
+         dynamicReachabilityCalculator.setUpcomingFootstep(upcomingFootstep);
    }
 
    /**
@@ -269,7 +274,8 @@ public class BalanceManager
    public void setNextFootstep(Footstep nextFootstep)
    {
       momentumRecoveryControlModule.setNextFootstep(nextFootstep);
-      dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
+      if (ENABLE_DYN_REACHABILITY)
+         dynamicReachabilityCalculator.setUpcomingFootstep(nextFootstep);
    }
 
    public boolean checkAndUpdateFootstep(Footstep footstep)
@@ -482,12 +488,15 @@ public class BalanceManager
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      dynamicReachabilityCalculator.setInSwing();
-
-      if (editStepTimingForReachability.getBooleanValue())
-         dynamicReachabilityCalculator.verifyAndEnsureReachability();
-      else
-         dynamicReachabilityCalculator.checkReachabilityOfStep();
+      if (ENABLE_DYN_REACHABILITY && Double.isFinite(defaultSwingTime))
+      {
+         dynamicReachabilityCalculator.setInSwing();
+         
+         if (editStepTimingForReachability.getBooleanValue())
+            dynamicReachabilityCalculator.verifyAndEnsureReachability();
+         else
+            dynamicReachabilityCalculator.checkReachabilityOfStep();
+      }
    }
 
    public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
@@ -517,12 +526,15 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      dynamicReachabilityCalculator.setInTransfer();
-
-      if (editStepTimingForReachability.getBooleanValue())
-         dynamicReachabilityCalculator.verifyAndEnsureReachability();
-      else
-         dynamicReachabilityCalculator.checkReachabilityOfStep();
+      if (ENABLE_DYN_REACHABILITY && Double.isFinite(defaultSwingTime))
+      {
+         dynamicReachabilityCalculator.setInTransfer();
+         
+         if (editStepTimingForReachability.getBooleanValue())
+            dynamicReachabilityCalculator.verifyAndEnsureReachability();
+         else
+            dynamicReachabilityCalculator.checkReachabilityOfStep();
+      }
    }
 
    public boolean isTransitionToSingleSupportSafe(RobotSide transferToSide)

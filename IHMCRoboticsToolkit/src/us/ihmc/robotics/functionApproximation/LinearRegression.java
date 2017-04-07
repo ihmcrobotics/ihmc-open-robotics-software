@@ -13,10 +13,6 @@ import Jama.Matrix;
  * makes all the assumptions needed when using the least squares (Gauss-Markov) method. Like all good things, this was found on
  * wikipedia. Note that to have an offset the client should augment the input vectors with a constant term.</p>
  *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: IHMC</p>
- *
  * @author jrebula
  * @version 1.0
  */

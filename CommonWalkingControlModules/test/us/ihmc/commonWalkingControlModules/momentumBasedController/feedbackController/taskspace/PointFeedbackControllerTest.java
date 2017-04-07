@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.List;
 import java.util.Random;
@@ -10,18 +9,16 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+import org.junit.Test;
 
-import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -40,12 +37,12 @@ import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
-public abstract class PointFeedbackControllerTest
+public final class PointFeedbackControllerTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   protected abstract MomentumOptimizationSettings getMomentumOptimizationSettings();
-
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testConvergence() throws Exception
    {
       Random random = new Random(5641654L);
@@ -73,16 +70,15 @@ public abstract class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      MomentumOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, momentumOptimizationSettings,
-            jointPrivilegedConfigurationParameters, null, controlDT, 0.0, geometricJacobianHolder, twistCalculator, null, null, registry);
+      
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
+                                                                            null, null, registry);
+      toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
@@ -100,9 +96,7 @@ public abstract class PointFeedbackControllerTest
       MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
-      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
-            jointIndexHandler, jointPrivilegedConfigurationParameters, registry);
+      MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
 
@@ -115,12 +109,11 @@ public abstract class PointFeedbackControllerTest
       for (int i = 0; i < 100; i++)
       {
          twistCalculator.compute();
-         geometricJacobianHolder.compute();
 
-         pointFeedbackController.compute();
-         PointAccelerationCommand output = pointFeedbackController.getOutput();
+         pointFeedbackController.computeInverseDynamics();
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
 
-         motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
+         motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);
          CommonOps.mult(jInverse, motionQPInput.taskObjective, jointAccelerations);
@@ -141,6 +134,8 @@ public abstract class PointFeedbackControllerTest
       }
    }
 
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testConvergenceWithJerryQP() throws Exception
    {
       Random random = new Random(5641654L);
@@ -168,16 +163,14 @@ public abstract class PointFeedbackControllerTest
       joints.get(0).getPredecessor().updateFramesRecursively();
 
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       TwistCalculator twistCalculator = new TwistCalculator(worldFrame, elevator);
       twistCalculator.compute();
       InverseDynamicsJoint[] jointsToOptimizeFor = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       double controlDT = 0.004;
 
-      MomentumOptimizationSettings momentumOptimizationSettings = getMomentumOptimizationSettings();
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(null, null, jointsToOptimizeFor, momentumOptimizationSettings,
-            jointPrivilegedConfigurationParameters, null, controlDT, 0.0, geometricJacobianHolder, twistCalculator, null, null, registry);
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator,
+                                                                            null, null, registry);
+      toolbox.setupForInverseDynamicsSolver(null);
       FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
       PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
 
@@ -195,9 +188,7 @@ public abstract class PointFeedbackControllerTest
       MotionQPInput motionQPInput = new MotionQPInput(numberOfDoFs);
       LinearSolver<DenseMatrix64F> pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
       DenseMatrix64F jInverse = new DenseMatrix64F(numberOfDoFs, 6);
-      JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator,
-            jointIndexHandler, jointPrivilegedConfigurationParameters, registry);
+      MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromJerryQP = new DenseMatrix64F(numberOfDoFs, 1);
       DenseMatrix64F jointAccelerationsFromQPOASES = new DenseMatrix64F(numberOfDoFs, 1);
@@ -228,11 +219,10 @@ public abstract class PointFeedbackControllerTest
       for (int i = 0; i < 100; i++)
       {
          twistCalculator.compute();
-         geometricJacobianHolder.compute();
 
-         pointFeedbackController.compute();
-         PointAccelerationCommand output = pointFeedbackController.getOutput();
-         motionQPInputCalculator.convertPointAccelerationCommand(output, motionQPInput);
+         pointFeedbackController.computeInverseDynamics();
+         SpatialAccelerationCommand output = pointFeedbackController.getInverseDynamicsOutput();
+         motionQPInputCalculator.convertSpatialAccelerationCommand(output, motionQPInput);
 
          MatrixTools.scaleTranspose(1.0, motionQPInput.taskJacobian, tempJtW); // J^T W
          CommonOps.mult(tempJtW, motionQPInput.taskJacobian, solverInput_H); // H = J^T W J
@@ -246,7 +236,7 @@ public abstract class PointFeedbackControllerTest
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
          jerryQPSolver.solve(jointAccelerationsFromJerryQP, new DenseMatrix64F(1, 1), new DenseMatrix64F(1, 1));
          oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
-               jointAccelerationsFromQPOASES, true);
+                             jointAccelerationsFromQPOASES, true);
 
          pseudoInverseSolver.setA(motionQPInput.taskJacobian);
          pseudoInverseSolver.invert(jInverse);

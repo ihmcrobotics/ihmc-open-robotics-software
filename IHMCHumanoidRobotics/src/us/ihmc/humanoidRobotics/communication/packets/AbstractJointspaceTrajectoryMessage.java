@@ -50,6 +50,26 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
       for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
          jointTrajectoryMessages[jointIndex] = new OneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
    }
+   
+   /**
+    * Use this constructor to go straight to the given end points using the specified qp weights.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param desiredJointPositions desired joint positions. The array length should be equal to the number of controlled joints.
+    * @param weights the qp weights for the joint accelerations
+    */
+   public AbstractJointspaceTrajectoryMessage(double trajectoryTime, double[] desiredJointPositions,  double[] weights)
+   {
+      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      jointTrajectoryMessages = new OneDoFJointTrajectoryMessage[desiredJointPositions.length];
+      for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)
+      {
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = new OneDoFJointTrajectoryMessage(trajectoryTime, desiredJointPositions[jointIndex]);
+         oneDoFJointTrajectoryMessage.setWeight(weights[jointIndex]);
+         jointTrajectoryMessages[jointIndex] = oneDoFJointTrajectoryMessage;
+      }
+         
+   }
 
    /**
     * Use this constructor to build a message with more than one trajectory point.
@@ -120,6 +140,12 @@ public abstract class AbstractJointspaceTrajectoryMessage<T extends AbstractJoin
    {
       rangeCheck(jointIndex);
       jointTrajectoryMessages[jointIndex].setTrajectoryPoint(trajectoryPointIndex, time, position, velocity);
+   }
+   
+   public void setQPWeight(int jointIndex, double weight)
+   {
+      rangeCheck(jointIndex);
+      jointTrajectoryMessages[jointIndex].setWeight(weight);
    }
 
    public int getNumberOfJoints()

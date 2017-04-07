@@ -3,42 +3,15 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.Map;
 
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public abstract class MomentumOptimizationSettings
+public abstract class MomentumOptimizationSettings implements ControllerCoreOptimizationSettings
 {
    public abstract Vector3D getLinearMomentumWeight();
 
    public abstract Vector3D getHighLinearMomentumWeightForRecovery();
 
    public abstract Vector3D getAngularMomentumWeight();
-
-   public abstract double getJointAccelerationWeight();
-
-   public abstract double getJointJerkWeight();
-
-   public abstract double getRhoWeight();
-
-   public abstract double getRhoMin();
-
-   public abstract double getRhoRateDefaultWeight();
-
-   public abstract double getRhoRateHighWeight();
-
-   public abstract Vector2D getCoPWeight();
-
-   public abstract Vector2D getCoPRateDefaultWeight();
-
-   public abstract Vector2D getCoPRateHighWeight();
-
-   public abstract int getNumberOfBasisVectorsPerContactPoint();
-
-   public abstract int getNumberOfContactPointsPerContactableBody();
-
-   public abstract int getNumberOfContactableBodies();
-
-   public abstract int getRhoSize();
 
    /**
     * The map returned contains all optimization weights for jointspace objectives. The key of the map

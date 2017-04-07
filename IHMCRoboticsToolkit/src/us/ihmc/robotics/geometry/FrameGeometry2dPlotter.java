@@ -17,18 +17,6 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class FrameGeometry2dPlotter extends JPanel implements MouseInputListener
 {
    private static final long serialVersionUID = 2505175418803166784L;
