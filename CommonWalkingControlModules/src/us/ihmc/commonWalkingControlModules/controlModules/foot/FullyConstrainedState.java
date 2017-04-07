@@ -82,7 +82,7 @@ public class FullyConstrainedState extends AbstractFootControlState
       ReferenceFrame bodyFixedFrame = contactableFoot.getRigidBody().getBodyFixedFrame();
       footAcceleration.changeBodyFrameNoRelativeAcceleration(bodyFixedFrame);
       footAcceleration.changeFrameNoRelativeMotion(bodyFixedFrame);
-      spatialAccelerationCommand.setSpatialAcceleration(footAcceleration);
+      spatialAccelerationCommand.setSpatialAcceleration(bodyFixedFrame, footAcceleration);
    }
 
    @Override

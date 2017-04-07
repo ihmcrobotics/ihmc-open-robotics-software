@@ -20,10 +20,6 @@ import java.util.ArrayList;
  * When placing cameras ensure that no overlap occurs as it will cause unpredictable behavior.
  * </p>
  *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
  * @author Jerry Pratt
  * @version 1.0
  */

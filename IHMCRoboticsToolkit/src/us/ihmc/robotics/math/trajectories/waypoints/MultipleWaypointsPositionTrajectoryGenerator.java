@@ -40,19 +40,19 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    }
 
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+                                                       YoVariableRegistry parentRegistry)
    {
       this(namePrefix, defaultMaximumNumberOfWaypoints, allowMultipleFrames, referenceFrame, parentRegistry);
    }
 
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+                                                       YoVariableRegistry parentRegistry)
    {
       this(namePrefix, maximumNumberOfWaypoints, false, referenceFrame, parentRegistry);
    }
 
    public MultipleWaypointsPositionTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, boolean allowMultipleFrames,
-         ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+                                                       ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       super(allowMultipleFrames, referenceFrame);
 
@@ -130,6 +130,20 @@ public class MultipleWaypointsPositionTrajectoryGenerator extends PositionTrajec
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(euclideanWaypoint);
+   }
+
+   public void appendWaypoint(FrameEuclideanTrajectoryPoint frameEuclideanTrajectoryPoint)
+   {
+      frameEuclideanTrajectoryPoint.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
+      appendWaypointUnsafe(frameEuclideanTrajectoryPoint);
+   }
+
+   public void appendWaypoint(FrameSE3TrajectoryPoint frameSE3TrajectoryPoint)
+   {
+      frameSE3TrajectoryPoint.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
+      appendWaypointUnsafe(frameSE3TrajectoryPoint);
    }
 
    private void appendWaypointUnsafe(EuclideanTrajectoryPointInterface<?> euclideanWaypoint)

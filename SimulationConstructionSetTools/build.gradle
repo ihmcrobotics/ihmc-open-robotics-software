@@ -45,7 +45,6 @@ dependencies {
     compile ihmc.getProjectDependency(":SimulationConstructionSet")
     compile group: 'us.ihmc', name: 'ihmc-commons', version: '0.9.1-alpha'
 
-    testCompile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
     testCompile group: 'us.ihmc', name: 'ihmc-commons-testing', version: '0.9.1-alpha'
 }
 
@@ -61,11 +60,5 @@ jar {
                 "Bundle-Version": project.version,
                 "Bundle-License": "${project.ext.licenseURL}",
                 "Bundle-Vendor": "IHMC")
-    }
-}
-
-distributions {
-    main {
-        baseName = 'SimulationConstructionSetTools'
     }
 }

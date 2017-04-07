@@ -19,12 +19,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
  *
  * </p>
  *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
  * @author Twan Koolen
- * @version 1.0
  */
 
 //Semi-TODO: use median algorithms instead of random algorithms

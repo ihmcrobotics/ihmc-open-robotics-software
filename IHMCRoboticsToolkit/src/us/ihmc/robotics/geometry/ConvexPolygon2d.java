@@ -23,11 +23,7 @@ import us.ihmc.robotics.random.RandomGeometry;
  * The vertices of this polygon are clockwise and are all different.
  * </p>
  *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author IHMC-Yobotics Biped Team
+ * @author IHMC Biped Team
  * @version 1.0
  */
 public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>

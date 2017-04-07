@@ -11,16 +11,12 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.Wrench;
 
 /**
- * @author twan
- *         Date: 5/2/13
+ * @author twan Date: 5/2/13
  */
 public class ExternalWrenchHandler
 {
@@ -39,8 +35,8 @@ public class ExternalWrenchHandler
    private final SpatialForceVector tempWrench = new SpatialForceVector();
    private final ReferenceFrame centerOfMassFrame;
 
-   public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, InverseDynamicsJoint rootJoint,
-         List<? extends ContactablePlaneBody> contactablePlaneBodies)
+   public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, double robotTotalMass,
+                                List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
@@ -48,8 +44,7 @@ public class ExternalWrenchHandler
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
       gravitationalWrench = new SpatialForceVector(centerOfMassFrame);
-      double totalMass = TotalMassCalculator.computeMass(ScrewTools.computeSupportAndSubtreeSuccessors(rootJoint.getSuccessor()));
-      gravitationalWrench.setLinearPartZ(-gravityZ * totalMass);
+      gravitationalWrench.setLinearPartZ(-gravityZ * robotTotalMass);
       totalWrenchAlreadyApplied = new SpatialForceVector(centerOfMassFrame);
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
@@ -75,7 +70,8 @@ public class ExternalWrenchHandler
    }
 
    /**
-    * Computes \dot{A} * v - external wrenches already applied (e.g. gravity, hand wrenches due to manipulation)
+    * Computes \dot{A} * v - external wrenches already applied (e.g. gravity, hand wrenches due to
+    * manipulation)
     *
     * @return
     */
@@ -135,7 +131,7 @@ public class ExternalWrenchHandler
       {
          RigidBody rigidBody = contactablePlaneBodies.get(i).getRigidBody();
          Wrench externalWrench = externalWrenches.get(rigidBody);
-         if(groundReactionWrenches.containsKey(rigidBody))
+         if (groundReactionWrenches.containsKey(rigidBody))
             externalWrench.add(groundReactionWrenches.get(rigidBody));
          if (!rigidBodiesWithExternalWrench.contains(rigidBody))
             rigidBodiesWithExternalWrench.add(rigidBody);
