@@ -20,8 +20,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMessage<ChestHybridJointspaceTaskspaceTrajectoryMessage> implements VisualizablePacket, FrameBasedMessage
 {
    
-   private ChestTrajectoryMessage chestTrajectoryMessage; 
-   private SpineTrajectoryMessage spineTrajectoryMessage;
+   public ChestTrajectoryMessage chestTrajectoryMessage; 
+   public SpineTrajectoryMessage spineTrajectoryMessage;
    
    /**
     * Empty constructor for serialization.
@@ -129,5 +129,11 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends QueueableMe
    public Quaternion getControlFrameOrientation()
    {
       return chestTrajectoryMessage.getControlFrameOrientation();
+   }
+   
+   @Override
+   public boolean useCustomControlFrame()
+   {
+      return chestTrajectoryMessage.useCustomControlFrame();
    }
 }
