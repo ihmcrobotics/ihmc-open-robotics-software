@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
@@ -252,13 +251,6 @@ public class InverseDynamicsOptimizationControlModule
    public void submitJointspaceAccelerationCommand(JointspaceAccelerationCommand command)
    {
       boolean success = motionQPInputCalculator.convertJointspaceAccelerationCommand(command, motionQPInput);
-      if (success)
-         qpSolver.addMotionInput(motionQPInput);
-   }
-
-   public void submitPointAccelerationCommand(PointAccelerationCommand command)
-   {
-      boolean success = motionQPInputCalculator.convertPointAccelerationCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }

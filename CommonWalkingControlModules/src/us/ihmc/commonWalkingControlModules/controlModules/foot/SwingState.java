@@ -213,6 +213,7 @@ public class SwingState extends AbstractUnconstrainedState
       orientationTrajectoryGenerator.setInitialConditions(initialOrientation, initialAngularVelocity);
    }
 
+   @Override
    protected void initializeTrajectory()
    {
       if (!hasInitialAngularConfigurationBeenProvided.getBooleanValue())
@@ -263,6 +264,7 @@ public class SwingState extends AbstractUnconstrainedState
       replanTrajectory.set(false);
    }
 
+   @Override
    protected void computeAndPackTrajectory()
    {
       if (this.replanTrajectory.getBooleanValue()) // This seems like a bad place for this?

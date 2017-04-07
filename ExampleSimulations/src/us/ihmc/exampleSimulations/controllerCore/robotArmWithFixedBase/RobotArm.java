@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -228,17 +229,30 @@ public class RobotArm extends Robot
       return momentOfInertia;
    }
 
-   public void updateSCSRobot()
+   public void updateSCSRobotJointTaus(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
    {
-      for (Pair<OneDoFJoint,OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
+      for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
       {
-         pair.getRight().setTau(pair.getLeft().getTau());
+         double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(pair.getLeft());
+         pair.getRight().setTau(tau);
+      }
+   }
+
+   public void updateSCSRobotJointConfiguration(LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder)
+   {
+      for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
+      {
+         double q = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition(pair.getLeft());
+         double qd = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointVelocity(pair.getLeft());
+
+         pair.getRight().setQ(q);
+         pair.getRight().setQd(qd);
       }
    }
 
    public void updateIDRobot()
    {
-      for (Pair<OneDoFJoint,OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
+      for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
       {
          pair.getLeft().setQ(pair.getRight().getQ());
          pair.getLeft().setQd(pair.getRight().getQD());
@@ -264,5 +278,40 @@ public class RobotArm extends Robot
    public double getGravity()
    {
       return gravity;
+   }
+
+   public RevoluteJoint getShoulderYaw()
+   {
+      return shoulderYaw;
+   }
+
+   public RevoluteJoint getShoulderRoll()
+   {
+      return shoulderRoll;
+   }
+
+   public RevoluteJoint getShoulderPitch()
+   {
+      return shoulderPitch;
+   }
+
+   public RevoluteJoint getElbowPitch()
+   {
+      return elbowPitch;
+   }
+
+   public RevoluteJoint getWristPitch()
+   {
+      return wristPitch;
+   }
+
+   public RevoluteJoint getWristRoll()
+   {
+      return wristRoll;
+   }
+
+   public RevoluteJoint getWristYaw()
+   {
+      return wristYaw;
    }
 }

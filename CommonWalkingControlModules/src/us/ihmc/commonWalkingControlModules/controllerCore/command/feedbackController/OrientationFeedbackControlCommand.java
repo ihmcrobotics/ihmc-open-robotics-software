@@ -216,14 +216,14 @@ public class OrientationFeedbackControlCommand implements FeedbackControlCommand
     */
    public void setSelectionMatrixToIdentity()
    {
-      spatialAccelerationCommand.setSelectionMatrixToIdentity();
+      spatialAccelerationCommand.setSelectionMatrixForAngularControl();
    }
 
    /**
     * Sets the selection matrix to be used for the next control tick.
     * <p>
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. Using the follwing 3-by-6 matrix will request the control of all
+    * that are to be controlled. Using the following 3-by-6 matrix will request the control of all
     * the 3 rotational degrees of freedom:
     * 
     * <pre>

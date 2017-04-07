@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.PositionPIDGains;
@@ -41,6 +41,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final Point3D bodyFixedPointInEndEffectorFrame = new Point3D();
+
    private final Point3D desiredPositionInWorld = new Point3D();
    private final Vector3D desiredLinearVelocityInWorld = new Vector3D();
    private final Vector3D feedForwardLinearAccelerationInWorld = new Vector3D();
@@ -55,7 +57,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * Should not be accessed from the user side.
     * </p>
     */
-   private final PointAccelerationCommand pointAccelerationCommand = new PointAccelerationCommand();
+   private final SpatialAccelerationCommand spatialAccelerationCommand = new SpatialAccelerationCommand();
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -63,7 +65,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public PointFeedbackControlCommand()
    {
-      pointAccelerationCommand.setSelectionMatrixToIdentity();
+      spatialAccelerationCommand.setSelectionMatrixForLinearControl();
    }
 
    /**
@@ -77,7 +79,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       feedForwardLinearAccelerationInWorld.set(other.feedForwardLinearAccelerationInWorld);
       setGains(other.gains);
 
-      pointAccelerationCommand.set(other.pointAccelerationCommand);
+      spatialAccelerationCommand.set(other.spatialAccelerationCommand);
    }
 
    /**
@@ -93,7 +95,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void set(RigidBody base, RigidBody endEffector)
    {
-      pointAccelerationCommand.set(base, endEffector);
+      spatialAccelerationCommand.set(base, endEffector);
    }
 
    /**
@@ -117,7 +119,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void setPrimaryBase(RigidBody primaryBase)
    {
-      pointAccelerationCommand.setPrimaryBase(primaryBase);
+      spatialAccelerationCommand.setPrimaryBase(primaryBase);
    }
 
    /**
@@ -191,7 +193,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void resetBodyFixedPoint()
    {
-      pointAccelerationCommand.resetBodyFixedPoint();
+      bodyFixedPointInEndEffectorFrame.setToZero();
    }
 
    /**
@@ -210,11 +212,18 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void setBodyFixedPointToControl(FramePoint bodyFixedPointInEndEffectorFrame)
    {
-      pointAccelerationCommand.setBodyFixedPointToControl(bodyFixedPointInEndEffectorFrame);
+      bodyFixedPointInEndEffectorFrame.checkReferenceFrameMatch(getEndEffector().getBodyFixedFrame());
+      bodyFixedPointInEndEffectorFrame.get(this.bodyFixedPointInEndEffectorFrame);
    }
 
    /**
-    * Sets the selection matrix to be used for the next control tick to the 3-by-3 identity matrix.
+    * Sets the selection matrix to be used for the next control tick to the following 3-by-6 matrix:
+    * 
+    * <pre>
+    *     / 0 0 0 1 0 0 \
+    * S = | 0 0 0 0 1 0 |
+    *     \ 0 0 0 0 0 1 /
+    * </pre>
     * <p>
     * This specifies that the 3 translational degrees of freedom of the end-effector are to be
     * controlled.
@@ -222,15 +231,21 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void setSelectionMatrixToIdentity()
    {
-      pointAccelerationCommand.setSelectionMatrixToIdentity();
+      spatialAccelerationCommand.setSelectionMatrixForLinearControl();
    }
 
    /**
     * Sets the selection matrix to be used for the next control tick.
     * <p>
     * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. A 3-by-3 identity matrix will request the control of all the 3
-    * translational degrees of freedom.
+    * that are to be controlled. Using the following 3-by-6 matrix will request the control of all
+    * the 3 translational degrees of freedom:
+    * 
+    * <pre>
+    *     / 0 0 0 1 0 0 \
+    * S = | 0 0 0 0 1 0 |
+    *     \ 0 0 0 0 0 1 /
+    * </pre>
     * </p>
     * <p>
     * Removing a row to the selection matrix using for instance
@@ -241,11 +256,14 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     * 
     * @param selectionMatrix the new selection matrix to be used. Not modified.
     * @throws RuntimeException if the selection matrix has a number of rows greater than 3 or has a
-    *            number of columns different to 3.
+    *            number of columns different to 6.
     */
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
-      pointAccelerationCommand.setSelectionMatrix(selectionMatrix);
+      if (selectionMatrix.getNumRows() > 3)
+         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
+
+      spatialAccelerationCommand.setSelectionMatrix(selectionMatrix);
    }
 
    /**
@@ -260,7 +278,7 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void setWeightForSolver(double weight)
    {
-      pointAccelerationCommand.setWeight(weight);
+      spatialAccelerationCommand.setWeight(weight);
    }
 
    /**
@@ -275,7 +293,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
     */
    public void setWeightsForSolver(Vector3D weight)
    {
-      pointAccelerationCommand.setWeights(weight);
+      spatialAccelerationCommand.setLinearWeights(weight);
+      spatialAccelerationCommand.setAngularWeightsToZero();
    }
 
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
@@ -287,22 +306,22 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
 
    public void getBodyFixedPointIncludingFrame(FramePoint bodyFixedPointToControlToPack)
    {
-      pointAccelerationCommand.getBodyFixedPointIncludingFrame(bodyFixedPointToControlToPack);
+      bodyFixedPointToControlToPack.setIncludingFrame(getEndEffector().getBodyFixedFrame(), this.bodyFixedPointInEndEffectorFrame);
    }
 
    public RigidBody getBase()
    {
-      return pointAccelerationCommand.getBase();
+      return spatialAccelerationCommand.getBase();
    }
 
    public RigidBody getEndEffector()
    {
-      return pointAccelerationCommand.getEndEffector();
+      return spatialAccelerationCommand.getEndEffector();
    }
 
-   public PointAccelerationCommand getPointAccelerationCommand()
+   public SpatialAccelerationCommand getSpatialAccelerationCommand()
    {
-      return pointAccelerationCommand;
+      return spatialAccelerationCommand;
    }
 
    public PositionPIDGainsInterface getGains()
@@ -320,8 +339,8 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
    public String toString()
    {
       String ret = getClass().getSimpleName() + ": ";
-      ret += "base = " + pointAccelerationCommand.getBaseName() + ", ";
-      ret += "endEffector = " + pointAccelerationCommand.getEndEffectorName() + ", ";
+      ret += "base = " + spatialAccelerationCommand.getBaseName() + ", ";
+      ret += "endEffector = " + spatialAccelerationCommand.getEndEffectorName() + ", ";
       ret += "position = " + desiredPositionInWorld;
       return ret;
    }

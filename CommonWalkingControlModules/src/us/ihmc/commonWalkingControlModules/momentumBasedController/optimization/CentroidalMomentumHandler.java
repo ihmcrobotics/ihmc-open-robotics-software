@@ -8,12 +8,8 @@ import org.ejml.ops.CommonOps;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.math.MatrixYoVariableConversionTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.CentroidalMomentumMatrix;
 import us.ihmc.robotics.screwTheory.CentroidalMomentumRateTermCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.Momentum;
@@ -24,19 +20,13 @@ import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 
 /**
- * @author twan
- *         Date: 5/1/13
+ * @author twan Date: 5/1/13
  */
 public class CentroidalMomentumHandler
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final CentroidalMomentumMatrix centroidalMomentumMatrix;
    private final DenseMatrix64F adotV = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
    private final DenseMatrix64F centroidalMomentumMatrixPart = new DenseMatrix64F(1, 1);
    private final SpatialForceVector centroidalMomentumRate;
-
-   private final DenseMatrix64F previousCentroidalMomentumMatrix;
-   private final DoubleYoVariable[][] yoPreviousCentroidalMomentumMatrix; // to make numerical differentiation rewindable
 
    private final InverseDynamicsJoint[] jointsInOrder;
    private final DenseMatrix64F v;
@@ -46,15 +36,9 @@ public class CentroidalMomentumHandler
    private final ReferenceFrame centerOfMassFrame;
    private final CentroidalMomentumRateTermCalculator centroidalMomentumRateTermCalculator;
 
-   public CentroidalMomentumHandler(RigidBody rootBody, ReferenceFrame centerOfMassFrame, YoVariableRegistry parentRegistry)
+   public CentroidalMomentumHandler(RigidBody rootBody, ReferenceFrame centerOfMassFrame)
    {
       this.jointsInOrder = ScrewTools.computeSupportAndSubtreeJoints(rootBody);
-
-      this.centroidalMomentumMatrix = new CentroidalMomentumMatrix(rootBody, centerOfMassFrame);
-      this.previousCentroidalMomentumMatrix = new DenseMatrix64F(centroidalMomentumMatrix.getMatrix().getNumRows(),
-            centroidalMomentumMatrix.getMatrix().getNumCols());
-      yoPreviousCentroidalMomentumMatrix = new DoubleYoVariable[previousCentroidalMomentumMatrix.getNumRows()][previousCentroidalMomentumMatrix.getNumCols()];
-      MatrixYoVariableConversionTools.populateYoVariables(yoPreviousCentroidalMomentumMatrix, "previousCMMatrix", registry);
 
       int nDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(jointsInOrder);
       this.v = new DenseMatrix64F(nDegreesOfFreedom, 1);
@@ -69,8 +53,6 @@ public class CentroidalMomentumHandler
 
       centroidalMomentumRate = new SpatialForceVector(centerOfMassFrame);
       this.centerOfMassFrame = centerOfMassFrame;
-
-      parentRegistry.addChild(registry);
 
       double robotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
       this.centroidalMomentumRateTermCalculator = new CentroidalMomentumRateTermCalculator(rootBody, centerOfMassFrame, v, robotMass);
@@ -98,7 +80,7 @@ public class CentroidalMomentumHandler
       {
          int[] columnsForJoint = columnsForJoints.get(joint);
          MatrixTools.extractColumns(centroidalMomentumRateTermCalculator.getCentroidalMomentumMatrix(), columnsForJoint, centroidalMomentumMatrixPart,
-               startColumn);
+                                    startColumn);
          startColumn += columnsForJoint.length;
       }
       return centroidalMomentumMatrixPart;

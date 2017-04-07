@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
@@ -51,7 +51,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final FrameVector desiredLinearVelocity = new FrameVector();
    private final FrameVector desiredLinearAcceleration = new FrameVector();
 
-   private final PointAccelerationCommand inverseDynamicsOutput = new PointAccelerationCommand();
+   private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
 
    private final YoPositionPIDGainsInterface gains;
@@ -124,7 +124,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       base = command.getBase();
 
-      inverseDynamicsOutput.set(command.getPointAccelerationCommand());
+      inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
 
       gains.set(command.getGains());
 
@@ -174,7 +174,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
       accelerationControlModule.getCurrentLinearVelocity(tempLinearVelocity);
       yoCurrentLinearVelocity.setAndMatchFrame(tempLinearVelocity);
 
-      inverseDynamicsOutput.setLinearAcceleration(desiredLinearAcceleration);
+      desiredLinearAcceleration.changeFrame(controlFrame);
+      inverseDynamicsOutput.setLinearAcceleration(controlFrame, desiredLinearAcceleration);
    }
 
    @Override
@@ -201,7 +202,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       tempPosition.setToZero(controlFrame);
       yoCurrentPosition.setAndMatchFrame(tempPosition);
 
-      inverseKinematicsOutput.setLinearVelocity(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), desiredLinearVelocity);
+      inverseKinematicsOutput.setLinearVelocity(controlFrame, desiredLinearVelocity);
    }
 
    @Override
@@ -226,7 +227,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public PointAccelerationCommand getInverseDynamicsOutput()
+   public SpatialAccelerationCommand getInverseDynamicsOutput()
    {
       if (!isEnabled())
          throw new RuntimeException("This controller is disabled.");
@@ -242,7 +243,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    }
 
    @Override
-   public PointAccelerationCommand getVirtualModelControlOutput()
+   public SpatialAccelerationCommand getVirtualModelControlOutput()
    {
       return getInverseDynamicsOutput();
    }
