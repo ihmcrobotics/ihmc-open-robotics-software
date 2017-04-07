@@ -135,6 +135,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
                .simulateAndBlockAndCatchExceptions(1.0 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
       }
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 46.8)
@@ -451,6 +453,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
 
       // check internal desired matches last trajectory point:
       String nameSpacePositionDesired = FeedbackControllerToolbox.class.getSimpleName();
