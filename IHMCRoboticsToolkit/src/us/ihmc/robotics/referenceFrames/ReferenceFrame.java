@@ -29,6 +29,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    private static final long serialVersionUID = 9129810880579453658L;
    protected final String frameName;
    private final long nameBasedHashCode;
+   private long additionalNameBasedHashCode;
    protected final ReferenceFrame parentFrame;
    private final ReferenceFrame[] framesStartingWithRootEndingWithThis;
 
@@ -730,5 +731,15 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    public long getNameBasedHashCode()
    {
       return nameBasedHashCode;
+   }
+
+   public long getAdditionalNameBasedHashCode()
+   {
+      return additionalNameBasedHashCode;
+   }
+
+   public void setAdditionalNameBasedHashCode(long additionalNameBasedHashCode)
+   {
+      this.additionalNameBasedHashCode = additionalNameBasedHashCode;
    }
 }

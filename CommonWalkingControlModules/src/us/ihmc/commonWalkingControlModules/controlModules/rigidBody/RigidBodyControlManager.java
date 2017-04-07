@@ -159,6 +159,16 @@ public class RigidBodyControlManager
          holdInJointspace();
 
       stateSwitched.set(stateMachine.checkTransitionConditions());
+
+      //cleanup the state. Don't cleanup if switching to hybrid
+      if (stateSwitched.getBooleanValue())
+      {
+         if (stateMachine.getCurrentStateEnum() != RigidBodyControlMode.HYBRID)
+         {
+            stateMachine.getPreviousState().clear();
+         }
+      }
+
       stateMachine.doAction();
 
       positionControlHelper.update();
