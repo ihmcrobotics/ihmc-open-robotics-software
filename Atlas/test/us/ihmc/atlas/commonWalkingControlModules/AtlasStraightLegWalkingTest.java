@@ -123,9 +123,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                }
 
                @Override
-               public double getDesiredTouchdownAcceleration()
+               public double getPrimaryBaseControlDurationInSwing()
                {
-                  return -2.0;
+                  return 0.25;
                }
 
                @Override

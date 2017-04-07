@@ -42,6 +42,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    private final BooleanYoVariable yoSetDesiredAccelerationToZero;
    private final BooleanYoVariable yoSetDesiredVelocityToZero;
 
+   protected final BooleanYoVariable usePrimaryBaseForControl;
+
    private final YoFrameVector angularWeight;
    private final YoFrameVector linearWeight;
 
@@ -63,6 +65,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       yoDesiredPosition.setToNaN();
       yoSetDesiredAccelerationToZero = new BooleanYoVariable(namePrefix + "SetDesiredAccelerationToZero", registry);
       yoSetDesiredVelocityToZero = new BooleanYoVariable(namePrefix + "SetDesiredVelocityToZero", registry);
+
+      usePrimaryBaseForControl = new BooleanYoVariable(namePrefix + "UsePrimaryBaseForControl", registry);
 
       angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
       linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
@@ -169,6 +173,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       angularWeight.get(tempAngularWeightVector);
       linearWeight.get(tempLinearWeightVector);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
+      spatialFeedbackControlCommand.setUsePrimaryBaseForControl(usePrimaryBaseForControl.getBooleanValue());
 
       if (getTimeInCurrentState() > 0.25)
       {
