@@ -15,13 +15,14 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.robotics.trajectories.providers.SettablePositionProvider;
 import us.ihmc.robotics.trajectories.providers.VectorProvider;
 
-public class MoveViaWaypointsState extends AbstractUnconstrainedState
+public class MoveViaWaypointsState extends AbstractFootControlState
 {
    private final ReferenceFrame footFrame;
 
@@ -33,13 +34,15 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    private final RigidBodyTaskspaceControlState taskspaceControlState;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommandForTouchdown = new SpatialFeedbackControlCommand();
 
+   private final YoFrameVector angularWeight;
+   private final YoFrameVector linearWeight;
    private final Vector3D tempAngularWeightVector = new Vector3D();
    private final Vector3D tempLinearWeightVector = new Vector3D();
 
    public MoveViaWaypointsState(FootControlHelper footControlHelper, VectorProvider touchdownVelocityProvider, VectorProvider touchdownAccelerationProvider,
          YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
-      super(ConstraintType.MOVE_VIA_WAYPOINTS, footControlHelper, gains, registry);
+      super(ConstraintType.MOVE_VIA_WAYPOINTS, footControlHelper);
 
       RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       String namePrefix = foot.getName() + "MoveViaWaypoints";
@@ -47,6 +50,9 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       isPerformingTouchdown = new BooleanYoVariable(namePrefix + "IsPerformingTouchdown", registry);
       positionTrajectoryForDisturbanceRecovery = new SoftTouchdownPositionTrajectoryGenerator(namePrefix + "Touchdown", worldFrame, currentDesiredFootPosition,
             touchdownVelocityProvider, touchdownAccelerationProvider, touchdownInitialTimeProvider, registry);
+
+      angularWeight = new YoFrameVector(namePrefix + "AngularWeight", null, registry);
+      linearWeight = new YoFrameVector(namePrefix + "LinearWeight", null, registry);
 
       footFrame = foot.getBodyFixedFrame();
       DoubleYoVariable yoTime = controllerToolbox.getYoTime();
@@ -64,17 +70,21 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
       spatialFeedbackControlCommandForTouchdown.setGains(gains);
    }
 
-   @Override
    public void setWeight(double weight)
    {
-      super.setWeight(weight);
+      angularWeight.set(1.0, 1.0, 1.0);
+      angularWeight.scale(weight);
+      linearWeight.set(1.0, 1.0, 1.0);
+      linearWeight.scale(weight);
+
       taskspaceControlState.setWeight(weight);
    }
 
-   @Override
    public void setWeights(Vector3D angularWeight, Vector3D linearWeight)
    {
-      super.setWeights(angularWeight, linearWeight);
+      this.angularWeight.set(angularWeight);
+      this.linearWeight.set(linearWeight);
+
       taskspaceControlState.setWeights(angularWeight, linearWeight);
    }
 
@@ -169,17 +179,5 @@ public class MoveViaWaypointsState extends AbstractUnconstrainedState
    public void doTransitionOutOfAction()
    {
       taskspaceControlState.doTransitionOutOfAction();
-   }
-
-   @Override
-   protected void computeAndPackTrajectory()
-   {
-
-   }
-
-   @Override
-   protected void initializeTrajectory()
-   {
-
    }
 }
