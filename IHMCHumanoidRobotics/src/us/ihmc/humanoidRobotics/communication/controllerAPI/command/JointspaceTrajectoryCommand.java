@@ -55,6 +55,10 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
             oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
             oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
          }
+         else
+         {
+            oneDoFJointTrajectoryCommand.clear();
+         }
       }
    }
 
