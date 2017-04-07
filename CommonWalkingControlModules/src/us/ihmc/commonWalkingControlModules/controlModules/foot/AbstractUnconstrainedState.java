@@ -170,6 +170,15 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
       linearWeight.get(tempLinearWeightVector);
       spatialFeedbackControlCommand.setWeightsForSolver(tempAngularWeightVector, tempLinearWeightVector);
 
+      if (getTimeInCurrentState() > 0.25)
+      {
+         spatialFeedbackControlCommand.setUsePrimaryBaseForControl(false);
+      }
+      else
+      {
+         spatialFeedbackControlCommand.setUsePrimaryBaseForControl(true);
+      }
+
       yoDesiredPosition.setAndMatchFrame(desiredPosition);
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
    }

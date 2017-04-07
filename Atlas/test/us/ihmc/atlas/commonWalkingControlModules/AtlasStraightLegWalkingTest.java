@@ -34,11 +34,11 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                   YoFootSE3Gains gains = new YoFootSE3Gains("SwingFoot", registry);
 
                   double kpXY = 150.0;
-                  double kpZ = 100.0; //200.0;
+                  double kpZ = 200.0; //200.0;
                   double zetaXYZ = 0.7;
 
-                  double kpXYOrientation = 150.0; // 200.0;
-                  double kpZOrientation = 150.0; // 200.0;
+                  double kpXYOrientation = 200.0; // 200.0;
+                  double kpZOrientation = 200.0; // 200.0;
                   double zetaOrientation = 0.7;
 
                   double maxPositionAcceleration = Double.POSITIVE_INFINITY;
@@ -65,13 +65,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getMaxICPErrorBeforeSingleSupportX()
                {
-                  return 0.05 * getJointMap().getModelScale();
+                  return 0.05;
                }
 
                @Override
                public double getMaxICPErrorBeforeSingleSupportY()
                {
-                  return 0.03 * getJointMap().getModelScale();
+                  return 0.03;
                }
 
                @Override
@@ -101,25 +101,31 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.15;
+                  return 0.12;
                }
 
                @Override
                public boolean checkECMPLocationToTriggerToeOff()
                {
-                  return false;
+                  return true;
                }
 
                @Override
                public double getECMPProximityForToeOff()
                {
-                  return getJointMap().getModelScale() * 0.04;
+                  return 0.03;
                }
 
                @Override
                public boolean useOptimizationBasedICPController()
                {
                   return true; //false;
+               }
+
+               @Override
+               public double getDesiredTouchdownAcceleration()
+               {
+                  return -2.0;
                }
 
                @Override
@@ -130,7 +136,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getSpeedForStanceLegStraightening()
                      {
-                        return 0.25;
+                        return 1.0;
                      }
 
                      @Override
@@ -160,13 +166,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getStraightLegPrivilegedConfigurationGain()
                      {
-                        return 100.0;
+                        return 50.0;
                      }
 
                      @Override
                      public double getStraightLegPrivilegedVelocityGain()
                      {
-                        return 6.0; // 6.0;
+                        return 4.0; // 6.0;
                      }
 
                      @Override
@@ -190,7 +196,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getBentLegPrivilegedWeight()
                      {
-                        return 20.0;
+                        return 10.0;
                      }
 
                      @Override
@@ -221,13 +227,13 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public Vector3D getDefaultLinearFootWeight()
                      {
-                        return new Vector3D(10.0, 10.0, 1.0);// Vector3D(30.0, 30.0, 30.0);
+                        return new Vector3D(10.0, 10.0, 10.0);// Vector3D(30.0, 30.0, 30.0);
                      }
 
                      @Override
                      public double getJointAccelerationWeight()
                      {
-                        return 0.01; //0.005;
+                        return 0.05; //0.005;
                      }
 
                      @Override
