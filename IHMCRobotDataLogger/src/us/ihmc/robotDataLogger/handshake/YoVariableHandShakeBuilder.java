@@ -38,7 +38,7 @@ public class YoVariableHandShakeBuilder
    private final ArrayList<JointHolder> jointHolders = new ArrayList<JointHolder>();   
    private final TObjectIntHashMap<YoVariable<?>> yoVariableIndices = new TObjectIntHashMap<>();
    private final ArrayList<ImmutablePair<YoVariable<?>, YoVariableRegistry>> variablesAndRootRegistries = new ArrayList<>();
-   private final TObjectIntHashMap<Class<?>> enumDescriptions = new TObjectIntHashMap<>(); 
+   private final TObjectIntHashMap<String> enumDescriptions = new TObjectIntHashMap<>(); 
    
    private int registryID = 1;
    private int enumID = 0;
@@ -169,7 +169,7 @@ public class YoVariableHandShakeBuilder
 
    }
    
-   private short getOrAddEnumType(Class<?> enumClass, String[] enumTypes)
+   private short getOrAddEnumType(String enumClass, String[] enumTypes)
    {
       if(enumDescriptions.containsKey(enumClass))
       {
@@ -184,7 +184,7 @@ public class YoVariableHandShakeBuilder
       enumID++;
       
       EnumType enumTypeDescription = handshake.getEnumTypes().add();
-      String name = enumClass.getCanonicalName();
+      String name = enumClass;
       if(name.length() > 255)
       {
          name = name.substring(name.length() - 255);
@@ -195,6 +195,10 @@ public class YoVariableHandShakeBuilder
       }
       
       enumTypeDescription.setName(name);
+      if(enumTypes.length > enumTypeDescription.getEnumValues().capacity())
+      {
+         throw new RuntimeException("The number of enum values for " + name + " exceeds the maximum number of enum values (" + enumTypeDescription.getEnumValues().capacity() + ")");
+      }
       for (String enumType : enumTypes)
       {
          if(enumType == null)
@@ -240,11 +244,11 @@ public class YoVariableHandShakeBuilder
             yoVariableDefinition.setType(YoType.EnumYoVariable);
             if(((EnumYoVariable<?>) variable).isBackedByEnum())
             {
-               yoVariableDefinition.setEnumType(getOrAddEnumType(((EnumYoVariable<?>) variable).getEnumType(), ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
+               yoVariableDefinition.setEnumType(getOrAddEnumType(((EnumYoVariable<?>) variable).getEnumType().getCanonicalName(), ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
             }
             else
             {
-               yoVariableDefinition.setEnumType(getOrAddEnumType(variable.getClass(), ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
+               yoVariableDefinition.setEnumType(getOrAddEnumType(variable.getFullNameWithNameSpace() + ".EnumType", ((EnumYoVariable<?>) variable).getEnumValuesAsString()));
             }
             yoVariableDefinition.setAllowNullValues(((EnumYoVariable<?>) variable).getAllowNullValue());
             break;
