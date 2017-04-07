@@ -32,6 +32,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    {
       wholebodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
       toolboxCommunicator.send(wholebodyTrajectoryMessage);
+      ThreadTools.sleep(50);
    }
 
    public boolean isValidWholeBodyPose(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
@@ -40,33 +41,26 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       // wait      
       return isValid();   
    }
-   
+      
+   public int cnt = 0;
    public void setSolarPanelWholeBodyPose(SolarPanelPath cleaningPath, double tempNodeData0, double tempNodeData1)
    {
-      // *********************************************************************** wholebody ***********************************************************************
-//      WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-//      
-//      Point3D desHandPosition = new Point3D(0.5, -0.35, 1.0);
-//      Quaternion desHandOrientation = new Quaternion();
-//      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2.0, desHandPosition, desHandOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-//      
-//      wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
-//      
-//      sendWholebodyTrajectoryMessage(wholebodyTrajectoryMessage);
-      
+      // *********************************************************************** wholebody ***********************************************************************          
       WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = cleaningPath.getWholeBodyMessageForValidityTest(-Math.PI*0.2, tempNodeData1, 0.0, tempNodeData0);      
       
       sendWholebodyTrajectoryMessage(wholebodyTrajectoryMessage);
-      for(int i =0;i<100;i++)
+      for(int i =0;i<50;i++)
       {
          isValid = false;
-         if(ikToolboxController.getSolution().solutionQuality < 0.01)
+         if(ikToolboxController.getSolution().solutionQuality < 0.015)
          {            
             isValid = true;
             break;
          }         
-         ThreadTools.sleep(100);         
+         ThreadTools.sleep(5);         
       }
+      cnt++;
+      
       // *********************************************************************** temp ***********************************************************************
 //      if(tempNodeData0 > 1.5 && tempNodeData0 < 2.5 && tempNodeData1 < Math.PI*0.1 && tempNodeData1 > -Math.PI*0.1)
 //      {

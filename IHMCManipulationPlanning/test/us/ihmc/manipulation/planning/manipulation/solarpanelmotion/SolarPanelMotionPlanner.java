@@ -66,7 +66,7 @@ public class SolarPanelMotionPlanner
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.LinearCleaningMotion);
          SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
          
-         SolarPanelCleaningPose endPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.1, -Math.PI*0.2);
+         SolarPanelCleaningPose endPose = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2);
          cleaningPath.addCleaningPose(endPose, 4.0);
          
          // *** RRT *** //
@@ -80,10 +80,13 @@ public class SolarPanelMotionPlanner
          plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
          plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
          
+         PrintTools.info("END setting");
          RRTNode1DTimeDomain.cleaningPath = cleaningPath;
-         plannerTimeDomain.expandTreeGoal(500);
-         //plannerTimeDomain.updateOptimalPath(101, 100);
-         
+                  
+         plannerTimeDomain.expandTreeGoal(200);
+         PrintTools.info("END expanding");
+         plannerTimeDomain.updateOptimalPath(30);
+         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
 
          
          break;
