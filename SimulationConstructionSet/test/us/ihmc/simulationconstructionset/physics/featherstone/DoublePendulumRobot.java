@@ -26,12 +26,15 @@ public class DoublePendulumRobot extends RobotWithClosedFormDynamics
    private final double Ixx1CoM = 0.4, Ixx2CoM = 0.5;
 
    private final double mass1 = 1.0, mass2 = 1.5;
-   private final double damping1 = 0.0, damping2 = 0.0;
+   private final double damping1 = 0.2, damping2 = 0.1;
    private final Axis axis = Axis.X;
 
    private final PinJoint pinJoint1;
    private final PinJoint pinJoint2;
 
+   /**
+    * Manipulator equation matrices, for matrix definitions see {@link #assertStateIsCloseToLagrangianCalculation}
+    */
    private final DenseMatrix64F H = new DenseMatrix64F(2, 2);
    private final DenseMatrix64F C = new DenseMatrix64F(2, 2);
    private final DenseMatrix64F G = new DenseMatrix64F(2, 1);
@@ -97,10 +100,10 @@ public class DoublePendulumRobot extends RobotWithClosedFormDynamics
       double H10 = H01;
       double H11 = Ixx2;
 
-      double C00 = -2.0 * mass2 * length1 * lengthCoM2 * Math.sin(q2) * qd2;
+      double C00 = -2.0 * mass2 * length1 * lengthCoM2 * Math.sin(q2) * qd2 + damping1;
       double C01 = - mass2 * length1 * lengthCoM2 * Math.sin(q2) * qd2;
       double C10 = mass2 * length1 * lengthCoM2 * Math.sin(q2) * qd1;
-      double C11 = 0.0;
+      double C11 = damping2;
 
       double G00 = (mass1 * lengthCoM1 + mass2 * length1) * g * Math.sin(q1) + mass2 * g * lengthCoM2 * Math.sin(q1 + q2);
       double G10 = mass2 * g * lengthCoM2 * Math.sin(q1 + q2);
@@ -133,6 +136,5 @@ public class DoublePendulumRobot extends RobotWithClosedFormDynamics
                                         + "\nSimulated joint accelerations: (" + qdd1 + ", " + qdd2 + ")"
                                         + "\nLagrangian accelerations: (" + qdd.get(0, 0) + ", " + qdd.get(1, 0) + ")");
       }
-
    }
 }
