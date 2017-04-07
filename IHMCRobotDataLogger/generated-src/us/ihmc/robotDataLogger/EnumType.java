@@ -18,7 +18,7 @@ public class EnumType implements IDLStruct<EnumType>
     public EnumType()
     {
         	name_ = new StringBuilder(255); 
-        	enumValues_ = new IDLSequence.StringBuilderHolder (128, "type_d");           
+        	enumValues_ = new IDLSequence.StringBuilderHolder (255, "type_d");           
         
     }
     @Override
@@ -67,7 +67,7 @@ public class EnumType implements IDLStruct<EnumType>
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 
 	    current_alignment += 4 + CDR.alignment(current_alignment, 4);
-	    for(int a = 0; a < 128; ++a)
+	    for(int a = 0; a < 255; ++a)
 	    {
 	        current_alignment += 4 + CDR.alignment(current_alignment, 4) + 255 + 1;
 	    }
@@ -105,7 +105,7 @@ public class EnumType implements IDLStruct<EnumType>
 	    cdr.write_type_d(name_);else
 	        throw new RuntimeException("name field exceeds the maximum length");
 
-	    if(enumValues_.size() <= 128)
+	    if(enumValues_.size() <= 255)
 	    cdr.write_type_e(enumValues_);else
 	        throw new RuntimeException("enumValues field exceeds the maximum length");
 	}

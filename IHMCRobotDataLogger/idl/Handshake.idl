@@ -62,7 +62,7 @@ module robotDataLogger{
 	struct EnumType
 	{
 		string name;
-		sequence<string, 128> enumValues;
+		sequence<string, 255> enumValues;
 	};
 	
 	
