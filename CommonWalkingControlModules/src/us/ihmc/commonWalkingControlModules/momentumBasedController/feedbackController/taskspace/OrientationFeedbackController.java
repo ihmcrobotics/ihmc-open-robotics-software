@@ -66,7 +66,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
-   private ReferenceFrame baseFrame;
 
    private final RigidBody endEffector;
    private final ReferenceFrame endEffectorFrame;
@@ -135,7 +134,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          throw new RuntimeException("Wrong end effector - received: " + command.getEndEffector() + ", expected: " + endEffector);
 
       base = command.getBase();
-      baseFrame = base.getBodyFixedFrame();
 
       inverseDynamicsOutput.set(command.getSpatialAccelerationCommand());
       inverseKinematicsOutput.setProperties(command.getSpatialAccelerationCommand());
@@ -225,7 +223,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       yoCurrentRotationVector.set(tempAxisAngle.getX(), tempAxisAngle.getY(), tempAxisAngle.getZ());
       yoCurrentRotationVector.scale(AngleTools.trimAngleMinusPiToPi(tempAxisAngle.getAngle()));
 
-      inverseKinematicsOutput.setAngularVelocity(endEffectorFrame, baseFrame, desiredAngularVelocity);
+      inverseKinematicsOutput.setAngularVelocity(endEffectorFrame, desiredAngularVelocity);
    }
 
    @Override
