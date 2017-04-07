@@ -9,12 +9,13 @@ import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationDoneListener;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class GoalOrientedTestConductor implements VariableChangedListener
+public class GoalOrientedTestConductor implements VariableChangedListener, SimulationDoneListener
 {
    private final SimulationConstructionSet scs;
    private final SimulationTestingParameters simulationTestingParameters;
@@ -39,8 +40,8 @@ public class GoalOrientedTestConductor implements VariableChangedListener
       
       DoubleYoVariable yoTime = (DoubleYoVariable) scs.getVariable("t");
       yoTime.addVariableChangedListener(this);
-      
       scs.startOnAThread();
+      scs.addSimulateDoneListener(this);
    }
    
    @Override
@@ -185,6 +186,9 @@ public class GoalOrientedTestConductor implements VariableChangedListener
          Thread.yield();
       }
       
+      //wait to see if scs threw any exceptions
+      ThreadTools.sleep(10);
+      
       if (assertionFailedMessage != null)
       {
          PrintTools.error(this, assertionFailedMessage);
@@ -244,5 +248,21 @@ public class GoalOrientedTestConductor implements VariableChangedListener
    public SimulationConstructionSet getScs()
    {
       return scs;
+   }
+
+   @Override
+   public void simulationDone()
+   {
+      
+   }
+
+   @Override
+   public void simulationDoneWithException(Throwable throwable)
+   {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         PrintTools.error(throwable.getMessage());
+      }
+      assertionFailedMessage = throwable.getMessage();
    }
 }

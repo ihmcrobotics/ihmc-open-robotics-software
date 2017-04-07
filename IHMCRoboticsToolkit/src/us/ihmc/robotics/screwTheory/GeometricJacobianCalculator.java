@@ -1,6 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -113,6 +114,9 @@ public class GeometricJacobianCalculator
 
       jointsFromBaseToEndEffector.clear();
       int distanceFromBase = ScrewTools.computeDistanceToAncestor(endEffector, base);
+      if (distanceFromBase < 0)
+         throw new RuntimeException("The base: " + base.getName() + "is not an ancestor of the given end-effector: " + endEffector.getName());
+
       while (jointsFromBaseToEndEffector.size() < distanceFromBase)
          jointsFromBaseToEndEffector.add(null);
 
@@ -126,6 +130,58 @@ public class GeometricJacobianCalculator
          InverseDynamicsJoint joint = currentBody.getParentJoint();
          jointsFromBaseToEndEffector.set(index--, joint);
          currentBody = joint.getPredecessor();
+      }
+   }
+
+   /**
+    * Sets the new kinematic chain the Jacobian is computed for.
+    * <p>
+    * Note that if the Jacobian frame was not set beforehand, it is automatically set to
+    * {@code endEffector.getBodyFixedFrame()}. It can be changed via
+    * {@link #setJacobianFrame(ReferenceFrame)}.
+    * </p>
+    * <p>
+    * This method orders if necessary the joints such that the resulting kinematic chain starts from
+    * the base and ends at the end-effector.
+    * </p>
+    * 
+    * @param joints the array of joints to use for computing the Jacobian. Not modified.
+    * @throws RuntimeException if {@code joints[0].getPredecessor()} is not the ancestor of
+    *            {@code joints[joints.length - 1].getSuccessor()} and that
+    *            {@code joints[joints.length - 1].getPredecessor()} is not the ancestor of
+    *            {@code joints[0].getSuccessor()}.
+    */
+   public void setKinematicChain(InverseDynamicsJoint[] joints)
+   {
+      base = joints[0].getPredecessor();
+      endEffector = joints[joints.length - 1].getSuccessor();
+
+      numberOfDegreesOfFreedom = ScrewTools.computeDegreesOfFreedom(joints);
+
+      if (ScrewTools.isAncestor(endEffector, base))
+      {
+         if (jacobianFrame == null)
+            jacobianFrame = endEffector.getBodyFixedFrame();
+         clearJacobianMatrix();
+
+         jointsFromBaseToEndEffector.clear();
+         for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
+            jointsFromBaseToEndEffector.add(joints[jointIndex]);
+      }
+      else
+      {
+         base = joints[joints.length - 1].getPredecessor();
+         endEffector = joints[0].getSuccessor();
+         if (!ScrewTools.isAncestor(endEffector, base))
+            throw new RuntimeException("Unable to process the array of joints: " + Arrays.toString(joints));
+
+         if (jacobianFrame == null)
+            jacobianFrame = endEffector.getBodyFixedFrame();
+         clearJacobianMatrix();
+
+         jointsFromBaseToEndEffector.clear();
+         for (int jointIndex = joints.length - 1; jointIndex >= 0; jointIndex--)
+            jointsFromBaseToEndEffector.add(joints[jointIndex]);
       }
    }
 

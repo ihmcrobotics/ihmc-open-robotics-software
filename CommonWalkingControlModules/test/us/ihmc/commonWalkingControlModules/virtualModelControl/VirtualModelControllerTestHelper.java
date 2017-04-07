@@ -14,7 +14,6 @@ import org.junit.Assert;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactableFoot;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -127,9 +126,8 @@ public class VirtualModelControllerTestHelper
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
-      VirtualModelController virtualModelController = new VirtualModelController(geometricJacobianHolder, controllerModel.getElevator(),
-            controllerModel.getOneDoFJoints(), registry, yoGraphicsListRegistry);
+      VirtualModelController virtualModelController = new VirtualModelController(controllerModel.getElevator(), controllerModel.getOneDoFJoints(),
+            registry, yoGraphicsListRegistry);
 
       List<ReferenceFrame> endEffectorFrames = new ArrayList<>();
       List<FramePose> desiredEndEffectorPoses = new ArrayList<>();
@@ -180,7 +178,7 @@ public class VirtualModelControllerTestHelper
       }
 
       DummyArmController armController = new DummyArmController(robotModel, controllerModel, controllerModel.getOneDoFJoints(), forcePointControllers, virtualModelController,
-            geometricJacobianHolder, endEffectors, desiredWrenches, selectionMatrix);
+            endEffectors, desiredWrenches, selectionMatrix);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotModel, simulationTestingParameters);
       robotModel.setController(armController);
@@ -2706,7 +2704,6 @@ public class VirtualModelControllerTestHelper
       private final OneDoFJoint[] controlledJoints;
 
       private final VirtualModelController virtualModelController;
-      private final GeometricJacobianHolder geometricJacobianHolder;
 
       private Wrench desiredWrench = new Wrench();
 
@@ -2718,15 +2715,14 @@ public class VirtualModelControllerTestHelper
       private boolean firstTick = true;
 
       public DummyArmController(SCSRobotFromInverseDynamicsRobotModel scsRobot, FullRobotModel controllerModel, OneDoFJoint[] controlledJoints,
-            List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, GeometricJacobianHolder geometricJacobianHolder,
-            List<RigidBody> endEffectors, List<YoWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
+            List<ForcePointController> forcePointControllers, VirtualModelController virtualModelController, List<RigidBody> endEffectors,
+            List<YoWrench> yoDesiredWrenches, DenseMatrix64F selectionMatrix)
       {
          this.scsRobot = scsRobot;
          this.controllerModel = controllerModel;
          this.controlledJoints = controlledJoints;
          this.forcePointControllers = forcePointControllers;
          this.virtualModelController = virtualModelController;
-         this.geometricJacobianHolder = geometricJacobianHolder;
          this.endEffectors = endEffectors;
          this.selectionMatrix = selectionMatrix;
          this.yoDesiredWrenches = yoDesiredWrenches;
@@ -2754,7 +2750,6 @@ public class VirtualModelControllerTestHelper
 
          for (ForcePointController forcePointController : forcePointControllers)
             forcePointController.doControl();
-         geometricJacobianHolder.compute();
 
          // compute forces
          VirtualModelControlSolution virtualModelControlSolution = new VirtualModelControlSolution();

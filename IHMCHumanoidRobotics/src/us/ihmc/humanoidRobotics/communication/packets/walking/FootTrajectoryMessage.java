@@ -16,17 +16,16 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
-      "This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points."
-            + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
-            + " To excute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
-            + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
+"This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points."
+      + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
+      + " To excute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/foot_trajectory")
 public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTrajectoryMessage> implements VisualizablePacket
 {
-   @RosExportedField(documentation = "Specifies the which foot will execute the trajectory.")
+   @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public RobotSide robotSide;
-   private static final long WORLD_FRAME_HASH_CODE = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    /**
     * Empty constructor for serialization.
@@ -35,18 +34,12 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
    public FootTrajectoryMessage(Random random)
    {
       super(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
 
    /**
@@ -56,11 +49,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
       super(footTrajectoryMessage);
-      setUniqueId(footTrajectoryMessage.getUniqueId());
-      setDestination(footTrajectoryMessage.getDestination());
       robotSide = footTrajectoryMessage.robotSide;
-      setDataReferenceFrameId(footTrajectoryMessage.getDataReferenceFrameId());
-      setTrajectoryReferenceFrameId(footTrajectoryMessage.getTrajectoryReferenceFrameId());
    }
 
    /**
@@ -73,13 +62,10 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation, WORLD_FRAME_HASH_CODE, WORLD_FRAME_HASH_CODE);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       this.robotSide = robotSide;
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
    }
-   
+
    /**
     * Use this constructor to build a message with more than one trajectory point.
     * This constructor only allocates memory for the trajectory points, you need to call {@link #setTrajectoryPoint(int, double, Point3D, Quaternion, Vector3D, Vector3D)} for each trajectory point afterwards.
@@ -90,10 +76,16 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
-      setDataReferenceFrameId(WORLD_FRAME_HASH_CODE);
-      setTrajectoryReferenceFrameId(WORLD_FRAME_HASH_CODE);
+      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
+      super.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
+   }
+
+   @Override
+   public void set(FootTrajectoryMessage other)
+   {
+      super.set(other);
+      robotSide = other.robotSide;
    }
 
    public RobotSide getRobotSide()
@@ -127,10 +119,5 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public String validateMessage()
    {
       return PacketValidityChecker.validateFootTrajectoryMessage(this);
-   }
-   
-   public final void setTrajectoryPoint(int trajectoryPointIndex, double time, Point3D position, Quaternion orientation, Vector3D linearVelocity, Vector3D angularVelocity)
-   {
-      super.setTrajectoryPoint(trajectoryPointIndex, time, position, orientation, linearVelocity, angularVelocity, WORLD_FRAME_HASH_CODE);
    }
 }

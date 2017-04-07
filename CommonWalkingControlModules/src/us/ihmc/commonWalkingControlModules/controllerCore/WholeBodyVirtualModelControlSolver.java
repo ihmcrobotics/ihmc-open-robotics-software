@@ -114,8 +114,7 @@ public class WholeBodyVirtualModelControlSolver
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, LowLevelJointControlMode.FORCE_CONTROL);
 
       controlRootBody = toolbox.getVirtualModelControlMainBody();
-      virtualModelController = new VirtualModelController(toolbox.getGeometricJacobianHolder(), controlRootBody, controlledOneDoFJoints, registry,
-                                                          toolbox.getYoGraphicsListRegistry());
+      virtualModelController = new VirtualModelController(controlRootBody, controlledOneDoFJoints, registry, toolbox.getYoGraphicsListRegistry());
 
       yoDesiredMomentumRateAngular = toolbox.getYoDesiredMomentumRateAngular();
       yoAchievedMomentumRateAngular = toolbox.getYoAchievedMomentumRateAngular();
