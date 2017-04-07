@@ -1,0 +1,10 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	struct VariableChangeRequest{
+		long variableID;
+		double requestedValue;
+	};
+};
+};
+};

@@ -27,7 +27,6 @@ import us.ihmc.rosControl.wholeRobot.IHMCWholeRobotControlJavaBridge;
 import us.ihmc.rosControl.wholeRobot.PositionJointHandle;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieConfigurationRoot;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
 
 public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBridge
@@ -65,7 +64,7 @@ public class ValkyrieRosControlSliderBoard extends IHMCWholeRobotControlJavaBrid
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final YoVariableServer yoVariableServer = new YoVariableServer(getClass(), new PeriodicNonRealtimeThreadScheduler(getClass().getSimpleName()),
-         robotModel.getLogModelProvider(), robotModel.getLogSettings(ValkyrieConfigurationRoot.USE_CAMERAS_FOR_LOGGING), 0.001);
+         robotModel.getLogModelProvider(), robotModel.getLogSettings(), 0.001);
 
    /* package private */ final DoubleYoVariable masterScaleFactor = new DoubleYoVariable("masterScaleFactor", registry);
 

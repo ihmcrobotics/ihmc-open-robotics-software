@@ -100,6 +100,11 @@ public class EnumYoVariable<T extends Enum<T>> extends YoVariable<EnumYoVariable
       this(name, "", registry, enumType, allowNullValue);
    }
 
+   public boolean isBackedByEnum()
+   {
+      return enumType != null;
+   }
+   
    private void checkIfBackedByEnum()
    {
       if (enumType == null)

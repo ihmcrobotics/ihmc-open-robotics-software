@@ -7,5 +7,4 @@ public class ValkyrieConfigurationRoot
 
    public static final boolean VALKYRIE_WITH_ARMS = true;
 
-   public static final boolean USE_CAMERAS_FOR_LOGGING = true;
 }
