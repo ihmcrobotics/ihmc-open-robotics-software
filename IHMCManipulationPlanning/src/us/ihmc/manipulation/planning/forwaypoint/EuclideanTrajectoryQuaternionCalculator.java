@@ -54,7 +54,7 @@ public class EuclideanTrajectoryQuaternionCalculator extends EuclideanTrajectory
       return trajectoryQuaternions;
    }
    
-   public int getNumberOfTrajectoryQuaternions()
+   public int getNumberOfTrajectoryPoints()
    {
       return trajectoryQuaternions.size();
    }
@@ -71,7 +71,7 @@ public class EuclideanTrajectoryQuaternionCalculator extends EuclideanTrajectory
    {  
       Vector3D angularVelocity = new Vector3D();
       
-      for(int i =0;i<getNumberOfTrajectoryQuaternions()-1;i++)
+      for(int i =0;i<getNumberOfTrajectoryPoints()-1;i++)
       {         
          Quaternion quaternionOne = new Quaternion(trajectoryQuaternions.get(i).getQuaternion());
          Quaternion quaternionOneInv = new Quaternion(quaternionOne);
@@ -98,6 +98,6 @@ public class EuclideanTrajectoryQuaternionCalculator extends EuclideanTrajectory
       }
             
       angularVelocity.setToZero();
-      trajectoryQuaternions.get(getNumberOfTrajectoryQuaternions()-1).setAngularVelocity(angularVelocity);
+      trajectoryQuaternions.get(getNumberOfTrajectoryPoints()-1).setAngularVelocity(angularVelocity);
    }
 }

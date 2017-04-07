@@ -202,7 +202,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
       tempPosition.setToZero(controlFrame);
       yoCurrentPosition.setAndMatchFrame(tempPosition);
 
-      inverseKinematicsOutput.setLinearVelocity(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), desiredLinearVelocity);
+      inverseKinematicsOutput.setLinearVelocity(controlFrame, desiredLinearVelocity);
    }
 
    @Override

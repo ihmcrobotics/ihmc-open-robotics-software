@@ -58,7 +58,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void changeFrame(ReferenceFrame referenceFrame)
    {
-      for (int i = 0; i < getNumberOfTrajectoryQuaternions(); i++)
+      for (int i = 0; i < getNumberOfTrajectoryPoints(); i++)
          trajectoryPoints.get(i).changeFrame(referenceFrame);
       this.referenceFrame = referenceFrame;
    }
@@ -116,7 +116,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void computeTrajectoryPointTimes(double firstTrajectoryPointTime, double trajectoryTime)
    {
-      int numberOfTrajectoryPoints = getNumberOfTrajectoryQuaternions();
+      int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
       if (numberOfTrajectoryPoints == 0)
          throw new RuntimeException("There is no trajectory point.");
 
@@ -203,7 +203,7 @@ public class EuclideanTrajectoryPointCalculator
 
    public void computeTrajectoryPointVelocities(boolean startAndFinishWithZeroVelocity)
    {
-      int numberOfTrajectoryPoints = getNumberOfTrajectoryQuaternions();
+      int numberOfTrajectoryPoints = getNumberOfTrajectoryPoints();
       if (numberOfTrajectoryPoints < 3)
          throw new RuntimeException("Need at least 3 trajectory points.");
 
@@ -335,7 +335,7 @@ public class EuclideanTrajectoryPointCalculator
       }
    }
 
-   public int getNumberOfTrajectoryQuaternions()
+   public int getNumberOfTrajectoryPoints()
    {
       return trajectoryPoints.size();
    }
