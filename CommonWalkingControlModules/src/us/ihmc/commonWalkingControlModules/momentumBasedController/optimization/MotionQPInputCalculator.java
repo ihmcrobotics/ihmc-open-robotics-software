@@ -236,10 +236,11 @@ public class MotionQPInputCalculator
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
       List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
+      // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
       if (primaryBase == null)
       { // No primary base provided for this task.
-         // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-         jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
            // Record the resulting Jacobian matrix for the privileged configuration.
          recordTaskJacobian(motionQPInputToPack.taskJacobian);
          // We're done!
@@ -265,23 +266,16 @@ public class MotionQPInputCalculator
 
                for (int dofIndex : jointIndices)
                {
+                  double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
+                  if (commandToConvert.usePrimaryBaseForControl())
+                     scaleFactor = 0.0;
+
                   // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), dofIndex, motionQPInputToPack.taskJacobian);
+                  MatrixTools.scaleColumn(scaleFactor, dofIndex, motionQPInputToPack.taskJacobian);
                   // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
                   MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
                }
             }
-         }
-
-         if (commandToConvert.usePrimaryBaseForControl())
-         { // It hasn't been specified to use the primary base for control, so use the full Jacobian to the floating base.
-            // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-            jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempPrimaryTaskJacobian, motionQPInputToPack.taskJacobian);
-         }
-         else
-         { // We want to use the primary base for control, so we will only try and achieve the acceleration with the joints in the kinematic chain.
-            // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-            jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
          }
 
          // Record the resulting Jacobian matrix which only zeros before the primary base for the privileged configuration.
@@ -356,10 +350,11 @@ public class MotionQPInputCalculator
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
       List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
 
+      // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
       if (primaryBase == null)
       { // No primary base provided for this task.
-         // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-         jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
            // Record the resulting Jacobian matrix for the privileged configuration.
          recordTaskJacobian(motionQPInputToPack.taskJacobian);
          // We're done!
@@ -385,23 +380,16 @@ public class MotionQPInputCalculator
 
                for (int dofIndex : jointIndices)
                {
+                  double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
+                  if (commandToConvert.usePrimaryBaseForControl())
+                     scaleFactor = 0.0;
+
                   // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), dofIndex, motionQPInputToPack.taskJacobian);
+                  MatrixTools.scaleColumn(scaleFactor, dofIndex, motionQPInputToPack.taskJacobian);
                   // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
                   MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
                }
             }
-         }
-
-         if (commandToConvert.usePrimaryBaseForControl())
-         { // It hasn't been specified to use the primary base for control, so use the full Jacobian to the floating base.
-            // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-            jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempPrimaryTaskJacobian, motionQPInputToPack.taskJacobian);
-         }
-         else
-         { // We want to use the primary base for control, so we will only try and achieve the acceleration with the joints in the kinematic chain.
-            // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
-            jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
          }
 
          // Record the resulting Jacobian matrix which only zeros before the primary base for the privileged configuration.

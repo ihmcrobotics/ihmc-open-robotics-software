@@ -123,6 +123,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
       optionalPrimaryBase = other.optionalPrimaryBase;
       optionalPrimaryBaseName = other.optionalPrimaryBaseName;
+      useOptionalPrimaryBaseForControl = other.useOptionalPrimaryBaseForControl;
 
       controlFramePose.setPoseIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularAcceleration.set(other.desiredAngularAcceleration);
