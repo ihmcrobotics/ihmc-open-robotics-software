@@ -80,6 +80,8 @@ public class SwingState extends AbstractUnconstrainedState
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable currentTimeWithSwingSpeedUp;
 
+   private final DoubleYoVariable primaryBaseControlDuration;
+
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameOrientation initialOrientation = new FrameOrientation();
    private final FrameVector initialAngularVelocity = new FrameVector();
@@ -129,6 +131,8 @@ public class SwingState extends AbstractUnconstrainedState
       velocityAdjustmentDamping = new DoubleYoVariable(namePrefix + "VelocityAdjustmentDamping", registry);
       velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
       adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
+
+      primaryBaseControlDuration = new DoubleYoVariable(namePrefix + "PrimaryBaseControlDuration", registry);
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
@@ -183,6 +187,8 @@ public class SwingState extends AbstractUnconstrainedState
       currentTimeWithSwingSpeedUp = new DoubleYoVariable(namePrefix + "CurrentTimeWithSwingSpeedUp", registry);
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
+
+      primaryBaseControlDuration.set(walkingControllerParameters.getPrimaryBaseControlDurationInSwing());
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -329,6 +335,11 @@ public class SwingState extends AbstractUnconstrainedState
       }
 
       transformDesiredsFromSoleFrameToControlFrame();
+
+      if (time > primaryBaseControlDuration.getDoubleValue())
+         usePrimaryBaseForControl.set(false);
+      else
+         usePrimaryBaseForControl.set(true);
    }
 
    private void transformDesiredsFromSoleFrameToControlFrame()

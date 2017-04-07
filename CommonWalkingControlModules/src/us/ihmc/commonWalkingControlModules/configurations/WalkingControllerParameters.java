@@ -579,4 +579,15 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return 0.0;
    }
+
+   /**
+    * The duration to use only the joints between the pelvis (the primary base) and the swing foot for controlling
+    * the swing foot acceleration during swing.
+    *
+    * @return duration in seconds.
+    */
+   public double getPrimaryBaseControlDurationInSwing()
+   {
+      return 0.0;
+   }
 }
