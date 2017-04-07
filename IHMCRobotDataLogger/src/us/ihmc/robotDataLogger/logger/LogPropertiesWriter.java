@@ -1,14 +1,15 @@
 package us.ihmc.robotDataLogger.logger;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
+
+import us.ihmc.idl.serializers.extra.PropertiesSerializer;
+import us.ihmc.robotDataLogger.LogProperties;
+import us.ihmc.robotDataLogger.LogPropertiesPubSubType;
 
 public class LogPropertiesWriter extends LogProperties
 {
-   private static final long serialVersionUID = -7146049485411068887L;
-
+   private final static String version = "3.0";
    private final File file;
    
    public LogPropertiesWriter(File file)
@@ -19,20 +20,15 @@ public class LogPropertiesWriter extends LogProperties
       {
          throw new RuntimeException("Properties file " + file.getAbsolutePath() + " already exists");
       }
-      setProperty("version", version);
-      
+      setVersion(version);
       // Backwards comparability options
-      setProperty("video.hasTimebase", "true");
+      getVideo().setHasTimebase(true);
    }
    
    public void store() throws IOException
    {
-      FileOutputStream os = new FileOutputStream(file);
-      OutputStreamWriter writer = new OutputStreamWriter(os);
-      store(writer, "Written by yovariable data logger");
-      writer.flush();
-      os.getFD().sync();
-      writer.close();
+      PropertiesSerializer<LogProperties> serializer = new PropertiesSerializer<>(new LogPropertiesPubSubType());
+      serializer.serialize(file, this);
    }
 
 }

@@ -16,10 +16,10 @@ import com.jmatio.types.MLNumericArray;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.robotDataLogger.logger.YoVariableLogReader;
-import us.ihmc.robotDataLogger.logger.util.CustomProgressMonitor;
-import us.ihmc.robotDataLogger.logger.util.ProgressMonitorInterface;
+import us.ihmc.robotDataVisualizer.logger.util.CustomProgressMonitor;
+import us.ihmc.robotDataVisualizer.logger.util.ProgressMonitorInterface;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
