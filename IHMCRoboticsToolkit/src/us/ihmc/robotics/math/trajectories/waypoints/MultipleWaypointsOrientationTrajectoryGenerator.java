@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.trajectories.waypoints;
 
-import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
+import static us.ihmc.robotics.math.trajectories.waypoints.MultipleWaypointsTrajectoryGenerator.*;
 
 import java.util.ArrayList;
 
@@ -39,19 +39,19 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    }
 
    public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, boolean allowMultipleFrames, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+                                                          YoVariableRegistry parentRegistry)
    {
       this(namePrefix, defaultMaximumNumberOfWaypoints, allowMultipleFrames, referenceFrame, parentRegistry);
    }
 
    public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
-         YoVariableRegistry parentRegistry)
+                                                          YoVariableRegistry parentRegistry)
    {
       this(namePrefix, maximumNumberOfWaypoints, false, referenceFrame, parentRegistry);
    }
 
    public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, boolean allowMultipleFrames,
-         ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+                                                          ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
    {
       super(allowMultipleFrames, referenceFrame);
 
@@ -129,6 +129,20 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    {
       checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
       appendWaypointUnsafe(so3Waypoint);
+   }
+
+   public void appendWaypoint(FrameSO3TrajectoryPoint frameSO3TrajectoryPoint)
+   {
+      frameSO3TrajectoryPoint.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
+      appendWaypointUnsafe(frameSO3TrajectoryPoint);
+   }
+
+   public void appendWaypoint(FrameSE3TrajectoryPoint frameSE3TrajectoryPoint)
+   {
+      frameSE3TrajectoryPoint.checkReferenceFrameMatch(getCurrentTrajectoryFrame());
+      checkNumberOfWaypoints(numberOfWaypoints.getIntegerValue() + 1);
+      appendWaypointUnsafe(frameSE3TrajectoryPoint);
    }
 
    private void appendWaypointUnsafe(SO3TrajectoryPointInterface<?> so3Waypoint)

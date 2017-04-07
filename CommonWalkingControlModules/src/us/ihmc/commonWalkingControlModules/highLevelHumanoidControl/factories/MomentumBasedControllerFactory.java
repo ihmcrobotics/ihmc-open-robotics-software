@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.KinematicsBasedFootSwitch;
@@ -317,11 +316,10 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
 
       /////////////////////////////////////////////////////////////////////////////////////////////
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
-      GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = walkingControllerParameters.getJointPrivilegedConfigurationParameters();
       double omega0 = walkingControllerParameters.getOmega0();
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, geometricJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder,
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder,
             wristForceSensors, yoTime, gravityZ, omega0, twistCalculator, feet, controlDT, updatables, contactablePlaneBodies, yoGraphicsListRegistry,
             jointsToIgnore);
       controllerToolbox.attachControllerStateChangedListeners(controllerStateChangedListenersToAttach);
@@ -359,8 +357,8 @@ public class MomentumBasedControllerFactory implements CloseableAndDisposable
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, rootJoint, jointsToOptimizeFor, centerOfMassFrame,
-                                                                            twistCalculator, geometricJacobianHolder, momentumOptimizationSettings,
-                                                                            yoGraphicsListRegistry, registry);
+                                                                            twistCalculator, momentumOptimizationSettings, yoGraphicsListRegistry,
+                                                                            registry);
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       if (setupInverseDynamicsSolver)
          toolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);

@@ -118,11 +118,10 @@ public class LogDataProcessorHelper
 
       double omega0 = walkingControllerParameters.getOmega0();
       double gravityZ = 9.81;
-      GeometricJacobianHolder robotJacobianHolder = new GeometricJacobianHolder();
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
       yoTime = (DoubleYoVariable) scs.getVariable(controllerTimeNamespace, "controllerTime");
 
-      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, robotJacobianHolder, referenceFrames, stateEstimatorFootSwitches,
+      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, referenceFrames, stateEstimatorFootSwitches,
             null, null, yoTime, gravityZ, omega0, twistCalculator, contactableFeet, controllerDT, updatables, null, null);
 
    }

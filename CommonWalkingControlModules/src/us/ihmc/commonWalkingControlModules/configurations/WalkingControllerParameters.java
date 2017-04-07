@@ -581,6 +581,18 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Sets whether or not the {@link us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator} will simply check whether or not the
+    * upcoming step is reachable using the given step timing ({@return} is false), or will edit the step timings to make sure that the step is reachable
+    * if ({@return} is true).
+    *
+    * @return whether or not to edit the timing based on the reachability of the step.
+    */
+   public boolean editStepTimingForReachability()
+   {
+      return false;
+   }
+
+   /**
     * The duration to use only the joints between the pelvis (the primary base) and the swing foot for controlling
     * the swing foot acceleration during swing.
     *

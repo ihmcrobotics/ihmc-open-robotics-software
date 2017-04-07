@@ -19,6 +19,13 @@ public class AtlasCapturePointPlannerParameters extends CapturePointPlannerParam
 
    /** {@inheritDoc} */
    @Override
+   public int getNumberOfFootstepsToConsider()
+   {
+      return 4;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public double getAdditionalTimeForSingleSupport()
    {
       return 0.1;
