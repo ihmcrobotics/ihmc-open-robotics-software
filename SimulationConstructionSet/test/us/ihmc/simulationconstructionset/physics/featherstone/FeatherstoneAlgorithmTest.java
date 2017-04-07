@@ -32,6 +32,14 @@ public class FeatherstoneAlgorithmTest
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
 
+   @Test
+   public void testCartPoleAgainstLagrangianCalculation()
+   {
+      double epsilon = 1e-5;
+      CartPoleRobot cartPoleRobot = new CartPoleRobot("cartPole", 0.3, -1.3, 0.4);
+      testAgainstLagrangianCalculation(cartPoleRobot, epsilon);
+   }
+
    private void testAgainstLagrangianCalculation(RobotWithClosedFormDynamics robotWithClosedFormDynamics, double epsilon)
    {
       robotWithClosedFormDynamics.setController(new DynamicsChecker(robotWithClosedFormDynamics, epsilon));
