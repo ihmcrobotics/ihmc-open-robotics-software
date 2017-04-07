@@ -10,7 +10,6 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -20,6 +19,7 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.frames.YoWrench;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -37,7 +37,7 @@ public class VirtualModelController
    private final Map<RigidBody, YoWrench> yoWrenches = new HashMap<>();
    private final Map<OneDoFJoint, DoubleYoVariable> vmcTorques = new HashMap<>();
 
-   private final GeometricJacobianHolder geometricJacobianHolder;
+   private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
    private final RigidBody defaultRootBody;
 
    private final Map<InverseDynamicsJoint, Double> jointTorques = new HashMap<>();
@@ -52,10 +52,9 @@ public class VirtualModelController
    private final Map<RigidBody, Wrench> gravityWrenchMap = new HashMap<>();
    private List<RigidBody> allBodies = new ArrayList<>();
 
-   public VirtualModelController(GeometricJacobianHolder geometricJacobianHolder, RigidBody defaultRootBody, OneDoFJoint[] controlledJoints,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public VirtualModelController(RigidBody defaultRootBody, OneDoFJoint[] controlledJoints, YoVariableRegistry parentRegistry,
+                                 YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.geometricJacobianHolder = geometricJacobianHolder;
       this.defaultRootBody = defaultRootBody;
 
       fullJTMatrix.reshape(0, 0);
@@ -74,7 +73,7 @@ public class VirtualModelController
          for (int i = 0; i < allBodies.length; i++)
             gravityWrenchMap.put(allBodies[i], new Wrench(allBodies[i].getBodyFixedFrame(), ReferenceFrame.getWorldFrame()));
          gravityWrenchVisualizer = new WrenchVisualizer("GravityWrenches", this.allBodies, 10.0, yoGraphicsListRegistry, registry, YoAppearance.Blue(),
-               YoAppearance.Blue());
+                                                        YoAppearance.Blue());
       }
       else
       {
@@ -122,18 +121,19 @@ public class VirtualModelController
    public void createYoVariable(RigidBody controlledBody)
    {
       YoWrench yoWrench = new YoWrench(controlledBody.getName() + "_VMCDesiredWrench", controlledBody.getBodyFixedFrame(), ReferenceFrame.getWorldFrame(),
-            registry);
+                                       registry);
       yoWrenches.put(controlledBody, yoWrench);
    }
 
    public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench)
    {
-      submitControlledBodyVirtualWrench(controlledBody, wrench, new CommonOps().identity(Wrench.SIZE, Wrench.SIZE));
+      submitControlledBodyVirtualWrench(controlledBody, wrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
    }
 
    public void submitControlledBodyVirtualWrench(VirtualWrenchCommand virtualWrenchCommand)
    {
-      submitControlledBodyVirtualWrench(virtualWrenchCommand.getControlledBody(), virtualWrenchCommand.getVirtualWrench(), virtualWrenchCommand.getSelectionMatrix());
+      submitControlledBodyVirtualWrench(virtualWrenchCommand.getControlledBody(), virtualWrenchCommand.getVirtualWrench(),
+                                        virtualWrenchCommand.getSelectionMatrix());
    }
 
    public void submitControlledBodyVirtualWrench(RigidBody controlledBody, Wrench wrench, DenseMatrix64F selectionMatrix)
@@ -217,14 +217,16 @@ public class VirtualModelController
                   for (int chainID = 0; chainID < numberOfControlChains; chainID++)
                   {
                      // get jacobian
-                     long jacobianID = geometricJacobianHolder
-                           .getOrCreateGeometricJacobian(vmcDataHandler.getJointsForControl(controlledBody, chainID), defaultRootBody.getBodyFixedFrame());
+                     geometricJacobianCalculator.clear();
+                     geometricJacobianCalculator.setKinematicChain(vmcDataHandler.getJointsForControl(controlledBody, chainID));
+                     geometricJacobianCalculator.setJacobianFrame(defaultRootBody.getBodyFixedFrame());
+                     geometricJacobianCalculator.computeJacobianMatrix();
 
                      // Apply selection matrix to jacobian
                      int numberOfJoints = vmcDataHandler.jointsInChain(controlledBody, chainID);
                      tmpJMatrix.reshape(taskSize, numberOfJoints);
                      tmpJTMatrix.reshape(numberOfJoints, taskSize);
-                     CommonOps.mult(selectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
+                     geometricJacobianCalculator.getJacobianMatrix(selectionMatrix, tmpJMatrix);
                      CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
 
                      // insert new jacobian into full objective jacobian
@@ -235,7 +237,7 @@ public class VirtualModelController
                      for (int jointID = 0; jointID < numberOfJoints; jointID++)
                      {
                         CommonOps.extract(tmpJTMatrix, jointID, jointID + 1, 0, taskSize, fullJTMatrix,
-                              vmcDataHandler.indexOfInTree(controlledBody, chainID, jointID), previousSize);
+                                          vmcDataHandler.indexOfInTree(controlledBody, chainID, jointID), previousSize);
                      }
                   }
                }
@@ -270,14 +272,16 @@ public class VirtualModelController
                CommonOps.mult(selectionMatrix, wrenchMatrix, tmpWrench);
 
                // get jacobian
-               long jacobianID = geometricJacobianHolder
-                     .getOrCreateGeometricJacobian(vmcDataHandler.getJointsForControl(controlledBody, 0), defaultRootBody.getBodyFixedFrame());
+               geometricJacobianCalculator.clear();
+               geometricJacobianCalculator.setKinematicChain(vmcDataHandler.getJointsForControl(controlledBody, 0));
+               geometricJacobianCalculator.setJacobianFrame(defaultRootBody.getBodyFixedFrame());
+               geometricJacobianCalculator.computeJacobianMatrix();
 
                // Apply selection matrix to jacobian
                int numberOfJoints = vmcDataHandler.jointsInChain(controlledBody, 0);
                tmpJMatrix.reshape(taskSize, numberOfJoints);
                tmpJTMatrix.reshape(numberOfJoints, taskSize);
-               CommonOps.mult(selectionMatrix, geometricJacobianHolder.getJacobian(jacobianID).getJacobianMatrix(), tmpJMatrix);
+               geometricJacobianCalculator.getJacobianMatrix(selectionMatrix, tmpJMatrix);
                CommonOps.transpose(tmpJMatrix, tmpJTMatrix);
 
                // get torques
@@ -290,7 +294,7 @@ public class VirtualModelController
 
                // put into full thing
                for (int j = 0; j < vmcDataHandler.jointsInChain(controlledBody, 0); j++)
-                  CommonOps.extract(jointTorques, j, j+1, 0, 1, fullEffortMatrix, vmcDataHandler.indexOfInTree(controlledBody, 0, j), 0);
+                  CommonOps.extract(jointTorques, j, j + 1, 0, 1, fullEffortMatrix, vmcDataHandler.indexOfInTree(controlledBody, 0, j), 0);
             }
          }
       }
@@ -312,7 +316,7 @@ public class VirtualModelController
          {
             Wrench gravityWrench = gravityWrenchMap.get(rigidBody);
             gravityWrench.set(new FrameVector(ReferenceFrame.getWorldFrame(), 0, 0, -9.81 * rigidBody.getInertia().getMass()),
-                  new FrameVector(ReferenceFrame.getWorldFrame(), 0, 0, 0));
+                              new FrameVector(ReferenceFrame.getWorldFrame(), 0, 0, 0));
          }
          gravityWrenchVisualizer.visualize(gravityWrenchMap);
       }

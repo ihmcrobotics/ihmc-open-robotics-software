@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -62,7 +61,6 @@ public class HexapodSimulationController implements RobotController
    private final WholeBodyControllerCore controllerCore;
    private final HexapodHighLevelControlManager highLevelController;
 
-   private final GeometricJacobianHolder geometricJacobianHolder = new GeometricJacobianHolder();
    private final HexapodReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
    private LongYoVariable totalTimeToCompleteTick = new LongYoVariable("totalTimeToCompleteTick", registry);
@@ -162,8 +160,8 @@ public class HexapodSimulationController implements RobotController
       FloatingInverseDynamicsJoint rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerDt, -gravity, rootJoint, controlledJoints, centerOfMassFrame,
-                                                                            twistCalculator, geometricJacobianHolder, momentumOptimizationSettings,
-                                                                            yoGraphicsListRegistry, registry);
+                                                                            twistCalculator, momentumOptimizationSettings, yoGraphicsListRegistry,
+                                                                            registry);
       toolbox.setJointPrivilegedConfigurationParameters(jointPrivilegedConfigurationParameters);
       toolbox.setupForInverseDynamicsSolver(footContactableBodies);
       toolbox.setupForInverseKinematicsSolver();
@@ -215,7 +213,6 @@ public class HexapodSimulationController implements RobotController
          frame.update();
       }
 
-      geometricJacobianHolder.compute();
       referenceFrames.updateFrames();
       twistCalculator.compute();
 

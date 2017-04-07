@@ -5,7 +5,6 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
@@ -15,13 +14,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.GeometricJacobianCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -30,7 +27,6 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class MotionQPInputCalculator
@@ -44,8 +40,6 @@ public class MotionQPInputCalculator
    private final PoseReferenceFrame controlFrame = new PoseReferenceFrame("controlFrame", worldFrame);
    private final GeometricJacobianCalculator jacobianCalculator = new GeometricJacobianCalculator();
 
-   private final GeometricJacobianHolder geometricJacobianHolder;
-
    private final InverseDynamicsJoint[] jointsToOptimizeFor;
    private final OneDoFJoint[] oneDoFJoints;
 
@@ -56,7 +50,6 @@ public class MotionQPInputCalculator
    private final JointPrivilegedConfigurationHandler privilegedConfigurationHandler;
 
    private final DenseMatrix64F tempPrimaryTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
-   private final DenseMatrix64F tempFullPrimaryTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
 
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
@@ -71,15 +64,13 @@ public class MotionQPInputCalculator
 
    private final int numberOfDoFs;
 
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, GeometricJacobianHolder geometricJacobianHolder, TwistCalculator twistCalculator,
-                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-                                  YoVariableRegistry parentRegistry)
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, JointIndexHandler jointIndexHandler,
+                                  JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
    {
-      this.geometricJacobianHolder = geometricJacobianHolder;
       this.jointIndexHandler = jointIndexHandler;
       this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame, registry);
+      centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame);
 
       if (jointPrivilegedConfigurationParameters != null)
          privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
@@ -177,15 +168,22 @@ public class MotionQPInputCalculator
       return true;
    }
 
-   private final TIntArrayList tempJointIndices = new TIntArrayList();
-
    /**
     * Converts a {@link SpatialAccelerationCommand} into a {@link MotionQPInput}.
+    * <p>
+    * The idea is to convert the information held in the {@code commandToConvert} such that it ends
+    * up being formulated as follows:<br>
+    * J<sub>MxN</sub> * vDot<sub>Nx1</sub> = p<sub>Mx1</sub> <br>
+    * where J is the M-by-N Jacobian matrix, vDot is the N-by-1 desired joint acceleration vector
+    * that the QP solver is solving for, and p is the M-by-1 objective vector. M is called the task
+    * size and N is the overall number of degrees of freedom (DoFs) to be controlled.
+    * </p>
     * 
     * @return true if the command was successfully converted.
     */
    public boolean convertSpatialAccelerationCommand(SpatialAccelerationCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
+      // Gets the M-by-6 selection matrix S.
       DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
       int taskSize = selectionMatrix.getNumRows();
 
@@ -194,9 +192,10 @@ public class MotionQPInputCalculator
 
       motionQPInputToPack.reshape(taskSize);
       motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      // If the task is setup as a hard constraint, there is no need for a weight matrix.
       if (!commandToConvert.isHardConstraint())
       {
-         // Compute the weight: W = S * W * S^T
+         // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(tempTaskWeight);
@@ -207,7 +206,6 @@ public class MotionQPInputCalculator
 
       RigidBody base = commandToConvert.getBase();
       RigidBody endEffector = commandToConvert.getEndEffector();
-
       commandToConvert.getControlFrame(controlFrame);
 
       jacobianCalculator.clear();
@@ -216,15 +214,42 @@ public class MotionQPInputCalculator
       jacobianCalculator.computeJacobianMatrix();
       jacobianCalculator.computeConvectiveTerm();
 
-      // Compute the task Jacobian: J = S * J
+      /*
+       * @formatter:off
+       * Compute the M-by-1 task objective vector p as follows:
+       * p = S * ( TDot - JDot * qDot )
+       * where TDot is the 6-by-1 end-effector desired acceleration vector and (JDot * qDot) is the 6-by-1
+       * convective term vector resulting from the Coriolis and Centrifugal effects.
+       * @formatter:on
+       */
+      jacobianCalculator.getConvectiveTerm(convectiveTermMatrix);
+      commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
+      CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
+      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+
+      // Compute the M-by-N task Jacobian: J = S * J
+      // Step 1, let's get the 'small' Jacobian matrix j.
+      // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
       jacobianCalculator.getJacobianMatrix(selectionMatrix, tempTaskJacobian);
 
+      // Dealing with the primary base:
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
       List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
-      if (primaryBase != null)
-      {
-         tempPrimaryTaskJacobian.reshape(taskSize, jointsUsedInTask.size());
-         tempPrimaryTaskJacobian.set(tempTaskJacobian);
+
+      // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
+      if (primaryBase == null)
+      { // No primary base provided for this task.
+           // Record the resulting Jacobian matrix for the privileged configuration.
+         recordTaskJacobian(motionQPInputToPack.taskJacobian);
+         // We're done!
+      }
+      else
+      { // A primary base has been provided, two things are happening here:
+           // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+        // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
+         tempPrimaryTaskJacobian.set(motionQPInputToPack.taskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
          for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
@@ -235,44 +260,44 @@ public class MotionQPInputCalculator
                isJointUpstreamOfPrimaryBase = true;
 
             if (isJointUpstreamOfPrimaryBase)
-            {
-               tempJointIndices.reset();
-               ScrewTools.computeIndexForJoint(jointsUsedInTask, tempJointIndices, joint);
-               for (int upstreamJointIndex = 0; upstreamJointIndex < tempJointIndices.size(); upstreamJointIndex++)
+            { // The current joint is located between the base and the primary base:
+                 // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+               int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+
+               for (int dofIndex : jointIndices)
                {
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(upstreamJointIndex), tempTaskJacobian);
-                  MatrixTools.zeroColumn(tempJointIndices.get(upstreamJointIndex), tempPrimaryTaskJacobian);
+                  // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
+                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), dofIndex, motionQPInputToPack.taskJacobian);
+                  // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
+                  MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
                }
             }
          }
 
-         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
-         jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
+         // Record the resulting Jacobian matrix which only zeros before the primary base for the privileged configuration.
+         recordTaskJacobian(tempPrimaryTaskJacobian);
+         // We're done!
       }
-
-      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
-
-      // Compute the task objective: p = S * ( TDot - JDot qDot )
-      jacobianCalculator.getConvectiveTerm(convectiveTermMatrix);
-      commandToConvert.getDesiredSpatialAcceleration(tempTaskObjective);
-      CommonOps.subtractEquals(tempTaskObjective, convectiveTermMatrix);
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
-
-      if (primaryBase != null)
-         recordTaskJacobian(tempFullPrimaryTaskJacobian);
-      else
-         recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
       return true;
    }
 
    /**
     * Converts a {@link SpatialVelocityCommand} into a {@link MotionQPInput}.
+    * <p>
+    * The idea is to convert the information held in the {@code commandToConvert} such that it ends
+    * up being formulated as follows:<br>
+    * J<sub>MxN</sub> * v<sub>Nx1</sub> = p<sub>Mx1</sub> <br>
+    * where J is the M-by-N Jacobian matrix, v is the N-by-1 desired joint velocity vector
+    * that the QP solver is solving for, and p is the M-by-1 objective vector. M is called the task
+    * size and N is the overall number of degrees of freedom (DoFs) to be controlled.
+    * </p>
     * 
     * @return true if the command was successfully converted.
     */
    public boolean convertSpatialVelocityCommand(SpatialVelocityCommand commandToConvert, MotionQPInput motionQPInputToPack)
    {
+      // Gets the M-by-6 selection matrix S.
       DenseMatrix64F selectionMatrix = commandToConvert.getSelectionMatrix();
       int taskSize = selectionMatrix.getNumRows();
 
@@ -280,10 +305,11 @@ public class MotionQPInputCalculator
          return false;
 
       motionQPInputToPack.reshape(taskSize);
-      motionQPInputToPack.setIsMotionConstraint(!commandToConvert.getHasWeight());
-      if (commandToConvert.getHasWeight())
+      motionQPInputToPack.setIsMotionConstraint(commandToConvert.isHardConstraint());
+      // If the task is setup as a hard constraint, there is no need for a weight matrix.
+      if (!commandToConvert.isHardConstraint())
       {
-         // Compute the weight: W = S * W * S^T
+         // Compute the M-by-M weight matrix W computed as follows: W = S * W * S^T
          motionQPInputToPack.setUseWeightScalar(false);
          tempTaskWeight.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
          commandToConvert.getWeightMatrix(tempTaskWeight);
@@ -292,57 +318,76 @@ public class MotionQPInputCalculator
          CommonOps.multTransB(tempTaskWeightSubspace, selectionMatrix, motionQPInputToPack.taskWeightMatrix);
       }
 
-      Twist spatialVelocity = commandToConvert.getSpatialVelocity();
       RigidBody base = commandToConvert.getBase();
       RigidBody endEffector = commandToConvert.getEndEffector();
-      long jacobianId = geometricJacobianHolder.getOrCreateGeometricJacobian(base, endEffector, spatialVelocity.getExpressedInFrame());
-      GeometricJacobian jacobian = geometricJacobianHolder.getJacobian(jacobianId);
+      commandToConvert.getControlFrame(controlFrame);
 
-      // Compute the task Jacobian: J = S * J
-      tempTaskJacobian.reshape(taskSize, jacobian.getNumberOfColumns());
-      CommonOps.mult(selectionMatrix, jacobian.getJacobianMatrix(), tempTaskJacobian);
+      jacobianCalculator.clear();
+      jacobianCalculator.setKinematicChain(base, endEffector);
+      jacobianCalculator.setJacobianFrame(controlFrame);
+      jacobianCalculator.computeJacobianMatrix();
 
+      /*
+       * @formatter:off
+       * Compute the M-by-1 task objective vector p as follows:
+       * p = S * T
+       * where T is the 6-by-1 end-effector desired velocity vector.
+       * @formatter:on
+       */
+      commandToConvert.getDesiredSpatialVelocity(tempTaskObjective);
+      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
+
+      // Compute the M-by-N task Jacobian: J = S * J
+      // Step 1, let's get the 'small' Jacobian matrix j.
+      // It is called small as its number of columns is equal to the number of DoFs to its kinematic chain which is way smaller than the number of robot DoFs.
+      jacobianCalculator.getJacobianMatrix(selectionMatrix, tempTaskJacobian);
+
+      // Dealing with the primary base:
       RigidBody primaryBase = commandToConvert.getPrimaryBase();
-      InverseDynamicsJoint[] jointsUsedInTask = jacobian.getJointsInOrder();
-      if (primaryBase != null)
-      {
-         tempPrimaryTaskJacobian.reshape(taskSize, jointsUsedInTask.length);
-         tempPrimaryTaskJacobian.set(tempTaskJacobian);
+      List<InverseDynamicsJoint> jointsUsedInTask = jacobianCalculator.getJointsFromBaseToEndEffector();
+
+      // Step 2: The small Jacobian matrix into the full Jacobian matrix. Proper indexing has to be ensured, so it is handled by the jointIndexHandler.
+      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
+
+      if (primaryBase == null)
+      { // No primary base provided for this task.
+           // Record the resulting Jacobian matrix for the privileged configuration.
+         recordTaskJacobian(motionQPInputToPack.taskJacobian);
+         // We're done!
+      }
+      else
+      { // A primary base has been provided, two things are happening here:
+           // 1- A weight is applied on the joints between the base and the primary base with objective to reduce their involvement for this task.
+        // 2- The Jacobian is transformed before being recorded such that the privileged configuration is only applied from the primary base to the end-effector.
+         tempPrimaryTaskJacobian.set(motionQPInputToPack.taskJacobian);
 
          boolean isJointUpstreamOfPrimaryBase = false;
-         for (int i = jointsUsedInTask.length - 1; i >= 0; i--)
+         for (int i = jointsUsedInTask.size() - 1; i >= 0; i--)
          {
-            InverseDynamicsJoint joint = jointsUsedInTask[i];
+            InverseDynamicsJoint joint = jointsUsedInTask.get(i);
 
             if (joint.getSuccessor() == primaryBase)
                isJointUpstreamOfPrimaryBase = true;
 
             if (isJointUpstreamOfPrimaryBase)
-            {
-               tempJointIndices.reset();
-               ScrewTools.computeIndexForJoint(jointsUsedInTask, tempJointIndices, joint);
-               for (int upstreamJointIndex = 0; upstreamJointIndex < tempJointIndices.size(); upstreamJointIndex++)
+            { // The current joint is located between the base and the primary base:
+                 // Find the column indices corresponding to this joint (it is usually only one index except for the floating joint which has 6).
+               int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+
+               for (int dofIndex : jointIndices)
                {
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), tempJointIndices.get(upstreamJointIndex), tempTaskJacobian);
-                  MatrixTools.zeroColumn(tempJointIndices.get(upstreamJointIndex), tempPrimaryTaskJacobian);
+                  // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
+                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), dofIndex, motionQPInputToPack.taskJacobian);
+                  // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
+                  MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
                }
             }
          }
 
-         tempFullPrimaryTaskJacobian.reshape(taskSize, numberOfDoFs);
-         jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempPrimaryTaskJacobian, tempFullPrimaryTaskJacobian);
+         // Record the resulting Jacobian matrix which only zeros before the primary base for the privileged configuration.
+         recordTaskJacobian(tempPrimaryTaskJacobian);
+         // We're done!
       }
-
-      jointIndexHandler.compactBlockToFullBlockIgnoreUnindexedJoints(jointsUsedInTask, tempTaskJacobian, motionQPInputToPack.taskJacobian);
-
-      // Compute the task objective: p = S * T
-      spatialVelocity.getMatrix(tempTaskObjective, 0);
-      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
-
-      if (primaryBase != null)
-         recordTaskJacobian(tempFullPrimaryTaskJacobian);
-      else
-         recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
       return true;
    }
