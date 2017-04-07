@@ -261,22 +261,19 @@ public class SpatialAccelerationVector extends SpatialMotionVector
    }
 
    /**
-    * Packs the linear acceleration of a point that is fixed in bodyFrame but is expressed in
-    * baseFrame, with respect to baseFrame, expressed in expressedInFrame
-    * 
-    *
+    * Packs the linear acceleration of a point that is fixed in bodyFrame, with respect to
+    * baseFrame. The resulting vector is expressed in {@code this.getExpressedInFrame()}.
     */
-   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint pointFixedInBodyFrame, FrameVector frameVectorToPack)
+   public void getAccelerationOfPointFixedInBodyFrame(Twist twist, FramePoint pointFixedInBodyFrame, FrameVector linearAccelerationToPack)
    {
-      expressedInFrame.checkReferenceFrameMatch(baseFrame);
-      pointFixedInBodyFrame.checkReferenceFrameMatch(baseFrame);
+      pointFixedInBodyFrame.checkReferenceFrameMatch(expressedInFrame);
 
       expressedInFrame.checkReferenceFrameMatch(twist.getExpressedInFrame());
       bodyFrame.checkReferenceFrameMatch(twist.getBodyFrame());
       baseFrame.checkReferenceFrameMatch(twist.getBaseFrame());
 
-      frameVectorToPack.setToZero(expressedInFrame);
-      Vector3D vectorToPack = frameVectorToPack.getVector();
+      linearAccelerationToPack.setToZero(expressedInFrame);
+      Vector3D vectorToPack = linearAccelerationToPack.getVector();
 
       tempVector.set(pointFixedInBodyFrame.getPoint());
       vectorToPack.cross(angularPart, tempVector);

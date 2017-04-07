@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
@@ -85,7 +84,7 @@ public class WholeBodyInverseDynamicsSolver
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
-      rootJoint = toolbox.getRobotRootJoint();
+      rootJoint = toolbox.getRootJoint();
       inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, registry);
 
@@ -170,11 +169,14 @@ public class WholeBodyInverseDynamicsSolver
       inverseDynamicsCalculator.compute();
       updateLowLevelData();
 
-      rootJoint.getWrench(residualRootJointWrench);
-      residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
-      residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
-      yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
-      yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      if (rootJoint != null)
+      {
+         rootJoint.getWrench(residualRootJointWrench);
+         residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
+         residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+         yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
+         yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      }
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
@@ -188,7 +190,8 @@ public class WholeBodyInverseDynamicsSolver
 
    private void updateLowLevelData()
    {
-      rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
+      if (rootJoint != null)
+         rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
 
@@ -204,9 +207,6 @@ public class WholeBodyInverseDynamicsSolver
          {
          case TASKSPACE:
             optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
-            break;
-         case POINT:
-            optimizationControlModule.submitPointAccelerationCommand((PointAccelerationCommand) command);
             break;
          case JOINTSPACE:
             optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);

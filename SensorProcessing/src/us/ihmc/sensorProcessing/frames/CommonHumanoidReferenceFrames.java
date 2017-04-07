@@ -42,4 +42,6 @@ public interface CommonHumanoidReferenceFrames extends ReferenceFrames
    public abstract SideDependentList<ReferenceFrame> getSoleZUpFrames();
 
    public abstract ReferenceFrame getChestFrame();
+
+   public abstract ReferenceFrame getMidFootZUpGroundFrame();
 }

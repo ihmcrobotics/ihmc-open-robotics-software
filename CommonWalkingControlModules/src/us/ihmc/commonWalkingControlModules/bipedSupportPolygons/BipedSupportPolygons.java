@@ -16,20 +16,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 
-/**
- * <p>Title: BipedSupportPolygons </p>
- *
- * <p>Description: Computes and holds on to information about the biped's support polygons that is a function of state only, and not of a particular controller.
- * </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
-
 /*
  * FIXME: not rewindable!
  */

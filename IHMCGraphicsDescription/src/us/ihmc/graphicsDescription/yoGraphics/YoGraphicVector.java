@@ -259,6 +259,16 @@ public class YoGraphicVector extends YoGraphic implements RemoteYoGraphic, Graph
       return false;
    }
 
+   public void hide()
+   {
+      x.setToNaN();
+      y.setToNaN();
+      z.setToNaN();
+      baseX.setToNaN();
+      baseY.setToNaN();
+      baseZ.setToNaN();
+   }
+
    @Override
    public RemoteGraphicType getRemoteGraphicType()
    {

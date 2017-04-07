@@ -1,15 +1,13 @@
 package us.ihmc.simulationconstructionset;
 
+import org.ejml.data.DenseMatrix64F;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.simulationconstructionset.mathfunctions.Matrix;
 
 /**
- * Title:        Yobotics! Simulation Construction Set<p>
+ * Title:        Simulation Construction Set<p>
  * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
  * @author Jerry Pratt
  * @version Beta 1.0
  */
@@ -84,7 +82,7 @@ public final class SpatialVector implements java.io.Serializable
       bottom.set(sV.bottom);
    }
 
-   public final void getMatrix(Matrix M)
+   public final void getMatrix(DenseMatrix64F M)
    {
       M.set(0, 0, top.getX());
       M.set(1, 0, top.getY());
@@ -94,21 +92,21 @@ public final class SpatialVector implements java.io.Serializable
       M.set(5, 0, bottom.getZ());
    }
 
-   public void getPlanarXYMatrix(Matrix M)
+   public void getPlanarXYMatrix(DenseMatrix64F M)
    {
       M.set(0, 0, top.getX());
       M.set(1, 0, top.getY());
       M.set(2, 0, bottom.getZ());
    }
 
-   public void getPlanarXZMatrix(Matrix M)
+   public void getPlanarXZMatrix(DenseMatrix64F M)
    {
       M.set(0, 0, top.getX());
       M.set(1, 0, top.getZ());
       M.set(2, 0, bottom.getY());
    }
 
-   public void getPlanarYZMatrix(Matrix M)
+   public void getPlanarYZMatrix(DenseMatrix64F M)
    {
       M.set(0, 0, top.getY());
       M.set(1, 0, top.getZ());

@@ -146,23 +146,25 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       assertTrue(success);
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(getRobotModel().createFullRobotModel());
-      ReferenceFrame pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
       ReferenceFrame chestFrame = referenceFrames.getChestFrame();
-
       RobotSide robotSide = RobotSide.RIGHT;
 
-      // position the cane on the ground
-      // TODO: change this to control the end point of the cane.
+      // position the contact point on the ground
       Quaternion handOrientation = new Quaternion();
       handOrientation.appendYawRotation(Math.PI / 4.0);
       handOrientation.appendPitchRotation(-Math.PI / 2.0);
       handOrientation.appendRollRotation(Math.PI / 4.0);
+      handOrientation.inverse();
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 2);
       handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
       handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.2, -0.15, 0.4), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
-      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.2, -0.15, 0.2), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setUseCustomControlFrame(true);
+      handTrajectoryMessage.setControlFramePosition(new Point3D(-0.307, -0.027, -0.022)); // hard coded to be at the simulation contact point.
+      handTrajectoryMessage.setControlFrameOrientation(handOrientation);
+
+      handTrajectoryMessage.setTrajectoryPoint(0, 1.0, new Point3D(0.275, -0.125, 0.1), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
+      handTrajectoryMessage.setTrajectoryPoint(1, 2.0, new Point3D(0.275, -0.125, -0.1), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(handTrajectoryMessage);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
 
@@ -188,7 +190,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       Quaternion footOrientation = new Quaternion();
       Point3D footPosition = new Point3D(0.25, 0.05, 0.2);
       footOrientation.appendPitchRotation(-Math.PI / 4.0);
-      footTrajectory.setTrajectoryPoint(0, 1.0, footPosition, footOrientation, new Vector3D(), new Vector3D());
+      footTrajectory.setTrajectoryPoint(0, 1.0, footPosition, footOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(footTrajectory);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
       assertTrue(success);
@@ -203,8 +205,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       // Return to safe stance and lift hand
       footOrientation.setToZero();
       FootTrajectoryMessage putDownFoot = new FootTrajectoryMessage(robotSide, 2);
-      putDownFoot.setTrajectoryPoint(0, 1.0, new Point3D(0.0, -0.075, 0.05), footOrientation, new Vector3D(), new Vector3D());
-      putDownFoot.setTrajectoryPoint(1, 1.5, new Point3D(0.0, -0.075, -0.01), footOrientation, new Vector3D(), new Vector3D());
+      putDownFoot.setTrajectoryPoint(0, 1.0, new Point3D(0.0, -0.075, 0.05), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      putDownFoot.setTrajectoryPoint(1, 1.5, new Point3D(0.0, -0.075, -0.01), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(putDownFoot);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
       assertTrue(success);
@@ -217,7 +219,9 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       HandTrajectoryMessage liftHand = new HandTrajectoryMessage(robotSide, 1);
       liftHand.setTrajectoryReferenceFrameId(chestFrame);
       liftHand.setDataReferenceFrameId(worldFrame);
-      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), handOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      liftHand.setUseCustomControlFrame(true);
+      liftHand.setControlFrameOrientation(handOrientation);
+      liftHand.setTrajectoryPoint(0, 0.5, new Point3D(0.2, -0.15, 0.5), new Quaternion(), new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(liftHand);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
    }

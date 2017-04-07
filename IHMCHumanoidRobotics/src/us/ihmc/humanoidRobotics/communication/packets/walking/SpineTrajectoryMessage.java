@@ -59,4 +59,16 @@ public class SpineTrajectoryMessage extends AbstractJointspaceTrajectoryMessage<
    {
       super(trajectoryTime, jointDesireds);
    }
+
+   /**
+    * Use this constructor to go straight to the given end points.
+    * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
+    * @param trajectoryTime how long it takes to reach the desired pose.
+    * @param jointDesireds desired joint positions. The array length should be equal to the number of joints.
+    * @param weights the qp weights for the joint accelerations. If any index is set to NaN, that joint will use the controller default weight
+    */
+   public SpineTrajectoryMessage(double trajectoryTime, double[] jointDesireds, double[] weights)
+   {
+      super(trajectoryTime, jointDesireds, weights);
+   }
 }

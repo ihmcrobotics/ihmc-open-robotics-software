@@ -1,10 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -18,6 +14,7 @@ import org.junit.Test;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -430,6 +427,46 @@ public class TwistTest extends SpatialMotionVectorTest
       twist1.getLinearVelocityOfPointFixedInBodyFrame(actual, bodyFrameOrigin);
 
       EuclidCoreTestTools.assertTuple3DEquals(expected, actual.getVectorCopy(), 1e-6);
+   }
+
+   /**
+    * This test is used to prove that the reference frame in which the linear velocity of a body fixed point in computed in does not matter.
+    */
+	@Test
+   public void testGetLinearVelocityOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
+   {
+      Random random = new Random(4354L);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         ReferenceFrame baseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("baseFrame", worldFrame,
+                                                                                                 EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         ReferenceFrame bodyFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bodyFrame", worldFrame,
+                                                                                                 EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+         Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+
+         Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
+
+         FramePoint pointFixedInBodyFrame = new FramePoint(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         FrameVector bodyFixedPointLinearVelocityInBody = new FrameVector();
+         FrameVector bodyFixedPointLinearVelocityInBase = new FrameVector();
+
+         // Compute the linear velocity while in bodyFrame
+         pointFixedInBodyFrame.changeFrame(bodyFrame);
+         twist.changeFrame(bodyFrame);
+         twist.getLinearVelocityOfPointFixedInBodyFrame(bodyFixedPointLinearVelocityInBody, pointFixedInBodyFrame);
+
+         // Compute the linear velocity while in baseFrame
+         pointFixedInBodyFrame.changeFrame(baseFrame);
+         twist.changeFrame(baseFrame);
+         twist.getLinearVelocityOfPointFixedInBodyFrame(bodyFixedPointLinearVelocityInBase, pointFixedInBodyFrame);
+
+         // Verify that they are the same
+         bodyFixedPointLinearVelocityInBody.changeFrame(baseFrame);
+         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearVelocityInBase.getVector(), bodyFixedPointLinearVelocityInBody.getVector(), 1.0e-12);
+      }
    }
 
 	@ContinuousIntegrationTest(estimatedDuration = 0.0)
