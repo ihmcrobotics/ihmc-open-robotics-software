@@ -243,7 +243,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          double feedForwardAcceleration = generator.getAcceleration();
 
          double weight = currentWeights.get(jointIdx).getDoubleValue();
-         if (weight > 0.00001)
+         if (weight > Double.MIN_VALUE)
          {
             OneDoFJoint joint = joints[jointIdx];
             feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gains.get(jointIdx), weight);
@@ -321,7 +321,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
             if (trajectoryPoints.getNumberOfTrajectoryPoints() > 0)
             {
                SimpleTrajectoryPoint1D trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
-               if (trajectoryPoint.getTime() > 1.0e-5)
+               if (trajectoryPoint.getTime() > Double.MIN_VALUE)
                {
                   queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
                }
@@ -516,5 +516,4 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    {
 
    }
-
 }
