@@ -6,6 +6,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTPiecewisePath;
 import us.ihmc.manipulation.planning.rrt.RRTTree;
+import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
 
 public class RRTPlannerTimeDomain
 {
@@ -33,7 +34,7 @@ public class RRTPlannerTimeDomain
    public boolean expandTreeGoal(int maxNumberOfExpanding)
    {
       for (int i = 0; i < maxNumberOfExpanding; i++)
-      {
+      {         
          if (rrtTree.expandTreeTimeDomain() == true)
          {
             if (rrtTree.getTime(rrtTree.getNewNode()) == rrtTree.getMotionTime())
@@ -48,7 +49,7 @@ public class RRTPlannerTimeDomain
       return false;
    }
    
-   public void updateOptimalPath(int sizeOfPiecewisePath)
+   public void updateShortCut(int sizeOfPiecewisePath)
    {
       if (optimalPath.size() > 1)
       {
@@ -57,7 +58,6 @@ public class RRTPlannerTimeDomain
          if (rrtPiecewisePath.updateShortCutPath() == true)
          {
             optimalPath = rrtPiecewisePath.getShortCutPath();
-            PrintTools.info("Shortcut");
          }
       }
       else
@@ -67,27 +67,90 @@ public class RRTPlannerTimeDomain
 
    public void updateOptimalPath(int sizeOfPiecewisePath, int numberOfIteration)
    {
-      PrintTools.info("Buliding Started");
-      for (int i = 0; i < numberOfIteration; i++)
+      PrintTools.info("Buliding Started");      
+      if(firstShortCut() == true)
       {
-         updateOptimalPath(sizeOfPiecewisePath);
+         
       }
-
-      if (optimalPath.size() > 2)
+      else
       {
-         ArrayList<RRTNode> tempPath = new ArrayList<RRTNode>();
-         tempPath.add(optimalPath.get(0));
-         for (int i = 1; i < optimalPath.size(); i++)
+         for (int i = 0; i < numberOfIteration; i++)
          {
-            if (optimalPath.get(0).getDistance(optimalPath.get(i)) > 0)
-            {
-               tempPath.add(optimalPath.get(i));
-            }
+            updateShortCut(sizeOfPiecewisePath);
+            PrintTools.info("Try Shortcut "+i);
          }
-         optimalPath = tempPath;
+
+         if (optimalPath.size() > 2)
+         {
+            ArrayList<RRTNode> tempPath = new ArrayList<RRTNode>();
+            tempPath.add(optimalPath.get(0));
+            for (int i = 1; i < optimalPath.size(); i++)
+            {
+               if (optimalPath.get(0).getDistance(optimalPath.get(i)) > 0)
+               {
+                  tempPath.add(optimalPath.get(i));
+               }
+            }
+            optimalPath = tempPath;
+         }
       }
 
       PrintTools.info("OptimalPath is Built");
+   }
+   
+   public void updateOptimalPath(int numberOfIteration)
+   {
+      int sizeOfPiecewisePath = optimalPath.size() * 4;
+      
+      PrintTools.info("Buliding Started");
+      if(firstShortCut() == true)
+      {
+         
+      }
+      else
+      {
+         for (int i = 0; i < numberOfIteration; i++)
+         {
+            updateShortCut(sizeOfPiecewisePath);
+            PrintTools.info("Try Shortcut "+i);
+         }
+
+         if (optimalPath.size() > 2)
+         {
+            ArrayList<RRTNode> tempPath = new ArrayList<RRTNode>();
+            tempPath.add(optimalPath.get(0));
+            for (int i = 1; i < optimalPath.size(); i++)
+            {
+               if (optimalPath.get(0).getDistance(optimalPath.get(i)) > 0)
+               {
+                  tempPath.add(optimalPath.get(i));
+               }
+            }
+            optimalPath = tempPath;
+         }
+      }
+      
+      
+      PrintTools.info("OptimalPath is Built");
+   }
+   
+   private boolean firstShortCut()
+   {
+      RRTValidConnection fastShortCut = new RRTValidConnection(optimalPath.get(0), optimalPath.get(optimalPath.size()-1));
+      fastShortCut.initialize(200);
+      if(fastShortCut.isValidConnection() == true)
+      {
+         ArrayList<RRTNode> tempPath = new ArrayList<RRTNode>();
+         tempPath.add(optimalPath.get(0));
+         tempPath.add(optimalPath.get(optimalPath.size()-1));
+
+         optimalPath = tempPath;
+         return true;
+      }
+      else
+      {
+         return false;         
+      }
    }
    
    public RRTTreeTimeDomain getTree()

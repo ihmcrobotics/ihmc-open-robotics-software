@@ -523,7 +523,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       plannerTimeDomain.getTree().setMaximumTimeGapOfStep(maximumTimeGap);
       
       plannerTimeDomain.expandTreeGoal(500);
-      plannerTimeDomain.updateOptimalPath(101, 100);
+      plannerTimeDomain.updateOptimalPath(100);
       
       PrintTools.info(""+plannerTimeDomain.getOptimalPath().size());
       
@@ -586,8 +586,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
          motionTime = solarPanelPlanner.getMotionTime();
          drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);   
-      }
-      
+      }      
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -597,9 +596,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
          //motionTime = solarPanelPlanner.getMotionTime();
          //drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
-      }
-      
-      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      }      
+      //drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
@@ -683,11 +681,11 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          
          g.setColor(Color.RED);
          ArrayList<RRTNode> nodeFail = plannerTimeDomain.getFailNodes();
-         for(int i =1;i<nodeFail.size();i++)
+         PrintTools.info("whole "+wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
+         for(int i =0;i<nodeFail.size();i++)
          {
             RRTNode rrtNode1 = nodeFail.get(i);
-            RRTNode rrtNode2 = nodeFail.get(i-1);
-            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+            point(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), 4);
          }
       }
       

@@ -26,6 +26,11 @@ public class SolarPanelPath
       arrivalTime.add(0.0);
    }
    
+   public ArrayList<Double> getArrivalTime()
+   {
+      return arrivalTime;
+   }
+   
    public void addCleaningPose(SolarPanelCleaningPose cleaningPose, double timeToGo)
    {
       SolarPanelCleaningPose newStartPose = wayPoses.get(wayPoses.size()-1);
@@ -36,7 +41,7 @@ public class SolarPanelPath
       this.linearPath.add(linearPath);      
       
       this.wayPoses.add(cleaningPose);
-      this.arrivalTime.add(timeToGo);
+      this.arrivalTime.add(endTime);
    }
       
    public WholeBodyTrajectoryMessage getWholeBodyMessage()
@@ -69,13 +74,13 @@ public class SolarPanelPath
       return message;
    }
    
-   private SolarPanelCleaningPose getCleaningPose(double time)
+   public SolarPanelCleaningPose getCleaningPose(double time)
    {
       int indexOfLinearPath = 0;
       
       if(arrivalTime.size() > 2)
       {
-         for(int i =0;i<arrivalTime.size()-2;i++)
+         for(int i =0;i<arrivalTime.size()-1;i++)
          {
             if(arrivalTime.get(i) < time && time <= arrivalTime.get(i+1))
             {
@@ -87,7 +92,7 @@ public class SolarPanelPath
       {
          indexOfLinearPath = 0;
       }
-      
+          
       SolarPanelCleaningPose cleaningPose = linearPath.get(indexOfLinearPath).getInterpolatedCleaningPose(time);
       
       return cleaningPose;

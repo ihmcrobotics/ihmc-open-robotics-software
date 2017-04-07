@@ -1,5 +1,7 @@
 package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
+import us.ihmc.commons.PrintTools;
+
 public class SolarPanelLinearPath
 {
    private SolarPanelCleaningPose startPose;
@@ -33,13 +35,13 @@ public class SolarPanelLinearPath
       {
          scale = 1;
       }      
-      
+            
       double u = scale*(endPose.getU() - startPose.getU()) + startPose.getU();
       double v = scale*(endPose.getV() - startPose.getV()) + startPose.getV();
       double w = scale*(endPose.getW() - startPose.getW()) + startPose.getW();
       
       double zRotation = scale*(endPose.getZRotation() - startPose.getZRotation()) + startPose.getZRotation();
-      
+            
       cleaningPose.setUVWCoordinate(u, v, w);
       cleaningPose.setZRotation(zRotation);
       
