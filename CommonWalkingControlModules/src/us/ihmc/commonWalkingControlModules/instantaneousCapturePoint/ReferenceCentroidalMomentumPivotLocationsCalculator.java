@@ -589,9 +589,10 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          centroidOfFootstepToConsider.setToZero(soleFrame);
       centroidOfFootstepToConsider.changeFrameAndProjectToXYPlane(soleFrame);
 
+      boolean polygonIsAPoint = footSupportPolygon.getArea() == 0.0;
       boolean putCMPOnToes = false;
 
-      if (!isUpcomingFootstepLast && centroidInSoleFrameOfUpcomingSupportFoot != null)
+      if (!isUpcomingFootstepLast && centroidInSoleFrameOfUpcomingSupportFoot != null && !polygonIsAPoint)
       {
          if (putExitCMPOnToes.getBooleanValue())
          {
@@ -614,7 +615,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
          }
       }
 
-      if (putCMPOnToes)
+
+      if (polygonIsAPoint)
+      {
+         cmp2d.set(footSupportPolygon.getVertex(0));
+      }
+      else if (putCMPOnToes)
       {
          putExitCMPOnToes(footSupportPolygon, cmp2d);
       }
