@@ -44,8 +44,8 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
 
    protected final BooleanYoVariable hasSwitchedToStraightLegs;
 
-   private final YoFrameVector angularWeight;
-   private final YoFrameVector linearWeight;
+   protected final YoFrameVector angularWeight;
+   protected final YoFrameVector linearWeight;
 
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
