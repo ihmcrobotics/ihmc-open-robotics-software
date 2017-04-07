@@ -175,6 +175,9 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.SpineTrajectoryMes
 import us.ihmc.humanoidRobotics.communication.packets.walking.TrackingWeightsMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingControllerFailureStatusMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatusMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.ChestHybridJointspaceTaskspaceMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import us.ihmc.humanoidRobotics.communication.packets.walking.hybridRigidBodyManager.HeadHybridJointspaceTaskspaceMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.JointAnglesPacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.MultiJointAnglePacket;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.SingleJointAnglePacket;
@@ -269,6 +272,9 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(TrackingWeightsMessage.class);
       registerPacketClass(StopAllTrajectoryMessage.class);
       registerPacketClass(GoHomeMessage.class);
+      registerPacketClass(HandHybridJointspaceTaskspaceTrajectoryMessage.class);
+      registerPacketClass(ChestHybridJointspaceTaskspaceMessage.class);
+      registerPacketClass(HeadHybridJointspaceTaskspaceMessage.class);
 
       // Trajectory message fields
       registerPacketClass(ExecutionMode.class);

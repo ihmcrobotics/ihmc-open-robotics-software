@@ -20,18 +20,6 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 
-/**
- * <p>Title: SimulationConstructionSet</p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class YoVariableTest
 {
    private YoVariable<?> yoVariable = null;

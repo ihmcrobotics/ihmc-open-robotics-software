@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.util.virtualHoist.VirtualHoist;
+import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 

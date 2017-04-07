@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -35,13 +34,13 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
    private final YoFramePoint capturePointUpdatedFromSCS;
 
    public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel,
-         GeometricJacobianHolder robotJacobianHolder, CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
+         CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
          CenterOfMassDataHolderReadOnly centerOfMassDataHolder, SideDependentList<ForceSensorDataReadOnly> wristForceSensors, DoubleYoVariable yoTime,
          double gravityZ, double omega0, TwistCalculator twistCalculator, SideDependentList<ContactableFoot> feet, double controlDT,
          ArrayList<Updatable> updatables, List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          InverseDynamicsJoint... jointsToIgnore)
    {
-      super(fullRobotModel, robotJacobianHolder, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors, yoTime, gravityZ, omega0,
+      super(fullRobotModel, referenceFrames, footSwitches, centerOfMassDataHolder, wristForceSensors, yoTime, gravityZ, omega0,
             twistCalculator, feet, controlDT, updatables, contactableBodies, yoGraphicsListRegistry, jointsToIgnore);
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)

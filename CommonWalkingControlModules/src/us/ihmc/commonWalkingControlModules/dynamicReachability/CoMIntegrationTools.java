@@ -142,12 +142,15 @@ public class CoMIntegrationTools
       initialCoM.checkReferenceFrameMatch(initialICP);
       initialCoM.checkReferenceFrameMatch(finalCoMToPack);
 
-      double timeDelta = finalTime - initialTime;
+      finalCoMToPack.set(initialCoM);
+
+      double timeDelta = Math.max(finalTime - initialTime, 0.0);
+      if (timeDelta == 0.0)
+         return;
 
       double xPosition = integrateCoMPositionWithConstantCMP(timeDelta, omega0, initialICP.getX(), initialCoM.getX(), constantCMP.getX());
       double yPosition = integrateCoMPositionWithConstantCMP(timeDelta, omega0, initialICP.getY(), initialCoM.getY(), constantCMP.getY());
 
-      finalCoMToPack.set(initialCoM);
       finalCoMToPack.setX(xPosition);
       finalCoMToPack.setY(yPosition);
    }
@@ -193,12 +196,16 @@ public class CoMIntegrationTools
       initialCoM.checkReferenceFrameMatch(initialICP);
       initialCoM.checkReferenceFrameMatch(finalCoMToPack);
 
-      double timeDelta = finalTime - initialTime;
+      finalCoMToPack.set(initialCoM);
+
+      double timeDelta = Math.max(finalTime - initialTime, 0.0);
+
+      if (timeDelta == 0.0)
+         return;
 
       double xPosition = integrateCoMPositionWithConstantCMP(timeDelta, omega0, initialICP.getX(), initialCoM.getX(), constantCMP.getX());
       double yPosition = integrateCoMPositionWithConstantCMP(timeDelta, omega0, initialICP.getY(), initialCoM.getY(), constantCMP.getY());
 
-      finalCoMToPack.set(initialCoM);
       finalCoMToPack.setX(xPosition);
       finalCoMToPack.setY(yPosition);
    }
@@ -206,6 +213,9 @@ public class CoMIntegrationTools
    private static double integrateCoMPositionWithConstantCMP(double duration, double omega0, double initialICPPosition, double initialCoMPosition,
          double cmpPosition)
    {
+      if (duration == 0.0)
+         return initialCoMPosition;
+
       double position = 0.5 * Math.exp(omega0 * duration) * (initialICPPosition - cmpPosition);
       position += Math.exp(-omega0 * duration) * (initialCoMPosition - 0.5 * (initialICPPosition + cmpPosition));
       position += cmpPosition;
@@ -261,10 +271,7 @@ public class CoMIntegrationTools
    public static void integrateCoMPositionFromCubicICP(double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, FramePoint initialCoM, FramePoint finalCoMToPack)
    {
-      if (duration == 0.0)
-         finalCoMToPack.set(initialCoM);
-      else
-         integrateCoMPositionUsingCubicICP(0.0, duration, duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM, finalCoMToPack);
+      integrateCoMPositionUsingCubicICP(0.0, duration, duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM, finalCoMToPack);
    }
 
    /**
@@ -288,11 +295,8 @@ public class CoMIntegrationTools
    public static void integrateCoMPositionUsingCubicICP(double time, double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, FramePoint initialCoM, FramePoint finalCoMToPack)
    {
-      if (duration == 0.0)
-         finalCoMToPack.set(initialCoM);
-      else
-         integrateCoMPositionUsingCubicICP(0.0, MathTools.clamp(time, 0.0, duration), duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
-               finalCoMToPack);
+      integrateCoMPositionUsingCubicICP(0.0, MathTools.clamp(time, 0.0, duration), duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
+            finalCoMToPack);
    }
 
    /**
@@ -316,11 +320,8 @@ public class CoMIntegrationTools
    public static void integrateCoMPositionUsingCubicICP(double time, double duration, double omega0, ReferenceFrame polynomialFrame, YoPolynomial xPolynomial,
          YoPolynomial yPolynomial, FramePoint2d initialCoM, FramePoint2d finalCoMToPack)
    {
-      if (duration == 0.0)
-         finalCoMToPack.set(initialCoM);
-      else
-         integrateCoMPositionUsingCubicICP(0.0, MathTools.clamp(time, 0.0, duration), duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
-               finalCoMToPack);
+      integrateCoMPositionUsingCubicICP(0.0, MathTools.clamp(time, 0.0, duration), duration, omega0, polynomialFrame, xPolynomial, yPolynomial, initialCoM,
+            finalCoMToPack);
    }
 
 
@@ -375,10 +376,14 @@ public class CoMIntegrationTools
       double integrationDuration = finalTime - initialTime;
       integrationDuration = MathTools.clamp(integrationDuration, 0.0, duration);
 
+      finalCoMToPack.set(initialCoM);
+
+      if (integrationDuration == 0.0)
+         return;
+
       double xPosition = integrateCoMPositionOverPolynomial(initialCoM.getX(), integrationDuration, omega0, xPolynomial);
       double yPosition = integrateCoMPositionOverPolynomial(initialCoM.getY(), integrationDuration, omega0, yPolynomial);
 
-      finalCoMToPack.set(initialCoM);
       finalCoMToPack.setX(xPosition);
       finalCoMToPack.setY(yPosition);
    }
@@ -410,11 +415,14 @@ public class CoMIntegrationTools
 
       double integrationDuration = finalTime - initialTime;
       integrationDuration = MathTools.clamp(integrationDuration, 0.0, duration);
+      finalCoMToPack.set(initialCoM);
+
+      if (integrationDuration == 0.0)
+         return;
 
       double xPosition = integrateCoMPositionOverPolynomial(initialCoM.getX(), integrationDuration, omega0, xPolynomial);
       double yPosition = integrateCoMPositionOverPolynomial(initialCoM.getY(), integrationDuration, omega0, yPolynomial);
 
-      finalCoMToPack.set(initialCoM);
       finalCoMToPack.setX(xPosition);
       finalCoMToPack.setY(yPosition);
    }
@@ -453,6 +461,9 @@ public class CoMIntegrationTools
 
    private static double integrateCoMPositionOverPolynomial(double initialPosition, double integrationDuration, double omega0, YoPolynomial polynomial)
    {
+      if (integrationDuration == 0.0)
+         return initialPosition;
+
       double position = polynomial.getCoefficient(3) * Math.pow(integrationDuration, 3.0);
       position += (polynomial.getCoefficient(2) + -3.0 / omega0 * polynomial.getCoefficient(3)) * Math.pow(integrationDuration, 2.0);
       position += (polynomial.getCoefficient(1) - 2.0 / omega0 * polynomial.getCoefficient(2) + 6.0 / Math.pow(omega0, 2.0) * polynomial.getCoefficient(3))

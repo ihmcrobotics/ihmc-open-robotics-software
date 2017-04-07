@@ -4,6 +4,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -18,6 +19,9 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    private final FrameSE3TrajectoryPointList trajectoryPointList = new FrameSE3TrajectoryPointList();
    private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
    private ReferenceFrame trajectoryFrame;
+
+   private boolean useCustomControlFrame = false;
+   private final RigidBodyTransform controlFramePoseInBodyFrame = new RigidBodyTransform();
 
    public SE3TrajectoryControllerCommand()
    {
@@ -51,8 +55,10 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       trajectoryPointList.setIncludingFrame(other.getTrajectoryPointList());
       setPropertiesOnly(other);
       trajectoryFrame = other.getTrajectoryFrame();
+      useCustomControlFrame = other.useCustomControlFrame();
+      other.packControlFramePose(controlFramePoseInBodyFrame);
    }
-   
+
    @Override
    public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, M message)
    {
@@ -78,6 +84,8 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
       message.getTrajectoryPoints(trajectoryPointList);
       setQueueqableCommandVariables(message);
       message.getSelectionMatrix(selectionMatrix);
+      useCustomControlFrame = message.useCustomControlFrame();
+      message.getTransformFromBodyToControlFrame(controlFramePoseInBodyFrame);
    }
 
    public void setTrajectoryPointList(FrameSE3TrajectoryPointList trajectoryPointList)
@@ -188,5 +196,17 @@ public abstract class SE3TrajectoryControllerCommand<T extends SE3TrajectoryCont
    public void setTrajectoryFrame(ReferenceFrame trajectoryFrame)
    {
       this.trajectoryFrame = trajectoryFrame;
+   }
+
+   @Override
+   public void packControlFramePose(RigidBodyTransform transformToPack)
+   {
+      transformToPack.set(controlFramePoseInBodyFrame);
+   }
+
+   @Override
+   public boolean useCustomControlFrame()
+   {
+      return useCustomControlFrame;
    }
 }

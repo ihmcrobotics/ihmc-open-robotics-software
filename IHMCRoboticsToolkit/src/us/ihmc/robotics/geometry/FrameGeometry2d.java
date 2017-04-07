@@ -4,18 +4,6 @@ import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2006</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public abstract class FrameGeometry2d<S extends FrameGeometry2d<S, T>, T extends GeometryObject<T>> extends AbstractFrameObject<S, T>
 {
    public FrameGeometry2d(ReferenceFrame referenceFrame, T transformableDataObject)

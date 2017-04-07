@@ -7,16 +7,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 
-/**
- * Title:        Yobotics! Simulation Construction Set<p>
- * Description:  Package for Simulating Dynamic Robots and Mechanisms<p>
- * Copyright:    Copyright (c) Jerry Pratt<p>
- * Company:      Yobotics, Inc. <p>
- * @author Jerry Pratt
- * @version Beta 1.0
- */
-
-
 public class FreeJoint extends Joint
 {
    /**
