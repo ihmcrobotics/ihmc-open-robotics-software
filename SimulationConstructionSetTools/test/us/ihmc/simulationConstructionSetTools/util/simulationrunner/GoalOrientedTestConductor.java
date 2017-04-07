@@ -259,6 +259,10 @@ public class GoalOrientedTestConductor implements VariableChangedListener, Simul
    @Override
    public void simulationDoneWithException(Throwable throwable)
    {
+      if (simulationTestingParameters.getKeepSCSUp())
+      {
+         PrintTools.error(throwable.getMessage());
+      }
       assertionFailedMessage = throwable.getMessage();
    }
 }
