@@ -5,7 +5,7 @@ import java.nio.LongBuffer;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
+import us.ihmc.robotDataLogger.JointType;
 import us.ihmc.robotics.screwTheory.Twist;
 
 public class SixDoFState extends JointState
