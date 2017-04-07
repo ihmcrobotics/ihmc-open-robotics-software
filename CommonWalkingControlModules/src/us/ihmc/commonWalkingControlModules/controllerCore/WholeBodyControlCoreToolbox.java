@@ -6,7 +6,6 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
@@ -23,7 +22,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -43,7 +41,6 @@ public class WholeBodyControlCoreToolbox
    private final FloatingInverseDynamicsJoint rootJoint;
    private final ReferenceFrame centerOfMassFrame;
    private final TwistCalculator twistCalculator;
-   private final GeometricJacobianHolder geometricJacobianHolder;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
@@ -110,8 +107,6 @@ public class WholeBodyControlCoreToolbox
     * @param twistCalculator calculator to compute the twist of the robot bodies from the measured
     *           joint velocities. This tool is assumed to be updated from outside the controller
     *           core.
-    * @param geometricJacobianHolder tool for registering and updating geometric Jacobians. This
-    *           tool is assumed to be updated from outside the controller core.
     * @param momentumOptimizationSettings set of parameters used to initialize the optimization
     *           problems.
     * @param yoGraphicsListRegistry the registry in which the {@link YoGraphic}s and
@@ -119,7 +114,7 @@ public class WholeBodyControlCoreToolbox
     * @param parentRegistry registry to which this toolbox will attach its own registry.
     */
    public WholeBodyControlCoreToolbox(double controlDT, double gravityZ, FloatingInverseDynamicsJoint rootJoint, InverseDynamicsJoint[] controlledJoints,
-                                      ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, GeometricJacobianHolder geometricJacobianHolder,
+                                      ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator,
                                       ControllerCoreOptimizationSettings momentumOptimizationSettings, YoGraphicsListRegistry yoGraphicsListRegistry,
                                       YoVariableRegistry parentRegistry)
    {
@@ -128,7 +123,6 @@ public class WholeBodyControlCoreToolbox
       this.rootJoint = rootJoint;
       this.centerOfMassFrame = centerOfMassFrame;
       this.twistCalculator = twistCalculator;
-      this.geometricJacobianHolder = geometricJacobianHolder;
       this.optimizationSettings = momentumOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -249,8 +243,8 @@ public class WholeBodyControlCoreToolbox
    {
       if (motionQPInputCalculator == null)
       {
-         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler,
-                                                               jointPrivilegedConfigurationParameters, registry);
+         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, jointIndexHandler, jointPrivilegedConfigurationParameters,
+                                                               registry);
       }
       return motionQPInputCalculator;
    }
@@ -329,32 +323,6 @@ public class WholeBodyControlCoreToolbox
    public double getTotalRobotMass()
    {
       return totalRobotMass;
-   }
-
-   public GeometricJacobianHolder getGeometricJacobianHolder()
-   {
-      return geometricJacobianHolder;
-   }
-
-   public long getOrCreateGeometricJacobian(RigidBody ancestor, RigidBody descendant, ReferenceFrame jacobianFrame)
-   {
-      return geometricJacobianHolder.getOrCreateGeometricJacobian(ancestor, descendant, jacobianFrame);
-   }
-
-   public long getOrCreateGeometricJacobian(InverseDynamicsJoint[] joints, ReferenceFrame jacobianFrame)
-   {
-      return geometricJacobianHolder.getOrCreateGeometricJacobian(joints, jacobianFrame);
-   }
-
-   /**
-    * Return a jacobian previously created with the getOrCreate method using a jacobianId.
-    * 
-    * @param jacobianId
-    * @return
-    */
-   public GeometricJacobian getJacobian(long jacobianId)
-   {
-      return geometricJacobianHolder.getJacobian(jacobianId);
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()

@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
@@ -27,7 +26,6 @@ public class InverseDynamicsCommandDataCopier
    private final RecyclingArrayList<MomentumRateCommand> momentumRateCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, MomentumRateCommand.class);
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, PlaneContactStateCommand.class);
    private final RecyclingArrayList<CenterOfPressureCommand> centerOfPressureCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, CenterOfPressureCommand.class);
-   private final RecyclingArrayList<PointAccelerationCommand> pointAccelerationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, PointAccelerationCommand.class);
    private final RecyclingArrayList<SpatialAccelerationCommand> spatialAccelerationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, SpatialAccelerationCommand.class);
    private final RecyclingArrayList<JointAccelerationIntegrationCommand> jointAccelerationIntegrationCommands = new RecyclingArrayList<>(INITIAL_CAPACITY, JointAccelerationIntegrationCommand.class);
 
@@ -54,14 +52,6 @@ public class InverseDynamicsCommandDataCopier
       {
          CenterOfPressureCommand command = centerOfPressureCommands.get(i);
          command.setContactingRigidBody(nameToRigidBodyMap.get(command.getContactingRigidBodyName()));
-      }
-
-      for (int i = 0; i < pointAccelerationCommands.size(); i++)
-      {
-         PointAccelerationCommand command = pointAccelerationCommands.get(i);
-         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
-         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
-         command.set(base, endEffector);
       }
 
       for (int i = 0; i < spatialAccelerationCommands.size(); i++)
@@ -107,9 +97,6 @@ public class InverseDynamicsCommandDataCopier
          case CENTER_OF_PRESSURE:
             copyCenterOfPressureCommand((CenterOfPressureCommand) commandToCopy);
             break;
-         case POINT:
-            copyPointAcclerationCommand((PointAccelerationCommand) commandToCopy);
-            break;
          case TASKSPACE:
             copySpatialAccelerationCommand((SpatialAccelerationCommand) commandToCopy);
             break;
@@ -133,7 +120,6 @@ public class InverseDynamicsCommandDataCopier
       momentumRateCommands.clear();
       planeContactStateCommands.clear();
       centerOfPressureCommands.clear();
-      pointAccelerationCommands.clear();
       spatialAccelerationCommands.clear();
       jointAccelerationIntegrationCommands.clear();
    }
@@ -169,13 +155,6 @@ public class InverseDynamicsCommandDataCopier
    private void copyCenterOfPressureCommand(CenterOfPressureCommand commandToCopy)
    {
       CenterOfPressureCommand localCommand = centerOfPressureCommands.add();
-      localCommand.set(commandToCopy);
-      inverseDynamicsCommandList.addCommand(localCommand);
-   }
-
-   private void copyPointAcclerationCommand(PointAccelerationCommand commandToCopy)
-   {
-      PointAccelerationCommand localCommand = pointAccelerationCommands.add();
       localCommand.set(commandToCopy);
       inverseDynamicsCommandList.addCommand(localCommand);
    }

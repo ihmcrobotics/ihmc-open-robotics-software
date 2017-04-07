@@ -240,12 +240,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                   feedForwardAngularAcceleration, base);
       accelerationControlModule.getAcceleration(desiredSpatialAcceleration);
       desiredSpatialAcceleration.changeBodyFrameNoRelativeAcceleration(endEffectorFrame);
-      desiredSpatialAcceleration.changeFrameNoRelativeMotion(endEffectorFrame);
 
       updatePositionVisualization();
       updateOrientationVisualization();
 
-      inverseDynamicsOutput.setSpatialAcceleration(desiredSpatialAcceleration);
+      inverseDynamicsOutput.setSpatialAcceleration(controlFrame, desiredSpatialAcceleration);
    }
 
    @Override
@@ -282,9 +281,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       desiredSpatialVelocity.setToZero(endEffectorFrame, base.getBodyFixedFrame(), controlFrame);
       desiredSpatialVelocity.setAngularPart(desiredAngularVelocity);
       desiredSpatialVelocity.setLinearPart(desiredLinearVelocity);
-      desiredSpatialVelocity.changeFrame(endEffectorFrame);
 
-      inverseKinematicsOutput.setSpatialVelocity(desiredSpatialVelocity);
+      inverseKinematicsOutput.setSpatialVelocity(controlFrame, desiredSpatialVelocity);
 
       // Update visualization variables
       tempPosition.setToZero(controlFrame);

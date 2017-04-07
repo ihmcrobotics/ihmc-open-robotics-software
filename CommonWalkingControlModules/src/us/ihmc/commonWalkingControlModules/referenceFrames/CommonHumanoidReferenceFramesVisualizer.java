@@ -29,7 +29,7 @@ public class CommonHumanoidReferenceFramesVisualizer
       yoGraphicsListRegistry.registerYoGraphic(vizName, midFeetFrame);
       referenceFramesVisualizers.add(midFeetFrame);
 
-      YoGraphicReferenceFrame midFeetAverageYawFrame = new YoGraphicReferenceFrame(referenceFrames.getMidFeetZUpAverageYawFrame(), registry, 0.2);
+      YoGraphicReferenceFrame midFeetAverageYawFrame = new YoGraphicReferenceFrame(referenceFrames.getMidFootZUpGroundFrame(), registry, 0.2);
       yoGraphicsListRegistry.registerYoGraphic(vizName, midFeetAverageYawFrame);
       referenceFramesVisualizers.add(midFeetAverageYawFrame);
 

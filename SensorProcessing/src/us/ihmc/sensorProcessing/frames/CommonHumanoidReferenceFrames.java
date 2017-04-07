@@ -43,8 +43,5 @@ public interface CommonHumanoidReferenceFrames extends ReferenceFrames
 
    public abstract ReferenceFrame getChestFrame();
 
-   public default ReferenceFrame getMidFeetZUpAverageYawFrame()
-   {
-      return null;
-   }
+   public abstract ReferenceFrame getMidFootZUpGroundFrame();
 }

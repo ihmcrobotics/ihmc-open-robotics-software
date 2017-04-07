@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
@@ -208,9 +207,6 @@ public class WholeBodyInverseDynamicsSolver
          {
          case TASKSPACE:
             optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
-            break;
-         case POINT:
-            optimizationControlModule.submitPointAccelerationCommand((PointAccelerationCommand) command);
             break;
          case JOINTSPACE:
             optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);
