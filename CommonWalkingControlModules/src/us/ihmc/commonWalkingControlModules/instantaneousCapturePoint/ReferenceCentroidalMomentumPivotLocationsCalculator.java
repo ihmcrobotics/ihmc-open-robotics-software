@@ -618,6 +618,7 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
 
       if (polygonIsAPoint)
       {
+         cmp2d.setToZero(footSupportPolygon.getReferenceFrame());
          cmp2d.set(footSupportPolygon.getVertex(0));
       }
       else if (putCMPOnToes)
