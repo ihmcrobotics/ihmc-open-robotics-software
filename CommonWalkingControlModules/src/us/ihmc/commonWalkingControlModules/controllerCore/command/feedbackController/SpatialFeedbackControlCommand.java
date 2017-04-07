@@ -140,6 +140,25 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
+    * Sets whether or not to use the intermediate base defined by {@link #setPrimaryBase(RigidBody)} as
+    * base for control.
+    * <p>
+    *    If false, as is the case in the default setting, the controller can use the floating base to help
+    *    achieve the desired spatial acceleration.
+    * </p>
+    * <p>
+    *    If true, the controller can only use the joints in the kinematic chain between the
+    *    {@code endEffector} and the {@code primaryBase}.
+    * </p>
+    *
+    * @param usePrimaryBaseForControl
+    */
+   public void setUsePrimaryBaseForControl(boolean usePrimaryBaseForControl)
+   {
+      spatialAccelerationCommand.setUsePrimaryBaseForControl(usePrimaryBaseForControl);
+   }
+
+   /**
     * Sets the gains for both the position and orientation to use during the next control tick.
     * 
     * @param gains the new set of gains to use. Not modified.

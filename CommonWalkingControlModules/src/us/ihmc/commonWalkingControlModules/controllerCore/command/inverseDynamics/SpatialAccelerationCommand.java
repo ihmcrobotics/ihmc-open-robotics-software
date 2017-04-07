@@ -29,6 +29,8 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    private String endEffectorName;
    private String optionalPrimaryBaseName;
 
+   private boolean useOptionalPrimaryBaseForControl = false;
+
    public SpatialAccelerationCommand()
    {
       removeWeight();
@@ -56,6 +58,11 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    {
       optionalPrimaryBase = primaryBase;
       optionalPrimaryBaseName = primaryBase.getName();
+   }
+
+   public void setUsePrimaryBaseForControl(boolean usePrimaryBaseForController)
+   {
+      useOptionalPrimaryBaseForControl = usePrimaryBaseForController;
    }
 
    public void setWeight(double weight)
@@ -147,6 +154,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
 
       optionalPrimaryBase = other.optionalPrimaryBase;
       optionalPrimaryBaseName = other.optionalPrimaryBaseName;
+      useOptionalPrimaryBaseForControl = other.useOptionalPrimaryBaseForControl;
    }
 
    public void setSelectionMatrixToIdentity()
@@ -239,6 +247,11 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
    public String getPrimaryBaseName()
    {
       return optionalPrimaryBaseName;
+   }
+
+   public boolean useOptionalPrimaryBaseForControl()
+   {
+      return useOptionalPrimaryBaseForControl;
    }
 
    public void removeWeight()
