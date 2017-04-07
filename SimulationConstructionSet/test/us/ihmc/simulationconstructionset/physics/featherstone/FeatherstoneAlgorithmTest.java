@@ -55,6 +55,7 @@ public class FeatherstoneAlgorithmTest
       private final YoVariableRegistry registry;
       private final RobotWithClosedFormDynamics robotWithClosedFormDynamics;
       private final double epsilon;
+      private int numberOfTicksToWait = 2;
 
       public DynamicsChecker(RobotWithClosedFormDynamics robotWithClosedFormDynamics, double epsilon)
       {
@@ -90,7 +91,10 @@ public class FeatherstoneAlgorithmTest
       @Override
       public void doControl()
       {
-         robotWithClosedFormDynamics.assertStateIsCloseToLagrangianCalculation(epsilon);
+         if(numberOfTicksToWait == 0)
+            robotWithClosedFormDynamics.assertStateIsCloseToLagrangianCalculation(epsilon);
+         else
+            numberOfTicksToWait--;
       }
    }
 }
