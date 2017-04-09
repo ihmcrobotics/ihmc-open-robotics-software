@@ -72,6 +72,7 @@ public class TimeAdjustmentSolver
    private int numberOfFootstepsToConsider;
    private int numberOfFootstepsRegistered;
    private int numberOfHigherSteps;
+   private int numberOfIterations;
 
    public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, boolean useHigherOrderSteps, YoVariableRegistry registry)
    {
@@ -436,7 +437,7 @@ public class TimeAdjustmentSolver
       activeSetSolver.setVariableBounds(solverInput_Lb, solverInput_Ub);
       activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
 
-      int numberOfIterations = activeSetSolver.solve(solution);
+      numberOfIterations = activeSetSolver.solve(solution);
 
       if (MatrixTools.containsNaN(solution))
       {
@@ -451,7 +452,8 @@ public class TimeAdjustmentSolver
       CommonOps.scale(constraintWeight, parallelObjective_H);
 
       CommonOps.transpose(parallel_J, parallelObjective_h);
-      CommonOps.scale(-2.0 * desiredParallelAdjustment * constraintWeight, parallelObjective_h);
+      //CommonOps.scale(-2.0 * desiredParallelAdjustment * constraintWeight, parallelObjective_h);
+      CommonOps.scale(-desiredParallelAdjustment * constraintWeight, parallelObjective_h);
 
       return Math.pow(desiredParallelAdjustment, 2.0) * constraintWeight;
    }
@@ -593,5 +595,10 @@ public class TimeAdjustmentSolver
    public double getHigherTransferAdjustment(int higherIndex)
    {
       return solution.get(nextEndTransferIndex + 2 * (higherIndex + 1), 0);
+   }
+
+   public int getNumberOfIterations()
+   {
+      return numberOfIterations;
    }
 }
