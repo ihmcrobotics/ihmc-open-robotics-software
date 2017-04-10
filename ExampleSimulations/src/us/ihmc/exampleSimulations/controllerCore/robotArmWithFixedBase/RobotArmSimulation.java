@@ -34,7 +34,7 @@ public class RobotArmSimulation
       int sliderIndex = 1;
       midiSliderBoard.setSlider(sliderIndex++, "handTargetX", scs, -1.0, 1.0);
       midiSliderBoard.setSlider(sliderIndex++, "handTargetY", scs, -1.0, 1.0);
-      midiSliderBoard.setSlider(sliderIndex++, "handTargetZ", scs, -1.0, 1.0);
+      midiSliderBoard.setSlider(sliderIndex++, "handTargetZ", scs,  0.0, 2.0);
       midiSliderBoard.setSlider(sliderIndex++, "handTargetYaw", scs, -Math.PI, Math.PI);
       midiSliderBoard.setSlider(sliderIndex++, "handTargetPitch", scs, -Math.PI, Math.PI);
       midiSliderBoard.setSlider(sliderIndex++, "handTargetRoll", scs, -Math.PI, Math.PI);
