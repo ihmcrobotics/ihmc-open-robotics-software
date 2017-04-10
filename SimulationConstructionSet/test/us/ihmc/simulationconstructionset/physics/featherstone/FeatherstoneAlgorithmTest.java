@@ -19,7 +19,7 @@ public class FeatherstoneAlgorithmTest
    @Test
    public void testSinglePendulumAgainstLagrangianCalculation()
    {
-      double epsilon = 1e-5;
+      double epsilon = 1e-7;
       SinglePendulumRobot pendulumRobot = new SinglePendulumRobot("pendulum", 1.2, -0.4);
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
@@ -27,7 +27,7 @@ public class FeatherstoneAlgorithmTest
    @Test
    public void testDoublePendulumAgainstLagrangianCalculation()
    {
-      double epsilon = 1e-4;
+      double epsilon = 1e-6;
       DoublePendulumRobot pendulumRobot = new DoublePendulumRobot("doublePendulum", 1.2, -0.4, -0.2, 0.5);
       testAgainstLagrangianCalculation(pendulumRobot, epsilon);
    }
@@ -35,7 +35,7 @@ public class FeatherstoneAlgorithmTest
    @Test
    public void testCartPoleAgainstLagrangianCalculation()
    {
-      double epsilon = 1e-5;
+      double epsilon = 1e-2;
       CartPoleRobot cartPoleRobot = new CartPoleRobot("cartPole", 0.3, -1.3, 0.4);
       testAgainstLagrangianCalculation(cartPoleRobot, epsilon);
    }
@@ -45,6 +45,7 @@ public class FeatherstoneAlgorithmTest
       robotWithClosedFormDynamics.setController(new DynamicsChecker(robotWithClosedFormDynamics, epsilon));
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robotWithClosedFormDynamics, simulationTestingParameters);
+      scs.setDT(1e-5, 20);
       scs.startOnAThread();
       BlockingSimulationRunner blockingSimulationRunner = new BlockingSimulationRunner(scs, 45.0);
 

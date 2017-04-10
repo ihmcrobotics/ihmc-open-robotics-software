@@ -1,5 +1,7 @@
 package us.ihmc.simulationconstructionset.physics.featherstone;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.MathTools;
@@ -15,6 +17,16 @@ public class CartPoleRobot extends RobotWithClosedFormDynamics
 
    private final SliderJoint sliderJoint;
    private final PinJoint pinJoint;
+
+   /**
+    * Manipulator equation matrices, for matrix definitions see {@link #assertStateIsCloseToLagrangianCalculation}
+    */
+   private final DenseMatrix64F H = new DenseMatrix64F(2, 2);
+   private final DenseMatrix64F C = new DenseMatrix64F(2, 2);
+   private final DenseMatrix64F G = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F qd = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F qdd = new DenseMatrix64F(2, 1);
+   private final DenseMatrix64F rightHandSide = new DenseMatrix64F(2, 1);
 
    public CartPoleRobot(String name, double initialCartVelocity, double initialPoleAngle, double initialPoleAngularVelocity)
    {
@@ -50,26 +62,68 @@ public class CartPoleRobot extends RobotWithClosedFormDynamics
    @Override
    public void assertStateIsCloseToLagrangianCalculation(double epsilon)
    {
+      double xd = sliderJoint.getQD();
       double xdd = sliderJoint.getQDD();
 
-      double q = pinJoint.getQ();
-      double qd = pinJoint.getQD();
-      double qdd = pinJoint.getQDD();
+      double theta = pinJoint.getQ();
+      double thetaD = pinJoint.getQD();
+      double thetaDD = pinJoint.getQDD();
 
       double g = Math.abs(gravityZ.getDoubleValue());
 
-      double xddLagrangian = - (poleMass * Math.sin(q) * (poleLength * MathTools.square(qd) + g * Math.cos(q))) / (cartMass + poleMass * MathTools.square(Math.sin(q)));
-      double qddLagrangian = (- poleMass * poleLength * MathTools.square(qd) * Math.cos(q) * Math.sin(q) - (cartMass + poleMass) * g * Math.sin(q)) / (poleLength * (cartMass + poleMass * MathTools.square(Math.sin(q))));
+      double H00 = cartMass + poleMass;
+      double H01 = poleMass * poleLength * Math.cos(theta);
+      double H10 = H01;
+      double H11 = poleMass * MathTools.square(poleLength);
 
-      if(Math.abs(xdd - xddLagrangian) > epsilon || Math.abs(qdd - qddLagrangian) > epsilon)
+      double C00 = 0.0;
+      double C01 = - poleMass * poleLength * thetaD * Math.sin(theta);
+      double C10 = 0.0;
+      double C11 = 0.0;
+
+      double G00 = 0.0;
+      double G10 = poleMass * g * poleLength * Math.sin(theta);
+
+      double cartForce = - cartDamping * xd;
+      double poleTorque = - poleDamping * thetaD;
+
+      H.set(0, 0, H00);
+      H.set(0, 1, H01);
+      H.set(1, 0, H10);
+      H.set(1, 1, H11);
+
+      C.set(0, 0, C00);
+      C.set(0, 1, C01);
+      C.set(1, 0, C10);
+      C.set(1, 1, C11);
+
+      G.set(0, 0, G00);
+      G.set(1, 0, G10);
+
+      // negative sign since it's negated below
+      rightHandSide.set(0, 0, - cartForce);
+      rightHandSide.set(1, 0, - poleTorque);
+
+      qd.set(0, 0, xd);
+      qd.set(1, 0, thetaD);
+
+      qdd.set(0, 0, xdd);
+      qdd.set(1, 0, thetaDD);
+
+      CommonOps.add(rightHandSide, G, rightHandSide);
+      CommonOps.multAdd(C, qd, rightHandSide);
+      CommonOps.scale(-1.0, rightHandSide);
+      CommonOps.solve(H, rightHandSide, qdd);
+
+      double xddLagrangian = - qdd.get(0, 0);
+      double thetaDDLagrangian = qdd.get(1, 0);
+
+      if(Math.abs(xdd - xddLagrangian) > epsilon || Math.abs(thetaDD - thetaDDLagrangian) > epsilon)
       {
-         System.out.println("x = " + sliderJoint.getQ());
-         System.out.println("q = " + q);
-
          throw new AssertionError("Joint accelerations from simulation and lagrangian don't match. "
                                         + "\nAt t=" + getTime()
-                                        + "\nSimulated joint accelerations: (" + xdd + ", " + qdd + ")"
-                                        + "\nLagrangian accelerations: (" + xddLagrangian + ", " + qddLagrangian + ")");
+                                        + "\nSimulated joint accelerations: (" + xdd + ", " + thetaDD + ")"
+                                        + "\nLagrangian accelerations: (" + xddLagrangian + ", " + thetaDDLagrangian + ")");
       }
    }
 }
