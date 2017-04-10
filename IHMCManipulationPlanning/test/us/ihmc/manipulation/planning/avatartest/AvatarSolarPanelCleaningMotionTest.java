@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.avatartest;
+package us.ihmc.manipulation.planning.avatartest;
 
 import static org.junit.Assert.assertTrue;
 
