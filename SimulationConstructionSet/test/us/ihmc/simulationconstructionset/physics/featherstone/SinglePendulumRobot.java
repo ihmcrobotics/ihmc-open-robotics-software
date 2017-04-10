@@ -36,7 +36,7 @@ public class SinglePendulumRobot extends RobotWithClosedFormDynamics
    }
 
    @Override
-   public void assertStateIsCloseToLagrangianCalculation(double epsilon) throws AssertionError
+   public void assertStateIsCloseToClosedFormCalculation(double epsilon) throws AssertionError
    {
       double q = pinJoint.getQ();
       double qd = pinJoint.getQD();

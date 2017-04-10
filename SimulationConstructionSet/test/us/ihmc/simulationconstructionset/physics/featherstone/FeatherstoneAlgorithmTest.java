@@ -1,6 +1,8 @@
 package us.ihmc.simulationconstructionset.physics.featherstone;
 
 import org.junit.Test;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations;
+import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -12,6 +14,7 @@ import static junit.framework.TestCase.fail;
 /**
  * Tests simulation against closed-form dynamics
  */
+@ContinuousIntegrationAnnotations.ContinuousIntegrationPlan(categories = IntegrationCategory.IN_DEVELOPMENT)
 public class FeatherstoneAlgorithmTest
 {
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
@@ -101,7 +104,7 @@ public class FeatherstoneAlgorithmTest
       public void doControl()
       {
          if(numberOfTicksToWait == 0)
-            robotWithClosedFormDynamics.assertStateIsCloseToLagrangianCalculation(epsilon);
+            robotWithClosedFormDynamics.assertStateIsCloseToClosedFormCalculation(epsilon);
          else
             numberOfTicksToWait--;
       }
