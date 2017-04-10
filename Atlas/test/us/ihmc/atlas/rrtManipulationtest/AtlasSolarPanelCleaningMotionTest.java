@@ -4,7 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel.RobotTarget;
-import us.ihmc.manipulation.planning.manipulation.avatartest.AvatarSolarPanelCleaningMotionTest;
+import us.ihmc.manipulation.planning.avatartest.AvatarSolarPanelCleaningMotionTest;
 
 public class AtlasSolarPanelCleaningMotionTest extends AvatarSolarPanelCleaningMotionTest
 {
