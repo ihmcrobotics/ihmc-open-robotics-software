@@ -243,6 +243,22 @@ public class FrameVector extends FrameTuple<FrameVector, Vector3D> implements Ve
       return tuple.lengthSquared();
    }
 
+   /**
+    * Limits this vector to a given maximum length.
+    * <p>
+    * Note that the sign of {@code maximumLength} should be positive, but this is not verified in
+    * this method.
+    * </p>
+    * 
+    * @param maximumLength the maximum length this vector can have.
+    */
+   public void limitLength(double maximumLength)
+   {
+      double length = length();
+      if (length > maximumLength)
+         scale(maximumLength / length);
+   }
+
    @Override
    public void applyTransform(Transform transform)
    {
