@@ -72,8 +72,6 @@ public class DynamicReachabilityCalculatorNew
    private final DoubleYoVariable swingLegMinimumHeight = new DoubleYoVariable("swingLegMinimumHeight", registry);
    private final DoubleYoVariable swingLegMaximumHeight = new DoubleYoVariable("swingLegMaximumHeight", registry);
 
-   private final BooleanYoVariable reachableWRTStanceFoot = new BooleanYoVariable("reachableWRTStanceFoot", registry);
-   private final BooleanYoVariable reachableWRTFootstep = new BooleanYoVariable("reachableWRTFootstep", registry);
    private final BooleanYoVariable isStepReachable = new BooleanYoVariable("isStepReachable", registry);
    private final BooleanYoVariable isModifiedStepReachable = new BooleanYoVariable("isModifiedStepReachable", registry);
 
@@ -515,8 +513,6 @@ public class DynamicReachabilityCalculatorNew
    {
       boolean isStepReachable = checkReachabilityInternal();
 
-      this.reachableWRTStanceFoot.set(stanceHeightLine.length() > 0.0);
-      this.reachableWRTFootstep.set(stepHeightLine.length() > 0.0);
       this.isStepReachable.set(isStepReachable);
 
       return isStepReachable;
@@ -531,23 +527,31 @@ public class DynamicReachabilityCalculatorNew
       totalTimer.startMeasurement();
       reset();
 
+      // Efficiently checks the reachability by examining if the required heights of the stance hip and step hip overlap, as this determines reachability.
       boolean isStepReachable = checkReachabilityInternal();
-
-      this.reachableWRTStanceFoot.set(stanceHeightLine.length() > 0.0);
-      this.reachableWRTFootstep.set(stepHeightLine.length() > 0.0);
       this.isStepReachable.set(isStepReachable);
       this.isModifiedStepReachable.set(isStepReachable);
 
       if (!isStepReachable)
-      {
+      { // The step isn't reachable using the efficient checks.
+         // Compute the required amount of adjustment in the direction of the step. This is less efficient but a little more accurate than the previous method,
+         // so we don't necessarily want to use it by default. If the adjustment is within a certain small bound, we say it is reachable and exit the algorithm.
          double originalRequiredAdjustment = computeRequiredAdjustment();
          double requiredAdjustment = originalRequiredAdjustment;
+         isStepReachable = MathTools.intervalContains(requiredAdjustment, -epsilon, epsilon);
 
-         if (requiredAdjustment == 0.0)
+         if (isStepReachable)
+         {
+            this.isStepReachable.set(true);
+            this.isModifiedStepReachable.set(true);
             return;
+         }
 
+         // Compute the number of higher order steps that should be considered in the optimization algorithm. In practice, we aren't really looking at these,
+         // as they don't actually have much of an effect, as their gradient is so small.
          int numberOfHigherSteps = computeNumberOfHigherSteps();
 
+         // Record the original timing durations and alphas that were submitted to the ICP Planner.
          for (int i = 0; i < 1 + numberOfHigherSteps; i++)
          {
             originalTransferDurations.add(icpPlanner.getTransferDuration(i));
@@ -559,21 +563,26 @@ public class DynamicReachabilityCalculatorNew
          originalTransferAlphas.add(icpPlanner.getTransferDurationAlpha(numberOfHigherSteps + 1));
 
          gradientTimer.startMeasurement();
+         // Compute the gradient associated with adjusting the different time segments.
          computeGradients(numberOfHigherSteps);
+         // Submit the gradient information to the solver
+         submitGradientInformationToSolver(numberOfHigherSteps);
          gradientTimer.stopMeasurement();
+
 
          calculationTimer.startMeasurement();
          while(!isStepReachable)
-         {
+         { // Start a loop for the solver to find the necessary timing adjustments to achieved the desired CoM adjustment.
             tickTimer.startMeasurement();
             if (numberOfAdjustments.getIntegerValue() >= maximumNumberOfAdjustments.getIntegerValue() )
                break;
 
-            submitGradientInformationToSolver(numberOfHigherSteps);
+            // Set the desired adjustment for the solver to achieve.
             solver.setDesiredParallelAdjustment(requiredAdjustment);
 
             requiredParallelCoMAdjustments.get(numberOfAdjustments.getIntegerValue()).set(requiredAdjustment);
 
+            // Compute the required timing adjustments to achieved the desired CoM adjustment using the linear approximation of the gradient.
             solverTimer.startMeasurement();
             try
             {
@@ -589,14 +598,19 @@ public class DynamicReachabilityCalculatorNew
             }
             solverTimer.stopMeasurement();
 
+            // Extract the adjustment solutions from the solver.
             extractTimingSolutionsFromSolver(numberOfHigherSteps);
-            applyAdjustmentsToPlanner(numberOfHigherSteps);
 
+            // Apply the adjustment solutions to the ICP Planner.
+            submitTimingAdjustmentsToPlanner(numberOfHigherSteps);
+
+            // Compute the remaining CoM adjustment to be reachable using the new times.
             applyVariation(tempFinalCoM);
             updateFrames(nextFootstep);
             double remainingAdjustment = computeRequiredAdjustment();
             isStepReachable = MathTools.intervalContains(remainingAdjustment, -epsilon, epsilon);
 
+            // Compute the achieved CoM adjustment from the remaining adjustment using the new times.
             double achievedAdjustment;
             if (Math.signum(remainingAdjustment) != Math.signum(originalRequiredAdjustment))
             {
@@ -611,10 +625,8 @@ public class DynamicReachabilityCalculatorNew
             }
             achievedParallelCoMAdjustments.get(numberOfAdjustments.getIntegerValue()).set(achievedAdjustment);
 
+            // Compute the adjustment we would like the solver to try and achieve on the next iteration.
             requiredAdjustment += requiredAdjustmentGain.getDoubleValue() * (originalRequiredAdjustment - achievedAdjustment);
-
-            if (!isStepReachable)
-               resetPlannerTiming(numberOfHigherSteps);
 
             isModifiedStepReachable.set(isStepReachable);
             numberOfAdjustments.increment();
@@ -844,7 +856,7 @@ public class DynamicReachabilityCalculatorNew
       }
    }
 
-   private void applyAdjustmentsToPlanner(int numberOfHigherSteps)
+   private void submitTimingAdjustmentsToPlanner(int numberOfHigherSteps)
    {
       int numberOfFootstepsRegistered = icpPlanner.getNumberOfFootstepsRegistered();
 

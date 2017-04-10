@@ -210,6 +210,27 @@ public class TimeAdjustmentSolver
       }
    }
 
+   public void zeroInputs()
+   {
+      solution.zero();
+
+      segmentAdjustmentObjective_H.zero();
+      stepAdjustmentObjective_H.zero();
+      perpendicularObjective_H.zero();
+      parallelObjective_H.zero();
+      parallelObjective_h.zero();
+
+      solverInput_H.zero();
+      solverInput_h.zero();
+      /*
+      solverInput_Lb.zero();
+      solverInput_Ub.zero();
+
+      solverInput_Ain.zero();
+      solverInput_bin.zero();
+      */
+   }
+
    /**
     * Sets the gradient of adjusting the time of the current transfer phase that is spent on the previous exit CMP.
     * This represents the time spent loading the current foot.
@@ -415,6 +436,8 @@ public class TimeAdjustmentSolver
     */
    public void compute() throws NoConvergenceException
    {
+      zeroInputs();
+
       // compute objectives
       double scalarCost = computeDesiredAdjustmentObjective();
       computePerpendicularAdjustmentMinimizationObjective();
@@ -452,7 +475,6 @@ public class TimeAdjustmentSolver
       CommonOps.scale(constraintWeight, parallelObjective_H);
 
       CommonOps.transpose(parallel_J, parallelObjective_h);
-      //CommonOps.scale(-2.0 * desiredParallelAdjustment * constraintWeight, parallelObjective_h);
       CommonOps.scale(-desiredParallelAdjustment * constraintWeight, parallelObjective_h);
 
       return Math.pow(desiredParallelAdjustment, 2.0) * constraintWeight;
