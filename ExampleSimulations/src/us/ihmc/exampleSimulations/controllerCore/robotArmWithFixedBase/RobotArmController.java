@@ -1,6 +1,8 @@
 package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -62,6 +64,9 @@ public class RobotArmController implements RobotController
       SPATIAL, LINEAR_ANGULAR_SEPARATE
    };
 
+   private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode = new EnumYoVariable<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class);
+   private final AtomicBoolean controllerCoreModeHasChanged = new AtomicBoolean(false);
+   private final List<ControllerCoreModeChangedListener> controllerModeListeners = new ArrayList<>();
    private final EnumYoVariable<FeedbackControlType> feedbackControlToUse = new EnumYoVariable<>("feedbackControlToUse", registry, FeedbackControlType.class,
                                                                                                  false);
 
@@ -93,10 +98,12 @@ public class RobotArmController implements RobotController
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final RobotJointLimitWatcher robotJointLimitWatcher;
 
-   public RobotArmController(RobotArm robotArm, double controlDT, WholeBodyControllerCoreMode controlMode, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public RobotArmController(RobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robotArm = robotArm;
-      controllerCoreCommand.setControllerCoreMode(controlMode);
+
+      controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
+      controllerCoreMode.addVariableChangedListener(v -> controllerCoreModeHasChanged.set(true));
 
       yoTime = robotArm.getYoTime();
       double gravityZ = robotArm.getGravity();
@@ -140,6 +147,11 @@ public class RobotArmController implements RobotController
       registry.addChild(robotJointLimitWatcher.getYoVariableRegistry());
 
       initialize();
+   }
+
+   public void registerControllerCoreModeChangedListener(ControllerCoreModeChangedListener listener)
+   {
+      controllerModeListeners.add(listener);
    }
 
    @Override
@@ -193,7 +205,9 @@ public class RobotArmController implements RobotController
 
       controllerCoreCommand.clear();
       if (feedbackControlToUse.getEnumValue() == FeedbackControlType.SPATIAL)
+      {
          controllerCoreCommand.addFeedbackControlCommand(handSpatialCommand);
+      }
       else
       {
          controllerCoreCommand.addFeedbackControlCommand(handPointCommand);
@@ -205,10 +219,18 @@ public class RobotArmController implements RobotController
 
       LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getControllerCoreOutput().getLowLevelOneDoFJointDesiredDataHolder();
 
-      if (controllerCoreCommand.getControllerCoreMode() == WholeBodyControllerCoreMode.INVERSE_KINEMATICS)
-         robotArm.updateSCSRobotJointConfiguration(lowLevelOneDoFJointDesiredDataHolder);
-      else
+      if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.OFF || controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+         controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
+
+      if (controllerCoreModeHasChanged.getAndSet(false))
+         controllerModeListeners.forEach(listener -> listener.controllerCoreModeHasChanged(controllerCoreMode.getEnumValue()));
+
+      controllerCoreCommand.setControllerCoreMode(controllerCoreMode.getEnumValue());
+
+      if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.INVERSE_DYNAMICS)
          robotArm.updateSCSRobotJointTaus(lowLevelOneDoFJointDesiredDataHolder);
+      else
+         robotArm.updateSCSRobotJointConfiguration(lowLevelOneDoFJointDesiredDataHolder);
 
       robotJointLimitWatcher.doControl();
    }

@@ -233,8 +233,13 @@ public class RobotArm extends Robot
    {
       for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
       {
-         double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(pair.getLeft());
-         pair.getRight().setTau(tau);
+         OneDoFJoint oneDoFJoint = pair.getLeft();
+
+         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredTorqueForJoint(oneDoFJoint))
+         {
+            double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque(oneDoFJoint);
+            pair.getRight().setTau(tau);
+         }
       }
    }
 
@@ -242,11 +247,18 @@ public class RobotArm extends Robot
    {
       for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
       {
-         double q = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition(pair.getLeft());
-         double qd = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointVelocity(pair.getLeft());
+         OneDoFJoint oneDoFJoint = pair.getLeft();
+         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredPositionForJoint(oneDoFJoint))
+         {
+            double q = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition(oneDoFJoint);
+            pair.getRight().setQ(q);
+         }
 
-         pair.getRight().setQ(q);
-         pair.getRight().setQd(qd);
+         if (lowLevelOneDoFJointDesiredDataHolder.hasDesiredVelocityForJoint(oneDoFJoint))
+         {
+            double qd = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointVelocity(oneDoFJoint);
+            pair.getRight().setQd(qd);
+         }
       }
    }
 

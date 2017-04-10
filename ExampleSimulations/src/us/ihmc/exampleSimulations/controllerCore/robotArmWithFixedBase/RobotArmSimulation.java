@@ -14,12 +14,8 @@ public class RobotArmSimulation
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
       RobotArm robotArm = new RobotArm();
-      WholeBodyControllerCoreMode controlMode = WholeBodyControllerCoreMode.INVERSE_DYNAMICS;
-
-      if (controlMode == WholeBodyControllerCoreMode.INVERSE_KINEMATICS)
-         robotArm.setDynamic(false);
-
-      RobotArmController robotArmController = new RobotArmController(robotArm, controlDT, controlMode, yoGraphicsListRegistry);
+      RobotArmController robotArmController = new RobotArmController(robotArm, controlDT, yoGraphicsListRegistry);
+      robotArmController.registerControllerCoreModeChangedListener((mode) -> robotArm.setDynamic(mode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS));
       robotArm.setController(robotArmController);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
