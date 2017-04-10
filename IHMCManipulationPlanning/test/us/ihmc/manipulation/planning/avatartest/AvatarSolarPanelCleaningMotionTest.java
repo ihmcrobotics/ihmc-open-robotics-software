@@ -460,7 +460,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       // ***************************************************** //
       
       
-//      scs.addStaticLinkGraphics(solarPanelValidityTester.getRobotCollisionModel().getCollisionGraphics());
+      scs.addStaticLinkGraphics(solarPanelValidityTester.getRobotCollisionModel().getCollisionGraphics());
          
 //      for (int i=0;i<kinematicsToolBoxController.getDesiredFullRobotModel().getOneDoFJoints().length;i++)
 //      {
@@ -552,7 +552,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    {
       SimulationConstructionSet scs = drcBehaviorTestHelper.getSimulationConstructionSet();      
       setupCamera(scs);
-      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
       drcBehaviorTestHelper.updateRobotModel();
@@ -585,7 +585,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       {
          wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
          motionTime = solarPanelPlanner.getMotionTime();
-         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);   
+         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);         
       }      
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
@@ -593,11 +593,12 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion))
       {
+         wholeBodyTrajectoryMessage.clear();
          wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
-         //motionTime = solarPanelPlanner.getMotionTime();
-         //drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
+         motionTime = solarPanelPlanner.getMotionTime();
+         drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
       }      
-      //drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
+      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(motionTime);
       
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
