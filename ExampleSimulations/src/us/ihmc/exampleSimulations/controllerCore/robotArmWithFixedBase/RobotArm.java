@@ -80,7 +80,7 @@ public class RobotArm extends Robot
    private final RevoluteJoint wristYaw;
    private final RigidBody hand;
 
-   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.2));
+   private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
 
    private final List<Pair<OneDoFJoint, OneDegreeOfFreedomJoint>> idToSCSJointPairs = new ArrayList<>();
