@@ -9,10 +9,9 @@ import us.ihmc.simulationconstructionset.SliderJoint;
 
 public class CartPoleRobot extends RobotWithClosedFormDynamics
 {
-   private final double cartMass = 1.2, poleMass = 0.8;
-   private final double poleInertia = 0.4;
-   private final double poleLength = 0.3;
-   private final double cartDamping = 0.0, poleDamping = 0.0;
+   private final double cartMass = 0.8, poleMass = 1.2;
+   private final double poleLength = 0.6;
+   private final double cartDamping = 0.1, poleDamping = 0.2;
 
    private final SliderJoint sliderJoint;
    private final PinJoint pinJoint;
@@ -33,7 +32,6 @@ public class CartPoleRobot extends RobotWithClosedFormDynamics
 
       Link poleLink = new Link(name + "PoleLink");
       poleLink.setMass(poleMass);
-      poleLink.setMomentOfInertia(0.0, poleInertia, 0.0);
       poleLink.setComOffset(0.0, 0.0, - poleLength);
       pinJoint.setLink(poleLink);
 
@@ -60,11 +58,14 @@ public class CartPoleRobot extends RobotWithClosedFormDynamics
 
       double g = Math.abs(gravityZ.getDoubleValue());
 
-      double xddLagrangian = (poleMass * Math.sin(q) * (poleLength * MathTools.square(qd) + g * Math.cos(q))) / (cartMass + poleMass * MathTools.square(Math.sin(q)));
+      double xddLagrangian = - (poleMass * Math.sin(q) * (poleLength * MathTools.square(qd) + g * Math.cos(q))) / (cartMass + poleMass * MathTools.square(Math.sin(q)));
       double qddLagrangian = (- poleMass * poleLength * MathTools.square(qd) * Math.cos(q) * Math.sin(q) - (cartMass + poleMass) * g * Math.sin(q)) / (poleLength * (cartMass + poleMass * MathTools.square(Math.sin(q))));
 
       if(Math.abs(xdd - xddLagrangian) > epsilon || Math.abs(qdd - qddLagrangian) > epsilon)
       {
+         System.out.println("x = " + sliderJoint.getQ());
+         System.out.println("q = " + q);
+
          throw new AssertionError("Joint accelerations from simulation and lagrangian don't match. "
                                         + "\nAt t=" + getTime()
                                         + "\nSimulated joint accelerations: (" + xdd + ", " + qdd + ")"
