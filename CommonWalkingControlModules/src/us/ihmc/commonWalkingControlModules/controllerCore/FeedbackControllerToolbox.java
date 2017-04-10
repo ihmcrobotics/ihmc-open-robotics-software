@@ -153,7 +153,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          namePrefix += "RateLimited";
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
-         rateLimitedYoFrameVector = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
+         rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
          endEffectorDataVectors.put(space, rateLimitedYoFrameVector);
          clearableData.add(rateLimitedYoFrameVector);
       }
