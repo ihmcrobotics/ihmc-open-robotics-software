@@ -567,15 +567,25 @@ public class ICPPlanner
       RobotSide transferToSide = this.transferToSide.getEnumValue();
       if (transferToSide == null)
          transferToSide = RobotSide.LEFT;
-      RobotSide transferFromSide = transferToSide.getOppositeSide();
-      ReferenceFrame transferFromSoleFrame = soleZUpFrames.get(transferFromSide);
-      ReferenceFrame transferToSoleFrame = soleZUpFrames.get(transferToSide);
 
       icpSingleSupportTrajectoryGenerator.hideVisualization();
 
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding.getBooleanValue(), transferToSide);
       referenceCMPsCalculator.update();
+
+      initializeTransferTrajectory(transferToSide);
+
+      if (!isStanding.getBooleanValue())
+         computeFinalCoMPositionInTransferInternal();
+   }
+
+   private void initializeTransferTrajectory(RobotSide transferToSide)
+   {
+      RobotSide transferFromSide = transferToSide.getOppositeSide();
+      ReferenceFrame transferFromSoleFrame = soleZUpFrames.get(transferFromSide);
+      ReferenceFrame transferToSoleFrame = soleZUpFrames.get(transferToSide);
+
       List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
       List<YoFramePoint> exitCMPs = referenceCMPsCalculator.getExitCMPs();
       switchCornerPointsToWorldFrame();
@@ -681,12 +691,36 @@ public class ICPPlanner
       icpDoubleSupportTrajectoryGenerator.setFinalConditions(singleSupportInitialICP, singleSupportInitialICPVelocity, finalFrame);
       icpDoubleSupportTrajectoryGenerator.setInitialCoMPosition(desiredCoMPosition, worldFrame);
       icpDoubleSupportTrajectoryGenerator.initialize();
-
-      if (!isStanding.getBooleanValue())
-         computeFinalCoMPositionInTransfer();
    }
 
-   private void computeFinalCoMPositionInTransfer()
+   /**
+    * Computes the final CoM position in transfer. Uses most of the same methods as {@link #initializeForSingleSupport(double)},
+    * but doesn't update the reference CMP calculator, making it slightly more computationally efficient
+    * <p>
+    * Make sure that footsteps have been registered using
+    * {@link #addFootstepToPlan(Footstep, FootstepTiming)} and that the support side has been
+    * registered using {@link #setSupportLeg(RobotSide)} before calling this method.
+    * </p>
+    */
+   public void computeFinalCoMPositionInTransfer()
+   {
+      int numberOfFootstepRegistered = referenceCMPsCalculator.getNumberOfFootstepRegistered();
+      if (numberOfFootstepRegistered < numberFootstepsToConsider.getIntegerValue())
+      {
+         transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+         transferDurationAlphas.get(numberOfFootstepRegistered).set(finalTransferDurationAlpha.getDoubleValue());
+      }
+
+      RobotSide transferToSide = this.transferToSide.getEnumValue();
+      if (transferToSide == null)
+         transferToSide = RobotSide.LEFT;
+      initializeTransferTrajectory(transferToSide);
+
+      computeFinalCoMPositionInTransferInternal();
+   }
+
+
+   private void computeFinalCoMPositionInTransferInternal()
    {
       icpDoubleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportInitialCoM);
       yoSingleSupportInitialCoM.set(singleSupportInitialCoM);
@@ -713,19 +747,12 @@ public class ICPPlanner
 
             icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
             icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM);
-
-            if (singleSupportInitialCoM.containsNaN())
-               throw new RuntimeException("Single Support Initial CoM contains NaN!.");
-            if (singleSupportFinalCoM.containsNaN())
-               throw new RuntimeException("Single Support Final CoM contains NaN!.");
          }
          else
          {
             singleSupportInitialICP.changeFrame(worldFrame);
             integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1), singleSupportInitialICP,
                   singleSupportInitialCoM, singleSupportFinalCoM);
-            if (singleSupportFinalCoM.containsNaN())
-               throw new RuntimeException("Single Support Final CoM contains NaN!.");
          }
       }
       else
@@ -774,6 +801,19 @@ public class ICPPlanner
       referenceCMPsCalculator.setUseTwoCMPsPerSupport(useTwoConstantCMPsPerSupport.getBooleanValue());
       referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
       referenceCMPsCalculator.update();
+
+      ReferenceFrame supportSoleFrame = initializeSwingTrajectory();
+
+      computeFinalCoMPositionInSwingInternal();
+
+      singleSupportInitialICP.changeFrame(supportSoleFrame);
+      entryCornerPoints.get(0).changeFrame(supportSoleFrame);
+      singleSupportFinalICP.changeFrame(worldFrame);
+      changeFrameOfRemainingCornerPoints(1, worldFrame);
+   }
+
+   private ReferenceFrame initializeSwingTrajectory()
+   {
       List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
       List<YoFramePoint> exitCMPs = referenceCMPsCalculator.getExitCMPs();
 
@@ -789,7 +829,7 @@ public class ICPPlanner
       singleSupportFinalICP.switchCurrentReferenceFrame(worldFrame);
       yoSingleSupportInitialCoM.getFrameTuple2d(singleSupportInitialCoM);
 
-      ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide);
+      ReferenceFrame supportSoleFrame = soleZUpFrames.get(supportSide.getEnumValue());
       double omega0 = this.omega0.getDoubleValue();
       if (useTwoConstantCMPsPerSupport.getBooleanValue())
       {
@@ -797,11 +837,11 @@ public class ICPPlanner
                swingDurationAlphas, transferDurationAlphas, omega0);
          computeDesiredCapturePointPosition(omega0, transferDurationAfterEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportInitialICP);
          computeDesiredCapturePointVelocity(omega0, transferDurationAfterEntryCornerPoint, entryCornerPoints.get(0), entryCMPs.get(0),
-                                            singleSupportInitialICPVelocity);
+               singleSupportInitialICPVelocity);
 
          computeDesiredCapturePointPosition(omega0, timeToSpendOnExitCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0), singleSupportFinalICP);
          computeDesiredCapturePointVelocity(omega0, timeToSpendOnExitCMPBeforeDoubleSupport, exitCornerPoints.get(0), exitCMPs.get(0),
-                                            singleSupportFinalICPVelocity);
+               singleSupportFinalICPVelocity);
 
          icpSingleSupportTrajectoryGenerator.setBoundaryICP(singleSupportInitialICP, singleSupportFinalICP);
          icpSingleSupportTrajectoryGenerator.setCornerPoints(entryCornerPoints.get(0), exitCornerPoints.get(0));
@@ -822,7 +862,23 @@ public class ICPPlanner
          computeDesiredCapturePointPosition(omega0, tFinal, entryCornerPoints.get(0), entryCMPs.get(0), singleSupportFinalICP);
       }
 
-      computeFinalCoMPositionInSwing();
+      return supportSoleFrame;
+   }
+
+   /**
+    * Computes the final CoM position in swing. Uses most of the same methods as {@link #initializeForSingleSupport(double)},
+    * but doesn't update the reference CMP calculator, making it slightly more computationally efficient
+    * <p>
+    * Make sure that footsteps have been registered using
+    * {@link #addFootstepToPlan(Footstep, FootstepTiming)} and that the support side has been
+    * registered using {@link #setSupportLeg(RobotSide)} before calling this method.
+    * </p>
+    */
+   public void computeFinalCoMPositionInSwing()
+   {
+      ReferenceFrame supportSoleFrame = initializeSwingTrajectory();
+
+      computeFinalCoMPositionInSwingInternal();
 
       singleSupportInitialICP.changeFrame(supportSoleFrame);
       entryCornerPoints.get(0).changeFrame(supportSoleFrame);
@@ -830,7 +886,7 @@ public class ICPPlanner
       changeFrameOfRemainingCornerPoints(1, worldFrame);
    }
 
-   private void computeFinalCoMPositionInSwing()
+   private void computeFinalCoMPositionInSwingInternal()
    {
       double swingDuration = swingDurations.get(0).getDoubleValue();
       if (Double.isFinite(swingDuration))
@@ -854,6 +910,8 @@ public class ICPPlanner
       }
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
+
+
 
    private void setCornerPointsToNaN()
    {

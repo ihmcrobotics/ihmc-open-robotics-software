@@ -605,7 +605,7 @@ public class DynamicReachabilityCalculator
             submitTimingAdjustmentsToPlanner(numberOfHigherSteps);
 
             // Compute the remaining CoM adjustment to be reachable using the new times.
-            applyVariation(tempFinalCoM);
+            initializePlan(tempFinalCoM);
             updateFrames(nextFootstep);
             double remainingAdjustment = computeRequiredAdjustment();
             isStepReachable = MathTools.intervalContains(remainingAdjustment, -epsilon, epsilon);
@@ -899,44 +899,6 @@ public class DynamicReachabilityCalculator
    }
 
 
-   private void resetPlannerTiming(int numberOfHigherSteps)
-   {
-      int numberOfFootstepsRegistered = icpPlanner.getNumberOfFootstepsRegistered();
-
-      icpPlanner.setTransferDuration(0, originalTransferDurations.get(0));
-      icpPlanner.setTransferDurationAlpha(0, originalTransferAlphas.get(0));
-
-      icpPlanner.setSwingDuration(0, originalSwingDurations.get(0));
-      icpPlanner.setSwingDurationAlpha(0, originalSwingAlphas.get(0));
-
-      boolean isThisTheFinalTransfer = (numberOfFootstepsRegistered == 1);
-
-      if (isThisTheFinalTransfer)
-      {
-         icpPlanner.setFinalTransferDuration(originalTransferDurations.get(1));
-         icpPlanner.setFinalTransferDurationAlpha(originalTransferAlphas.get(1));
-      }
-      else
-      {
-         icpPlanner.setTransferDuration(1, originalTransferDurations.get(1));
-         icpPlanner.setTransferDurationAlpha(1, originalTransferAlphas.get(1));
-      }
-
-      for (int i = 0; i < numberOfHigherSteps; i++)
-      {
-         double swingDuration = originalSwingDurations.get(i + 1);
-         icpPlanner.setSwingDuration(i + 1, swingDuration);
-
-         int transferIndex = i + 2;
-         double transferDuration = originalTransferDurations.get(transferIndex);
-
-         isThisTheFinalTransfer = (numberOfFootstepsRegistered == transferIndex);
-         if (isThisTheFinalTransfer)
-            icpPlanner.setFinalTransferDuration(transferDuration);
-         else
-            icpPlanner.setTransferDuration(transferIndex, transferDuration);
-      }
-   }
 
 
 
@@ -1117,6 +1079,16 @@ public class DynamicReachabilityCalculator
    }
 
    private void applyVariation(FramePoint2d comToPack)
+   {
+      if (isInTransfer)
+         icpPlanner.computeFinalCoMPositionInTransfer();
+      else
+         icpPlanner.computeFinalCoMPositionInSwing();
+
+      icpPlanner.getFinalDesiredCenterOfMassPosition(comToPack);
+   }
+
+   private void initializePlan(FramePoint2d comToPack)
    {
       double currentInitialTime = icpPlanner.getInitialTime();
 
