@@ -13,5 +13,5 @@ public abstract class RobotWithClosedFormDynamics extends Robot
     * Checks joint accelerations computed from physics engine are close to those computed from the Lagrangian
     * @param epsilon error bound on joint accelerations
     */
-   public abstract void assertStateIsCloseToLagrangianCalculation(double epsilon);
+   public abstract void assertStateIsCloseToClosedFormCalculation(double epsilon);
 }

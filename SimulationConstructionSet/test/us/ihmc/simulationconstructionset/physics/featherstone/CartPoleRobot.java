@@ -19,7 +19,7 @@ public class CartPoleRobot extends RobotWithClosedFormDynamics
    private final PinJoint pinJoint;
 
    /**
-    * Manipulator equation matrices, for matrix definitions see {@link #assertStateIsCloseToLagrangianCalculation}
+    * Manipulator equation matrices, for matrix definitions see {@link #assertStateIsCloseToClosedFormCalculation}
     */
    private final DenseMatrix64F H = new DenseMatrix64F(2, 2);
    private final DenseMatrix64F C = new DenseMatrix64F(2, 2);
@@ -60,7 +60,7 @@ public class CartPoleRobot extends RobotWithClosedFormDynamics
     * @see <a href="https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-832-underactuated-robotics-spring-2009/readings/MIT6_832s09_read_ch03.pdf</a>
     */
    @Override
-   public void assertStateIsCloseToLagrangianCalculation(double epsilon)
+   public void assertStateIsCloseToClosedFormCalculation(double epsilon)
    {
       double xd = sliderJoint.getQD();
       double xdd = sliderJoint.getQDD();
