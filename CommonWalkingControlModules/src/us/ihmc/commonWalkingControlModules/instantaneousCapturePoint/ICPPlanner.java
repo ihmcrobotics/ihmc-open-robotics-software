@@ -655,7 +655,7 @@ public class ICPPlanner
             computeDesiredCornerPointsDoubleSupport(entryCornerPoints, entryCMPs, swingDurations, transferDurations, transferDurationAlphas, omega0);
             double timeToNextCornerPoint = transferDurationAfterEntryCornerPoint + swingDuration;
             computeDesiredCapturePointPosition(omega0, timeToNextCornerPoint, entryCornerPoints.get(1), entryCMPs.get(1), singleSupportFinalICP);
-            computeDesiredCapturePointVelocity(omega0, timeToNextCornerPoint, exitCornerPoints.get(1), exitCMPs.get(1), singleSupportFinalICPVelocity);
+            computeDesiredCapturePointVelocity(omega0, timeToNextCornerPoint, entryCornerPoints.get(1), entryCMPs.get(1), singleSupportFinalICPVelocity);
          }
 
          computeDesiredCapturePointPosition(omega0, transferDurationAfterEntryCornerPoint, entryCornerPoints.get(1), entryCMPs.get(1), singleSupportInitialICP);
@@ -692,30 +692,45 @@ public class ICPPlanner
       yoSingleSupportInitialCoM.set(singleSupportInitialCoM);
 
       double swingDuration = swingDurations.get(0).getDoubleValue();
-      if (useTwoConstantCMPsPerSupport.getBooleanValue())
+
+      if (Double.isFinite(swingDuration))
       {
-         double swingAlpha = swingDurationAlphas.get(0).getDoubleValue();
-         double timeOnEntryDuringSwing = swingDuration * swingAlpha;
-         double timeOnExitDuringSwing = swingDuration * (1.0 - swingAlpha);
+         if (useTwoConstantCMPsPerSupport.getBooleanValue())
+         {
+            double swingAlpha = swingDurationAlphas.get(0).getDoubleValue();
+            double timeOnEntryDuringSwing = swingDuration * swingAlpha;
+            double timeOnExitDuringSwing = swingDuration * (1.0 - swingAlpha);
 
-         ReferenceFrame supportSoleFrame = soleZUpFrames.get(transferToSide.getEnumValue());
+            ReferenceFrame supportSoleFrame = soleZUpFrames.get(transferToSide.getEnumValue());
 
-         icpSingleSupportTrajectoryGenerator.setBoundaryICP(singleSupportInitialICP, singleSupportFinalICP);
-         icpSingleSupportTrajectoryGenerator.setCornerPoints(entryCornerPoints.get(1), exitCornerPoints.get(1));
-         icpSingleSupportTrajectoryGenerator.setReferenceCMPs(referenceCMPsCalculator.getEntryCMPs().get(1), referenceCMPsCalculator.getExitCMPs().get(1));
-         icpSingleSupportTrajectoryGenerator.setReferenceFrames(supportSoleFrame, worldFrame);
-         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
-         icpSingleSupportTrajectoryGenerator.setTrajectoryTime(timeOnEntryDuringSwing, timeOnExitDuringSwing);
-         icpSingleSupportTrajectoryGenerator.initialize();
+            icpSingleSupportTrajectoryGenerator.setBoundaryICP(singleSupportInitialICP, singleSupportFinalICP);
+            icpSingleSupportTrajectoryGenerator.setCornerPoints(entryCornerPoints.get(1), exitCornerPoints.get(1));
+            icpSingleSupportTrajectoryGenerator.setReferenceCMPs(referenceCMPsCalculator.getEntryCMPs().get(1), referenceCMPsCalculator.getExitCMPs().get(1));
+            icpSingleSupportTrajectoryGenerator.setReferenceFrames(supportSoleFrame, worldFrame);
+            icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
+            icpSingleSupportTrajectoryGenerator.setTrajectoryTime(timeOnEntryDuringSwing, timeOnExitDuringSwing);
+            icpSingleSupportTrajectoryGenerator.initialize();
 
-         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
-         icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM);
+            icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
+            icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM);
+
+            if (singleSupportInitialCoM.containsNaN())
+               throw new RuntimeException("Single Support Initial CoM contains NaN!.");
+            if (singleSupportFinalCoM.containsNaN())
+               throw new RuntimeException("Single Support Final CoM contains NaN!.");
+         }
+         else
+         {
+            singleSupportInitialICP.changeFrame(worldFrame);
+            integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1), singleSupportInitialICP,
+                  singleSupportInitialCoM, singleSupportFinalCoM);
+            if (singleSupportFinalCoM.containsNaN())
+               throw new RuntimeException("Single Support Final CoM contains NaN!.");
+         }
       }
       else
       {
-         singleSupportInitialICP.changeFrame(worldFrame);
-         integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), referenceCMPsCalculator.getEntryCMPs().get(1), singleSupportInitialICP,
-               singleSupportInitialCoM, singleSupportFinalCoM);
+         singleSupportFinalCoM.set(singleSupportInitialCoM);
       }
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }
@@ -817,18 +832,25 @@ public class ICPPlanner
 
    private void computeFinalCoMPositionInSwing()
    {
-      if (useTwoConstantCMPsPerSupport.getBooleanValue())
+      double swingDuration = swingDurations.get(0).getDoubleValue();
+      if (Double.isFinite(swingDuration))
       {
-         icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
-         icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM);
+         if (useTwoConstantCMPsPerSupport.getBooleanValue())
+         {
+            icpSingleSupportTrajectoryGenerator.setInitialCoMPosition(singleSupportInitialCoM, worldFrame);
+            icpSingleSupportTrajectoryGenerator.computeFinalCoMPosition(singleSupportFinalCoM);
+         }
+         else
+         {
+            List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
+            singleSupportInitialICP.changeFrame(worldFrame);
+            integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0), singleSupportInitialICP, singleSupportInitialCoM,
+                  singleSupportFinalCoM);
+         }
       }
       else
       {
-         double swingDuration = swingDurations.get(0).getDoubleValue();
-         List<YoFramePoint> entryCMPs = referenceCMPsCalculator.getEntryCMPs();
-         singleSupportInitialICP.changeFrame(worldFrame);
-         integrateCoMPositionUsingConstantCMP(swingDuration, omega0.getDoubleValue(), entryCMPs.get(0), singleSupportInitialICP, singleSupportInitialCoM,
-               singleSupportFinalCoM);
+         singleSupportFinalCoM.set(singleSupportInitialCoM);
       }
       yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
    }

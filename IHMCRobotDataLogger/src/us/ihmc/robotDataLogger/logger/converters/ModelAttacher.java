@@ -2,7 +2,6 @@ package us.ihmc.robotDataLogger.logger.converters;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
@@ -17,7 +16,9 @@ import java.util.Properties;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
-import us.ihmc.robotDataLogger.logger.LogProperties;
+import us.ihmc.idl.serializers.extra.PropertiesSerializer;
+import us.ihmc.robotDataLogger.LogProperties;
+import us.ihmc.robotDataLogger.LogPropertiesPubSubType;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 
@@ -171,7 +172,7 @@ public class ModelAttacher extends SimpleFileVisitor<Path>
 
 
 
-      if (properties.getModelLoaderClass() == null)
+      if (properties.getModel().getLoaderAsString().isEmpty())
       {
          if (model == null || !model.isValid())
          {
@@ -179,11 +180,16 @@ public class ModelAttacher extends SimpleFileVisitor<Path>
          }
 
          System.out.println("Adding model to " + modelDirectory);
-         properties.setModelLoaderClass(model.getLoader());
-         properties.setModelName(model.getModelName());
-         properties.setModelResourceDirectories(model.getResourceDirectories());
-         properties.setModelPath(modelFilename);
-         properties.setModelResourceBundlePath(modelResourceBundle);
+         properties.getModel().setLoader(model.getLoader());
+         properties.getModel().setName(model.getModelName());
+         
+         for(String directory : model.getResourceDirectories())
+         {
+            properties.getModel().getResourceDirectoriesList().add(directory);
+         }
+         
+         properties.getModel().setPath(modelFilename);
+         properties.getModel().setResourceBundle(modelResourceBundle);
 
          File modelFile = new File(modelDirectory, modelFilename);
          Files.copy(model.getModel().toPath(), modelFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -191,9 +197,9 @@ public class ModelAttacher extends SimpleFileVisitor<Path>
          Files.copy(model.getResources().toPath(), resourceFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
          
          File log = new File(modelDirectory, YoVariableLoggerListener.propertyFile);
-         FileWriter writer = new FileWriter(log);
-         properties.store(writer, "Model added by ModelAttacher");
-         writer.close();
+         PropertiesSerializer<LogProperties> writer = new PropertiesSerializer<>(new LogPropertiesPubSubType());
+         writer.serialize(log, properties);
+         
          System.out.println("Attached model to " + modelDirectory);
       }
       else

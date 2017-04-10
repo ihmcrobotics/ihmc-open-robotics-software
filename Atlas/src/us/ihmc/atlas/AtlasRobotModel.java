@@ -435,23 +435,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public LogSettings getLogSettings()
    {
-      return getLogSettings(true);
-   }
 
-   public LogSettings getLogSettings(boolean useCameras)
-   {
       switch (target)
       {
       case REAL_ROBOT :
-         if(useCameras)
-         {
             return LogSettings.ATLAS_IAN;
-         }
-         else
-         {
-            return LogSettings.ATLAS_NO_CAMERAS;
-         }
-
       case GAZEBO :
       case SCS:
       default :
