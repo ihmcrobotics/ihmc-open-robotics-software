@@ -15,8 +15,11 @@ public class SolarPanelMotionPlanner
    private SolarPanel solarPanel;
    
    WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();   
+   SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry();
    
    public RRTPlanner1DTimeDomain plannerTimeDomain;
+   
+   private double motionTime;
    
    // For debug
    public ArrayList<Pose> debugPose = new ArrayList<Pose>();
@@ -55,8 +58,9 @@ public class SolarPanelMotionPlanner
       {
       case ReadyPose:
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.ReadyPose);
-         SolarPanelWholeBodyPose wholebodyReadyPose = new SolarPanelWholeBodyPose(readyPose, 0.0, 0.0);
-         wholebodyReadyPose.getWholeBodyTrajectoryMessage(wholeBodyTrajectoryMessage, 3.0);
+         this.motionTime = 3.0;
+         motionFactory.setMessage(readyPose, 0.0, 0.0, this.motionTime);
+         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
          
          debugPose.add(readyPose.getPose());
          
@@ -64,30 +68,42 @@ public class SolarPanelMotionPlanner
          
       case LinearCleaningMotion:
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.LinearCleaningMotion);
+         this.motionTime = 5.0;
+         
          SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-         
-         SolarPanelCleaningPose endPose = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2);
-         cleaningPath.addCleaningPose(endPose, 4.0);
-         
-         // *** RRT *** //
-         
-         double motionTime = 5.0;
-         
-         RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(0.0, -Math.PI*0.4);
-         RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(motionTime*1.5, Math.PI*0.4);
-         
-         plannerTimeDomain.getTree().setMotionTime(motionTime);
-         plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
-         plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
-         
-         PrintTools.info("END setting");
-         RRTNode1DTimeDomain.cleaningPath = cleaningPath;
                   
-         plannerTimeDomain.expandTreeGoal(200);
-         PrintTools.info("END expanding");
-         plannerTimeDomain.updateOptimalPath(30);
-         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
-
+         SolarPanelCleaningPose endPose = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2);
+         cleaningPath.addCleaningPose(endPose, this.motionTime);
+         
+         // *** RRT *** //         
+         
+         
+//         RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(0.0, -Math.PI*0.4);
+//         RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(motionTime*1.5, Math.PI*0.4);
+//         
+//         plannerTimeDomain.getTree().setMotionTime(motionTime);
+//         plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
+//         plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
+//         
+//         PrintTools.info("END setting");
+//         RRTNode1DTimeDomain.cleaningPath = cleaningPath;         
+//                  
+//         plannerTimeDomain.expandTreeGoal(200);
+//         PrintTools.info("END expanding");
+//         plannerTimeDomain.updateOptimalPath(30);
+//         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
+//
+//         // *** message *** //
+//         PrintTools.info("Putting on Message");
+//         motionFactory.setCleaningPath(cleaningPath);
+//         motionFactory.setMessage(plannerTimeDomain.getOptimalPath());
+         
+         
+         
+         motionFactory.setMessage(endPose, Math.PI*0.2, 0.0, this.motionTime);
+         
+         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
+         PrintTools.info("Complete putting on message");
          
          break;
          
@@ -126,9 +142,8 @@ public class SolarPanelMotionPlanner
    }
    
    public double getMotionTime()
-   {
-      PrintTools.info("MotionTime is "+this.wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getTrajectoryTime());
-      return this.wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT).getTrajectoryTime();
+   {      
+      return motionTime;
    }
    
    
