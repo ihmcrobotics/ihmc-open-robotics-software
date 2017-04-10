@@ -9,9 +9,9 @@ import com.martiansoftware.jsap.Switch;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.visualization.GainControllerSliderBoard;
 import us.ihmc.avatar.visualization.WalkControllerSliderBoard;
-import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
-import us.ihmc.multicastLogDataProtocol.broadcast.LogSessionDisplay;
+import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.rtps.LogProducerDisplay;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -38,7 +38,7 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       scsVisualizer.addButton("calibrateWristForceSensors", 1.0);
       scsVisualizer.setShowOverheadView(true);
 
-      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", null, new RemoteAtlasVisualizerLogFilter());
+      YoVariableClient client = new YoVariableClient(scsVisualizer, "remote", new RemoteAtlasVisualizerLogFilter());
       client.start();
    }
 
@@ -109,12 +109,12 @@ public class RemoteAtlasVisualizer implements SCSVisualizerStateListener
       }
    }
 
-   private class RemoteAtlasVisualizerLogFilter implements LogSessionDisplay.LogSessionFilter
+   private class RemoteAtlasVisualizerLogFilter implements LogProducerDisplay.LogSessionFilter
    {
       @Override
-      public boolean shouldAddToDisplay(AnnounceRequest description)
+      public boolean shouldAddToDisplay(Announcement description)
       {
-         String ipAsString = ipToString(description.controlIP);
+         String ipAsString = ipToString(description.getDataIP());
          return ipAsString.startsWith("10.7.4.") || ipAsString.startsWith("10.7.1.");
       }
 

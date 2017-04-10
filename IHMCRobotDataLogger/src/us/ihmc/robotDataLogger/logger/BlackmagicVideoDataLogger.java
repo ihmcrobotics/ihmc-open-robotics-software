@@ -7,6 +7,7 @@ import java.io.IOException;
 import us.ihmc.commons.Conversions;
 import us.ihmc.javadecklink.Capture;
 import us.ihmc.javadecklink.CaptureHandler;
+import us.ihmc.robotDataLogger.LogProperties;
 import us.ihmc.tools.maps.CircularLongMap;
 
 public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implements CaptureHandler
@@ -26,9 +27,9 @@ public class BlackmagicVideoDataLogger extends VideoDataLoggerInterface implemen
    
    private int frame;
 
-   public BlackmagicVideoDataLogger(File logPath, LogProperties logProperties, int decklinkID, YoVariableLoggerOptions options) throws IOException
+   public BlackmagicVideoDataLogger(String name, File logPath, LogProperties logProperties, int decklinkID, YoVariableLoggerOptions options) throws IOException
    {
-      super(logPath, logProperties, "Camera" + decklinkID);
+      super(logPath, logProperties, name);
       decklink = decklinkID;
       quality = options.getVideoQuality();
 

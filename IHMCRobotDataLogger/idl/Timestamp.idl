@@ -1,0 +1,10 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	struct Timestamp
+	{
+		long long timestamp;
+	};
+};
+};
+};
