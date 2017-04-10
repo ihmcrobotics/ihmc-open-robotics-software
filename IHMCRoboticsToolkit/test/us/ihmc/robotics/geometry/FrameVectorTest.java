@@ -340,8 +340,9 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
          FrameVector smallVector = new FrameVector(theFrame, EuclidCoreRandomTools.generateRandomVector3DWithFixedLength(random, smallLength));
          expectedVector.set(smallVector);
 
-         smallVector.limitLength(maximumLength);
+         boolean hasBeenLimited = smallVector.limitLength(maximumLength);
 
+         assertFalse(hasBeenLimited);
          assertTrue(smallVector.length() < maximumLength); // Redundant assertion but this is what the method does at the end.
 
          assertEquals(expectedVector.getReferenceFrame(), smallVector.getReferenceFrame());
@@ -353,8 +354,9 @@ public class FrameVectorTest extends FrameTupleTest<Vector3D>
          expectedVector.normalize();
          expectedVector.scale(maximumLength);
          
-         bigVector.limitLength(maximumLength);
+         hasBeenLimited = bigVector.limitLength(maximumLength);
 
+         assertTrue(hasBeenLimited);
          assertEquals(bigVector.length(), maximumLength, epsilon);
 
          assertEquals(expectedVector.getReferenceFrame(), bigVector.getReferenceFrame());
