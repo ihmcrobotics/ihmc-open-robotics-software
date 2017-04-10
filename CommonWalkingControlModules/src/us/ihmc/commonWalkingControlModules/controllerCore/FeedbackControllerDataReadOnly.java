@@ -15,7 +15,8 @@ public interface FeedbackControllerDataReadOnly
       FEEDFORWARD("FeedForward"),
       FEEDBACK("Feedback"),
       ACHIEVED("Achieved"),
-      ERROR("Error");
+      ERROR("Error"),
+      ERROR_INTEGRATED("ErrorIntegrated");
 
       private final String name;
 
