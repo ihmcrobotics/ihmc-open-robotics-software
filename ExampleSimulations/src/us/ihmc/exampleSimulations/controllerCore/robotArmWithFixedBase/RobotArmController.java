@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -56,7 +56,6 @@ public class RobotArmController implements RobotController
    private final DoubleYoVariable yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final TwistCalculator twistCalculator;
-   private final GeometricJacobianHolder geometricJacobianHolder;
 
    public enum FeedbackControlType
    {
@@ -94,9 +93,11 @@ public class RobotArmController implements RobotController
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final RobotJointLimitWatcher robotJointLimitWatcher;
 
-   public RobotArmController(RobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public RobotArmController(RobotArm robotArm, double controlDT, WholeBodyControllerCoreMode controlMode, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robotArm = robotArm;
+      controllerCoreCommand.setControllerCoreMode(controlMode);
+
       yoTime = robotArm.getYoTime();
       double gravityZ = robotArm.getGravity();
       RigidBody hand = robotArm.getHand();
@@ -104,13 +105,18 @@ public class RobotArmController implements RobotController
       InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
       twistCalculator = new TwistCalculator(worldFrame, elevator);
-      geometricJacobianHolder = new GeometricJacobianHolder();
+
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
+
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
-                                                                                       twistCalculator, geometricJacobianHolder, optimizationSettings,
-                                                                                       yoGraphicsListRegistry, registry);
+                                                                                       twistCalculator, optimizationSettings, yoGraphicsListRegistry,
+                                                                                       registry);
+
       controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
+
       controlCoreToolbox.setupForInverseDynamicsSolver(new ArrayList<>());
+      controlCoreToolbox.setupForInverseKinematicsSolver();
+
       FeedbackControlCommandList allPossibleCommands = new FeedbackControlCommandList();
 
       handPointCommand.set(elevator, hand);
@@ -181,7 +187,6 @@ public class RobotArmController implements RobotController
       robotArm.updateIDRobot();
       centerOfMassFrame.update();
       twistCalculator.compute();
-      geometricJacobianHolder.compute();
 
       updateTrajectory();
       updateFeedbackCommands();
@@ -198,7 +203,12 @@ public class RobotArmController implements RobotController
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
-      robotArm.updateSCSRobot();
+      LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getControllerCoreOutput().getLowLevelOneDoFJointDesiredDataHolder();
+
+      if (controllerCoreCommand.getControllerCoreMode() == WholeBodyControllerCoreMode.INVERSE_KINEMATICS)
+         robotArm.updateSCSRobotJointConfiguration(lowLevelOneDoFJointDesiredDataHolder);
+      else
+         robotArm.updateSCSRobotJointTaus(lowLevelOneDoFJointDesiredDataHolder);
 
       robotJointLimitWatcher.doControl();
    }

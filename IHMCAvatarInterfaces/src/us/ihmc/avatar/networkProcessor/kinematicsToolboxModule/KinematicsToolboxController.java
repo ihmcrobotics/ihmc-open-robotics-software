@@ -22,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -76,7 +75,6 @@ public class KinematicsToolboxController extends ToolboxController
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
-   private final GeometricJacobianHolder geometricJacobianHolder;
 
    private final ReferenceFrame elevatorFrame;
 
@@ -137,12 +135,11 @@ public class KinematicsToolboxController extends ToolboxController
 
       elevatorFrame = elevator.getBodyFixedFrame();
 
-      geometricJacobianHolder = new GeometricJacobianHolder();
       MomentumOptimizationSettings momentumOptimizationSettings = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings();
       ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       desiredRootJoint = desiredFullRobotModel.getRootJoint();
-      toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, desiredRootJoint, controlledJoints, centerOfMassFrame, twistCalculator, geometricJacobianHolder,
-                                                momentumOptimizationSettings, yoGraphicsListRegistry, registry);
+      toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, desiredRootJoint, controlledJoints, centerOfMassFrame, twistCalculator, momentumOptimizationSettings,
+                                                yoGraphicsListRegistry, registry);
       toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       toolbox.setupForInverseKinematicsSolver();
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
@@ -278,7 +275,6 @@ public class KinematicsToolboxController extends ToolboxController
       desiredFullRobotModel.updateFrames();
       referenceFrames.updateFrames();
       twistCalculator.compute();
-      geometricJacobianHolder.compute();
    }
 
    private final MutableDouble tempErrorMagnitude = new MutableDouble();
@@ -302,7 +298,7 @@ public class KinematicsToolboxController extends ToolboxController
             newSolutionQuality += handWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, hand);
-            spatialVelocityCommand.setSpatialVelocity(desiredHandTwist);
+            spatialVelocityCommand.setSpatialVelocity(handControlFrame, desiredHandTwist);
             spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
             spatialVelocityCommand.setWeight(handWeight.getDoubleValue());
             ret.addCommand(spatialVelocityCommand);
@@ -324,7 +320,7 @@ public class KinematicsToolboxController extends ToolboxController
             newSolutionQuality += footWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, foot);
-            spatialVelocityCommand.setSpatialVelocity(desiredFootTwist);
+            spatialVelocityCommand.setSpatialVelocity(foot.getBodyFixedFrame(), desiredFootTwist);
             spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
             spatialVelocityCommand.setWeight(footWeight.getDoubleValue());
             ret.addCommand(spatialVelocityCommand);
@@ -353,12 +349,9 @@ public class KinematicsToolboxController extends ToolboxController
          Twist desiredChestTwist = computeDesiredTwist(desiredChestOrientation, chest, chestSelectionMatrix, tempErrorMagnitude);
          newSolutionQuality += chestWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         FrameVector desiredChestAngularVelocity = new FrameVector();
-         desiredChestTwist.getAngularVelocityInBaseFrame(desiredChestAngularVelocity);
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, chest);
-         spatialVelocityCommand.setAngularVelocity(chestFrame, elevatorFrame, desiredChestAngularVelocity);
-         spatialVelocityCommand.setSpatialVelocity(desiredChestTwist);
+         spatialVelocityCommand.setSpatialVelocity(chestFrame, desiredChestTwist);
          spatialVelocityCommand.setSelectionMatrix(chestSelectionMatrix);
          spatialVelocityCommand.setWeight(chestWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
@@ -371,12 +364,9 @@ public class KinematicsToolboxController extends ToolboxController
          Twist desiredPelvisTwist = computeDesiredTwist(desiredPelvisOrientation, pelvis, pelvisSelectionMatrix, tempErrorMagnitude);
          newSolutionQuality += pelvisOrientationWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-         FrameVector desiredPelvisAngularVelocity = new FrameVector();
-         desiredPelvisTwist.getAngularVelocityInBaseFrame(desiredPelvisAngularVelocity);
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, pelvis);
-         spatialVelocityCommand.setAngularVelocity(pelvisFrame, elevatorFrame, desiredPelvisAngularVelocity);
-         spatialVelocityCommand.setSpatialVelocity(desiredPelvisTwist);
+         spatialVelocityCommand.setSpatialVelocity(pelvisFrame, desiredPelvisTwist);
          spatialVelocityCommand.setSelectionMatrix(pelvisSelectionMatrix);
          spatialVelocityCommand.setWeight(pelvisOrientationWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
@@ -392,7 +382,7 @@ public class KinematicsToolboxController extends ToolboxController
          newSolutionQuality += pelvisHeightWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, pelvis);
-         spatialVelocityCommand.setSpatialVelocity(desiredPelvisTwist);
+         spatialVelocityCommand.setSpatialVelocity(pelvisFrame, desiredPelvisTwist);
          spatialVelocityCommand.setSelectionMatrix(heightSelectionMatrix);
          spatialVelocityCommand.setWeight(pelvisHeightWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);

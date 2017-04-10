@@ -374,6 +374,28 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
+    * Sets the position of the {@code controlFrame}'s origin with respect to the
+    * {@code endEffector.getBodyFixedFrame()}. The {@code controlFrame} will have the same
+    * orientation as the end-effector body-fixed frame.
+    * <p>
+    * The {@code controlFrame} describes on what the feedback control is applied, such that the
+    * feedback controller for this end-effector will do its best to bring the {@code controlFrame}
+    * to the given desired position and orientation.
+    * </p>
+    * 
+    * @param position the position of the {@code controlFrame}'s origin. Not modified.
+    * @throws ReferenceFrameMismatchException if any of the {@code position} is not expressed in
+    *            {@code endEffector.getBodyFixedFrame()}.
+    */
+   public void setControlFrameFixedInEndEffector(FramePoint position)
+   {
+      RigidBody endEffector = spatialAccelerationCommand.getEndEffector();
+      position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
+      position.get(controlFrameOriginInEndEffectorFrame);
+      controlFrameOrientationInEndEffectorFrame.setToZero();
+   }
+
+   /**
     * Sets the position and orientation of the {@code controlFrame} with respect to the
     * {@code endEffector.getBodyFixedFrame()}.
     * <p>

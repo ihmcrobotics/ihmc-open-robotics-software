@@ -190,7 +190,7 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       Quaternion footOrientation = new Quaternion();
       Point3D footPosition = new Point3D(0.25, 0.05, 0.2);
       footOrientation.appendPitchRotation(-Math.PI / 4.0);
-      footTrajectory.setTrajectoryPoint(0, 1.0, footPosition, footOrientation, new Vector3D(), new Vector3D());
+      footTrajectory.setTrajectoryPoint(0, 1.0, footPosition, footOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(footTrajectory);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
       assertTrue(success);
@@ -205,8 +205,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       // Return to safe stance and lift hand
       footOrientation.setToZero();
       FootTrajectoryMessage putDownFoot = new FootTrajectoryMessage(robotSide, 2);
-      putDownFoot.setTrajectoryPoint(0, 1.0, new Point3D(0.0, -0.075, 0.05), footOrientation, new Vector3D(), new Vector3D());
-      putDownFoot.setTrajectoryPoint(1, 1.5, new Point3D(0.0, -0.075, -0.01), footOrientation, new Vector3D(), new Vector3D());
+      putDownFoot.setTrajectoryPoint(0, 1.0, new Point3D(0.0, -0.075, 0.05), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
+      putDownFoot.setTrajectoryPoint(1, 1.5, new Point3D(0.0, -0.075, -0.01), footOrientation, new Vector3D(), new Vector3D(), worldFrame);
       drcSimulationTestHelper.send(putDownFoot);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
       assertTrue(success);
