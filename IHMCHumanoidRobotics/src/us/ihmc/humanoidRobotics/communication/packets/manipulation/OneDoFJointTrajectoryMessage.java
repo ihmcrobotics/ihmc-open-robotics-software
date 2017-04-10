@@ -28,6 +28,7 @@ public class OneDoFJointTrajectoryMessage extends Abstract1DTrajectoryMessage<On
    public OneDoFJointTrajectoryMessage(OneDoFJointTrajectoryMessage trajectory1dMessage)
    {
       super(trajectory1dMessage);
+      this.weight = trajectory1dMessage.getWeight();
    }
 
    public OneDoFJointTrajectoryMessage(SimpleTrajectoryPoint1DList trajectoryData)

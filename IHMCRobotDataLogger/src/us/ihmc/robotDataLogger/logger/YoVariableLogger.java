@@ -7,17 +7,19 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import us.ihmc.multicastLogDataProtocol.broadcast.AnnounceRequest;
+import us.ihmc.robotDataLogger.Announcement;
 import us.ihmc.robotDataLogger.YoVariableClient;
+import us.ihmc.robotDataLogger.rtps.DataConsumerParticipant;
 
 public class YoVariableLogger
 {
-   public static final long timeout = 5000;
+   public static final int timeout = 5000;
 
    private final YoVariableClient client;
 
-   public YoVariableLogger(AnnounceRequest request, YoVariableLoggerOptions options) throws IOException
+   public YoVariableLogger(Announcement request, YoVariableLoggerOptions options) throws IOException
    {
+      DataConsumerParticipant participant = new DataConsumerParticipant(request.getName() + "Logger");
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
@@ -40,7 +42,7 @@ public class YoVariableLogger
       }
 
       YoVariableLoggerListener logger = new YoVariableLoggerListener(tempDirectory, finalDirectory, timestamp, request, options);
-      client = new YoVariableClient(request, logger, "");
+      client = new YoVariableClient(participant, request, logger, "");
 
       try
       {

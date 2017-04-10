@@ -345,9 +345,6 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
    @Override
    public void doTransitionOutOfAction()
    {
-      trackingOrientation.set(false);
-      trackingPosition.set(false);
-      clear();
       hideGraphics();
    }
 
@@ -618,6 +615,8 @@ public class RigidBodyTaskspaceControlState extends RigidBodyControlState
       numberOfPointsInQueue.set(0);
       numberOfPointsInGenerator.set(0);
       numberOfPoints.set(0);
+      trackingOrientation.set(false);
+      trackingPosition.set(false);
    }
 
    private boolean checkPoseGainsAndWeights()

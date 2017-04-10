@@ -22,12 +22,13 @@ import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
 import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.plotting.Plotter;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
-import us.ihmc.robotDataLogger.logger.converters.LogFormatUpdater;
-import us.ihmc.robotDataLogger.logger.util.FileSelectionDialog;
+import us.ihmc.robotDataVisualizer.logger.converters.LogFormatUpdater;
+import us.ihmc.robotDataVisualizer.logger.util.FileSelectionDialog;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
@@ -99,10 +100,10 @@ public class LogVisualizer
       LogPropertiesReader logProperties = new LogPropertiesReader(new File(selectedFile, YoVariableLoggerListener.propertyFile));
       LogFormatUpdater.updateLogs(selectedFile, logProperties);
 
-      File handshake = new File(selectedFile, logProperties.getHandshakeFile());
+      File handshake = new File(selectedFile, logProperties.getVariables().getHandshakeAsString());
       if (!handshake.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
 
 
@@ -111,25 +112,25 @@ public class LogVisualizer
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged");
+      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType(), "logged");
       parser.parseFrom(handshakeData);
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
       List<JointState> jointStates = parser.getJointStates();
 
-      if (logProperties.getModelLoaderClass() != null)
+      if (!logProperties.getModel().getLoaderAsString().isEmpty())
       {
          SDFModelLoader loader = new SDFModelLoader();
-         String modelName = logProperties.getModelName();
-         String[] resourceDirectories = logProperties.getModelResourceDirectories();
+         String modelName = logProperties.getModel().getNameAsString();
+         String[] resourceDirectories = logProperties.getModel().getResourceDirectoriesList().toStringArray();
 
-         File model = new File(selectedFile, logProperties.getModelPath());
+         File model = new File(selectedFile, logProperties.getModel().getPathAsString());
          DataInputStream modelStream = new DataInputStream(new FileInputStream(model));
          byte[] modelData = new byte[(int) model.length()];
          modelStream.readFully(modelData);
          modelStream.close();
 
-         File resourceBundle = new File(selectedFile, logProperties.getModelResourceBundlePath());
+         File resourceBundle = new File(selectedFile, logProperties.getModel().getResourceBundleAsString());
          DataInputStream resourceStream = new DataInputStream(new FileInputStream(resourceBundle));
          byte[] resourceData = new byte[(int) resourceBundle.length()];
          resourceStream.readFully(resourceData);

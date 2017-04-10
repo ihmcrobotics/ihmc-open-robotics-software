@@ -426,12 +426,12 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
     *           YoGraphic expected to be in the same order as packed in {@link #getConstants()}.
     * @return a YoGraphic setup for remote visualization.
     */
-   static YoGraphicPolynomial3D createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, Double[] constants)
+   static YoGraphicPolynomial3D createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, double[] constants)
    {
       return new YoGraphicPolynomial3D(name, yoVariables, constants);
    }
 
-   private YoGraphicPolynomial3D(String name, YoVariable<?>[] yoVariables, Double[] constants)
+   private YoGraphicPolynomial3D(String name, YoVariable<?>[] yoVariables, double[] constants)
    {
       super(name);
 
@@ -439,10 +439,10 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
 
       int index = 0;
       radius = constants[index++];
-      resolution = constants[index++].intValue();
-      radialResolution = constants[index++].intValue();
-      hasPoseDefined = constants[index++].intValue() == 1;
-      numberOfPolynomials = constants[index++].intValue();
+      resolution = (int) constants[index++];
+      radialResolution = (int) constants[index++];
+      hasPoseDefined = ((int) constants[index++]) == 1;
+      numberOfPolynomials = (int) constants[index++];
 
       yoPolynomialSizes = subArray(constants, index, 3 * numberOfPolynomials);
 
@@ -520,11 +520,11 @@ public class YoGraphicPolynomial3D extends YoGraphic implements RemoteYoGraphic,
       getVariablesDefiningGraphic().forEach(variable -> variable.addVariableChangedListener(v -> dirtyGraphic.set(true)));
    }
 
-   private static int[] subArray(Double[] source, int start, int length)
+   private static int[] subArray(double[] source, int start, int length)
    {
       int[] subArray = new int[length];
       for (int i = 0; i < length; i++)
-         subArray[i] = source[i + start].intValue();
+         subArray[i] = (int) source[i + start];
       return subArray;
    }
 

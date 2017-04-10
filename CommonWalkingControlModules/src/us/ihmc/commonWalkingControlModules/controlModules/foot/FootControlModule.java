@@ -12,11 +12,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.desiredFootStep.DesiredFootstepCalculatorTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -438,24 +436,7 @@ public class FootControlModule
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
    {
-      switch (command.getExecutionMode())
-      {
-      case OVERRIDE:
-         boolean isInMoveViaWaypointsState = stateMachine.isCurrentState(ConstraintType.MOVE_VIA_WAYPOINTS);
-         boolean initializeToCurrent = !isInMoveViaWaypointsState;
-         moveViaWaypointsState.handleFootTrajectoryCommand(command, initializeToCurrent);
-         if (isInMoveViaWaypointsState)
-            resetCurrentState();
-         break;
-      case QUEUE:
-         boolean success = moveViaWaypointsState.queueFootTrajectoryCommand(command);
-         if (!success)
-            moveViaWaypointsState.holdCurrentPosition();
-         return;
-      default:
-         PrintTools.warn(this, "Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
-         return;
-      }
+      moveViaWaypointsState.handleFootTrajectoryCommand(command);
    }
 
    public void resetHeightCorrectionParametersForSingularityAvoidance()

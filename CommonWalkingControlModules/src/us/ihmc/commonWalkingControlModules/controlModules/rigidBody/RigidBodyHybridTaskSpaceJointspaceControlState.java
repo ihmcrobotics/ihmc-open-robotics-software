@@ -114,4 +114,11 @@ public class RigidBodyHybridTaskSpaceJointspaceControlState extends RigidBodyCon
       feedbackControlCommandList.addCommand(taskspaceControlState.getFeedbackControlCommand());
       return feedbackControlCommandList;
    }
+
+   @Override
+   public void clear()
+   {
+      taskspaceControlState.clear();
+      jointspaceControlState.clear();
+   }
 }
