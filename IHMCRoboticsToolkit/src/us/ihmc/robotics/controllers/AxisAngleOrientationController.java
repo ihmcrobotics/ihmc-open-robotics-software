@@ -74,8 +74,8 @@ public class AxisAngleOrientationController
       integralTerm = new FrameVector(bodyFrame);
 
       feedbackAngularAction = new YoFrameVector(prefix + "FeedbackAngularAction", bodyFrame, registry);
-      rateLimitedFeedbackAngularAction = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "",
-            registry, gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
+      rateLimitedFeedbackAngularAction = new RateLimitedYoFrameVector(prefix + "RateLimitedFeedbackAngularAction", "", registry,
+                                                                      gains.getYoMaximumFeedbackRate(), dt, feedbackAngularAction);
 
       parentRegistry.addChild(registry);
    }

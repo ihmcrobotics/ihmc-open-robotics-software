@@ -76,9 +76,8 @@ public class RigidBodyLinearAccelerationControlModule
       velocityError = new YoFrameVector(namePrefix + "LinearVelocityError", worldFrame, registry);
 
       feedbackLinearAcceleration = new YoFrameVector(namePrefix + "FeedbackLinearAcceleration", worldFrame, registry);
-      rateLimitedFeedbackLinearAcceleration = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(namePrefix + "RateLimitedFeedbackLinearAcceleration", "",
-                                                                                                      registry, gains.getYoMaximumFeedbackRate(), dt,
-                                                                                                      feedbackLinearAcceleration);
+      rateLimitedFeedbackLinearAcceleration = new RateLimitedYoFrameVector(namePrefix + "RateLimitedFeedbackLinearAcceleration", "",
+                                                                           registry, gains.getYoMaximumFeedbackRate(), dt, feedbackLinearAcceleration);
 
       parentRegistry.addChild(registry);
    }
