@@ -289,6 +289,7 @@ public abstract class ToolboxModule
 
    public void sleep()
    {
+
       if (DEBUG)
          PrintTools.debug(this, "Going to sleep");
 
