@@ -38,8 +38,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.manipulation.planning.forwaypoint.EuclideanTrajectoryQuaternionCalculator;
-import us.ihmc.manipulation.planning.forwaypoint.FrameEuclideanTrajectoryQuaternion;
+import us.ihmc.manipulation.planning.forwaypoint.SO3TrajectoryPointCalculator;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
@@ -53,7 +52,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.waypoints.EuclideanTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.waypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.waypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -234,16 +235,15 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       curHandPoseR.getPosition(curHandPosR);
       curHandPoseR.getOrientation(curHandOriR);
       PrintTools.info("Cur Pos "+curHandPosR.getX()+" "+curHandPosR.getY()+" "+curHandPosR.getZ()+" ");
-      PrintTools.info("Cur Ori "+curHandOriR.getS()+" "+curHandOriR.getX()+" "+curHandOriR.getY()+" "+curHandOriR.getZ());
-      
+      PrintTools.info("Cur Ori "+curHandOriR.getS()+" "+curHandOriR.getX()+" "+curHandOriR.getY()+" "+curHandOriR.getZ());      
       
       double radius = 0.15;
       Pose centerPoseOfCircle = new Pose(new Point3D(0.65,  -0.35,  1.2), new Quaternion());
       double timePerWaypoint = 0.2;
       double trajectoryTime = numberOfWayPointForCircle * timePerWaypoint;
-      
-      EuclideanTrajectoryQuaternionCalculator euclideanWayPointCalculator = new EuclideanTrajectoryQuaternionCalculator();
-      
+
+      EuclideanTrajectoryPointCalculator euclideanCalculator = new EuclideanTrajectoryPointCalculator();
+      SO3TrajectoryPointCalculator so3Calculator = new SO3TrajectoryPointCalculator();
       for(int i=0;i<numberOfWayPointForCircle;i++)
       {         
          Pose poseOfWayPoint = new Pose(centerPoseOfCircle.getPosition(), centerPoseOfCircle.getOrientation());
@@ -259,20 +259,19 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          Point3D desiredPosition = new Point3D(poseOfWayPoint.getPosition());
          Quaternion desiredOrientation = new Quaternion(poseOfWayPoint.getOrientation());
          
-         
-         
-         euclideanWayPointCalculator.appendTrajectoryPoint(desiredPosition);
-         euclideanWayPointCalculator.appendTrajectoryQuaternion(desiredOrientation);
+         euclideanCalculator.appendTrajectoryPoint(desiredPosition);
+         so3Calculator.appendTrajectoryOrientation(desiredOrientation);
          
       }
+
+      euclideanCalculator.computeTrajectoryPointTimes(0.1, trajectoryTime);
+      euclideanCalculator.computeTrajectoryPointVelocities(true);
+
+      so3Calculator.getTrajectoryPointTimes(euclideanCalculator.getTrajectoryPoints());
+      so3Calculator.computeTrajectoryOrientations();            
       
-      euclideanWayPointCalculator.computeTrajectoryPointTimes(0.1, trajectoryTime);
-      euclideanWayPointCalculator.computeTrajectoryPointVelocities(true);
-            
-      euclideanWayPointCalculator.computeTrajectoryQuaternions();
-      
-      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanWayPointCalculator.getTrajectoryPoints();
-      ArrayList<FrameEuclideanTrajectoryQuaternion> trajectoryQuaternions = euclideanWayPointCalculator.getTrajectoryQuaternions();
+      RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanCalculator.getTrajectoryPoints();
+      RecyclingArrayList<FrameSO3TrajectoryPoint> trajectoryQuaternions = so3Calculator.getTrajectoryPoints();
       
       for (int i=0;i<numberOfWayPointForCircle;i++)
       {
@@ -283,8 +282,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          
          double time = trajectoryPoints.get(i).get(desiredPosition, desiredLinearVelocity);
          
-         desiredOrientation = trajectoryQuaternions.get(i).getQuaternion();
-         desiredAngularVelocity = trajectoryQuaternions.get(i).getAngularVelocity();
+         trajectoryQuaternions.get(i).getOrientation(desiredOrientation);;
+         trajectoryQuaternions.get(i).getAngularVelocity(desiredAngularVelocity);
                   
          handTrajectoryMessageCircle.setTrajectoryPoint(i, time, desiredPosition, desiredOrientation, desiredLinearVelocity, desiredAngularVelocity, worldFrame);
       }
