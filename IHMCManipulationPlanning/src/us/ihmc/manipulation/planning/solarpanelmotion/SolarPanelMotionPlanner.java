@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import java.util.ArrayList;
 
@@ -6,9 +6,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTPlanner1DTimeDomain;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SolarPanelMotionPlanner
 {

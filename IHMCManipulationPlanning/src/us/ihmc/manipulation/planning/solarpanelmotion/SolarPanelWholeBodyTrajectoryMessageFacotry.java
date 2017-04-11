@@ -1,10 +1,8 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;

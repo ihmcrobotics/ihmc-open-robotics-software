@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.robotcollisionmodel;
+package us.ihmc.manipulation.robotcollisionmodel;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
