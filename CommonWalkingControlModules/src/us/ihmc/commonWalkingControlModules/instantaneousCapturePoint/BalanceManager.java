@@ -173,9 +173,14 @@ public class BalanceManager
       icpPlanner.setFinalTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       if (ENABLE_DYN_REACHABILITY)
-         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame, registry, yoGraphicsListRegistry);
+      {
+         dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, centerOfMassFrame,
+               walkingControllerParameters.getDynamicReachabilityParameters(), registry, yoGraphicsListRegistry);
+      }
       else
+      {
          dynamicReachabilityCalculator = null;
+      }
       editStepTimingForReachability.set(walkingControllerParameters.editStepTimingForReachability());
 
       safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
