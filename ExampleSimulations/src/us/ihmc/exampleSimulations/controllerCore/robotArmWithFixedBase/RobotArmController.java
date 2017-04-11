@@ -50,6 +50,7 @@ import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 
 public class RobotArmController implements RobotController
 {
+   private static final boolean USE_PRIVILEGED_CONFIGURATION = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
@@ -100,6 +101,8 @@ public class RobotArmController implements RobotController
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final RobotJointLimitWatcher robotJointLimitWatcher;
 
+   private final BooleanYoVariable setRandomConfiguration = new BooleanYoVariable("setRandomConfiguration", registry);
+
    public RobotArmController(RobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robotArm = robotArm;
@@ -121,7 +124,8 @@ public class RobotArmController implements RobotController
                                                                                        twistCalculator, optimizationSettings, yoGraphicsListRegistry,
                                                                                        registry);
 
-      controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
+      if (USE_PRIVILEGED_CONFIGURATION)
+         controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
 
       controlCoreToolbox.setupForInverseDynamicsSolver(new ArrayList<>());
       controlCoreToolbox.setupForInverseKinematicsSolver();
@@ -220,7 +224,8 @@ public class RobotArmController implements RobotController
          controllerCoreCommand.addFeedbackControlCommand(handPointCommand);
          controllerCoreCommand.addFeedbackControlCommand(handOrientationCommand);
       }
-      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      if (USE_PRIVILEGED_CONFIGURATION)
+         controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
