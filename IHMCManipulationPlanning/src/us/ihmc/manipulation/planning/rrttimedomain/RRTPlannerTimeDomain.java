@@ -105,7 +105,7 @@ public class RRTPlannerTimeDomain
       PrintTools.info("Buliding Started");
       if(firstShortCut() == true)
       {
-         
+         PrintTools.info("First cut Success");
       }
       else
       {

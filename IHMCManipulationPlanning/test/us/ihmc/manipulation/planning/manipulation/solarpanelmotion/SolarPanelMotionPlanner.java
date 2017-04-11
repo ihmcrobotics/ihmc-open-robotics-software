@@ -44,12 +44,16 @@ public class SolarPanelMotionPlanner
    public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
    {
       return this.wholeBodyTrajectoryMessage;
-   }   
+   }      
+   
+   public double getMotionTime()
+   {      
+      return motionTime;
+   }
       
    public boolean setWholeBodyTrajectoryMessage(CleaningMotion motion)
-   {
-      WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      
+   {      
+      this.wholeBodyTrajectoryMessage.clear();
       SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.1, -Math.PI*0.2);
       
       
@@ -59,7 +63,7 @@ public class SolarPanelMotionPlanner
       case ReadyPose:
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.ReadyPose);
          this.motionTime = 3.0;
-         motionFactory.setMessage(readyPose, 0.0, 0.0, this.motionTime);
+         motionFactory.setMessage(readyPose, Math.PI*0.0, 0.0, this.motionTime);
          wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
          
          debugPose.add(readyPose.getPose());
@@ -68,39 +72,50 @@ public class SolarPanelMotionPlanner
          
       case LinearCleaningMotion:
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.LinearCleaningMotion);
-         this.motionTime = 5.0;
          
          SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
                   
-         SolarPanelCleaningPose endPose = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2);
-         cleaningPath.addCleaningPose(endPose, this.motionTime);
+         SolarPanelCleaningPose endPose = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2);//
+         cleaningPath.addCleaningPose(endPose, 5.0);
+         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.1, -Math.PI*0.2), 1.0);
+         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.1, -Math.PI*0.2), 5.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.1, -Math.PI*0.2), 1.0);
+//         
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.1, -Math.PI*0.2), 5.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.1, -Math.PI*0.2), 1.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.1, -Math.PI*0.2), 5.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.1, -Math.PI*0.2), 1.0);
+         
+         
+         this.motionTime = cleaningPath.getArrivalTime().get(cleaningPath.getArrivalTime().size()-1);
+         PrintTools.info("motionTime :: "+this.motionTime);
          
          // *** RRT *** //         
+         /*
+         
+         RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(0.0, -Math.PI*0.4);
+         RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(motionTime*1.5, Math.PI*0.4);
          
          
-//         RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(0.0, -Math.PI*0.4);
-//         RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(motionTime*1.5, Math.PI*0.4);
-//         
-//         plannerTimeDomain.getTree().setMotionTime(motionTime);
-//         plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
-//         plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
-//         
-//         PrintTools.info("END setting");
-//         RRTNode1DTimeDomain.cleaningPath = cleaningPath;         
-//                  
-//         plannerTimeDomain.expandTreeGoal(200);
-//         PrintTools.info("END expanding");
-//         plannerTimeDomain.updateOptimalPath(30);
-//         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
-//
-//         // *** message *** //
-//         PrintTools.info("Putting on Message");
-//         motionFactory.setCleaningPath(cleaningPath);
-//         motionFactory.setMessage(plannerTimeDomain.getOptimalPath());
+         plannerTimeDomain.getTree().setMotionTime(motionTime);
+         plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
+         plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
          
+         PrintTools.info("END setting");
+         RRTNode1DTimeDomain.cleaningPath = cleaningPath;         
+                  
+         plannerTimeDomain.expandTreeGoal(200);
+         PrintTools.info("END expanding");
+         plannerTimeDomain.updateOptimalPath(30);
+         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
+
+         // *** message *** //
+         PrintTools.info("Putting on Message");
+         motionFactory.setCleaningPath(cleaningPath);
+         */
          
+         //motionFactory.setMessage(plannerTimeDomain.getOptimalPath()); -----
          
-         motionFactory.setMessage(endPose, Math.PI*0.2, 0.0, this.motionTime);
          
          wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
          PrintTools.info("Complete putting on message");
@@ -135,16 +150,11 @@ public class SolarPanelMotionPlanner
          
       }
       
-      this.wholeBodyTrajectoryMessage.clear();
-      this.wholeBodyTrajectoryMessage = wholeBodyTrajectoryMessage;
+      
       
       return true;
    }
-   
-   public double getMotionTime()
-   {      
-      return motionTime;
-   }
+
    
    
    

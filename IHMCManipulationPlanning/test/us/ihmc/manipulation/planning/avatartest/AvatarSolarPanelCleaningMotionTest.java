@@ -565,17 +565,6 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       // ********** Planning *** //
       
-      
-
-      
-
-      
-      
-      
-      
-      
-      
-      
       double motionTime = 0;
       WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
      
@@ -591,9 +580,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
-      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion))
+      if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion) == true)
       {
-         wholeBodyTrajectoryMessage.clear();
          wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
          motionTime = solarPanelPlanner.getMotionTime();
          drcBehaviorTestHelper.send(wholeBodyTrajectoryMessage);
@@ -634,7 +622,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    // ************************************* //
    class DrawPanel extends JPanel
    {
-      int timeScale = 300;
+      int timeScale = 60;
       int pelvisYawScale = 300;
       RRTPlannerTimeDomain plannerTimeDomain;
       
@@ -688,6 +676,11 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
             RRTNode rrtNode1 = nodeFail.get(i);
             point(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), 4);
          }
+         
+         g.setColor(Color.yellow);
+         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1), Math.PI*0.4, 4);
+         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(2), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(2), Math.PI*0.4, 4);
+         branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(3), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(3), Math.PI*0.4, 4);
       }
       
       public int t2u(double time)
