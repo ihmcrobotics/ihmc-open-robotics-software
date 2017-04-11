@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
+import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -28,6 +29,7 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
    protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
+   protected DynamicReachabilityParameters dynamicReachabilityParameters;
 
    /**
     * Specifies if the controller should by default compute for all the robot joints desired
@@ -497,6 +499,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the parameters in the dynamic reachability calculator.
+    */
+   public DynamicReachabilityParameters getDynamicReachabilityParameters()
+   {
+      if (dynamicReachabilityParameters == null)
+         dynamicReachabilityParameters = new DynamicReachabilityParameters();
+
+      return dynamicReachabilityParameters;
+   }
+
+   /**
     * Determines whether or not to attempt to directly control the height.
     * If true, the height will be controlled by controlling either the pelvis or the center of mass height.
     * If false, the height will be controlled inside the nullspace by trying to achieve the desired
@@ -589,7 +602,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Sets whether or not the {@link us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator} will simply check whether or not the
+    * Sets whether or not the {@link DynamicReachabilityCalculator} will simply check whether or not the
     * upcoming step is reachable using the given step timing ({@return} is false), or will edit the step timings to make sure that the step is reachable
     * if ({@return} is true).
     *

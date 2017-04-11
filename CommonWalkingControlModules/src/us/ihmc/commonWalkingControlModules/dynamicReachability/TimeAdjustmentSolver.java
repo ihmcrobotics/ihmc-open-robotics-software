@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -19,22 +20,9 @@ public class TimeAdjustmentSolver
    private static final int nextInitialTransferIndex = 4;
    private static final int nextEndTransferIndex = 5;
 
-   private static final double minimumInitialTransferDuration = 0.01;
-   private static final double minimumEndTransferDuration = 0.05;
-   private static final double minimumInitialSwingDuration = 0.15;
-   private static final double minimumEndSwingDuration = 0.15;
-
-   private static final double minimumTransferDuration = 0.15;
-   private static final double maximumTransferDuration = 5.0;
-   private static final double minimumSwingDuration = 0.4;
-   private static final double maximumSwingDuration = 10.0;
-
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
 
-   private static final double perpendicularWeight = 0.1;
-   private static final double swingAdjustmentWeight = 10.0;
-   private static final double transferAdjustmentWeight = 1.0;
-   private static final double constraintWeight = 1000.0;
+   private final DynamicReachabilityParameters dynamicReachabilityParameters;
 
    private final DoubleYoVariable yoMinimumInitialTransferDuration;
    private final DoubleYoVariable yoMinimumEndTransferDuration;
@@ -74,9 +62,10 @@ public class TimeAdjustmentSolver
    private int numberOfHigherSteps;
    private int numberOfIterations;
 
-   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, boolean useHigherOrderSteps, YoVariableRegistry registry)
+   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry registry)
    {
-      this.useHigherOrderSteps = useHigherOrderSteps;
+      this.dynamicReachabilityParameters = dynamicReachabilityParameters;
+      this.useHigherOrderSteps = dynamicReachabilityParameters.useHigherOrderSteps();
 
       yoMinimumInitialTransferDuration = new DoubleYoVariable("minimumInitialTransferDuration", registry);
       yoMinimumEndTransferDuration = new DoubleYoVariable("minimumEndTransferDuration", registry);
@@ -87,15 +76,15 @@ public class TimeAdjustmentSolver
       yoMinimumSwingDuration = new DoubleYoVariable("minimumSwingDuration", registry);
       yoMaximumSwingDuration = new DoubleYoVariable("maximumSwingDuration", registry);
 
-      yoMinimumInitialTransferDuration.set(minimumInitialTransferDuration);
-      yoMinimumEndTransferDuration.set(minimumEndTransferDuration);
-      yoMinimumInitialSwingDuration.set(minimumInitialSwingDuration);
-      yoMinimumEndSwingDuration.set(minimumEndSwingDuration);
+      yoMinimumInitialTransferDuration.set(dynamicReachabilityParameters.getMinimumInitialTransferDuration());
+      yoMinimumEndTransferDuration.set(dynamicReachabilityParameters.getMinimumEndTransferDuration());
+      yoMinimumInitialSwingDuration.set(dynamicReachabilityParameters.getMinimumInitialSwingDuration());
+      yoMinimumEndSwingDuration.set(dynamicReachabilityParameters.getMinimumEndSwingDuration());
 
-      yoMinimumTransferDuration.set(minimumTransferDuration);
-      yoMaximumTransferDuration.set(maximumTransferDuration);
-      yoMinimumSwingDuration.set(minimumSwingDuration);
-      yoMaximumSwingDuration.set(maximumSwingDuration);
+      yoMinimumTransferDuration.set(dynamicReachabilityParameters.getMinimumTransferDuration());
+      yoMaximumTransferDuration.set(dynamicReachabilityParameters.getMaximumTransferDuration());
+      yoMinimumSwingDuration.set(dynamicReachabilityParameters.getMinimumSwingDuration());
+      yoMaximumSwingDuration.set(dynamicReachabilityParameters.getMaximumSwingDuration());
 
       int problemSize = 6 + 2 * (maxNumberOfFootstepsToConsider - 3);
 
@@ -471,6 +460,8 @@ public class TimeAdjustmentSolver
 
    private double computeDesiredAdjustmentObjective()
    {
+      double constraintWeight = dynamicReachabilityParameters.getConstraintWeight();
+
       CommonOps.multTransA(parallel_J, parallel_J, parallelObjective_H);
       CommonOps.scale(constraintWeight, parallelObjective_H);
 
@@ -482,12 +473,16 @@ public class TimeAdjustmentSolver
 
    private void computePerpendicularAdjustmentMinimizationObjective()
    {
+      double perpendicularWeight = dynamicReachabilityParameters.getPerpendicularWeight();
       CommonOps.multTransA(perpendicular_J, perpendicular_J, perpendicularObjective_H);
       CommonOps.scale(perpendicularWeight, perpendicularObjective_H);
    }
 
    private void computeTimeAdjustmentMinimizationObjective()
    {
+      double transferAdjustmentWeight = dynamicReachabilityParameters.getTransferAdjustmentWeight();
+      double swingAdjustmentWeight = dynamicReachabilityParameters.getSwingAdjustmentWeight();
+
       segmentAdjustmentObjective_H.set(0, 0, transferAdjustmentWeight);
       segmentAdjustmentObjective_H.set(1, 1, transferAdjustmentWeight);
       segmentAdjustmentObjective_H.set(2, 2, swingAdjustmentWeight);

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -33,27 +34,19 @@ public class DynamicReachabilityCalculator
    //// TODO: 3/21/17 add in the ability to angle the hip forward for reachability
    //// TODO: 3/21/17 add in the ability to drop the pelvis for reachability
 
-   private static final boolean USE_HIGHER_ORDER_STEPS = false;
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
    private static final boolean VISUALIZE = true;
-   private static final double MAXIMUM_DESIRED_KNEE_BEND = 0.15;
-   private static final double STEP_UP_THRESHOLD = 0.05;
-   private static final double STEP_DOWN_THRESHOLD = -0.05;
-   private static final int MAXIMUM_NUMBER_OF_ADJUSTMENTS = 10;
    private static final double epsilon = 0.005;
 
-   private static final double transferTwiddleSizeDuration = 0.4;
-   private static final double swingTwiddleSizeDuration = 0.4;
-
-   private static final double requiredAdjustmentSF = 1.0;
-   private static final double requiredAdjustmentGn = 0.4;
+   private final double transferTwiddleSizeDuration;
+   private final double swingTwiddleSizeDuration;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DoubleYoVariable requiredAdjustmentSafetyFactor = new DoubleYoVariable("requiredAdjustmentSafetyFactor", registry);
-   private final DoubleYoVariable requiredAdjustmentGain = new DoubleYoVariable("requiredAdjustmentGain", registry);
+   private final DoubleYoVariable requiredAdjustmentFeedbackGain = new DoubleYoVariable("requiredAdjustmentFeedbackGain", registry);
    private final DoubleYoVariable widthOfReachableRegion = new DoubleYoVariable("widthOfReachableRegion", registry);
 
    private final DoubleYoVariable minimumLegLength = new DoubleYoVariable("minimumLegLength", registry);
@@ -131,6 +124,7 @@ public class DynamicReachabilityCalculator
    private final FramePoint2d tempPoint2d = new FramePoint2d();
    private final FramePoint2d tempFinalCoM = new FramePoint2d();
 
+   private final DynamicReachabilityParameters dynamicReachabilityParameters;
    private final double thighLength;
    private final double shinLength;
    private final double maximumKneeBend;
@@ -146,27 +140,25 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
    public DynamicReachabilityCalculator(ICPPlanner icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(icpPlanner, fullRobotModel, centerOfMassFrame, MAXIMUM_DESIRED_KNEE_BEND, parentRegistry, yoGraphicsListRegistry);
-   }
-
-   public DynamicReachabilityCalculator(ICPPlanner icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
-         double maximumDesiredKneeBend, YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
+      this.dynamicReachabilityParameters = dynamicReachabilityParameters;
       this.icpPlanner = icpPlanner;
       this.fullRobotModel = fullRobotModel;
 
-      this.requiredAdjustmentSafetyFactor.set(requiredAdjustmentSF);
-      this.requiredAdjustmentGain.set(requiredAdjustmentGn);
+      this.requiredAdjustmentSafetyFactor.set(dynamicReachabilityParameters.getRequiredAdjustmentSafetyFactor());
+      this.requiredAdjustmentFeedbackGain.set(dynamicReachabilityParameters.getRequiredAdjustmentFeedbackGain());
 
-      this.maximumDesiredKneeBend.set(maximumDesiredKneeBend);
-      maximumNumberOfAdjustments.set(MAXIMUM_NUMBER_OF_ADJUSTMENTS);
+      this.transferTwiddleSizeDuration = dynamicReachabilityParameters.getPercentOfTransferDurationToCalculateGradient();
+      this.swingTwiddleSizeDuration = dynamicReachabilityParameters.getPercentOfSwingDurationToCalculateGradient();
+
+      this.maximumDesiredKneeBend.set(dynamicReachabilityParameters.getMaximumDesiredKneeBend());
+      this.maximumNumberOfAdjustments.set(dynamicReachabilityParameters.getMaximumNumberOfCoMAdjustments());
 
       maximumKneeBend = Math.min(Math.min(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getJointLimitUpper(),
             fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH).getJointLimitUpper()), 1.7);
 
-      solver = new TimeAdjustmentSolver(icpPlanner.getNumberOfFootstepsToConsider(), USE_HIGHER_ORDER_STEPS, registry);
+      solver = new TimeAdjustmentSolver(icpPlanner.getNumberOfFootstepsToConsider(), dynamicReachabilityParameters, registry);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -194,7 +186,7 @@ public class DynamicReachabilityCalculator
          higherTransferAdjustments.add(higherTransferAdjustment);
       }
 
-      for (int i = 0; i < MAXIMUM_NUMBER_OF_ADJUSTMENTS; i++)
+      for (int i = 0; i < dynamicReachabilityParameters.getMaximumNumberOfCoMAdjustments(); i++)
       {
          requiredParallelCoMAdjustments.add(new DoubleYoVariable("requiredParallelCoMAdjustment" + i, registry));
          achievedParallelCoMAdjustments.add(new DoubleYoVariable("achievedParallelCoMAdjustment" + i, registry));
@@ -249,7 +241,8 @@ public class DynamicReachabilityCalculator
          hipJoint.changeFrame(pelvisFrame);
          translationToPelvis.set(hipJoint);
          translationToPelvis.sub(pelvisCenter);
-         TranslationReferenceFrame predictedHipFrame = new TranslationReferenceFrame(robotSide.getShortLowerCaseName() + " Predicted Hip Frame", predictedPelvisFrame);
+         TranslationReferenceFrame predictedHipFrame = new TranslationReferenceFrame(robotSide.getShortLowerCaseName() + " Predicted Hip Frame",
+               predictedPelvisFrame);
          predictedHipFrame.updateTranslation(translationToPelvis.getVector());
          predictedHipFrames.put(robotSide, predictedHipFrame);
 
@@ -612,7 +605,7 @@ public class DynamicReachabilityCalculator
             achievedParallelCoMAdjustments.get(numberOfAdjustments.getIntegerValue()).set(achievedAdjustment);
 
             // Compute the adjustment we would like the solver to try and achieve on the next iteration.
-            requiredAdjustment += requiredAdjustmentGain.getDoubleValue() * (originalRequiredAdjustment - achievedAdjustment);
+            requiredAdjustment += requiredAdjustmentFeedbackGain.getDoubleValue() * (originalRequiredAdjustment - achievedAdjustment);
 
             isModifiedStepReachable.set(isStepReachable);
             numberOfAdjustments.increment();
@@ -630,12 +623,12 @@ public class DynamicReachabilityCalculator
       double heightChange = computeChangeInHeight(nextFootstep);
 
       double minimumStanceLegLength, minimumStepLegLength;
-      if (heightChange > STEP_UP_THRESHOLD)
+      if (heightChange > dynamicReachabilityParameters.getThresholdForStepUp())
       {
          minimumStepLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStanceLegLength = minimumLegLength.getDoubleValue();
       }
-      else if (heightChange < STEP_DOWN_THRESHOLD)
+      else if (heightChange < dynamicReachabilityParameters.getThresholdForStepDown())
       {
          minimumStanceLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStepLegLength = minimumLegLength.getDoubleValue();
@@ -712,12 +705,12 @@ public class DynamicReachabilityCalculator
 
       // compute the minimum leg lengths
       double minimumStanceLegLength, minimumStepLegLength;
-      if (stepHeight > STEP_UP_THRESHOLD)
+      if (stepHeight > dynamicReachabilityParameters.getThresholdForStepUp())
       {
          minimumStepLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStanceLegLength = minimumLegLength.getDoubleValue();
       }
-      else if (stepHeight < STEP_DOWN_THRESHOLD)
+      else if (stepHeight < dynamicReachabilityParameters.getThresholdForStepDown())
       {
          minimumStanceLegLength = computeLegLength(thighLength, shinLength, maximumKneeBend);
          minimumStepLegLength = minimumLegLength.getDoubleValue();
@@ -773,7 +766,7 @@ public class DynamicReachabilityCalculator
 
    private int computeNumberOfHigherSteps()
    {
-      if (USE_HIGHER_ORDER_STEPS)
+      if (dynamicReachabilityParameters.useHigherOrderSteps())
       {
          int numberOfFootstepsToConsider = icpPlanner.getNumberOfFootstepsToConsider();
          int numberOfFootstepsRegistered = icpPlanner.getNumberOfFootstepsRegistered();
