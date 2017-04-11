@@ -28,6 +28,18 @@ import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
+/**
+ * {@code FeedbackControllerToolbox} is meant to be used only in the
+ * {@link WholeBodyFeedbackController}.
+ * <p>
+ * It is used as a factory for creating a unique set of {@code YoVariable}s used by the feedback
+ * controllers. For instance, when a {@code YoFramePoint} has already been created by a controller,
+ * the same object will be given to be next controller needing it.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ *
+ */
 public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -51,7 +63,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       parentRegistry.addChild(registry);
    }
 
-   public YoFramePoint getOrCreatePosition(RigidBody endEffector, Type type)
+   /**
+    * Retrieves and returns the {@code YoFramePoint} associated with the given end-effector and
+    * {@code type}, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoFramePoint} matching the search criteria.
+    */
+   public YoFramePoint getPosition(RigidBody endEffector, Type type)
    {
       EnumMap<Type, YoFramePoint> typeDependentPositions = endEffectorPositions.get(endEffector);
 
@@ -76,7 +96,15 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return yoFramePoint;
    }
 
-   public YoFrameQuaternion getOrCreateOrientation(RigidBody endEffector, Type type)
+   /**
+    * Retrieves and returns the {@code YoFrameQuaternion} associated with the given end-effector and
+    * {@code type}, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoFrameQuaternion} matching the search criteria.
+    */
+   public YoFrameQuaternion getOrientation(RigidBody endEffector, Type type)
    {
       EnumMap<Type, YoFrameQuaternion> typeDependentOrientations = endEffectorOrientations.get(endEffector);
 
@@ -101,7 +129,16 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return yoFrameQuaternion;
    }
 
-   public YoFrameVector getOrCreateDataVector(RigidBody endEffector, Type type, Space space)
+   /**
+    * Retrieves and returns the {@code YoFrameVector} associated with the given end-effector,
+    * {@code type}, and {@code space}, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @param space the space of the data to retrieve.
+    * @return the unique {@code YoFrameVector} matching the search criteria.
+    */
+   public YoFrameVector getDataVector(RigidBody endEffector, Type type, Space space)
    {
       EnumMap<Type, EnumMap<Space, YoFrameVector>> dataVectorStep1 = endEffectorDataVectors.get(endEffector);
 
@@ -134,6 +171,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return yoFrameVector;
    }
 
+   /**
+    * Retrieves and returns the {@code RateLimitedYoFrameVector} associated with the given
+    * end-effector, {@code type}, and {@code space}, if it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not
+    * exist yet.
+    * </p>
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param space the space of the data to retrieve.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
+    */
    public RateLimitedYoFrameVector getRateLimitedDataVector(RigidBody endEffector, Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate)
    {
       EnumMap<Space, RateLimitedYoFrameVector> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
@@ -145,7 +197,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       }
 
       RateLimitedYoFrameVector rateLimitedYoFrameVector = endEffectorDataVectors.get(space);
-      YoFrameVector rawYoFrameVector = getOrCreateDataVector(endEffector, rawDataType, space);
+      YoFrameVector rawYoFrameVector = getDataVector(endEffector, rawDataType, space);
 
       if (rateLimitedYoFrameVector == null)
       {
@@ -161,6 +213,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return rateLimitedYoFrameVector;
    }
 
+   /**
+    * Retrieves and returns the set of gains {@code YoOrientationPIDGainsInterface} associated to
+    * the given end-effector, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the gains are associated.
+    * @return the unique {@code YoOrientationPIDGainsInterface} associated with the given
+    *         end-effector.
+    */
    public YoOrientationPIDGainsInterface getOrientationGains(RigidBody endEffector)
    {
       YoOrientationPIDGainsInterface gains = endEffectorOrientationGains.get(endEffector);
@@ -173,6 +233,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return gains;
    }
 
+   /**
+    * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} associated to the
+    * given end-effector, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the gains are associated.
+    * @return the unique {@code YoPositionPIDGainsInterface} associated with the given end-effector.
+    */
    public YoPositionPIDGainsInterface getPositionGains(RigidBody endEffector)
    {
       YoPositionPIDGainsInterface gains = endEffectorPositionGains.get(endEffector);
@@ -185,6 +252,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       return gains;
    }
 
+   /**
+    * Retrieves and returns the set of gains {@code YoSE3PIDGainsInterface} associated to the given
+    * end-effector, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the gains are associated.
+    * @return the unique {@code YoSE3PIDGainsInterface} associated with the given end-effector.
+    */
    public YoSE3PIDGainsInterface getSE3PIDGains(RigidBody endEffector)
    {
       YoPositionPIDGainsInterface positionGains = getPositionGains(endEffector);
@@ -225,6 +299,14 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       };
    }
 
+   /**
+    * Retrieves and returns the control frame {@code YoSE3OffsetFrame} associated to the given
+    * end-effector, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the control frame is associated.
+    * @return the unique {@code YoSE3OffsetFrame} control frame associated with the given
+    *         end-effector.
+    */
    public YoSE3OffsetFrame getControlFrame(RigidBody endEffector)
    {
       YoSE3OffsetFrame controlFrame = endEffectorControlFrames.get(endEffector);
