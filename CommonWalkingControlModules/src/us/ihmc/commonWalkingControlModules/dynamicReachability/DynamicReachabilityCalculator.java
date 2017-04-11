@@ -158,7 +158,7 @@ public class DynamicReachabilityCalculator
       maximumKneeBend = Math.min(Math.min(fullRobotModel.getLegJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH).getJointLimitUpper(),
             fullRobotModel.getLegJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH).getJointLimitUpper()), 1.7);
 
-      solver = new TimeAdjustmentSolver(icpPlanner.getNumberOfFootstepsToConsider(), dynamicReachabilityParameters, registry);
+      solver = new TimeAdjustmentSolver(icpPlanner.getNumberOfFootstepsToConsider(), dynamicReachabilityParameters);
 
       for (RobotSide robotSide : RobotSide.values)
       {

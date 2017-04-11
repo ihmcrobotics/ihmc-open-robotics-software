@@ -97,41 +97,65 @@ public class DynamicReachabilityParameters
       return 0.4;
    }
 
+   /**
+    * Minimum allowable transfer duration computed by the solver.
+    */
    public double getMinimumTransferDuration()
    {
       return 0.15;
    }
 
+   /**
+    * Maximum allowable transfer duration computed by the solver.
+    */
    public double getMaximumTransferDuration()
    {
       return 5.0;
    }
 
+   /**
+    * Minimum allowable swing duration computed by the solver.
+    */
    public double getMinimumSwingDuration()
    {
       return 0.4;
    }
 
+   /**
+    * Maximum allowable swing duration computed by the solver.
+    */
    public double getMaximumSwingDuration()
    {
       return 10.0;
    }
 
+   /**
+    * Minimum allowable initial transfer duration computed by the solver.
+    */
    public double getMinimumInitialTransferDuration()
    {
       return 0.01;
    }
 
+   /**
+    * Minimum allowable ending transfer duration computed by the solver.
+    */
    public double getMinimumEndTransferDuration()
    {
       return 0.05;
    }
 
+   /**
+    * Minimum allowable initial swing duration computed by the solver.
+    */
    public double getMinimumInitialSwingDuration()
    {
       return 0.15;
    }
 
+   /**
+    * Minimum allowable ending swing duration computed by the solver.
+    */
    public double getMinimumEndSwingDuration()
    {
       return 0.15;

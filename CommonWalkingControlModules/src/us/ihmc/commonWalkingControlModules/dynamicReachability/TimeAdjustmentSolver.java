@@ -24,14 +24,14 @@ public class TimeAdjustmentSolver
 
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
 
-   private final DoubleYoVariable yoMinimumInitialTransferDuration;
-   private final DoubleYoVariable yoMinimumEndTransferDuration;
-   private final DoubleYoVariable yoMinimumInitialSwingDuration;
-   private final DoubleYoVariable yoMinimumEndSwingDuration;
-   private final DoubleYoVariable yoMinimumTransferDuration;
-   private final DoubleYoVariable yoMaximumTransferDuration;
-   private final DoubleYoVariable yoMinimumSwingDuration;
-   private final DoubleYoVariable yoMaximumSwingDuration;
+   private final double minimumInitialTransferDuration;
+   private final double minimumEndTransferDuration;
+   private final double minimumInitialSwingDuration;
+   private final double minimumEndSwingDuration;
+   private final double minimumTransferDuration;
+   private final double maximumTransferDuration;
+   private final double minimumSwingDuration;
+   private final double maximumSwingDuration;
 
    private double desiredParallelAdjustment;
 
@@ -62,29 +62,20 @@ public class TimeAdjustmentSolver
    private int numberOfHigherSteps;
    private int numberOfIterations;
 
-   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry registry)
+   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, DynamicReachabilityParameters dynamicReachabilityParameters)
    {
       this.dynamicReachabilityParameters = dynamicReachabilityParameters;
       this.useHigherOrderSteps = dynamicReachabilityParameters.useHigherOrderSteps();
 
-      yoMinimumInitialTransferDuration = new DoubleYoVariable("minimumInitialTransferDuration", registry);
-      yoMinimumEndTransferDuration = new DoubleYoVariable("minimumEndTransferDuration", registry);
-      yoMinimumInitialSwingDuration = new DoubleYoVariable("minimumInitialSwingDuration", registry);
-      yoMinimumEndSwingDuration = new DoubleYoVariable("minimumEndSwingDuration", registry);
-      yoMinimumTransferDuration = new DoubleYoVariable("minimumTransferDuration", registry);
-      yoMaximumTransferDuration = new DoubleYoVariable("maximumTransferDuration", registry);
-      yoMinimumSwingDuration = new DoubleYoVariable("minimumSwingDuration", registry);
-      yoMaximumSwingDuration = new DoubleYoVariable("maximumSwingDuration", registry);
+      minimumInitialTransferDuration = dynamicReachabilityParameters.getMinimumInitialTransferDuration();
+      minimumEndTransferDuration = dynamicReachabilityParameters.getMinimumEndTransferDuration();
+      minimumInitialSwingDuration = dynamicReachabilityParameters.getMinimumInitialSwingDuration();
+      minimumEndSwingDuration = dynamicReachabilityParameters.getMinimumEndSwingDuration();
 
-      yoMinimumInitialTransferDuration.set(dynamicReachabilityParameters.getMinimumInitialTransferDuration());
-      yoMinimumEndTransferDuration.set(dynamicReachabilityParameters.getMinimumEndTransferDuration());
-      yoMinimumInitialSwingDuration.set(dynamicReachabilityParameters.getMinimumInitialSwingDuration());
-      yoMinimumEndSwingDuration.set(dynamicReachabilityParameters.getMinimumEndSwingDuration());
-
-      yoMinimumTransferDuration.set(dynamicReachabilityParameters.getMinimumTransferDuration());
-      yoMaximumTransferDuration.set(dynamicReachabilityParameters.getMaximumTransferDuration());
-      yoMinimumSwingDuration.set(dynamicReachabilityParameters.getMinimumSwingDuration());
-      yoMaximumSwingDuration.set(dynamicReachabilityParameters.getMaximumSwingDuration());
+      minimumTransferDuration = dynamicReachabilityParameters.getMinimumTransferDuration();
+      maximumTransferDuration = dynamicReachabilityParameters.getMaximumTransferDuration();
+      minimumSwingDuration = dynamicReachabilityParameters.getMinimumSwingDuration();
+      maximumSwingDuration = dynamicReachabilityParameters.getMaximumSwingDuration();
 
       int problemSize = 6 + 2 * (maxNumberOfFootstepsToConsider - 3);
 
@@ -342,11 +333,11 @@ public class TimeAdjustmentSolver
       double initialDuration = alpha * duration;
       double endDuration = (1.0 - alpha) * duration;
 
-      solverInput_Lb.set(currentInitialTransferIndex, 0, yoMinimumInitialTransferDuration.getDoubleValue() - initialDuration);
-      solverInput_Lb.set(currentEndTransferIndex, 0, yoMinimumEndTransferDuration.getDoubleValue() - endDuration);
+      solverInput_Lb.set(currentInitialTransferIndex, 0, minimumInitialTransferDuration - initialDuration);
+      solverInput_Lb.set(currentEndTransferIndex, 0, minimumEndTransferDuration - endDuration);
 
-      solverInput_bin.set(0, 0, -yoMinimumTransferDuration.getDoubleValue() + duration);
-      solverInput_bin.set(3, 0, yoMaximumTransferDuration.getDoubleValue() - duration);
+      solverInput_bin.set(0, 0, -minimumTransferDuration + duration);
+      solverInput_bin.set(3, 0, maximumTransferDuration - duration);
    }
 
    /**
@@ -360,11 +351,11 @@ public class TimeAdjustmentSolver
       double initialDuration = alpha * duration;
       double endDuration = (1.0 - alpha) * duration;
 
-      solverInput_Lb.set(currentInitialSwingIndex, 0, yoMinimumInitialSwingDuration.getDoubleValue() - initialDuration);
-      solverInput_Lb.set(currentEndSwingIndex, 0, yoMinimumEndSwingDuration.getDoubleValue() - endDuration);
+      solverInput_Lb.set(currentInitialSwingIndex, 0, minimumInitialSwingDuration - initialDuration);
+      solverInput_Lb.set(currentEndSwingIndex, 0, minimumEndSwingDuration - endDuration);
 
-      solverInput_bin.set(1, 0, -yoMinimumSwingDuration.getDoubleValue() + duration);
-      solverInput_bin.set(4, 0, yoMaximumSwingDuration.getDoubleValue() - duration);
+      solverInput_bin.set(1, 0, -minimumSwingDuration + duration);
+      solverInput_bin.set(4, 0, maximumSwingDuration - duration);
    }
 
    /**
@@ -378,11 +369,11 @@ public class TimeAdjustmentSolver
       double initialDuration = alpha * duration;
       double endDuration = (1.0 - alpha) * duration;
 
-      solverInput_Lb.set(nextInitialTransferIndex, 0, yoMinimumInitialTransferDuration.getDoubleValue() - initialDuration);
-      solverInput_Lb.set(nextEndTransferIndex, 0, yoMinimumEndTransferDuration.getDoubleValue() - endDuration);
+      solverInput_Lb.set(nextInitialTransferIndex, 0, minimumInitialTransferDuration - initialDuration);
+      solverInput_Lb.set(nextEndTransferIndex, 0, minimumEndTransferDuration - endDuration);
 
-      solverInput_bin.set(2, 0, -yoMinimumTransferDuration.getDoubleValue() + duration);
-      solverInput_bin.set(5, 0, yoMaximumTransferDuration.getDoubleValue() - duration);
+      solverInput_bin.set(2, 0, -minimumTransferDuration + duration);
+      solverInput_bin.set(5, 0, maximumTransferDuration - duration);
    }
 
    /**
@@ -394,7 +385,7 @@ public class TimeAdjustmentSolver
     */
    public void setHigherSwingDuration(int higherIndex, double duration)
    {
-      solverInput_Lb.set(6 + 2 * higherIndex, 0, yoMinimumSwingDuration.getDoubleValue() - duration);
+      solverInput_Lb.set(6 + 2 * higherIndex, 0, minimumSwingDuration - duration);
    }
 
    /**
@@ -407,7 +398,7 @@ public class TimeAdjustmentSolver
     */
    public void setHigherTransferDuration(int higherIndex, double duration)
    {
-      solverInput_Lb.set(7 + 2 * higherIndex, 0, yoMinimumTransferDuration.getDoubleValue() - duration);
+      solverInput_Lb.set(7 + 2 * higherIndex, 0, minimumTransferDuration - duration);
    }
 
    /**
