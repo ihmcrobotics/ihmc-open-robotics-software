@@ -477,7 +477,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * </p>
     * 
     * @param weight dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to a 6-by-1 vector ordered as: {@code angularX},
+    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
     *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
     *           {@code linearZ}. Not modified.
     */
