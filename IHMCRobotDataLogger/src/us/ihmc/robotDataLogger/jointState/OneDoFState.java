@@ -2,7 +2,8 @@ package us.ihmc.robotDataLogger.jointState;
 
 import java.nio.LongBuffer;
 
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
+import us.ihmc.robotDataLogger.JointType;
+
 
 public class OneDoFState extends JointState
 {

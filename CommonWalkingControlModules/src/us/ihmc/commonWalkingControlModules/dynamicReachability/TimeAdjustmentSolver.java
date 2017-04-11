@@ -2,10 +2,11 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
+import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -19,31 +20,20 @@ public class TimeAdjustmentSolver
    private static final int nextInitialTransferIndex = 4;
    private static final int nextEndTransferIndex = 5;
 
-   private static final double minimumInitialTransferDuration = 0.01;
-   private static final double minimumEndTransferDuration = 0.05;
-   private static final double minimumInitialSwingDuration = 0.15;
-   private static final double minimumEndSwingDuration = 0.15;
-
-   private static final double minimumTransferDuration = 0.15;
-   private static final double maximumTransferDuration = 5.0;
-   private static final double minimumSwingDuration = 0.4;
-   private static final double maximumSwingDuration = 10.0;
-
+   private static final boolean useQuadProg = true;
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
+   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
-   private static final double perpendicularWeight = 0.1;
-   private static final double swingAdjustmentWeight = 10.0;
-   private static final double transferAdjustmentWeight = 1.0;
-   private static final double constraintWeight = 1000.0;
+   private final DynamicReachabilityParameters dynamicReachabilityParameters;
 
-   private final DoubleYoVariable yoMinimumInitialTransferDuration;
-   private final DoubleYoVariable yoMinimumEndTransferDuration;
-   private final DoubleYoVariable yoMinimumInitialSwingDuration;
-   private final DoubleYoVariable yoMinimumEndSwingDuration;
-   private final DoubleYoVariable yoMinimumTransferDuration;
-   private final DoubleYoVariable yoMaximumTransferDuration;
-   private final DoubleYoVariable yoMinimumSwingDuration;
-   private final DoubleYoVariable yoMaximumSwingDuration;
+   private final double minimumInitialTransferDuration;
+   private final double minimumEndTransferDuration;
+   private final double minimumInitialSwingDuration;
+   private final double minimumEndSwingDuration;
+   private final double minimumTransferDuration;
+   private final double maximumTransferDuration;
+   private final double minimumSwingDuration;
+   private final double maximumSwingDuration;
 
    private double desiredParallelAdjustment;
 
@@ -65,6 +55,9 @@ public class TimeAdjustmentSolver
    private final DenseMatrix64F solverInput_Ain;
    private final DenseMatrix64F solverInput_bin;
 
+   private final DenseMatrix64F solverInput_Aeq;
+   private final DenseMatrix64F solverInput_beq;
+
    private final DenseMatrix64F solution;
 
    private final boolean useHigherOrderSteps;
@@ -72,29 +65,22 @@ public class TimeAdjustmentSolver
    private int numberOfFootstepsToConsider;
    private int numberOfFootstepsRegistered;
    private int numberOfHigherSteps;
+   private int numberOfIterations;
 
-   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, boolean useHigherOrderSteps, YoVariableRegistry registry)
+   public TimeAdjustmentSolver(int maxNumberOfFootstepsToConsider, DynamicReachabilityParameters dynamicReachabilityParameters)
    {
-      this.useHigherOrderSteps = useHigherOrderSteps;
+      this.dynamicReachabilityParameters = dynamicReachabilityParameters;
+      this.useHigherOrderSteps = dynamicReachabilityParameters.useHigherOrderSteps();
 
-      yoMinimumInitialTransferDuration = new DoubleYoVariable("minimumInitialTransferDuration", registry);
-      yoMinimumEndTransferDuration = new DoubleYoVariable("minimumEndTransferDuration", registry);
-      yoMinimumInitialSwingDuration = new DoubleYoVariable("minimumInitialSwingDuration", registry);
-      yoMinimumEndSwingDuration = new DoubleYoVariable("minimumEndSwingDuration", registry);
-      yoMinimumTransferDuration = new DoubleYoVariable("minimumTransferDuration", registry);
-      yoMaximumTransferDuration = new DoubleYoVariable("maximumTransferDuration", registry);
-      yoMinimumSwingDuration = new DoubleYoVariable("minimumSwingDuration", registry);
-      yoMaximumSwingDuration = new DoubleYoVariable("maximumSwingDuration", registry);
+      minimumInitialTransferDuration = dynamicReachabilityParameters.getMinimumInitialTransferDuration();
+      minimumEndTransferDuration = dynamicReachabilityParameters.getMinimumEndTransferDuration();
+      minimumInitialSwingDuration = dynamicReachabilityParameters.getMinimumInitialSwingDuration();
+      minimumEndSwingDuration = dynamicReachabilityParameters.getMinimumEndSwingDuration();
 
-      yoMinimumInitialTransferDuration.set(minimumInitialTransferDuration);
-      yoMinimumEndTransferDuration.set(minimumEndTransferDuration);
-      yoMinimumInitialSwingDuration.set(minimumInitialSwingDuration);
-      yoMinimumEndSwingDuration.set(minimumEndSwingDuration);
-
-      yoMinimumTransferDuration.set(minimumTransferDuration);
-      yoMaximumTransferDuration.set(maximumTransferDuration);
-      yoMinimumSwingDuration.set(minimumSwingDuration);
-      yoMaximumSwingDuration.set(maximumSwingDuration);
+      minimumTransferDuration = dynamicReachabilityParameters.getMinimumTransferDuration();
+      maximumTransferDuration = dynamicReachabilityParameters.getMaximumTransferDuration();
+      minimumSwingDuration = dynamicReachabilityParameters.getMinimumSwingDuration();
+      maximumSwingDuration = dynamicReachabilityParameters.getMaximumSwingDuration();
 
       int problemSize = 6 + 2 * (maxNumberOfFootstepsToConsider - 3);
 
@@ -106,6 +92,9 @@ public class TimeAdjustmentSolver
 
       solverInput_Ain = new DenseMatrix64F(6, problemSize);
       solverInput_bin = new DenseMatrix64F(6, 1);
+
+      solverInput_Aeq = new DenseMatrix64F(0, problemSize);
+      solverInput_beq = new DenseMatrix64F(0, 1);
 
       solution = new DenseMatrix64F(problemSize, 1);
 
@@ -144,8 +133,8 @@ public class TimeAdjustmentSolver
    }
 
    /**
-    * Resets the size of the problem. Before using this, {@link #numberOfFootstepsRegistered} and {@link #numberOfFootstepsToConsider} must be called,
-    * as this determines the problem size.
+    * Resets the size of the problem. Before using this, {@link #setNumberOfFootstepsToConsider(int)} ()} and {@link #setNumberOfFootstepsRegistered(int)} must
+    * be called, as this determines the problem size.
     */
    public void reshape()
    {
@@ -157,7 +146,7 @@ public class TimeAdjustmentSolver
          problemSize += 2 * numberOfHigherSteps;
       }
 
-      solution.reshape(problemSize, problemSize);
+      solution.reshape(problemSize, 1);
 
       segmentAdjustmentObjective_H.reshape(problemSize, problemSize);
       stepAdjustmentObjective_H.reshape(problemSize, problemSize);
@@ -176,6 +165,9 @@ public class TimeAdjustmentSolver
 
       solverInput_Ain.reshape(6, problemSize);
       solverInput_bin.reshape(6, 1);
+
+      solverInput_Aeq.reshape(0, problemSize);
+      solverInput_beq.reshape(0, 1);
 
       solution.zero();
 
@@ -207,6 +199,20 @@ public class TimeAdjustmentSolver
       {
          return 0;
       }
+   }
+
+   public void zeroInputs()
+   {
+      solution.zero();
+
+      segmentAdjustmentObjective_H.zero();
+      stepAdjustmentObjective_H.zero();
+      perpendicularObjective_H.zero();
+      parallelObjective_H.zero();
+      parallelObjective_h.zero();
+
+      solverInput_H.zero();
+      solverInput_h.zero();
    }
 
    /**
@@ -331,11 +337,11 @@ public class TimeAdjustmentSolver
       double initialDuration = alpha * duration;
       double endDuration = (1.0 - alpha) * duration;
 
-      solverInput_Lb.set(currentInitialTransferIndex, 0, yoMinimumInitialTransferDuration.getDoubleValue() - initialDuration);
-      solverInput_Lb.set(currentEndTransferIndex, 0, yoMinimumEndTransferDuration.getDoubleValue() - endDuration);
+      solverInput_Lb.set(currentInitialTransferIndex, 0, minimumInitialTransferDuration - initialDuration);
+      solverInput_Lb.set(currentEndTransferIndex, 0, minimumEndTransferDuration - endDuration);
 
-      solverInput_bin.set(0, 0, -yoMinimumTransferDuration.getDoubleValue() + duration);
-      solverInput_bin.set(3, 0, yoMaximumTransferDuration.getDoubleValue() - duration);
+      solverInput_bin.set(0, 0, -minimumTransferDuration + duration);
+      solverInput_bin.set(3, 0, maximumTransferDuration - duration);
    }
 
    /**
@@ -349,11 +355,11 @@ public class TimeAdjustmentSolver
       double initialDuration = alpha * duration;
       double endDuration = (1.0 - alpha) * duration;
 
-      solverInput_Lb.set(currentInitialSwingIndex, 0, yoMinimumInitialSwingDuration.getDoubleValue() - initialDuration);
-      solverInput_Lb.set(currentEndSwingIndex, 0, yoMinimumEndSwingDuration.getDoubleValue() - endDuration);
+      solverInput_Lb.set(currentInitialSwingIndex, 0, minimumInitialSwingDuration - initialDuration);
+      solverInput_Lb.set(currentEndSwingIndex, 0, minimumEndSwingDuration - endDuration);
 
-      solverInput_bin.set(1, 0, -yoMinimumSwingDuration.getDoubleValue() + duration);
-      solverInput_bin.set(4, 0, yoMaximumSwingDuration.getDoubleValue() - duration);
+      solverInput_bin.set(1, 0, -minimumSwingDuration + duration);
+      solverInput_bin.set(4, 0, maximumSwingDuration - duration);
    }
 
    /**
@@ -367,11 +373,11 @@ public class TimeAdjustmentSolver
       double initialDuration = alpha * duration;
       double endDuration = (1.0 - alpha) * duration;
 
-      solverInput_Lb.set(nextInitialTransferIndex, 0, yoMinimumInitialTransferDuration.getDoubleValue() - initialDuration);
-      solverInput_Lb.set(nextEndTransferIndex, 0, yoMinimumEndTransferDuration.getDoubleValue() - endDuration);
+      solverInput_Lb.set(nextInitialTransferIndex, 0, minimumInitialTransferDuration - initialDuration);
+      solverInput_Lb.set(nextEndTransferIndex, 0, minimumEndTransferDuration - endDuration);
 
-      solverInput_bin.set(2, 0, -yoMinimumTransferDuration.getDoubleValue() + duration);
-      solverInput_bin.set(5, 0, yoMaximumTransferDuration.getDoubleValue() - duration);
+      solverInput_bin.set(2, 0, -minimumTransferDuration + duration);
+      solverInput_bin.set(5, 0, maximumTransferDuration - duration);
    }
 
    /**
@@ -383,7 +389,7 @@ public class TimeAdjustmentSolver
     */
    public void setHigherSwingDuration(int higherIndex, double duration)
    {
-      solverInput_Lb.set(6 + 2 * higherIndex, 0, yoMinimumSwingDuration.getDoubleValue() - duration);
+      solverInput_Lb.set(6 + 2 * higherIndex, 0, minimumSwingDuration - duration);
    }
 
    /**
@@ -396,7 +402,7 @@ public class TimeAdjustmentSolver
     */
    public void setHigherTransferDuration(int higherIndex, double duration)
    {
-      solverInput_Lb.set(7 + 2 * higherIndex, 0, yoMinimumTransferDuration.getDoubleValue() - duration);
+      solverInput_Lb.set(7 + 2 * higherIndex, 0, minimumTransferDuration - duration);
    }
 
    /**
@@ -414,6 +420,8 @@ public class TimeAdjustmentSolver
     */
    public void compute() throws NoConvergenceException
    {
+      zeroInputs();
+
       // compute objectives
       double scalarCost = computeDesiredAdjustmentObjective();
       computePerpendicularAdjustmentMinimizationObjective();
@@ -430,13 +438,22 @@ public class TimeAdjustmentSolver
       CommonOps.fill(solverInput_Ub, Double.POSITIVE_INFINITY);
       assembleTimingConstraints();
 
-      activeSetSolver.clear();
+      if (!useQuadProg)
+      {
+         activeSetSolver.clear();
 
-      activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, scalarCost);
-      activeSetSolver.setVariableBounds(solverInput_Lb, solverInput_Ub);
-      activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+         activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, scalarCost);
+         activeSetSolver.setVariableBounds(solverInput_Lb, solverInput_Ub);
+         activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
 
-      int numberOfIterations = activeSetSolver.solve(solution);
+         numberOfIterations = activeSetSolver.solve(solution);
+      }
+      else
+      {
+         qpSolver.solve(solverInput_H, solverInput_h, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_Lb, solverInput_Ub,
+               solution, false);
+         numberOfIterations = 1;
+      }
 
       if (MatrixTools.containsNaN(solution))
       {
@@ -447,23 +464,29 @@ public class TimeAdjustmentSolver
 
    private double computeDesiredAdjustmentObjective()
    {
+      double constraintWeight = dynamicReachabilityParameters.getConstraintWeight();
+
       CommonOps.multTransA(parallel_J, parallel_J, parallelObjective_H);
       CommonOps.scale(constraintWeight, parallelObjective_H);
 
       CommonOps.transpose(parallel_J, parallelObjective_h);
-      CommonOps.scale(-2.0 * desiredParallelAdjustment * constraintWeight, parallelObjective_h);
+      CommonOps.scale(-desiredParallelAdjustment * constraintWeight, parallelObjective_h);
 
       return Math.pow(desiredParallelAdjustment, 2.0) * constraintWeight;
    }
 
    private void computePerpendicularAdjustmentMinimizationObjective()
    {
+      double perpendicularWeight = dynamicReachabilityParameters.getPerpendicularWeight();
       CommonOps.multTransA(perpendicular_J, perpendicular_J, perpendicularObjective_H);
       CommonOps.scale(perpendicularWeight, perpendicularObjective_H);
    }
 
    private void computeTimeAdjustmentMinimizationObjective()
    {
+      double transferAdjustmentWeight = dynamicReachabilityParameters.getTransferAdjustmentWeight();
+      double swingAdjustmentWeight = dynamicReachabilityParameters.getSwingAdjustmentWeight();
+
       segmentAdjustmentObjective_H.set(0, 0, transferAdjustmentWeight);
       segmentAdjustmentObjective_H.set(1, 1, transferAdjustmentWeight);
       segmentAdjustmentObjective_H.set(2, 2, swingAdjustmentWeight);
@@ -593,5 +616,10 @@ public class TimeAdjustmentSolver
    public double getHigherTransferAdjustment(int higherIndex)
    {
       return solution.get(nextEndTransferIndex + 2 * (higherIndex + 1), 0);
+   }
+
+   public int getNumberOfIterations()
+   {
+      return numberOfIterations;
    }
 }

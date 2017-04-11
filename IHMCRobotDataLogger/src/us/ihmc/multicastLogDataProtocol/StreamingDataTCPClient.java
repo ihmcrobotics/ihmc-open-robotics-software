@@ -11,7 +11,6 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.robotDataLogger.LogDataHeader;
 
 public class StreamingDataTCPClient extends Thread
@@ -72,7 +71,7 @@ public class StreamingDataTCPClient extends Thread
          Selector selector = Selector.open();
          key = connection.register(selector, SelectionKey.OP_READ);
          ByteBuffer command = ByteBuffer.allocateDirect(2);
-         command.put(LogHandshake.STREAM_REQUEST);
+         command.put(MultiClientStreamingDataTCPServer.STREAM_REQUEST);
          command.put(sendEveryNthTick);
          command.flip();
          connection.write(command);
@@ -168,29 +167,7 @@ public class StreamingDataTCPClient extends Thread
       updateHandler.timeout();
       running = false;
    }
-
-   public LogHandshake getHandshake() throws IOException
-   {
-      SocketChannel connection = SocketChannel.open();
-      connection.connect(address);
-      
-      ByteBuffer command = ByteBuffer.allocateDirect(1);
-      command.put(LogHandshake.HANDSHAKE_REQUEST);
-      command.flip();
-      connection.write(command);
-      connection.configureBlocking(false);
-      
-      Selector selector = Selector.open();
-      SelectionKey key = connection.register(selector, SelectionKey.OP_READ);
-
-      LogHandshake handshake = LogHandshake.read(key);
-      key.cancel();
-      connection.close();
-
-      return handshake;
-
-   }
-
+   
    public boolean isRunning()
    {
       return running;

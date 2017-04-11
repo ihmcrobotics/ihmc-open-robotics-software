@@ -154,4 +154,10 @@ public class RigidBodyUserControlState extends RigidBodyControlState
       return 0.0;
    }
 
+   @Override
+   public void clear()
+   {
+      
+   }
+
 }

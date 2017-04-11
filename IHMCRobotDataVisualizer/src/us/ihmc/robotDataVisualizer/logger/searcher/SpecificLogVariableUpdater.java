@@ -60,20 +60,20 @@ public class SpecificLogVariableUpdater
       int numberOfJointStates = JointState.getNumberOfJointStates(jointStates);
       int bufferSize = (1 + jointStateOffset + numberOfJointStates) * 8;
 
-      File logdata = new File(selectedFile, logProperties.getVariableDataFile());
+      File logdata = new File(selectedFile, logProperties.getVariables().getDataAsString());
       if (!logdata.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getDataAsString());
       }
       this.logChannel = new FileInputStream(logdata).getChannel();
 
-      this.compressed = logProperties.getCompressed();
+      this.compressed = logProperties.getVariables().getCompressed();
       if (this.compressed)
       {
-         File indexData = new File(selectedFile, logProperties.getVariablesIndexFile());
+         File indexData = new File(selectedFile, logProperties.getVariables().getIndexAsString());
          if (!indexData.exists())
          {
-            throw new RuntimeException("Cannot find " + logProperties.getVariablesIndexFile());
+            throw new RuntimeException("Cannot find " + logProperties.getVariables().getIndexAsString());
          }
          logIndex = new LogIndex(indexData, logChannel.size());
          compressedBuffer = ByteBuffer.allocate(SnappyUtils.maxCompressedLength(bufferSize));
