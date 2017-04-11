@@ -24,6 +24,7 @@ public class LogSettings
    public static final LogSettings V2EXO = new LogSettings(true);
    public static final LogSettings MEGABOTS = new LogSettings(true, "MegaBOTSGUI");
    public static final LogSettings FOOTSTEP_PLANNER = new LogSettings(true);
+   public static final LogSettings THOR = new LogSettings(false);
 
    private final boolean log;
    private final String videoStream;
