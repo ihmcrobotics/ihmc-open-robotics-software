@@ -39,9 +39,9 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.forwaypoint.SO3TrajectoryPointCalculator;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelMotionPlanner;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTPlanner1DTimeDomain;

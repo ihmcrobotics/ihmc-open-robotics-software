@@ -1,10 +1,9 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
