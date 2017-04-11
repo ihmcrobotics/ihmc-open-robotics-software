@@ -122,6 +122,7 @@ public abstract class TransferState extends WalkingState
 
       Footstep nextFootstep = walkingMessageHandler.peek(0);
       failureDetectionControlModule.setNextFootstep(nextFootstep);
+      balanceManager.setUpcomingFootstep(nextFootstep);
 
       balanceManager.resetPushRecovery();
 
