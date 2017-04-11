@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -66,7 +67,8 @@ public class RobotArmController implements RobotController
       SPATIAL, LINEAR_ANGULAR_SEPARATE
    };
 
-   private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode = new EnumYoVariable<>("controllerCoreMode", registry, WholeBodyControllerCoreMode.class);
+   private final EnumYoVariable<WholeBodyControllerCoreMode> controllerCoreMode = new EnumYoVariable<>("controllerCoreMode", registry,
+                                                                                                       WholeBodyControllerCoreMode.class);
    private final AtomicBoolean controllerCoreModeHasChanged = new AtomicBoolean(false);
    private final List<ControllerCoreModeChangedListener> controllerModeListeners = new ArrayList<>();
    private final EnumYoVariable<FeedbackControlType> feedbackControlToUse = new EnumYoVariable<>("feedbackControlToUse", registry, FeedbackControlType.class,
@@ -121,8 +123,7 @@ public class RobotArmController implements RobotController
       ControllerCoreOptimizationSettings optimizationSettings = new RobotArmControllerCoreOptimizationSettings();
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
-                                                                                       twistCalculator, optimizationSettings, yoGraphicsListRegistry,
-                                                                                       registry);
+                                                                                       twistCalculator, optimizationSettings, yoGraphicsListRegistry, registry);
 
       if (USE_PRIVILEGED_CONFIGURATION)
          controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
@@ -229,9 +230,11 @@ public class RobotArmController implements RobotController
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
 
-      LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCore.getControllerCoreOutput().getLowLevelOneDoFJointDesiredDataHolder();
+      ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
+      LowLevelOneDoFJointDesiredDataHolderReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
 
-      if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.OFF || controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
+      if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.OFF
+            || controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
          controllerCoreMode.set(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
 
       if (controllerCoreModeHasChanged.getAndSet(false))
