@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -275,7 +276,12 @@ public class ReferenceCentroidalMomentumPivotLocationsCalculator
    public void addUpcomingFootstep(Footstep footstep)
    {
       if (footstep != null)
-         upcomingFootsteps.add(footstep);
+      {
+         if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
+            upcomingFootsteps.add(footstep);
+         else
+            PrintTools.warn(this, "Received bad footstep: " + footstep);
+      }
    }
 
    public int getNumberOfFootstepRegistered()
