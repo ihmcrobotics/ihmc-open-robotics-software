@@ -1,6 +1,4 @@
-package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
-
-import us.ihmc.commons.PrintTools;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 public class SolarPanelLinearPath
 {

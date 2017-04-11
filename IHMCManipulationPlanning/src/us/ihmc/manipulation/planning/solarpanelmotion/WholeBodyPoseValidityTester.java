@@ -1,7 +1,7 @@
 package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
-import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
+import us.ihmc.manipulation.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public abstract class WholeBodyPoseValidityTester
