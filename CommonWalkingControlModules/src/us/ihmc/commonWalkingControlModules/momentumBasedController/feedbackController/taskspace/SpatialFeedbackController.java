@@ -116,32 +116,32 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       isEnabled = new BooleanYoVariable(endEffectorName + "isSpatialFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.DESIRED);
-      yoCurrentPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.CURRENT);
+      yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, Type.DESIRED);
+      yoCurrentPosition = feedbackControllerToolbox.getPosition(endEffector, Type.CURRENT);
 
-      yoDesiredOrientation = feedbackControllerToolbox.getOrCreateOrientation(endEffector, Type.DESIRED);
-      yoCurrentOrientation = feedbackControllerToolbox.getOrCreateOrientation(endEffector, Type.CURRENT);
+      yoDesiredOrientation = feedbackControllerToolbox.getOrientation(endEffector, Type.DESIRED);
+      yoCurrentOrientation = feedbackControllerToolbox.getOrientation(endEffector, Type.CURRENT);
 
-      yoDesiredRotationVector = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ROTATION_VECTOR);
-      yoCurrentRotationVector = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.ROTATION_VECTOR);
+      yoDesiredRotationVector = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.ROTATION_VECTOR);
+      yoCurrentRotationVector = feedbackControllerToolbox.getDataVector(endEffector, Type.CURRENT, Space.ROTATION_VECTOR);
 
-      yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
-      yoDesiredAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_VELOCITY);
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
+      yoDesiredAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.ANGULAR_VELOCITY);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
-         yoCurrentAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.ANGULAR_VELOCITY);
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
+         yoCurrentAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.CURRENT, Space.ANGULAR_VELOCITY);
 
          accelerationControlModule = new RigidBodySpatialAccelerationControlModule(endEffectorName, twistCalculator, endEffector, controlFrame, dt, gains,
                                                                                    registry);
-         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
-         yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
-         yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
+         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
+         yoDesiredLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
+         yoAchievedLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
 
-         yoFeedForwardAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
-         yoDesiredAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.ANGULAR_ACCELERATION);
-         yoAchievedAngularAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.ANGULAR_ACCELERATION);
+         yoFeedForwardAngularAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
+         yoDesiredAngularAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.ANGULAR_ACCELERATION);
+         yoAchievedAngularAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.ACHIEVED, Space.ANGULAR_ACCELERATION);
       }
       else
       {
@@ -160,11 +160,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
-         yoFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
 
-         yoFeedForwardAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
-         yoFeedbackAngularVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDBACK, Space.ANGULAR_VELOCITY);
+         yoFeedForwardAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.ANGULAR_ACCELERATION);
+         yoFeedbackAngularVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, Space.ANGULAR_VELOCITY);
       }
       else
       {

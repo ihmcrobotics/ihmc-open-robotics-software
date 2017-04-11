@@ -79,19 +79,19 @@ public class PointFeedbackController implements FeedbackControllerInterface
       isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.DESIRED);
-      yoCurrentPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.CURRENT);
+      yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, Type.DESIRED);
+      yoCurrentPosition = feedbackControllerToolbox.getPosition(endEffector, Type.CURRENT);
 
-      yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
 
          accelerationControlModule = new RigidBodyLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, controlFrame, dt, gains, registry);
-         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
-         yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
-         yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
+         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
+         yoDesiredLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
+         yoAchievedLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
       }
       else
       {
@@ -105,8 +105,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
-         yoFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
       }
       else
       {
