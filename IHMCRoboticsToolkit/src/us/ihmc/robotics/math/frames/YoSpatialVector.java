@@ -23,65 +23,65 @@ public class YoSpatialVector
    {
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
-      
+
       linearPart = new YoFrameVector(namePrefix + "Linear", nameSuffix, expressedInFrame, registry);
       angularPart = new YoFrameVector(namePrefix + "Angular", nameSuffix, expressedInFrame, registry);
       this.expressedInFrame = expressedInFrame;
    }
-   
+
    public YoSpatialVector(String namePrefix, ReferenceFrame expressedInFrame, YoVariableRegistry registry)
    {
       this(namePrefix, "", expressedInFrame, registry);
    }
-   
+
    public YoSpatialVector(YoFrameVector yoLinearPart, YoFrameVector yoAngularPart)
    {
       yoLinearPart.checkReferenceFrameMatch(yoAngularPart);
 
       this.namePrefix = StringUtils.getCommonPrefix(yoLinearPart.getNamePrefix(), yoAngularPart.getNamePrefix());
       this.nameSuffix = YoFrameVariableNameTools.getCommonSuffix(yoLinearPart.getNameSuffix(), yoAngularPart.getNameSuffix());
-      
+
       this.linearPart = yoLinearPart;
       this.angularPart = yoAngularPart;
       this.expressedInFrame = yoLinearPart.getReferenceFrame();
    }
-   
+
    public void set(YoSpatialVector yoSpacialVector)
    {
-      linearPart.set(yoSpacialVector.getExpressedInFrame(), yoSpacialVector.getLinearPartX(), yoSpacialVector.getLinearPartY(), yoSpacialVector.getLinearPartZ());
-      angularPart.set(yoSpacialVector.getExpressedInFrame(), yoSpacialVector.getAngularPartX(), yoSpacialVector.getAngularPartY(), yoSpacialVector.getAngularPartZ());
+      linearPart.set(yoSpacialVector.linearPart);
+      angularPart.set(yoSpacialVector.angularPart);
    }
-   
+
    public void setLinearPart(Vector3DReadOnly vector3d)
    {
       linearPart.set(vector3d);
    }
-   
+
    public void setLinearPart(FrameVector frameVector)
    {
       linearPart.set(frameVector);
    }
-   
+
    public void setLinearPart(YoFrameVector yoFrameVector)
    {
       linearPart.set(yoFrameVector);
    }
-   
+
    public void setAngularPart(Vector3DReadOnly vector3d)
    {
       angularPart.set(vector3d);
    }
-   
+
    public void setAngularPart(FrameVector frameVector)
    {
       angularPart.set(frameVector);
    }
-   
+
    public void setAngularPart(YoFrameVector yoFrameVector)
    {
       angularPart.set(yoFrameVector);
    }
-   
+
    public void scale(double scaleFactor)
    {
       scaleLinearPart(scaleFactor);
@@ -97,7 +97,7 @@ public class YoSpatialVector
    {
       angularPart.scale(scaleFactor);
    }
-   
+
    public void setToZero()
    {
       linearPart.setToZero();
@@ -113,7 +113,7 @@ public class YoSpatialVector
    {
       return angularPart;
    }
-   
+
    public FrameVector getLinearPart()
    {
       return linearPart.getFrameTuple();
@@ -123,42 +123,48 @@ public class YoSpatialVector
    {
       return angularPart.getFrameTuple();
    }
-   
+
    public void setAndMatchFrameLinearPart(FrameTuple<?, ?> frameVector)
    {
       linearPart.setAndMatchFrame(frameVector);
    }
-   
+
    public void setAndMatchFrameAngularPart(FrameTuple<?, ?> frameVector)
    {
       angularPart.setAndMatchFrame(frameVector);
    }
-   
+
+   public void setAndMatchFrame(FrameTuple<?, ?> linearPart, FrameTuple<?, ?> angularPart)
+   {
+      setAndMatchFrameLinearPart(linearPart);
+      setAndMatchFrameAngularPart(angularPart);
+   }
+
    public double getLinearPartX()
    {
       return linearPart.getX();
    }
-   
+
    public double getLinearPartY()
    {
       return linearPart.getY();
    }
-   
+
    public double getLinearPartZ()
    {
       return linearPart.getZ();
    }
-   
+
    public double getAngularPartX()
    {
       return angularPart.getX();
    }
-   
+
    public double getAngularPartY()
    {
       return angularPart.getY();
    }
-   
+
    public double getAngularPartZ()
    {
       return angularPart.getZ();
