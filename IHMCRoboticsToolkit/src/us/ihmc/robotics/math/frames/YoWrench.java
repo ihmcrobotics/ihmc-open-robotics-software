@@ -12,9 +12,9 @@ public class YoWrench extends YoSpatialVector
    /** Redundant but allows to make sure the frame isn't changed. */
    protected final ReferenceFrame bodyFrame;
    
-   public YoWrench(YoFrameVector yoForce, YoFrameVector yoTorque, ReferenceFrame bodyFrame, ReferenceFrame expressedInFrame)
+   public YoWrench(YoFrameVector yoForce, YoFrameVector yoTorque, ReferenceFrame bodyFrame)
    {
-      super(yoForce, yoTorque, expressedInFrame);
+      super(yoForce, yoTorque);
       this.bodyFrame = bodyFrame;
       this.wrench = createEmptyWrench();
    }
