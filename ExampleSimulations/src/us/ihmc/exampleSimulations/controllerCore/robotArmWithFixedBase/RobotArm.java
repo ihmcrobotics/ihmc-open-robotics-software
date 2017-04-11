@@ -142,6 +142,15 @@ public class RobotArm extends Robot
       PinJoint scsWristRoll = new PinJoint("wristRoll", wristRollOffset, this, Axis.X);
       PinJoint scsWristYaw = new PinJoint("wristYaw", wristYawOffset, this, Axis.Z);
 
+      double b_damp = 0.025;
+      scsShoulderYaw.setDamping(b_damp);
+      scsShoulderRoll.setDamping(b_damp);
+      scsShoulderPitch.setDamping(b_damp);
+      scsElbowPitch.setDamping(b_damp);
+      scsWristPitch.setDamping(b_damp);
+      scsWristRoll.setDamping(b_damp);
+      scsWristYaw.setDamping(b_damp);
+
       Link scsShoulderYawLink = new Link("shoulderYawLink");
       scsShoulderYawLink.setMass(SMALL_MASS);
       scsShoulderYawLink.setMomentOfInertia(createNullMOI());
