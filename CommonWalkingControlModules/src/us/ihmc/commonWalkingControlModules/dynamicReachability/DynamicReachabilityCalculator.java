@@ -24,7 +24,6 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class DynamicReachabilityCalculator
    private static final boolean USE_HIGHER_ORDER_STEPS = false;
    private static final boolean USE_CONSERVATIVE_REQUIRED_ADJUSTMENT = true;
    private static final boolean VISUALIZE = true;
-   private static final double MAXIMUM_DESIRED_KNEE_BEND = 0.2;
+   private static final double MAXIMUM_DESIRED_KNEE_BEND = 0.15;
    private static final double STEP_UP_THRESHOLD = 0.05;
    private static final double STEP_DOWN_THRESHOLD = -0.05;
    private static final int MAXIMUM_NUMBER_OF_ADJUSTMENTS = 10;
@@ -53,11 +52,6 @@ public class DynamicReachabilityCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ExecutionTimer totalTimer = new ExecutionTimer("dynamicReachabilityTotalTimer", 0.5, registry);
-   private final ExecutionTimer tickTimer = new ExecutionTimer("dynamicReachabilityTickTimer", 0.5, registry);
-   private final ExecutionTimer calculationTimer = new ExecutionTimer("dynamicReachabilityCalcTimer", 0.5, registry);
-   private final ExecutionTimer gradientTimer = new ExecutionTimer("gradientCalculationTimer", 0.5, registry);
-   private final ExecutionTimer solverTimer = new ExecutionTimer("solverTimer", 0.5, registry);
    private final DoubleYoVariable requiredAdjustmentSafetyFactor = new DoubleYoVariable("requiredAdjustmentSafetyFactor", registry);
    private final DoubleYoVariable requiredAdjustmentGain = new DoubleYoVariable("requiredAdjustmentGain", registry);
    private final DoubleYoVariable widthOfReachableRegion = new DoubleYoVariable("widthOfReachableRegion", registry);
@@ -524,7 +518,6 @@ public class DynamicReachabilityCalculator
     */
    public void verifyAndEnsureReachability()
    {
-      totalTimer.startMeasurement();
       reset();
 
       // Efficiently checks the reachability by examining if the required heights of the stance hip and step hip overlap, as this determines reachability.
@@ -562,18 +555,13 @@ public class DynamicReachabilityCalculator
          originalTransferDurations.add(icpPlanner.getTransferDuration(numberOfHigherSteps + 1));
          originalTransferAlphas.add(icpPlanner.getTransferDurationAlpha(numberOfHigherSteps + 1));
 
-         gradientTimer.startMeasurement();
          // Compute the gradient associated with adjusting the different time segments.
          computeGradients(numberOfHigherSteps);
          // Submit the gradient information to the solver
          submitGradientInformationToSolver(numberOfHigherSteps);
-         gradientTimer.stopMeasurement();
 
-
-         calculationTimer.startMeasurement();
          while(!isStepReachable)
          { // Start a loop for the solver to find the necessary timing adjustments to achieved the desired CoM adjustment.
-            tickTimer.startMeasurement();
             if (numberOfAdjustments.getIntegerValue() >= maximumNumberOfAdjustments.getIntegerValue() )
                break;
 
@@ -583,7 +571,6 @@ public class DynamicReachabilityCalculator
             requiredParallelCoMAdjustments.get(numberOfAdjustments.getIntegerValue()).set(requiredAdjustment);
 
             // Compute the required timing adjustments to achieved the desired CoM adjustment using the linear approximation of the gradient.
-            solverTimer.startMeasurement();
             try
             {
                solver.compute();
@@ -596,7 +583,6 @@ public class DynamicReachabilityCalculator
                      + "The Timing optimization solver failed on iteration " + numberOfAdjustments.getIntegerValue() + ", so sticking with the last solution.");
                break;
             }
-            solverTimer.stopMeasurement();
 
             // Extract the adjustment solutions from the solver.
             extractTimingSolutionsFromSolver(numberOfHigherSteps);
@@ -630,12 +616,8 @@ public class DynamicReachabilityCalculator
 
             isModifiedStepReachable.set(isStepReachable);
             numberOfAdjustments.increment();
-
-            tickTimer.stopMeasurement();
          }
-         calculationTimer.stopMeasurement();
       }
-      totalTimer.stopMeasurement();
    }
 
    private boolean checkReachabilityInternal()
