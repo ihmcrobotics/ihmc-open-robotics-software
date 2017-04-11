@@ -3,10 +3,10 @@ package us.ihmc.commonWalkingControlModules.dynamicReachability;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
+import us.ihmc.convexOptimization.quadraticProgram.ConstrainedQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolverInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -20,7 +20,9 @@ public class TimeAdjustmentSolver
    private static final int nextInitialTransferIndex = 4;
    private static final int nextEndTransferIndex = 5;
 
+   private static final boolean useQuadProg = true;
    private final SimpleActiveSetQPSolverInterface activeSetSolver = new SimpleEfficientActiveSetQPSolver();
+   private static final ConstrainedQPSolver qpSolver = new QuadProgSolver();
 
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
 
@@ -52,6 +54,9 @@ public class TimeAdjustmentSolver
 
    private final DenseMatrix64F solverInput_Ain;
    private final DenseMatrix64F solverInput_bin;
+
+   private final DenseMatrix64F solverInput_Aeq;
+   private final DenseMatrix64F solverInput_beq;
 
    private final DenseMatrix64F solution;
 
@@ -87,6 +92,9 @@ public class TimeAdjustmentSolver
 
       solverInput_Ain = new DenseMatrix64F(6, problemSize);
       solverInput_bin = new DenseMatrix64F(6, 1);
+
+      solverInput_Aeq = new DenseMatrix64F(0, problemSize);
+      solverInput_beq = new DenseMatrix64F(0, 1);
 
       solution = new DenseMatrix64F(problemSize, 1);
 
@@ -138,7 +146,7 @@ public class TimeAdjustmentSolver
          problemSize += 2 * numberOfHigherSteps;
       }
 
-      solution.reshape(problemSize, problemSize);
+      solution.reshape(problemSize, 1);
 
       segmentAdjustmentObjective_H.reshape(problemSize, problemSize);
       stepAdjustmentObjective_H.reshape(problemSize, problemSize);
@@ -157,6 +165,9 @@ public class TimeAdjustmentSolver
 
       solverInput_Ain.reshape(6, problemSize);
       solverInput_bin.reshape(6, 1);
+
+      solverInput_Aeq.reshape(0, problemSize);
+      solverInput_beq.reshape(0, 1);
 
       solution.zero();
 
@@ -202,13 +213,6 @@ public class TimeAdjustmentSolver
 
       solverInput_H.zero();
       solverInput_h.zero();
-      /*
-      solverInput_Lb.zero();
-      solverInput_Ub.zero();
-
-      solverInput_Ain.zero();
-      solverInput_bin.zero();
-      */
    }
 
    /**
@@ -434,13 +438,22 @@ public class TimeAdjustmentSolver
       CommonOps.fill(solverInput_Ub, Double.POSITIVE_INFINITY);
       assembleTimingConstraints();
 
-      activeSetSolver.clear();
+      if (!useQuadProg)
+      {
+         activeSetSolver.clear();
 
-      activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, scalarCost);
-      activeSetSolver.setVariableBounds(solverInput_Lb, solverInput_Ub);
-      activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
+         activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, scalarCost);
+         activeSetSolver.setVariableBounds(solverInput_Lb, solverInput_Ub);
+         activeSetSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
 
-      numberOfIterations = activeSetSolver.solve(solution);
+         numberOfIterations = activeSetSolver.solve(solution);
+      }
+      else
+      {
+         qpSolver.solve(solverInput_H, solverInput_h, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_Lb, solverInput_Ub,
+               solution, false);
+         numberOfIterations = 1;
+      }
 
       if (MatrixTools.containsNaN(solution))
       {

@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
 import org.junit.Test;
+import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
-import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.tools.exceptions.NoConvergenceException;
@@ -19,9 +19,8 @@ public class TimeAdjustmentSolverTest
    public void testWithoutHigherSteps()
    {
       int maximumNumberOfSteps = 3;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
 
-      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, false, registry);
+      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, new DynamicReachabilityParameters());
 
       solver.setNumberOfFootstepsToConsider(maximumNumberOfSteps);
       solver.setNumberOfFootstepsRegistered(1);
@@ -142,9 +141,8 @@ public class TimeAdjustmentSolverTest
    public void testWithHigherStepsButOutOfBounds()
    {
       int maximumNumberOfSteps = 3;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
 
-      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, true, registry);
+      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, new DynamicReachabilityParameters());
 
       solver.setNumberOfFootstepsToConsider(maximumNumberOfSteps);
       solver.setNumberOfFootstepsRegistered(2);
@@ -265,9 +263,8 @@ public class TimeAdjustmentSolverTest
    public void testWithHigherStepsButNotSubmitted()
    {
       int maximumNumberOfSteps = 4;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
 
-      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, true, registry);
+      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, new DynamicReachabilityParameters());
 
       solver.setNumberOfFootstepsToConsider(maximumNumberOfSteps);
       solver.setNumberOfFootstepsRegistered(2);
@@ -395,9 +392,8 @@ public class TimeAdjustmentSolverTest
    public void testWithHigherSteps()
    {
       int maximumNumberOfSteps = 4;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
 
-      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, true, registry);
+      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, new DynamicReachabilityParameters());
 
       solver.setNumberOfFootstepsToConsider(maximumNumberOfSteps);
       solver.setNumberOfFootstepsRegistered(2);

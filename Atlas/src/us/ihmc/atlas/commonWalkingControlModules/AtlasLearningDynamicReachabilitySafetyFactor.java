@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
@@ -166,8 +167,8 @@ public class AtlasLearningDynamicReachabilitySafetyFactor
       icpPlanner.setOmega0(3.0);
       icpPlanner.setFinalTransferDuration(1.0);
 
-      dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, referenceFrames.getCenterOfMassFrame(), robotRegistry,
-            yoGraphicsListRegistry);
+      dynamicReachabilityCalculator = new DynamicReachabilityCalculator(icpPlanner, fullRobotModel, referenceFrames.getCenterOfMassFrame(),
+            new DynamicReachabilityParameters(), robotRegistry, yoGraphicsListRegistry);
 
       requiredAdjustment = (DoubleYoVariable) robotRegistry.getVariable("requiredParallelCoMAdjustment0");
       achievedAdjustment = (DoubleYoVariable) robotRegistry.getVariable("achievedParallelCoMAdjustment0");
