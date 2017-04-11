@@ -16,6 +16,7 @@ public interface FeedbackControllerDataReadOnly
       FEEDBACK("Feedback"),
       ACHIEVED("Achieved"),
       ERROR("Error"),
+      ERROR_CUMULATED("ErrorCumulated"),
       ERROR_INTEGRATED("ErrorIntegrated");
 
       private final String name;
