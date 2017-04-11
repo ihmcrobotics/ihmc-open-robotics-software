@@ -8,6 +8,7 @@ public class RRTNode1DTimeDomain extends RRTNode
 {
    public static SolarPanelPoseValidityTester nodeValidityTester;
    public static SolarPanelPath cleaningPath;
+   
    /*
     * getNodeData(0) = time getNodeData(1) = pelvisYaw
     */
@@ -22,7 +23,7 @@ public class RRTNode1DTimeDomain extends RRTNode
       super(2);
       super.setNodeData(0, timeK);
       super.setNodeData(1, pelvisYawK);
-   }   
+   }  
    
    @Override
    public boolean isValidNode()

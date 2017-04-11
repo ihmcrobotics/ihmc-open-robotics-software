@@ -94,7 +94,6 @@ public class RRTTree
    public boolean expandTree()
    {
       RRTNode node = getRandomNode();
-      //updateNearNodeForTargetNodeOld(node);
       updateNearNodeForTargetNode(node);
       this.newNode = getNewNode(node);
 
@@ -103,7 +102,6 @@ public class RRTTree
 
    public boolean expandTree(RRTNode node)
    {
-      //updateNearNodeForTargetNodeOld(node);
       updateNearNodeForTargetNode(node);
       this.newNode = getNewNode(node);
       return addNewNode();
@@ -131,75 +129,6 @@ public class RRTTree
       this.nearNode = optNode;
    }
    
-   public void updateNearNodeForTargetNodeOld(RRTNode targetNode)
-   {
-      RRTNode[] nodeOnCurrentLevel;
-      RRTNode[] nodeOnFutureLevel;
-      int currentLevel = 0;
-      int numberOfCurrentLevel = 0;
-      int numberOfFutureLevel = 0;
-      int numberOfSearch = 0;
-
-      RRTNode optNode = this.rootNode;
-      RRTNode curNode = this.rootNode;
-
-      double optMatric = Double.MAX_VALUE;
-      double curMatric = getMatric(targetNode, curNode);
-
-      if (curMatric < optMatric)
-      {
-         optMatric = curMatric;
-         optNode = curNode;
-      }
-
-      numberOfCurrentLevel++;
-      nodeOnCurrentLevel = new RRTNode[numberOfCurrentLevel];
-      nodeOnCurrentLevel[currentLevel] = this.rootNode;
-
-      while (true)
-      {
-         numberOfFutureLevel = 0;
-         for (int i = 0; i < numberOfCurrentLevel; i++)
-         {
-            numberOfFutureLevel = numberOfFutureLevel + nodeOnCurrentLevel[i].getNumberOfChild();
-         }
-
-         if (numberOfFutureLevel == 0)
-         {
-            break;
-         }
-
-         int tempNumber = 0;
-         nodeOnFutureLevel = new RRTNode[numberOfFutureLevel];
-         for (int i = 0; i < numberOfCurrentLevel; i++)
-         {
-            for (int j = 0; j < nodeOnCurrentLevel[i].getNumberOfChild(); j++)
-            {
-               nodeOnFutureLevel[tempNumber + j] = nodeOnCurrentLevel[i].getChildNode(j);
-               curNode = nodeOnFutureLevel[tempNumber + j];
-
-               curMatric = getMatric(targetNode, curNode);
-               if (curMatric < optMatric)
-               {
-                  optMatric = curMatric;
-                  optNode = curNode;
-               }
-               numberOfSearch++;
-            }
-            tempNumber = tempNumber + nodeOnCurrentLevel[i].getNumberOfChild();
-         }
-
-         numberOfCurrentLevel = numberOfFutureLevel;
-         nodeOnCurrentLevel = new RRTNode[numberOfCurrentLevel];
-         for (int i = 0; i < numberOfCurrentLevel; i++)
-         {
-            nodeOnCurrentLevel[i] = nodeOnFutureLevel[i];
-         }
-
-         currentLevel++;
-      }
-      this.nearNode = optNode;
-   }
 
    public RRTNode getNewNode(RRTNode targetNode)
    {
@@ -297,5 +226,82 @@ public class RRTTree
    public ArrayList<RRTNode> getWholeNode()
    {
       return wholeNodes;
+   }
+   
+   
+   
+   
+   /*
+    * will be deleted.
+    */
+
+   public void updateNearNodeForTargetNodeOld(RRTNode targetNode)
+   {
+      RRTNode[] nodeOnCurrentLevel;
+      RRTNode[] nodeOnFutureLevel;
+      int currentLevel = 0;
+      int numberOfCurrentLevel = 0;
+      int numberOfFutureLevel = 0;
+      int numberOfSearch = 0;
+
+      RRTNode optNode = this.rootNode;
+      RRTNode curNode = this.rootNode;
+
+      double optMatric = Double.MAX_VALUE;
+      double curMatric = getMatric(targetNode, curNode);
+
+      if (curMatric < optMatric)
+      {
+         optMatric = curMatric;
+         optNode = curNode;
+      }
+
+      numberOfCurrentLevel++;
+      nodeOnCurrentLevel = new RRTNode[numberOfCurrentLevel];
+      nodeOnCurrentLevel[currentLevel] = this.rootNode;
+
+      while (true)
+      {
+         numberOfFutureLevel = 0;
+         for (int i = 0; i < numberOfCurrentLevel; i++)
+         {
+            numberOfFutureLevel = numberOfFutureLevel + nodeOnCurrentLevel[i].getNumberOfChild();
+         }
+
+         if (numberOfFutureLevel == 0)
+         {
+            break;
+         }
+
+         int tempNumber = 0;
+         nodeOnFutureLevel = new RRTNode[numberOfFutureLevel];
+         for (int i = 0; i < numberOfCurrentLevel; i++)
+         {
+            for (int j = 0; j < nodeOnCurrentLevel[i].getNumberOfChild(); j++)
+            {
+               nodeOnFutureLevel[tempNumber + j] = nodeOnCurrentLevel[i].getChildNode(j);
+               curNode = nodeOnFutureLevel[tempNumber + j];
+
+               curMatric = getMatric(targetNode, curNode);
+               if (curMatric < optMatric)
+               {
+                  optMatric = curMatric;
+                  optNode = curNode;
+               }
+               numberOfSearch++;
+            }
+            tempNumber = tempNumber + nodeOnCurrentLevel[i].getNumberOfChild();
+         }
+
+         numberOfCurrentLevel = numberOfFutureLevel;
+         nodeOnCurrentLevel = new RRTNode[numberOfCurrentLevel];
+         for (int i = 0; i < numberOfCurrentLevel; i++)
+         {
+            nodeOnCurrentLevel[i] = nodeOnFutureLevel[i];
+         }
+
+         currentLevel++;
+      }
+      this.nearNode = optNode;
    }
 }

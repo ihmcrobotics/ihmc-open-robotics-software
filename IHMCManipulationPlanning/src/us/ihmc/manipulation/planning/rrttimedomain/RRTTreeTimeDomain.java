@@ -11,8 +11,8 @@ public class RRTTreeTimeDomain extends RRTTree
    protected double motionTime;
    protected double timeScaleForMatric = 0.5;
 
-   protected double maximumDisplacementOfStep = 0.3;   
-   protected double maximumTimeGapOfStep = 0.3;
+   protected double maximumDisplacementOfStep = 0.4;   
+   protected double maximumTimeGapOfStep = 0.4;
 
    public RRTTreeTimeDomain(RRTNode rootNode)
    {
