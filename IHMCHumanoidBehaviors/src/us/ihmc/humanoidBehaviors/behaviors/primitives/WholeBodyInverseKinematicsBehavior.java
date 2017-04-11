@@ -294,6 +294,8 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
+
+      System.out.println("init whole body behavior");
       isPaused.set(false);
       isStopped.set(false);
       isDone.set(false);

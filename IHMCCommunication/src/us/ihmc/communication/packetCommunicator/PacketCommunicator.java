@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.net.GlobalObjectConsumer;
 import us.ihmc.communication.net.KryoObjectClient;
 import us.ihmc.communication.net.KryoObjectServer;
