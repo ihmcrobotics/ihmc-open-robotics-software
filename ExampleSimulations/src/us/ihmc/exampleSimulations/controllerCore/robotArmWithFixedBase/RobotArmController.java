@@ -24,7 +24,8 @@ import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajecto
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.controllers.SE3PIDGainsInterface;
+import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
+import us.ihmc.robotics.controllers.PositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSymmetricSE3PIDGains;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -78,7 +79,8 @@ public class RobotArmController implements RobotController
    private final WholeBodyControllerCore controllerCore;
 
    private final DoubleYoVariable handWeight = new DoubleYoVariable("handWeight", registry);
-   private final YoSymmetricSE3PIDGains handGains = new YoSymmetricSE3PIDGains("hand", registry);
+   private final YoSymmetricSE3PIDGains handPositionGains = new YoSymmetricSE3PIDGains("handPosition", registry);
+   private final YoSymmetricSE3PIDGains handOrientationGains = new YoSymmetricSE3PIDGains("handOrientation", registry);
    private final YoFramePoint handTargetPosition = new YoFramePoint("handTarget", worldFrame, registry);
 
    private final YoFrameOrientation handTargetOrientation = new YoFrameOrientation("handTarget", worldFrame, registry);
@@ -160,9 +162,14 @@ public class RobotArmController implements RobotController
       robotArm.updateIDRobot();
 
       handWeight.set(1.0);
-      handGains.setProportionalGain(100.0);
-      handGains.setDampingRatio(1.0);
-      handGains.createDerivativeGainUpdater(true);
+
+      handPositionGains.setProportionalGain(100.0);
+      handPositionGains.setDampingRatio(1.0);
+      handPositionGains.createDerivativeGainUpdater(true);
+
+      handOrientationGains.setProportionalGain(100.0);
+      handOrientationGains.setDampingRatio(1.0);
+      handOrientationGains.createDerivativeGainUpdater(true);
 
       FramePoint initialPosition = new FramePoint(robotArm.getHandControlFrame());
       initialPosition.changeFrame(worldFrame);
@@ -245,18 +252,19 @@ public class RobotArmController implements RobotController
 
       handPointCommand.setBodyFixedPointToControl(controlFramePose.getFramePointCopy());
       handPointCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handPointCommand.setGains(handGains);
+      handPointCommand.setGains(handPositionGains);
       handPointCommand.setSelectionMatrix(computeLinearSelectionMatrix());
       handPointCommand.set(position, linearVelocity, linearAcceleration);
 
       handOrientationCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handOrientationCommand.setGains(handGains);
+      handOrientationCommand.setGains(handOrientationGains);
       handOrientationCommand.setSelectionMatrix(computeAngularSelectionMatrix());
       handOrientationCommand.set(orientation, angularVelocity, angularAcceleration);
 
       handSpatialCommand.setControlFrameFixedInEndEffector(controlFramePose);
       handSpatialCommand.setWeightForSolver(handWeight.getDoubleValue());
-      handSpatialCommand.setGains((SE3PIDGainsInterface) handGains);
+      handSpatialCommand.setGains((PositionPIDGainsInterface) handPositionGains);
+      handSpatialCommand.setGains((OrientationPIDGainsInterface) handOrientationGains);
       handSpatialCommand.setSelectionMatrix(computeSpatialSelectionMatrix());
       handSpatialCommand.set(position, linearVelocity, linearAcceleration);
       handSpatialCommand.set(orientation, angularVelocity, angularAcceleration);
