@@ -43,8 +43,8 @@ public class UniversalJointRobot extends RobotWithClosedFormDynamics
       if(Math.abs(Math.cos(qy)) < 1e-4)
          return;
 
-      double qddxLagrangian = - (mass * g * Math.sin(qx)) / (length * Math.cos(qy));
-      double qddyLagrangian = - (mass * g * Math.cos(qx) * Math.sin(qy)) / length;
+      double qddxLagrangian = - (g * Math.sin(qx)) / (length * Math.cos(qy));
+      double qddyLagrangian = - (g * Math.cos(qx) * Math.sin(qy)) / length;
 
       if(Math.abs(qddxLagrangian - qddx) > epsilon || Math.abs(qddyLagrangian - qddy) > epsilon)
       {
