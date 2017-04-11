@@ -4,7 +4,15 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.RotationTools;
 
-public class MidFrameZUpAverageYawFrame extends ReferenceFrame
+/**
+ * This is a common reference frame for humanoids with parent frame world. It is created with
+ * two reference frames and will be updated to be a z-up frame with the average yaw of the
+ * original frames. The z-position of the frame will be at the lower given frame. The x and y
+ * position will be located in the middle between the original frames.
+ *
+ * @author Georg
+ */
+public class MidFootZUpGroundFrame extends ReferenceFrame
 {
    private static final long serialVersionUID = -8299445128076938283L;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -14,7 +22,7 @@ public class MidFrameZUpAverageYawFrame extends ReferenceFrame
    private final FramePose poseOne = new FramePose();
    private final FramePose poseTwo = new FramePose();
 
-   public MidFrameZUpAverageYawFrame(String name, ReferenceFrame frameOne, ReferenceFrame frameTwo)
+   public MidFootZUpGroundFrame(String name, ReferenceFrame frameOne, ReferenceFrame frameTwo)
    {
       super(name, worldFrame, false, false, true);
       this.frameOne = frameOne;

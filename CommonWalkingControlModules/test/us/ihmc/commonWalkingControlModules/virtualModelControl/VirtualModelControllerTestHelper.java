@@ -67,8 +67,8 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 
 public class VirtualModelControllerTestHelper
 {
@@ -684,22 +684,26 @@ public class VirtualModelControllerTestHelper
          return scsRobotArm;
       }
 
+      @Override
       public RobotSpecificJointNames getRobotSpecificJointNames()
       {
          return null;
       }
 
+      @Override
       public void updateFrames()
       {
          worldFrame.update();
          elevator.updateFramesRecursively();
       }
 
+      @Override
       public ReferenceFrame getWorldFrame()
       {
          return worldFrame;
       }
 
+      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
@@ -720,11 +724,13 @@ public class VirtualModelControllerTestHelper
          return upperArm.getParentJoint();
       }
 
+      @Override
       public SixDoFJoint getRootJoint()
       {
          return null;
       }
 
+      @Override
       public RigidBody getElevator()
       {
          return elevator;
@@ -735,41 +741,49 @@ public class VirtualModelControllerTestHelper
          return hand;
       }
 
+      @Override
       public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
 
+      @Override
       public InverseDynamicsJoint getLidarJoint(String lidarName)
       {
          return null;
       }
 
+      @Override
       public RigidBody getPelvis()
       {
          return null;
       }
 
+      @Override
       public RigidBody getChest()
       {
          return null;
       }
 
+      @Override
       public RigidBody getHead()
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
+      @Override
       public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
@@ -778,16 +792,19 @@ public class VirtualModelControllerTestHelper
             oneDoFJointsToPack.set(i, list.get(i));
       }
 
+      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
       }
 
+      @Override
       public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return null;
       }
 
+      @Override
       public ContactSensorDefinition[] getContactSensorDefinitions()
       {
          return null;
@@ -1003,22 +1020,26 @@ public class VirtualModelControllerTestHelper
          return scsRobotArm;
       }
 
+      @Override
       public RobotSpecificJointNames getRobotSpecificJointNames()
       {
          return null;
       }
 
+      @Override
       public void updateFrames()
       {
          worldFrame.update();
          elevator.updateFramesRecursively();
       }
 
+      @Override
       public ReferenceFrame getWorldFrame()
       {
          return worldFrame;
       }
 
+      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
@@ -1039,11 +1060,13 @@ public class VirtualModelControllerTestHelper
          return shoulderDifferentialYaw.getParentJoint();
       }
 
+      @Override
       public SixDoFJoint getRootJoint()
       {
          return null;
       }
 
+      @Override
       public RigidBody getElevator()
       {
          return elevator;
@@ -1054,41 +1077,49 @@ public class VirtualModelControllerTestHelper
          return hand;
       }
 
+      @Override
       public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
 
+      @Override
       public InverseDynamicsJoint getLidarJoint(String lidarName)
       {
          return null;
       }
 
+      @Override
       public RigidBody getPelvis()
       {
          return null;
       }
 
+      @Override
       public RigidBody getChest()
       {
          return null;
       }
 
+      @Override
       public RigidBody getHead()
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
+      @Override
       public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
@@ -1097,16 +1128,19 @@ public class VirtualModelControllerTestHelper
             oneDoFJointsToPack.set(i, list.get(i));
       }
 
+      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
       }
 
+      @Override
       public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return null;
       }
 
+      @Override
       public ContactSensorDefinition[] getContactSensorDefinitions()
       {
          return null;
@@ -1386,22 +1420,26 @@ public class VirtualModelControllerTestHelper
          return scsRobotArm;
       }
 
+      @Override
       public RobotSpecificJointNames getRobotSpecificJointNames()
       {
          return null;
       }
 
+      @Override
       public void updateFrames()
       {
          worldFrame.update();
          elevator.updateFramesRecursively();
       }
 
+      @Override
       public ReferenceFrame getWorldFrame()
       {
          return worldFrame;
       }
 
+      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
@@ -1422,11 +1460,13 @@ public class VirtualModelControllerTestHelper
          return shoulderDifferentialYaw.getParentJoint();
       }
 
+      @Override
       public SixDoFJoint getRootJoint()
       {
          return null;
       }
 
+      @Override
       public RigidBody getElevator()
       {
          return elevator;
@@ -1441,41 +1481,49 @@ public class VirtualModelControllerTestHelper
       {
          return hands;
       }
+      @Override
       public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
 
+      @Override
       public InverseDynamicsJoint getLidarJoint(String lidarName)
       {
          return null;
       }
 
+      @Override
       public RigidBody getPelvis()
       {
          return null;
       }
 
+      @Override
       public RigidBody getChest()
       {
          return null;
       }
 
+      @Override
       public RigidBody getHead()
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
+      @Override
       public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
@@ -1484,16 +1532,19 @@ public class VirtualModelControllerTestHelper
             oneDoFJointsToPack.set(i, list.get(i));
       }
 
+      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
       }
 
+      @Override
       public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return null;
       }
 
+      @Override
       public ContactSensorDefinition[] getContactSensorDefinitions()
       {
          return null;
@@ -1762,22 +1813,26 @@ public class VirtualModelControllerTestHelper
          return scsRobotArm;
       }
 
+      @Override
       public RobotSpecificJointNames getRobotSpecificJointNames()
       {
          return null;
       }
 
+      @Override
       public void updateFrames()
       {
          worldFrame.update();
          elevator.updateFramesRecursively();
       }
 
+      @Override
       public ReferenceFrame getWorldFrame()
       {
          return worldFrame;
       }
 
+      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevatorFrame;
@@ -1798,11 +1853,13 @@ public class VirtualModelControllerTestHelper
          return upperArm.getParentJoint();
       }
 
+      @Override
       public SixDoFJoint getRootJoint()
       {
          return null;
       }
 
+      @Override
       public RigidBody getElevator()
       {
          return elevator;
@@ -1817,41 +1874,49 @@ public class VirtualModelControllerTestHelper
       {
          return hands;
       }
+      @Override
       public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
 
+      @Override
       public InverseDynamicsJoint getLidarJoint(String lidarName)
       {
          return null;
       }
 
+      @Override
       public RigidBody getPelvis()
       {
          return null;
       }
 
+      @Override
       public RigidBody getChest()
       {
          return null;
       }
 
+      @Override
       public RigidBody getHead()
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint[] getOneDoFJoints()
       {
          return oneDoFJoints;
       }
 
+      @Override
       public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
          List<OneDoFJoint> list = Arrays.asList(oneDoFJoints);
@@ -1860,16 +1925,19 @@ public class VirtualModelControllerTestHelper
             oneDoFJointsToPack.set(i, list.get(i));
       }
 
+      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
       }
 
+      @Override
       public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return null;
       }
 
+      @Override
       public ContactSensorDefinition[] getContactSensorDefinitions()
       {
          return null;
@@ -2051,6 +2119,7 @@ public class VirtualModelControllerTestHelper
          super(name);
       }
 
+      @Override
       public void updateFrames()
       {
          worldFrame.update();
@@ -2116,66 +2185,79 @@ public class VirtualModelControllerTestHelper
          referenceFrames = new LegReferenceFrames(pelvis, elevator, feet, soleFrames);
       }
 
+      @Override
       public RobotSpecificJointNames getRobotSpecificJointNames()
       {
          return null;
       }
 
+      @Override
       public ReferenceFrame getWorldFrame()
       {
          return worldFrame;
       }
 
+      @Override
       public ReferenceFrame getElevatorFrame()
       {
          return elevator.getBodyFixedFrame();
       }
 
+      @Override
       public SixDoFJoint getRootJoint()
       {
          return rootJoint;
       }
 
+      @Override
       public RigidBody getElevator()
       {
          return elevator;
       }
 
+      @Override
       public OneDoFJoint getSpineJoint(SpineJointName spineJointName)
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint getNeckJoint(NeckJointName neckJointName)
       {
          return null;
       }
 
+      @Override
       public InverseDynamicsJoint getLidarJoint(String lidarName)
       {
          return null;
       }
 
+      @Override
       public RigidBody getPelvis()
       {
          return pelvis;
       }
 
+      @Override
       public RigidBody getChest()
       {
          return null;
       }
 
+      @Override
       public RigidBody getHead()
       {
          return null;
       }
 
+      @Override
       public OneDoFJoint[] getOneDoFJoints()
       {
          return joints;
       }
 
+      @Override
       public void getOneDoFJoints(ArrayList<OneDoFJoint> oneDoFJointsToPack)
       {
          oneDoFJointsToPack.clear();
@@ -2183,16 +2265,19 @@ public class VirtualModelControllerTestHelper
             oneDoFJointsToPack.add(joint);
       }
 
+      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
       }
 
+      @Override
       public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return null;
       }
 
+      @Override
       public ContactSensorDefinition[] getContactSensorDefinitions()
       {
          return null;
@@ -2313,6 +2398,7 @@ public class VirtualModelControllerTestHelper
          }
       }
 
+      @Override
       public void updateFrames()
       {
          centerOfMassFrame.update();
@@ -2323,87 +2409,109 @@ public class VirtualModelControllerTestHelper
          }
       }
 
+      @Override
       public ReferenceFrame getABodyAttachedZUpFrame()
       {
          return null;
       }
 
+      @Override
       public ReferenceFrame getMidFeetZUpFrame()
       {
          return null;
       }
 
+      @Override
       public ReferenceFrame getMidFeetUnderPelvisFrame()
       {
          return null;
       }
 
+      @Override
+      public ReferenceFrame getMidFootZUpGroundFrame()
+      {
+         return null;
+      }
 
+      @Override
       public SideDependentList<ReferenceFrame> getAnkleZUpReferenceFrames()
       {
          return null;
       }
 
+      @Override
       public SideDependentList<ReferenceFrame> getFootReferenceFrames()
       {
          return footReferenceFrames;
       }
 
+      @Override
       public SideDependentList<ReferenceFrame> getSoleFrames()
       {
          return soleReferenceFrames;
       }
 
+      @Override
       public ReferenceFrame getPelvisFrame()
       {
          return pelvisFrame;
       }
 
+      @Override
       public ReferenceFrame getAnkleZUpFrame(RobotSide robotSide)
       {
          return null;
       }
 
+      @Override
       public ReferenceFrame getFootFrame(RobotSide robotSide)
       {
          return footReferenceFrames.get(robotSide);
       }
 
+      @Override
       public ReferenceFrame getLegJointFrame(RobotSide robotSide, LegJointName legJointName)
       {
          return null;
       }
 
+      @Override
       public EnumMap<LegJointName, ReferenceFrame> getLegJointFrames(RobotSide robotSide)
       {
          return null;
       }
 
+      @Override
       public ReferenceFrame getIMUFrame()
       {
          return null;
       }
 
+      @Override
       public ReferenceFrame getCenterOfMassFrame()
       {
          return centerOfMassFrame;
       }
 
+      @Override
       public ReferenceFrame getPelvisZUpFrame()
       {
          return null;
       }
 
+      @Override
       public ReferenceFrame getSoleFrame(RobotSide robotSide)
       {
          return soleReferenceFrames.get(robotSide);
       }
 
+      @Override
       public ReferenceFrame getSoleZUpFrame(RobotSide robotSide)
       {
          return null;
       }
 
+      @Override
       public SideDependentList<ReferenceFrame> getSoleZUpFrames()
       {
          return null;
@@ -2574,6 +2682,7 @@ public class VirtualModelControllerTestHelper
          hasInitialForce = true;
       }
 
+      @Override
       public void initialize()
       {
          if (!hasInitialForce)
@@ -2588,6 +2697,7 @@ public class VirtualModelControllerTestHelper
          pidControllerLinearZ.resetIntegrator();
       }
 
+      @Override
       public void doControl()
       {
          currentPose.setToZero(handFrame);
@@ -2677,16 +2787,19 @@ public class VirtualModelControllerTestHelper
          return currentOrientation;
       }
 
+      @Override
       public String getName()
       {
          return "robotArmController";
       }
 
+      @Override
       public String getDescription()
       {
          return getName();
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
@@ -2734,12 +2847,14 @@ public class VirtualModelControllerTestHelper
             registry.addChild(forcePointController.getYoVariableRegistry());
       }
 
+      @Override
       public void initialize()
       {
          for (ForcePointController forcePointController : forcePointControllers)
             forcePointController.initialize();
       }
 
+      @Override
       public void doControl()
       {
          // copy from scs
@@ -2805,16 +2920,19 @@ public class VirtualModelControllerTestHelper
          return forcePointControllers.get(index).getCurrentTorque();
       }
 
+      @Override
       public String getName()
       {
          return "robotArmController";
       }
 
+      @Override
       public String getDescription()
       {
          return getName();
       }
 
+      @Override
       public YoVariableRegistry getYoVariableRegistry()
       {
          return registry;
