@@ -1,17 +1,10 @@
 package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
-import us.ihmc.manipulation.planning.robotcollisionmodel.CollisionModelBox;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.manipulation.robotcollisionmodel.CollisionModelBox;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
