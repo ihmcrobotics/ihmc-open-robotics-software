@@ -164,7 +164,7 @@ public class AxisAngleOrientationController
 
       // Limit the maximum position error considered for control action
       double maximumError = gains.getMaximumProportionalError();
-      if (errorAngleAxis.getAngle() > maximumError)
+      if (Math.abs(errorAngleAxis.getAngle()) > maximumError)
       {
          errorAngleAxis.setAngle(Math.signum(errorAngleAxis.getAngle()) * maximumError);
       }

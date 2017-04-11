@@ -12,6 +12,7 @@ import us.ihmc.euclid.axisAngle.interfaces.AxisAngleReadOnly;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -21,6 +22,8 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 // Note: You should only make these once at the initialization of a controller. You shouldn't make
@@ -166,6 +169,67 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
       setFromReferenceFrame(referenceFrame, true);
    }
 
+   /**
+    * Sets this quaternion to the same orientation described by the given rotation vector
+    * {@code rotationVector}.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param rotation vector the rotation vector used to set this {@code YoFrameQuaternion}. Not
+    *           modified.
+    */
+   public void setRotationVector(Vector3DReadOnly rotationVector)
+   {
+      frameOrientation.setToZero(getReferenceFrame());
+      frameOrientation.setRotationVector(rotationVector);
+      getYoValuesFromFrameOrientation();
+   }
+
+   /**
+    * Sets this quaternion to the same orientation described by the given rotation vector
+    * {@code rotationVector}.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param rotation vector the rotation vector used to set this {@code YoFrameQuaternion}. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@code this.referenceFrame}.
+    */
+   public void setRotationVector(FrameVector rotationVector)
+   {
+      frameOrientation.setToZero(getReferenceFrame());
+      frameOrientation.setRotationVector(rotationVector);
+      getYoValuesFromFrameOrientation();
+   }
+
+   /**
+    * Sets this quaternion to the same orientation described by the given rotation vector
+    * {@code rotationVector}.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param rotation vector the rotation vector used to set this {@code YoFrameQuaternion}. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@code this.referenceFrame}.
+    */
+   public void setRotationVector(YoFrameVector rotationVector)
+   {
+      frameOrientation.setToZero(getReferenceFrame());
+      frameOrientation.setRotationVector(rotationVector.getFrameTuple());
+      getYoValuesFromFrameOrientation();
+   }
+
    public void get(QuaternionBasics quaternionToPack)
    {
       putYoValuesIntoFrameOrientation();
@@ -282,10 +346,12 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
    }
 
    /**
-    * Method used to concatenate the orientation represented by this YoFrameQuaternion and the
-    * orientation represented by the FrameOrientation.
-    * 
-    * @param quaternion
+    * Multiplies this quaternion by {@code quaternion}.
+    * <p>
+    * this = this * quaternion
+    * </p>
+    *
+    * @param quaternion the other quaternion to multiply this. Not modified.
     */
    public void multiply(Quaternion quaternion)
    {
@@ -295,15 +361,32 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
    }
 
    /**
-    * Method used to concatenate the orientation represented by this YoFrameQuaternion and the
-    * orientation represented by the FrameOrientation.
-    * 
-    * @param frameOrientation
+    * Multiplies this quaternion by {@code frameOrientation}.
+    * <p>
+    * this = this * frameOrientation.quaternion
+    * </p>
+    *
+    * @param frameOrientation the frame orientation to multiply this. Not modified.
     */
    public void multiply(FrameOrientation frameOrientation)
    {
       putYoValuesIntoFrameOrientation();
       this.frameOrientation.multiply(frameOrientation);
+      getYoValuesFromFrameOrientation();
+   }
+
+   /**
+    * Multiplies this quaternion by {@code other}.
+    * <p>
+    * this = this * other
+    * </p>
+    *
+    * @param other the quaternion to multiply this. Not modified.
+    */
+   public void multiply(YoFrameQuaternion other)
+   {
+      putYoValuesIntoFrameOrientation();
+      this.frameOrientation.multiply(other.getFrameOrientation());
       getYoValuesFromFrameOrientation();
    }
 
@@ -315,7 +398,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
    }
 
    /**
-    * Compute the dot product between this quaternion and the orhter quaternion: this . other = qx *
+    * Compute the dot product between this quaternion and the other quaternion: this . other = qx *
     * other.qx + qy * other.qy + qz * other.qz + qs * other.qs.
     * 
     * @param other
