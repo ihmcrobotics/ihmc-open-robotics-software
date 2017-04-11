@@ -2,11 +2,13 @@ package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -270,6 +272,25 @@ public class RobotArm extends Robot
          pair.getLeft().setQd(pair.getRight().getQD());
       }
       elevator.updateFramesRecursively();
+   }
+
+   public void setRandomConfiguration()
+   {
+      Random random = new Random();
+
+      for (Pair<OneDoFJoint, OneDegreeOfFreedomJoint> pair : idToSCSJointPairs)
+      {
+         OneDegreeOfFreedomJoint joint = pair.getRight();
+         
+         double lowerLimit = joint.getJointLowerLimit();
+         if (!Double.isFinite(lowerLimit))
+            lowerLimit = - Math.PI;
+         double upperLimit = joint.getJointUpperLimit();
+         if (!Double.isFinite(upperLimit))
+            upperLimit = Math.PI;
+         
+         joint.setQ(RandomNumbers.nextDouble(random, lowerLimit, upperLimit));
+      }
    }
 
    public RigidBody getElevator()
