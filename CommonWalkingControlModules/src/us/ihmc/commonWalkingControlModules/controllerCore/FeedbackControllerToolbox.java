@@ -17,9 +17,11 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -37,6 +39,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    private final Map<RigidBody, EnumMap<Type, YoFramePoint>> endEffectorPositions = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, YoFrameQuaternion>> endEffectorOrientations = new HashMap<>();
    private final Map<RigidBody, EnumMap<Type, EnumMap<Space, YoFrameVector>>> endEffectorDataVectors = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Space, RateLimitedYoFrameVector>> endEffectorRateLimitedDataVectors = new HashMap<>();
 
    private final Map<RigidBody, YoOrientationPIDGainsInterface> endEffectorOrientationGains = new HashMap<>();
    private final Map<RigidBody, YoPositionPIDGainsInterface> endEffectorPositionGains = new HashMap<>();
@@ -129,6 +132,33 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       }
 
       return yoFrameVector;
+   }
+
+   public RateLimitedYoFrameVector getRateLimitedDataVector(RigidBody endEffector, Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate)
+   {
+      EnumMap<Space, RateLimitedYoFrameVector> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
+
+      if (endEffectorDataVectors == null)
+      {
+         endEffectorDataVectors = new EnumMap<>(Space.class);
+         endEffectorRateLimitedDataVectors.put(endEffector, endEffectorDataVectors);
+      }
+
+      RateLimitedYoFrameVector rateLimitedYoFrameVector = endEffectorDataVectors.get(space);
+      YoFrameVector rawYoFrameVector = getOrCreateDataVector(endEffector, rawDataType, space);
+
+      if (rateLimitedYoFrameVector == null)
+      {
+         String namePrefix = endEffector.getName();
+         namePrefix += "RateLimited";
+         namePrefix += rawDataType.getName();
+         namePrefix += space.getName();
+         rateLimitedYoFrameVector = RateLimitedYoFrameVector.createRateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
+         endEffectorDataVectors.put(space, rateLimitedYoFrameVector);
+         clearableData.add(rateLimitedYoFrameVector);
+      }
+
+      return rateLimitedYoFrameVector;
    }
 
    public YoOrientationPIDGainsInterface getOrientationGains(RigidBody endEffector)

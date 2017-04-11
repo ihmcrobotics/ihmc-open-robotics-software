@@ -15,15 +15,17 @@ public interface FeedbackControllerDataReadOnly
       FEEDFORWARD("FeedForward"),
       FEEDBACK("Feedback"),
       ACHIEVED("Achieved"),
-      ERROR("Error");
-   
+      ERROR("Error"),
+      ERROR_CUMULATED("ErrorCumulated"),
+      ERROR_INTEGRATED("ErrorIntegrated");
+
       private final String name;
-   
+
       private Type(String name)
       {
          this.name = name;
       }
-   
+
       public String getName()
       {
          return name;
@@ -39,19 +41,19 @@ public interface FeedbackControllerDataReadOnly
       ANGULAR_VELOCITY("AngularVelocity"),
       LINEAR_ACCELERATION("LinearAcceleration"),
       ANGULAR_ACCELERATION("AngularAcceleration");
-   
+
       private final String name;
-   
+
       private Space(String name)
       {
          this.name = name;
       }
-   
+
       public String getName()
       {
          return name;
       }
-   
+
       @Override
       public String toString()
       {
@@ -62,12 +64,15 @@ public interface FeedbackControllerDataReadOnly
    /**
     * Retrieves if possible the position data about a specific end-effector.
     * <p>
-    * If no feedback controller has used the requested data, it will not be available in which case the method returns {@code false}.
+    * If no feedback controller has used the requested data, it will not be available in which case
+    * the method returns {@code false}.
     * </p>
     * 
     * @param endEffector the end-effector for which the data is requested.
-    * @param positionDataToPack the {@link FramePoint} in which the position data is stored. Data is expressed in {@link ReferenceFrame#getWorldFrame()}. Modified. 
-    * @param type whether the current or desired position is requested, the other values in {@link Type} are not applicable.
+    * @param positionDataToPack the {@link FramePoint} in which the position data is stored. Data is
+    *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
+    * @param type whether the current or desired position is requested, the other values in
+    *           {@link Type} are not applicable.
     * @return whether the data is available or not.
     */
    boolean getPositionData(RigidBody endEffector, FramePoint positionDataToPack, Type type);
@@ -75,12 +80,15 @@ public interface FeedbackControllerDataReadOnly
    /**
     * Retrieves if possible the orientation data about a specific end-effector.
     * <p>
-    * If no feedback controller has used the requested data, it will not be available in which case the method returns {@code false}.
+    * If no feedback controller has used the requested data, it will not be available in which case
+    * the method returns {@code false}.
     * </p>
     * 
     * @param endEffector the end-effector for which the data is requested.
-    * @param orientationDataToPack the {@link FrameOrientation} in which the orientation data is stored. Data is expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
-    * @param type whether the current or desired orientation is requested, the other values in {@link Type} are not applicable.
+    * @param orientationDataToPack the {@link FrameOrientation} in which the orientation data is
+    *           stored. Data is expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
+    * @param type whether the current or desired orientation is requested, the other values in
+    *           {@link Type} are not applicable.
     * @return whether the data is available or not.
     */
    boolean getOrientationData(RigidBody endEffector, FrameOrientation orientationDataToPack, Type type);
@@ -88,13 +96,16 @@ public interface FeedbackControllerDataReadOnly
    /**
     * Retrieves if possible the vector data about a specific end-effector.
     * <p>
-    * If no feedback controller has used the requested data, it will not be available in which case the method returns {@code false}.
+    * If no feedback controller has used the requested data, it will not be available in which case
+    * the method returns {@code false}.
     * </p>
     * 
     * @param endEffector the end-effector for which the data is requested.
-    * @param vectorDataToPack the {@link FrameVector} in which the vector data is stored. Data is expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
+    * @param vectorDataToPack the {@link FrameVector} in which the vector data is stored. Data is
+    *           expressed in {@link ReferenceFrame#getWorldFrame()}. Modified.
     * @param type specifies the data type requested. Look up the options available in {@link Type}.
-    * @param space specifies the physical quantity requested. Look up the options available in {@link Space}.
+    * @param space specifies the physical quantity requested. Look up the options available in
+    *           {@link Space}.
     * @return whether the data is available or not.
     */
    boolean getVectorData(RigidBody endEffector, FrameVector vectorDataToPack, Type type, Space space);
