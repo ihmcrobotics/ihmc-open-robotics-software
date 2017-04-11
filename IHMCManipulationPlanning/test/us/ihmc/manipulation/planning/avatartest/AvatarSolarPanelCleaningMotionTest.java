@@ -260,15 +260,15 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
          Quaternion desiredOrientation = new Quaternion(poseOfWayPoint.getOrientation());
          
          euclideanCalculator.appendTrajectoryPoint(desiredPosition);
-         so3Calculator.appendTrajectoryOrientation(desiredOrientation);
+         so3Calculator.appendTrajectoryPoint(desiredOrientation);
          
       }
 
       euclideanCalculator.computeTrajectoryPointTimes(0.1, trajectoryTime);
       euclideanCalculator.computeTrajectoryPointVelocities(true);
 
-      so3Calculator.getTrajectoryPointTimes(euclideanCalculator.getTrajectoryPoints());
-      so3Calculator.computeTrajectoryOrientations();            
+      so3Calculator.setTrajectoryPointTimes(euclideanCalculator.getTrajectoryPoints());
+      so3Calculator.computeTrajectoryPoints();            
       
       RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints = euclideanCalculator.getTrajectoryPoints();
       RecyclingArrayList<FrameSO3TrajectoryPoint> trajectoryQuaternions = so3Calculator.getTrajectoryPoints();

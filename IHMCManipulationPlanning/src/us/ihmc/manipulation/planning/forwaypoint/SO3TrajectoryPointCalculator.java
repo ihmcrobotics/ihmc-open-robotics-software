@@ -20,7 +20,7 @@ public class SO3TrajectoryPointCalculator
       
    }
    
-   public void appendTrajectoryOrientation(Quaternion orientation)
+   public void appendTrajectoryPoint(Quaternion orientation)
    {
       FrameSO3TrajectoryPoint aTrajectoryQuaternion = trajectoryPoints.add();
       aTrajectoryQuaternion.setToZero(referenceFrame);
@@ -29,7 +29,7 @@ public class SO3TrajectoryPointCalculator
       aTrajectoryQuaternion.setAngularVelocityToNaN();
    }
    
-   public void appendTrajectoryOrientation(Quaternion orientation, Vector3D angularVelocity)
+   public void appendTrajectoryPoint(Quaternion orientation, Vector3D angularVelocity)
    {    
       FrameSO3TrajectoryPoint aTrajectoryQuaternion = trajectoryPoints.add();
       aTrajectoryQuaternion.setToZero(referenceFrame);
@@ -38,20 +38,20 @@ public class SO3TrajectoryPointCalculator
       aTrajectoryQuaternion.setAngularVelocity(angularVelocity);      
    }
    
-   public void setTrajectoryQuaternion(int index, Vector3D angularVelocity)
+   public void setTrajectoryPointAngularVelocity(int index, Vector3D angularVelocity)
    {
       trajectoryPoints.get(index).setAngularVelocity(angularVelocity);
    }
    
-   public void setTrajectoryQuaternion(int index, Quaternion orientation)
+   public void setTrajectoryPointOrientation(int index, Quaternion orientation)
    {
       trajectoryPoints.get(index).setOrientation(orientation);
    }
    
-   public void setTrajectoryQuaternion(int index, Quaternion orientation, Vector3D angularVelocity)
+   public void setTrajectoryPoint(int index, Quaternion orientation, Vector3D angularVelocity)
    {
-      setTrajectoryQuaternion(index, orientation);
-      setTrajectoryQuaternion(index, angularVelocity);
+      setTrajectoryPointOrientation(index, orientation);
+      setTrajectoryPointAngularVelocity(index, angularVelocity);
    }
    
    // public void ChangeFrame should be added after making FrameEulideanTrajectoryQuaternion extending GeometricObject.
@@ -71,7 +71,7 @@ public class SO3TrajectoryPointCalculator
       return getTrajectoryPoints().get(index).getTime();
    }
    
-   public void getTrajectoryPointTimes(RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints)
+   public void setTrajectoryPointTimes(RecyclingArrayList<FrameEuclideanTrajectoryPoint> trajectoryPoints)
    {
       for(int i =0;i<trajectoryPoints.size();i++)
       {
@@ -83,7 +83,7 @@ public class SO3TrajectoryPointCalculator
    // This is temporary equation for obtaining angular velocity. /17.03.17/ 
    // w = log(qi-1 ^(-1) * qi)
    // The B-Spline proposed by KimKimShin should be added.
-   public void computeTrajectoryOrientations()
+   public void computeTrajectoryPoints()
    {  
       Vector3D angularVelocity = new Vector3D();
       
