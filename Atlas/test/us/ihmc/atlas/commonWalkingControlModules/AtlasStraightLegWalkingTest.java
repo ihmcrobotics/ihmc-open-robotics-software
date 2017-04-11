@@ -101,7 +101,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public double getICPPercentOfStanceForSSToeOff()
                {
-                  return 0.12;
+                  return 0.15;
                }
 
                @Override
@@ -178,7 +178,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getStraightLegPrivilegedWeight()
                      {
-                        return 50.0;
+                        return 100.0;
                      }
 
                      @Override
