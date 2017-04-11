@@ -239,6 +239,12 @@ public class RobotArmController implements RobotController
       else
          robotArm.updateSCSRobotJointConfiguration(lowLevelOneDoFJointDesiredDataHolder);
 
+      if (setRandomConfiguration.getBooleanValue())
+      {
+         robotArm.setRandomConfiguration();
+         setRandomConfiguration.set(false);
+      }
+
       robotJointLimitWatcher.doControl();
    }
 
