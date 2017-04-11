@@ -41,6 +41,7 @@ public class RobotArmSimulation
 
       int buttonIndex = 1;
       midiSliderBoard.setButton(buttonIndex++, "goToTarget", scs);
+      midiSliderBoard.setButton(buttonIndex++, "setRandomConfiguration", scs);
 
       buttonIndex = 9; // Second row
       midiSliderBoard.setButton(buttonIndex++, "controlLinearX", scs);
