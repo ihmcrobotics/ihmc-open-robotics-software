@@ -34,14 +34,16 @@ public class YoSpatialVector
       this(namePrefix, "", expressedInFrame, registry);
    }
    
-   public YoSpatialVector(YoFrameVector yoLinearPart, YoFrameVector yoAngularPart, ReferenceFrame expressedInFrame)
+   public YoSpatialVector(YoFrameVector yoLinearPart, YoFrameVector yoAngularPart)
    {
+      yoLinearPart.checkReferenceFrameMatch(yoAngularPart);
+
       this.namePrefix = StringUtils.getCommonPrefix(yoLinearPart.getNamePrefix(), yoAngularPart.getNamePrefix());
       this.nameSuffix = YoFrameVariableNameTools.getCommonSuffix(yoLinearPart.getNameSuffix(), yoAngularPart.getNameSuffix());
       
       this.linearPart = yoLinearPart;
       this.angularPart = yoAngularPart;
-      this.expressedInFrame = expressedInFrame;
+      this.expressedInFrame = yoLinearPart.getReferenceFrame();
    }
    
    public void set(YoSpatialVector yoSpacialVector)
