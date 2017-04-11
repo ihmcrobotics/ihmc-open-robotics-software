@@ -5,7 +5,6 @@ import us.ihmc.humanoidRobotics.communication.packets.AbstractJointspaceTrajecto
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTrajectoryMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1D;
-import us.ihmc.robotics.math.trajectories.waypoints.SimpleTrajectoryPoint1DList;
 
 public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectoryCommand<T, M>, M extends AbstractJointspaceTrajectoryMessage<M>> extends QueueableCommand<T, M>
 {
@@ -37,7 +36,7 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
       set(message.getTrajectoryPointLists());
    }
 
-   private void set(RecyclingArrayList<? extends SimpleTrajectoryPoint1DList> trajectoryPointListArray)
+   private void set(RecyclingArrayList<? extends OneDoFJointTrajectoryCommand> trajectoryPointListArray)
    {
       for (int i = 0; i < trajectoryPointListArray.size(); i++)
       {
@@ -49,15 +48,24 @@ public abstract class JointspaceTrajectoryCommand<T extends JointspaceTrajectory
    {
       for (int i = 0; i < trajectoryPointListArray.length; i++)
       {
-         SimpleTrajectoryPoint1DList simpleTrajectoryPoint1DList = jointTrajectoryInputs.add();
+         OneDoFJointTrajectoryCommand oneDoFJointTrajectoryCommand = jointTrajectoryInputs.add();
          OneDoFJointTrajectoryMessage oneJointTrajectoryMessage = trajectoryPointListArray[i];
-         oneJointTrajectoryMessage.getTrajectoryPoints(simpleTrajectoryPoint1DList);
+         if(oneJointTrajectoryMessage != null)
+         {
+            oneJointTrajectoryMessage.getTrajectoryPoints(oneDoFJointTrajectoryCommand);
+            oneDoFJointTrajectoryCommand.setWeight(oneJointTrajectoryMessage.getWeight());
+         }
+         else
+         {
+            oneDoFJointTrajectoryCommand.clear();
+            oneDoFJointTrajectoryCommand.setWeight(0.0);
+         }
       }
    }
 
-   private void set(int jointIndex, SimpleTrajectoryPoint1DList otherTrajectoryPointList)
+   private void set(int jointIndex, OneDoFJointTrajectoryCommand otherTrajectoryPointList)
    {
-      SimpleTrajectoryPoint1DList thisJointTrajectoryPointList = jointTrajectoryInputs.getAndGrowIfNeeded(jointIndex);
+      OneDoFJointTrajectoryCommand thisJointTrajectoryPointList = jointTrajectoryInputs.getAndGrowIfNeeded(jointIndex);
       thisJointTrajectoryPointList.set(otherTrajectoryPointList);
    }
 

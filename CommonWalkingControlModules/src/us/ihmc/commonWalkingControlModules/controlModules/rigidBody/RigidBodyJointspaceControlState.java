@@ -215,6 +215,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       double timeInTrajectory = getTimeInTrajectory();
       boolean allDone = true;
 
+      feedbackControlCommand.clear();
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          MultipleWaypointsTrajectoryGenerator generator = jointTrajectoryGenerators.get(jointIdx);
@@ -241,9 +242,12 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          double desiredVelocity = generator.getVelocity();
          double feedForwardAcceleration = generator.getAcceleration();
 
-         feedbackControlCommand.setOneDoFJoint(jointIdx, desiredPosition, desiredVelocity, feedForwardAcceleration);
-         feedbackControlCommand.setGains(jointIdx, gains.get(jointIdx));
-         feedbackControlCommand.setWeightForSolver(jointIdx, currentWeights.get(jointIdx).getDoubleValue());
+         double weight = currentWeights.get(jointIdx).getDoubleValue();
+         if (weight > Double.MIN_VALUE)
+         {
+            OneDoFJoint joint = joints[jointIdx];
+            feedbackControlCommand.addJoint(joint, desiredPosition, desiredVelocity, feedForwardAcceleration, gains.get(jointIdx), weight);
+         }
 
          IntegerYoVariable numberOfPointsInQueue = this.numberOfPointsInQueue.get(jointIdx);
          IntegerYoVariable numberOfPointsInGenerator = this.numberOfPointsInGenerator.get(jointIdx);
@@ -314,9 +318,13 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
          {
             SimpleTrajectoryPoint1DList trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
-            if (trajectoryPoints.getTrajectoryPoint(0).getTime() > 1.0e-5)
+            if (trajectoryPoints.getNumberOfTrajectoryPoints() > 0)
             {
-               queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
+               SimpleTrajectoryPoint1D trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
+               if (trajectoryPoint.getTime() > Double.MIN_VALUE)
+               {
+                  queueInitialPoint(initialJointPositions[jointIdx], jointIdx);
+               }
             }
          }
       }
@@ -325,7 +333,11 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       {
          OneDoFJointTrajectoryCommand trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
 
-         double weight = trajectoryPoints.getWeight();
+         double weight = 0.0;
+         if (trajectoryPoints != null)
+         {
+            weight = trajectoryPoints.getWeight();
+         }
 
          if (Double.isNaN(weight))
          {
@@ -339,13 +351,16 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
          for (int pointIdx = 0; pointIdx < trajectoryPoints.getNumberOfTrajectoryPoints(); pointIdx++)
          {
             SimpleTrajectoryPoint1D trajectoryPoint = trajectoryPoints.getTrajectoryPoint(pointIdx);
-            if (!checkTime(trajectoryPoint.getTime(), jointIdx))
+            if (trajectoryPoint != null)
             {
-               return false;
-            }
-            if (!queuePoint(trajectoryPoint, jointIdx))
-            {
-               return false;
+               if (!checkTime(trajectoryPoint.getTime(), jointIdx))
+               {
+                  return false;
+               }
+               if (!queuePoint(trajectoryPoint, jointIdx))
+               {
+                  return false;
+               }
             }
          }
       }
@@ -496,4 +511,9 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
       return feedbackControlCommand;
    }
 
+   @Override
+   public void clear()
+   {
+
+   }
 }

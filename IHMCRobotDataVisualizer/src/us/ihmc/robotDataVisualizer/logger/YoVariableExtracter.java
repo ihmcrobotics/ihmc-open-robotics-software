@@ -27,11 +27,12 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.ProtoBufferYoVariableHandshakeParser;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
-import us.ihmc.robotDataLogger.logger.util.FileSelectionDialog;
+import us.ihmc.robotDataVisualizer.logger.util.FileSelectionDialog;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
@@ -40,10 +41,10 @@ public class YoVariableExtracter
    public YoVariableExtracter(File logFile) throws IOException
    {
       LogPropertiesReader logProperties = new LogPropertiesReader(new File(logFile, YoVariableLoggerListener.propertyFile));
-      File handshake = new File(logFile, logProperties.getHandshakeFile());
+      File handshake = new File(logFile, logProperties.getVariables().getHandshakeAsString());
       if (!handshake.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getHandshakeFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getHandshakeAsString());
       }
 
       DataInputStream handshakeStream = new DataInputStream(new FileInputStream(handshake));
@@ -51,14 +52,14 @@ public class YoVariableExtracter
       handshakeStream.readFully(handshakeData);
       handshakeStream.close();
 
-      YoVariableHandshakeParser parser = new YoVariableHandshakeParser("logged");
+      YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType(), "logged");
       parser.parseFrom(handshakeData);
       YoVariableRegistry registry = parser.getRootRegistry();
 
-      File logdata = new File(logFile, logProperties.getVariableDataFile());
+      File logdata = new File(logFile, logProperties.getVariables().getDataAsString());
       if(!logdata.exists())
       {
-         throw new RuntimeException("Cannot find " + logProperties.getVariableDataFile());
+         throw new RuntimeException("Cannot find " + logProperties.getVariables().getDataAsString());
       }
       @SuppressWarnings("resource")
       final FileChannel logChannel = new FileInputStream(logdata).getChannel();
