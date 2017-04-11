@@ -25,6 +25,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
 
 import java.util.ArrayList;
@@ -82,6 +83,8 @@ public class DynamicReachabilityCalculator
    private final DoubleYoVariable currentTransferAlpha = new DoubleYoVariable("currentTransferAlpha", registry);
    private final DoubleYoVariable currentSwingAlpha = new DoubleYoVariable("currentSwingAlpha", registry);
    private final DoubleYoVariable nextTransferAlpha = new DoubleYoVariable("nextTransferAlpha", registry);
+
+   private final ExecutionTimer reachabilityTimer = new ExecutionTimer("reachabilityTimer", registry);
 
    private final FrameVector2d currentInitialTransferGradient = new FrameVector2d(worldFrame);
    private final FrameVector2d currentEndTransferGradient = new FrameVector2d(worldFrame);
@@ -511,6 +514,7 @@ public class DynamicReachabilityCalculator
     */
    public void verifyAndEnsureReachability()
    {
+      reachabilityTimer.startMeasurement();
       reset();
 
       // Efficiently checks the reachability by examining if the required heights of the stance hip and step hip overlap, as this determines reachability.
@@ -611,6 +615,7 @@ public class DynamicReachabilityCalculator
             numberOfAdjustments.increment();
          }
       }
+      reachabilityTimer.stopMeasurement();
    }
 
    private boolean checkReachabilityInternal()

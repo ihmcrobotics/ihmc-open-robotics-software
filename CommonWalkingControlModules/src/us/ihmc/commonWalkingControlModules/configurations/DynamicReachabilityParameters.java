@@ -166,7 +166,7 @@ public class DynamicReachabilityParameters
     */
    public double getConstraintWeight()
    {
-      return 1000.0;
+      return 10000.0;
    }
 
    /**
