@@ -49,7 +49,7 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 
-public class RobotArmController implements RobotController
+public class FixedBaseRobotArmController implements RobotController
 {
    private static final boolean USE_PRIVILEGED_CONFIGURATION = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -57,7 +57,7 @@ public class RobotArmController implements RobotController
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final RobotArm robotArm;
+   private final FixedBaseRobotArm robotArm;
    private final DoubleYoVariable yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final TwistCalculator twistCalculator;
@@ -105,7 +105,7 @@ public class RobotArmController implements RobotController
 
    private final BooleanYoVariable setRandomConfiguration = new BooleanYoVariable("setRandomConfiguration", registry);
 
-   public RobotArmController(RobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public FixedBaseRobotArmController(FixedBaseRobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robotArm = robotArm;
 

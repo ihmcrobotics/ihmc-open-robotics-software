@@ -32,7 +32,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 
-public class RobotArm extends Robot
+public class FixedBaseRobotArm extends Robot
 {
    private static final double SMALL_MASS = 0.2;
    private static final Vector3D X_AXIS = new Vector3D(1.0, 0.0, 0.0);
@@ -95,9 +95,9 @@ public class RobotArm extends Robot
 
    private final Map<OneDoFJoint, OneDegreeOfFreedomJoint> idToSCSJointMap = new HashMap<>();
 
-   public RobotArm(double dt)
+   public FixedBaseRobotArm(double dt)
    {
-      super(RobotArm.class.getSimpleName());
+      super(FixedBaseRobotArm.class.getSimpleName());
       this.setGravity(0.0, 0.0, -gravity);
 
       elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevator", worldFrame, new RigidBodyTransform());
