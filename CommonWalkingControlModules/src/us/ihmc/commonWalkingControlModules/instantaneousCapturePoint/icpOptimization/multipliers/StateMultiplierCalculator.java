@@ -10,8 +10,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.StateEndCurrentMultiplier;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.EntryCMPRecursionMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.ExitCMPRecursionMultiplier;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.EntryCMPRecursionMultipliers;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.ExitCMPRecursionMultipliers;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.FinalICPRecursionMultiplier;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.StanceEntryCMPRecursionMultiplier;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.StanceExitCMPRecursionMultiplier;
@@ -48,8 +48,8 @@ public class StateMultiplierCalculator
    private final FinalICPRecursionMultiplier finalICPRecursionMultiplier;
    private final StanceExitCMPRecursionMultiplier stanceExitCMPRecursionMultiplier;
    private final StanceEntryCMPRecursionMultiplier stanceEntryCMPRecursionMultiplier;
-   private final ExitCMPRecursionMultiplier exitCMPRecursionMultiplier;
-   private final EntryCMPRecursionMultiplier entryCMPRecursionMultiplier;
+   private final ExitCMPRecursionMultipliers exitCMPRecursionMultipliers;
+   private final EntryCMPRecursionMultipliers entryCMPRecursionMultipliers;
 
    private final ExitCMPCurrentMultiplier exitCMPCurrentMultiplier;
    private final EntryCMPCurrentMultiplier entryCMPCurrentMultiplier;
@@ -95,8 +95,8 @@ public class StateMultiplierCalculator
       finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
       stanceExitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
       stanceEntryCMPRecursionMultiplier = new StanceEntryCMPRecursionMultiplier(namePrefix, exitCMPDurationInPercentOfStepTime, registry);
-      exitCMPRecursionMultiplier = new ExitCMPRecursionMultiplier(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
-      entryCMPRecursionMultiplier = new EntryCMPRecursionMultiplier(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
+      exitCMPRecursionMultipliers = new ExitCMPRecursionMultipliers(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
+      entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers(namePrefix, maxNumberOfFootstepsToConsider, exitCMPDurationInPercentOfStepTime, registry);
 
       cubicMatrix = new CubicMatrix();
       cubicDerivativeMatrix = new CubicDerivativeMatrix();
@@ -135,22 +135,25 @@ public class StateMultiplierCalculator
       finalICPRecursionMultiplier.reset();
       stanceExitCMPRecursionMultiplier.reset();
       stanceEntryCMPRecursionMultiplier.reset();
-      exitCMPRecursionMultiplier.reset();
-      entryCMPRecursionMultiplier.reset();
+      exitCMPRecursionMultipliers.reset();
+      entryCMPRecursionMultipliers.reset();
    }
 
-   public void computeRecursionMultipliers(int numberOfStepsToConsider, boolean isInTransfer, boolean useTwoCMPs, double omega0)
+   public void computeRecursionMultipliers(int numberOfStepsToConsider, int numberOfStepsRegistered, boolean isInTransfer, boolean useTwoCMPs, double omega0)
    {
       resetRecursionMultipliers();
 
       if (numberOfStepsToConsider > maxNumberOfFootstepsToConsider)
          throw new RuntimeException("Requesting too many steps.");
 
-      finalICPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      finalICPRecursionMultiplier.compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations,
+            useTwoCMPs, isInTransfer, omega0);
       stanceExitCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
       stanceEntryCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
-      exitCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
-      entryCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      exitCMPRecursionMultipliers
+            .compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+      entryCMPRecursionMultipliers
+            .compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
    }
 
    public double getFinalICPRecursionMultiplier()
@@ -170,12 +173,12 @@ public class StateMultiplierCalculator
 
    public double getExitCMPRecursionMultiplier(int footstepIndex)
    {
-      return exitCMPRecursionMultiplier.getExitMultiplier(footstepIndex);
+      return exitCMPRecursionMultipliers.getExitMultiplier(footstepIndex);
    }
 
    public double getEntryCMPRecursionMultiplier(int footstepIndex)
    {
-      return entryCMPRecursionMultiplier.getEntryMultiplier(footstepIndex);
+      return entryCMPRecursionMultipliers.getEntryMultiplier(footstepIndex);
    }
 
 

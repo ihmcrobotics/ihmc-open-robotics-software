@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class EntryCMPRecursionMultiplier
+public class EntryCMPRecursionMultipliers
 {
    private static final String name = "CMPEntryRecursionMultiplier";
 
@@ -16,14 +16,18 @@ public class EntryCMPRecursionMultiplier
 
    private final int maximumNumberOfFootstepsToConsider;
 
-   public EntryCMPRecursionMultiplier(String namePrefix, int maximumNumberOfFootstepsToConsider, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
+   public EntryCMPRecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
          YoVariableRegistry parentRegistry)
    {
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-         entryMultipliers.add(new DoubleYoVariable(namePrefix + name + i, registry));
+      {
+         DoubleYoVariable entryMultiplier = new DoubleYoVariable(namePrefix + name + i, registry);
+         entryMultiplier.setToNaN();
+         entryMultipliers.add(entryMultiplier);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -31,10 +35,11 @@ public class EntryCMPRecursionMultiplier
    public void reset()
    {
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
-         entryMultipliers.get(i).set(0.0);
+         entryMultipliers.get(i).setToNaN();
    }
 
-   public void compute(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
+         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
@@ -43,28 +48,41 @@ public class EntryCMPRecursionMultiplier
          throw new RuntimeException("Single Support Durations list is not long enough");
 
       if (useTwoCMPs)
-         computeWithTwoCMPs(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
+         computeWithTwoCMPs(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
       else
-         computeWithOneCMP(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, omega0);
+         computeWithOneCMP(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, omega0);
    }
 
-   private void computeWithOneCMP(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
+         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          double omega0)
    {
       double recursionTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
 
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
-         double steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
+         double steppingDuration;
+         if (i + 1 < numberOfStepsRegistered)
+         { // this is the next step
+            steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
+         }
+         else
+         { // this is the final transfer
+            steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue();
+         }
 
          double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * steppingDuration));
          entryMultipliers.get(i).set(entryRecursion);
+
+         if (i + 1 == numberOfStepsRegistered)
+            break; // this is the final transfer
 
          recursionTime += steppingDuration;
       }
    }
 
-   private void computeWithTwoCMPs(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
+         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
       double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
@@ -81,13 +99,24 @@ public class EntryCMPRecursionMultiplier
 
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
-         double steppingDuration = singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+         double steppingDuration;
+         if (i + 1 < numberOfStepsRegistered)
+         { // this is the next step
+            steppingDuration = singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+         }
+         else
+         { // this is the final transfer
+            steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue();
+         }
 
          double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * steppingDuration;
 
          double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * timeSpentOnEntryCMP));
 
          entryMultipliers.get(i).set(entryRecursion);
+
+         if (i + 1 == numberOfStepsRegistered)
+            break; // this is the final transfer
 
          recursionTime += steppingDuration;
       }

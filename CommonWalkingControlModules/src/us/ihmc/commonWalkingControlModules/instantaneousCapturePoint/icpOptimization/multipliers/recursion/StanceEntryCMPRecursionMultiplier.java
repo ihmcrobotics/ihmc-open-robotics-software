@@ -26,7 +26,7 @@ public class StanceEntryCMPRecursionMultiplier
 
    public void reset()
    {
-      entryMultiplier.set(0.0);
+      entryMultiplier.setToNaN();
    }
 
    public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,

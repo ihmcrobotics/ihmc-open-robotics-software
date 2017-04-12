@@ -26,11 +26,11 @@ public class StanceExitCMPRecursionMultiplier
 
    public void reset()
    {
-      exitMultiplier.set(0.0);
+      exitMultiplier.setToNaN();
    }
 
-   public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations,
-         ArrayList<DoubleYoVariable> singleSupportDurations, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfFootstepsToConsider == 0)
       {
@@ -49,7 +49,8 @@ public class StanceExitCMPRecursionMultiplier
       exitMultiplier.set(0.0);
    }
 
-   private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
+   private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         boolean isInTransfer, double omega0)
    {
       double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
       double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * firstStepTime;

@@ -20,10 +20,11 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
 
    public void reset()
    {
-      this.set(0.0);
+      this.setToNaN();
    }
 
-   public void compute(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
+         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
@@ -38,26 +39,37 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
       }
 
       if (useTwoCMPs)
-         computeWithTwoCMPs(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
+         computeWithTwoCMPs(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
       else
-         computeWithOneCMP(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, omega0);
+         computeWithOneCMP(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, omega0);
    }
 
-   private void computeWithOneCMP(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
+         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          double omega0)
    {
       double recursionTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
 
       for (int i = 0; i < numberOfStepsToConsider; i++)
-         recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+      {
+         if (i + 1 < numberOfStepsRegistered)
+         { // this is the next step
+            recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+         }
+         else
+         { // this is the final transfer
+            recursionTime += doubleSupportDurations.get(i + 1).getDoubleValue();
+            break;
+         }
+      }
 
       double icpRecursion = Math.exp(-omega0 * recursionTime);
       this.set(icpRecursion);
 
    }
 
-   private void computeWithTwoCMPs(int numberOfStepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         boolean isInTransfer, double omega0)
+   private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
+         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
    {
       double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
       double currentTimeSpentOnExitCMP = exitCMPDurationInPercentOfStepTime.getDoubleValue() * firstStepTime;
@@ -71,12 +83,19 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
 
       for (int i = 0; i < numberOfStepsToConsider; i++)
       {
-         recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+         if (i + 1 < numberOfStepsRegistered)
+         { // this is the next step
+            recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+         }
+         else
+         { // this is the final transfer
+            recursionTime += doubleSupportDurations.get(i + 1).getDoubleValue();
+            break;
+         }
       }
 
       double icpRecursion = Math.exp(-omega0 * recursionTime);
       this.set(icpRecursion);
-
    }
 }
 
