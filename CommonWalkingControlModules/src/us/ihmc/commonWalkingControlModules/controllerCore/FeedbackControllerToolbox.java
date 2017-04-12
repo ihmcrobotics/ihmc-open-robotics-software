@@ -22,9 +22,12 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
+import us.ihmc.robotics.math.filters.RateLimitedYoSpatialVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
+import us.ihmc.robotics.math.frames.YoFramePoseUsingQuaternions;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.math.frames.YoSpatialVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
@@ -211,6 +214,91 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       }
 
       return rateLimitedYoFrameVector;
+   }
+
+   /**
+    * Retrieves and returns the {@code YoFramePoseUsingQuaternions} associated with the given
+    * end-effector and {@code type}, if it does not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoFramePoseUsingQuaternions} matching the search criteria.
+    */
+   public YoFramePoseUsingQuaternions getPose(RigidBody endEffector, Type type)
+   {
+      return new YoFramePoseUsingQuaternions(getPosition(endEffector, type), getOrientation(endEffector, type));
+   }
+
+   /**
+    * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
+    * velocities of the given end-effector for representing a given data {@code type}. If it does
+    * not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoSpatialVector} matching the search criteria.
+    */
+   public YoSpatialVector getVelocity(RigidBody endEffector, Type type)
+   {
+      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_VELOCITY), getDataVector(endEffector, type, Space.ANGULAR_VELOCITY));
+   }
+
+   /**
+    * Retrieves and returns the {@code YoSpatialVector} for holding the angular and linear
+    * accelerations of the given end-effector for representing a given data {@code type}. If it does
+    * not exist it is created.
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoSpatialVector} matching the search criteria.
+    */
+   public YoSpatialVector getAcceleration(RigidBody endEffector, Type type)
+   {
+      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_ACCELERATION), getDataVector(endEffector, type, Space.ANGULAR_ACCELERATION));
+   }
+
+   /**
+    * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
+    * linear velocities of the given end-effector. The date type of the vector is defined by
+    * {@code type}. If it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
+    * only used if the data does not exist yet.
+    * </p>
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
+    */
+   public RateLimitedYoSpatialVector getRateLimitedVelocity(RigidBody endEffector, Type rawDataType, double dt, DoubleYoVariable maximumLinearRate,
+                                                            DoubleYoVariable maximumAngularRate)
+   {
+      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, maximumLinearRate),
+                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, maximumAngularRate));
+   }
+
+   /**
+    * Retrieves and returns the {@code RateLimitedYoSpatialVector} for the rate-limited angular and
+    * linear accelerations of the given end-effector. The date type of the vector is defined by
+    * {@code type}. If it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt}, {@code maximumLinearRate}, and {@code maximumAngularRate} are
+    * only used if the data does not exist yet.
+    * </p>
+    * 
+    * @param endEffector the end-effector to which the returned data is associated.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
+    */
+   public RateLimitedYoSpatialVector getRateLimitedAcceleration(RigidBody endEffector, Type rawDataType, double dt, DoubleYoVariable maximumLinearRate,
+                                                                DoubleYoVariable maximumAngularRate)
+   {
+      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate),
+                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate));
    }
 
    /**
