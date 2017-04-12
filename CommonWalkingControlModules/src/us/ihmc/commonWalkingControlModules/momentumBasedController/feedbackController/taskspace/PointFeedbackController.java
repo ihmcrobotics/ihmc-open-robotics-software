@@ -213,12 +213,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
       desiredLinearAcceleration.add(derivativeFeedback);
       desiredLinearAcceleration.add(integralFeedback);
       desiredLinearAcceleration.limitLength(gains.getMaximumFeedback());
-
-      System.out.println("Point: " + desiredLinearAcceleration);
       yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
       rateLimitedFeedbackLinearAcceleration.update();
       rateLimitedFeedbackLinearAcceleration.getFrameTupleIncludingFrame(desiredLinearAcceleration);
-      System.out.println("Point: " + desiredLinearAcceleration);
 
       desiredLinearAcceleration.changeFrame(controlFrame);
       desiredLinearAcceleration.add(feedForwardLinearAcceleration);
