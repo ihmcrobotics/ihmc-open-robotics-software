@@ -67,7 +67,7 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
    @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
          + "The waypoints specify the sole position in the world frame.")
-   public Point3D[] trajectoryWaypoints = new Point3D[0];
+   public Point3D[] positionWaypoints = new Point3D[0];
    @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
          + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
    public double swingHeight = 0.0;
@@ -144,11 +144,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.trajectoryType = footstepData.trajectoryType;
       this.swingHeight = footstepData.swingHeight;
 
-      if (footstepData.trajectoryWaypoints != null)
+      if (footstepData.positionWaypoints != null)
       {
-         this.trajectoryWaypoints = new Point3D[footstepData.trajectoryWaypoints.length];
-         for (int i = 0; i < footstepData.trajectoryWaypoints.length; i++)
-            trajectoryWaypoints[i] = new Point3D(footstepData.trajectoryWaypoints[i]);
+         this.positionWaypoints = new Point3D[footstepData.positionWaypoints.length];
+         for (int i = 0; i < footstepData.positionWaypoints.length; i++)
+            positionWaypoints[i] = new Point3D(footstepData.positionWaypoints[i]);
       }
 
       this.swingDuration = footstepData.swingDuration;
@@ -193,11 +193,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       trajectoryType = footstep.getTrajectoryType();
       swingHeight = footstep.getSwingHeight();
 
-      if (footstep.getSwingWaypoints().size() != 0)
+      if (footstep.getCustomPositionWaypoints().size() != 0)
       {
-         trajectoryWaypoints = new Point3D[footstep.getSwingWaypoints().size()];
-         for (int i = 0; i < footstep.getSwingWaypoints().size(); i++)
-            trajectoryWaypoints[i] = new Point3D(footstep.getSwingWaypoints().get(i));
+         positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
+         for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
+            positionWaypoints[i] = new Point3D(footstep.getCustomPositionWaypoints().get(i));
       }
    }
 
@@ -283,14 +283,14 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       this.trajectoryType = trajectoryType;
    }
 
-   public Point3D[] getTrajectoryWaypoints()
+   public Point3D[] getCustomPositionWaypoints()
    {
-      return trajectoryWaypoints;
+      return positionWaypoints;
    }
 
-   public void setTrajectoryWaypoints(Point3D[] trajectoryWaypoints)
+   public void setCustomPositionWaypoints(Point3D[] trajectoryWaypoints)
    {
-      this.trajectoryWaypoints = trajectoryWaypoints;
+      this.positionWaypoints = trajectoryWaypoints;
    }
 
    public void setTimings(double swingDuration, double transferDuration)
@@ -340,9 +340,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       ret += trajectoryType.name() + "\n";
 
-      if(trajectoryWaypoints != null)
+      if(positionWaypoints != null)
       {
-         ret += "waypoints = " + trajectoryWaypoints.length + "\n";
+         ret += "waypoints = " + positionWaypoints.length + "\n";
       }
       else
       {
@@ -392,21 +392,21 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       boolean trajectoryWaypointsEqual = true;
 
-      if ((this.trajectoryWaypoints == null) && (footstepData.trajectoryWaypoints != null))
+      if ((this.positionWaypoints == null) && (footstepData.positionWaypoints != null))
          trajectoryWaypointsEqual = false;
-      else if ((this.trajectoryWaypoints != null) && (footstepData.trajectoryWaypoints == null))
+      else if ((this.positionWaypoints != null) && (footstepData.positionWaypoints == null))
          trajectoryWaypointsEqual = false;
-      else if (this.trajectoryWaypoints != null)
+      else if (this.positionWaypoints != null)
       {
-         int size = trajectoryWaypoints.length;
-         if (size != footstepData.trajectoryWaypoints.length)
+         int size = positionWaypoints.length;
+         if (size != footstepData.positionWaypoints.length)
             trajectoryWaypointsEqual = false;
          else
          {
             for (int i = 0; i < size; i++)
             {
-               Point3D pointOne = trajectoryWaypoints[i];
-               Point3D pointTwo = footstepData.trajectoryWaypoints[i];
+               Point3D pointOne = positionWaypoints[i];
+               Point3D pointTwo = footstepData.positionWaypoints[i];
 
                if (!(pointOne.distanceSquared(pointTwo) < 1e-7))
                   trajectoryWaypointsEqual = false;
@@ -432,10 +432,10 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       ret.orientation = TransformTools.getTransformedQuat(this.getOrientation(), transform);
 
       // Waypoints if they exist:
-      if (trajectoryWaypoints != null)
+      if (positionWaypoints != null)
       {
-         for (int i = 0; i < trajectoryWaypoints.length; i++)
-            ret.trajectoryWaypoints[i] = TransformTools.getTransformedPoint(trajectoryWaypoints[i], transform);
+         for (int i = 0; i < positionWaypoints.length; i++)
+            ret.positionWaypoints[i] = TransformTools.getTransformedPoint(positionWaypoints[i], transform);
       }
 
       return ret;
@@ -466,9 +466,9 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         trajectoryWaypoints = new Point3D[2];
-         trajectoryWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
-         trajectoryWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
+         positionWaypoints = new Point3D[2];
+         positionWaypoints[0] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
+         positionWaypoints[1] = RandomGeometry.nextPoint3D(random, -10.0, 10.0);
       }
    }
 
