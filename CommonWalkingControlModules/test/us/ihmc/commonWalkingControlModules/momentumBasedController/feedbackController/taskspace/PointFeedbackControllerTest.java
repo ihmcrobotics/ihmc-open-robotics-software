@@ -287,16 +287,16 @@ public final class PointFeedbackControllerTest
       WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controlDT, 0.0, null, jointsToOptimizeFor, centerOfMassFrame, twistCalculator, null,
                                                                             null, registry);
       toolbox.setupForInverseDynamicsSolver(null);
-      FeedbackControllerToolbox feedbackControllerToolbox = new FeedbackControllerToolbox(registry);
-      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
+      // Making the controllers to run with different instances of the toolbox so they don't share variables.
+      PointFeedbackController pointFeedbackController = new PointFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
+      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, new FeedbackControllerToolbox(new YoVariableRegistry("Dummy")), registry);
       pointFeedbackController.setEnabled(true);
+      spatialFeedbackController.setEnabled(true);
 
       PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
       pointFeedbackControlCommand.set(elevator, endEffector);
       PositionPIDGains positionGains = new PositionPIDGains();
 
-      SpatialFeedbackController spatialFeedbackController = new SpatialFeedbackController(endEffector, toolbox, feedbackControllerToolbox, registry);
-      spatialFeedbackController.setEnabled(true);
 
       SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
       spatialFeedbackControlCommand.set(elevator, endEffector);
@@ -320,12 +320,12 @@ public final class PointFeedbackControllerTest
 
          double proportionalGain = RandomNumbers.nextDouble(random, 10.0, 200.0);
          double derivativeGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
-         double integralGain = 0.0;// RandomNumbers.nextDouble(random, 0.0, 100.0); //TODO difference here as one is integrating the error in world and the other in the controlFrame. Need to be made consistent.
+         double integralGain = RandomNumbers.nextDouble(random, 0.0, 100.0);
          double maxIntegralError = RandomNumbers.nextDouble(random, 0.0, 10.0);
          positionGains.setGains(proportionalGain, derivativeGain, integralGain, maxIntegralError);
          positionGains.setMaximumError(RandomNumbers.nextDouble(random, 0.0, 10.0));
          positionGains.setMaximumVelocityError(RandomNumbers.nextDouble(random, 0.0, 10.0));
-         positionGains.setMaximumFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), Double.POSITIVE_INFINITY); // TODO the rate limitation is not applied in the same frame. Need to determine which frame is better. 
+         positionGains.setMaximumFeedbackAndFeedbackRate(RandomNumbers.nextDouble(random, 0.1, 10.0), RandomNumbers.nextDouble(random, 0.1, 10.0)); 
          pointFeedbackControlCommand.setGains(positionGains);
          spatialFeedbackControlCommand.setGains(positionGains);
 
