@@ -186,7 +186,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(0), walkingMessageHandler.peekTiming(0));
       balanceManager.addFootstepToPlan(walkingMessageHandler.peek(1), walkingMessageHandler.peekTiming(1));
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(defaultSwingTime, defaultTransferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport(finalTransferTime);
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
