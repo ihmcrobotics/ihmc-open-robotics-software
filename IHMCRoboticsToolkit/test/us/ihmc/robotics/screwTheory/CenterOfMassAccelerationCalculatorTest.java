@@ -36,8 +36,8 @@ public class CenterOfMassAccelerationCalculatorTest
       ScrewTools.addRigidBody("body", sixDoFJoint, getRandomDiagonalMatrix(random), mass, new Vector3D());
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
       TwistCalculator twistCalculator = new TwistCalculator(elevatorFrame, elevator);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, elevatorFrame, rootAcceleration,
-                                                                       twistCalculator, true, false);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true,
+                                                                       false);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       ReferenceFrame frameAfterJoint = sixDoFJoint.getFrameAfterJoint();
@@ -79,8 +79,8 @@ public class CenterOfMassAccelerationCalculatorTest
 
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
       TwistCalculator twistCalculator = new TwistCalculator(elevatorFrame, elevator);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, elevatorFrame, rootAcceleration,
-                                                                       twistCalculator, true, false);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true,
+                                                                       false);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       double qdd1 = random.nextDouble();
@@ -129,8 +129,8 @@ public class CenterOfMassAccelerationCalculatorTest
 
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
       TwistCalculator twistCalculator = new TwistCalculator(elevatorFrame, elevator);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, elevatorFrame, rootAcceleration,
-                                                                       twistCalculator, true, false);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true,
+                                                                       false);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       twistCalculator.compute();
@@ -160,8 +160,8 @@ public class CenterOfMassAccelerationCalculatorTest
 
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(elevatorFrame, elevatorFrame, elevatorFrame);
       TwistCalculator twistCalculator = new TwistCalculator(elevatorFrame, elevator);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, elevatorFrame, rootAcceleration,
-                                                                       twistCalculator, true, false);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true,
+                                                                       false);
       CenterOfMassAccelerationCalculator comAccelerationCalculator = new CenterOfMassAccelerationCalculator(elevator, spatialAccelerationCalculator);
 
       twistCalculator.compute();

@@ -228,8 +228,8 @@ public class GeometricJacobianCalculatorTest
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          TwistCalculator twistCalculator = new TwistCalculator(worldFrame, body);
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(body, worldFrame, rootAcceleration, twistCalculator,
-                                                                                                         true, false, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false,
+                                                                                                         false);
 
          twistCalculator.compute();
          spatialAccelerationCalculator.compute();
