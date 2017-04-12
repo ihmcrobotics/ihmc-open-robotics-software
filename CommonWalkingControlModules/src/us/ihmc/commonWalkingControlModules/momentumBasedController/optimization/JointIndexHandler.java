@@ -26,11 +26,25 @@ public class JointIndexHandler
       indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
 
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      populateColumnIndices();
+   }
 
-      for (InverseDynamicsJoint joint : jointsToIndex)
+   public JointIndexHandler(List<? extends InverseDynamicsJoint> jointsToIndex)
+   {
+      indexedJoints = new InverseDynamicsJoint[jointsToIndex.size()];
+      jointsToIndex.toArray(indexedJoints);
+      indexedOneDoFJoints = ScrewTools.filterJoints(indexedJoints, OneDoFJoint.class);
+
+      numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToIndex);
+      populateColumnIndices();
+   }
+
+   private void populateColumnIndices()
+   {
+      for (InverseDynamicsJoint joint : indexedJoints)
       {
          TIntArrayList listToPackIndices = new TIntArrayList();
-         ScrewTools.computeIndexForJoint(jointsToIndex, listToPackIndices, joint);
+         ScrewTools.computeIndexForJoint(indexedJoints, listToPackIndices, joint);
          int[] indices = listToPackIndices.toArray();
 
          columnsForJoints.put(joint, indices);
