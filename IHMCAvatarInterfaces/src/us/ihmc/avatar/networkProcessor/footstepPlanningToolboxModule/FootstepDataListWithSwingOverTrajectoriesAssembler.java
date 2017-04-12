@@ -86,7 +86,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
-         footstepDataMessage.setTrajectoryWaypoints(waypoints);
+         footstepDataMessage.setCustomPositionWaypoints(waypoints);
 
          if (simpleFootstep.hasFoothold())
          {
@@ -151,7 +151,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          Point3D[] waypoints = new Point3D[] {new Point3D(), new Point3D()};
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypoints[0]);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypoints[1]);
-         footstepDataMessage.setTrajectoryWaypoints(waypoints);
+         footstepDataMessage.setCustomPositionWaypoints(waypoints);
 
          if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
          {

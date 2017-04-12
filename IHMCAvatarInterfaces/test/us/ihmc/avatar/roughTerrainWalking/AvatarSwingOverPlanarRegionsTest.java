@@ -132,7 +132,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
          Point3D waypointTwo = new Point3D();
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypointOne);
          swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypointTwo);
-         footstepData.setTrajectoryWaypoints(new Point3D[] {waypointOne, waypointTwo});
+         footstepData.setCustomPositionWaypoints(new Point3D[] {waypointOne, waypointTwo});
 
          double maxSpeed = maxSpeedDimensionless / swingTime;
          if (maxSpeed > maxSwingSpeed)

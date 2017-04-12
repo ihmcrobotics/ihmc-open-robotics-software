@@ -131,7 +131,7 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       ihmcMessage.setPredictedContactPoints(predictedContactPoints);
-      ihmcMessage.setTrajectoryWaypoints(trajectoryWaypoints);
+      ihmcMessage.setCustomPositionWaypoints(trajectoryWaypoints);
 
       return ihmcMessage;
    }
@@ -261,9 +261,9 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       List<Vector3> trajectoryWaypoints = new ArrayList<>();
-      if(footstep.trajectoryWaypoints != null)
+      if(footstep.getCustomPositionWaypoints() != null)
       {
-         for (Point3D trajectoryWaypoint : footstep.trajectoryWaypoints)
+         for (Point3D trajectoryWaypoint : footstep.getCustomPositionWaypoints())
          {
             trajectoryWaypoints.add(GenericROSTranslationTools.convertTuple3d(trajectoryWaypoint));
          }

@@ -34,7 +34,7 @@ public class Footstep
    private final ReferenceFrame soleReferenceFrame;
 
    private final List<Point2D> predictedContactPoints = new ArrayList<>();
-   private final RecyclingArrayList<Point3D> swingWaypoints = new RecyclingArrayList<>(Point3D.class);
+   private final RecyclingArrayList<Point3D> customPositionWaypoints = new RecyclingArrayList<>(Point3D.class);
 
    private final boolean trustHeight;
    private boolean scriptedFootstep;
@@ -115,16 +115,16 @@ public class Footstep
       this.trajectoryType = trajectoryType;
    }
 
-   public List<Point3D> getSwingWaypoints()
+   public List<Point3D> getCustomPositionWaypoints()
    {
-      return swingWaypoints;
+      return customPositionWaypoints;
    }
 
-   public void setSwingWaypoints(RecyclingArrayList<Point3D> trajectoryWaypoints)
+   public void setCustomPositionWaypoints(RecyclingArrayList<Point3D> customPositionWaypoints)
    {
-      swingWaypoints.clear();
-      for (int i = 0; i < trajectoryWaypoints.size(); i++)
-         swingWaypoints.add().set(trajectoryWaypoints.get(i));
+      this.customPositionWaypoints.clear();
+      for (int i = 0; i < customPositionWaypoints.size(); i++)
+         this.customPositionWaypoints.add().set(customPositionWaypoints.get(i));
    }
 
    public double getSwingHeight()
@@ -505,13 +505,13 @@ public class Footstep
       boolean sameRobotSide = robotSide == otherFootstep.robotSide;
       boolean isTrustHeightTheSame = trustHeight == otherFootstep.trustHeight;
 
-      boolean sameWaypoints = swingWaypoints.size() == otherFootstep.swingWaypoints.size();
+      boolean sameWaypoints = customPositionWaypoints.size() == otherFootstep.customPositionWaypoints.size();
       if (sameWaypoints)
       {
-         for (int i = 0; i < swingWaypoints.size(); i++)
+         for (int i = 0; i < customPositionWaypoints.size(); i++)
          {
-            Point3D waypoint = swingWaypoints.get(i);
-            Point3D otherWaypoint = otherFootstep.swingWaypoints.get(i);
+            Point3D waypoint = customPositionWaypoints.get(i);
+            Point3D otherWaypoint = otherFootstep.customPositionWaypoints.get(i);
             sameWaypoints = sameWaypoints && waypoint.epsilonEquals(otherWaypoint, epsilon);
          }
       }

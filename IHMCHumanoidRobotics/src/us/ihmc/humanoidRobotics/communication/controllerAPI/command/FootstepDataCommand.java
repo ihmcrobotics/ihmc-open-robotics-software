@@ -17,7 +17,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    private RobotSide robotSide;
    private FootstepOrigin origin;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   private final RecyclingArrayList<Point3D> trajectoryWaypoints = new RecyclingArrayList<>(2, Point3D.class);
+   private final RecyclingArrayList<Point3D> customPositionWaypoints = new RecyclingArrayList<>(2, Point3D.class);
    private double swingHeight = 0.0;
    private final Point3D position = new Point3D();
    private final Quaternion orientation = new Quaternion();
@@ -41,7 +41,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       position.set(0.0, 0.0, 0.0);
       orientation.set(0.0, 0.0, 0.0, 1.0);
       predictedContactPoints.clear();
-      trajectoryWaypoints.clear();
+      customPositionWaypoints.clear();
 
       swingDuration = Double.NaN;
       transferDuration = Double.NaN;
@@ -53,12 +53,12 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = message.getRobotSide();
       origin = message.getOrigin();
       trajectoryType = message.getTrajectoryType();
-      Point3D[] originalWaypointList = message.getTrajectoryWaypoints();
-      trajectoryWaypoints.clear();
+      Point3D[] originalWaypointList = message.getCustomPositionWaypoints();
+      customPositionWaypoints.clear();
       if (originalWaypointList != null)
       {
          for (int i = 0; i < originalWaypointList.length; i++)
-            trajectoryWaypoints.add().set(originalWaypointList[i]);
+            customPositionWaypoints.add().set(originalWaypointList[i]);
       }
       swingHeight = message.getSwingHeight();
       position.set(message.getLocation());
@@ -81,10 +81,10 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       robotSide = other.robotSide;
       origin = other.origin;
       trajectoryType = other.trajectoryType;
-      RecyclingArrayList<Point3D> otherWaypointList = other.trajectoryWaypoints;
-      trajectoryWaypoints.clear();
+      RecyclingArrayList<Point3D> otherWaypointList = other.customPositionWaypoints;
+      customPositionWaypoints.clear();
       for (int i = 0; i < otherWaypointList.size(); i++)
-         trajectoryWaypoints.add().set(otherWaypointList.get(i));
+         customPositionWaypoints.add().set(otherWaypointList.get(i));
       swingHeight = other.swingHeight;
       position.set(other.position);
       orientation.set(other.orientation);
@@ -145,9 +145,9 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return trajectoryType;
    }
 
-   public RecyclingArrayList<Point3D> getTrajectoryWaypoints()
+   public RecyclingArrayList<Point3D> getCustomPositionWaypoints()
    {
-      return trajectoryWaypoints;
+      return customPositionWaypoints;
    }
 
    public double getSwingHeight()

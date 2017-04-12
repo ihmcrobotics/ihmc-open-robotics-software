@@ -659,7 +659,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             Point3D waypointTwo = new Point3D();
             swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypointOne);
             swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypointTwo);
-            firstFootstepMessage.setTrajectoryWaypoints(new Point3D[] {waypointOne, waypointTwo});
+            firstFootstepMessage.setCustomPositionWaypoints(new Point3D[] {waypointOne, waypointTwo});
             System.out.println("sending footstep of side " + footstep.getRobotSide());
 
             footstepDataListMessage.add(firstFootstepMessage);

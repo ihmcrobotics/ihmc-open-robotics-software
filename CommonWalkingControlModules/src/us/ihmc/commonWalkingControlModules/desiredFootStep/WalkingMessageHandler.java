@@ -561,15 +561,15 @@ public class WalkingMessageHandler
       Footstep footstep = new Footstep(rigidBody, robotSide, soleFrame, footstepPoseFrame, true, contactPoints);
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         if (footstepData.getTrajectoryWaypoints() == null)
+         if (footstepData.getCustomPositionWaypoints() == null)
          {
             PrintTools.warn("Can not request custom trajectory without specifying waypoints. Using default trajectory.");
             trajectoryType = TrajectoryType.DEFAULT;
          }
          else
          {
-            RecyclingArrayList<Point3D> trajectoryWaypoints = footstepData.getTrajectoryWaypoints();
-            footstep.setSwingWaypoints(trajectoryWaypoints);
+            RecyclingArrayList<Point3D> positionWaypoints = footstepData.getCustomPositionWaypoints();
+            footstep.setCustomPositionWaypoints(positionWaypoints);
          }
       }
 
