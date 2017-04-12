@@ -4,16 +4,18 @@ import java.util.ArrayList;
 
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
+import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
 public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>
 {
-   private double defaultSwingTime;
-   private double defaultTransferTime;
-   private double finalTransferTime;
+   private double defaultSwingDuration;
+   private double defaultTransferDuration;
+   private double finalTransferDuration;
    private ExecutionMode executionMode = ExecutionMode.OVERRIDE;
+   private ExecutionTiming executionTiming = ExecutionTiming.CONTROL_DURATIONS;
    private final RecyclingArrayList<FootstepDataCommand> footsteps = new RecyclingArrayList<>(30, FootstepDataCommand.class);
 
    public FootstepDataListCommand()
@@ -24,9 +26,9 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    @Override
    public void clear()
    {
-      defaultSwingTime = 0.0;
-      defaultTransferTime = 0.0;
-      finalTransferTime = 0.0;
+      defaultSwingDuration = 0.0;
+      defaultTransferDuration = 0.0;
+      finalTransferDuration = 0.0;
       footsteps.clear();
    }
 
@@ -35,10 +37,11 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       clear();
 
-      defaultSwingTime = message.defaultSwingTime;
-      defaultTransferTime = message.defaultTransferTime;
-      finalTransferTime = message.finalTransferTime;
+      defaultSwingDuration = message.defaultSwingDuration;
+      defaultTransferDuration = message.defaultTransferDuration;
+      finalTransferDuration = message.finalTransferDuration;
       executionMode = message.executionMode;
+      executionTiming = message.executionTiming;
       ArrayList<FootstepDataMessage> dataList = message.getDataList();
       if (dataList != null)
       {
@@ -52,10 +55,11 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       clear();
 
-      defaultSwingTime = other.defaultSwingTime;
-      defaultTransferTime = other.defaultTransferTime;
-      finalTransferTime = other.finalTransferTime;
+      defaultSwingDuration = other.defaultSwingDuration;
+      defaultTransferDuration = other.defaultTransferDuration;
+      finalTransferDuration = other.finalTransferDuration;
       executionMode = other.executionMode;
+      executionTiming = other.executionTiming;
       RecyclingArrayList<FootstepDataCommand> otherFootsteps = other.getFootsteps();
       if (otherFootsteps != null)
       {
@@ -74,14 +78,14 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       footsteps.add().set(footstep);
    }
 
-   public void setSwingTime(double swingTime)
+   public void setDefaultSwingDuration(double defaultSwingDuration)
    {
-      this.defaultSwingTime = swingTime;
+      this.defaultSwingDuration = defaultSwingDuration;
    }
 
-   public void setTransferTime(double transferTime)
+   public void setDefaultTransferDuration(double defaultTransferDuration)
    {
-      this.defaultTransferTime = transferTime;
+      this.defaultTransferDuration = defaultTransferDuration;
    }
 
    public void setExecutionMode(ExecutionMode executionMode)
@@ -89,19 +93,24 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       this.executionMode = executionMode;
    }
 
-   public double getDefaultSwingTime()
+   public double getDefaultSwingDuration()
    {
-      return defaultSwingTime;
+      return defaultSwingDuration;
    }
 
-   public double getDefaultTransferTime()
+   public double getDefaultTransferDuration()
    {
-      return defaultTransferTime;
+      return defaultTransferDuration;
    }
 
-   public double getFinalTransferTime()
+   public double getFinalTransferDuration()
    {
-      return finalTransferTime;
+      return finalTransferDuration;
+   }
+
+   public ExecutionTiming getExecutionTiming()
+   {
+      return executionTiming;
    }
 
    public ExecutionMode getExecutionMode()

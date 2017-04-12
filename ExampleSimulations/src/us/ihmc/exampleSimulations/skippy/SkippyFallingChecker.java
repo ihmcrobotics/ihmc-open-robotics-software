@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.skippy;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.controllers.ControllerFailureListener;
-import us.ihmc.simulationconstructionset.robotController.SimpleRobotController;
+import us.ihmc.simulationConstructionSetTools.robotController.SimpleRobotController;
 
 public class SkippyFallingChecker extends SimpleRobotController
 {

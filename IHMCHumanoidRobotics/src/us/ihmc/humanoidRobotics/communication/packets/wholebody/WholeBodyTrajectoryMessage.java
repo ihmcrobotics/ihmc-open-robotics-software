@@ -10,8 +10,6 @@ import us.ihmc.communication.packets.TrackablePacket;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.ArmTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
@@ -25,8 +23,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
       + " If setting a field to null is not an option (going through IHMC ROS API), the user can use the latter rule to select the messages to be processed by the controller.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/whole_body_trajectory")
-public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTrajectoryMessage>
-      implements VisualizablePacket, TransformableDataObject<WholeBodyTrajectoryMessage>, MultiplePacketHolder
+public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTrajectoryMessage> implements VisualizablePacket, MultiplePacketHolder
 {
    @RosExportedField(documentation = "Trajectory for the left hand")
    public HandTrajectoryMessage leftHandTrajectoryMessage;
@@ -358,31 +355,6 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
       return true;
    }
 
-   @Override
-   public WholeBodyTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      WholeBodyTrajectoryMessage transformedWholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-
-      if (leftHandTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.leftHandTrajectoryMessage = leftHandTrajectoryMessage.transform(transform);
-      if (rightHandTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.rightHandTrajectoryMessage = rightHandTrajectoryMessage.transform(transform);
-      if (leftArmTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.leftArmTrajectoryMessage = new ArmTrajectoryMessage(leftArmTrajectoryMessage);
-      if (rightArmTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.rightArmTrajectoryMessage = new ArmTrajectoryMessage(rightArmTrajectoryMessage);
-      if (chestTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.chestTrajectoryMessage = chestTrajectoryMessage.transform(transform);
-      if (pelvisTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.pelvisTrajectoryMessage = pelvisTrajectoryMessage.transform(transform);
-      if (leftFootTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.leftFootTrajectoryMessage = leftFootTrajectoryMessage.transform(transform);
-      if (rightFootTrajectoryMessage != null)
-         transformedWholeBodyTrajectoryMessage.rightFootTrajectoryMessage = rightFootTrajectoryMessage.transform(transform);
-
-      return transformedWholeBodyTrajectoryMessage;
-   }
-
    /** {@inheritDoc} */
    @Override
    public String validateMessage()
@@ -430,14 +402,22 @@ public class WholeBodyTrajectoryMessage extends TrackablePacket<WholeBodyTraject
    public List<Packet<?>> getPackets()
    {
       ArrayList<Packet<?>> wholeBodyPackets = new ArrayList<>();
-      wholeBodyPackets.add(leftHandTrajectoryMessage);
-      wholeBodyPackets.add(rightHandTrajectoryMessage);
-      wholeBodyPackets.add(leftArmTrajectoryMessage);
-      wholeBodyPackets.add(rightArmTrajectoryMessage);
-      wholeBodyPackets.add(chestTrajectoryMessage);
-      wholeBodyPackets.add(pelvisTrajectoryMessage);
-      wholeBodyPackets.add(leftFootTrajectoryMessage);
-      wholeBodyPackets.add(rightFootTrajectoryMessage);
+      if (leftHandTrajectoryMessage != null)
+         wholeBodyPackets.add(leftHandTrajectoryMessage);
+      if (rightHandTrajectoryMessage != null)
+         wholeBodyPackets.add(rightHandTrajectoryMessage);
+      if (leftArmTrajectoryMessage != null)
+         wholeBodyPackets.add(leftArmTrajectoryMessage);
+      if (rightArmTrajectoryMessage != null)
+         wholeBodyPackets.add(rightArmTrajectoryMessage);
+      if (chestTrajectoryMessage != null)
+         wholeBodyPackets.add(chestTrajectoryMessage);
+      if (pelvisTrajectoryMessage != null)
+         wholeBodyPackets.add(pelvisTrajectoryMessage);
+      if (leftFootTrajectoryMessage != null)
+         wholeBodyPackets.add(leftFootTrajectoryMessage);
+      if (rightFootTrajectoryMessage != null)
+         wholeBodyPackets.add(rightFootTrajectoryMessage);
       return wholeBodyPackets;
    }
 }

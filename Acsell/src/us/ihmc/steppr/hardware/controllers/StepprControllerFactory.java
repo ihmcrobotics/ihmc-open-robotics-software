@@ -11,7 +11,6 @@ import us.ihmc.acsell.hardware.AcsellAffinity;
 import us.ihmc.acsell.hardware.AcsellSetup;
 import us.ihmc.avatar.DRCEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.ArmControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
@@ -56,7 +55,7 @@ public class StepprControllerFactory
    private final PriorityParameters controllerPriority = new PriorityParameters(PriorityParameters.getMaximumPriority() - 5);
    private final PriorityParameters loggerPriority = new PriorityParameters(40);
    private final PriorityParameters poseCommunicatorPriority = new PriorityParameters(45);
-   
+
    public StepprControllerFactory() throws IOException, JAXBException
    {
 
@@ -94,7 +93,7 @@ public class StepprControllerFactory
       controllerFactory.attachControllerStateChangedListener(stepprOutputWriter);
       controllerFactory.attachControllerFailureListener(stepprOutputWriter);
       DRCOutputWriter drcOutputWriter = stepprOutputWriter;
-      
+
       boolean INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES = true;
       if (INTEGRATE_ACCELERATIONS_AND_CONTROL_VELOCITIES)
       {
@@ -104,7 +103,7 @@ public class StepprControllerFactory
          stepprOutputWriterWithAccelerationIntegration.setAlphaDesiredPosition(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setVelocityGains(0.0, 0.0);
          stepprOutputWriterWithAccelerationIntegration.setPositionGains(0.0, 0.0);
-         
+
          drcOutputWriter = stepprOutputWriterWithAccelerationIntegration;
       }
       /*
@@ -155,10 +154,10 @@ public class StepprControllerFactory
       robotController.start();
       StepprRunner runner = new StepprRunner(estimatorPriority, sensorReaderFactory, robotController);
       runner.start();
-      
+
       ThreadTools.sleep(2000);
       yoVariableServer.start();
-      
+
       runner.join();
 
       System.exit(0);
@@ -171,7 +170,6 @@ public class StepprControllerFactory
 
       final HighLevelState initialBehavior = HighLevelState.DO_NOTHING_BEHAVIOR; // HERE!!
       WalkingControllerParameters walkingControllerParamaters = robotModel.getWalkingControllerParameters();
-      ArmControllerParameters armControllerParamaters = robotModel.getArmControllerParameters();
       CapturePointPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       ICPOptimizationParameters icpOptimizationParameters = robotModel.getICPOptimizationParameters();
 
@@ -179,21 +177,21 @@ public class StepprControllerFactory
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       MomentumBasedControllerFactory controllerFactory = new MomentumBasedControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-            feetContactSensorNames, wristForceSensorNames , walkingControllerParamaters, armControllerParamaters, capturePointPlannerParameters, initialBehavior);
+            feetContactSensorNames, wristForceSensorNames , walkingControllerParamaters, capturePointPlannerParameters, initialBehavior);
       controllerFactory.setICPOptimizationControllerParameters(icpOptimizationParameters);
 
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
       humanoidJointPoseList.createPoseSettersJustLegs();
-      
+
       boolean useArms = false;
       boolean robotIsHanging = true;
-      
+
       DiagnosticsWhenHangingControllerFactory diagnosticsWhenHangingHighLevelBehaviorFactory = new DiagnosticsWhenHangingControllerFactory(humanoidJointPoseList, useArms, robotIsHanging, null);
       // Configure the MomentumBasedControllerFactory so we start with the diagnostic controller
       diagnosticsWhenHangingHighLevelBehaviorFactory.setTransitionRequested(true);
       controllerFactory.addHighLevelBehaviorFactory(diagnosticsWhenHangingHighLevelBehaviorFactory);
       controllerFactory.createControllerNetworkSubscriber(new PeriodicRealtimeThreadScheduler(poseCommunicatorPriority), packetCommunicator);
-      
+
       if (walkingProvider == WalkingProvider.VELOCITY_HEADING_COMPONENT)
          controllerFactory.createComponentBasedFootstepDataMessageGenerator();
 

@@ -3,7 +3,8 @@ package us.ihmc.robotDataLogger.jointState;
 import java.nio.LongBuffer;
 import java.util.List;
 
-import us.ihmc.robotDataLogger.generated.YoProtoHandshakeProto.YoProtoHandshake.JointDefinition.JointType;
+import us.ihmc.robotDataLogger.JointType;
+
 
 public abstract class JointState
 {
@@ -35,9 +36,17 @@ public abstract class JointState
 
    public static int getNumberOfVariables(JointType type)
    {
-      return createJointState(null, type).getNumberOfStateVariables();
+      switch (type)
+      {
+      case OneDoFJoint:
+         return OneDoFState.numberOfStateVariables;
+      case SiXDoFJoint:
+         return SixDoFState.numberOfStateVariables;
+      default:
+         throw new RuntimeException("Unknown joint type" + type);
+      }
    }
-   
+      
    public static JointState createJointState(String name, JointType type)
    {
       switch (type)

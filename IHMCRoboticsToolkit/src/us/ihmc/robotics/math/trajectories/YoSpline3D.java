@@ -61,7 +61,7 @@ public class YoSpline3D
 
    public void setLinear(double t0, double tf, FramePoint p0, FramePoint pf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 2);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 2);
 
       for (Direction direction : Direction.values)
       {
@@ -73,7 +73,7 @@ public class YoSpline3D
 
    public void setLinearUsingInitialPositionAndVelocity(double t0, double tf, FramePoint p0, FrameVector pd0)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 2);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 2);
 
       for (Direction direction : Direction.values)
       {
@@ -85,7 +85,7 @@ public class YoSpline3D
 
    public void setLinearUsingFinalPositionAndVelocity(double t0, double tf, FramePoint pf, FrameVector pdf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 2);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 2);
 
       for (Direction direction : Direction.values)
       {
@@ -98,7 +98,7 @@ public class YoSpline3D
    public void setQuarticUsingIntermediateVelocity(double t0, double t1, double tf, FramePoint p0, FrameVector pd0, FrameVector pd1, FramePoint pf,
            FrameVector pdf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 5);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 5);
 
       for (Direction direction : Direction.values)
       {
@@ -112,7 +112,7 @@ public class YoSpline3D
    public void setQuinticUsingIntermediateVelocityAndAcceleration(double t0, double t1, double tf, FramePoint p0, FrameVector pd0, FrameVector pd1,
            FrameVector pdd1, FramePoint pf, FrameVector pdf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 6);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 6);
 
       for (Direction direction : Direction.values)
       {
@@ -126,7 +126,7 @@ public class YoSpline3D
    public void setSexticUsingWaypoint(double t0, double t1, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0, FramePoint p1, FramePoint pf,
                                       FrameVector pdf, FrameVector pddf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 7);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 7);
 
       for (Direction direction : Direction.values)
       {
@@ -140,7 +140,7 @@ public class YoSpline3D
    public void setSexticUsingWaypointVelocityAndAccelerationAndInitialAcceleration(double t0, double t1, double tf, FramePoint p0, FrameVector pd0,
            FrameVector pdd0, FrameVector pd1, FrameVector pdd1, FramePoint pf, FrameVector pdf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 7);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 7);
 
       for (Direction direction : Direction.values)
       {
@@ -154,7 +154,7 @@ public class YoSpline3D
    public void setSexticUsingWaypointVelocityAndAccelerationAndFinalAcceleration(double t0, double t1, double tf, FramePoint p0, FrameVector pd0,
            FrameVector pd1, FrameVector pdd1, FramePoint pf, FrameVector pdf, FrameVector pddf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 7);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 7);
 
       for (Direction direction : Direction.values)
       {
@@ -167,7 +167,7 @@ public class YoSpline3D
 
    public void setQuarticUsingInitialAcceleration(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0, FramePoint pf, FrameVector pdf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 5);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 5);
 
       for (Direction direction : Direction.values)
       {
@@ -179,7 +179,7 @@ public class YoSpline3D
 
    public void setQuarticUsingFinalAcceleration(double t0, double tf, FramePoint p0, FrameVector pd0, FramePoint pf, FrameVector pdf, FrameVector pddf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 5);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 5);
 
       for (Direction direction : Direction.values)
       {
@@ -191,7 +191,7 @@ public class YoSpline3D
 
    public void setQuadraticUsingInitialVelocity(double t0, double tf, FramePoint p0, FrameVector pd0, FramePoint pf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 3);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 3);
 
       for (Direction direction : Direction.values)
       {
@@ -203,7 +203,7 @@ public class YoSpline3D
 
    public void setQuadraticUsingFinalVelocity(double t0, double tf, FramePoint p0, FramePoint pf, FrameVector pdf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 3);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 3);
 
       for (Direction direction : Direction.values)
       {
@@ -215,7 +215,7 @@ public class YoSpline3D
 
    public void setQuadraticUsingInitialVelocityAndAcceleration(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 3);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 3);
 
       for (Direction direction : Direction.values)
       {
@@ -227,7 +227,7 @@ public class YoSpline3D
 
    public void setCubic(double t0, double tf, FramePoint p0, FrameVector pd0, FramePoint pf, FrameVector pdf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 4);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 4);
 
       for (Direction direction : Direction.values)
       {
@@ -239,7 +239,7 @@ public class YoSpline3D
 
    public void setCubicUsingFinalAccelerationButNotFinalPosition(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdf, FrameVector pddf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 4);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 4);
 
       for (Direction direction : Direction.values)
       {
@@ -252,7 +252,7 @@ public class YoSpline3D
 
    public void setQuintic(double t0, double tf, FramePoint p0, FrameVector pd0, FrameVector pdd0, FramePoint pf, FrameVector pdf, FrameVector pddf)
    {
-      MathTools.checkIfEqual(numberOfCoefficientsPerPolynomial, 6);
+      MathTools.checkEquals(numberOfCoefficientsPerPolynomial, 6);
 
       for (Direction direction : Direction.values)
       {

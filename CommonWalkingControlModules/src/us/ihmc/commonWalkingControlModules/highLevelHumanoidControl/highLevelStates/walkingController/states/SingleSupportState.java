@@ -28,7 +28,7 @@ public abstract class SingleSupportState extends WalkingState
    protected final BalanceManager balanceManager;
 
    public SingleSupportState(RobotSide supportSide, WalkingStateEnum singleSupportStateEnum, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory, YoVariableRegistry parentRegistry)
+         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory, YoVariableRegistry parentRegistry)
    {
       super(singleSupportStateEnum, parentRegistry);
 
@@ -38,8 +38,8 @@ public abstract class SingleSupportState extends WalkingState
       minimumSwingFraction.set(0.5);
 
       this.walkingMessageHandler = walkingMessageHandler;
-      footSwitches = momentumBasedController.getFootSwitches();
-      fullRobotModel = momentumBasedController.getFullRobotModel();
+      footSwitches = controllerToolbox.getFootSwitches();
+      fullRobotModel = controllerToolbox.getFullRobotModel();
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
    }

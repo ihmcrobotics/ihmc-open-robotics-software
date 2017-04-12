@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,7 +24,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.shapes.Box3d;
 import us.ihmc.robotics.geometry.shapes.Plane3d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -62,7 +62,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
 //      SimplifiedGroundOnlyQuadTree quadTree = new SimplifiedGroundOnlyQuadTree(minX, minY, maxX, maxY, resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise );
 
       int maxBalls = 200;
-      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(new BoundingBox2d(minX, minY, maxX, maxY), maxBalls, visualizeAndKeepUp);
+      QuadTreeTestHelper testHelper = new QuadTreeTestHelper(new BoundingBox2D(minX, minY, maxX, maxY), maxBalls, visualizeAndKeepUp);
       testHelper.setResolutionParameters(resolution, heightThreshold, quadTreeMaxMultiLevelZChangeToFilterNoise, maxNodes);
 
 //      String filename = "resources/pointListsForTesting/pointList150122_DRCObstacleCourse.pointList";
@@ -170,7 +170,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       double maxX = centerX + halfWidth;
       double maxY = centerY + halfWidth;
 
-      BoundingBox2d boundingBox = new BoundingBox2d(minX, minY, maxX, maxY);
+      BoundingBox2D boundingBox = new BoundingBox2D(minX, minY, maxX, maxY);
  
       double resolution = 0.02;
       double heightThreshold = 0.002;
@@ -201,7 +201,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
    {
       normal.normalize();
 
-      BoundingBox2d boundingBox = new BoundingBox2d(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
+      BoundingBox2D boundingBox = new BoundingBox2D(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
       Plane3d plane3d = new Plane3d(center, normal);
       ArrayList<Point3D> points = generatePointsForStairs(plane3d, halfWidth, resolution, stairSeparation, oneStairLandingHeight);
 
@@ -229,7 +229,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
    {
       normal.normalize();
 
-      BoundingBox2d boundingBox = new BoundingBox2d(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
+      BoundingBox2D boundingBox = new BoundingBox2D(center.getX() - halfWidth, center.getY() - halfWidth, center.getX() + halfWidth, center.getY() + halfWidth);
       Plane3d plane3d = new Plane3d(center, normal);
       ArrayList<Point3D> points = generatePointsForSlope(plane3d, halfWidth, resolution);
       
@@ -237,7 +237,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       return testOnAListOfPoints(points, pointsPerBallUpdate, boundingBox, resolution, visualize);
    }
 
-   private QuadTreeTestHelper testOnAListOfPoints(ArrayList<Point3D> points, int pointsPerBallUpdate, BoundingBox2d rangeOfPoints, double resolution, boolean visualize)
+   private QuadTreeTestHelper testOnAListOfPoints(ArrayList<Point3D> points, int pointsPerBallUpdate, BoundingBox2D rangeOfPoints, double resolution, boolean visualize)
    {
       double heightThreshold = 0.002;
       double quadTreeMaxMultiLevelZChangeToFilterNoise = 0.2;
@@ -314,7 +314,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       private QuadTreeHeightMapInterface heightMap;
 //    private final double centerX, centerY;
 //    private final double minX, minY, maxX, maxY;
-      private final BoundingBox2d rangeOfPointsToTest;
+      private final BoundingBox2D rangeOfPointsToTest;
 
       private double resolution = 0.1;
       private double heightThreshold = 0.002;
@@ -324,7 +324,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       private int maxNodes = 1000000;
 
       
-      public QuadTreeTestHelper(BoundingBox2d rangeOfPointsToTest, int maxNumberOfBallsInBag, boolean visualize)
+      public QuadTreeTestHelper(BoundingBox2D rangeOfPointsToTest, int maxNumberOfBallsInBag, boolean visualize)
       {
          this.visualize = visualize;
          
@@ -391,7 +391,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          return QuadTreeHeightMapVisualizer.drawPoints(scs, points, resolution, appearance);       
       }
       
-      public Graphics3DNode drawHeightMap(BoundingBox2d rangeOfPoints, double resolution2)
+      public Graphics3DNode drawHeightMap(BoundingBox2D rangeOfPoints, double resolution2)
       {
          return QuadTreeHeightMapVisualizer.drawHeightMap(heightMap, scs, rangeOfPoints, resolution);  
          
@@ -448,7 +448,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          if (!visualize) return null;
          
          Point2D centerPoint = new Point2D();
-         rangeOfPointsToTest.getCenterPointCopy(centerPoint);
+         rangeOfPointsToTest.getCenterPoint(centerPoint);
          List<Point3D> allPointsWithinArea = heightMap.getAllPointsWithinArea(centerPoint.getX(), centerPoint.getY(), 10.0, 10.0);
          
          int count = 0;
@@ -482,7 +482,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          }
       }
 
-      public ArrayList<Point3D> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, BoundingBox2d testingRange, double resolution)
+      public ArrayList<Point3D> createAListOfPointsFromAGroundProfile(GroundProfile3D groundProfile, BoundingBox2D testingRange, double resolution)
       {
          double minX = testingRange.getMinPoint().getX();
          double maxX = testingRange.getMaxPoint().getX();

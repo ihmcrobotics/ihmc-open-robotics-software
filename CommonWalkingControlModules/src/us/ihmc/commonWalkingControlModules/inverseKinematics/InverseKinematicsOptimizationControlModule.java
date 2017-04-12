@@ -6,30 +6,25 @@ import java.util.Map;
 import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class InverseKinematicsOptimizationControlModule
 {
@@ -57,17 +52,11 @@ public class InverseKinematicsOptimizationControlModule
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
 
-      ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
-
       numberOfDoFs = ScrewTools.computeDegreesOfFreedom(jointsToOptimizeFor);
       motionQPInput = new MotionQPInput(numberOfDoFs);
 
-      double controlDT = toolbox.getControlDT();
-      GeometricJacobianHolder geometricJacobianHolder = toolbox.getGeometricJacobianHolder();
-      TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, geometricJacobianHolder, twistCalculator, jointIndexHandler,
-            toolbox.getJointPrivilegedConfigurationParameters(), registry);
-      boundCalculator = new InverseDynamicsQPBoundCalculator(jointIndexHandler, controlDT, registry);
+      motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
+      boundCalculator = toolbox.getQPBoundCalculator();
 
       qDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
       qDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);
@@ -149,66 +138,33 @@ public class InverseKinematicsOptimizationControlModule
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   public void submitInverseKinematicsCommand(InverseKinematicsCommand<?> command)
-   {
-      switch (command.getCommandType())
-      {
-      case TASKSPACE:
-         submitSpatialVelocityCommand((SpatialVelocityCommand) command);
-         return;
-      case JOINTSPACE:
-         submitJointspaceVelocityCommand((JointspaceVelocityCommand) command);
-         return;
-      case MOMENTUM:
-         submitMomentumCommand((MomentumCommand) command);
-         return;
-      case PRIVILEGED_CONFIGURATION:
-         submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
-         break;
-      case LIMIT_REDUCTION:
-         submitJointLimitReductionCommand((JointLimitReductionCommand) command);
-         break;
-      case COMMAND_LIST:
-         submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
-         return;
-      default:
-         throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
-      }
-   }
-
-   private void submitSpatialVelocityCommand(SpatialVelocityCommand command)
+   public void submitSpatialVelocityCommand(SpatialVelocityCommand command)
    {
       boolean success = motionQPInputCalculator.convertSpatialVelocityCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitJointspaceVelocityCommand(JointspaceVelocityCommand command)
+   public void submitJointspaceVelocityCommand(JointspaceVelocityCommand command)
    {
       boolean success = motionQPInputCalculator.convertJointspaceVelocityCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitMomentumCommand(MomentumCommand command)
+   public void submitMomentumCommand(MomentumCommand command)
    {
       boolean success = motionQPInputCalculator.convertMomentumCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
    }
 
-   private void submitInverseKinematicsCommandList(InverseKinematicsCommandList command)
-   {
-      while (command.getNumberOfCommands() > 0)
-         submitInverseKinematicsCommand(command.pollCommand());
-   }
-
-   private void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
+   public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)
    {
       motionQPInputCalculator.updatePrivilegedConfiguration(command);
    }
 
-   private void submitJointLimitReductionCommand(JointLimitReductionCommand command)
+   public void submitJointLimitReductionCommand(JointLimitReductionCommand command)
    {
       boundCalculator.submitJointLimitReductionCommand(command);
    }

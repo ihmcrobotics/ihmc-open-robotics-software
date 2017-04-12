@@ -4,10 +4,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 
 /**
- * This interface is applied to DynamicGraphicObjects and Artifacts which support
+ * This interface is applied to YoGraphics and Artifacts which support
  * being packed into YoVariables and sent from simulation to viewer.
  *
- * See DynamicGraphicFactory and YoVariableHandshakeServer
+ * See YoGraphicFactory and YoVariableHandshakeServer
  *
  * @author Alex Lesman
  *
@@ -34,7 +34,8 @@ public interface RemoteYoGraphic
       LINE_SEGMENT_2D_ARTIFACT,
       POLYGON_ARTIFACT,
       LINE_ARTIFACT,
-      PLANAR_REGIONS_LIST_DGO
+      PLANAR_REGIONS_LIST_DGO,
+      POLYNOMIAL_3D_DGO
    }
 
    public String getName();

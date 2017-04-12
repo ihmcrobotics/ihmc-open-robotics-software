@@ -43,7 +43,7 @@ public class ThreeDoFAngularAccelerationCalculator
       DenseMatrix64F jointAccelerations = new DenseMatrix64F(angularJacobian.getNumCols(), 1);
 
       desiredAngularAcceleration.changeFrame(jacobian.getJacobianFrame());
-      desiredAngularAcceleration.getInMatrixColumn(biasedAccelerationMatrix, 0);
+      desiredAngularAcceleration.get(0, biasedAccelerationMatrix);
       CommonOps.scale(sign, biasedAccelerationMatrix);
 
       jacobian.compute();

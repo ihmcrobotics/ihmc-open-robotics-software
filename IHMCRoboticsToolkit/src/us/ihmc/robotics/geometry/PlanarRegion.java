@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -31,8 +33,9 @@ public class PlanarRegion
     */
    private final List<ConvexPolygon2d> convexPolygons;
 
-   private final BoundingBox3d boundingBox3dInWorld = new BoundingBox3d(new Point3D(Double.NaN, Double.NaN, Double.NaN),
+   private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
          new Point3D(Double.NaN, Double.NaN, Double.NaN));
+   private double boundingBoxEpsilon = DEFAULT_BOUNDING_BOX_EPSILON;
    private final Point3D tempPointForConvexPolygonProjection = new Point3D();
 
    private final ConvexPolygon2d convexHull = new ConvexPolygon2d();
@@ -44,7 +47,6 @@ public class PlanarRegion
    {
       concaveHullsVertices = new ArrayList<>();
       convexPolygons = new ArrayList<>();
-      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
       updateConvexHull();
    }
@@ -60,7 +62,6 @@ public class PlanarRegion
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
       concaveHullsVertices = new ArrayList<>();
       convexPolygons = planarRegionConvexPolygons;
-      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
       updateConvexHull();
    }
@@ -78,7 +79,6 @@ public class PlanarRegion
       this.concaveHullsVertices = new ArrayList<>();
       concaveHullsVertices.add(concaveHullVertices);
       convexPolygons = planarRegionConvexPolygons;
-      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
       updateConvexHull();
    }
@@ -95,7 +95,6 @@ public class PlanarRegion
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
       this.concaveHullsVertices = concaveHullsVertices;
       convexPolygons = planarRegionConvexPolygons;
-      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
       updateConvexHull();
    }
@@ -112,7 +111,6 @@ public class PlanarRegion
       concaveHullsVertices = new ArrayList<>();
       convexPolygons = new ArrayList<>();
       convexPolygons.add(convexPolygon);
-      boundingBox3dInWorld.setEpsilonToGrow(DEFAULT_BOUNDING_BOX_EPSILON);
       updateBoundingBox();
       updateConvexHull();
    }
@@ -170,8 +168,8 @@ public class PlanarRegion
     */
    public boolean isPolygonIntersecting(ConvexPolygon2d convexPolygon2d)
    {
-	   BoundingBox2d polygonBoundingBox = convexPolygon2d.getBoundingBox();
-	   if (!boundingBox3dInWorld.intersectsInXYPlane(polygonBoundingBox))
+	   BoundingBox2D polygonBoundingBox = convexPolygon2d.getBoundingBox();
+	   if (!boundingBox3dInWorld.intersectsEpsilonInXYPlane(polygonBoundingBox, boundingBoxEpsilon))
 		   return false;
 
 	   // Instead of projecting all the polygons of this region onto the world XY-plane,
@@ -435,7 +433,7 @@ public class PlanarRegion
     */
    public boolean isPointOnOrSlightlyAbove(Point3DReadOnly point3dInWorld, double distanceFromPlane)
    {
-      MathTools.checkIfPositive(distanceFromPlane);
+      MathTools.checkPositive(distanceFromPlane);
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
@@ -455,7 +453,7 @@ public class PlanarRegion
     */
    public boolean isPointOnOrSlightlyBelow(Point3DReadOnly point3dInWorld, double distanceFromPlane)
    {
-      MathTools.checkIfPositive(distanceFromPlane);
+      MathTools.checkPositive(distanceFromPlane);
       Point3D localPoint = new Point3D();
       fromWorldToLocalTransform.transform(point3dInWorld, localPoint);
 
@@ -687,7 +685,7 @@ public class PlanarRegion
     * Get a reference to the PlanarRegion's axis-aligned minimal bounding box (AABB) in world.
     * @return the axis-aligned minimal bounding box for the planar region, in world coordinates.
     */
-   public BoundingBox3d getBoundingBox3dInWorld()
+   public BoundingBox3D getBoundingBox3dInWorld()
    {
       return this.boundingBox3dInWorld;
    }
@@ -696,18 +694,18 @@ public class PlanarRegion
     * Get a deep copy of this PlanarRegion's axis-aligned minimal bounding box (AABB) in world
     * @return a deep copy of the axis-aligned minimal bounding box for the planar region, in world coordinates.
     */
-   public BoundingBox3d getBoundingBox3dInWorldCopy()
+   public BoundingBox3D getBoundingBox3dInWorldCopy()
    {
-      return new BoundingBox3d(this.boundingBox3dInWorld);
+      return new BoundingBox3D(this.boundingBox3dInWorld);
    }
 
    /**
-    * Set defining points of the passed-in BoundingBox3d to the same as
+    * Set defining points of the passed-in BoundingBox3D to the same as
     * those in this PlanarRegion's axis-aligned minimal bounding box (AABB) in world coordinates.
     *
     * @param boundingBox3dToPack the bounding box that will be updated to reflect this PlanarRegion's AABB
     */
-   public void getBoundingBox3dInWorld(BoundingBox3d boundingBox3dToPack)
+   public void getBoundingBox3dInWorld(BoundingBox3D boundingBox3dToPack)
    {
       boundingBox3dToPack.set(this.boundingBox3dInWorld);
    }
@@ -745,7 +743,7 @@ public class PlanarRegion
 
    public void setBoundingBoxEpsilon(double epsilon)
    {
-      this.boundingBox3dInWorld.setEpsilonToGrow(epsilon);
+      boundingBoxEpsilon = epsilon;
       updateBoundingBox();
    }
 

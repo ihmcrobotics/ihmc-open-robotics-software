@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -23,7 +24,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class ICPOptimizationController
 {
@@ -194,10 +194,10 @@ public class ICPOptimizationController
       upcomingDoubleSupportSplitFraction = new DoubleYoVariable(yoNamePrefix + "UpcomingDoubleSupportSplitFraction", registry);
       magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
-      exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getTimeSpentOnExitCMPInPercentOfStepTime());
-      defaultDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
+      exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getSwingDurationAlpha());
+      defaultDoubleSupportSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
       doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
-      upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getDoubleSupportSplitFraction());
+      upcomingDoubleSupportSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
@@ -266,15 +266,22 @@ public class ICPOptimizationController
    private final FramePoint2d tmpFramePoint2d = new FramePoint2d();
    public void addFootstepToPlan(Footstep footstep)
    {
-      if (footstep != null)
+      if (footstep != null && !footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
       {
-         upcomingFootsteps.add(footstep);
-         footstep.getPosition2d(tmpFramePoint2d);
-         upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
-         inputHandler.addFootstepToPlan(footstep);
+         if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
+         {
+            upcomingFootsteps.add(footstep);
+            footstep.getPosition2d(tmpFramePoint2d);
+            upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            inputHandler.addFootstepToPlan(footstep);
 
-         footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
-         unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            footstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+            unclippedFootstepSolutions.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
+         }
+         else
+         {
+            PrintTools.warn(this, "Received bad footstep: " + footstep);
+         }
       }
    }
 

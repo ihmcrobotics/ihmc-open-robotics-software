@@ -24,10 +24,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.util.LinearStickSlipGroundContactModel;
-import us.ihmc.simulationconstructionset.util.environments.ContactableSelectableBoxRobot;
+import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableSelectableBoxRobot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.RotatableConvexPolygonTerrainObject;
-import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class ExampleRockContactSimulation
@@ -87,7 +87,7 @@ public class ExampleRockContactSimulation
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       double forceVectorScale = 0.001;
       AppearanceDefinition appearance = YoAppearance.Green();
-      contactableBoxRobot.addDynamicGraphicForceVectorsToGroundContactPoints(forceVectorScale, appearance , yoGraphicsListRegistry);
+      contactableBoxRobot.addYoGraphicForceVectorsToGroundContactPoints(forceVectorScale, appearance , yoGraphicsListRegistry);
       
       YoGraphicPosition checkGroundPosition = new YoGraphicPosition("checkGround", groundCheckPoint, 0.01, YoAppearance.Orange());
       yoGraphicsListRegistry.registerYoGraphic("CheckGroundPosition", checkGroundPosition);

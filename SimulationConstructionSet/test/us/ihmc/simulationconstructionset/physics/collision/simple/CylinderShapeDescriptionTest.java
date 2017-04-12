@@ -1,16 +1,15 @@
 package us.ihmc.simulationconstructionset.physics.collision.simple;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class CylinderShapeDescriptionTest
 {
@@ -97,7 +96,7 @@ public class CylinderShapeDescriptionTest
       double radius = 0.5;
       double height = 0.1;
       CylinderShapeDescription<?> cylinder = new CylinderShapeDescription<>(radius, height);
-      BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      BoundingBox3D boundingBox = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       cylinder.getBoundingBox(boundingBox);
 
       Point3D minimumPoint = new Point3D();

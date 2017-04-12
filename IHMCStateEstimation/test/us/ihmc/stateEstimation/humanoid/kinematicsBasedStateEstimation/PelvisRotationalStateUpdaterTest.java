@@ -196,7 +196,7 @@ public class PelvisRotationalStateUpdaterTest
          IMUDefinition imuDefinition = stateEstimatorSensorDefinitions.getIMUSensorDefinitions().get(i);
          RigidBody measurementLink = imuDefinition.getRigidBody();
          Twist twistIMU = new Twist();
-         inverseDynamicsStructure.getTwistCalculator().getTwistOfBody(twistIMU, measurementLink);
+         inverseDynamicsStructure.getTwistCalculator().getTwistOfBody(measurementLink, twistIMU);
          twistIMU.changeFrame(imuSensors.get(i).getMeasurementFrame());
          twistIMU.changeBodyFrameNoRelativeTwist(imuSensors.get(i).getMeasurementFrame());
          

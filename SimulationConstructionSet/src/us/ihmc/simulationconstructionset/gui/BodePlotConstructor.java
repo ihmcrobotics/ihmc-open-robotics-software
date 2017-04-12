@@ -2,21 +2,9 @@ package us.ihmc.simulationconstructionset.gui;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import us.ihmc.robotics.linearDynamicSystems.BodeUnitsConverter;
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2009</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class BodePlotConstructor
 {
    private BodePlotConstructor()
@@ -28,8 +16,8 @@ public class BodePlotConstructor
       double[][] freqMagPhase = computeFreqMagPhase(time, data);
 
       double[] frequency = freqMagPhase[0];
-      double[] magnitude = BodeUnitsConverter.convertMagnitudeToDecibels(freqMagPhase[1]);
-      double[] phase = BodeUnitsConverter.convertRadianToDegrees(freqMagPhase[2]);
+      double[] magnitude = Conversions.convertMagnitudeToDecibels(freqMagPhase[1]);
+      double[] phase = Conversions.convertRadianToDegrees(freqMagPhase[2]);
 
       double[][] bodeData = new double[][]
       {
@@ -61,12 +49,12 @@ public class BodePlotConstructor
    public static void plotBodeForTransferFunction(String name, TransferFunction transferFunction, double[] omega)
    {
       double[] bodeMagnitude = transferFunction.getMagnitude(omega);
-      bodeMagnitude = BodeUnitsConverter.convertMagnitudeToDecibels(bodeMagnitude);
+      bodeMagnitude = Conversions.convertMagnitudeToDecibels(bodeMagnitude);
 
       double[] bodePhase = transferFunction.getPhase(omega);
-      bodePhase = BodeUnitsConverter.convertRadianToDegrees(bodePhase);
+      bodePhase = Conversions.convertRadianToDegrees(bodePhase);
 
-      double[] bodeFrequency = BodeUnitsConverter.convertRadPerSecondToHz(omega);
+      double[] bodeFrequency = Conversions.convertRadPerSecondToHz(omega);
 
       double[][] bodeData = new double[][]
       {
@@ -96,10 +84,10 @@ public class BodePlotConstructor
       double[] outputPhase = outputFreqMagPhase[2];
 
       double[] bodeMagnitude = divide(outputMagnitude, inputMagnitude);
-      bodeMagnitude = BodeUnitsConverter.convertMagnitudeToDecibels(bodeMagnitude);
+      bodeMagnitude = Conversions.convertMagnitudeToDecibels(bodeMagnitude);
 
       double[] bodePhase = subtractMod2PI(outputPhase, inputPhase);
-      bodePhase = BodeUnitsConverter.convertRadianToDegrees(bodePhase);
+      bodePhase = Conversions.convertRadianToDegrees(bodePhase);
 
       return new double[][]
       {

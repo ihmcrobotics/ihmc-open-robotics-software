@@ -27,7 +27,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
@@ -47,7 +46,7 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.util.inputdevices.MidiSliderBoard;
+import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 
 public class DRCRobotMidiSliderBoardPositionManipulation
 {
@@ -1030,10 +1029,10 @@ public class DRCRobotMidiSliderBoardPositionManipulation
          
          for (int j = i + 1; j < basePoints.length; j++)
          {
-            YoGraphicLineSegment dynamicGraphicLineSegment = new YoGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
+            YoGraphicLineSegment yoGraphicLineSegment = new YoGraphicLineSegment(namePrefix + "SupportLine", basePoints[i], basePoints[j],
                   1.0, appearance, false);
-            yoGraphicsList.add(dynamicGraphicLineSegment);
-            linesList.add(dynamicGraphicLineSegment);
+            yoGraphicsList.add(yoGraphicLineSegment);
+            linesList.add(yoGraphicLineSegment);
          }
       }
 

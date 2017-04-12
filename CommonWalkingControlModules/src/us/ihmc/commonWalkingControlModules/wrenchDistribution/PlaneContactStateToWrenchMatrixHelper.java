@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -20,7 +21,6 @@ import us.ihmc.robotics.dataStructures.variable.LongYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
@@ -105,6 +105,8 @@ public class PlaneContactStateToWrenchMatrixHelper
       RigidBody rigidBody = contactablePlaneBody.getRigidBody();
       planeFrame = contactablePlaneBody.getSoleFrame();
       yoPlaneContactState = new YoPlaneContactState(namePrefix, rigidBody, planeFrame, contactPoints2d, 0.0, registry);
+      yoPlaneContactState.clear();
+      yoPlaneContactState.computeSupportPolygon();
 
       hasReset = new BooleanYoVariable(namePrefix + "HasReset", registry);
       resetRequested = new BooleanYoVariable(namePrefix + "ResetRequested", registry);
@@ -112,7 +114,7 @@ public class PlaneContactStateToWrenchMatrixHelper
 
       hasReceivedCenterOfPressureCommand = new BooleanYoVariable(namePrefix + "HasReceivedCoPCommand", registry);
       desiredCoPCommandInSoleFrame = new YoFramePoint2d(namePrefix + "DesiredCoPCommand", planeFrame, registry);
-      
+
       yoRho = new YoMatrix(namePrefix + "Rho", rhoSize, 1, registry);
 
       for (int i = 0; i < rhoSize; i++)
@@ -208,7 +210,7 @@ public class PlaneContactStateToWrenchMatrixHelper
             desiredCoPMatrix.set(1, 0, desiredCoPCommandInSoleFrame.getY());
             desiredCoPWeightMatrix.set(0, 0, desiredCoPCommandWeightInSoleFrame.getX());
             desiredCoPWeightMatrix.set(1, 1, desiredCoPCommandWeightInSoleFrame.getY());
-            
+
             hasReceivedCenterOfPressureCommand.set(false);
          }
          else
@@ -294,7 +296,7 @@ public class PlaneContactStateToWrenchMatrixHelper
       yoPlaneContactState.getContactNormalFrameVector(contactNormalVector);
       contactNormalVector.changeFrame(planeFrame);
       contactNormalVector.normalize();
-      GeometryTools.getAxisAngleFromZUpToVector(contactNormalVector.getVector(), normalContactVectorRotation);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(contactNormalVector.getVector(), normalContactVectorRotation);
       normalContactVectorRotationMatrixToPack.set(normalContactVectorRotation);
    }
 
@@ -337,9 +339,9 @@ public class PlaneContactStateToWrenchMatrixHelper
       {
          basisVectorOrigin.changeFrame(planeFrame);
          basisVector.changeFrame(planeFrame);
-         
+
          unitSpatialForceVector.setIncludingFrame(basisVector, basisVectorOrigin);
-         
+
          singleRhoCoPJacobian.set(0, 0, -unitSpatialForceVector.getAngularPartY() / forceFromRho.getZ());
          singleRhoCoPJacobian.set(1, 0, unitSpatialForceVector.getAngularPartX() / forceFromRho.getZ());
       }

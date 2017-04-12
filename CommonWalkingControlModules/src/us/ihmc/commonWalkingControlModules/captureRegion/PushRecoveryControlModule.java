@@ -67,19 +67,19 @@ public class PushRecoveryControlModule
    private final FramePoint projectedCapturePoint = new FramePoint();
    private final FramePoint2d projectedCapturePoint2d = new FramePoint2d();
 
-   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.bipedSupportPolygon = bipedSupportPolygons;
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
-      feet = momentumBasedController.getContactableFeet();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+      feet = controllerToolbox.getContactableFeet();
       midFeetZUp = referenceFrames.getMidFeetZUpFrame();
       soleFrames = referenceFrames.getSoleFrames();
 
       enablePushRecovery = new BooleanYoVariable("enablePushRecovery", registry);
       enablePushRecovery.set(ENABLE); // todo add some smartness on whether ot not to enable this if using the icp optimization
 
-      yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
       footstepAdjustor = new FootstepAdjustor(feet, registry, yoGraphicsListRegistry);
 

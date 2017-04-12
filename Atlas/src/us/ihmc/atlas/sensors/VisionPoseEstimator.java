@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import boofcv.struct.calib.IntrinsicParameters;
 import georegression.struct.plane.PlaneGeneral3D_F64;
 import georegression.struct.point.Point3D_F64;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -33,7 +34,6 @@ import us.ihmc.sensorProcessing.bubo.clouds.detect.wrapper.ConfigSurfaceNormals;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.sensorData.CameraData;
 import us.ihmc.sensorProcessing.sensorData.DRCStereoListener;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class VisionPoseEstimator implements DRCStereoListener
 {

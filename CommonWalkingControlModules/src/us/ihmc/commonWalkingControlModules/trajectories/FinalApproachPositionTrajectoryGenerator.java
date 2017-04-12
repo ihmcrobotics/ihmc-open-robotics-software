@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFramePointInMultipleFrames;
 import us.ihmc.robotics.math.frames.YoFrameVectorInMultipleFrames;
 import us.ihmc.robotics.math.trajectories.PositionTrajectoryGeneratorInMultipleFrames;
@@ -189,7 +189,7 @@ public class FinalApproachPositionTrajectoryGenerator extends PositionTrajectory
       this.finalDirection.normalize();
       this.finalDirection.get(tempVector);
       tempVector.negate();
-      GeometryTools.getAxisAngleFromZUpToVector(tempVector, axisAngleToWorld);
+      EuclidGeometryTools.axisAngleFromZUpToVector3D(tempVector, axisAngleToWorld);
       rotationPlane.setIncludingFrame(this.finalDirection.getReferenceFrame(), axisAngleToWorld);
 
       this.approachDistance.set(approachDistance);

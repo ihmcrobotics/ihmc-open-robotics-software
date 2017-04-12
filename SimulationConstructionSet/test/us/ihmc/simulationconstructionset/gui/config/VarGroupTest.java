@@ -1,6 +1,6 @@
 package us.ihmc.simulationconstructionset.gui.config;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;

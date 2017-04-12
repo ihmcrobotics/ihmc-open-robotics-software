@@ -341,16 +341,20 @@ public class PelvisKinematicsBasedLinearStateCalculator
                   // TODO Garbage
                   FramePoint2d[] intersectionPoints = footPolygon.intersectionWith(footCenterCoPLineSegment);
 
-                  if (intersectionPoints.length == 2)
-                     System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
-
-                  if (intersectionPoints.length == 0)
+                  if (intersectionPoints == null || intersectionPoints.length == 0)
                   {
                      System.out.println("In " + getClass().getSimpleName() + ": Found no solution for the CoP projection.");
                      tempCoP2d.setToZero(footFrame);
                   }
                   else
+                  {
                      tempCoP2d.set(intersectionPoints[0]);
+                     
+                     if (intersectionPoints.length == 2)
+                        System.out.println("In " + getClass().getSimpleName() + ": Found two solutions for the CoP projection.");
+                  }
+                  
+
                }
                else // If foot barely loaded and actual CoP outside, then don't update the raw CoP right below
                {
@@ -438,7 +442,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          Twist footTwistInWorld = footTwistsInWorld.get(foot);
          YoFrameVector footVelocityInWorld = footVelocitiesInWorld.get(foot);
 
-         twistCalculator.getTwistOfBody(footTwistInWorld, foot);
+         twistCalculator.getTwistOfBody(foot, footTwistInWorld);
          footTwistInWorld.changeBodyFrameNoRelativeTwist(soleFrames.get(foot));
          footTwistInWorld.changeFrame(soleFrames.get(foot));
 

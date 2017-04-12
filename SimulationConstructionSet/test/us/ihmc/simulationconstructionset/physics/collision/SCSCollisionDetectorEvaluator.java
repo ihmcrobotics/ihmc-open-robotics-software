@@ -54,7 +54,7 @@ public class SCSCollisionDetectorEvaluator
          pointsOnB.add(pointOnBViz);
       }
 
-      robot.addDynamicGraphicObjectsListRegistry(yoGraphicsListRegistry );
+      robot.addYoGraphicsListRegistry(yoGraphicsListRegistry );
       // Create the joints:
       FloatingJoint jointOne = new FloatingJoint("one", "cubeOne", new Vector3D(), robot);
       Link linkOne = new Link("CubeOne");

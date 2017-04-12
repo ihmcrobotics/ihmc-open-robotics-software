@@ -14,6 +14,7 @@ import us.ihmc.communication.packets.StatusPacket;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyTrajectoryCommand;
@@ -40,6 +41,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(HandTrajectoryCommand.class);
       commands.add(ChestTrajectoryCommand.class);
+      commands.add(PelvisHeightTrajectoryCommand.class);
       commands.add(PelvisOrientationTrajectoryCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
       commands.add(TrackingWeightsCommand.class);

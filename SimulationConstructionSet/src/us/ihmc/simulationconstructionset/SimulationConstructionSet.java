@@ -32,6 +32,7 @@ import javax.swing.JTextField;
 
 import com.jme3.renderer.Camera;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -85,30 +86,24 @@ import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandExecu
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.commands.WriteDataCommandExecutor;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.DynamicGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.config.VarGroupList;
 import us.ihmc.simulationconstructionset.gui.dialogConstructors.GUIEnablerAndDisabler;
-import us.ihmc.simulationconstructionset.gui.hierarchyTree.NameSpaceHierarchyTree;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.physics.CollisionHandler;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
-import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RobotConnectionGUIUpdater;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
-import us.ihmc.simulationconstructionset.robotcommprotocol.SCSRobotGUICommunicatorComponents;
 import us.ihmc.simulationconstructionset.robotdefinition.RobotDefinitionFixedFrame;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.synchronization.SimulationSynchronizer;
-import us.ihmc.simulationconstructionset.util.graphics.DynamicGraphicCheckBoxMenuItem;
+import us.ihmc.simulationconstructionset.gui.YoGraphicCheckBoxMenuItem;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.tools.gui.GraphicsUpdatable;
-import us.ihmc.tools.io.printing.PrintTools;
 import us.ihmc.tools.thread.ThreadTools;
 
 /**
@@ -220,9 +215,6 @@ import us.ihmc.tools.thread.ThreadTools;
  * <p>In the first example, the 11 variables are specified by name.  The second example specifies some variables by name as well as including an array of regular expressions to be used in finding
  * additional variables.</p>
  * <p/>
- * <p>Copyright: Copyright (c) 2005</p>
- * <p/>
- * <p>Company: Yobotics, Inc.</p>
  *
  * @author Jerry Pratt
  * @version 1.0
@@ -235,6 +227,14 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       DataBufferCommandsExecutor, TickAndUpdatable
 {
    private static final boolean TESTING_LOAD_STUFF = false;
+
+   /**
+    * If set top true this will print YoVariable hotspots. Those are YoVariableRegistries with more
+    * then the specified number of variables or children.
+    */
+   private static final boolean SHOW_REGISTRY_SIZES_ON_STARTUP = false;
+   private static final int MIN_VARIABLES_FOR_HOTSPOT = 75;
+   private static final int MIN_CHILDREN_FOR_HOTSPOT = 15;
 
    /**
     * The default size of the data buffer in record steps.
@@ -290,7 +290,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    private final SimulationConstructionSetParameters parameters;
 
-   private final DynamicGraphicMenuManager dynamicGraphicMenuManager;
+   private final YoGraphicMenuManager yoGraphicMenuManager;
 
    public static SimulationConstructionSet generateSimulationFromDataFile(File chosenFile)
    {
@@ -410,11 +410,11 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                createFrame(showGUI);
             }
          });
-         this.dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
+         this.yoGraphicMenuManager = new YoGraphicMenuManager();
       }
       else
       {
-         this.dynamicGraphicMenuManager = null;
+         this.yoGraphicMenuManager = null;
       }
 
       this.mySimulation = simulation;
@@ -489,7 +489,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                myGUI.getGraphics3dAdapter().play();
          }
       });
-      
+
       if (robots != null)
       {
          for (Robot robot : robots)
@@ -1165,7 +1165,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       if (myGUI != null)
       {
          myGUI.setCameraPosition(cameraPosition);
-      }      
+      }
    }
 
    /**
@@ -1192,6 +1192,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void startOnAThread()
    {
       ThreadTools.startAThread(this, "Simulation Contruction Set");
+
+      if (SHOW_REGISTRY_SIZES_ON_STARTUP)
+         YoVariableRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT, rootRegistry);
 
       while (!this.hasSimulationThreadStarted())
       {
@@ -1384,7 +1387,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       this.setTime(timeToSetInSeconds);
       this.tickAndUpdate();
    }
-   
+
    /**
     * Increments the data buffer index and updates all of the entries min & max values.  If a GUI exists, its graphs are updated.
     */
@@ -1961,7 +1964,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    {
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
       addRobot(robot);
-      return robot; 
+      return robot;
    }
 
    /**
@@ -1971,7 +1974,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void addRobot(Robot robot)
    {
       //TODO: Clean this up and clean up setRobot too.
-      
+
       YoVariableRegistry robotsYoVariableRegistry = robot.getRobotsYoVariableRegistry();
       YoVariableRegistry parentRegistry = robotsYoVariableRegistry.getParent();
       if (parentRegistry != null)
@@ -2226,7 +2229,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void run()
    {
       // myGUI.setupConfiguration("all", "all", "all", "all");
-      
+
       if (!TESTING_LOAD_STUFF)
       {
          if ((!defaultLoaded) && (myGUI != null))
@@ -2282,10 +2285,12 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          if (parameters.getShowWindows()) myGUI.show();
 
-         if (!parameters.getShowYoGraphicObjects() && dynamicGraphicMenuManager != null)
+         if (!parameters.getShowYoGraphicObjects() && yoGraphicMenuManager != null)
          {
-            dynamicGraphicMenuManager.hideAllGraphics();
+            yoGraphicMenuManager.hideAllGraphics();
          }
+
+         this.setYoGraphicsGlobalScale(parameters.getYoGraphicsGlobalScale());
       }
 
       hasSimulationThreadStarted = true;
@@ -2300,6 +2305,9 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       fastTicks = 0;
 
       // t = rob.getVariable("t");
+
+      if (SHOW_REGISTRY_SIZES_ON_STARTUP)
+         YoVariableRegistry.printSizeRecursively(MIN_VARIABLES_FOR_HOTSPOT, MIN_CHILDREN_FOR_HOTSPOT, rootRegistry);
 
       // Three state loop, simulation is either playing, running, or waiting
       while (true)
@@ -3918,58 +3926,6 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return standardAllCommandsExecutor.createNewViewportWindow(viewportName, screenID, maximizeWindow);
    }
 
-   public RobotSocketConnection allowTCPConnectionToHost(String HOST)
-   {
-      return allowTCPConnectionToHost(HOST, (ArrayList<NewDataListener>) null);
-   }
-
-   public RobotSocketConnection allowTCPConnectionToHost(String HOST, NewDataListener newDataListener)
-   {
-      if (newDataListener == null)
-      {
-         return allowTCPConnectionToHost(HOST);
-      }
-
-      ArrayList<NewDataListener> newDataListeners = new ArrayList<NewDataListener>(1);
-      newDataListeners.add(newDataListener);
-
-      return allowTCPConnectionToHost(HOST, newDataListeners);
-   }
-
-   /**
-    * Creates a SCSRobotGUICommandListener which communicates to a robot at the specified ethernet HOST address.
-    * Only the variables specified in the YoVariableRegistries, set through the GUI are sent and/or logged on the robot side.
-    * This method adds the relevant GUI modifications for robot communication.
-    * Once communication is established the new RobotSocketConnection monitors and manages robot communication.
-    *
-    * @param HOST IP address of robot.
-    * @return The new SCSRobotGUICommandListener.
-    * @see SCSRobotGUICommunicatorComponents SCSRobotGUICommandListener
-    */
-   public RobotSocketConnection allowTCPConnectionToHost(String HOST, ArrayList<NewDataListener> newDataListeners)
-   {
-      RobotConnectionGUIUpdater guiUpdater = new RobotConnectionGUIUpdater(this);
-
-      GUISideCommandListener robotCommandListener = new GUISideCommandListener(mySimulation.getDataBuffer(), rootRegistry, guiUpdater, guiUpdater);
-      RobotSocketConnection robotSocketConnection = new RobotSocketConnection(HOST, robotCommandListener, rootRegistry, newDataListeners);
-
-      if (myGUI != null)
-      {
-         NameSpaceHierarchyTree nameSpaceHierarchyTree = myGUI.getCombinedVarPanel().getNameSpaceHierarchyTree();
-         nameSpaceHierarchyTree.addRegistrySettingsChangedListener(robotSocketConnection);
-         robotCommandListener.addCreatedNewRegistryListener(nameSpaceHierarchyTree);
-      }
-
-      SCSRobotGUICommunicatorComponents robotGUI = new SCSRobotGUICommunicatorComponents(robotSocketConnection);
-
-      robotCommandListener.attachDoDisconnectListener(robotSocketConnection);
-      robotCommandListener.attachDoDisconnectListener(robotGUI);
-
-      robotGUI.putButtonsAndExitActionListenerOnSimulationGUI(this);
-
-      return robotSocketConnection;
-   }
-
    // ++JEP:  These aren't good, but is only there so that PC104 stuff can work...
 
    /**
@@ -4176,7 +4132,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
    public void addExtraJpanel(Component extraPanel, String name, boolean showOnStart)
    {
       setupExtraPanel(new ExtraPanelConfiguration(name, extraPanel, showOnStart));
-      
+
       if (showOnStart)
       {
          getStandardSimulationGUI().selectPanel(name);
@@ -4347,16 +4303,27 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
       if (yoGraphicsLists == null) return;
 
-      if(dynamicGraphicMenuManager != null)
+      if(yoGraphicMenuManager != null)
       {
-         addCheckBoxesToDynamicGraphicCheckBoxMenuItem(yoGraphicsLists);
+         addCheckBoxesToYoGraphicCheckBoxMenuItem(yoGraphicsLists);
          displayYoGraphicMenu();
       }
 
       yoGraphicListRegistries.add(yoGraphicsListRegistry);
    }
 
-   private void addCheckBoxesToDynamicGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
+   public void setYoGraphicsGlobalScale(double globalScale)
+   {
+      myGUI.setYoGraphicsGlobalScale(globalScale);
+      parameters.setYoGraphicsGlobalScale(globalScale);
+   }
+
+   public double getGlobalYoGraphicsScale()
+   {
+      return myGUI.getYoGraphicsGlobalScale();
+   }
+
+   private void addCheckBoxesToYoGraphicCheckBoxMenuItem(final List<YoGraphicsList> yoGraphicsLists)
    {
       EventDispatchThreadHelper.invokeAndWait(new Runnable()
       {
@@ -4374,13 +4341,13 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
                String label = yoGraphicsList.getLabel();
                ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
                boolean selectedState = yoGraphicsList.checkAllYoGraphicsAreShowing();
-               DynamicGraphicCheckBoxMenuItem checkBox = new DynamicGraphicCheckBoxMenuItem(label, yoGraphics, selectedState);
-               dynamicGraphicMenuManager.addCheckBox(checkBox);
+               YoGraphicCheckBoxMenuItem checkBox = new YoGraphicCheckBoxMenuItem(label, yoGraphics, selectedState);
+               yoGraphicMenuManager.addCheckBox(checkBox);
             }
          }
       });
    }
-   
+
    public SimulationOverheadPlotterFactory createSimulationOverheadPlotterFactory()
    {
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = new SimulationOverheadPlotterFactory();
@@ -4388,7 +4355,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return simulationOverheadPlotterFactory;
    }
 
-   public void hideAllDynamicGraphicObjects()
+   public void hideAllYoGraphics()
    {
       int numberOfElements = yoGraphicListRegistries.size();
 
@@ -4399,7 +4366,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       }
    }
 
-   public boolean checkAllDynamicGraphicObjectsListRegistriesAreShowing()
+   public boolean checkAllYoGraphicsListRegistriesAreShowing()
    {
       boolean ret = true;
       int numberOfElements = yoGraphicListRegistries.size();
@@ -4413,7 +4380,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       return ret;
    }
 
-   public void setDynamicGraphicObjectsListVisible(String name, boolean visible)
+   public void setYoGraphicsListVisible(String name, boolean visible)
    {
       ArrayList<YoGraphicsList> lists = new ArrayList<YoGraphicsList>();
       int numberOfElements = yoGraphicListRegistries.size();
@@ -4422,7 +4389,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
       {
          YoGraphicsListRegistry yoGraphicsListRegistry = yoGraphicListRegistries.get(i);
          lists.clear();
-         yoGraphicsListRegistry.getRegisteredDynamicGraphicObjectsLists(lists);
+         yoGraphicsListRegistry.getRegisteredYoGraphicsLists(lists);
          int n = lists.size();
 
          for (int j = 0; j < n; j++)
@@ -4443,7 +4410,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
 
    }
 
-   public ArrayList<YoGraphicsListRegistry> getDynamicGraphicObjectsListRegistries()
+   public ArrayList<YoGraphicsListRegistry> getYoGraphicsListRegistries()
    {
       return yoGraphicListRegistries;
    }
@@ -4456,7 +4423,7 @@ public class SimulationConstructionSet implements Runnable, YoVariableHolder, Ru
          public void run()
          {
             JMenuBar menuBar = new JMenuBar();
-            menuBar.add(dynamicGraphicMenuManager.getjMenu());
+            menuBar.add(yoGraphicMenuManager.getjMenu());
             addMenuBar(menuBar);
          }
       });

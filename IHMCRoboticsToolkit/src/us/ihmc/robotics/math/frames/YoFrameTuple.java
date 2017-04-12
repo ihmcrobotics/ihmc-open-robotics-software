@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.frames;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,7 +24,7 @@ import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 //Note: You should only make these once at the initialization of a controller. You shouldn't make any on the fly since they contain YoVariables.
-public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends AbstractReferenceFrameHolder
+public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends AbstractReferenceFrameHolder implements Clearable
 {
    private final String namePrefix;
    private final String nameSuffix;
@@ -157,6 +158,23 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       }
    }
 
+   /**
+    * Selects a component of this tuple based on {@code index} and returns its value.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to get.
+    * @return the value of the component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public double getElement(int index)
+   {
+      putYoValuesIntoFrameTuple();
+      return frameTuple.getElement(index);
+   }
+
    public final DoubleYoVariable getYoX()
    {
       return x;
@@ -198,6 +216,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
     * Sets x, y, and z with no checks for reference frame matches.
     * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.
     */
+   @Deprecated
    public final void setWithoutChecks(FrameTuple<?, ?> frameTuple)
    {
       x.set(frameTuple.getX());
@@ -337,6 +356,13 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       frameTuple.setToZero(getReferenceFrame());
       frameTuple.add(frameTuple1, frameTuple2);
+      getYoValuesFromFrameTuple();
+   }
+
+   public final void add(YoFrameTuple<?, ?> yoFrameTuple1, YoFrameTuple<?, ?> yoFrameTuple2)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.add(yoFrameTuple1.getFrameTuple(), yoFrameTuple2.getFrameTuple());
       getYoValuesFromFrameTuple();
    }
 
@@ -550,12 +576,14 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       frameTuple.checkForNaN();
    }
 
+   @Override
    public final boolean containsNaN()
    {
       putYoValuesIntoFrameTuple();
       return frameTuple.containsNaN();
    }
 
+   @Override
    public final void setToZero()
    {
       setToZero(false);
@@ -567,6 +595,7 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       getYoValuesFromFrameTuple(notifyListeners);
    }
 
+   @Override
    public final void setToNaN()
    {
       frameTuple.setToNaN(getReferenceFrame());
@@ -584,6 +613,24 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       putYoValuesIntoFrameTuple();
       frameTuple.set(direction, value);
+      getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Selects a component of this tuple based on {@code index} and sets it to {@code value}.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to set.
+    * @param value the new value of the selected component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public void setElement(int index, double value)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.setElement(index, value);
       getYoValuesFromFrameTuple();
    }
 

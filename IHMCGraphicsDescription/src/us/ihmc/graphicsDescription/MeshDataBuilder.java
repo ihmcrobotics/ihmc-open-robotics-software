@@ -73,7 +73,7 @@ public class MeshDataBuilder
     */
    public void addCone(double height, double radius, Tuple3DBasics offset)
    {
-      addMesh(MeshDataGenerator.Cone(radius, height, DEFAULT_RES), offset);
+      addMesh(MeshDataGenerator.Cone(height, radius, DEFAULT_RES), offset);
    }
 
    /**

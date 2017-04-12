@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
@@ -68,19 +67,19 @@ public class CenterOfMassHeightManager
    private final RigidBody pelvis;
    private final TwistCalculator twistCalculator;
 
-   public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox momentumBasedController, WalkingControllerParameters walkingControllerParameters,
+   public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
          YoVariableRegistry parentRegistry)
    {
-      CommonHumanoidReferenceFrames referenceFrames = momentumBasedController.getReferenceFrames();
+      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMassJacobian = momentumBasedController.getCenterOfMassJacobian();
+      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
       pelvisFrame = referenceFrames.getPelvisFrame();
 
-      gravity = momentumBasedController.getGravityZ();
-      pelvis = momentumBasedController.getFullRobotModel().getPelvis();
-      twistCalculator = momentumBasedController.getTwistCalculator();
+      gravity = controllerToolbox.getGravityZ();
+      pelvis = controllerToolbox.getFullRobotModel().getPelvis();
+      twistCalculator = controllerToolbox.getTwistCalculator();
 
-      centerOfMassTrajectoryGenerator = createTrajectoryGenerator(momentumBasedController, walkingControllerParameters, referenceFrames);
+      centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
 
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
       controlPelvisHeightInsteadOfCoMHeight.set(true);
@@ -91,7 +90,7 @@ public class CenterOfMassHeightManager
       DoubleYoVariable maxCoMHeightAcceleration = comHeightControlGains.getYoMaximumFeedback();
       DoubleYoVariable maxCoMHeightJerk = comHeightControlGains.getYoMaximumFeedbackRate();
 
-      double controlDT = momentumBasedController.getControlDT();
+      double controlDT = controllerToolbox.getControlDT();
       // TODO Need to extract the maximum velocity parameter.
       coMHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(null, maxCoMHeightAcceleration, maxCoMHeightJerk, controlDT, registry);
       this.centerOfMassHeightController = new PDController(kpCoMHeight, kdCoMHeight, "comHeight", registry);
@@ -99,7 +98,7 @@ public class CenterOfMassHeightManager
       parentRegistry.addChild(registry);
    }
 
-   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox momentumBasedController,
+   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames)
    {
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
@@ -110,8 +109,8 @@ public class CenterOfMassHeightManager
       boolean activateDriftCompensation = walkingControllerParameters.getCoMHeightDriftCompensation();
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
       SideDependentList<ReferenceFrame> ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
-      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
             nominalHeightAboveGround, maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, centerOfMassFrame, pelvisFrame,
@@ -152,9 +151,9 @@ public class CenterOfMassHeightManager
       centerOfMassTrajectoryGenerator.handlePelvisHeightTrajectoryCommand(command);
    }
 
-   public void handleGoHomeCommand(GoHomeCommand command)
+   public void goHome(double trajectoryTime)
    {
-      centerOfMassTrajectoryGenerator.handleGoHomeCommand(command);
+      centerOfMassTrajectoryGenerator.goHome(trajectoryTime);
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
@@ -210,7 +209,7 @@ public class CenterOfMassHeightManager
          pelvisPosition.setToZero(pelvisFrame);
          pelvisPosition.changeFrame(worldFrame);
          zCurrent = pelvisPosition.getZ();
-         twistCalculator.getTwistOfBody(currentPelvisTwist, pelvis);
+         twistCalculator.getTwistOfBody(pelvis, currentPelvisTwist);
          currentPelvisTwist.changeFrame(worldFrame);
          zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }

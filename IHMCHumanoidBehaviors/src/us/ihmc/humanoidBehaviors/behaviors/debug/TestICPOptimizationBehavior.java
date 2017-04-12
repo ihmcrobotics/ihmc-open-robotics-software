@@ -25,6 +25,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
    private final DoubleYoVariable swingTime = new DoubleYoVariable("BehaviorSwingTime", registry);
    private final DoubleYoVariable sleepTime = new DoubleYoVariable("BehaviorSleepTime", registry);
    private final DoubleYoVariable transferTime = new DoubleYoVariable("BehaviorTransferTime", registry);
+   private final DoubleYoVariable stepLength = new DoubleYoVariable("BehaviorStepLength", registry);
    private final BooleanYoVariable stepInPlace = new BooleanYoVariable("StepInPlace", registry);
    private final BooleanYoVariable abortBehavior = new BooleanYoVariable("AbortBehavior", registry);
 
@@ -38,6 +39,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       swingTime.set(1.2);
       transferTime.set(0.6);
       sleepTime.set(10.0);
+      stepLength.set(0.3);
 
       timer = new YoStopwatch(yoTime);
    }
@@ -66,7 +68,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
       else if (!stepInPlace.getBooleanValue())
       {
          sendPacket(new TextToSpeechPacket("Step forward."));
-         stepPose.setX(0.3);
+         stepPose.setX(stepLength.getDoubleValue());
       }
       else
       {

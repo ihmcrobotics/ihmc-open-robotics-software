@@ -3,12 +3,12 @@ package us.ihmc.modelFileLoaders.SdfLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFJoint;
-import us.ihmc.tools.io.printing.PrintTools;
 
 public class SDFJointHolder
 {

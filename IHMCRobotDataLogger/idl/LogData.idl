@@ -1,0 +1,12 @@
+module us{
+module ihmc{
+module robotDataLogger{
+	struct LogData
+	{
+		long long uid;
+   		long long timestamp;
+		sequence<octet> data;
+	};
+};
+};
+};

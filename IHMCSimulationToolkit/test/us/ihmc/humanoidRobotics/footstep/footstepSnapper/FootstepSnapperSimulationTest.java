@@ -1,7 +1,6 @@
 package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +16,7 @@ import org.junit.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -35,7 +35,6 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.BoundingBox2d;
 import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -137,7 +136,7 @@ public class FootstepSnapperSimulationTest
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(minX, minY, maxX, maxY);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(minX, minY, maxX, maxY);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("List of Points", footstepSnapper, new Graphics3DObject(), visualizeAndKeepUp);
 
 
@@ -200,7 +199,7 @@ public class FootstepSnapperSimulationTest
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(minX, minY, maxX, maxY);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(minX, minY, maxX, maxY);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("List of Points", footstepSnapper, new Graphics3DObject(), visualizeAndKeepUp);
 
 
@@ -247,7 +246,7 @@ public class FootstepSnapperSimulationTest
       double boundingBoxDimension = 0.3;
       footstepSnapper.setUseMask(true, maskSafetyBuffer, boundingBoxDimension);
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(-1.0, -1.0, 1.0, 1.0);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(-1.0, -1.0, 1.0, 1.0);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Simple Bumpy Ground", footstepSnapper, null, visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -291,7 +290,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 3.5;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -334,7 +333,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 3.5;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -377,7 +376,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 0;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -421,7 +420,7 @@ public class FootstepSnapperSimulationTest
       double centerY = 0;
       double halfWidth = 0.6;
 
-      BoundingBox2d rangeOfPointsToTest = new BoundingBox2d(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
+      BoundingBox2D rangeOfPointsToTest = new BoundingBox2D(centerX - halfWidth, centerY - halfWidth, centerX + halfWidth, centerY + halfWidth);
       FootstepSnapperTestHelper helper = new FootstepSnapperTestHelper("Steps", footstepSnapper, groundProfile.getLinkGraphics(), visualizeAndKeepUp);
 
       double resolution = 0.02;
@@ -669,7 +668,7 @@ public class FootstepSnapperSimulationTest
 
 
 
-      public void createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2d testingRange, double resolution, double heightThreshold,
+      public void createHeightMap(us.ihmc.graphicsDescription.HeightMap inputHeightMap, BoundingBox2D testingRange, double resolution, double heightThreshold,
                                   double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
                                   double maxAllowableXYDistanceForAPointToBeConsideredClose, int maxNodes)
       {
@@ -702,7 +701,7 @@ public class FootstepSnapperSimulationTest
       }
 
 
-      public void createHeightMap(ArrayList<Point3D> listOfPoints, BoundingBox2d testingRange, double resolution, double heightThreshold,
+      public void createHeightMap(ArrayList<Point3D> listOfPoints, BoundingBox2D testingRange, double resolution, double heightThreshold,
                                   double quadTreeMaxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
                                   double maxAllowableXYDistanceForAPointToBeConsideredClose, int maxNodes)
       {
@@ -763,7 +762,7 @@ public class FootstepSnapperSimulationTest
          testAPoint(assertPositionConditions, assertPointConditions, footstepBody);
       }
 
-      private void testRandomPoints(int numberOfPointsToTest, BoundingBox2d rangeOfPointsToTest, boolean assertPositionConditions,
+      private void testRandomPoints(int numberOfPointsToTest, BoundingBox2D rangeOfPointsToTest, boolean assertPositionConditions,
                                     boolean assertPointConditions)
               throws InsufficientDataException
       {

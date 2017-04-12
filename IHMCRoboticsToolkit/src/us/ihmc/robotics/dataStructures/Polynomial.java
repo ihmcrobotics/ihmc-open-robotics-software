@@ -7,15 +7,11 @@ import org.ejml.data.DenseMatrix64F;
 import us.ihmc.robotics.MathTools;
 
 /**
- * <p>Polynomial </p>
+ * <p>
+ * Polynomial Function with real coefficients. Immuatable.
+ * </p>
  *
- * <p>Polynomial Function with real coefficients. Immuatable. </p>
- *
- * <p>Copyright (c) 2008</p>
- *
- * <p>IHMC-Yobotics </p>
- *
- * @author IHMC-Yobotics Biped Team
+ * @author IHMC Biped Team
  * @version 1.0
  */
 public class Polynomial
@@ -26,7 +22,7 @@ public class Polynomial
    private DenseMatrix64F constraintMatrix;
    private DenseMatrix64F constraintVector;
    private DenseMatrix64F coefficientVector;
-   
+
    public Polynomial(double constant)
    {
       this(new double[] {constant});
@@ -67,7 +63,7 @@ public class Polynomial
          }
       }
 
-      if (coefficientsHighOrderFirst.length - coefficientsToSkip == 0)    // Skipped them all since was {0.0, 0.0, ..., 0.0};
+      if (coefficientsHighOrderFirst.length - coefficientsToSkip == 0) // Skipped them all since was {0.0, 0.0, ..., 0.0};
       {
          coefficientsToSkip = coefficientsToSkip - 1;
       }
@@ -78,33 +74,33 @@ public class Polynomial
       {
          this.coefficients[i - coefficientsToSkip] = coefficientsHighOrderFirst[i];
       }
-      
-      if(coefficientsHighOrderFirst.length == 1)
+
+      if (coefficientsHighOrderFirst.length == 1)
       {
-    	  this.derivativeCoefficients = new double[]{0.0};    	  
+         this.derivativeCoefficients = new double[] {0.0};
       }
       else
       {
-          this.derivativeCoefficients = new double[coefficientsHighOrderFirst.length - 1];
-          int length = coefficientsHighOrderFirst.length;
-          for(int i = 0; i < coefficientsHighOrderFirst.length - 1; i++)
-          {
-        	  this.derivativeCoefficients[i] = (length - i - 1) * coefficientsHighOrderFirst[i];
-          }
+         this.derivativeCoefficients = new double[coefficientsHighOrderFirst.length - 1];
+         int length = coefficientsHighOrderFirst.length;
+         for (int i = 0; i < coefficientsHighOrderFirst.length - 1; i++)
+         {
+            this.derivativeCoefficients[i] = (length - i - 1) * coefficientsHighOrderFirst[i];
+         }
       }
-      
-      if(coefficientsHighOrderFirst.length < 3)
+
+      if (coefficientsHighOrderFirst.length < 3)
       {
-    	  this.doubleDerivativeCoefficients = new double[]{0.0};    	  
+         this.doubleDerivativeCoefficients = new double[] {0.0};
       }
       else
       {
-          this.doubleDerivativeCoefficients = new double[coefficientsHighOrderFirst.length - 2];
-          int length = coefficientsHighOrderFirst.length;
-          for(int i = 0; i < coefficientsHighOrderFirst.length - 2; i++)
-          {
-        	  this.doubleDerivativeCoefficients[i] = (length - i - 1) * (length - i - 2) * coefficientsHighOrderFirst[i];
-          }
+         this.doubleDerivativeCoefficients = new double[coefficientsHighOrderFirst.length - 2];
+         int length = coefficientsHighOrderFirst.length;
+         for (int i = 0; i < coefficientsHighOrderFirst.length - 2; i++)
+         {
+            this.doubleDerivativeCoefficients[i] = (length - i - 1) * (length - i - 2) * coefficientsHighOrderFirst[i];
+         }
       }
 
       if (coefficients == null)
@@ -120,7 +116,7 @@ public class Polynomial
       }
 
    }
-   
+
    private double findMaxAbsoluteCoefficient(double[] coefficients)
    {
       double maxCoefficient = 0.0;
@@ -153,13 +149,9 @@ public class Polynomial
       Polynomial scalePolynomial = new Polynomial(new double[] {scaleFactor});
 
       if (complexRootPairs == null)
-         complexRootPairs = new ComplexNumber[]
-         {
-         };
+         complexRootPairs = new ComplexNumber[] {};
       if (realRoots == null)
-         realRoots = new double[]
-         {
-         };
+         realRoots = new double[] {};
 
       Polynomial[] complexRootPolynomials = new Polynomial[complexRootPairs.length];
       Polynomial[] realRootPolynomials = new Polynomial[realRoots.length];
@@ -203,37 +195,36 @@ public class Polynomial
 
       return ret;
    }
-   
+
    public double evaluateDerivative(double input)
    {
-	   double x_n = 1.0;
-	   double ret = 0.0;
+      double x_n = 1.0;
+      double ret = 0.0;
 
-	   for (int i = coefficients.length - 2; i >= 0; i--) 
-	   {
-		   double coefficient = derivativeCoefficients[i];
-		   ret = ret + coefficient * x_n;
-		   x_n = x_n * input;
-	   }
+      for (int i = coefficients.length - 2; i >= 0; i--)
+      {
+         double coefficient = derivativeCoefficients[i];
+         ret = ret + coefficient * x_n;
+         x_n = x_n * input;
+      }
 
-	   return ret;
+      return ret;
    }
-   
+
    public double evaluateDoubleDerivative(double input)
    {
-	   double x_n = 1.0;
-	   double ret = 0.0;
+      double x_n = 1.0;
+      double ret = 0.0;
 
-	   for (int i = coefficients.length - 3; i >= 0; i--) 
-	   {
-		   double coefficient = doubleDerivativeCoefficients[i];
-		   ret = ret + coefficient * x_n;
-		   x_n = x_n * input;
-	   }
+      for (int i = coefficients.length - 3; i >= 0; i--)
+      {
+         double coefficient = doubleDerivativeCoefficients[i];
+         ret = ret + coefficient * x_n;
+         x_n = x_n * input;
+      }
 
-	   return ret;
+      return ret;
    }
-   
 
    public ComplexNumber evaluate(ComplexNumber input)
    {
@@ -249,7 +240,6 @@ public class Polynomial
 
       return ret;
    }
-
 
    public int getOrder()
    {
@@ -334,7 +324,6 @@ public class Polynomial
       return new Polynomial(newCoefficients);
    }
 
-
    public String toString()
    {
       StringBuilder builder = new StringBuilder();
@@ -372,123 +361,123 @@ public class Polynomial
 
       return true;
    }
-   
+
    public void setQuintic(double x0, double x1, double y0, double yd0, double ydd0, double y1, double yd1, double ydd1)
    {
-	   MathTools.checkIfEqual(coefficients.length, 6);
-	   constraintMatrix = new DenseMatrix64F(new double[6][6]);
-	   constraintVector = new DenseMatrix64F(new double[6][1]);
-	   coefficientVector = new DenseMatrix64F(new double[6][1]);
+      MathTools.checkEquals(coefficients.length, 6);
+      constraintMatrix = new DenseMatrix64F(new double[6][6]);
+      constraintVector = new DenseMatrix64F(new double[6][1]);
+      coefficientVector = new DenseMatrix64F(new double[6][1]);
 
-	   setPointConstraint(0, x0, y0);
-	   setDerivativeConstraint(1, x0, yd0);
-	   setDoubleDerivativeConstraint(2, x0, ydd0);
+      setPointConstraint(0, x0, y0);
+      setDerivativeConstraint(1, x0, yd0);
+      setDoubleDerivativeConstraint(2, x0, ydd0);
 
-	   setPointConstraint(3, x1, y1);
-	   setDerivativeConstraint(4, x1, yd1);
-	   setDoubleDerivativeConstraint(5, x1, ydd1);
-	   
-	   solve(constraintMatrix, constraintVector, coefficientVector);
-	   setVariables();
+      setPointConstraint(3, x1, y1);
+      setDerivativeConstraint(4, x1, yd1);
+      setDoubleDerivativeConstraint(5, x1, ydd1);
+
+      solve(constraintMatrix, constraintVector, coefficientVector);
+      setVariables();
    }
-   
+
    public void setCubic(double x0, double x1, double y0, double yd0, double y1, double yd1)
    {
-	   MathTools.checkIfEqual(coefficients.length, 4);
-	   constraintMatrix = new DenseMatrix64F(new double[4][4]);
-	   constraintVector = new DenseMatrix64F(new double[4][1]);
-	   coefficientVector = new DenseMatrix64F(new double[4][1]);
+      MathTools.checkEquals(coefficients.length, 4);
+      constraintMatrix = new DenseMatrix64F(new double[4][4]);
+      constraintVector = new DenseMatrix64F(new double[4][1]);
+      coefficientVector = new DenseMatrix64F(new double[4][1]);
 
-	   setPointConstraint(0, x0, y0);
-	   setDerivativeConstraint(1, x0, yd0);
+      setPointConstraint(0, x0, y0);
+      setDerivativeConstraint(1, x0, yd0);
 
-	   setPointConstraint(2, x1, y1);
-	   setDerivativeConstraint(3, x1, yd1);
-	   
-	   solve(constraintMatrix, constraintVector, coefficientVector);
-	   setVariables();
+      setPointConstraint(2, x1, y1);
+      setDerivativeConstraint(3, x1, yd1);
+
+      solve(constraintMatrix, constraintVector, coefficientVector);
+      setVariables();
    }
-   
+
    private void setPointConstraint(int row, double xValue, double yValue)
    {
-	   double x_n = 1.0;
-	   
-	   for(int column = coefficients.length - 1; column >= 0; column--)
-	   {
-		   constraintMatrix.set(row, column, x_n);
-		   x_n *= xValue;
-	   }
-	   
-	   constraintVector.set(row, yValue);
+      double x_n = 1.0;
+
+      for (int column = coefficients.length - 1; column >= 0; column--)
+      {
+         constraintMatrix.set(row, column, x_n);
+         x_n *= xValue;
+      }
+
+      constraintVector.set(row, yValue);
    }
-   
+
    private void setDerivativeConstraint(int row, double xValue, double yValue)
    {
-	   double x_n = 1.0;
-	   constraintMatrix.set(row, coefficients.length - 1, 0.0);
-	   
-	   for(int column = coefficients.length - 2; column >= 0; column--)
-	   {
-		   constraintMatrix.set(row, column, (coefficients.length - column - 1) * x_n);
-		   x_n *= xValue;
-	   }
-	   
-	   constraintVector.set(row, yValue);
+      double x_n = 1.0;
+      constraintMatrix.set(row, coefficients.length - 1, 0.0);
+
+      for (int column = coefficients.length - 2; column >= 0; column--)
+      {
+         constraintMatrix.set(row, column, (coefficients.length - column - 1) * x_n);
+         x_n *= xValue;
+      }
+
+      constraintVector.set(row, yValue);
    }
 
    private void setDoubleDerivativeConstraint(int row, double xValue, double yValue)
    {
-	   double x_n = 1.0;
-	   constraintMatrix.set(row, coefficients.length - 1, 0.0);
-	   constraintMatrix.set(row, coefficients.length - 2, 0.0);
-	   
-	   for(int column = coefficients.length - 3; column >= 0; column--)
-	   {
-		   constraintMatrix.set(row, column, (coefficients.length - column - 1) * (coefficients.length - column - 2) * x_n);
-		   x_n *= xValue;
-	   }
-	   
-	   constraintVector.set(row, yValue);
+      double x_n = 1.0;
+      constraintMatrix.set(row, coefficients.length - 1, 0.0);
+      constraintMatrix.set(row, coefficients.length - 2, 0.0);
+
+      for (int column = coefficients.length - 3; column >= 0; column--)
+      {
+         constraintMatrix.set(row, column, (coefficients.length - column - 1) * (coefficients.length - column - 2) * x_n);
+         x_n *= xValue;
+      }
+
+      constraintVector.set(row, yValue);
    }
-   
+
    private void setVariables()
-   {  
+   {
       int length = coefficients.length;
-      
-	   for (int row = 0; row < length; row++)
-	   {
-		   coefficients[row]                 = coefficientVector.get(row, 0);
-		   
-		   if( row< length-1)
-		      derivativeCoefficients[row]       = coefficientVector.get(row, 0);
-		   
-		   if( row< length-2)
-		      doubleDerivativeCoefficients[row] = coefficientVector.get(row, 0) ;
-	   }
-	   
-	   for(int i = 0; i < length - 1; i++)
+
+      for (int row = 0; row < length; row++)
       {
-	      derivativeCoefficients[i] *= (length - i - 1) ;
+         coefficients[row] = coefficientVector.get(row, 0);
+
+         if (row < length - 1)
+            derivativeCoefficients[row] = coefficientVector.get(row, 0);
+
+         if (row < length - 2)
+            doubleDerivativeCoefficients[row] = coefficientVector.get(row, 0);
       }
-	   
-	   for(int i = 0; i < length - 2; i++)
+
+      for (int i = 0; i < length - 1; i++)
       {
-	      doubleDerivativeCoefficients[i] *= (length - i - 1) * (length - i - 2);
+         derivativeCoefficients[i] *= (length - i - 1);
+      }
+
+      for (int i = 0; i < length - 2; i++)
+      {
+         doubleDerivativeCoefficients[i] *= (length - i - 1) * (length - i - 2);
       }
    }
-   
+
    public boolean equalsZero()
    {
       return (Math.abs(this.coefficients[0]) < 1e-15);
    }
-   
+
    public double[] getDerivativeCoefficients()
    {
-	   return derivativeCoefficients.clone();
+      return derivativeCoefficients.clone();
    }
 
    public double[] getDoubleDerivativeCoefficients()
    {
-	   return doubleDerivativeCoefficients.clone();
+      return doubleDerivativeCoefficients.clone();
    }
 }

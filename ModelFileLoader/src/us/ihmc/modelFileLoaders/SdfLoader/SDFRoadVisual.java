@@ -9,7 +9,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
-import us.ihmc.robotics.geometry.GeometryTools;
 
 public class SDFRoadVisual extends Graphics3DObject
 {
@@ -53,7 +52,7 @@ public class SDFRoadVisual extends Graphics3DObject
 
             Vector2D toSide2d = new Vector2D(toSide.getX(), toSide.getY());
             Vector2D nextSide2d = new Vector2D(nextSide.getX(), nextSide.getY());
-            double angle = GeometryTools.getAngleFromFirstToSecondVector(toSide2d, nextSide2d);
+            double angle = toSide2d.angle(nextSide2d);
             
             RigidBodyTransform rotZ = new RigidBodyTransform();
             rotZ.setRotationYawAndZeroTranslation(angle/2.0);

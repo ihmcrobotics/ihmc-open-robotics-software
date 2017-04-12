@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
 
 //February 17, 1996: Ann Torres and Jerry Pratt.  Agile Hexapod created using MIT Leg Laboratory Creature Library.
-//June 8, 2001:  Jerry Pratt.  Ported to Yobotics! Simulation Construction Set.
+//June 8, 2001:  Jerry Pratt.
 
 public class AgileHexapodRobot extends Robot
 {

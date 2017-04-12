@@ -14,6 +14,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class CenterOfMassJacobian
@@ -26,13 +27,14 @@ public class CenterOfMassJacobian
    private final Twist tempUnitTwist = new Twist();
    private final Vector3D tempJacobianColumn = new Vector3D();
    private final Vector3D tempVector = new Vector3D();
+   private final FrameVector tempFrameVector = new FrameVector();
    private final DenseMatrix64F tempJointVelocitiesMatrix;
    private final DenseMatrix64F centerOfMassVelocityMatrix;
 
    private final Map<RigidBody, MutableDouble> subTreeMassMap = new LinkedHashMap<RigidBody, MutableDouble>();
    private final Map<RigidBody, FramePoint> comScaledByMassMap = new LinkedHashMap<RigidBody, FramePoint>();
    private final Map<RigidBody, MutableBoolean> comScaledByMassMapIsUpdated = new LinkedHashMap<RigidBody, MutableBoolean>();
-      
+
    private double inverseTotalMass;
 
    public CenterOfMassJacobian(RigidBody rootBody)
@@ -64,7 +66,7 @@ public class CenterOfMassJacobian
          comScaledByMassMapIsUpdated.put(rigidBody, new MutableBoolean(false));
          subTreeMassMap.put(rigidBody, new MutableDouble(-1.0));
       }
-      
+
       recomputeSubtreeMassesAndTotalMass();
    }
 
@@ -72,10 +74,10 @@ public class CenterOfMassJacobian
    {
       for (int i = 0; i < rigidBodyList.size(); i++)
          subTreeMassMap.get(rigidBodyList.get(i)).setValue(-1.0);
-      
+
       inverseTotalMass = 1.0 / TotalMassCalculator.computeMass(rigidBodyList);
    }
-   
+
    public void compute()
    {
       int column = 0;
@@ -83,19 +85,17 @@ public class CenterOfMassJacobian
       {
          comScaledByMassMapIsUpdated.get(rigidBodyList.get(i)).setValue(false);
       }
-      
+
       for (InverseDynamicsJoint joint : joints)
       {
          RigidBody childBody = joint.getSuccessor();
-         
+
          FramePoint comPositionScaledByMass = getCoMScaledByMass(childBody);
          double subTreeMass = getSubTreeMass(childBody);
 
-         GeometricJacobian motionSubspace = joint.getMotionSubspace();
-         final List<Twist> allTwists = motionSubspace.getAllUnitTwists();
-         for(int i = 0; i <  allTwists.size(); i++)
+         for (int dofIndex = 0; dofIndex < joint.getDegreesOfFreedom(); dofIndex++)
          {
-            tempUnitTwist.set(allTwists.get(i));
+            joint.getUnitTwist(dofIndex, tempUnitTwist);
             tempUnitTwist.changeFrame(rootFrame);
 
             setColumn(tempUnitTwist, comPositionScaledByMass, subTreeMass, column);
@@ -103,13 +103,12 @@ public class CenterOfMassJacobian
          }
       }
 
-      
       CommonOps.scale(inverseTotalMass, jacobianMatrix);
    }
 
    private double getSubTreeMass(RigidBody rigidBody)
    {
-      
+
       if (!subTreeMassMap.containsKey(rigidBody))
          subTreeMassMap.put(rigidBody, new MutableDouble(-1.0));
 
@@ -138,16 +137,15 @@ public class CenterOfMassJacobian
    private FramePoint getCoMScaledByMass(RigidBody rigidBody)
    {
       MutableBoolean comIsUpdated = comScaledByMassMapIsUpdated.get(rigidBody);
-      
+
       if (comIsUpdated == null)
       {
          comIsUpdated = new MutableBoolean(false);
-         
+
          comScaledByMassMapIsUpdated.put(rigidBody, comIsUpdated);
          comScaledByMassMap.put(rigidBody, new FramePoint());
       }
-      
-      
+
       if (comIsUpdated.booleanValue())
       {
          return comScaledByMassMap.get(rigidBody);
@@ -155,7 +153,7 @@ public class CenterOfMassJacobian
       else
       {
          FramePoint curChildCoMScaledByMass = comScaledByMassMap.get(rigidBody);
-         
+
          curChildCoMScaledByMass.setToZero(rootFrame);
          rigidBody.getCoMOffset(curChildCoMScaledByMass);
          curChildCoMScaledByMass.changeFrame(rootFrame);
@@ -182,14 +180,20 @@ public class CenterOfMassJacobian
    public void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack)
    {
       ScrewTools.getJointVelocitiesMatrix(joints, tempJointVelocitiesMatrix);
-      getCenterOfMassVelocity(centerOfMassVelocityToPack, tempJointVelocitiesMatrix);
+      CommonOps.mult(jacobianMatrix, tempJointVelocitiesMatrix, centerOfMassVelocityMatrix);
+      centerOfMassVelocityToPack.setIncludingFrame(rootFrame, centerOfMassVelocityMatrix);
    }
 
-   private void getCenterOfMassVelocity(FrameVector centerOfMassVelocityToPack, DenseMatrix64F jointVelocities)
+   public void getCenterOfMassVelocity(FrameVector2d centerOfMassVelocityToPack)
    {
-      CommonOps.mult(jacobianMatrix, jointVelocities, centerOfMassVelocityMatrix);
-      centerOfMassVelocityToPack.setIncludingFrame(rootFrame, centerOfMassVelocityMatrix.get(0, 0), centerOfMassVelocityMatrix.get(1, 0),
-                                     centerOfMassVelocityMatrix.get(2, 0));
+      getCenterOfMassVelocity(rootFrame, centerOfMassVelocityToPack);
+   }
+
+   public void getCenterOfMassVelocity(ReferenceFrame desiredOutputFrame, FrameVector2d centerOfMassVelocityToPack)
+   {
+      getCenterOfMassVelocity(tempFrameVector);
+      tempFrameVector.changeFrame(desiredOutputFrame);
+      centerOfMassVelocityToPack.setByProjectionOntoXYPlaneIncludingFrame(tempFrameVector);
    }
 
    private void setColumn(Twist twist, FramePoint comPositionScaledByMass, double subTreeMass, int column)

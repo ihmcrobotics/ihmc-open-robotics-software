@@ -65,27 +65,6 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
 {
    private static final int MAX_PLANAR_REGIONS_LIST_DEQUE_SIZE = 2;
 
-   /**
-    * Describes the job of {@link YoGraphic}. When the user creates one, the {@link YoGraphic} is assumed 
-    * to be writing in the {@link YoVariable}s.
-    * When the graphic is created from {@link YoGraphicFactory}, it is assumed that the graphic is used as a
-    * {@link RemoteYoGraphic} and thus does only read the {@link YoVariable}s.
-    * 
-    * <p>
-    * Differentiating the {@link YoGraphic} according to their job allows to implement simple 
-    * synchronization between a {@code WRITER} and a {@code READER} to ensure proper rendering.
-    * 
-    * @author Sylvain
-    *
-    */
-   private enum YoGraphicJob
-   {
-      /** The YoGraphic is the one processing planar regions and updating the YoVariables. */
-      WRITER,
-      /** The YoGraphic reads the YoVariable to create the meshes only. */
-      READER
-   };
-
    private final YoGraphicJob yoGraphicJob;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -224,7 +203,7 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * @param constants the list of constants (variables that will never change) needed for this YoGraphic expected to be in the same order as packed in {@link #getConstants()}.
     * @return a YoGraphic setup for remote visualization.
     */
-   static YoGraphicPlanarRegionsList createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, Double[] constants)
+   static YoGraphicPlanarRegionsList createAsRemoteYoGraphic(String name, YoVariable<?>[] yoVariables, double[] constants)
    {
       return new YoGraphicPlanarRegionsList(name, yoVariables, constants);
    }
@@ -234,14 +213,14 @@ public class YoGraphicPlanarRegionsList extends YoGraphic implements RemoteYoGra
     * It is automatically handled and should not be used for creating a new YoGraphic.
     * For the latter, use the other constructor(s).
     */
-   private YoGraphicPlanarRegionsList(String name, YoVariable<?>[] yoVariables, Double[] constants)
+   private YoGraphicPlanarRegionsList(String name, YoVariable<?>[] yoVariables, double[] constants)
    {
       super(name);
 
       yoGraphicJob = YoGraphicJob.READER;
 
-      vertexBufferSize = constants[0].intValue();
-      meshBufferSize = constants[1].intValue();
+      vertexBufferSize = (int)constants[0];
+      meshBufferSize = (int)constants[1];
 
       vertexBuffer = new ArrayList<>(vertexBufferSize);
 

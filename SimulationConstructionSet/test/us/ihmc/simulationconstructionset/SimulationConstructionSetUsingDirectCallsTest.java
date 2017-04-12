@@ -1,10 +1,6 @@
 package us.ihmc.simulationconstructionset;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.AWTException;
 import java.awt.Button;
@@ -53,11 +49,11 @@ import us.ihmc.robotics.dataStructures.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.commands.ToggleKeyPointModeCommandListener;
 import us.ihmc.simulationconstructionset.examples.FallingBrickRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsDynamicGraphicsObject;
-import us.ihmc.simulationconstructionset.gui.DynamicGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.GraphArrayWindow;
 import us.ihmc.simulationconstructionset.gui.StandardGUIActions;
 import us.ihmc.simulationconstructionset.gui.StandardSimulationGUI;
 import us.ihmc.simulationconstructionset.gui.ViewportWindow;
+import us.ihmc.simulationconstructionset.gui.YoGraphicMenuManager;
 import us.ihmc.simulationconstructionset.gui.camera.CameraTrackAndDollyYoVariablesHolder;
 import us.ihmc.simulationconstructionset.gui.config.GraphGroupList;
 import us.ihmc.simulationconstructionset.physics.CollisionArbiter;
@@ -70,7 +66,6 @@ import us.ihmc.simulationconstructionset.physics.collision.CollisionDetectionRes
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionHandler;
 import us.ihmc.simulationconstructionset.physics.collision.DefaultCollisionVisualizer;
 import us.ihmc.simulationconstructionset.physics.collision.simple.DoNothingCollisionArbiter;
-import us.ihmc.simulationconstructionset.robotcommprotocol.RobotSocketConnection;
 import us.ihmc.tools.thread.ThreadTools;
 
 @ContinuousIntegrationPlan(categories = {IntegrationCategory.UI})
@@ -155,7 +150,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private final String extraPanelConfigurationName = "simpleExtraPanelConfigurationName";
    private final String simpleComponentName =  "simpleComponent";
    private final String runningName = "simpleRunningName";
-   private final String yoGraphicsListName = "simpleDynamicGraphicObjectsList";
+   private final String yoGraphicsListName = "simpleYoGraphicsList";
    private final String[][] graphGroupVars = { cameraTrackingXYZVarNames, cameraDollyXYZVarNames };
    private final String[][][] graphGroupVarsWithConfig = { { cameraTrackingXYZVarNames, { "config_1" } }, { cameraDollyXYZVarNames, { "config_2" } } };
    private final String simpleRobotFirstVariableName = getFirstVariableNameFromRobotRegistry(simpleRobot);
@@ -185,7 +180,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
    private BooleanYoVariable processDataHasBeenCalled;
    private BooleanYoVariable toggleKeyPointModeCommandListenerHasBeenCalled;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
-   private DynamicGraphicMenuManager dynamicGraphicMenuManager;
+   private YoGraphicMenuManager yoGraphicMenuManager;
    private ScsPhysics simpleScsPhysics;
    private SimulationConstructionSet scs;
 
@@ -219,8 +214,8 @@ public class SimulationConstructionSetUsingDirectCallsTest
       realTimeRateInSCS = new DoubleYoVariable("realTimeRate", dummyRegistry);
       processDataHasBeenCalled = new BooleanYoVariable("processDataHasBeenCalled", dummyRegistry);
       toggleKeyPointModeCommandListenerHasBeenCalled = new BooleanYoVariable("toggleKeyPointModeCommandListenerHasBeenCalled", dummyRegistry);
-      yoGraphicsListRegistry = createDynamicGraphicObjectsListRegistryWithObject();
-      dynamicGraphicMenuManager = new DynamicGraphicMenuManager();
+      yoGraphicsListRegistry = createYoGraphicsListRegistryWithObject();
+      yoGraphicMenuManager = new YoGraphicMenuManager();
 
       scs = new SimulationConstructionSet(simpleRobot);
       simpleScsPhysics = createScsPhysics();
@@ -255,7 +250,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       processDataHasBeenCalled = null;
       toggleKeyPointModeCommandListenerHasBeenCalled = null;
       yoGraphicsListRegistry = null;
-      dynamicGraphicMenuManager = null;
+      yoGraphicMenuManager = null;
       simpleScsPhysics = null;
    }
 
@@ -295,13 +290,6 @@ public class SimulationConstructionSetUsingDirectCallsTest
       scs.setScrollGraphsEnabled(false);
       boolean isScrollGraphsEnabled2 = scs.isSafeToScroll();
       assertFalse(isScrollGraphsEnabled2);
-
-      RobotSocketConnection robotSocketConnectionFromSCS = scs.allowTCPConnectionToHost("host");
-      assertNotNull(robotSocketConnectionFromSCS);
-
-      NewDataListener newDataListener = createNewDataListener();
-      RobotSocketConnection robotSocketConnectionFromSCS2 = scs.allowTCPConnectionToHost("host2", newDataListener);
-      assertNotNull(robotSocketConnectionFromSCS2);
 
       boolean initialKeyPointStatus = scs.isKeyPointModeToggled();
       scs.toggleKeyPointMode();
@@ -700,17 +688,17 @@ public class SimulationConstructionSetUsingDirectCallsTest
       boolean isGroundVisibleFromSCS2 = stateIfTerrainIsVisible(scs);
       assertTrue(isGroundVisibleFromSCS2);
 
-      ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getDynamicGraphicObjectsListRegistries();
+      ArrayList<YoGraphicsListRegistry> yoGraphicListRegistriesFromSCS = scs.getYoGraphicsListRegistries();
       assertArrayOfObjectsContainsTheObject(yoGraphicListRegistriesFromSCS, yoGraphicsListRegistry);
 
-      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
-      scs.hideAllDynamicGraphicObjects();
-      boolean yoGraphicsAreShowing = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      scs.setYoGraphicsListVisible(yoGraphicsListName, true);
+      scs.hideAllYoGraphics();
+      boolean yoGraphicsAreShowing = scs.checkAllYoGraphicsListRegistriesAreShowing();
       assertFalse(yoGraphicsAreShowing);
 
-      scs.hideAllDynamicGraphicObjects();
-      scs.setDynamicGraphicObjectsListVisible(yoGraphicsListName, true);
-      boolean yoGraphicsAreShowing2 = scs.checkAllDynamicGraphicObjectsListRegistriesAreShowing();
+      scs.hideAllYoGraphics();
+      scs.setYoGraphicsListVisible(yoGraphicsListName, true);
+      boolean yoGraphicsAreShowing2 = scs.checkAllYoGraphicsListRegistriesAreShowing();
       assertTrue(yoGraphicsAreShowing2);
 
 //      scs.setDynamicGraphicMenuManager(dynamicGraphicMenuManager);
@@ -1292,7 +1280,7 @@ public class SimulationConstructionSetUsingDirectCallsTest
       return scsCollisionConfigure;
    }
 
-   private YoGraphicsListRegistry createDynamicGraphicObjectsListRegistryWithObject()
+   private YoGraphicsListRegistry createYoGraphicsListRegistryWithObject()
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoGraphicsList yoGraphicsList = new YoGraphicsList(yoGraphicsListName);

@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import static us.ihmc.robotics.geometry.AngleTools.computeAngleDifferenceMinusPiToPi;
-import static us.ihmc.robotics.geometry.AngleTools.trimAngleMinusPiToPi;
+import static us.ihmc.robotics.geometry.AngleTools.*;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -23,7 +23,6 @@ import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFramePose;
 import us.ihmc.robotics.math.frames.YoFrameQuaternion;
@@ -182,7 +181,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          {
             circleOrigin.get(localTranslation);
             rotationAxis.get(localRotationAxis);
-            GeometryTools.getAxisAngleFromZUpToVector(localRotationAxis, localAxisAngle);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(localRotationAxis, localAxisAngle);
             transformToParent.set(localAxisAngle, localTranslation);
          }
       };

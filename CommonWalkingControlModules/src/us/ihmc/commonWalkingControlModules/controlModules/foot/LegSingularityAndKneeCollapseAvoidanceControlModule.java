@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -22,7 +23,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
@@ -154,7 +154,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
    private final OneDoFJoint hipPitchJoint;
 
    public LegSingularityAndKneeCollapseAvoidanceControlModule(String namePrefix, ContactablePlaneBody contactablePlaneBody, final RobotSide robotSide,
-         WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox momentumBasedController, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, final HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
       registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -169,11 +169,11 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
       minimumLegLength = new DoubleYoVariable(namePrefix + "MinLegLength", registry);
       minimumLegLength.set(walkingControllerParameters.getMinMechanicalLegLength());
 
-      twistCalculator = momentumBasedController.getTwistCalculator();
-      controlDT = momentumBasedController.getControlDT();
-      yoTime = momentumBasedController.getYoTime();
+      twistCalculator = controllerToolbox.getTwistCalculator();
+      controlDT = controllerToolbox.getControlDT();
+      yoTime = controllerToolbox.getYoTime();
 
-      FullHumanoidRobotModel fullRobotModel = momentumBasedController.getFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
       hipPitchJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH);
       frameBeforeHipPitchJoint = hipPitchJoint.getFrameBeforeJoint();
@@ -287,7 +287,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            GeometryTools.getAxisAngleFromZUpToVector(footToHipAxis.getVector(), hipPitchRotationToParentFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
             hipPitchPosition.get(hipPitchToParentFrame);
@@ -313,7 +313,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            GeometryTools.getAxisAngleFromZUpToVector(footToHipAxis.getVector(), anklePitchRotationToParentFrame);
+            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis.getVector(), anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
             anklePitchPosition.get(anklePitchToParentFrame);
@@ -323,7 +323,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          }
       };
 
-      YoGraphicsListRegistry yoGraphicsListRegistry = momentumBasedController.getDynamicGraphicObjectsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       visualize = visualize && yoGraphicsListRegistry != null;
       moreVisualizers = visualize && moreVisualizers;
 
@@ -474,7 +474,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          return;
 
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
-      twistCalculator.getTwistOfBody(pelvisTwist, pelvis);
+      twistCalculator.getTwistOfBody(pelvis, pelvisTwist);
       //      pelvisTwist.changeFrame(virtualLegTangentialFrameAnkleCentered);
       pelvisTwist.getLinearPart(pelvisLinearVelocity);
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
@@ -580,7 +580,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          return;
 
       desiredFootLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
-      twistCalculator.getTwistOfBody(pelvisTwist, pelvis);
+      twistCalculator.getTwistOfBody(pelvis, pelvisTwist);
       pelvisTwist.getLinearPart(pelvisLinearVelocity);
       pelvisLinearVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
