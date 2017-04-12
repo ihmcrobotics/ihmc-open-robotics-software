@@ -208,6 +208,7 @@ public class RobotArmController implements RobotController
    @Override
    public void doControl()
    {
+      robotArm.updateControlFrameAcceleration();
       robotArm.updateIDRobot();
       centerOfMassFrame.update();
       twistCalculator.compute();

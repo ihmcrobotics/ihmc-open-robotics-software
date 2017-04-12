@@ -13,7 +13,7 @@ public class RobotArmSimulation
       double controlDT = 5.0e-5;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      RobotArm robotArm = new RobotArm();
+      RobotArm robotArm = new RobotArm(controlDT);
       RobotArmController robotArmController = new RobotArmController(robotArm, controlDT, yoGraphicsListRegistry);
       robotArmController.registerControllerCoreModeChangedListener((mode) -> robotArm.setDynamic(mode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS));
       robotArm.setController(robotArmController);
