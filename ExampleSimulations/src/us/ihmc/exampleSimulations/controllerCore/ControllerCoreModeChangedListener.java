@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
+package us.ihmc.exampleSimulations.controllerCore;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 
