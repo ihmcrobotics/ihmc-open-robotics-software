@@ -31,6 +31,11 @@ public class SolarPanelPath
       return arrivalTime;
    }
    
+   public ArrayList<SolarPanelLinearPath> getLinearPath()
+   {
+      return linearPath;
+   }
+   
    public void addCleaningPose(SolarPanelCleaningPose cleaningPose, double timeToGo)
    {
       SolarPanelCleaningPose newStartPose = wayPoses.get(wayPoses.size()-1);
@@ -65,11 +70,10 @@ public class SolarPanelPath
       Quaternion desiredChestOrientation = new Quaternion();
       desiredChestOrientation.appendYawRotation(pelvisYaw);      
       ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage(defaultMotionTime, desiredChestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-      
+
       message.setHandTrajectoryMessage(handTrajectoryMessage);
       message.setChestTrajectoryMessage(chestTrajectoryMessage);
       //message.setPelvisTrajectoryMessage(pelvisHeightTrajectoryMessage);      
-      
       
       return message;
    }

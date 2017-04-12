@@ -27,7 +27,7 @@ public class RRTPlanner2D extends RRTPlanner
          if (getRRTTree().newNode.getDistance(getGoalNode()) < getRRTTree().getStepLength())
          {
             getRRTTree().newNode.addChildNode(getGoalNode());
-            getRRTTree().updatePath(getGoalNode());
+            getRRTTree().updatePathNode(getGoalNode());
             setOptimalPath(getRRTTree().pathNode);
 
             return true;

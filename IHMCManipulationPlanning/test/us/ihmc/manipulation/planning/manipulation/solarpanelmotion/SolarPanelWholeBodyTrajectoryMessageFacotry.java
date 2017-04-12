@@ -78,21 +78,13 @@ public class SolarPanelWholeBodyTrajectoryMessageFacotry
             PrintTools.info("cleaningPose "+cleaningPose.getU() +" "+cleaningPose.getV() +" " + cleaningPose.getDesiredHandPosition().getY());
             PrintTools.info("cleaningPose "+cleaningPose.getDesiredHandPosition().getX() +" "+cleaningPose.getDesiredHandPosition().getY() +" " + cleaningPose.getDesiredHandPosition().getZ());
                         
+            handTrajectoryMessage.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
             handTrajectoryMessage.setTrajectoryPoint(i-1, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), new Vector3D(), new Vector3D(), ReferenceFrame.getWorldFrame());            
             
             Quaternion desiredChestOrientation = new Quaternion();
             desiredChestOrientation.appendYawRotation(rrtPath.get(i).getNodeData(1));
             chestTrajectoryMessage.setTrajectoryPoint(i-1, time, desiredChestOrientation, new Vector3D(), ReferenceFrame.getWorldFrame());
-            PrintTools.info("rrtPath.get(i).getNodeData(0) "+rrtPath.get(i).getNodeData(0));
-            PrintTools.info("rrtPath.get(i).getNodeData(1) "+rrtPath.get(i).getNodeData(1));
          }
-//         double time = rrtPath.get(1).getNodeData(0);
-//         SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
-//         handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, time, cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-//         PrintTools.info("cleaningPose "+cleaningPose.getDesiredHandPosition().getX() +" "+cleaningPose.getDesiredHandPosition().getY() +" " + cleaningPose.getDesiredHandPosition().getZ());
-//         Quaternion desiredChestOrientation = new Quaternion();
-//         desiredChestOrientation.appendYawRotation(rrtPath.get(1).getNodeData(1));
-//         chestTrajectoryMessage = new ChestTrajectoryMessage(time, desiredChestOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
          
          wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
          wholebodyTrajectoryMessage.setChestTrajectoryMessage(chestTrajectoryMessage);         
