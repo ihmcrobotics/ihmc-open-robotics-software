@@ -1,5 +1,6 @@
 package us.ihmc.manipulation.planning.rrttimedomain;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPoseValidityTester;

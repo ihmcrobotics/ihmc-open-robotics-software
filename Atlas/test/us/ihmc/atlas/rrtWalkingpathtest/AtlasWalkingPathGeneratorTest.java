@@ -12,7 +12,7 @@ public class AtlasWalkingPathGeneratorTest extends AvatarWalkingPathGeneratorTes
    public DRCRobotModel getRobotModel()
    {
       // TODO Auto-generated method stub
-      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false);
    }
 
    @Override

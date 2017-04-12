@@ -124,8 +124,6 @@ public class SolarPanelCleaningPose
    {            
       Point3D positionToWorld = new Point3D(getDesiredHandPosition());      
       Quaternion orientationToWorld = new Quaternion(getDesiredHandOrientation());
-            
-      // PrintTools.info(""+positionToWorld.getX()+" "+positionToWorld.getY()+" "+positionToWorld.getZ()+" ");
       
       HandTrajectoryMessage handMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, positionToWorld, orientationToWorld, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
             

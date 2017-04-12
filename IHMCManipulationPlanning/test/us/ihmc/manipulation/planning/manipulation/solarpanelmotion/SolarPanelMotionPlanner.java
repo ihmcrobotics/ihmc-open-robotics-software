@@ -5,10 +5,9 @@ import java.util.ArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
-import us.ihmc.manipulation.planning.rrttimedomain.RRTPlanner1DTimeDomain;
+import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerSolarPanelCleaning;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotics.geometry.transformables.Pose;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class SolarPanelMotionPlanner
 {
@@ -17,7 +16,7 @@ public class SolarPanelMotionPlanner
    WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();   
    SolarPanelWholeBodyTrajectoryMessageFacotry motionFactory = new SolarPanelWholeBodyTrajectoryMessageFacotry();
    
-   public RRTPlanner1DTimeDomain plannerTimeDomain;
+   public RRTPlannerSolarPanelCleaning rrtPlanner;
    
    private double motionTime;
    
@@ -27,9 +26,6 @@ public class SolarPanelMotionPlanner
    public SolarPanelMotionPlanner(SolarPanel panel)
    {
       this.solarPanel = panel;
-      
-      RRTNode1DTimeDomain nodeRoot = new RRTNode1DTimeDomain(0.0, 0.0);
-      plannerTimeDomain = new RRTPlanner1DTimeDomain(nodeRoot);
    }
    
    public enum CleaningMotion
@@ -74,48 +70,37 @@ public class SolarPanelMotionPlanner
          PrintTools.info("setTrajectoryMessage -> "+CleaningMotion.LinearCleaningMotion);
          
          SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
-                  
-         SolarPanelCleaningPose endPose = new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2);//
-         cleaningPath.addCleaningPose(endPose, 5.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.1, -Math.PI*0.2), 1.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.1, -Math.PI*0.2), 5.0);
-//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.1, -Math.PI*0.2), 1.0);
-//         
-//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.1, -Math.PI*0.2), 5.0);
-//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.4, -0.1, -Math.PI*0.2), 1.0);
-//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.4, -0.1, -Math.PI*0.2), 5.0);
-//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.5, -0.1, -Math.PI*0.2), 1.0);
          
+         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2), 5.0);
+         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.1, -Math.PI*0.2), 5.0);
+         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.1, -Math.PI*0.2), 5.0);
+                  
          
          this.motionTime = cleaningPath.getArrivalTime().get(cleaningPath.getArrivalTime().size()-1);
          PrintTools.info("motionTime :: "+this.motionTime);
          
          // *** RRT *** //         
-         /*
+         RRTNode1DTimeDomain.cleaningPath = cleaningPath;
+         RRTNode1DTimeDomain nodeRoot = new RRTNode1DTimeDomain(0.0, 0.0);
+         rrtPlanner = new RRTPlannerSolarPanelCleaning(nodeRoot, cleaningPath);
          
-         RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(0.0, -Math.PI*0.4);
-         RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(motionTime*1.5, Math.PI*0.4);
+         rrtPlanner.expandingTreesAndShortCut(200);
          
-         
-         plannerTimeDomain.getTree().setMotionTime(motionTime);
-         plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
-         plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
-         
-         PrintTools.info("END setting");
-         RRTNode1DTimeDomain.cleaningPath = cleaningPath;         
-                  
-         plannerTimeDomain.expandTreeGoal(200);
-         PrintTools.info("END expanding");
-         plannerTimeDomain.updateOptimalPath(30);
+         for(int i=0;i<rrtPlanner.getNumberOfPlanners();i++)
+         {
+            PrintTools.info("path "+i);
+            for(int k=0;k<rrtPlanner.getPlanner(i).getOptimalPath().size();k++)
+            {
+               PrintTools.info("anOptimalPath "+rrtPlanner.getPlanner(i).getOptimalPath().get(k).getNodeData(0));
+            }   
+         }
+               
          PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
 
          // *** message *** //
          PrintTools.info("Putting on Message");
-         motionFactory.setCleaningPath(cleaningPath);
-         */
-         
-         //motionFactory.setMessage(plannerTimeDomain.getOptimalPath()); -----
-         
+         motionFactory.setCleaningPath(cleaningPath);         
+         motionFactory.setMessage(rrtPlanner.getRRTPath());
          
          wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
          PrintTools.info("Complete putting on message");

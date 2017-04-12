@@ -32,7 +32,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    {
       wholebodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
       toolboxCommunicator.send(wholebodyTrajectoryMessage);
-      ThreadTools.sleep(50);
+      ThreadTools.sleep(10);
    }
 
    public boolean isValidWholeBodyPose(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
@@ -46,8 +46,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
    public void setSolarPanelWholeBodyPose(SolarPanelPath cleaningPath, double tempNodeData0, double tempNodeData1)
    {
       // *********************************************************************** wholebody ***********************************************************************          
-      WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = cleaningPath.getWholeBodyMessageForValidityTest(-Math.PI*0.2, tempNodeData1, 0.0, tempNodeData0);      
-      
+      WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = cleaningPath.getWholeBodyMessageForValidityTest(-Math.PI*0.2, tempNodeData1, 0.0, tempNodeData0); 
       sendWholebodyTrajectoryMessage(wholebodyTrajectoryMessage);
       for(int i =0;i<50;i++)
       {

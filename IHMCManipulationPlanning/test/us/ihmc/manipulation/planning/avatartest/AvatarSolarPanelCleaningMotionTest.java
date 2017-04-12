@@ -34,18 +34,21 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PelvisTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.forwaypoint.SO3TrajectoryPointCalculator;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelLinearPath;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
-import us.ihmc.manipulation.planning.rrttimedomain.RRTPlanner1DTimeDomain;
-import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerTimeDomain;
+import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerSolarPanelCleaning;
+import us.ihmc.manipulation.planning.rrttimedomain.RRTTreeTimeDomain;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPoseValidityTester;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -513,36 +516,36 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       RRTNode1DTimeDomain nodeLowerBound = new RRTNode1DTimeDomain(0.0, -Math.PI*0.4);
       RRTNode1DTimeDomain nodeUpperBound = new RRTNode1DTimeDomain(motionTime*1.5, Math.PI*0.4);
       
-      RRTPlanner1DTimeDomain plannerTimeDomain = new RRTPlanner1DTimeDomain(nodeRoot);
-      
-      plannerTimeDomain.getTree().setMotionTime(motionTime);
-      plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
-      plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
-      plannerTimeDomain.getTree().setMaximumDisplacementOfStep(maximumDisplacement);      
-      plannerTimeDomain.getTree().setMaximumTimeGapOfStep(maximumTimeGap);
-      
-      plannerTimeDomain.expandTreeGoal(500);
-      plannerTimeDomain.updateOptimalPath(100);
-      
-      PrintTools.info(""+plannerTimeDomain.getOptimalPath().size());
+//      RRTPlannerSolarPanelCleaningOLDOLDOLD plannerTimeDomain = new RRTPlannerSolarPanelCleaningOLDOLDOLD(nodeRoot);
+//      
+//      plannerTimeDomain.getTree().setMaximumMotionTime(motionTime);
+//      plannerTimeDomain.getTree().setUpperBound(nodeUpperBound);
+//      plannerTimeDomain.getTree().setLowerBound(nodeLowerBound);
+//      plannerTimeDomain.getTree().setMaximumDisplacementOfStep(maximumDisplacement);      
+//      plannerTimeDomain.getTree().setMaximumTimeGapOfStep(maximumTimeGap);
+//      
+//      plannerTimeDomain.expandTreeGoal(500);
+//      plannerTimeDomain.updateOptimalPath(100);
+//      
+//      PrintTools.info(""+plannerTimeDomain.getOptimalPath().size());
       
    // ************************************* //
       // show
    // ************************************* //
-      JFrame frame;
-      DrawPanel drawPanel;
-      Dimension dim;
-      
-
-      frame = new JFrame("RRTTest");
-      drawPanel = new DrawPanel(plannerTimeDomain);
-      dim = new Dimension(1600, 800);
-      frame.setPreferredSize(dim);
-      frame.setLocation(200, 100);
-
-      frame.add(drawPanel);
-      frame.pack();
-      frame.setVisible(true);      
+//      JFrame frame;
+//      DrawPanel drawPanel;
+//      Dimension dim;
+//      
+//
+//      frame = new JFrame("RRTTest");
+//      drawPanel = new DrawPanel(plannerTimeDomain);
+//      dim = new Dimension(1600, 800);
+//      frame.setPreferredSize(dim);
+//      frame.setLocation(200, 100);
+//
+//      frame.add(drawPanel);
+//      frame.pack();
+//      frame.setVisible(true);      
    }
    
    
@@ -554,8 +557,8 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
-      drcBehaviorTestHelper.updateRobotModel();
-      //ThreadTools.sleep(20000);
+      drcBehaviorTestHelper.updateRobotModel(); 
+      ThreadTools.sleep(10000);
       
       
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController(); 
@@ -592,7 +595,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       
       
-      
+      scs.addStaticLinkGraphics(getPrintCleaningPath(RRTNode1DTimeDomain.cleaningPath));
       
       // ************************************* //
       // show
@@ -603,7 +606,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
 
       frame = new JFrame("RRTTest");
-      drawPanel = new DrawPanel(solarPanelPlanner.plannerTimeDomain);
+      drawPanel = new DrawPanel(solarPanelPlanner.rrtPlanner);
       dim = new Dimension(1600, 800);
       frame.setPreferredSize(dim);
       frame.setLocation(200, 100);
@@ -621,60 +624,70 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
    // ************************************* //
    class DrawPanel extends JPanel
    {
-      int timeScale = 60;
+      int timeScale = 100;
       int pelvisYawScale = 300;
-      RRTPlannerTimeDomain plannerTimeDomain;
+      RRTPlannerSolarPanelCleaning planner;
       
-      DrawPanel(RRTPlannerTimeDomain plannerTimeDomain)
+      DrawPanel(RRTPlannerSolarPanelCleaning plannerTimeDomain)
       {
-         this.plannerTimeDomain = plannerTimeDomain;
+         this.planner = plannerTimeDomain;
       }
 
       public void paint(Graphics g)
       {
          super.paint(g);
-         g.setColor(Color.BLACK);
+//       g.setColor(Color.red);
+//       branch(g, 1.5, -Math.PI*0.1, 1.5, Math.PI*0.1, 4);
+//       branch(g, 1.5, Math.PI*0.1, 2.5, Math.PI*0.1, 4);
+//       branch(g, 2.5, Math.PI*0.1, 2.5, -Math.PI*0.1, 4);
+//       branch(g, 2.5, -Math.PI*0.1, 1.5, -Math.PI*0.1, 4);
+
          
-         ArrayList<RRTNode> wholeNode = plannerTimeDomain.getTree().getWholeNode();
-         for(int i =1;i<wholeNode.size();i++)
+         
+         
+         for(int j =0;j<planner.getNumberOfPlanners();j++)
          {
-            RRTNode rrtNode1 = wholeNode.get(i);
-            RRTNode rrtNode2 = rrtNode1.getParentNode();
-            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+            RRTTreeTimeDomain tree = planner.getPlanner(j).getTree();
+            ArrayList<RRTNode> wholeNode = tree.getWholeNode();
+            g.setColor(Color.BLACK);
+            for(int i =1;i<wholeNode.size();i++)
+            {
+               RRTNode rrtNode1 = wholeNode.get(i);
+               RRTNode rrtNode2 = rrtNode1.getParentNode();
+               branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+            }
+            
+            
+            g.setColor(Color.BLUE);
+            ArrayList<RRTNode> nodePath = tree.getPathNode();
+            for(int i =1;i<nodePath.size();i++)
+            {
+               RRTNode rrtNode1 = nodePath.get(i);
+               RRTNode rrtNode2 = rrtNode1.getParentNode();
+               branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+            }
+            
+             g.setColor(Color.CYAN);
+             ArrayList<RRTNode> nodeShort = planner.getPlanner(j).getOptimalPath();
+             for(int i =1;i<nodeShort.size();i++)
+             {
+                RRTNode rrtNode1 = nodeShort.get(i);
+                RRTNode rrtNode2 = nodeShort.get(i-1);
+                branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
+             }
+             
+             g.setColor(Color.RED);
+             ArrayList<RRTNode> nodeFail = tree.failNodes;
+             PrintTools.info("whole "+wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
+             for(int i =0;i<nodeFail.size();i++)
+             {
+                RRTNode rrtNode1 = nodeFail.get(i);
+                point(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), 4);
+             }
          }
+
          
-//         g.setColor(Color.red);
-//         branch(g, 1.5, -Math.PI*0.1, 1.5, Math.PI*0.1, 4);
-//         branch(g, 1.5, Math.PI*0.1, 2.5, Math.PI*0.1, 4);
-//         branch(g, 2.5, Math.PI*0.1, 2.5, -Math.PI*0.1, 4);
-//         branch(g, 2.5, -Math.PI*0.1, 1.5, -Math.PI*0.1, 4);
-         
-         g.setColor(Color.BLUE);
-         ArrayList<RRTNode> nodePath = plannerTimeDomain.getTree().getPathNode();
-         for(int i =1;i<nodePath.size();i++)
-         {
-            RRTNode rrtNode1 = nodePath.get(i);
-            RRTNode rrtNode2 = rrtNode1.getParentNode();
-            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
-         }
-         
-         g.setColor(Color.CYAN);
-         ArrayList<RRTNode> nodeShort = plannerTimeDomain.getOptimalPath();
-         for(int i =1;i<nodeShort.size();i++)
-         {
-            RRTNode rrtNode1 = nodeShort.get(i);
-            RRTNode rrtNode2 = nodeShort.get(i-1);
-            branch(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), rrtNode2.getNodeData(0), rrtNode2.getNodeData(1), 4);
-         }
-         
-         g.setColor(Color.RED);
-         ArrayList<RRTNode> nodeFail = plannerTimeDomain.getFailNodes();
-         PrintTools.info("whole "+wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
-         for(int i =0;i<nodeFail.size();i++)
-         {
-            RRTNode rrtNode1 = nodeFail.get(i);
-            point(g, rrtNode1.getNodeData(0), rrtNode1.getNodeData(1), 4);
-         }
+
          
          g.setColor(Color.yellow);
          branch(g, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1), -Math.PI*0.4, RRTNode1DTimeDomain.cleaningPath.getArrivalTime().get(1), Math.PI*0.4, 4);
@@ -877,52 +890,46 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       return ret;
    }
    
-   /*
-    *
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(solarPanelPlanner.getMotionTime());
-//      
-//      
-//      kinematicsToolBoxController.update();
-//      FullHumanoidRobotModel desiredFullRobotModel = kinematicsToolBoxController.getDesiredFullRobotModel();
-//      
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL).getQ());      
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.ELBOW_ROLL).getQ());
-//      
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.FIRST_WRIST_PITCH).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.WRIST_ROLL).getQ());
-//      PrintTools.info("answer... "+desiredFullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SECOND_WRIST_PITCH).getQ());
-//            
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-//      
-//      OneDoFJoint[] oneDoFJoints = desiredFullRobotModel.getOneDoFJoints();
-//      float[] jointAngles = kinematicsToolBoxController.getSolution().getJointAngles();
-//      PrintTools.info("!!!"+ jointAngles.length);
-//      
-//      for(int i=0;i<jointAngles.length;i++)
-//      {
-//      //   PrintTools.info("!!! "+ oneDoFJoints[i].getName() +" "+oneDoFJoints[i].getQ());
-//      }
-//      
-//      
-//      
-//      for (int i = 0; i < oneDoFJoints.length; i++)
-//      {         
-//         double jointPosition = oneDoFJoints[i].getQ();
-//         Joint scsJoint = drcBehaviorTestHelper.getRobot().getJoint(oneDoFJoints[i].getName());
-//         if (scsJoint instanceof PinJoint)
-//         {
-//            PinJoint pinJoint = (PinJoint) scsJoint;
-//            pinJoint.setQ(jointPosition);
-//         }
-//         else
-//         {
-//            PrintTools.info(oneDoFJoints[i].getName() + " was not a PinJoint.");
-//         }
-//      }
-//      scs.addStaticLinkGraphics(createXYZAxis(solarPanelPlanner.debugPoseOne));
-//      drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-    * 
-    */
+   private ArrayList<Graphics3DObject> getPrintCleaningPath(SolarPanelPath cleaningPath)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+      
+      for(int i=0;i<cleaningPath.getLinearPath().size();i++)
+      {
+         ret.addAll(getPrintLinearPath(cleaningPath.getLinearPath().get(i)));
+      }
+      
+      return ret;
+   }
+   
+   private ArrayList<Graphics3DObject> getPrintLinearPath(SolarPanelLinearPath linearPath)
+   {
+      ArrayList<Graphics3DObject> ret = new ArrayList<Graphics3DObject>();
+
+      
+      Graphics3DObject nodeOneSphere = new Graphics3DObject();
+      Graphics3DObject nodeTwoSphere = new Graphics3DObject();
+      
+      Graphics3DObject lineCapsule = new Graphics3DObject();
+      
+      Point3D translationNodeOne = linearPath.getStartPose().getDesiredHandPosition();
+      nodeOneSphere.translate(translationNodeOne);
+      nodeOneSphere.addSphere(0.02, YoAppearance.DarkGray());
+      
+      Point3D translationNodeTwo = linearPath.getEndPose().getDesiredHandPosition();
+      nodeTwoSphere.translate(translationNodeTwo);
+      nodeTwoSphere.addSphere(0.02, YoAppearance.DarkGray());
+      
+      Point3D translationLine = new Point3D((translationNodeOne.getX()+translationNodeTwo.getX())/2, (translationNodeOne.getY()+translationNodeTwo.getY())/2, (translationNodeOne.getZ()+translationNodeTwo.getZ())/2);
+      AxisAngle rotationLine = new AxisAngle(-(translationNodeOne.getY()-translationNodeTwo.getY()), (translationNodeOne.getX()-translationNodeTwo.getX()), 0, Math.PI/2);
+      lineCapsule.translate(translationLine);      
+      lineCapsule.rotate(rotationLine);
+      lineCapsule.addCapsule(0.02, translationNodeOne.distance(translationNodeTwo), YoAppearance.Gray());
+            
+      ret.add(nodeOneSphere);
+      ret.add(nodeTwoSphere);
+
+      return ret;
+   }
+   
 }

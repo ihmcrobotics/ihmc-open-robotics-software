@@ -2,13 +2,14 @@ package us.ihmc.manipulation.planning.rrttimedomain;
 
 import java.util.Random;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrt.RRTTree;
 import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
 
 public class RRTTreeTimeDomain extends RRTTree
 {
-   protected double motionTime;
+   protected double motionMaximumTime;
    protected double timeScaleForMatric = 0.5;
 
    protected double maximumDisplacementOfStep = 0.4;   
@@ -19,9 +20,9 @@ public class RRTTreeTimeDomain extends RRTTree
       super(rootNode);
    }
 
-   public void setMotionTime(double motionTime)
+   public void setMaximumMotionTime(double motionTime)
    {
-      this.motionTime = motionTime;
+      this.motionMaximumTime = motionTime;
    }
 
    public void setMaximumDisplacementOfStep(double maximumDisplacementOfStep)
@@ -41,7 +42,7 @@ public class RRTTreeTimeDomain extends RRTTree
    
    public double getMotionTime()
    {
-      return motionTime;
+      return motionMaximumTime;
    }
       
    public double getTime(RRTNode node)
@@ -89,9 +90,9 @@ public class RRTTreeTimeDomain extends RRTTree
          randomNode.setNodeData(i, randonValue);
       }
 
-      if (randomNode.getNodeData(0) > motionTime)
+      if (randomNode.getNodeData(0) > motionMaximumTime)
       {
-         randomNode.setNodeData(0, motionTime);
+         randomNode.setNodeData(0, motionMaximumTime);
       }
 
       return randomNode;
@@ -121,10 +122,8 @@ public class RRTTreeTimeDomain extends RRTTree
    public boolean expandTreeTimeDomain()
    {
       RRTNode node = getRandomNode();
-       
       updateNearNodeForTargetNode(node);
       this.newNode = getNewNodeTimeDomain(node);
-
       return addNewNodeTimeDomain();
    }   
    

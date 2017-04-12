@@ -10,7 +10,7 @@ import us.ihmc.manipulation.planning.rrt.RRTValidConnection;
 
 public class RRTPlannerTimeDomain
 {
-   private RRTNode rootNode;
+   protected RRTNode rootNode;
    private RRTTreeTimeDomain rrtTree;
 
    private RRTPiecewisePath rrtPiecewisePath;
@@ -40,7 +40,7 @@ public class RRTPlannerTimeDomain
             if (rrtTree.getTime(rrtTree.getNewNode()) == rrtTree.getMotionTime())
             {
                PrintTools.info("Reach "+i);
-               rrtTree.updatePath(rrtTree.getNewNode());
+               rrtTree.updatePathNode(rrtTree.getNewNode());
                optimalPath = rrtTree.getPathNode();
                return true;
             }
