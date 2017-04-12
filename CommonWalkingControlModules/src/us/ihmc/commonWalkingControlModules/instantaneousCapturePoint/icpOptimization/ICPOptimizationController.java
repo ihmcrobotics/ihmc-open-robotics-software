@@ -358,7 +358,7 @@ public class ICPOptimizationController
       stateMultiplierCalculator.submitTimes(numberOfFootstepsToConsider + 1, transferDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue(),
             swingDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue());
 
-      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
       inputHandler.initializeForDoubleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, isStanding.getBooleanValue(), useTwoCMPs, transferToSide, omega0);
 
@@ -395,7 +395,7 @@ public class ICPOptimizationController
       stateMultiplierCalculator.submitTimes(numberOfFootstepsToConsider + 1, transferDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue(),
             swingDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue());
 
-      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+      stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
       inputHandler.initializeForSingleSupport(numberOfFootstepsToConsider, upcomingFootstepLocations, useTwoCMPs, supportSide, omega0);
 
@@ -717,7 +717,7 @@ public class ICPOptimizationController
       {
          doingBigAdjustment.set(true);
          upcomingDoubleSupportSplitFraction.set(minimumDoubleSupportSplitFraction);
-         stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
+         stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, upcomingFootsteps.size(), isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
       }
    }
 
