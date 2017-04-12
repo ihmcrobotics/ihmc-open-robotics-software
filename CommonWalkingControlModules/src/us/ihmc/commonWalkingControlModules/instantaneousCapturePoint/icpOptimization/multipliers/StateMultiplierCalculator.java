@@ -119,8 +119,8 @@ public class StateMultiplierCalculator
    {
       for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
       {
-         doubleSupportDurations.get(i).set(0.0);
-         singleSupportDurations.get(i).set(0.0);
+         doubleSupportDurations.get(i).setToNaN();
+         singleSupportDurations.get(i).setToNaN();
       }
    }
 
@@ -192,11 +192,11 @@ public class StateMultiplierCalculator
    {
       currentSwingSegment.set(0);
 
-      timeSpentOnInitialCMP.set(Double.NaN);
-      timeSpentOnFinalCMP.set(Double.NaN);
-      totalTrajectoryTime.set(Double.NaN);
-      startOfSplineTime.set(Double.NaN);
-      endOfSplineTime.set(Double.NaN);
+      timeSpentOnInitialCMP.setToNaN();
+      timeSpentOnFinalCMP.setToNaN();
+      totalTrajectoryTime.setToNaN();
+      startOfSplineTime.setToNaN();
+      endOfSplineTime.setToNaN();
 
       double doubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
       cubicDerivativeMatrix.setSegmentDuration(doubleSupportDuration);

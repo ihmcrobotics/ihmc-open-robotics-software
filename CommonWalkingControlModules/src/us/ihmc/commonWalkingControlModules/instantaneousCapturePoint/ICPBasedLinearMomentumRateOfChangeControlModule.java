@@ -4,6 +4,7 @@ package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -61,14 +62,11 @@ public class ICPBasedLinearMomentumRateOfChangeControlModule extends LinearMomen
       }
    }
 
-
-   public void setDoubleSupportDuration(double doubleSupportDuration){}
-
-   public void setSingleSupportDuration(double singleSupportDuration){}
-
    public void clearPlan(){}
 
-   public void addFootstepToPlan(Footstep footstep){}
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing){}
+
+   public void setFinalTransferDuration(double finalTransferDuration){}
 
    public void initializeForStanding(){}
 
