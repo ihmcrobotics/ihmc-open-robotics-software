@@ -101,6 +101,36 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
       position.set(x, y, z);
    }
 
+   /**
+    * Normalizes the quaternion part of this pose to ensure it is a unit-quaternion describing a
+    * proper orientation.
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the quaternion contains {@link Double#NaN}, this method is ineffective.
+    * </ul>
+    * </p>
+    */
+   public void normalizeQuaternion()
+   {
+      orientation.normalize();
+   }
+
+   /**
+    * Normalizes the quaternion part of this pose and then limits the angle of the rotation it
+    * represents to be &in; [-<i>pi</i>;<i>pi</i>].
+    * <p>
+    * Edge cases:
+    * <ul>
+    * <li>if the quaternion contains {@link Double#NaN}, this method is ineffective.
+    * </ul>
+    * </p>
+    */
+   public void normalizeQuaternionAndLimitToPi()
+   {
+      orientation.normalizeAndLimitToPiMinusPi();
+   }
+
    public void translate(Tuple3DReadOnly translation)
    {
       position.add(translation);
@@ -286,6 +316,22 @@ public class Pose implements GeometryObject<Pose>, PoseTransform
    public void getOrientation(AxisAngleBasics axisAngleToPack)
    {
       axisAngleToPack.set(orientation);
+   }
+
+   /**
+    * Computes and packs the orientation described by the quaternion part of this pose as a rotation
+    * vector.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param rotationVectorToPack the vector in which the rotation vector is stored. Modified.
+    */
+   public void getRotationVector(Vector3DBasics rotationVectorToPack)
+   {
+      orientation.get(rotationVectorToPack);
    }
 
    public void setYawPitchRoll(double[] yawPitchRoll)
