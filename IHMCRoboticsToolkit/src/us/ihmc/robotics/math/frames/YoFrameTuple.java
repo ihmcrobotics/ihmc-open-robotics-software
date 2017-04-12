@@ -158,6 +158,23 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       }
    }
 
+   /**
+    * Selects a component of this tuple based on {@code index} and returns its value.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to get.
+    * @return the value of the component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public double getElement(int index)
+   {
+      putYoValuesIntoFrameTuple();
+      return frameTuple.getElement(index);
+   }
+
    public final DoubleYoVariable getYoX()
    {
       return x;
@@ -596,6 +613,24 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       putYoValuesIntoFrameTuple();
       frameTuple.set(direction, value);
+      getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Selects a component of this tuple based on {@code index} and sets it to {@code value}.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to set.
+    * @param value the new value of the selected component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public void setElement(int index, double value)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.setElement(index, value);
       getYoValuesFromFrameTuple();
    }
 
