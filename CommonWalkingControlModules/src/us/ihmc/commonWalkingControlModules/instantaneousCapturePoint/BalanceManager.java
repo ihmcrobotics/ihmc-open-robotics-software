@@ -258,7 +258,7 @@ public class BalanceManager
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       icpPlanner.addFootstepToPlan(footstep, timing);
-      linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep);
+      linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep, timing);
    }
 
    /**
@@ -487,8 +487,6 @@ public class BalanceManager
 
    public void initializeICPPlanForSingleSupport(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
    {
-      setDefaultSingleSupportTime(defaultSwingTime);
-      setDefaultDoubleSupportTime(defaultTransferTime);
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
@@ -511,8 +509,6 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setDefaultSingleSupportTime(defaultSwingTime);
-      setDefaultDoubleSupportTime(defaultTransferTime);
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
@@ -525,8 +521,6 @@ public class BalanceManager
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setDefaultSingleSupportTime(defaultSwingTime);
-      setDefaultDoubleSupportTime(defaultTransferTime);
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
@@ -647,19 +641,10 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
-   private void setDefaultDoubleSupportTime(double defaultDoubleSupportTime)
-   {
-      linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(defaultDoubleSupportTime);
-   }
-
-   private void setDefaultSingleSupportTime(double defaultSingleSupportTime)
-   {
-      linearMomentumRateOfChangeControlModule.setSingleSupportDuration(defaultSingleSupportTime);
-   }
-
    private void setFinalTransferTime(double finalTransferTime)
    {
       icpPlanner.setFinalTransferDuration(finalTransferTime);
+      linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferTime);
    }
 
    /**

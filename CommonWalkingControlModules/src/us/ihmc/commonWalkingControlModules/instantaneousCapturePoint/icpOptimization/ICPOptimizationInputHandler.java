@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -40,8 +41,10 @@ public class ICPOptimizationInputHandler
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
    private final StateMultiplierCalculator stateMultiplierCalculator;
 
-   private final DoubleYoVariable doubleSupportDuration;
-   private final DoubleYoVariable singleSupportDuration;
+   //private final DoubleYoVariable doubleSupportDuration;
+   //private final DoubleYoVariable singleSupportDuration;
+   private final List<DoubleYoVariable> transferDurations;
+   private final List<DoubleYoVariable> swingDurations;
 
    private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
@@ -54,14 +57,17 @@ public class ICPOptimizationInputHandler
    private final FramePoint2d cmpOffsetRecursion = new FramePoint2d();
 
    public ICPOptimizationInputHandler(CapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
-         SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider, StateMultiplierCalculator stateMultiplierCalculator,
-         DoubleYoVariable doubleSupportDuration, DoubleYoVariable singleSupportDuration, DoubleYoVariable exitCMPDurationInPercentOfStepTime, boolean visualize,
+         SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
+         StateMultiplierCalculator stateMultiplierCalculator, DoubleYoVariable doubleSupportDuration, DoubleYoVariable singleSupportDuration,
+         List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations, DoubleYoVariable exitCMPDurationInPercentOfStepTime, boolean visualize,
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.stateMultiplierCalculator = stateMultiplierCalculator;
 
-      this.doubleSupportDuration = doubleSupportDuration;
-      this.singleSupportDuration = singleSupportDuration;
+      //this.doubleSupportDuration = doubleSupportDuration;
+      //this.singleSupportDuration = singleSupportDuration;
+      this.transferDurations = transferDurations;
+      this.swingDurations = swingDurations;
       this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
 
       exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getSwingDurationAlpha());
@@ -159,7 +165,8 @@ public class ICPOptimizationInputHandler
 
    private void initializeCornerPoints(boolean useTwoCMPs, double omega0)
    {
-      double steppingDuration = doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue();
+      //double steppingDuration = doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue();
+      double steppingDuration = transferDurations.get(0).getDoubleValue() + swingDurations.get(0).getDoubleValue();
       if (useTwoCMPs)
       {
          CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, referenceCMPsCalculator.getEntryCMPs(), referenceCMPsCalculator.getExitCMPs(),

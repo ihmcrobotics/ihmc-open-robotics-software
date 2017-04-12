@@ -12,6 +12,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -360,13 +361,11 @@ public abstract class LinearMomentumRateOfChangeControlModule
       this.controlHeightWithMomentum = controlHeightWithMomentum;
    }
 
-   public abstract void setDoubleSupportDuration(double doubleSupportDuration);
-
-   public abstract void setSingleSupportDuration(double singleSupportDuration);
-
    public abstract void clearPlan();
 
-   public abstract void addFootstepToPlan(Footstep footstep);
+   public abstract void addFootstepToPlan(Footstep footstep, FootstepTiming timing);
+
+   public abstract void setFinalTransferDuration(double finalTransferDuration);
 
    public abstract void initializeForStanding();
 
