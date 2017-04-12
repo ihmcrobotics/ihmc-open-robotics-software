@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.frames;
 
 import org.apache.commons.lang3.StringUtils;
 
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.geometry.FrameTuple;
@@ -80,6 +81,24 @@ public class YoSpatialVector
    public void setAngularPart(YoFrameVector yoFrameVector)
    {
       angularPart.set(yoFrameVector);
+   }
+
+   public void set(Vector3DReadOnly linearPart, Vector3DReadOnly angularPart)
+   {
+      setLinearPart(linearPart);
+      setAngularPart(angularPart);
+   }
+
+   public void set(FrameVector linearPart, FrameVector angularPart)
+   {
+      setLinearPart(linearPart);
+      setAngularPart(angularPart);
+   }
+
+   public void set(YoFrameVector linearPart, YoFrameVector angularPart)
+   {
+      setLinearPart(linearPart);
+      setAngularPart(angularPart);
    }
 
    public void scale(double scaleFactor)
@@ -168,6 +187,70 @@ public class YoSpatialVector
    public double getAngularPartZ()
    {
       return angularPart.getZ();
+   }
+
+   public void getLinearPart(Vector3DBasics linearPartToPack)
+   {
+      this.linearPart.get(linearPartToPack);
+   }
+
+   public void getLinearPart(FrameVector linearPartToPack)
+   {
+      this.linearPart.getFrameTuple(linearPartToPack);
+   }
+
+   public void getLinearPartIncludingFrame(FrameVector linearPartToPack)
+   {
+      this.linearPart.getFrameTupleIncludingFrame(linearPartToPack);
+   }
+
+   public void getLinearPart(YoFrameVector linearPartToPack)
+   {
+      linearPartToPack.set(this.linearPart);
+   }
+
+   public void getAngularPart(Vector3DBasics angularPartToPack)
+   {
+      this.angularPart.get(angularPartToPack);
+   }
+
+   public void getAngularPart(FrameVector angularPartToPack)
+   {
+      this.angularPart.getFrameTuple(angularPartToPack);
+   }
+
+   public void getAngularPartIncludingFrame(FrameVector angularPartToPack)
+   {
+      this.angularPart.getFrameTupleIncludingFrame(angularPartToPack);
+   }
+
+   public void getAngularPart(YoFrameVector angularPartToPack)
+   {
+      angularPartToPack.set(this.angularPart);
+   }
+
+   public void get(Vector3DBasics linearPartToPack, Vector3DBasics angularPartToPack)
+   {
+      getLinearPart(linearPartToPack);
+      getAngularPart(angularPartToPack);
+   }
+
+   public void get(FrameVector linearPartToPack, FrameVector angularPartToPack)
+   {
+      getLinearPart(linearPartToPack);
+      getAngularPart(angularPartToPack);
+   }
+
+   public void getIncludingFrame(FrameVector linearPartToPack, FrameVector angularPartToPack)
+   {
+      getLinearPartIncludingFrame(linearPartToPack);
+      getAngularPartIncludingFrame(angularPartToPack);
+   }
+
+   public void get(YoFrameVector linearPartToPack, YoFrameVector angularPartToPack)
+   {
+      getLinearPart(linearPartToPack);
+      getAngularPart(angularPartToPack);
    }
 
    public ReferenceFrame getExpressedInFrame()
