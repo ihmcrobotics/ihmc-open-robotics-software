@@ -33,7 +33,7 @@ SelectionMatrix
 <Visible> true</Visible>
 </Main Viewport>
 
-<Graph Array Window Size>3</Graph Array Window Size>
+<Graph Array Window Size>4</Graph Array Window Size>
 <Graph Array Window1>
 <ScreenID>2</ScreenID>
 <WindowLocation>-1928.0, -8.0</WindowLocation>
@@ -257,7 +257,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationX,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationX</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationX,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationX,root.RobotArm.controlFrameLinearAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config20</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -269,7 +269,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationY,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationY</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationY,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationY,root.RobotArm.controlFrameLinearAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config21</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -281,7 +281,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationZ,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationZ</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationZ,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationZ,root.RobotArm.controlFrameLinearAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config22</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -293,7 +293,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationX,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationX</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationX,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationX,root.RobotArm.controlFrameAngularAccelerationX</Variables>
 		<GraphConfiguration>
 			<Name>config23</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -305,7 +305,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationY,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationY</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationY,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationY,root.RobotArm.controlFrameAngularAccelerationY</Variables>
 		<GraphConfiguration>
 			<Name>config24</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -317,7 +317,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationZ,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationZ</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationZ,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationZ,root.RobotArm.controlFrameAngularAccelerationZ</Variables>
 		<GraphConfiguration>
 			<Name>config25</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -336,7 +336,7 @@ SelectionMatrix
 <GraphGroup>
 	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handEuclideanPositionController.handPositionErrorX,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorPositionX</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorPositionX</Variables>
 		<GraphConfiguration>
 			<Name>config26</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -348,7 +348,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handEuclideanPositionController.handPositionErrorY,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorPositionY</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorPositionY</Variables>
 		<GraphConfiguration>
 			<Name>config27</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -360,7 +360,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handEuclideanPositionController.handPositionErrorZ,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorPositionZ</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorPositionZ</Variables>
 		<GraphConfiguration>
 			<Name>config28</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -372,7 +372,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handAxisAngleOrientationController.handRotationErrorInBodyX</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorRotationVectorX</Variables>
 		<GraphConfiguration>
 			<Name>config29</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -384,7 +384,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handAxisAngleOrientationController.handRotationErrorInBodyY</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorRotationVectorY</Variables>
 		<GraphConfiguration>
 			<Name>config30</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -396,7 +396,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handAxisAngleOrientationController.handRotationErrorInBodyZ</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorRotationVectorZ</Variables>
 		<GraphConfiguration>
 			<Name>config31</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -408,7 +408,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handEuclideanPositionController.handLinearVelocityErrorX</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorLinearVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config32</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -420,7 +420,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handEuclideanPositionController.handLinearVelocityErrorY</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorLinearVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config33</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -432,7 +432,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handEuclideanPositionController.handLinearVelocityErrorZ</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorLinearVelocityZ</Variables>
 		<GraphConfiguration>
 			<Name>config34</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -444,7 +444,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handAxisAngleOrientationController.handAngularVelocityErrorX</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorAngularVelocityX</Variables>
 		<GraphConfiguration>
 			<Name>config35</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -456,7 +456,7 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handAxisAngleOrientationController.handAngularVelocityErrorY</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorAngularVelocityY</Variables>
 		<GraphConfiguration>
 			<Name>config36</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -468,153 +468,9 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.handSpatialFBController.handRigidBodySpatialAccelerationControlModule.handAxisAngleOrientationController.handAngularVelocityErrorZ</Variables>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorAngularVelocityZ</Variables>
 		<GraphConfiguration>
 			<Name>config37</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorLinearVelocityX</Variables>
-		<GraphConfiguration>
-			<Name>config38</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorLinearVelocityY</Variables>
-		<GraphConfiguration>
-			<Name>config39</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handErrorLinearVelocityZ</Variables>
-		<GraphConfiguration>
-			<Name>config40</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config41</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config42</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config43</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config44</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config45</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config46</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config47</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config48</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables></Variables>
-		<GraphConfiguration>
-			<Name>config49</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -633,7 +489,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_min_qp_shoulderYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.qd_qp_shoulderYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_max_qp_shoulderYaw</Variables>
 		<GraphConfiguration>
-			<Name>config50</Name>
+			<Name>config38</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -645,7 +501,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_min_qp_shoulderYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_shoulderYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_max_qp_shoulderYaw</Variables>
 		<GraphConfiguration>
-			<Name>config51</Name>
+			<Name>config39</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -657,7 +513,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.JointLimits.limitshoulderYaw_Status</Variables>
 		<GraphConfiguration>
-			<Name>config52</Name>
+			<Name>config40</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -669,7 +525,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_min_qp_shoulderRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.qd_qp_shoulderRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_max_qp_shoulderRoll</Variables>
 		<GraphConfiguration>
-			<Name>config53</Name>
+			<Name>config41</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -681,7 +537,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_min_qp_shoulderRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_shoulderRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_max_qp_shoulderRoll</Variables>
 		<GraphConfiguration>
-			<Name>config54</Name>
+			<Name>config42</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -693,7 +549,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.JointLimits.limitshoulderRoll_Status</Variables>
 		<GraphConfiguration>
-			<Name>config55</Name>
+			<Name>config43</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -705,7 +561,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_min_qp_shoulderPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.qd_qp_shoulderPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_max_qp_shoulderPitch</Variables>
 		<GraphConfiguration>
-			<Name>config56</Name>
+			<Name>config44</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -717,7 +573,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_min_qp_shoulderPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_shoulderPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_max_qp_shoulderPitch</Variables>
 		<GraphConfiguration>
-			<Name>config57</Name>
+			<Name>config45</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -729,7 +585,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.JointLimits.limitshoulderPitch_Status</Variables>
 		<GraphConfiguration>
-			<Name>config58</Name>
+			<Name>config46</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -741,7 +597,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_min_qp_elbowPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.qd_qp_elbowPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_max_qp_elbowPitch</Variables>
 		<GraphConfiguration>
-			<Name>config59</Name>
+			<Name>config47</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -753,7 +609,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_min_qp_elbowPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_elbowPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_max_qp_elbowPitch</Variables>
 		<GraphConfiguration>
-			<Name>config60</Name>
+			<Name>config48</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -765,7 +621,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.JointLimits.limitelbowPitch_Status</Variables>
 		<GraphConfiguration>
-			<Name>config61</Name>
+			<Name>config49</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -777,7 +633,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_min_qp_wristPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.qd_qp_wristPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_max_qp_wristPitch</Variables>
 		<GraphConfiguration>
-			<Name>config62</Name>
+			<Name>config50</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -789,7 +645,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_min_qp_wristPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_wristPitch,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_max_qp_wristPitch</Variables>
 		<GraphConfiguration>
-			<Name>config63</Name>
+			<Name>config51</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -801,7 +657,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.JointLimits.limitwristPitch_Status</Variables>
 		<GraphConfiguration>
-			<Name>config64</Name>
+			<Name>config52</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -813,7 +669,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_min_qp_wristRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.qd_qp_wristRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_max_qp_wristRoll</Variables>
 		<GraphConfiguration>
-			<Name>config65</Name>
+			<Name>config53</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -825,7 +681,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_min_qp_wristRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_wristRoll,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_max_qp_wristRoll</Variables>
 		<GraphConfiguration>
-			<Name>config66</Name>
+			<Name>config54</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -837,7 +693,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.JointLimits.limitwristRoll_Status</Variables>
 		<GraphConfiguration>
-			<Name>config67</Name>
+			<Name>config55</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -849,7 +705,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_min_qp_wristYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.qd_qp_wristYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseKinematicsSolver.InverseKinematicsOptimizationControlModule.qd_max_qp_wristYaw</Variables>
 		<GraphConfiguration>
-			<Name>config68</Name>
+			<Name>config56</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -861,7 +717,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_min_qp_wristYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.qdd_qp_wristYaw,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.qdd_max_qp_wristYaw</Variables>
 		<GraphConfiguration>
-			<Name>config69</Name>
+			<Name>config57</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -873,7 +729,7 @@ SelectionMatrix
 	<Graph>
 		<Variables>root.RobotArm.RobotArmController.JointLimits.limitwristYaw_Status</Variables>
 		<GraphConfiguration>
-			<Name>config70</Name>
+			<Name>config58</Name>
 			<ScalingMethod>1</ScalingMethod>
 			<PlotType>100</PlotType>
 			<ShowBaseLines>true</ShowBaseLines>
@@ -883,7 +739,86 @@ SelectionMatrix
 		</GraphConfig>
 	</Graph>
 </GraphGroup>
-</Graph Array Window3>
+</Graph Array Window3><Graph Array Window4>
+<ScreenID>0</ScreenID>
+<WindowLocation>-4488.0, -8.0</WindowLocation>
+<WindowSize>2576.0, 1456.0</WindowSize>
+<GraphGroup>
+	<Cols>2</Cols>
+	<Graph>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationX,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationX,root.RobotArm.controlFrameLinearAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config59</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationX,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationX,root.RobotArm.controlFrameAngularAccelerationX</Variables>
+		<GraphConfiguration>
+			<Name>config60</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationY,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationY,root.RobotArm.controlFrameLinearAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config61</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationY,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationY,root.RobotArm.controlFrameAngularAccelerationY</Variables>
+		<GraphConfiguration>
+			<Name>config62</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredLinearAccelerationZ,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedLinearAccelerationZ,root.RobotArm.controlFrameLinearAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config63</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+	<Graph>
+		<Variables>root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handDesiredAngularAccelerationZ,root.RobotArm.RobotArmController.WholeBodyControllerCore.WholeBodyFeedbackController.FeedbackControllerToolbox.handAchievedAngularAccelerationZ,root.RobotArm.controlFrameAngularAccelerationZ</Variables>
+		<GraphConfiguration>
+			<Name>config64</Name>
+			<ScalingMethod>1</ScalingMethod>
+			<PlotType>100</PlotType>
+			<ShowBaseLines>true</ShowBaseLines>
+			<BaseLines>0.0,</BaseLines>
+			<MaxScaling>1.0</MaxScaling>
+			<MinScaling>0.0</MinScaling>
+		</GraphConfig>
+	</Graph>
+</GraphGroup>
+</Graph Array Window4>
 
 <Extra Panels>
 <Main Viewport>
