@@ -186,7 +186,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       return null;
    }
 
-   public void checkTransitionConditions()
+   public boolean checkTransitionConditions()
    {
       T currentState = getCurrentState();
 
@@ -205,7 +205,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
          }
          else
          {
-            return;
+            return false;
          }
       }
 
@@ -215,6 +215,7 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
       currentState.doTransitionOutOfAction();
       stateTransition.doAction();
       setCurrentState(stateTransition.getNextStateEnum());
+      return true;
    }
 
    public String toString()

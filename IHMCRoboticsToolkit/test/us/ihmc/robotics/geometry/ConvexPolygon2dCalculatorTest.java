@@ -1,8 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -12,6 +10,7 @@ import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -1660,7 +1659,7 @@ public class ConvexPolygon2dCalculatorTest
          Point2DReadOnly edgeEnd = polygon.getNextVertex(i);
          Vector2D edgeVector = new Vector2D();
          edgeVector.sub(edgeEnd, edgeStart);
-         GeometryTools.getPerpendicularVector(edgeVector, expected);
+         EuclidGeometryTools.perpendicularVector2D(edgeVector, expected);
          expected.normalize();
 
          assertTrue("Expected normal Vector did not match computed one.", expected.epsilonEquals(normal, epsilon));

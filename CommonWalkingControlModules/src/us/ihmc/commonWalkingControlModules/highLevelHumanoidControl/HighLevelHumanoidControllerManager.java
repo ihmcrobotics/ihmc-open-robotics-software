@@ -7,7 +7,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelBehavior;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -40,7 +43,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private final GenericStateMachine<HighLevelState, HighLevelBehavior> stateMachine;
    private final HighLevelState initialBehavior;
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final EnumYoVariable<HighLevelState> requestedHighLevelState = new EnumYoVariable<HighLevelState>("requestedHighLevelState", registry,
          HighLevelState.class, true);
@@ -62,12 +65,12 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    public HighLevelHumanoidControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
          WholeBodyControllerCore controllerCore, HighLevelState initialBehavior, ArrayList<HighLevelBehavior> highLevelBehaviors,
-         HighLevelHumanoidControllerToolbox momentumBasedController, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+         HighLevelHumanoidControllerToolbox controllerToolbox, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
          ControllerCoreOutputReadOnly controllerCoreOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
-      DoubleYoVariable yoTime = momentumBasedController.getYoTime();
+      DoubleYoVariable yoTime = controllerToolbox.getYoTime();
       this.controllerCoreOutput = controllerCoreOutput;
       this.controllerCore = controllerCore;
 
@@ -81,11 +84,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
          this.registry.addChild(highLevelBehaviors.get(i).getYoVariableRegistry());
       }
       this.initialBehavior = initialBehavior;
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.centerOfPressureDataHolderForEstimator = centerOfPressureDataHolderForEstimator;
-      this.registry.addChild(momentumBasedController.getYoVariableRegistry());
+      this.registry.addChild(controllerToolbox.getYoVariableRegistry());
 
-      momentumBasedController.attachControllerFailureListener(new ControllerFailureListener()
+      controllerToolbox.attachControllerFailureListener(new ControllerFailureListener()
       {
          @Override
          public void controllerFailed(FrameVector2d fallingDirection)
@@ -159,7 +162,7 @@ public class HighLevelHumanoidControllerManager implements RobotController
    public void initialize()
    {
       controllerCore.initialize();
-      momentumBasedController.initialize();
+      controllerToolbox.initialize();
       stateMachine.setCurrentState(initialBehavior);
    }
 
@@ -189,11 +192,11 @@ public class HighLevelHumanoidControllerManager implements RobotController
 
    private void reportDesiredCenterOfPressureForEstimator()
    {
-      SideDependentList<? extends ContactablePlaneBody> contactableFeet = momentumBasedController.getContactableFeet();
-      FullHumanoidRobotModel fullHumanoidRobotModel = momentumBasedController.getFullRobotModel();
+      SideDependentList<? extends ContactablePlaneBody> contactableFeet = controllerToolbox.getContactableFeet();
+      FullHumanoidRobotModel fullHumanoidRobotModel = controllerToolbox.getFullRobotModel();
       for (RobotSide robotSide : RobotSide.values)
       {
-         momentumBasedController.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
+         controllerToolbox.getDesiredCenterOfPressure(contactableFeet.get(robotSide), desiredFootCoPs.get(robotSide));
          centerOfPressureDataHolderForEstimator.setCenterOfPressure(desiredFootCoPs.get(robotSide), fullHumanoidRobotModel.getFoot(robotSide));
       }
    }
@@ -238,6 +241,39 @@ public class HighLevelHumanoidControllerManager implements RobotController
    public String getDescription()
    {
       return getName();
+   }
+
+   /**
+    * Warmup the walking behavior by running all states for a number of iterations.
+    * 
+    * Also warms up the controller core
+    * 
+    * @param iterations number of times to run a single state
+    * @param walkingBehavior 
+    */
+   public void warmup(int iterations, WalkingHighLevelHumanoidController walkingBehavior)
+   {
+      PrintTools.info(this, "Starting JIT warmup routine");
+      ArrayList<WalkingStateEnum> states = new ArrayList<>();
+      controllerCore.initialize();
+      walkingBehavior.doTransitionIntoAction();
+      
+      walkingBehavior.getOrderedWalkingStatesForWarmup(states);
+      for(WalkingStateEnum walkingState : states)
+      {
+         PrintTools.info(this, "Warming up " + walkingState);
+         for(int i = 0; i < iterations; i++)
+         {
+            walkingBehavior.warmupStateIteration(walkingState);
+            ControllerCoreCommand controllerCoreCommandList = walkingBehavior.getControllerCoreCommand();
+            controllerCore.submitControllerCoreCommand(controllerCoreCommandList);
+            controllerCore.compute();
+         }
+      }
+
+      walkingBehavior.doTransitionOutOfAction();
+      walkingBehavior.getControllerCoreCommand().clear();
+      PrintTools.info(this, "Finished JIT warmup routine");
    }
 
 }

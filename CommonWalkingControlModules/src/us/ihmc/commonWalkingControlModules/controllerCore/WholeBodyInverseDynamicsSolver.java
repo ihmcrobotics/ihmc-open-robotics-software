@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PointAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
@@ -38,8 +37,8 @@ import us.ihmc.robotics.screwTheory.*;
 
 public class WholeBodyInverseDynamicsSolver
 {
-   private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = false;
-   private static final boolean MINIMIZE_JOINT_TORQUES = false;
+   private static final boolean USE_DYNAMIC_MATRIX_CALCULATOR = true;
+   private static final boolean MINIMIZE_JOINT_TORQUES = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -81,11 +80,11 @@ public class WholeBodyInverseDynamicsSolver
    public WholeBodyInverseDynamicsSolver(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
       controlDT = toolbox.getControlDT();
-      rootJoint = toolbox.getRobotRootJoint();
+      rootJoint = toolbox.getRootJoint();
       inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
       WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
-      optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, wrenchMatrixCalculator, dynamicsMatrixCalculator, registry);
+      optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, dynamicsMatrixCalculator, registry);
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
@@ -199,11 +198,14 @@ public class WholeBodyInverseDynamicsSolver
 
       updateLowLevelData();
 
-      rootJoint.getWrench(residualRootJointWrench);
-      residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
-      residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
-      yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
-      yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      if (rootJoint != null)
+      {
+         rootJoint.getWrench(residualRootJointWrench);
+         residualRootJointWrench.getAngularPartIncludingFrame(residualRootJointTorque);
+         residualRootJointWrench.getLinearPartIncludingFrame(residualRootJointForce);
+         yoResidualRootJointForce.setAndMatchFrame(residualRootJointForce);
+         yoResidualRootJointTorque.setAndMatchFrame(residualRootJointTorque);
+      }
 
       for (int i = 0; i < controlledOneDoFJoints.length; i++)
       {
@@ -217,7 +219,8 @@ public class WholeBodyInverseDynamicsSolver
 
    private void updateLowLevelData()
    {
-      rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
+      if (rootJoint != null)
+         rootJointDesiredConfiguration.setDesiredAccelerationFromJoint(rootJoint);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredTorqueFromJoints(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setDesiredAccelerationFromJoints(controlledOneDoFJoints);
 
@@ -233,9 +236,6 @@ public class WholeBodyInverseDynamicsSolver
          {
          case TASKSPACE:
             optimizationControlModule.submitSpatialAccelerationCommand((SpatialAccelerationCommand) command);
-            break;
-         case POINT:
-            optimizationControlModule.submitPointAccelerationCommand((PointAccelerationCommand) command);
             break;
          case JOINTSPACE:
             optimizationControlModule.submitJointspaceAccelerationCommand((JointspaceAccelerationCommand) command);

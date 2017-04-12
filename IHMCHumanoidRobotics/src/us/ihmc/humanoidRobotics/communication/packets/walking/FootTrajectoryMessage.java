@@ -7,24 +7,24 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.VisualizablePacket;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.AbstractSE3TrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 @RosMessagePacket(documentation =
-      "This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points."
-            + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
-            + " To excute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
-            + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
+"This message commands the controller first to unload if necessary and then to move in taskspace a foot to the desired pose (position & orientation) while going through the specified trajectory points."
+      + " A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations."
+      + " To excute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time."
+      + " A message with a unique id equals to 0 will be interpreted as invalid and will not be processed by the controller. This rule does not apply to the fields of this message.",
       rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE,
       topic = "/control/foot_trajectory")
 public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTrajectoryMessage> implements VisualizablePacket
 {
-   @RosExportedField(documentation = "Specifies the which foot will execute the trajectory.")
+   @RosExportedField(documentation = "Specifies which foot will execute the trajectory.")
    public RobotSide robotSide;
 
    /**
@@ -34,14 +34,12 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage()
    {
       super();
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    public FootTrajectoryMessage(Random random)
    {
       super(random);
       robotSide = RandomNumbers.nextEnum(random, RobotSide.class);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -51,8 +49,6 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage(FootTrajectoryMessage footTrajectoryMessage)
    {
       super(footTrajectoryMessage);
-      setUniqueId(footTrajectoryMessage.getUniqueId());
-      setDestination(footTrajectoryMessage.getDestination());
       robotSide = footTrajectoryMessage.robotSide;
    }
 
@@ -66,8 +62,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
     */
    public FootTrajectoryMessage(RobotSide robotSide, double trajectoryTime, Point3D desiredPosition, Quaternion desiredOrientation)
    {
-      super(trajectoryTime, desiredPosition, desiredOrientation);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
+      super(trajectoryTime, desiredPosition, desiredOrientation, ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       this.robotSide = robotSide;
    }
 
@@ -81,8 +76,16 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    public FootTrajectoryMessage(RobotSide robotSide, int numberOfTrajectoryPoints)
    {
       super(numberOfTrajectoryPoints);
-      setUniqueId(VALID_MESSAGE_DEFAULT_ID);
       this.robotSide = robotSide;
+      super.setDataReferenceFrameId(ReferenceFrame.getWorldFrame());
+      super.setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame());
+   }
+
+   @Override
+   public void set(FootTrajectoryMessage other)
+   {
+      super.set(other);
+      robotSide = other.robotSide;
    }
 
    public RobotSide getRobotSide()
@@ -100,14 +103,6 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
    }
 
    @Override
-   public FootTrajectoryMessage transform(RigidBodyTransform transform)
-   {
-      FootTrajectoryMessage transformedFootTrajectoryMessage = new FootTrajectoryMessage(this);
-      transformedFootTrajectoryMessage.applyTransform(transform);
-      return transformedFootTrajectoryMessage;
-   }
-
-   @Override
    public String toString()
    {
       String ret = "";
@@ -118,7 +113,7 @@ public class FootTrajectoryMessage extends AbstractSE3TrajectoryMessage<FootTraj
 
       return ret + ", robotSide = " + robotSide + ".";
    }
-   
+
    /** {@inheritDoc} */
    @Override
    public String validateMessage()

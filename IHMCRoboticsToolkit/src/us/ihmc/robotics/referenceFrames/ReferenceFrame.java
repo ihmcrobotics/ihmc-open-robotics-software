@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Random;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,7 +12,6 @@ import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.AbstractReferenceFrameHolder;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeHolder;
 import us.ihmc.robotics.nameBasedHashCode.NameBasedHashCodeTools;
@@ -29,6 +29,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    private static final long serialVersionUID = 9129810880579453658L;
    protected final String frameName;
    private final long nameBasedHashCode;
+   private long additionalNameBasedHashCode;
    protected final ReferenceFrame parentFrame;
    private final ReferenceFrame[] framesStartingWithRootEndingWithThis;
 
@@ -114,7 +115,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       
       AxisAngle rotationToDesired = new AxisAngle();
       alignAxisWithThis.changeFrame(referenceNormal.getReferenceFrame());
-      GeometryTools.getAxisAngleFromFirstToSecondVector(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(referenceNormal.getVectorCopy(), alignAxisWithThis.getVectorCopy(), rotationToDesired);
       
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
 
@@ -166,7 +167,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       ReferenceFrame initialFrame = alignAxisWithThis.getReferenceFrame();
       alignAxisWithThis.changeFrame(currentXYZAxis.getReferenceFrame());
       AxisAngle rotationToDesired = new AxisAngle();
-      GeometryTools.getAxisAngleFromFirstToSecondVector(currentXYZAxis.getVector(), alignAxisWithThis.getVector(), rotationToDesired);
+      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(currentXYZAxis.getVector(), alignAxisWithThis.getVector(), rotationToDesired);
       alignAxisWithThis.changeFrame(initialFrame);
       
       RigidBodyTransform transformToDesired = new RigidBodyTransform();
@@ -254,7 +255,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       this.frameName = frameName;
       this.parentFrame = parentFrame;
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
 
       this.transformToRoot = new RigidBodyTransform();
@@ -324,7 +325,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, RigidBodyTransform transformToParent, boolean isBodyCenteredFrame, boolean isWorldFrame,
          boolean isZupFrame)
    {
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
+      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
       this.frameName = frameName;
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
@@ -342,7 +343,6 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
 
    public ReferenceFrame(String frameName, ReferenceFrame parentFrame, boolean isBodyCenteredFrame, boolean isWorldFrame, boolean isZupFrame)
    {
-      nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame);
       this.frameName = frameName;
       this.parentFrame = parentFrame;
       this.framesStartingWithRootEndingWithThis = constructFramesStartingWithRootEndingWithThis(this);
@@ -354,6 +354,15 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
       this.transformToRoot = new RigidBodyTransform();
       this.inverseTransformToRoot = new RigidBodyTransform();
       this.transformToParent = new RigidBodyTransform();
+      
+      if(parentFrame != null)
+      {
+         nameBasedHashCode = NameBasedHashCodeTools.combineHashCodes(frameName, parentFrame.getName());
+      }
+      else
+      {
+         nameBasedHashCode = NameBasedHashCodeTools.computeStringHashCode(frameName);
+      }
    }
 
    public boolean isBodyCenteredFrame()
@@ -620,7 +629,7 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    {
       RigidBodyTransform ret = new RigidBodyTransform();
 
-      ret.setRotation(GeometryTools.getAxisAngleFromZUpToVector(zAxis.getVectorCopy()));
+      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis.getVectorCopy()));
       Vector3D translation = new Vector3D();
       point.get(translation);
       ret.setTranslation(translation);
@@ -719,8 +728,18 @@ public abstract class ReferenceFrame implements Serializable, NameBasedHashCodeH
    }
 
    @Override
-   public long nameBasedHashCode()
+   public long getNameBasedHashCode()
    {
       return nameBasedHashCode;
+   }
+
+   public long getAdditionalNameBasedHashCode()
+   {
+      return additionalNameBasedHashCode;
+   }
+
+   public void setAdditionalNameBasedHashCode(long additionalNameBasedHashCode)
+   {
+      this.additionalNameBasedHashCode = additionalNameBasedHashCode;
    }
 }

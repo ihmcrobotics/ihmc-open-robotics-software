@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -21,17 +23,13 @@ import us.ihmc.robotics.random.RandomGeometry;
  * The vertices of this polygon are clockwise and are all different.
  * </p>
  *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author IHMC-Yobotics Biped Team
+ * @author IHMC Biped Team
  * @version 1.0
  */
-public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
+public class ConvexPolygon2d implements GeometryObject<ConvexPolygon2d>
 {
    private final ArrayList<Point2D> clockwiseOrderedListOfPoints = new ArrayList<Point2D>();
-   private final BoundingBox2d boundingBox = new BoundingBox2d();
+   private final BoundingBox2D boundingBox = new BoundingBox2D();
    private final Point2D centroid = new Point2D();
    private int numberOfVertices = 0;
    private boolean isUpToDate = false;
@@ -533,7 +531,7 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return centroid;
    }
 
-   public BoundingBox2d getBoundingBox()
+   public BoundingBox2D getBoundingBox()
    {
       return boundingBox;
    }
@@ -548,15 +546,15 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return boundingBox.getMaxPoint().getY() - boundingBox.getMinPoint().getY();
    }
 
-   public BoundingBox2d getBoundingBoxCopy()
+   public BoundingBox2D getBoundingBoxCopy()
    {
       checkIfUpToDate();
-      BoundingBox2d ret = new BoundingBox2d(boundingBox);
+      BoundingBox2D ret = new BoundingBox2D(boundingBox);
 
       return ret;
    }
 
-   public void getBoundingBox(BoundingBox2d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox2D boundingBoxToPack)
    {
       boundingBoxToPack.set(boundingBox);
    }
@@ -710,7 +708,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       update();
    }
 
-   @Override
    public void applyTransformAndProjectToXYPlane(Transform transform)
    {
       isUpToDate = false;
@@ -723,7 +720,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       update();
    }
 
-   @Override
    public ConvexPolygon2d applyTransformCopy(Transform transform)
    {
       ConvexPolygon2d copy = new ConvexPolygon2d(this);
@@ -731,7 +727,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return copy;
    }
 
-   @Override
    public ConvexPolygon2d applyTransformAndProjectToXYPlaneCopy(Transform transform)
    {
       ConvexPolygon2d copy = new ConvexPolygon2d(this);
@@ -1002,13 +997,11 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.getClosestPointToRay(ray, pointToPack, this);
    }
 
-   @Override
    public double distance(Point2DReadOnly point)
    {
       return Math.max(0.0, ConvexPolygon2dCalculator.getSignedDistance(point, this));
    }
 
-   @Override
    public void orthogonalProjection(Point2DBasics point2d)
    {
       ConvexPolygon2dCalculator.orthogonalProjection(point2d, this);
@@ -1019,7 +1012,6 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return Math.abs(ConvexPolygon2dCalculator.getSignedDistance(point, this)) < 1.0E-10;
    }
 
-   @Override
    public Point2D[] intersectionWith(Line2d line)
    {
       return ConvexPolygon2dCalculator.intersectionWithLineCopy(line, this);
@@ -1040,20 +1032,17 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygon2dCalculator.intersectionWithRayCopy(ray, this);
    }
 
-   @Override
    public Point2D orthogonalProjectionCopy(Point2DReadOnly point)
    {
       return ConvexPolygon2dCalculator.orthogonalProjectionCopy(point, this);
    }
 
-   @Override
    public Point2D[] intersectionWith(LineSegment2d lineSegment2d)
    {
       return ConvexPolygon2dCalculator.intersectionWithLineSegmentCopy(lineSegment2d, this);
    }
 
    // TODO: clean up garbage in / implement the following methods
-   @Override
    public ConvexPolygon2d intersectionWith(ConvexPolygon2d convexPolygon)
    {
       checkIfUpToDate();
@@ -1070,21 +1059,18 @@ public class ConvexPolygon2d implements Geometry2d<ConvexPolygon2d>
       return ConvexPolygonTools.computeIntersectionOfPolygons(this, convexPolygon, intersectionToPack);
    }
 
-   @Override
    public double distance(Line2d line)
    {
       checkIfUpToDate();
       throw new RuntimeException("Not yet implemented");
    }
 
-   @Override
    public double distance(LineSegment2d lineSegment)
    {
       checkIfUpToDate();
       throw new RuntimeException("Not yet implemented");
    }
 
-   @Override
    public double distance(ConvexPolygon2d convexPolygon)
    {
       checkIfUpToDate();

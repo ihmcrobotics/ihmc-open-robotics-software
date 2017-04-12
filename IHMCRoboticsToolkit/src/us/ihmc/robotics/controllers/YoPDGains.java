@@ -157,11 +157,22 @@ public class YoPDGains implements PDGainsInterface
             kd.set(GainCalculator.computeDerivativeGain(kp.getDoubleValue(), zeta.getDoubleValue()));
          }
       };
-   
+
       kp.addVariableChangedListener(kdUpdater);
       zeta.addVariableChangedListener(kdUpdater);
-      
+
       if (updateNow) kdUpdater.variableChanged(null);
+   }
+
+   public void set(YoPDGains other)
+   {
+      this.kp.set(other.kp.getDoubleValue());
+      this.zeta.set(other.zeta.getDoubleValue());
+      this.kd.set(other.kd.getDoubleValue());
+      this.maximumOutput.set(other.maximumOutput.getDoubleValue());
+      this.maximumFeedback.set(other.maximumFeedback.getDoubleValue());
+      this.maximumFeedbackRate.set(other.maximumFeedbackRate.getDoubleValue());
+      this.positionDeadband.set(other.positionDeadband.getDoubleValue());
    }
 
 }

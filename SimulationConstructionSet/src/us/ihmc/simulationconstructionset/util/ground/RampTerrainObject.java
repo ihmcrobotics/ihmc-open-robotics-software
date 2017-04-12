@@ -1,5 +1,6 @@
 package us.ihmc.simulationconstructionset.util.ground;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -7,7 +8,6 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
 import us.ihmc.robotics.Axis;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
@@ -15,7 +15,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
    private final double xStart, xEnd;
    private final double height;
 
-   private final BoundingBox3d boundingBox;
+   private final BoundingBox3D boundingBox;
    
    private Graphics3DObject linkGraphics;
 
@@ -41,7 +41,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
       Point3D minPoint = new Point3D(xMin, yMin, Double.NEGATIVE_INFINITY);
       Point3D maxPoint = new Point3D(xMax, yMax, height);
       
-      boundingBox = new BoundingBox3d(minPoint, maxPoint);
+      boundingBox = new BoundingBox3D(minPoint, maxPoint);
    }
 
    public RampTerrainObject(double xStart, double yStart, double xEnd, double yEnd, double height)
@@ -159,7 +159,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
    @Override
    public boolean isClose(double x, double y, double z)
    {
-      return boundingBox.isXYInside(x, y);
+      return boundingBox.isXYInsideInclusive(x, y);
    }
 
    public double getXMin()
@@ -183,7 +183,7 @@ public class RampTerrainObject implements TerrainObject3D, HeightMapWithNormals
    }
 
    @Override
-   public BoundingBox3d getBoundingBox()
+   public BoundingBox3D getBoundingBox()
    {
       return boundingBox;
    }

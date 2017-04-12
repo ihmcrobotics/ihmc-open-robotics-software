@@ -1,5 +1,8 @@
 package us.ihmc.exampleSimulations.beetle.controller;
 
+import java.util.Map;
+
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -16,7 +19,7 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    private final Vector3D highLinearFootWeight = new Vector3D(50.0, 50.0, 50.0);
 
    private final Vector3D chestAngularWeight = new Vector3D(15.0, 10.0, 5.0);
-   private final double spineJointspaceWeight = 1.0;
+   private final double chestUserModeWeight = 50.0;
    private final Vector3D pelvisAngularWeight = new Vector3D(5.0, 5.0, 5.0);
 
    private final int nBasisVectorsPerContactPoint = 4;
@@ -33,12 +36,13 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
    private final Vector2D copRateDefaultWeight = new Vector2D(20000.0, 20000.0); //100000.0, 200000.0);
    private final Vector2D copRateHighWeight = new Vector2D(2500000.0, 10000000.0);
    private final double headJointspaceWeight = 1.0;
-   private final double headTaskspaceWeight = 1.0;
    private final double headUserModeWeight = 1.0;
    private final double handUserModeWeight = 50.0;
    private final double handJointspaceWeight = 1.0;
    private final Vector3D handAngularTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
    private final Vector3D handLinearTaskspaceWeight = new Vector3D(1.0, 1.0, 1.0);
+
+   private final Vector3D headAngularWeight = new Vector3D(1.0, 1.0, 1.0);
 
    /** @inheritDoc */
    @Override
@@ -140,9 +144,9 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
 
    /** @inheritDoc */
    @Override
-   public double getHeadTaskspaceWeight()
+   public Vector3D getHeadAngularWeight()
    {
-      return headTaskspaceWeight;
+      return headAngularWeight;
    }
 
    /** @inheritDoc */
@@ -245,8 +249,40 @@ public class HexapodMomentumOptimizationSettings extends MomentumOptimizationSet
 
    /** @inheritDoc */
    @Override
-   public double getSpineJointspaceWeight()
+   public TObjectDoubleHashMap<String> getJointspaceWeights()
    {
-      return spineJointspaceWeight;
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public double getChestUserModeWeight()
+   {
+      return chestUserModeWeight;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public TObjectDoubleHashMap<String> getUserModeWeights()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public Map<String, Vector3D> getTaskspaceAngularWeights()
+   {
+      // TODO Auto-generated method stub
+      return null;
+   }
+
+   /** @inheritDoc */
+   @Override
+   public Map<String, Vector3D> getTaskspaceLinearWeights()
+   {
+      // TODO Auto-generated method stub
+      return null;
    }
 }

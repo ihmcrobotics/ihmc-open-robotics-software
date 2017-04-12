@@ -20,6 +20,7 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.taskExecutor.PipeLine;
 
 public class GraspAndTurnValveBehavior extends AbstractBehavior
@@ -37,19 +38,20 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    private final double ROTATION_SEGMENTS = 10;
 
    private final AtlasPrimitiveActions atlasPrimitiveActions;
-   private final HumanoidReferenceFrames referenceFrames;
 
    private final ResetRobotBehavior resetRobotBehavior;
    //   private final PassPacketBehavior passPacketBehavior;
+   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   
 
 
-   public GraspAndTurnValveBehavior(DoubleYoVariable yoTime, HumanoidReferenceFrames referenceFrames, CommunicationBridge outgoingCommunicationBridge,
+
+   public GraspAndTurnValveBehavior(DoubleYoVariable yoTime, CommunicationBridge outgoingCommunicationBridge,
          AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(outgoingCommunicationBridge);
-      this.referenceFrames = referenceFrames;
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-
+      
       resetRobotBehavior = new ResetRobotBehavior(communicationBridge, yoTime);
       //      passPacketBehavior = new PassPacketBehavior(outgoingCommunicationBridge);
 
@@ -166,6 +168,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    {
       BehaviorAction moveHandAroundToValve = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
+
          @Override
          protected void setBehaviorInput()
          {
@@ -178,7 +181,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
             sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
 
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-                  point.getFrameOrientationCopy().getQuaternion());
+                  point.getFrameOrientationCopy().getQuaternion(), worldFrame.getNameBasedHashCode(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
 
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
          }
@@ -201,7 +204,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       sendPacketToUI(new UIPositionCheckerPacket(point.getFramePointCopy().getPoint()));
 
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 2, point.getFramePointCopy().getPoint(),
-            point.getFrameOrientationCopy().getQuaternion());
+            point.getFrameOrientationCopy().getQuaternion(), worldFrame.getNameBasedHashCode(), CommonReferenceFrameIds.CHEST_FRAME.getHashId());
 
       atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(handTrajectoryMessage);
    }

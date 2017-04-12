@@ -80,7 +80,7 @@ public class DesiredJointAccelerationCalculatorTest
             spatialAccelerationCalculator.compute();
 
             SpatialAccelerationVector accelerationOfEndEffectorWithRespectToBaseBack = new SpatialAccelerationVector();
-            spatialAccelerationCalculator.getRelativeAcceleration(accelerationOfEndEffectorWithRespectToBaseBack, base, endEffector);
+            spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, accelerationOfEndEffectorWithRespectToBaseBack);
 
             SpatialMotionVectorTest.assertSpatialMotionVectorEquals(accelerationOfEndEffectorWithRespectToBase, accelerationOfEndEffectorWithRespectToBaseBack, 1e-10);
             testIndex++;

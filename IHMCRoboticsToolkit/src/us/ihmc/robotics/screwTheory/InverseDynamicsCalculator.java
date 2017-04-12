@@ -50,12 +50,12 @@ public class InverseDynamicsCalculator
    public InverseDynamicsCalculator(ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration, HashMap<RigidBody, Wrench> externalWrenches,
          List<InverseDynamicsJoint> jointsToIgnore, boolean doVelocityTerms, boolean doAccelerationTerms, TwistCalculator twistCalculator)
    {
-      this(inertialFrame, externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(twistCalculator.getRootBody(), inertialFrame, rootAcceleration,
-            twistCalculator, doVelocityTerms, doAccelerationTerms, true), twistCalculator, doVelocityTerms);
+      this(inertialFrame, externalWrenches, jointsToIgnore, new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, doVelocityTerms,
+            doAccelerationTerms, true), twistCalculator);
    }
 
    public InverseDynamicsCalculator(ReferenceFrame inertialFrame, HashMap<RigidBody, Wrench> externalWrenches, List<InverseDynamicsJoint> jointsToIgnore,
-         SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator, boolean doVelocityTerms)
+         SpatialAccelerationCalculator spatialAccelerationCalculator, TwistCalculator twistCalculator)
    {
       this.rootBody = twistCalculator.getRootBody();
       this.externalWrenches = new LinkedHashMap<RigidBody, Wrench>(externalWrenches);
@@ -63,7 +63,7 @@ public class InverseDynamicsCalculator
       this.twistCalculator = twistCalculator;
       this.spatialAccelerationCalculator = spatialAccelerationCalculator;
 
-      this.doVelocityTerms = doVelocityTerms;
+      this.doVelocityTerms = spatialAccelerationCalculator.areVelocitiesConsidered();
 
       populateMapsAndLists();
 
@@ -119,10 +119,10 @@ public class InverseDynamicsCalculator
       {
          RigidBody body = allBodiesExceptRoot.get(bodyIndex);
          Wrench netWrench = netWrenches.get(body);
-         twistCalculator.getTwistOfBody(tempTwist, body);
+         twistCalculator.getTwistOfBody(body, tempTwist);
          if (!doVelocityTerms)
             tempTwist.setToZero();
-         spatialAccelerationCalculator.getAccelerationOfBody(tempAcceleration, body);
+         spatialAccelerationCalculator.getAccelerationOfBody(body, tempAcceleration);
          body.getInertia().computeDynamicWrenchInBodyCoordinates(tempAcceleration, tempTwist, netWrench);
       }
    }

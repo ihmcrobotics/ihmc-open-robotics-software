@@ -14,10 +14,10 @@ public class TransferToFlamingoStanceState extends TransferState
    private final FootstepTiming footstepTiming = new FootstepTiming();
 
    public TransferToFlamingoStanceState(RobotSide transferToSide, WalkingMessageHandler walkingMessageHandler,
-         HighLevelHumanoidControllerToolbox momentumBasedController, HighLevelControlManagerFactory managerFactory,
+         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
-      super(transferToSide, WalkingStateEnum.getFlamingoTransferState(transferToSide), walkingMessageHandler, momentumBasedController, managerFactory,
+      super(transferToSide, WalkingStateEnum.getFlamingoTransferState(transferToSide), walkingMessageHandler, controllerToolbox, managerFactory,
             failureDetectionControlModule, parentRegistry);
    }
 

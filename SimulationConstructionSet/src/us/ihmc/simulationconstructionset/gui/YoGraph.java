@@ -33,11 +33,12 @@ import javax.swing.border.SoftBevelBorder;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntry;
 import us.ihmc.graphicsDescription.dataBuffer.DataEntryHolder;
 import us.ihmc.graphicsDescription.dataBuffer.TimeDataHolder;
+import us.ihmc.graphicsDescription.graphInterfaces.GraphIndicesHolder;
+import us.ihmc.graphicsDescription.graphInterfaces.SelectedVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
 import us.ihmc.simulationconstructionset.GraphConfiguration;
 import us.ihmc.simulationconstructionset.gui.dialogs.GraphPropertiesDialog;
-import us.ihmc.simulationconstructionset.robotcommprotocol.GUISideCommandListener;
 
 public class YoGraph extends JPanel implements MouseListener, MouseMotionListener, KeyListener, FocusListener
 {
@@ -1379,7 +1380,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
 
       // Left click places index:
 
-      else if (!evt.isMetaDown() &&!evt.isAltDown() &&!GUISideCommandListener.isRecording())
+      else if (!evt.isMetaDown() &&!evt.isAltDown())
       {
          if ((this.entriesOnThisGraph == null) || (this.entriesOnThisGraph.size() < 1) || (getPlotType() == PHASE_PLOT))
          {
@@ -1533,7 +1534,7 @@ public class YoGraph extends JPanel implements MouseListener, MouseMotionListene
       if (clickedY > h - DONT_PLOT_TIMELINE_BOTTOM_PIXELS)
          return;
 
-      if (!evt.isMetaDown() && (!evt.isAltDown()) && (getPlotType() != PHASE_PLOT) &&!GUISideCommandListener.isRecording() )
+      if (!evt.isMetaDown() && (!evt.isAltDown()) && (getPlotType() != PHASE_PLOT))
       {    // Left Click n Drag
          int index = clickIndex(draggedX, w, clickedLeftIndex, clickedRightIndex);
          graphIndicesHolder.setIndexLater(index);    // +++JEP setIndex or setIndexLater??

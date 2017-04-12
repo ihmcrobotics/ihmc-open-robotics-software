@@ -933,7 +933,7 @@ public class QuadrupedPositionBasedCrawlController implements QuadrupedControlle
    private void updateEstimates()
    {
       twistCalculator.compute();
-      twistCalculator.getTwistOfBody(bodyTwist, actualFullRobotModel.getPelvis());
+      twistCalculator.getTwistOfBody(actualFullRobotModel.getPelvis(), bodyTwist);
 
       actualRobotRootJoint.getRotation(yawPitchRollArray);
       actualYaw.set(yawPitchRollArray[0]);

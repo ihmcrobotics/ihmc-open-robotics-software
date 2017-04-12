@@ -22,9 +22,9 @@ import us.ihmc.plotting.Plotter;
 import us.ihmc.robotics.geometry.Line2d;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectory;
 import us.ihmc.robotics.trajectories.ParametricSplineTrajectorySolver;
-import us.ihmc.simulationconstructionset.util.graphs.JFreeGraph;
-import us.ihmc.simulationconstructionset.util.graphs.JFreeGraphGroup;
-import us.ihmc.simulationconstructionset.util.graphs.JFreePlot;
+import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraph;
+import us.ihmc.simulationConstructionSetTools.util.graphs.JFreeGraphGroup;
+import us.ihmc.simulationConstructionSetTools.util.graphs.JFreePlot;
 
 /**
  * Created by agrabertilton on 2/5/15.

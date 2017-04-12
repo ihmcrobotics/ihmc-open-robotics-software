@@ -19,6 +19,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFModel;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFRoot;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFWorld.Road;
+import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.sensors.ContactSensorType;
@@ -147,23 +148,23 @@ public class JaxbSDFLoader
       generalizedSDFRobotModels.get(jointMap.getModelName()).addContactSensor(sensorName, parentJointName, type);
    }
 
-   public RobotDescription createRobotDescription(JointNameMap jointNameMap)
+   public RobotDescription createRobotDescription(JointNameMap jointNameMap, ContactPointDefinitionHolder contactDefinition)
    {
       boolean useCollisionMeshes = false;
 
-      return createRobotDescription(jointNameMap, useCollisionMeshes);
+      return createRobotDescription(jointNameMap, contactDefinition, useCollisionMeshes);
    }
 
-   public RobotDescription createRobotDescription(JointNameMap jointNameMap, boolean useCollisionMeshes)
+   public RobotDescription createRobotDescription(JointNameMap jointNameMap, ContactPointDefinitionHolder contactDefinition, boolean useCollisionMeshes)
    {
       if (jointNameMap != null)
       {
          String modelName = jointNameMap.getModelName();
          checkModelName(modelName);
 
-
          RobotDescriptionFromSDFLoader loader = new RobotDescriptionFromSDFLoader();
-         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), jointNameMap, useCollisionMeshes);
+         RobotDescription description = loader.loadRobotDescriptionFromSDF(generalizedSDFRobotModels.get(modelName), jointNameMap, contactDefinition,
+               useCollisionMeshes);
 
          return description;
       }

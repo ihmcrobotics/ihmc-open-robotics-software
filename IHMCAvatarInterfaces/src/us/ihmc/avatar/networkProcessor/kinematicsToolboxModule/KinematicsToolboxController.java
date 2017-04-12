@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox.createForInverseKinematicsOnly;
-
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,7 +22,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -39,6 +36,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TrackingWeightsCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -49,6 +47,7 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -76,7 +75,6 @@ public class KinematicsToolboxController extends ToolboxController
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final TwistCalculator twistCalculator;
-   private final GeometricJacobianHolder geometricJacobianHolder;
 
    private final ReferenceFrame elevatorFrame;
 
@@ -88,13 +86,17 @@ public class KinematicsToolboxController extends ToolboxController
    private final FloatingInverseDynamicsJoint desiredRootJoint;
    private final OneDoFJoint[] oneDoFJoints;
 
+   // TODO Change everything to yovariables
    private final AtomicReference<FramePoint2d> desiredCenterOfMassXYReference = new AtomicReference<>(null);
    private final AtomicReference<FrameOrientation> desiredChestOrientationReference = new AtomicReference<FrameOrientation>(null);
    private final AtomicReference<FrameOrientation> desiredPelvisOrientationReference = new AtomicReference<FrameOrientation>(null);
-   private final SideDependentList<DenseMatrix64F> handSelectionMatrices = new SideDependentList<>();
+   private final DoubleYoVariable desiredPelvisHeight = new DoubleYoVariable("desiredPelvisHeight", registry);
    private final SideDependentList<FramePose> desiredHandPoses = new SideDependentList<>();
-   private final SideDependentList<DenseMatrix64F> footSelectionMatrices = new SideDependentList<>();
    private final SideDependentList<FramePose> desiredFootPoses = new SideDependentList<>();
+   
+   
+   private final SideDependentList<DenseMatrix64F> handSelectionMatrices = new SideDependentList<>();
+   private final SideDependentList<DenseMatrix64F> footSelectionMatrices = new SideDependentList<>();
    private DenseMatrix64F chestSelectionMatrix = null;
    private DenseMatrix64F pelvisSelectionMatrix = null;
 
@@ -109,6 +111,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final DoubleYoVariable momentumWeight = new DoubleYoVariable("momentumWeight", registry);
    private final DoubleYoVariable chestWeight = new DoubleYoVariable("chestWeight", registry);
    private final DoubleYoVariable pelvisOrientationWeight = new DoubleYoVariable("pelvisOrientationWeight", registry);
+   private final DoubleYoVariable pelvisHeightWeight = new DoubleYoVariable("pelvisHeightWeight", registry);
 
    private final CommandInputManager commandInputManager;
    private final DoubleYoVariable solutionQuality = new DoubleYoVariable("solutionQuality", registry);
@@ -132,13 +135,14 @@ public class KinematicsToolboxController extends ToolboxController
 
       elevatorFrame = elevator.getBodyFixedFrame();
 
-      geometricJacobianHolder = new GeometricJacobianHolder();
-      JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
       MomentumOptimizationSettings momentumOptimizationSettings = robotModel.getWalkingControllerParameters().getMomentumOptimizationSettings();
-      toolbox = createForInverseKinematicsOnly(desiredFullRobotModel, controlledJoints, jointPrivilegedConfigurationParameters, referenceFrames, updateDT,
-            geometricJacobianHolder, twistCalculator, momentumOptimizationSettings);
-      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
+      ReferenceFrame centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
       desiredRootJoint = desiredFullRobotModel.getRootJoint();
+      toolbox = new WholeBodyControlCoreToolbox(updateDT, 0.0, desiredRootJoint, controlledJoints, centerOfMassFrame, twistCalculator, momentumOptimizationSettings,
+                                                yoGraphicsListRegistry, registry);
+      toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
+      toolbox.setupForInverseKinematicsSolver();
+      oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
 
       wholeBodyInverseKinematicsSolver = new WholeBodyInverseKinematicsSolver(toolbox, registry);
 
@@ -161,6 +165,7 @@ public class KinematicsToolboxController extends ToolboxController
       momentumWeight.set(1.0);
       chestWeight.set(0.02);
       pelvisOrientationWeight.set(0.02);
+      pelvisHeightWeight.set(0.02);
       privilegedWeight.set(1.0);
       privilegedConfigurationGain.set(50.0);
       privilegedMaxVelocity.set(Double.POSITIVE_INFINITY);
@@ -186,7 +191,7 @@ public class KinematicsToolboxController extends ToolboxController
       consumeCommands();
 
       wholeBodyInverseKinematicsSolver.reset();
-      wholeBodyInverseKinematicsSolver.submitInverseKinematicsCommand(computeInverseKinematicsCommands());
+      wholeBodyInverseKinematicsSolver.submitInverseKinematicsCommandList(computeInverseKinematicsCommands());
       wholeBodyInverseKinematicsSolver.compute();
 
       updateDesiredFullRobotModelState();
@@ -222,7 +227,6 @@ public class KinematicsToolboxController extends ToolboxController
             desiredHandPoses.put(robotSide, desiredPose);
             DenseMatrix64F selectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
             handSelectionMatrices.put(robotSide, selectionMatrix);
-
          }
       }
 
@@ -233,6 +237,13 @@ public class KinematicsToolboxController extends ToolboxController
          command.getLastTrajectoryPoint().getOrientation(desiredChestOrientation);
          desiredChestOrientationReference.set(desiredChestOrientation);
          chestSelectionMatrix = new DenseMatrix64F(command.getSelectionMatrix());
+      }
+
+      if (commandInputManager.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
+      {
+         PelvisHeightTrajectoryCommand command = commandInputManager.pollNewestCommand(PelvisHeightTrajectoryCommand.class);
+         double desiredHeight = command.getLastTrajectoryPoint().getPosition();
+         desiredPelvisHeight.set(desiredHeight);
       }
 
       if (commandInputManager.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
@@ -264,7 +275,6 @@ public class KinematicsToolboxController extends ToolboxController
       desiredFullRobotModel.updateFrames();
       referenceFrames.updateFrames();
       twistCalculator.compute();
-      geometricJacobianHolder.compute();
    }
 
    private final MutableDouble tempErrorMagnitude = new MutableDouble();
@@ -285,10 +295,11 @@ public class KinematicsToolboxController extends ToolboxController
             ReferenceFrame handControlFrame = desiredFullRobotModel.getHandControlFrame(robotSide);
             DenseMatrix64F selectionMatrix = handSelectionMatrices.get(robotSide);
             Twist desiredHandTwist = computeDesiredTwist(desiredHandPose, hand, handControlFrame, selectionMatrix, tempErrorMagnitude);
-            newSolutionQuality += tempErrorMagnitude.doubleValue();
+            newSolutionQuality += handWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, hand);
-            spatialVelocityCommand.set(desiredHandTwist, selectionMatrix);
+            spatialVelocityCommand.setSpatialVelocity(handControlFrame, desiredHandTwist);
+            spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
             spatialVelocityCommand.setWeight(handWeight.getDoubleValue());
             ret.addCommand(spatialVelocityCommand);
 
@@ -306,10 +317,11 @@ public class KinematicsToolboxController extends ToolboxController
             RigidBody foot = desiredFullRobotModel.getFoot(robotSide);
             DenseMatrix64F selectionMatrix = footSelectionMatrices.get(robotSide);
             Twist desiredFootTwist = computeDesiredTwist(desiredFootPose, foot, selectionMatrix, tempErrorMagnitude);
-            newSolutionQuality += tempErrorMagnitude.doubleValue();
+            newSolutionQuality += footWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
             SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
             spatialVelocityCommand.set(elevator, foot);
-            spatialVelocityCommand.set(desiredFootTwist, selectionMatrix);
+            spatialVelocityCommand.setSpatialVelocity(foot.getBodyFixedFrame(), desiredFootTwist);
+            spatialVelocityCommand.setSelectionMatrix(selectionMatrix);
             spatialVelocityCommand.setWeight(footWeight.getDoubleValue());
             ret.addCommand(spatialVelocityCommand);
 
@@ -323,7 +335,7 @@ public class KinematicsToolboxController extends ToolboxController
       if (desiredCoMXY != null)
       {
          FrameVector2d desiredMomentumXY = computeDesiredMomentumXY(desiredCoMXY, tempErrorMagnitude);
-         newSolutionQuality += tempErrorMagnitude.doubleValue();
+         newSolutionQuality += momentumWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          MomentumCommand momentumCommand = new MomentumCommand();
          momentumCommand.setLinearMomentumXY(desiredMomentumXY);
          momentumCommand.setWeight(momentumWeight.getDoubleValue());
@@ -335,14 +347,12 @@ public class KinematicsToolboxController extends ToolboxController
       {
          RigidBody chest = desiredFullRobotModel.getChest();
          Twist desiredChestTwist = computeDesiredTwist(desiredChestOrientation, chest, chestSelectionMatrix, tempErrorMagnitude);
-         newSolutionQuality += tempErrorMagnitude.doubleValue();
+         newSolutionQuality += chestWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         FrameVector desiredChestAngularVelocity = new FrameVector();
-         desiredChestTwist.getAngularVelocityInBaseFrame(desiredChestAngularVelocity);
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, chest);
-         spatialVelocityCommand.setAngularVelocity(chestFrame, elevatorFrame, desiredChestAngularVelocity);
-         spatialVelocityCommand.set(desiredChestTwist, chestSelectionMatrix);
+         spatialVelocityCommand.setSpatialVelocity(chestFrame, desiredChestTwist);
+         spatialVelocityCommand.setSelectionMatrix(chestSelectionMatrix);
          spatialVelocityCommand.setWeight(chestWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
@@ -352,18 +362,32 @@ public class KinematicsToolboxController extends ToolboxController
       {
          RigidBody pelvis = desiredFullRobotModel.getPelvis();
          Twist desiredPelvisTwist = computeDesiredTwist(desiredPelvisOrientation, pelvis, pelvisSelectionMatrix, tempErrorMagnitude);
-         newSolutionQuality += tempErrorMagnitude.doubleValue();
+         newSolutionQuality += pelvisOrientationWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          ReferenceFrame pelvisFrame = pelvis.getBodyFixedFrame();
-         FrameVector desiredPelvisAngularVelocity = new FrameVector();
-         desiredPelvisTwist.getAngularVelocityInBaseFrame(desiredPelvisAngularVelocity);
          SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
          spatialVelocityCommand.set(elevator, pelvis);
-         spatialVelocityCommand.setAngularVelocity(pelvisFrame, elevatorFrame, desiredPelvisAngularVelocity);
-         spatialVelocityCommand.set(desiredPelvisTwist, pelvisSelectionMatrix);
+         spatialVelocityCommand.setSpatialVelocity(pelvisFrame, desiredPelvisTwist);
+         spatialVelocityCommand.setSelectionMatrix(pelvisSelectionMatrix);
          spatialVelocityCommand.setWeight(pelvisOrientationWeight.getDoubleValue());
          ret.addCommand(spatialVelocityCommand);
       }
 
+      if (!desiredPelvisHeight.isNaN())
+      {
+         RigidBody pelvis = desiredFullRobotModel.getPelvis();
+         ReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint(); // As defined in CommonHumanoidReferenceFrames.
+         DenseMatrix64F heightSelectionMatrix = new DenseMatrix64F(1, 6);
+         heightSelectionMatrix.set(0, 5, 1.0);
+         Twist desiredPelvisTwist = computeDesiredTwist(new FramePoint(worldFrame, 0.0, 0.0, desiredPelvisHeight.getDoubleValue()), pelvis, pelvisFrame, heightSelectionMatrix, tempErrorMagnitude);
+         newSolutionQuality += pelvisHeightWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
+         SpatialVelocityCommand spatialVelocityCommand = new SpatialVelocityCommand();
+         spatialVelocityCommand.set(elevator, pelvis);
+         spatialVelocityCommand.setSpatialVelocity(pelvisFrame, desiredPelvisTwist);
+         spatialVelocityCommand.setSelectionMatrix(heightSelectionMatrix);
+         spatialVelocityCommand.setWeight(pelvisHeightWeight.getDoubleValue());
+         ret.addCommand(spatialVelocityCommand);
+      }
+      
       ret.addCommand(privilegedConfigurationCommandReference.getAndSet(null));
 
       JointLimitReductionCommand jointLimitReductionCommand = new JointLimitReductionCommand();
@@ -435,6 +459,29 @@ public class KinematicsToolboxController extends ToolboxController
       ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
       Twist desiredTwist = new Twist();
       desiredTwist.set(endEffectorFrame, elevatorFrame, controlFrame, new Vector3D(), errorRotation);
+      desiredTwist.getMatrix(spatialError, 0);
+      subspaceError.reshape(selectionMatrix.getNumRows(), 1);
+      CommonOps.mult(selectionMatrix, spatialError, subspaceError);
+      errorMagnitude.setValue(NormOps.normP2(subspaceError));
+      desiredTwist.scale(1.0 / updateDT);
+
+      return desiredTwist;
+   }
+
+   public Twist computeDesiredTwist(FramePoint desiredPosition, RigidBody endEffector, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   {
+      return computeDesiredTwist(desiredPosition, endEffector, endEffector.getBodyFixedFrame(), selectionMatrix, errorMagnitude);
+   }
+
+   public Twist computeDesiredTwist(FramePoint desiredPosition, RigidBody endEffector, ReferenceFrame controlFrame, DenseMatrix64F selectionMatrix, MutableDouble errorMagnitude)
+   {
+      errorFramePose.setPoseIncludingFrame(desiredPosition, new FrameOrientation(desiredPosition.getReferenceFrame()));
+      errorFramePose.changeFrame(controlFrame);
+      errorFramePose.getPosition(errorPosition);
+
+      ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
+      Twist desiredTwist = new Twist();
+      desiredTwist.set(endEffectorFrame, elevatorFrame, controlFrame, errorPosition, new Vector3D());
       desiredTwist.getMatrix(spatialError, 0);
       subspaceError.reshape(selectionMatrix.getNumRows(), 1);
       CommonOps.mult(selectionMatrix, spatialError, subspaceError);
@@ -527,7 +574,9 @@ public class KinematicsToolboxController extends ToolboxController
       MatrixTools.removeRow(pelvisSelectionMatrix, 4);
       MatrixTools.removeRow(pelvisSelectionMatrix, 3);
 
-      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
+      desiredPelvisHeight.setToNaN();
+
+      RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
       if (robotConfigurationData == null)
          return false;
 
@@ -597,5 +646,10 @@ public class KinematicsToolboxController extends ToolboxController
    {
       // This toolbox should run until if falls asleep.
       return false;
+   }
+   
+   public KinematicsToolboxOutputStatus getSolution()
+   {
+      return inverseKinematicsSolution;
    }
 }

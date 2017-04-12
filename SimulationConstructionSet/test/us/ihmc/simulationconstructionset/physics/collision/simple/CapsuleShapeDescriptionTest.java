@@ -3,10 +3,10 @@ package us.ihmc.simulationconstructionset.physics.collision.simple;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.geometry.BoundingBox3d;
 
 public class CapsuleShapeDescriptionTest
 {
@@ -19,7 +19,7 @@ public class CapsuleShapeDescriptionTest
 
       CapsuleShapeDescription<?> capsule = new CapsuleShapeDescription<>(radius, height);
 
-      BoundingBox3d boundingBox = new BoundingBox3d(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      BoundingBox3D boundingBox = new BoundingBox3D(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       capsule.getBoundingBox(boundingBox);
       Point3D minimumPoint = new Point3D();
       boundingBox.getMinPoint(minimumPoint);

@@ -61,8 +61,8 @@ public class LinearAccelerationMeasurementModelJacobianAssembler
       ReferenceFrame elevatorFrame = elevator.getBodyFixedFrame();
 
       // T, Td
-      twistCalculator.getRelativeTwist(twistOfMeasurementLink, elevator, measurementLink);
-      spatialAccelerationCalculator.getRelativeAcceleration(spatialAccelerationOfMeasurementLink, elevator, measurementLink);
+      twistCalculator.getRelativeTwist(elevator, measurementLink, twistOfMeasurementLink);
+      spatialAccelerationCalculator.getRelativeAcceleration(elevator, measurementLink, spatialAccelerationOfMeasurementLink);
       spatialAccelerationOfMeasurementLink.changeFrame(elevatorFrame, twistOfMeasurementLink, twistOfMeasurementLink);
       twistOfMeasurementLink.changeFrame(elevatorFrame);
 

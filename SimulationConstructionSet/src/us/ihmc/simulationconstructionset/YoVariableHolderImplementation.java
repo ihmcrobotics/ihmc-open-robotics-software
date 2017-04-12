@@ -4,22 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.YoVariableHolder;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
-import us.ihmc.tools.io.printing.PrintTools;
 
 /**
- * <p>Title: YoVariableHolderImplementation</p>
- *
  * <p>Description: An implementation of a YoVariableHolder. </p>
- *
- * <p>Copyright: Copyright (c) 2009</p>
- *
- * <p>Company: Yobotics, Inc. and IHMC</p>
- *
- * @author not attributable
- * @version 1.0
  */
 public class YoVariableHolderImplementation implements YoVariableHolder
 {

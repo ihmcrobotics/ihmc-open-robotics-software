@@ -10,6 +10,7 @@ import java.util.List;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -27,7 +28,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Blend;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.HeightMap.Texture;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Mesh;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 
 
@@ -164,7 +164,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                Vector3D normal = ModelFileLoaderConversionsHelper.stringToNormalizedVector3d(geometry.getPlane().getNormal());
                Vector2D size = ModelFileLoaderConversionsHelper.stringToVector2d(geometry.getPlane().getSize());
 
-               AxisAngle planeRotation = GeometryTools.getAxisAngleFromZUpToVector(normal);
+               AxisAngle planeRotation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
                rotate(planeRotation);
                addCube(size.getX(), size.getY(), 0.005, getDefaultAppearanceIfNull(appearance));
             }
@@ -177,7 +177,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                AppearanceDefinition app = DEFAULT_APPEARANCE;
                if(geometry.getHeightMap().getTextures() != null)
                {
-                  double width = heightMap.getBoundingBox().getXMax() - heightMap.getBoundingBox().getXMin();
+                  double width = heightMap.getBoundingBox().getMaxX() - heightMap.getBoundingBox().getMinX();
                   HeightBasedTerrainBlend sdfTerrainBlend = new HeightBasedTerrainBlend(heightMap);
                   for(Texture text : geometry.getHeightMap().getTextures())
                   {

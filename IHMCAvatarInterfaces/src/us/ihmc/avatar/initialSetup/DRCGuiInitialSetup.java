@@ -15,8 +15,8 @@ import us.ihmc.sensorProcessing.parameters.DRCRobotSensorInformation;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
-import us.ihmc.simulationconstructionset.dataExporter.TorqueSpeedDataExporter;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
+import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporter;
 
 public class DRCGuiInitialSetup implements GuiInitialSetup
 {
@@ -102,8 +102,8 @@ public class DRCGuiInitialSetup implements GuiInitialSetup
 
       if (SHOW_ONLY_WRENCH_VISUALIZER)
       {
-         scs.hideAllDynamicGraphicObjects();
-         scs.setDynamicGraphicObjectsListVisible("wrenchVisualizer", true);
+         scs.hideAllYoGraphics();
+         scs.setYoGraphicsListVisible("wrenchVisualizer", true);
       }
 
       if (SHOW_EXPORT_TORQUE_AND_SPEED)

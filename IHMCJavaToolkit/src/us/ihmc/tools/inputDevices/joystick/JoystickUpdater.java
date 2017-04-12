@@ -9,6 +9,7 @@ import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.Event;
 import net.java.games.input.EventQueue;
+import us.ihmc.commons.PrintTools;
 
 public class JoystickUpdater implements Runnable
 {
@@ -18,17 +19,23 @@ public class JoystickUpdater implements Runnable
    private final Object listnerConch = new Object();
    private final ArrayList<JoystickEventListener> listeners = new ArrayList<JoystickEventListener>();
    private final ArrayList<JoystickStatusListener> generalListenersList;
-   private final Map<Identifier, JoystickComponentFilter> componentFilterMap = new HashMap<>();
+   private final Map<Identifier, JoystickCompatibilityFilter> compatibilityFilterMap = new HashMap<>();
+   private final Map<Identifier, JoystickCustomizationFilter> customizationFilterMap = new HashMap<>();
    
    private HashMap<String, Float> lastValues = new HashMap<String, Float>();
    private int pollIntervalMillis = 5;
    private boolean connected;
    private boolean threadRunning = false;
 
-   public JoystickUpdater(Controller joystickController, ArrayList<JoystickStatusListener> generalListenersList)
+   public JoystickUpdater(Controller joystickController, JoystickModel model, ArrayList<JoystickStatusListener> generalListenersList)
    {
       this.joystickController = joystickController;
       this.generalListenersList = generalListenersList;
+      
+      for (JoystickCompatibilityFilter compatibilityFilter : model.getCompatibilityFilters())
+      {
+         compatibilityFilterMap.put(compatibilityFilter.getIdentifier(), compatibilityFilter);
+      }
       
       connected = true;
    }
@@ -61,9 +68,13 @@ public class JoystickUpdater implements Runnable
 
          while (queue.getNextEvent(event))
          {
-            if (componentFilterMap.containsKey(event.getComponent().getIdentifier()))
+            if (compatibilityFilterMap.containsKey(event.getComponent().getIdentifier()))
             {
-               event.set(event.getComponent(), (float) componentFilterMap.get(event.getComponent().getIdentifier()).apply(event.getValue()), event.getNanos());
+               event.set(event.getComponent(), (float) compatibilityFilterMap.get(event.getComponent().getIdentifier()).apply(event.getValue()), event.getNanos());
+            }
+            if (customizationFilterMap.containsKey(event.getComponent().getIdentifier()))
+            {
+               event.set(event.getComponent(), (float) customizationFilterMap.get(event.getComponent().getIdentifier()).apply(event.getValue()), event.getNanos());
             }
             
             if (isNewValue(event))
@@ -85,6 +96,7 @@ public class JoystickUpdater implements Runnable
                   catch (ConcurrentModificationException e)
                   {
                      // Some listeners might not be notified.
+                     PrintTools.error(this, e.getMessage());
                   }
                }
 
@@ -134,8 +146,8 @@ public class JoystickUpdater implements Runnable
       this.pollIntervalMillis = pollIntervalMillis;
    }
    
-   public void setComponentFilter(JoystickComponentFilter componentFilter)
+   public void setCustomizationFilter(JoystickCustomizationFilter componentFilter)
    {
-      componentFilterMap.put(componentFilter.getIdentifier(), componentFilter);
+      customizationFilterMap.put(componentFilter.getIdentifier(), componentFilter);
    }
 }

@@ -18,7 +18,6 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,7 +35,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final FramePose desiredFootPoseInWorld = new FramePose(worldFrame);
    private final FramePoint nextExitCMP = new FramePoint();
 
-   private final HighLevelHumanoidControllerToolbox momentumBasedController;
+   private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
@@ -50,14 +49,14 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final BooleanYoVariable finishSingleSupportWhenICPPlannerIsDone = new BooleanYoVariable("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final BooleanYoVariable minimizeAngularMomentumRateZDuringSwing = new BooleanYoVariable("minimizeAngularMomentumRateZDuringSwing", registry);
 
-   public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox momentumBasedController,
+   public WalkingSingleSupportState(RobotSide supportSide, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
          WalkingFailureDetectionControlModule failureDetectionControlModule, YoVariableRegistry parentRegistry)
    {
-      super(supportSide, WalkingStateEnum.getWalkingSingleSupportState(supportSide), walkingMessageHandler, momentumBasedController, managerFactory,
+      super(supportSide, WalkingStateEnum.getWalkingSingleSupportState(supportSide), walkingMessageHandler, controllerToolbox, managerFactory,
             parentRegistry);
 
-      this.momentumBasedController = momentumBasedController;
+      this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
@@ -89,7 +88,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
 
-            balanceManager.updateICPPlanForSingleSupportDisturbances();
+            balanceManager.updateCurrentICPPlan();
          }
 
       }
@@ -106,7 +105,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.replanSwingTrajectory(swingSide, nextFootstep, swingTime, true);
 
-            balanceManager.updateICPPlanForSingleSupportDisturbances();
+            balanceManager.updateCurrentICPPlan();
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())
@@ -128,7 +127,7 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.clearICPPlan();
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
-            balanceManager.updateICPPlanForSingleSupportDisturbances();
+            balanceManager.updateCurrentICPPlan();
          }
       }
 
@@ -191,7 +190,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
-         balanceManager.updateICPPlanForSingleSupportDisturbances();
+         balanceManager.updateCurrentICPPlan();
          balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
@@ -229,11 +228,11 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.getDesiredCMP(desiredCMP);
          balanceManager.getDesiredICP(desiredICP);
          balanceManager.getCapturePoint(currentICP);
+         balanceManager.getNextExitCMP(nextExitCMP);
 
-         if (feetManager.checkIfToeOffSafeSingleSupport(nextFootstep, desiredCMP, currentICP, desiredICP, balanceManager.isOnExitCMP()))
+         if (feetManager.checkIfToeOffSafeSingleSupport(nextFootstep, nextExitCMP, desiredCMP, currentICP, desiredICP))
          {
-            momentumBasedController.getFilteredDesiredCenterOfPressure(momentumBasedController.getContactableFeet().get(supportSide), filteredDesiredCoP);
-            balanceManager.getNextExitCMP(nextExitCMP);
+            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
 
             feetManager.computeToeOffContactPoint(supportSide, nextExitCMP, filteredDesiredCoP);
             feetManager.requestToeOff(supportSide);
@@ -242,7 +241,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    /**
-    * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(double, FramePoint2d)}.
+    * Request the swing trajectory to speed up using {@link ICPPlanner#estimateTimeRemainingForStateUnderDisturbance(FramePoint2d)}.
     * It is clamped w.r.t. to {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     * @return the current swing time remaining for the swing foot trajectory
     */
@@ -276,8 +275,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
       // Update the contact states based on the footstep. If the footstep doesn't have any predicted contact points, then use the default ones in the ContactablePlaneBodys.
-      momentumBasedController.updateContactPointsForUpcomingFootstep(nextFootstep);
-      momentumBasedController.updateBipedSupportPolygons();
+      controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
+      controllerToolbox.updateBipedSupportPolygons();
    }
 
    @Override

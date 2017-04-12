@@ -21,7 +21,7 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * This class allows constructs RemoteDynamicGraphic objects from parsed
+ * This class allows constructs RemoteYoGraphic objects from parsed
  * data retrieved by the YoVariableHandshakeClient.
  *
  * @author Alex Lesman
@@ -29,7 +29,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class YoGraphicFactory
 {
-   public static RemoteYoGraphic yoGraphicFromMessage(RemoteGraphicType type, String name, YoVariable<?>[] vars, Double[] consts,
+   public static RemoteYoGraphic yoGraphicFromMessage(RemoteGraphicType type, String name, YoVariable<?>[] vars, double[] consts,
          AppearanceDefinition appearance)
    {
       switch (type)
@@ -114,6 +114,8 @@ public class YoGraphicFactory
       {
          return YoGraphicPlanarRegionsList.createAsRemoteYoGraphic(name, vars, consts);
       }
+      case POLYNOMIAL_3D_DGO:
+         return YoGraphicPolynomial3D.createAsRemoteYoGraphic(name, vars, consts);
 
       default:
          throw new NotImplementedException(type.toString() + " is not implemented");

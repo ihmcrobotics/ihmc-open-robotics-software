@@ -2,14 +2,17 @@ package us.ihmc.simulationconstructionset;
 
 import org.junit.Test;
 
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 
 public class DummyOneDegreeOfFreedomJointTest
 {
-
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 30.0)
+   @Test(timeout = 300000)
    public void testDummyOneDegreeOfFreedomJoint()
    {
       Robot robot = new Robot("testDummyOneDegreeOfFreedomJoint");
@@ -27,11 +30,14 @@ public class DummyOneDegreeOfFreedomJointTest
       
       robot.addRootJoint(jointOne);
       
-      SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      SimulationConstructionSetParameters parameters = SimulationTestingParameters.createFromEnvironmentVariables();
+      SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
       
       scs.startOnAThread();
       
-      ThreadTools.sleepForever();
+      if (!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         ThreadTools.sleepForever();
+      }
    }
-
 }

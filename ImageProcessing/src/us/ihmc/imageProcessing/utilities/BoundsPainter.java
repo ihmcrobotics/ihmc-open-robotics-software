@@ -8,7 +8,7 @@ import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.geometry.BoundingBox2d;
+import us.ihmc.euclid.geometry.BoundingBox2D;
 
 /**
  * User: Matt
@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.BoundingBox2d;
  */
 public class BoundsPainter implements PostProcessor
 {
-   private List<BoundingBox2d> boundingBoxes = new ArrayList<BoundingBox2d>();
+   private List<BoundingBox2D> boundingBoxes = new ArrayList<BoundingBox2D>();
    private float lineThickness = 1.0f;
    private int imageHeight = 544;
 
@@ -30,7 +30,7 @@ public class BoundsPainter implements PostProcessor
       this.imageHeight = imageHeight;
    }
 
-   public void setBoundingBoxes(List<BoundingBox2d> boundingBoxes)
+   public void setBoundingBoxes(List<BoundingBox2D> boundingBoxes)
    {
       this.boundingBoxes = boundingBoxes;
    }
@@ -48,7 +48,7 @@ public class BoundsPainter implements PostProcessor
       Stroke originalStroke = g2d.getStroke();
       g2d.setStroke(new BasicStroke(lineThickness));
 
-      for (BoundingBox2d boundingBox : boundingBoxes)
+      for (BoundingBox2D boundingBox : boundingBoxes)
       {
          int x = new Double(boundingBox.getMinPoint().getX()).intValue();
          int y = new Double(boundingBox.getMinPoint().getY()).intValue();

@@ -284,7 +284,7 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
          break;
       }
       default:
-         throw new RuntimeException("Shouldn't get here. Seems you set an invalid DynamicGraphicPosition type! type = " + type);
+         throw new RuntimeException("Shouldn't get here. Seems you set an invalid YoGraphicPosition type! type = " + type);
       }
 
       return linkGraphics;
@@ -308,7 +308,13 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
          else
             translationVector.set(x.getDoubleValue(), y.getDoubleValue(), 0.0);
 
-         transform3D.setScale(scale);
+         double globalScale = 1.0;
+         if (globalScaleProvider != null)
+         {
+            globalScale = globalScaleProvider.getValue();
+         }
+
+         transform3D.setScale(scale * globalScale);
          transform3D.setTranslation(translationVector);
       }
    }

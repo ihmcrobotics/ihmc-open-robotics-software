@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.math3.util.Pair;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -21,11 +22,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * The vertices of this polygon are clockwise and are all different.
  * </p>
  *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
- * @author IHMC-Yobotics Biped Team
+ * @author IHMC Biped Team
  * @version 1.0
  */
 public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, ConvexPolygon2d>
@@ -781,14 +778,14 @@ public class FrameConvexPolygon2d extends FrameGeometry2d<FrameConvexPolygon2d, 
       return ConvexPolygon2dCalculator.getSignedDistance(point.tuple, this.convexPolygon);
    }
 
-   public BoundingBox2d getBoundingBoxCopy()
+   public BoundingBox2D getBoundingBoxCopy()
    {
-      BoundingBox2d ret = this.convexPolygon.getBoundingBoxCopy();
+      BoundingBox2D ret = this.convexPolygon.getBoundingBoxCopy();
 
       return ret;
    }
 
-   public void getBoundingBox(BoundingBox2d boundingBoxToPack)
+   public void getBoundingBox(BoundingBox2D boundingBoxToPack)
    {
       this.convexPolygon.getBoundingBox(boundingBoxToPack);
    }

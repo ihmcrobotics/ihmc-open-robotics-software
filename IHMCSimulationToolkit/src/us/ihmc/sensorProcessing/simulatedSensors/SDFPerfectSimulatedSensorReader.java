@@ -127,7 +127,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       updateReferenceFrames();
       readAndUpdateRootJointAngularAndLinearVelocity();
 
-      long timestamp = Conversions.secondsToNanoSeconds(robot.getTime());
+      long timestamp = Conversions.secondsToNanoseconds(robot.getTime());
       this.timestamp.set(timestamp);
       this.visionSensorTimestamp.set(timestamp);
       this.sensorHeadPPSTimetamp.set(timestamp);

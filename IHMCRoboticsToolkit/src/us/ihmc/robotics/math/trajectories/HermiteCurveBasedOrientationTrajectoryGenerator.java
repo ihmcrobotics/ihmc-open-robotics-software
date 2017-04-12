@@ -449,7 +449,7 @@ public class HermiteCurveBasedOrientationTrajectoryGenerator extends Orientation
       double timeSquare = time * time;
       double timeCube = timeSquare * time;
 
-      cumulativeBeziers[1].set(1 - MathTools.powWithInteger(1 - time, 3));
+      cumulativeBeziers[1].set(1 - MathTools.pow(1 - time, 3));
       cumulativeBeziers[2].set(3.0 * timeSquare - 2 * timeCube);
       cumulativeBeziers[3].set(timeCube);
    }

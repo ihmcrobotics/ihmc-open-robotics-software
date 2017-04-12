@@ -9,18 +9,6 @@ import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2006</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class YoGraphicLineSegment extends YoGraphicVector
 {
    private final DoubleYoVariable startX, startY, startZ, endX, endY, endZ;
@@ -47,7 +35,7 @@ public class YoGraphicLineSegment extends YoGraphicVector
 
       if ((!startPoint.getReferenceFrame().isWorldFrame()) || (!endPoint.getReferenceFrame().isWorldFrame()))
       {
-         System.err.println("Warning: Should be in a World Frame to create a DynamicGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
+         System.err.println("Warning: Should be in a World Frame to create a YoGraphicLineSegment. startPoint = " + startPoint + ", endPoint = " + endPoint);
       }
    }
 

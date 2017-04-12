@@ -10,37 +10,29 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
-import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
-import us.ihmc.robotics.geometry.FrameConvexPolygon2d;
-import us.ihmc.robotics.geometry.FrameLine2d;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FrameVector;
-import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class OnToesState extends AbstractFootControlState
 {
-   private final OrientationFeedbackControlCommand orientationFeedbackControlCommand = new OrientationFeedbackControlCommand();
-   private final PointFeedbackControlCommand pointFeedbackControlCommand = new PointFeedbackControlCommand();
-   private final FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
+   private final SpatialFeedbackControlCommand feedbackControlCommand = new SpatialFeedbackControlCommand();
 
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
+
+   private final ToeOffHelper toeOffHelper;
 
    private final Twist footTwist = new Twist();
 
@@ -50,36 +42,25 @@ public class OnToesState extends AbstractFootControlState
 
    private final FramePoint contactPointPosition = new FramePoint();
 
-   private final YoPlaneContactState contactState = momentumBasedController.getContactState(contactableFoot);
+   private final YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
    private final List<YoContactPoint> contactPoints = contactState.getContactPoints();
-
-   private final DenseMatrix64F selectionMatrix = CommonOps.identity(6);
 
    private final DoubleYoVariable toeOffDesiredPitchAngle, toeOffDesiredPitchVelocity, toeOffDesiredPitchAcceleration;
    private final DoubleYoVariable toeOffCurrentPitchAngle, toeOffCurrentPitchVelocity;
 
    private final FramePoint2d toeOffContactPoint2d = new FramePoint2d();
-   private final FramePoint exitCMP = new FramePoint();
-   private final FramePoint2d exitCMP2d = new FramePoint2d();
-   private final FrameVector2d exitCMPRayDirection2d = new FrameVector2d();
-   private final FrameLine2d rayThroughExitCMP = new FrameLine2d();
 
    private final TwistCalculator twistCalculator;
 
-   private final ReferenceFrame soleFrame;
-   private final FrameConvexPolygon2d footPolygon = new FrameConvexPolygon2d();
-
-   private final DoubleYoVariable toeOffContactInterpolation;
-   private final BooleanYoVariable hasComputedToeOffContactPoint;
-
-   public OnToesState(FootControlHelper footControlHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, ToeOffHelper toeOffHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
 
-      twistCalculator = momentumBasedController.getTwistCalculator();
+      this.toeOffHelper = toeOffHelper;
+
+      twistCalculator = controllerToolbox.getTwistCalculator();
 
       String namePrefix = contactableFoot.getName();
-      soleFrame = contactableFoot.getSoleFrame();
 
       maximumToeOffAngleProvider = new YoVariableDoubleProvider(namePrefix + "MaximumToeOffAngle", registry);
       maximumToeOffAngleProvider.set(footControlHelper.getWalkingControllerParameters().getMaximumToeOffAngle());
@@ -100,56 +81,34 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
-      orientationFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
-      orientationFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
-      orientationFeedbackControlCommand.setPrimaryBase(pelvis);
-      orientationFeedbackControlCommand.setGains(gains.getOrientationGains());
+      feedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
+      feedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
+      feedbackControlCommand.setPrimaryBase(pelvis);
+      feedbackControlCommand.setGains(gains);
 
-      pointFeedbackControlCommand.setWeightForSolver(SolverWeightLevels.HIGH);
-      pointFeedbackControlCommand.set(rootBody, contactableFoot.getRigidBody());
-      pointFeedbackControlCommand.setPrimaryBase(pelvis);
-      pointFeedbackControlCommand.setGains(gains.getPositionGains());
-
-      feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
-      feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
-
-      for (int i = 0; i < 3; i++)
-         MatrixTools.removeRow(selectionMatrix, 3); // Remove linear part
+      DenseMatrix64F selectionMatrix = CommonOps.identity(6);
       MatrixTools.removeRow(selectionMatrix, 1); // Remove pitch
-      orientationFeedbackControlCommand.setSelectionMatrix(selectionMatrix);
-
-      exitCMP2d.setToNaN(soleFrame);
-      exitCMPRayDirection2d.setIncludingFrame(soleFrame, 1.0, 0.0);
-      rayThroughExitCMP.setToNaN(soleFrame);
-
-      toeOffContactInterpolation = new DoubleYoVariable(namePrefix + "ToeOffContactInterpolation", registry);
-      toeOffContactInterpolation.set(footControlHelper.getWalkingControllerParameters().getToeOffContactInterpolation());
-
-      hasComputedToeOffContactPoint = new BooleanYoVariable(namePrefix + "HasComputedToeOffContactPoint", registry);
+      feedbackControlCommand.setSelectionMatrix(selectionMatrix);
    }
 
    public void setWeight(double weight)
    {
-      pointFeedbackControlCommand.setWeightForSolver(weight);
-      orientationFeedbackControlCommand.setWeightForSolver(weight);
+      feedbackControlCommand.setWeightForSolver(weight);
    }
 
    public void setWeights(Vector3D angular, Vector3D linear)
    {
-      pointFeedbackControlCommand.setWeightsForSolver(linear);
-      orientationFeedbackControlCommand.setWeightsForSolver(angular);
+      feedbackControlCommand.setWeightsForSolver(angular, linear);
    }
 
    @Override
    public void doSpecificAction()
    {
-      feedbackControlCommandList.clear();
-
       desiredOrientation.setToZero(contactableFoot.getFrameAfterParentJoint());
       desiredOrientation.changeFrame(worldFrame);
       desiredOrientation.getYawPitchRoll(tempYawPitchRoll);
 
-      twistCalculator.getRelativeTwist(footTwist, rootBody, contactableFoot.getRigidBody());
+      twistCalculator.getRelativeTwist(rootBody, contactableFoot.getRigidBody(), footTwist);
       footTwist.changeFrame(contactableFoot.getFrameAfterParentJoint());
 
       toeOffCurrentPitchAngle.set(tempYawPitchRoll[1]);
@@ -170,13 +129,10 @@ public class OnToesState extends AbstractFootControlState
       desiredAngularAcceleration.setIncludingFrame(contactableFoot.getFrameAfterParentJoint(), 0.0, toeOffDesiredPitchAcceleration.getDoubleValue(), 0.0);
       desiredAngularAcceleration.changeFrame(worldFrame);
 
-      orientationFeedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
-      pointFeedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      feedbackControlCommand.set(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      feedbackControlCommand.set(desiredContactPointPosition, desiredLinearVelocity, desiredLinearAcceleration);
 
       setupSingleContactPoint();
-
-      feedbackControlCommandList.addCommand(orientationFeedbackControlCommand);
-      feedbackControlCommandList.addCommand(pointFeedbackControlCommand);
    }
 
    private void computeDesiredsForFreeMotion()
@@ -216,12 +172,11 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      if (!hasComputedToeOffContactPoint.getBooleanValue())
-         computeToeOffContactPoint(null);
+      toeOffHelper.getToeOffContactPoint(toeOffContactPoint2d, robotSide);
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
-      pointFeedbackControlCommand.setBodyFixedPointToControl(contactPointPosition);
+      feedbackControlCommand.setControlFrameFixedInEndEffector(contactPointPosition);
 
       desiredContactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       desiredContactPointPosition.changeFrame(worldFrame);
@@ -244,57 +199,7 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
-      exitCMP2d.setToNaN();
-
-      hasComputedToeOffContactPoint.set(false);
-   }
-
-   public void setExitCMP(FramePoint exitCMP)
-   {
-      this.exitCMP.setIncludingFrame(exitCMP);
-      this.exitCMP.changeFrame(soleFrame);
-      exitCMP2d.setByProjectionOntoXYPlaneIncludingFrame(this.exitCMP);
-   }
-
-   private final FramePoint2d interpolatedRayOrigin = new FramePoint2d();
-   public void computeToeOffContactPoint(FramePoint2d desiredCMP)
-   {
-      footPolygon.clear(soleFrame);
-
-      for (int i = 0; i < contactPoints.size(); i++)
-      {
-         contactPoints.get(i).getPosition2d(toeOffContactPoint2d);
-         footPolygon.addVertex(toeOffContactPoint2d);
-      }
-
-      footPolygon.update();
-
-      FramePoint2d rayOrigin;
-      if (!exitCMP2d.containsNaN() && footPolygon.isPointInside(exitCMP2d))
-         rayOrigin = exitCMP2d;
-      else
-         rayOrigin = footPolygon.getCentroid();
-
-      if (desiredCMP != null && !desiredCMP.containsNaN())
-      {
-         interpolatedRayOrigin.setToZero(soleFrame);
-         desiredCMP.changeFrameAndProjectToXYPlane(soleFrame);
-         interpolatedRayOrigin.interpolate(rayOrigin, desiredCMP, toeOffContactInterpolation.getDoubleValue());
-
-         if (footPolygon.isPointInside(interpolatedRayOrigin))
-            rayThroughExitCMP.set(interpolatedRayOrigin, exitCMPRayDirection2d);
-         else
-            rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
-      }
-      else
-      {
-         rayThroughExitCMP.set(rayOrigin, exitCMPRayDirection2d);
-      }
-
-      FramePoint2d[] intersectionWithRay = footPolygon.intersectionWithRayCopy(rayThroughExitCMP);
-      toeOffContactPoint2d.set(intersectionWithRay[0]);
-
-      hasComputedToeOffContactPoint.set(true);
+      toeOffHelper.clear();
    }
 
    @Override
@@ -309,6 +214,6 @@ public class OnToesState extends AbstractFootControlState
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      return feedbackControlCommandList;
+      return feedbackControlCommand;
    }
 }

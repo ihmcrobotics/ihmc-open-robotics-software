@@ -1,13 +1,20 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
+import java.util.ArrayList;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
-import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.screwTheory.*;
-
-import java.util.ArrayList;
+import us.ihmc.robotics.screwTheory.CompositeRigidBodyMassMatrixHandler;
+import us.ihmc.robotics.screwTheory.FloatingBaseRigidBodyDynamicsTools;
+import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
+import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.robotics.screwTheory.TwistCalculator;
+import us.ihmc.robotics.screwTheory.Wrench;
 
 public class DynamicsMatrixCalculator
 {
@@ -43,23 +50,23 @@ public class DynamicsMatrixCalculator
 
    public DynamicsMatrixCalculator(ArrayList<InverseDynamicsJoint> jointsToIgnore, WholeBodyControlCoreToolbox toolbox, WrenchMatrixCalculator wrenchMatrixCalculator)
    {
-      FullRobotModel fullRobotModel = toolbox.getFullRobotModel();
-      RigidBody elevator = fullRobotModel.getElevator();
+      FloatingInverseDynamicsJoint rootJoint = toolbox.getRootJoint();
+      TwistCalculator twistCalculator = toolbox.getTwistCalculator();
+      RigidBody rootBody = twistCalculator.getRootBody();
       int rhoSize = wrenchMatrixCalculator.getRhoSize();
 
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
 
-      massMatrixHandler = new CompositeRigidBodyMassMatrixHandler(elevator, jointsToIgnore);
-      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(toolbox.getTwistCalculator(), jointsToIgnore, toolbox.getGravityZ());
-      contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(elevator, toolbox.getContactablePlaneBodies(), wrenchMatrixCalculator, jointIndexHandler,
-            toolbox.getGeometricJacobianHolder());
+      massMatrixHandler = new CompositeRigidBodyMassMatrixHandler(rootBody, jointsToIgnore);
+      coriolisMatrixCalculator = new GravityCoriolisExternalWrenchMatrixCalculator(twistCalculator, jointsToIgnore, toolbox.getGravityZ());
+      contactWrenchMatrixCalculator = new ContactWrenchMatrixCalculator(rootBody, toolbox.getContactablePlaneBodies(), wrenchMatrixCalculator, jointIndexHandler);
 
       helper = new DynamicsMatrixCalculatorHelper(coriolisMatrixCalculator, jointIndexHandler);
       helper.setRhoSize(rhoSize);
 
       int numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
-      int floatingBaseDoFs = toolbox.getRobotRootJoint().getDegreesOfFreedom();
+      int floatingBaseDoFs = rootJoint != null ? rootJoint.getDegreesOfFreedom() : 0;
       bodyDoFs = numberOfDoFs - floatingBaseDoFs;
 
       jointTorques = new DenseMatrix64F(bodyDoFs, 1);
