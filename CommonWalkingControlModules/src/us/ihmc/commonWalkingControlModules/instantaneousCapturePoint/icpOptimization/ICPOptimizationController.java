@@ -340,7 +340,7 @@ public class ICPOptimizationController
       isInTransfer.set(true);
 
       int numberOfFootstepRegistered = upcomingFootsteps.size();
-      if (numberOfFootstepRegistered < numberOfFootstepsToConsider.getIntegerValue())
+      if (numberOfFootstepRegistered == numberOfFootstepsToConsider.getIntegerValue())
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
 
       upcomingDoubleSupportSplitFraction.set(defaultDoubleSupportSplitFraction.getDoubleValue());
@@ -380,7 +380,7 @@ public class ICPOptimizationController
       isInitialTransfer.set(false);
 
       int numberOfFootstepRegistered = upcomingFootsteps.size();
-      if (numberOfFootstepRegistered < numberOfFootstepsToConsider.getIntegerValue())
+      if (numberOfFootstepRegistered == numberOfFootstepsToConsider.getIntegerValue())
          transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
 
       upcomingDoubleSupportSplitFraction.set(defaultDoubleSupportSplitFraction.getDoubleValue());
