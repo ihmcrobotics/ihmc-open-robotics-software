@@ -848,6 +848,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       for (RobotSide robotSide : RobotSide.values)
       {
          fullRobotModel.updateFrames();
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
          ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
          FramePose desiredHandPose = new FramePose(handControlFrame);
          desiredHandPose.changeFrame(worldFrame);
@@ -855,7 +856,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
          desiredHandPose.getPose(desiredPosition, desiredOrientation);
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, worldFrame, worldFrame);
+         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation,
+                                                                                 worldFrame, chestFrame);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
          overridingPoses.put(robotSide, desiredHandPose);
