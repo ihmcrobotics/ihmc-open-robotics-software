@@ -1,14 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
-import java.io.IOException;
-
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.PacketRouter;
-import us.ihmc.communication.packetCommunicator.PacketCommunicator;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.TextToSpeechPacket;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SolarPanelBehaviorStateMachine.SolarPanelStates;
@@ -18,8 +11,10 @@ import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelMotionPlanner;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -29,9 +24,10 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
    private BehaviorAction<SolarPanelStates> bahaviorAction;
    
    
-   private PacketCommunicator toolboxCommunicator;   
-   private final PacketRouter<PacketDestination> networkProcessor;   
-   private KinematicsToolboxModule kinematicsToolboxModule;
+   
+   SolarPanel solarPanel;
+   SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
+   
    
    
    
@@ -49,19 +45,8 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       
       // ************************* Immigration ******************************* //
-      networkProcessor = new PacketRouter<>(PacketDestination.class);
-      toolboxCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
-      try
-      {
-         toolboxCommunicator.connect();
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-      networkProcessor.attachPacketCommunicator(PacketDestination.KINEMATICS_TOOLBOX_MODULE, toolboxCommunicator);
+
       
-      kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
       
       
       
@@ -151,11 +136,21 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
    
    public void setUpMotionPlanner()
    {
-      KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();
+      
    }
    
    
-   
+   private void setUpSolarPanel()
+   {
+      Pose poseSolarPanel = new Pose();
+      Quaternion quaternionSolarPanel = new Quaternion();
+      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
+      quaternionSolarPanel.appendRollRotation(0.0);
+      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+      poseSolarPanel.setOrientation(quaternionSolarPanel);
+      
+      solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
+   }
    
    
    
