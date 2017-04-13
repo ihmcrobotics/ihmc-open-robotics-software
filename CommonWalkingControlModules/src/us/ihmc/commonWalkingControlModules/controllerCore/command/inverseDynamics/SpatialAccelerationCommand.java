@@ -257,7 +257,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param desiredLinearAcceleration the desired linear acceleration of the origin of the control
     *           frame with respect to the base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredAngularAcceleration} or
-    *            {@code desiredLineaerAcceleration} is not expressed in control frame.
+    *            {@code desiredLinearAcceleration} is not expressed in control frame.
     */
    public void setSpatialAcceleration(ReferenceFrame controlFrame, FrameVector desiredAngularAcceleration, FrameVector desiredLinearAcceleration)
    {
