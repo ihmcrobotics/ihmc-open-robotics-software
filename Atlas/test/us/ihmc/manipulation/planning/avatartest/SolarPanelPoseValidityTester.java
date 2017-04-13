@@ -12,20 +12,20 @@ import us.ihmc.tools.thread.ThreadTools;
 public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
 {
    private SolarPanel solarPanel;
-   private PacketCommunicator toolboxCommunicator;
+   private PacketCommunicator packetCommunicator;
   
-   public SolarPanelPoseValidityTester(SolarPanel solarPanel, PacketCommunicator toolboxCommunicator, KinematicsToolboxController ikToolboxController)
+   public SolarPanelPoseValidityTester(SolarPanel solarPanel, PacketCommunicator packetCommunicator, KinematicsToolboxController ikToolboxController)
    {
       super(ikToolboxController);
       this.solarPanel = solarPanel;
-      this.toolboxCommunicator = toolboxCommunicator;
+      this.packetCommunicator = packetCommunicator;
       addEnvironmentCollisionModel();
    }
    
    public void sendWholebodyTrajectoryMessage(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)
    {
       wholebodyTrajectoryMessage.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);      
-      toolboxCommunicator.send(wholebodyTrajectoryMessage);
+      packetCommunicator.send(wholebodyTrajectoryMessage);
       ThreadTools.sleep(10);
    }
 

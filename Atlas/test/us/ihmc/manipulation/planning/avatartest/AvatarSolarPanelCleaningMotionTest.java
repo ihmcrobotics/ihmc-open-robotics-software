@@ -41,14 +41,14 @@ import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTraject
 import us.ihmc.manipulation.planning.forwaypoint.SO3TrajectoryPointCalculator;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelLinearPath;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner;
+import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerSolarPanelCleaning;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTTreeTimeDomain;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelMotionPlanner;
-import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelMotionPlanner.CleaningMotion;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
