@@ -577,6 +577,7 @@ public class KinematicsToolboxController extends ToolboxController
       desiredPelvisHeight.setToNaN();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
+      //RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.getAndSet(null);
       if (robotConfigurationData == null)
          return false;
 
