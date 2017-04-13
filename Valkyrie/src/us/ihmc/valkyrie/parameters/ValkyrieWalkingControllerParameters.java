@@ -137,7 +137,10 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
-      return target != RobotTarget.REAL_ROBOT;
+      // Used to be: target != RobotTarget.REAL_ROBOT;
+      // Trying to see if that's really necessary (Sylvain)
+      // It delays the toe-off to some extent which can cause some issues.
+      return false;
    }
 
    @Override
@@ -1298,5 +1301,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
       // For some reason it causes the test ValkyrieEndToEndCinderBlockFieldTest to fail by making the state estimator drift more than usual.
       // As there is no real need for it in sim, I'm leaving it on only for the real robot. (Sylvain)
       return target == RobotTarget.REAL_ROBOT;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public boolean useSupportState()
+   {
+      return true;
    }
 }

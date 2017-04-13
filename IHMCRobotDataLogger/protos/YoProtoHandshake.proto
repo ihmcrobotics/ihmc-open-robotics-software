@@ -1,5 +1,5 @@
 option java_outer_classname = "YoProtoHandshakeProto";
-option java_package = "us.ihmc.robotDataLogger.generated";
+option java_package = "us.ihmc.robotDataLogger.handshake.generated";
 
 message YoProtoHandshake
 {

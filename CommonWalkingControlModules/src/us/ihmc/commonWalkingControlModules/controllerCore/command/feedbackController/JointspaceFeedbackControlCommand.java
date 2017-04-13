@@ -159,6 +159,26 @@ public class JointspaceFeedbackControlCommand implements FeedbackControlCommand<
       weightsForSolver.add().setValue(Double.POSITIVE_INFINITY);
       gains.add().set(0.0, 0.0, 0.0, 0.0);
    }
+   
+   /**
+    * Adds a joint to be controlled in the next control tick.
+    *
+    * @param joint the joint to be controlled.
+    * @param desiredPosition the joint's desired position.
+    * @param desiredVelocity the joint's desired velocity.
+    * @param feedForwardAcceleration the feed-forward acceleration for the joint, used to improve
+    *           tracking performance.
+    */
+   public void addJoint(OneDoFJoint joint, double desiredPosition, double desiredVelocity, double feedForwardAcceleration, PDGainsInterface gains, double weight)
+   {
+      joints.add(joint);
+      jointNames.add(joint.getName());
+      desiredPositions.add().setValue(desiredPosition);
+      desiredVelocities.add().setValue(desiredVelocity);
+      feedForwardAccelerations.add().setValue(feedForwardAcceleration);
+      weightsForSolver.add().setValue(weight);
+      this.gains.add().set(gains);
+   }
 
    /**
     * Updates the desireds for a joint already registered given its index.

@@ -52,18 +52,18 @@ public class YoGraphicPolynomial3DTest
                                                                            radialResolution, registry);
 
          YoVariable<?>[] allWriterYoVariables = yoGraphicWriter.getVariables();
-         Double[] allWriterConstants = new Double[yoGraphicWriter.getConstants().length];
+         double[] allWriterConstants = new double[yoGraphicWriter.getConstants().length];
          for (int i = 0; i < yoGraphicWriter.getConstants().length; i++)
             allWriterConstants[i] = yoGraphicWriter.getConstants()[i];
 
          YoGraphicPolynomial3D yoGraphicReader = YoGraphicPolynomial3D.createAsRemoteYoGraphic("reader", allWriterYoVariables, allWriterConstants);
          YoVariable<?>[] allReaderYoVariables = yoGraphicReader.getVariables();
-         Double[] allReaderConstants = new Double[yoGraphicReader.getConstants().length];
+         double[] allReaderConstants = new double[yoGraphicReader.getConstants().length];
          for (int i = 0; i < yoGraphicReader.getConstants().length; i++)
             allReaderConstants[i] = yoGraphicReader.getConstants()[i];
 
          assertArrayEquals(allWriterYoVariables, allReaderYoVariables);
-         assertArrayEquals(allWriterConstants, allReaderConstants);
+         assertArrayEquals(allWriterConstants, allReaderConstants, 1e-7);
       }
    }
 }

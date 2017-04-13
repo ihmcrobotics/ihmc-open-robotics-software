@@ -29,7 +29,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  */
 public class YoGraphicFactory
 {
-   public static RemoteYoGraphic yoGraphicFromMessage(RemoteGraphicType type, String name, YoVariable<?>[] vars, Double[] consts,
+   public static RemoteYoGraphic yoGraphicFromMessage(RemoteGraphicType type, String name, YoVariable<?>[] vars, double[] consts,
          AppearanceDefinition appearance)
    {
       switch (type)

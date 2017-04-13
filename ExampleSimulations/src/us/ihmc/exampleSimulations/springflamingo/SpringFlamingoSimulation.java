@@ -22,7 +22,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
 import us.ihmc.simulationconstructionset.util.simulationRunner.VariableDifference;
-import us.ihmc.simulationconstructionset.util.visualizers.RobotFreezeFramer;
+import us.ihmc.simulationConstructionSetTools.util.visualizers.RobotFreezeFramer;
 
 public class SpringFlamingoSimulation
 {

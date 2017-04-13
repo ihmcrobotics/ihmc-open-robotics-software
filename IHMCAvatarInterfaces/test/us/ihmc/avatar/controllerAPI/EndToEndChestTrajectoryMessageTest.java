@@ -16,6 +16,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -25,7 +26,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajec
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.AxisAngleOrientationController;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -36,8 +36,8 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -1046,8 +1046,8 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    public static Vector3D findControlErrorRotationVector(SimulationConstructionSet scs, RigidBody chest)
    {
       String chestPrefix = chest.getName();
-      String nameSpace = chestPrefix + AxisAngleOrientationController.class.getSimpleName();
-      String varName = chestPrefix + "RotationErrorInBody";
+      String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
+      String varName = chestPrefix + "ErrorRotationVector";
       return findVector3d(nameSpace, varName, scs);
    }
 

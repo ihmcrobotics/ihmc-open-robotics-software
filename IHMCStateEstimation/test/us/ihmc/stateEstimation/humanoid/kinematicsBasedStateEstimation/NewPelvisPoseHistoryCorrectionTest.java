@@ -41,36 +41,36 @@ public class NewPelvisPoseHistoryCorrectionTest
 {
    private YoVariableRegistry registry;
    SimulationTestingParameters simulationTestingParameters = new SimulationTestingParameters();
-   
+
    SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
    SimulationConstructionSet simulationConstructionSet;
-   
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final double estimatorDT = 0.001;
-   
+
    private Robot robot;
    private ReferenceFrame pelvisReferenceFrame;
    private RigidBodyTransform pelvisTransformInWorldFrame = new RigidBodyTransform();
    private SixDoFJoint sixDofPelvisJoint;
-   
+
    private final int pelvisBufferSize = 100;
    private final int numberOfTimeStamps = 50000;
    private final int bufferSize = numberOfTimeStamps;
-   
+
    private ExternalPelvisPoseCreator externalPelvisPoseCreator;
    private NewPelvisPoseHistoryCorrection pelvisCorrector;
    private YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   
+
    int numberOfPelvisWaypoints = 11;
    TimeStampedTransformBuffer pelvisWaypointsTransformPoseBufferInWorldFrame = new TimeStampedTransformBuffer(numberOfPelvisWaypoints);
 
    int numberOfIcpOffsets = 16;
    TimeStampedTransformBuffer icpTransformPoseBufferInWorldFrame = new TimeStampedTransformBuffer(70);
    TimeStampedTransformBuffer icpOffsetsTransformPoseBuffer = new TimeStampedTransformBuffer(70);
-   
+
    private boolean angleErrorTooBigDetectedAndPacketSent = false;
-   
+
    @Before
    public void setUp()
    {
@@ -80,7 +80,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       setupSim();
       setupCorrector();
       simulationConstructionSet.addYoGraphicsListRegistry(yoGraphicsListRegistry);
-      
+
    }
 
    @After
@@ -88,7 +88,7 @@ public class NewPelvisPoseHistoryCorrectionTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
-   
+
    private void setupRobot()
    {
       robot = new Robot("dummy");
@@ -112,7 +112,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(false);
       parameters.setDataBufferSize(bufferSize);
-      
+
       simulationConstructionSet = new SimulationConstructionSet(robot, parameters);
       simulationConstructionSet.setDT(0.001, 1);
    }
@@ -122,7 +122,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       externalPelvisPoseCreator = new ExternalPelvisPoseCreator();
       pelvisCorrector = new NewPelvisPoseHistoryCorrection(sixDofPelvisJoint, estimatorDT, registry, pelvisBufferSize, yoGraphicsListRegistry, externalPelvisPoseCreator);
    }
-   
+
    private void generatePelvisWayPoints()
    {
       RigidBodyTransform pelvisTransformInWorldFrame = new RigidBodyTransform();
@@ -205,7 +205,7 @@ public class NewPelvisPoseHistoryCorrectionTest
          generateIcpOffsetsWithRespectToPelvisInTransformBuffer(timeStamp, translationOffset, rotationOffset);
       }
    }
-   
+
    private void saveIcpOffsetInTransformBuffer(long timeStamp, Vector3D translationOffset, Quaternion rotationOffset)
    {
       RigidBodyTransform icpOffsetTransform = new RigidBodyTransform(rotationOffset, translationOffset);
@@ -217,35 +217,35 @@ public class NewPelvisPoseHistoryCorrectionTest
       TimeStampedTransform3D pelvisTransformAtSpecificTimeStamp = new TimeStampedTransform3D();
       RigidBodyTransform pelvisTransformAtSpecificTimeStamp_Translation = new RigidBodyTransform();
       RigidBodyTransform pelvisTransformAtSpecificTimeStamp_Rotation = new RigidBodyTransform();
-      
+
       RigidBodyTransform currentPelvisTransformModifiedWithOffset = new RigidBodyTransform();
       RigidBodyTransform smallOffsetsTransform_Translation = new RigidBodyTransform();
       RigidBodyTransform smallOffsetsTransform_Rotation = new RigidBodyTransform();
-      
+
       pelvisWaypointsTransformPoseBufferInWorldFrame.findTransform(timeStamp, pelvisTransformAtSpecificTimeStamp);
       pelvisTransformAtSpecificTimeStamp_Translation.set(pelvisTransformAtSpecificTimeStamp.getTransform3D());
       pelvisTransformAtSpecificTimeStamp_Rotation.set(pelvisTransformAtSpecificTimeStamp_Translation);
       pelvisTransformAtSpecificTimeStamp_Translation.setRotationToZero();
       pelvisTransformAtSpecificTimeStamp_Rotation.setTranslationToZero();
-      
+
       smallOffsetsTransform_Translation.setTranslationAndIdentityRotation(translationOffset);
       smallOffsetsTransform_Rotation.setRotationAndZeroTranslation(rotationOffset);
-      
+
       currentPelvisTransformModifiedWithOffset.setIdentity();
       currentPelvisTransformModifiedWithOffset.multiply(pelvisTransformAtSpecificTimeStamp_Translation);
       currentPelvisTransformModifiedWithOffset.multiply(smallOffsetsTransform_Translation);
       currentPelvisTransformModifiedWithOffset.multiply(pelvisTransformAtSpecificTimeStamp_Rotation);
       currentPelvisTransformModifiedWithOffset.multiply(smallOffsetsTransform_Rotation);
-      
+
       icpTransformPoseBufferInWorldFrame.put(currentPelvisTransformModifiedWithOffset, timeStamp);
    }
 
-   
+
    private BooleanYoVariable isRotationCorrectionEnabled;
    private DoubleYoVariable maximumErrorTranslation;
    private DoubleYoVariable maximumErrorAngleInDegrees;
-   
-   @ContinuousIntegrationTest(estimatedDuration = 0.8)
+
+   @ContinuousIntegrationTest(estimatedDuration = 0.8, categoriesOverride = {IntegrationCategory.IN_DEVELOPMENT})
    @Test(timeout = 30000)
    public void testTranslationCorrectionOnlyWithPelvisFollowingAKnownPathAndRandomLocalizationOffsets()
    {
@@ -255,10 +255,10 @@ public class NewPelvisPoseHistoryCorrectionTest
       maximumErrorTranslation.set(Double.MAX_VALUE);
       maximumErrorAngleInDegrees = (DoubleYoVariable) registry.getVariable("ClippedSpeedOffsetErrorInterpolator", "maximumErrorAngleInDegrees");
       maximumErrorAngleInDegrees.set(Double.MAX_VALUE);
-      
+
       generatePelvisWayPoints();
       generateSmallIcpOffsetsAroundPelvis();
-      
+
       TimeStampedTransform3D pelvisTimeStampedTransform3D = new TimeStampedTransform3D();
       TimeStampedTransform3D icpTimeStampedTransform3D = new TimeStampedTransform3D();
 
@@ -266,61 +266,61 @@ public class NewPelvisPoseHistoryCorrectionTest
       RigidBodyTransform pelvisBeforeCorrection_Rotation = new RigidBodyTransform();
       RigidBodyTransform pelvisAfterCorrection = new RigidBodyTransform();
       RigidBodyTransform pelvisExpectedCorrection = new RigidBodyTransform();
-      
-      FramePose correctedPelvisverify = new FramePose(worldFrame); 
+
+      FramePose correctedPelvisverify = new FramePose(worldFrame);
       YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
-      
-      
+
+
       for (long timeStamp = 0; timeStamp < numberOfTimeStamps; timeStamp++)
       {
          pelvisWaypointsTransformPoseBufferInWorldFrame.findTransform(timeStamp, pelvisTimeStampedTransform3D);
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
-         
+
          sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection_Translation.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisBeforeCorrection_Translation.setRotationToZero();
          pelvisBeforeCorrection_Rotation.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisBeforeCorrection_Rotation.setTranslationToZero();
-         
+
          pelvisCorrector.doControl(timeStamp);
          pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
-         
+
          correctedPelvisverify.setPose(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
-         
+
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
          {
             icpTransformPoseBufferInWorldFrame.findTransform(timeStamp - 80, icpTimeStampedTransform3D);
             StampedPosePacket newestStampedPosePacket = new StampedPosePacket("/pelvis", icpTimeStampedTransform3D, 1.0);
             externalPelvisPoseCreator.setNewestPose(newestStampedPosePacket);
          }
-         
+
          simulationConstructionSet.tickAndUpdate();
-         
+
          if((timeStamp-2000)%3000 == 0)
          {
             if(timeStamp >= icpOffsetsTransformPoseBuffer.getOldestTimestamp())
             {
                TimeStampedTransform3D temporaryTimeStampedTransform = new TimeStampedTransform3D();
                icpOffsetsTransformPoseBuffer.findTransform(timeStamp - 2000, temporaryTimeStampedTransform);
-               
+
                RigidBodyTransform temporaryTransform = new RigidBodyTransform(temporaryTimeStampedTransform.getTransform3D());
                temporaryTransform.setRotationToZero(); //here we can do that because rotation correction is deactivated by default. This will need to be updated if we activate rotation correction
-               
+
                pelvisExpectedCorrection.setIdentity();
                pelvisExpectedCorrection.multiply(pelvisBeforeCorrection_Translation);
                pelvisExpectedCorrection.multiply(temporaryTransform);
                pelvisExpectedCorrection.multiply(pelvisBeforeCorrection_Rotation);
 
                assertTrue(pelvisExpectedCorrection.epsilonEquals(pelvisAfterCorrection, 1e-4));
-               
+
             }
          }
       }
    }
-   
+
    @ContinuousIntegrationTest(estimatedDuration = 1.0)
    @Test(timeout = 30000)
    public void testTooBigAngleErrorAreDetectedAndPacketIsSent()
@@ -328,27 +328,27 @@ public class NewPelvisPoseHistoryCorrectionTest
       boolean checkPacketHasBeenSentNextLoopIteration = false;
       generatePelvisWayPoints();
       generateIcpOffsetsAroundPelvisWithTooBigAngleErrors();
-      
+
       TimeStampedTransform3D pelvisTimeStampedTransform3D = new TimeStampedTransform3D();
       TimeStampedTransform3D icpTimeStampedTransform3D = new TimeStampedTransform3D();
-      
+
       RigidBodyTransform pelvisBeforeCorrection = new RigidBodyTransform();
       RigidBodyTransform pelvisAfterCorrection = new RigidBodyTransform();
-      
-      FramePose correctedPelvisverify = new FramePose(worldFrame); 
+
+      FramePose correctedPelvisverify = new FramePose(worldFrame);
       YoFramePose correctedPelvisToVerifyTheTest = new YoFramePose("correctedPelvisToVerifyTheTest", worldFrame, registry);
-      
-      
+
+
       for (long timeStamp = 0; timeStamp < numberOfTimeStamps; timeStamp++)
       {
          pelvisWaypointsTransformPoseBufferInWorldFrame.findTransform(timeStamp, pelvisTimeStampedTransform3D);
          pelvisTransformInWorldFrame.set(pelvisTimeStampedTransform3D.getTransform3D());
          pelvisReferenceFrame.update();
-         
+
          sixDofPelvisJoint.setPositionAndRotation(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection.set(pelvisTimeStampedTransform3D.getTransform3D());
-         
+
          pelvisCorrector.doControl(timeStamp);
          pelvisAfterCorrection.set(sixDofPelvisJoint.getJointTransform3D());
          if(checkPacketHasBeenSentNextLoopIteration)
@@ -357,7 +357,7 @@ public class NewPelvisPoseHistoryCorrectionTest
             angleErrorTooBigDetectedAndPacketSent = false;
             checkPacketHasBeenSentNextLoopIteration = false;
          }
-         
+
          if ( timeStamp > 3000 && ((timeStamp - 80) % 3000) == 0)
          {
             icpTransformPoseBufferInWorldFrame.findTransform(timeStamp - 80, icpTimeStampedTransform3D);
@@ -365,10 +365,10 @@ public class NewPelvisPoseHistoryCorrectionTest
             externalPelvisPoseCreator.setNewestPose(newestStampedPosePacket);
             checkPacketHasBeenSentNextLoopIteration = true;
          }
-         
+
          correctedPelvisverify.setPose(pelvisAfterCorrection);
          correctedPelvisToVerifyTheTest.set(correctedPelvisverify);
-         
+
          simulationConstructionSet.tickAndUpdate();
 
          assertTrue(pelvisBeforeCorrection.epsilonEquals(pelvisAfterCorrection, 1e-4));
@@ -414,7 +414,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       orientationTooBigOffset[14] = tempQuat;
       tempQuat.setYawPitchRoll(Math.toRadians(-20.0), Math.toRadians(0.0), Math.toRadians(0.9));
       orientationTooBigOffset[15] = tempQuat;
-      
+
       for(long timeStamp = 3000; timeStamp <50000; timeStamp += 3000)
       {
          Vector3D translationOffset = RandomGeometry.nextVector3D(random, 0.04);
@@ -468,7 +468,7 @@ public class NewPelvisPoseHistoryCorrectionTest
       public void sendLocalizationResetRequest(LocalizationPacket localizationPacket)
       {
          angleErrorTooBigDetectedAndPacketSent = true;
-         
+
       }
    }
 }

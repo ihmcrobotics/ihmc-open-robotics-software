@@ -41,8 +41,7 @@ public class ConvectiveTermCalculatorTest
       TwistCalculator twistCalculator = new TwistCalculator(elevator.getBodyFixedFrame(), elevator);
       ReferenceFrame rootFrame = elevator.getBodyFixedFrame();
       SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootFrame, rootFrame, rootFrame);
-      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(elevator, rootFrame, rootAcceleration, twistCalculator,
-                                                                                                      true, true);
+      SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, true);
 
       twistCalculator.compute();
       spatialAccelerationCalculator.compute();
@@ -53,7 +52,8 @@ public class ConvectiveTermCalculatorTest
       SpatialMotionVectorTest.assertSpatialMotionVectorEquals(accelerationBack, acceleration, 1e-12);
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @Test(timeout = 30000)
    public void testWithJointAccelerations() throws Exception
    {
       Random random = new Random(345345L);
@@ -78,7 +78,7 @@ public class ConvectiveTermCalculatorTest
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          TwistCalculator twistCalculator = new  TwistCalculator(worldFrame, body);
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(body, worldFrame, rootAcceleration, twistCalculator , true, false, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false , false);
          
          twistCalculator.compute();
          spatialAccelerationCalculator.compute();

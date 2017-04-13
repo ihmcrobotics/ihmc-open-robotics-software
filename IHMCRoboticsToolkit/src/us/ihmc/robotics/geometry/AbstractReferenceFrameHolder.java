@@ -3,16 +3,7 @@ package us.ihmc.robotics.geometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2008</p>
- *
- * <p>Company: </p>
- *
  * @author Twan koolen
- * @version 1.0
  */
 public abstract class AbstractReferenceFrameHolder implements ReferenceFrameHolder
 {

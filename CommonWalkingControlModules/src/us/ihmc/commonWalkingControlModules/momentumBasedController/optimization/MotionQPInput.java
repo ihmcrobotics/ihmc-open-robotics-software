@@ -12,6 +12,18 @@ public class MotionQPInput
    private boolean isMotionConstraint = false;
    private final int numberOfDoFs;
 
+   /**
+    * <p>
+    *    Motion objective input into the QP solver.
+    *    Must be in the form
+    * </p>
+    * <p>
+    *    J*x - x
+    * </p>
+    * <p>
+    *    where the overall desire is minimize the objective.
+    * </p>
+    */
    public MotionQPInput(int numberOfDoFs)
    {
       this.numberOfDoFs = numberOfDoFs;
@@ -70,5 +82,20 @@ public class MotionQPInput
    public boolean isMotionConstraint()
    {
       return isMotionConstraint;
+   }
+
+   @Override
+   public String toString()
+   {
+      String ret = getClass().getSimpleName();
+      ret += "Jacobian:\n" + taskJacobian;
+      ret += "Objective:\n" + taskObjective;
+      if (isMotionConstraint)
+         ret += "Motion constraint.";
+      else if (useWeightScalar)
+         ret += "Weight: " + taskWeightScalar;
+      else
+         ret += "Weight:\n" + taskWeightMatrix;
+      return ret;
    }
 }

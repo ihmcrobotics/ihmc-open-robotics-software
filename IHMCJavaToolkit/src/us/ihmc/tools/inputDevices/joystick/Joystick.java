@@ -5,6 +5,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ThreadFactory;
 
+import javax.swing.JFrame;
+
+import org.apache.commons.lang3.SystemUtils;
+
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
@@ -13,6 +17,11 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 import us.ihmc.tools.thread.ThreadTools;
 
+/**
+ * <p>WARNING: On Windows, the process running this thread needs to have a Window in focus for the OS 
+ *    to reveal events. Call setStandalone() to open a focus window if you're on Windows and don't have
+ *    any other GUIs running.</p>
+ */
 public class Joystick
 {
    private static final ThreadFactory namedThreadFactory = ThreadTools.getNamedThreadFactory(Joystick.class.getSimpleName());
@@ -51,7 +60,7 @@ public class Joystick
       
       initializeIdentifiers();
       
-      joystickUpdater = new JoystickUpdater(joystickController, statusListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
@@ -79,7 +88,7 @@ public class Joystick
       
       initializeIdentifiers();
       
-      joystickUpdater = new JoystickUpdater(joystickController, statusListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
@@ -99,7 +108,7 @@ public class Joystick
       
       initializeIdentifiers();
       
-      joystickUpdater = new JoystickUpdater(joystickController, statusListeners);
+      joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
@@ -157,9 +166,23 @@ public class Joystick
       joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
    }
    
-   public void setComponentFilter(JoystickComponentFilter componentFilter)
+   /**
+    * For Windows users, jinput requires a window to be in focus.
+    */
+   public void setStandalone()
    {
-      joystickUpdater.setComponentFilter(componentFilter);
+      if (SystemUtils.IS_OS_WINDOWS)
+      {
+         JFrame frame = new JFrame("Joystick Input Enable Window");
+         frame.setSize(480, 320);
+         frame.setVisible(true);
+         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      }
+   }
+   
+   public void setCustomizationFilter(JoystickCustomizationFilter componentFilter)
+   {
+      joystickUpdater.setCustomizationFilter(componentFilter);
    }
 
    public JoystickModel getModel()
