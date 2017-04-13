@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -67,6 +69,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -122,7 +126,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
          {
             OneDoFJoint original = armOriginal[jointIndex];
-            OneDoFJoint clone = armClone[jointIndex]; 
+            OneDoFJoint clone = armClone[jointIndex];
 
             double limitLower = clone.getJointLimitLower();
             double limitUpper = clone.getJointLimitUpper();
@@ -738,8 +742,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, getClass().getSimpleName(), selectedLocation, simulationTestingParameters,
+                                                            getRobotModel());
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 0.0, 0.5));
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -800,7 +806,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
             handTrajectoryMessage.setUniqueId(id);
             handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
-            handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
+            handTrajectoryMessage.setTrajectoryReferenceFrameId(worldFrame);
 
             if (messageIndex > 0)
                handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
@@ -841,19 +847,15 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-
-         ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         FramePose desiredHandPose = new FramePose(chestFrame);
-         Point3D position = new Point3D(0.25, robotSide.negateIfRightSide(0.35), -0.4);
-         position.scale(scale);
-         desiredHandPose.setPosition(position);
+         fullRobotModel.updateFrames();
+         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+         FramePose desiredHandPose = new FramePose(handControlFrame);
          desiredHandPose.changeFrame(worldFrame);
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
          desiredHandPose.getPose(desiredPosition, desiredOrientation);
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, worldFrame, chestFrame);
+         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, worldFrame, worldFrame);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
          overridingPoses.put(robotSide, desiredHandPose);
