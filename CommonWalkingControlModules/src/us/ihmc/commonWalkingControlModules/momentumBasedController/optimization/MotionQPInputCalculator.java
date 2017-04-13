@@ -64,13 +64,14 @@ public class MotionQPInputCalculator
 
    private final int numberOfDoFs;
 
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, JointIndexHandler jointIndexHandler,
-                                  JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, CentroidalMomentumHandler centroidalMomentumHandler,
+                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+                                  YoVariableRegistry parentRegistry)
    {
       this.jointIndexHandler = jointIndexHandler;
       this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      this.centroidalMomentumHandler = centroidalMomentumHandler;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame);
 
       if (jointPrivilegedConfigurationParameters != null)
          privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.frames;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -62,6 +63,45 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       putYoValuesIntoFrameTuple();
       frameTuple.get(tuple3dToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * its first row index.
+    *
+    * @param tupleMatrixToPack the array in which this tuple is stored. Modified.
+    */
+   public void get(DenseMatrix64F tupleMatrixToPack)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.get(tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param tupleMatrixToPack the column vector in which this tuple is stored. Modified.
+    */
+   public void get(int startRow, DenseMatrix64F tupleMatrixToPack)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.get(startRow, tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow} at the column index {@code column}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param column the column index to write in the dense-matrix.
+    * @param tupleMatrixToPack the matrix in which this tuple is stored. Modified.
+    */
+   public void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.get(startRow, column, tupleMatrixToPack);
    }
 
    public final Vector3D getVector3dCopy()
@@ -211,7 +251,49 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       y.set(newY);
       z.set(newZ);
    }
-   
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given column
+    * vector starting to read from its first row index.
+    *
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void set(DenseMatrix64F tupleDenseMatrix)
+   {
+      frameTuple.setIncludingFrame(getReferenceFrame(), tupleDenseMatrix);
+      getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given column
+    * vector starting to read from {@code startRow}.
+    *
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void set(int startRow, DenseMatrix64F tupleDenseMatrix)
+   {
+      frameTuple.setIncludingFrame(getReferenceFrame(), startRow, tupleDenseMatrix);
+      getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given matrix
+    * starting to read from {@code startRow} at the column index {@code column}.
+    *
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param column the column index to read in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void set(int startRow, int column, DenseMatrix64F tupleDenseMatrix)
+   {
+      frameTuple.setIncludingFrame(getReferenceFrame(), startRow, column, tupleDenseMatrix);
+      getYoValuesFromFrameTuple();
+   }
+
    /**
     * Sets x, y, and z with no checks for reference frame matches.
     * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.

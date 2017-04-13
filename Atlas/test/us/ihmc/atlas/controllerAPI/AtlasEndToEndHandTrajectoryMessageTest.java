@@ -85,7 +85,7 @@ public class AtlasEndToEndHandTrajectoryMessageTest extends EndToEndHandTrajecto
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       String handName = fullRobotModel.getHand(robotSide).getName();
-      String nameSpace = handName + FeedbackControllerToolbox.class.getSimpleName();
+      String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
       String varname = handName + "ErrorRotationVector";
       Vector3D rotationError = findVector3d(nameSpace, varname, scs);
 
