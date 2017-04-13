@@ -111,11 +111,16 @@ import us.ihmc.tools.thread.ThreadTools;
    {
       private final int port;
       private final ArrayList<IntraprocessObjectCommunicator> clients = new ArrayList<>();
-      private final ExecutorService callBackExecutor;
+      private ExecutorService callBackExecutor;
 
       private IntraprocessCommunicator(int port)
       {
          this.port = port;
+         createCallbackExecuter();
+      }
+
+      private void createCallbackExecuter()
+      {
          this.callBackExecutor = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory("IntraprocessCommunicatorCallback-" + port));
       }
 
@@ -128,6 +133,11 @@ import us.ihmc.tools.thread.ThreadTools;
       {
          clients.add(client);
          client.connected();
+         
+         if(callBackExecutor.isShutdown())
+         {
+            createCallbackExecuter();
+         }
       }
 
       private synchronized void disconnect(IntraprocessObjectCommunicator client)
@@ -161,6 +171,7 @@ import us.ihmc.tools.thread.ThreadTools;
                if (client != sender)
                {
                   final Object copy = sender.copyPacket(object);
+                  
                   callBackExecutor.execute(new Runnable()
                   {
                      @Override

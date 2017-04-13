@@ -6,18 +6,6 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
 
-/**
- * <p>Title: </p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2004</p>
- *
- * <p>Company: </p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class QuaternionBasedJamaFullIMUKalmanFilter implements QuaternionBasedFullIMUKalmanFilter
 {
    @SuppressWarnings("unused")

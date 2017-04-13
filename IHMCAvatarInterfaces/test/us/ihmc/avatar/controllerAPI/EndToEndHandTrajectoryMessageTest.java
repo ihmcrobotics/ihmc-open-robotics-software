@@ -1,6 +1,8 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -17,12 +19,14 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.Type;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -39,13 +43,13 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.controllers.EuclideanPositionController;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.lists.RecyclingArrayList;
@@ -62,11 +66,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Twist;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
@@ -115,9 +121,20 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
 
+         OneDoFJoint[] armOriginal = ScrewTools.createOneDoFJointPath(chest, hand);
          OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
+         for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
+         {
+            OneDoFJoint original = armOriginal[jointIndex];
+            OneDoFJoint clone = armClone[jointIndex];
 
-         ScrewTestTools.setRandomPositionsWithinJointLimits(armClone, random);
+            double limitLower = clone.getJointLimitLower();
+            double limitUpper = clone.getJointLimitUpper();
+
+            double randomQ = RandomNumbers.nextDouble(random, original.getQ() - 0.2, original.getQ() + 0.2);
+            randomQ = MathTools.clamp(randomQ, limitLower, limitUpper);
+            clone.setQ(randomQ);
+         }
 
          RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
@@ -148,6 +165,66 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertSingleWaypointExecuted(handName, desiredPosition, desiredOrientation, scs);
       }
+   }
+
+   @ContinuousIntegrationTest(estimatedDuration = 25.0)
+   @Test(timeout = 50000)
+   public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      ThreadTools.sleep(1000);
+      Random random = new Random(873736734567L);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      assertTrue(success);
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+      RobotSide robotSide = RobotSide.LEFT;
+      double trajectoryTime = 1.0;
+      Point3D position = new Point3D(0.2, robotSide.negateIfRightSide(0.2), 0.4);
+      Quaternion orientation = new Quaternion();
+      orientation.appendYawRotation(robotSide.negateIfRightSide(-Math.PI / 2.0));
+      orientation.appendRollRotation(-Math.PI / 4.0);
+
+      {
+         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
+         handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
+         handTrajectoryMessage.setTrajectoryReferenceFrameId(worldFrame);
+         handTrajectoryMessage.setUseCustomControlFrame(true);
+         handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, position, orientation, new Vector3D(), new Vector3D(), worldFrame);
+
+         drcSimulationTestHelper.send(handTrajectoryMessage);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
+         assertTrue(success);
+      }
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      fullRobotModel.updateFrames();
+
+      {
+         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, 1);
+         handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
+         handTrajectoryMessage.setTrajectoryReferenceFrameId(worldFrame);
+
+         handTrajectoryMessage.setUseCustomControlFrame(true);
+         Point3D framePosition = EuclidCoreRandomTools.generateRandomPoint3D(random, -0.1, 0.1);
+         Quaternion frameOrientation = new Quaternion(); //.generateRandomQuaternion(random, Math.toRadians(20.0));
+         handTrajectoryMessage.setControlFramePosition(framePosition);
+         handTrajectoryMessage.setControlFrameOrientation(frameOrientation);
+
+         ReferenceFrame handBodyFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
+         FrameVector frameFramePosition = new FrameVector(handBodyFrame, framePosition);
+         frameFramePosition.changeFrame(worldFrame);
+         position.add(frameFramePosition.getVector());
+
+         handTrajectoryMessage.setTrajectoryPoint(0, trajectoryTime, position, orientation, new Vector3D(), new Vector3D(), worldFrame);
+
+         drcSimulationTestHelper.send(handTrajectoryMessage);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(trajectoryTime + 1.5);
+         assertTrue(success);
+      }
+
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 25.0)
@@ -247,13 +324,13 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         
+
          SE3TrajectoryPointMessage lastPoint = handTrajectoryPoints.get(robotSide).peekLast();
          FrameSE3TrajectoryPoint lastFramePoint = new FrameSE3TrajectoryPoint(worldFrame);
          lastFramePoint.set(lastPoint.time, lastPoint.position, lastPoint.orientation, lastPoint.linearVelocity, lastPoint.angularVelocity);
          lastFramePoint.changeFrame(chestFrame);
          lastTrajectoryPoints.put(robotSide, lastFramePoint);
-         
+
          String handName = fullRobotModel.getHand(robotSide).getName();
          assertNumberOfWaypoints(handName, numberOfTrajectoryPoints + 1, scs);
 
@@ -467,7 +544,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getControllerDT());
       fullRobotModel.updateFrames();
       assertTrue(success);
-      
+
       double timeOffset = 0.0;
       int totalNumberOfPoints = numberOfMessages * numberOfTrajectoryPoints + 1;
       boolean firstSegment = true;
@@ -496,7 +573,6 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
             lastPointTime = Math.max(framePoint.getTime(), lastPointTime);
             lastPoint.setIncludingFrame(framePoint);
-            System.out.println(trajectoryPointIndex);
          }
 
          success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(lastPointTime - timeOffset);
@@ -514,12 +590,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       // check internal tracking is decent:
-      String nameSpaceRotation = handName + AxisAngleOrientationController.class.getSimpleName();
-      String varnameRotation = handName + "RotationErrorInBody";
+      String nameSpaceRotation = FeedbackControllerToolbox.class.getSimpleName();
+      String varnameRotation = handName + "ErrorRotationVector";
       Vector3D rotationError = findVector3d(nameSpaceRotation, varnameRotation, scs);
 
-      String nameSpacePosition = handName + EuclideanPositionController.class.getSimpleName();
-      String varnamePosition = handName + "PositionError";
+      String nameSpacePosition = FeedbackControllerToolbox.class.getSimpleName();
+      String varnamePosition = handName + "ErrorPosition";
       Vector3D positionError = findVector3d(nameSpacePosition, varnamePosition, scs);
 
       assertTrue(rotationError.length() < Math.toRadians(10.0));
@@ -666,8 +742,10 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
-
-      drcSimulationTestHelper = new DRCSimulationTestHelper(getClass().getSimpleName(), selectedLocation, simulationTestingParameters, getRobotModel());
+      CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
+      drcSimulationTestHelper = new DRCSimulationTestHelper(environment, getClass().getSimpleName(), selectedLocation, simulationTestingParameters,
+                                                            getRobotModel());
+      drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.0, 0.0, 0.5), new Point3D(6.0, 0.0, 0.5));
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
@@ -728,8 +806,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
             HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, numberOfTrajectoryPoints);
             handTrajectoryMessage.setUniqueId(id);
             handTrajectoryMessage.setDataReferenceFrameId(worldFrame);
-            handTrajectoryMessage.setTrajectoryReferenceFrameId(chestFrame);
-            
+            handTrajectoryMessage.setTrajectoryReferenceFrameId(worldFrame);
+
             if (messageIndex > 0)
                handTrajectoryMessage.setExecutionMode(ExecutionMode.QUEUE, id - 1);
             id++;
@@ -769,19 +847,17 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBody chest = fullRobotModel.getChest();
-
-         ReferenceFrame chestFrame = chest.getBodyFixedFrame();
-         FramePose desiredHandPose = new FramePose(chestFrame);
-         Point3D position = new Point3D(0.25, robotSide.negateIfRightSide(0.35), -0.4);
-         position.scale(scale);
-         desiredHandPose.setPosition(position);
+         fullRobotModel.updateFrames();
+         ReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
+         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+         FramePose desiredHandPose = new FramePose(handControlFrame);
          desiredHandPose.changeFrame(worldFrame);
 
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();
          desiredHandPose.getPose(desiredPosition, desiredOrientation);
-         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation, worldFrame, chestFrame);
+         HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(robotSide, overrideTrajectoryTime, desiredPosition, desiredOrientation,
+                                                                                 worldFrame, chestFrame);
 
          drcSimulationTestHelper.send(handTrajectoryMessage);
          overridingPoses.put(robotSide, desiredHandPose);

@@ -16,14 +16,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
  * <p>Description: Provides a mapping from scalar values to colors.
  * Colors are given as an array of RGB values.
  *
- * </p>
- *
- * <p>Copyright: Copyright (c) 2007</p>
- *
- * <p>Company: </p>
- *
  * @author Brian Bonnlander
- * @version 1.0
  */
 public class ColorSpectrum
 {

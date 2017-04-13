@@ -498,7 +498,16 @@ public class MatrixTools
          destStartColumn++;
       }
    }
-   
+
+   public static void extractRows(DenseMatrix64F source, int[] srcRows, DenseMatrix64F dest, int destStartRow)
+   {
+      for (int i : srcRows)
+      {
+         CommonOps.extract(source, i, i + 1, 0, source.getNumCols(), dest, destStartRow, 0);
+         destStartRow++;
+      }
+   }
+
    public static void extractColumns(DenseMatrix64F source, TIntArrayList srcColumns, DenseMatrix64F dest, int destStartColumn)
    {
       for (int i = 0; i < srcColumns.size(); i++)

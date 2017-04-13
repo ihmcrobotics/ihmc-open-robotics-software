@@ -115,8 +115,8 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
     * 
-    * @param twistToPack the {@code SpatialAccelerationVector} in which the acceleration of this
-    *           joint's {@code successor} is stored. Modified.
+    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration
+    *           of this joint's {@code successor} is stored. Modified.
     */
    public abstract void getSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
@@ -130,7 +130,7 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * <li>{@code expressedInFrame} is {@code afterJointFrame}.
     * </ul>
     * 
-    * @param accelerationToPack the {@code SpatialAccelerationVector} in which the desired
+    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the desired
     *           acceleration of this joint is stored. Modified.
     */
    public abstract void getDesiredJointAcceleration(SpatialAccelerationVector jointAccelerationToPack);
@@ -146,9 +146,9 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * <li>{@code expressedInFrame} is {@code successorFrame}.
     * </ul>
     * 
-    * @param twistToPack the {@code SpatialAccelerationVector} in which the acceleration of this
-    *           joint's {@code successor} resulting from this joint desired acceleration is stored.
-    *           Modified.
+    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration
+    *           of this joint's {@code successor} resulting from this joint desired acceleration is
+    *           stored. Modified.
     */
    public abstract void getDesiredSuccessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
@@ -163,9 +163,9 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * <li>{@code expressedInFrame} is {@code predecessorFrame}.
     * </ul>
     * 
-    * @param twistToPack the {@code SpatialAccelerationVector} in which the acceleration of this
-    *           joint's {@code predecessor} resulting from this joint desired acceleration is
-    *           stored. Modified.
+    * @param jointAccelerationToPack the {@code SpatialAccelerationVector} in which the acceleration
+    *           of this joint's {@code predecessor} resulting from this joint desired acceleration
+    *           is stored. Modified.
     */
    public abstract void getDesiredPredecessorAcceleration(SpatialAccelerationVector jointAccelerationToPack);
 
@@ -259,6 +259,24 @@ public abstract interface InverseDynamicsJoint extends CommonJoint, NameBasedHas
     * @param rowStart row index of the first component of this joint configuration.
     */
    public abstract void setConfiguration(DenseMatrix64F matrix, int rowStart);
+
+   /**
+    * Sets the joint current wrench from the given column vector {@code DenseMatrix64F}. Here are a
+    * few examples:
+    * <ul>
+    * <li>For a {@code RevoluteJoint}, the {@code rowStart}<sup>th</sup> row of the given column
+    * vector is used to set the joint torque {@code tau}.
+    * <li>For a {@code SixDoFJoint}, the 6 rows starting from {@code rowStart} are use to set the
+    * current spatial wrench of this joint starting with the torque. Note: the joint wrench is the
+    * wrench of the {@code afterJointFrame} with respect to the {@code beforeJointFrame} expressed
+    * in the {@code afterJointFrame}.
+    * </ul>
+    *
+    * @param matrixToPack the column vector from which the configuration of this joint is to be
+    *           extracted. Not modified.
+    * @param rowStart row index of the first component of this joint configuration.
+    */
+   public abstract void setJointTorque(DenseMatrix64F matrixToPack, int rowStart);
 
    /**
     * Sets this joint current velocity from the given column vector {@code DenseMAtrix64F}. Here are

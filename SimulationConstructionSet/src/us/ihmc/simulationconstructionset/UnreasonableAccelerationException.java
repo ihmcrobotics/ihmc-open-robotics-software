@@ -7,10 +7,6 @@ import java.util.ArrayList;
  *
  * <p>Description: </p>
  *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
  * @author not attributable
  * @version 1.0
  */

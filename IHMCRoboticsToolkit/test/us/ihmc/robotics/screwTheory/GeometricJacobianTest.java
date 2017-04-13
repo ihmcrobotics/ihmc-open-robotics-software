@@ -91,6 +91,8 @@ public class GeometricJacobianTest
 
          twistCalculator.getRelativeTwist(randomBase, randomEndEffector, expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
+
+         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
       }
    }
 
@@ -143,6 +145,8 @@ public class GeometricJacobianTest
 
          twistCalculator.getRelativeTwist(randomBase, randomEndEffector, expectedTwist);
          jacobian.getTwist(jointVelocitiesMatrix, actualTwist);
+
+         TwistCalculatorTest.assertTwistEquals(expectedTwist, actualTwist, 1.0e-12);
       }
    }
 

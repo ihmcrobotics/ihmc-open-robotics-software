@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Random;
 
@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -93,6 +94,49 @@ public class SpatialAccelerationVectorTest extends SpatialMotionVectorTest
       expected.cross(twist.getAngularPart(), expected);
 
       EuclidCoreTestTools.assertTuple3DEquals(expected, accelerationOfPointFixedInFrameB.getVector(), 1e-7);
+   }
+
+	/**
+	 * This test is used to prove that the reference frame in which the linear acceleration of a body fixed point in computed in does not matter.
+	 */
+	@Test
+   public void testGetAccelerationOfPointFixedInBodyFrameComputedInDifferentFrames() throws Exception
+   {
+      Random random = new Random(345345L);
+
+      for (int i = 0; i < 1000; i++)
+      {
+         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         ReferenceFrame baseFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("baseFrame", worldFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         ReferenceFrame bodyFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("bodyFrame", worldFrame, EuclidCoreRandomTools.generateRandomRigidBodyTransform(random));
+         
+         Vector3D linearAcceleration = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+         Vector3D angularAcceleration = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+         SpatialAccelerationVector spatialAccelerationVector = new SpatialAccelerationVector(bodyFrame, baseFrame, bodyFrame, linearAcceleration, angularAcceleration);
+         
+         Vector3D linearVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+         Vector3D angularVelocity = EuclidCoreRandomTools.generateRandomVector3D(random, -10.0, 10.0);
+         Twist twist = new Twist(bodyFrame, baseFrame, bodyFrame, linearVelocity, angularVelocity);
+         
+         FramePoint pointFixedInBodyFrame = new FramePoint(bodyFrame, EuclidCoreRandomTools.generateRandomPoint3D(random, 1.0));
+         FrameVector bodyFixedPointLinearAccelerationInBody = new FrameVector();
+         FrameVector bodyFixedPointLinearAccelerationInBase = new FrameVector();
+         
+         
+         // Compute the linear acceleration while in bodyFrame
+         pointFixedInBodyFrame.changeFrame(bodyFrame);
+         spatialAccelerationVector.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInBodyFrame, bodyFixedPointLinearAccelerationInBody);
+         
+         // Compute the linear acceleration while in bodyFrame
+         pointFixedInBodyFrame.changeFrame(baseFrame);
+         spatialAccelerationVector.changeFrame(baseFrame, twist, twist);
+         twist.changeFrame(baseFrame);
+         spatialAccelerationVector.getAccelerationOfPointFixedInBodyFrame(twist, pointFixedInBodyFrame, bodyFixedPointLinearAccelerationInBase);
+         
+         // Verify that they are the same
+         bodyFixedPointLinearAccelerationInBody.changeFrame(baseFrame);
+         EuclidCoreTestTools.assertTuple3DEquals(bodyFixedPointLinearAccelerationInBase.getVector(), bodyFixedPointLinearAccelerationInBody.getVector(), 1.0e-12);
+      }
    }
 
    // TODO: Figure out this test and get it to pass if it should.

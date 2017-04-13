@@ -31,8 +31,9 @@ public class InverseKinematicsCommandDataCopier
       for (int i = 0; i < spatialVelocityCommands.size(); i++)
       {
          SpatialVelocityCommand command = spatialVelocityCommands.get(i);
-         command.setBase(nameToRigidBodyMap.get(command.getBaseName()));
-         command.setEndEffector(nameToRigidBodyMap.get(command.getEndEffectorName()));
+         RigidBody base = nameToRigidBodyMap.get(command.getBaseName());
+         RigidBody endEffector = nameToRigidBodyMap.get(command.getEndEffectorName());
+         command.set(base, endEffector);
       }
    }
 

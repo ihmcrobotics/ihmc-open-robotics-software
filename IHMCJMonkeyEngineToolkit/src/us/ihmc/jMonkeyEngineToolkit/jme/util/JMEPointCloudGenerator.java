@@ -19,6 +19,7 @@ import com.jme3.scene.VertexBuffer;
 import com.jme3.util.BufferUtils;
 
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public class JMEPointCloudGenerator
@@ -236,7 +237,7 @@ public class JMEPointCloudGenerator
       return generatePointCloudGraph(coords, colors);
    }
 
-   public Node generatePointCloudGraph(Point3D32[] pointCloud, Collection<ColorRGBA> colorsRGBA) throws Exception
+   public Node generatePointCloudGraph(Point3DReadOnly[] pointCloud, Collection<ColorRGBA> colorsRGBA) throws Exception
    {
       if (colorsRGBA == null)
          throw new Exception("point cloud colors must not be null!");
@@ -245,7 +246,7 @@ public class JMEPointCloudGenerator
          throw new Exception("There should be a color value for each point, if colors are used!");
 
       FloatBuffer pointBuffer = BufferUtils.createFloatBuffer(3 * pointCloud.length);
-      for(Point3D32 point : pointCloud)
+      for(Point3DReadOnly point : pointCloud)
       {
          pointBuffer.put(point.getX32());
          pointBuffer.put(point.getY32());

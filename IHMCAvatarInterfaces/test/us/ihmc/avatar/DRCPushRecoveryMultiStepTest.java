@@ -23,14 +23,14 @@ import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachines.conditionBasedStateMachine.StateTransitionCondition;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -40,9 +40,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
 
    private DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack;
 
-   private static final boolean VISUALIZE_FORCE = false;
-
-   private static final double PUSH_DELAY = 0.5;
+   private static final boolean VISUALIZE_FORCE = true;
 
    protected PushRobotController pushRobotController;
 
@@ -55,6 +53,11 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
    protected SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
    StateTransitionCondition pushCondition = doubleSupportStartConditions.get(RobotSide.LEFT);
+   
+   protected double getPushDelay()
+   {
+      return 0.5;
+   }
 
    @Before
    public void showMemoryUsageBeforeTest()
@@ -107,7 +110,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       blockingSimulationRunner.simulateAndBlock(4.0);
 
       // push the robot
-      pushRobotController.applyForceDelayed(pushCondition, PUSH_DELAY, forceDirection, forceMagnitude, forceDuration);
+      pushRobotController.applyForceDelayed(pushCondition, getPushDelay(), forceDirection, forceMagnitude, forceDuration);
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 6.0);
@@ -142,7 +145,7 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       blockingSimulationRunner.simulateAndBlock(1.0);
 
       // push the robot
-      pushRobotController.applyForceDelayed(pushCondition, PUSH_DELAY, forceDirection, forceMagnitude, forceDuration);
+      pushRobotController.applyForceDelayed(pushCondition, getPushDelay(), forceDirection, forceMagnitude, forceDuration);
 
       // simulate for a little while longer
       blockingSimulationRunner.simulateAndBlock(forceDuration + 5.0);
@@ -165,7 +168,9 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
       boolean runMultiThreaded = false;
       setupTrack(runMultiThreaded, robotModel);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      pushRobotController = new PushRobotController(drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot(), fullRobotModel);
+      HumanoidFloatingRootJointRobot robot = drcFlatGroundWalkingTrack.getAvatarSimulation().getHumanoidFloatingRootJointRobot();
+//      pushRobotController = new PushRobotController(robot, fullRobotModel);
+      pushRobotController = new PushRobotController(robot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, getPushPointFromChestZOffset()));
 
       if (VISUALIZE_FORCE)
       {
@@ -186,6 +191,11 @@ public abstract class DRCPushRecoveryMultiStepTest implements MultiRobotTestInte
          final EnumYoVariable<WalkingStateEnum> walkingState = (EnumYoVariable<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController", "walkingState");
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
+   }
+
+   protected double getPushPointFromChestZOffset()
+   {
+      return 0.3;
    }
 
    private void setupTrack(boolean runMultiThreaded, DRCRobotModel robotModel)

@@ -2,18 +2,6 @@ package us.ihmc.simulationconstructionset;
 
 import java.util.ArrayList;
 
-/**
- * <p>Title: SimulationConstructionSet</p>
- *
- * <p>Description: </p>
- *
- * <p>Copyright: Copyright (c) 2000</p>
- *
- * <p>Company: Yobotics, Inc.</p>
- *
- * @author not attributable
- * @version 1.0
- */
 public class GroundContactPointGroup
 {
    private ArrayList<GroundContactPoint> groundContactPoints = new ArrayList<GroundContactPoint>();

@@ -17,11 +17,11 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.multicastLogDataProtocol.control.LogHandshake;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.SDFModelLoader;
 import us.ihmc.robotDataLogger.YoVariableClient;
-import us.ihmc.robotDataLogger.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
+import us.ihmc.robotDataLogger.handshake.LogHandshake;
+import us.ihmc.robotDataLogger.handshake.YoVariableHandshakeParser;
 import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.YoVariable;
@@ -34,6 +34,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 
+/**
+ * Main entry point for the visualizer. 
+ * 
+ * To make a custom visualizer for your robot, do NOT copy, instead extend. 
+ *  
+ * @author jesper
+ *
+ */
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
    protected YoVariableRegistry registry;
@@ -96,6 +104,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             jointUpdaters.get(i).update();
          }
          scs.setTime(Conversions.nanosecondsToSeconds(timestamp));
+         updateLocalVariables();
          scs.tickAndUpdate();
       }
    }
@@ -205,10 +214,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public final void start(LogHandshake handshake, YoVariableHandshakeParser handshakeParser)
    {
       Robot robot = new Robot("DummyRobot");
-      if (handshake.modelLoaderClass != null)
+      if (handshake.getModelLoaderClass() != null)
       {
          SDFModelLoader modelLoader = new SDFModelLoader();
-         modelLoader.load(handshake.modelName, handshake.model, handshake.resourceDirectories, handshake.resourceZip, null);
+         modelLoader.load(handshake.getModelName(), handshake.getModel(), handshake.getResourceDirectories(), handshake.getResourceZip(), null);
          robot = new FloatingRootJointRobot(modelLoader.createRobot());
       }
 
@@ -326,6 +335,16 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
    {
    }
+   
+   /**
+    * Overridable method to update local variables.
+    * 
+    * Needs to return in less than your visualization dt.
+    */
+   public void updateLocalVariables()
+   {
+      
+   }
 
    public static void main(String[] args)
    {
@@ -343,7 +362,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public void clearLog()
+   public void clearLog(String guid)
    {
    }
 

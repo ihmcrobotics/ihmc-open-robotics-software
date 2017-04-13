@@ -26,9 +26,9 @@ public class YoTwist extends YoSpatialVector
       this(namePrefix, "", bodyFrame, baseFrame, expressedInFrame, registry);
    }
    
-   public YoTwist(YoFrameVector yoLinearVelocity, YoFrameVector yoAngularVelocity, ReferenceFrame bodyFrame, ReferenceFrame baseFrame, ReferenceFrame expressedInFrame)
+   public YoTwist(YoFrameVector yoLinearVelocity, YoFrameVector yoAngularVelocity, ReferenceFrame bodyFrame, ReferenceFrame baseFrame)
    {
-      super(yoLinearVelocity, yoAngularVelocity, expressedInFrame);
+      super(yoLinearVelocity, yoAngularVelocity);
       this.bodyFrame = bodyFrame;
       this.baseFrame = baseFrame;
       this.twist = createEmptyTwist();
