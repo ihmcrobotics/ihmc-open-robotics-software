@@ -23,8 +23,12 @@ import us.ihmc.robotics.screwTheory.Momentum;
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
  * The objective of a {@link MomentumRateCommand} is to notify the inverse dynamics optimization
- * module that the center of mass is to track a desired acceleration during the next control tick to
- * reach the desired rate of change of momentum set in this command.
+ * module to get the robot to achieve the desired rate of change of momentum during the next control
+ * tick.
+ * </p>
+ * <p>
+ * This command can notably be used to control the center of mass acceleration by using the linear
+ * part of the rate of change of momentum.
  * </p>
  * 
  * @author Sylvain Bertrand
@@ -115,7 +119,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @param linearMomentumRateOfChange the desired linear momentum rate in world frame. Not
     *           modified.
     * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} or
-    *            {@code desiredLineaerAcceleration} is not expressed in world frame.
+    *            {@code linearMomentumRateOfChange} is not expressed in world frame.
     */
    public void setMomentumRate(FrameVector angularMomentumRateOfChange, FrameVector linearMomentumRateOfChange)
    {
@@ -164,8 +168,19 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       linearMomentumRateOfChange.get(3, momentumRateOfChange);
    }
 
+   /**
+    * Sets the desired rate of change of linear momentum in the XY-plane to submit for the
+    * optimization and sets the angular part and the z component of the linear part to zero.
+    * 
+    * @param linearMomentumRateOfChange the desired linear momentum rate in world frame. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed
+    *            in world frame.
+    */
    public void setLinearMomentumXYRate(FrameVector2d linearMomentumRateOfChange)
    {
+      linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
+
       momentumRateOfChange.zero();
       linearMomentumRateOfChange.get(3, momentumRateOfChange);
    }
