@@ -82,7 +82,7 @@ public class WholeBodyInverseDynamicsSolver
       controlDT = toolbox.getControlDT();
       rootJoint = toolbox.getRootJoint();
       inverseDynamicsCalculator = toolbox.getInverseDynamicsCalculator();
-      WrenchMatrixCalculator wrenchMatrixCalculator = new WrenchMatrixCalculator(toolbox, registry);
+      WrenchMatrixCalculator wrenchMatrixCalculator = toolbox.getWrenchMatrixCalculator();
       dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox, wrenchMatrixCalculator);
       optimizationControlModule = new InverseDynamicsOptimizationControlModule(toolbox, dynamicsMatrixCalculator, registry);
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
