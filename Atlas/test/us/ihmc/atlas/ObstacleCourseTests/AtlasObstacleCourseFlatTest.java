@@ -4,6 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -37,8 +38,7 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
       
-      return (DoubleYoVariable) scs.getVariable("root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HighLevelHumanoidControllerManager.MomentumBasedControllerFactory.WholeBodyControllerCore.WholeBodyFeedbackController.pelvisOrientationFBController.pelvisAxisAngleOrientationController",
-                                                "pelvisRotationErrorInBodyZ");
+      return (DoubleYoVariable) scs.getVariable(FeedbackControllerToolbox.class.getSimpleName(), "pelvisErroRotationVectorZ");
    }
 
    @Override
