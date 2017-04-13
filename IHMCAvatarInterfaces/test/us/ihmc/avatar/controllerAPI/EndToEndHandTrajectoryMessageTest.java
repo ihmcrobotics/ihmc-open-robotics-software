@@ -576,12 +576,12 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       // check internal tracking is decent:
-      String nameSpaceRotation = handName + FeedbackControllerToolbox.class.getSimpleName();
+      String nameSpaceRotation = FeedbackControllerToolbox.class.getSimpleName();
       String varnameRotation = handName + "ErrorRotationVector";
       Vector3D rotationError = findVector3d(nameSpaceRotation, varnameRotation, scs);
 
-      String nameSpacePosition = handName + FeedbackControllerToolbox.class.getSimpleName();
-      String varnamePosition = handName + "PositionError";
+      String nameSpacePosition = FeedbackControllerToolbox.class.getSimpleName();
+      String varnamePosition = handName + "ErrorPosition";
       Vector3D positionError = findVector3d(nameSpacePosition, varnamePosition, scs);
 
       assertTrue(rotationError.length() < Math.toRadians(10.0));
