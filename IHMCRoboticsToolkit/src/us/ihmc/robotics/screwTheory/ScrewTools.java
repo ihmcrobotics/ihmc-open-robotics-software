@@ -879,7 +879,7 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndexForJoint(List<InverseDynamicsJoint> jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
+   public static void computeIndexForJoint(List<? extends InverseDynamicsJoint> jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.size(); i++)
