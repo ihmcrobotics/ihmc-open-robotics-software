@@ -302,8 +302,7 @@ public final class PointFeedbackControllerTest
       spatialFeedbackControlCommand.set(elevator, endEffector);
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForLinearControl();
 
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, toolbox.getJointIndexHandler(), null,
-                                                                                    registry);
+      MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       MotionQPInput pointMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
       MotionQPInput spatialMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
