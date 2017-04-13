@@ -22,8 +22,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
-import us.ihmc.robotics.screwTheory.Twist;
 
 /**
  * {@link SpatialAccelerationCommand} is a command meant to be submitted to the
@@ -350,7 +348,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      selectionMatrix.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
       CommonOps.setIdentity(selectionMatrix);
    }
 
@@ -366,7 +364,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.reshape(3, Twist.SIZE);
+      selectionMatrix.reshape(3, SpatialAccelerationVector.SIZE);
       selectionMatrix.zero();
       selectionMatrix.set(0, 3, 1.0);
       selectionMatrix.set(1, 4, 1.0);
@@ -385,7 +383,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.reshape(3, Twist.SIZE);
+      selectionMatrix.reshape(3, SpatialAccelerationVector.SIZE);
       selectionMatrix.zero();
       selectionMatrix.set(0, 0, 1.0);
       selectionMatrix.set(1, 1, 1.0);
