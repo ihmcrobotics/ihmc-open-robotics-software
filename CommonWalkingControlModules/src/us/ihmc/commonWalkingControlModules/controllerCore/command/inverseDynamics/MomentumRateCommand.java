@@ -5,73 +5,181 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverW
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.Momentum;
 
+/**
+ * {@link MomentumRateCommand} is a command meant to be submitted to the
+ * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
+ * <p>
+ * The objective of a {@link MomentumRateCommand} is to notify the inverse dynamics optimization
+ * module that the center of mass is to track a desired acceleration during the next control tick to
+ * reach the desired rate of change of momentum set in this command.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ *
+ */
 public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateCommand>
 {
-   private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F momentumRate = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   /**
+    * It defines the 6-components of the desired rate of change of momentum to achieve for the next
+    * control.
+    * <p>
+    * More precisely, it represents the desired rate of change of momentum at the center of mass
+    * while the data is expressed in world frame.
+    * </p>
+    */
+   private final DenseMatrix64F momentumRateOfChange = new DenseMatrix64F(Momentum.SIZE, 1);
+   /**
+    * Weights on a per component basis to use in the optimization function. A higher weight means
+    * higher priority of this task.
+    */
+   private final DenseMatrix64F weightVector = new DenseMatrix64F(Momentum.SIZE, 1);
+   /**
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum rate
+    * that are to be controlled. A 6-by-6 identity matrix will request the control of all the 6
+    * degrees of freedom.
+    * <p>
+    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
+    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
+    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
+    * specific DoF for the momentum rate.
+    * </p>
+    */
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
+
+   /**
+    * Creates an empty command. It needs to be configured before being submitted to the controller
+    * core.
+    */
    public MomentumRateCommand()
    {
    }
 
+   /**
+    * Performs a full-depth copy of the data contained in the other command.
+    */
    @Override
    public void set(MomentumRateCommand other)
    {
       weightVector.set(other.weightVector);
       selectionMatrix.set(other.selectionMatrix);
-      momentumRate.set(other.momentumRate);
+      momentumRateOfChange.set(other.momentumRateOfChange);
    }
 
+   /**
+    * Sets the desired momentum rate to submit for the optimization to zero.
+    */
    public void setMomentumRateToZero()
    {
-      momentumRate.zero();
+      momentumRateOfChange.zero();
    }
 
-   public void setMomentumRate(SpatialForceVector momentumRateOfChange)
+   /**
+    * Sets the desired rate of change of momentum to submit for the optimization.
+    * <p>
+    * It is assumed to represent the desired rate of change of momentum at the center of mass while
+    * the data is expressed in world frame.
+    * </p>
+    * 
+    * @param momentumRateOfChange the desired momentum rate at the center of mass expressed in world
+    *           frame. Not modified.
+    */
+   public void setMomentumRate(DenseMatrix64F momentumRateOfChange)
    {
-      momentumRateOfChange.getMatrix(momentumRate);
+      this.momentumRateOfChange.set(momentumRateOfChange);
    }
 
-   public void setMomentumRate(DenseMatrix64F momentumRate)
+   /**
+    * Sets the desired rate of change of momentum to submit for the optimization.
+    * <p>
+    * It is assumed to represent the desired rate of change of momentum at the center of mass while
+    * the data is expressed in world frame.
+    * </p>
+    * 
+    * @param angularMomentumRateOfChange the desired angular momentum rate at the center of mass
+    *           expressed in world frame. Not modified.
+    * @param linearMomentumRateOfChange the desired linear momentum rate in world frame. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} or
+    *            {@code desiredLineaerAcceleration} is not expressed in world frame.
+    */
+   public void setMomentumRate(FrameVector angularMomentumRateOfChange, FrameVector linearMomentumRateOfChange)
    {
-      this.momentumRate.set(momentumRate);
+      angularMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
+      linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
+
+      angularMomentumRateOfChange.get(0, momentumRateOfChange);
+      linearMomentumRateOfChange.get(3, momentumRateOfChange);
    }
 
-   public void setLinearMomentumRate(FrameVector linearMomentumRateOfChange)
-   {
-      linearMomentumRateOfChange.get(3, momentumRate);
-   }
-
+   /**
+    * Sets the desired rate of change of angular momentum to submit for the optimization and sets
+    * the linear part to zero.
+    * <p>
+    * It is assumed to represent the desired rate of change of momentum at the center of mass while
+    * the data is expressed in world frame.
+    * </p>
+    * 
+    * @param angularMomentumRateOfChange the desired angular momentum rate at the center of mass
+    *           expressed in world frame. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code angularMomentumRateOfChange} is not
+    *            expressed in world frame.
+    */
    public void setAngularMomentumRate(FrameVector angularMomentumRateOfChange)
    {
-      angularMomentumRateOfChange.get(0, momentumRate);
+      angularMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
+
+      momentumRateOfChange.zero();
+      angularMomentumRateOfChange.get(0, momentumRateOfChange);
+   }
+
+   /**
+    * Sets the desired rate of change of linear momentum to submit for the optimization and sets the
+    * angular part to zero.
+    * 
+    * @param linearMomentumRateOfChange the desired linear momentum rate in world frame. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if {@code linearMomentumRateOfChange} is not expressed
+    *            in world frame.
+    */
+   public void setLinearMomentumRate(FrameVector linearMomentumRateOfChange)
+   {
+      linearMomentumRateOfChange.checkReferenceFrameMatch(worldFrame);
+
+      momentumRateOfChange.zero();
+      linearMomentumRateOfChange.get(3, momentumRateOfChange);
    }
 
    public void setLinearMomentumXYRate(FrameVector2d linearMomentumRateOfChange)
    {
-      linearMomentumRateOfChange.get(3, momentumRate);
+      momentumRateOfChange.zero();
+      linearMomentumRateOfChange.get(3, momentumRateOfChange);
    }
 
    /**
     * Sets the selection matrix to be used for the next control tick to the 6-by-6 identity matrix.
     * <p>
-    * This specifies that the 6 degrees of freedom of the end-effector are to be controlled.
+    * This specifies that the 6 degrees of freedom for the rate of change of momentum are to be
+    * controlled.
     * </p>
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      selectionMatrix.reshape(Momentum.SIZE, Momentum.SIZE);
       CommonOps.setIdentity(selectionMatrix);
    }
 
@@ -87,7 +195,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setSelectionMatrixForLinearControl()
    {
-      selectionMatrix.reshape(3, SpatialForceVector.SIZE);
+      selectionMatrix.reshape(3, Momentum.SIZE);
       selectionMatrix.zero();
       selectionMatrix.set(0, 3, 1.0);
       selectionMatrix.set(1, 4, 1.0);
@@ -106,7 +214,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setSelectionMatrixForLinearXYControl()
    {
-      selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
+      selectionMatrix.reshape(2, Momentum.SIZE);
       selectionMatrix.zero();
       selectionMatrix.set(0, 3, 1.0);
       selectionMatrix.set(1, 4, 1.0);
@@ -124,7 +232,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.reshape(3, SpatialForceVector.SIZE);
+      selectionMatrix.reshape(3, Momentum.SIZE);
       selectionMatrix.zero();
       selectionMatrix.set(0, 0, 1.0);
       selectionMatrix.set(1, 1, 1.0);
@@ -134,15 +242,15 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    /**
     * Sets the selection matrix to be used for the next control tick.
     * <p>
-    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) of the end-effector
-    * that are to be controlled. A 6-by-6 identity matrix will request the control of all the 6
-    * degrees of freedom.
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the rate of change
+    * of momentum that are to be controlled. A 6-by-6 identity matrix will request the control of
+    * all the 6 degrees of freedom.
     * </p>
     * <p>
     * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
     * translational DoFs of the end-effector. Removing a row to the selection matrix using for
     * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
-    * specific DoF of the end-effector.
+    * specific DoF for the rate of change of momentum.
     * </p>
     *
     * @param selectionMatrix the new selection matrix to be used. Not modified.
@@ -151,9 +259,9 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
    {
-      if (selectionMatrix.getNumRows() > SpatialForceVector.SIZE)
+      if (selectionMatrix.getNumRows() > Momentum.SIZE)
          throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
-      if (selectionMatrix.getNumCols() != SpatialForceVector.SIZE)
+      if (selectionMatrix.getNumCols() != Momentum.SIZE)
          throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
 
       this.selectionMatrix.set(selectionMatrix);
@@ -184,7 +292,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setWeight(double weight)
    {
-      for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 0; i < Momentum.SIZE; i++)
          weightVector.set(i, 0, weight);
    }
 
@@ -203,7 +311,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    {
       for (int i = 0; i < 3; i++)
          weightVector.set(i, 0, angular);
-      for (int i = 3; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 3; i < Momentum.SIZE; i++)
          weightVector.set(i, 0, linear);
    }
 
@@ -247,7 +355,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setWeights(DenseMatrix64F weight)
    {
-      for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 0; i < Momentum.SIZE; i++)
       {
          weightVector.set(i, 0, weight.get(i, 0));
       }
@@ -334,7 +442,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void setLinearWeightsToZero()
    {
-      for (int i = 3; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 3; i < Momentum.SIZE; i++)
          weightVector.set(i, 0, 0.0);
    }
 
@@ -350,7 +458,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public boolean isHardConstraint()
    {
-      for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 0; i < Momentum.SIZE; i++)
       {
          if (weightVector.get(i, 0) == HARD_CONSTRAINT)
             return true;
@@ -382,9 +490,9 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     */
    public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
    {
-      weightMatrixToPack.reshape(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+      weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
       CommonOps.setIdentity(weightMatrixToPack);
-      for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 0; i < Momentum.SIZE; i++)
          weightMatrixToPack.set(i, i, weightVector.get(i, 0));
    }
 
@@ -411,16 +519,35 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       return weightVector;
    }
 
+   /**
+    * Gets the reference to the selection matrix to use with this command.
+    * 
+    * @return the selection matrix.
+    */
    public DenseMatrix64F getSelectionMatrix()
    {
       return selectionMatrix;
    }
 
+   /**
+    * Gets the reference to the desired rate of change of momentum carried by this command.
+    * <p>
+    * It represents the desired rate of change of momentum at the center of mass while the data is
+    * expressed in world frame.
+    * </p>
+    * 
+    * @return the desired rate of change of momentum.
+    */
    public DenseMatrix64F getMomentumRate()
    {
-      return momentumRate;
+      return momentumRateOfChange;
    }
 
+   /**
+    * {@inheritDoc}
+    * 
+    * @return {@link ControllerCoreCommandType#TASKSPACE}.
+    */
    @Override
    public ControllerCoreCommandType getCommandType()
    {
@@ -430,6 +557,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": selection matrix = " + selectionMatrix;
+      String stringOfMomentumRate = EuclidCoreIOTools.getStringOf("(", ")", ",", momentumRateOfChange.getData());
+      return getClass().getSimpleName() + ": momentum rate: " + stringOfMomentumRate + ", selection matrix = " + selectionMatrix;
    }
 }
