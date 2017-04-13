@@ -299,7 +299,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       currentOrientation.setToZero(endEffectorFrame);
       currentOrientation.changeFrame(worldFrame);
       yoCurrentOrientation.set(currentOrientation);
-      yoCurrentOrientation.getRotationVector(yoCurrentRotationVector);
+      yoCurrentRotationVector.setAsRotationVector(yoCurrentOrientation);
 
       yoDesiredOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
       desiredOrientation.changeFrame(endEffectorFrame);

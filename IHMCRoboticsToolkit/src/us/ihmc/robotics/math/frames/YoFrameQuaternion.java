@@ -330,7 +330,7 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
     */
    public void getRotationVector(YoFrameVector yoFrameRotationVectorToPack)
    {
-      getFrameOrientation().getRotationVector(yoFrameRotationVectorToPack.getFrameTuple());
+      yoFrameRotationVectorToPack.setAsRotationVector(getFrameOrientation());
    }
 
    public DoubleYoVariable getYoQx()
