@@ -297,7 +297,7 @@ public class YoVariableHandShakeBuilder
       {
          if (!this.yoVariableIndices.containsKey(yoVar))
          {
-            throw new RuntimeException("Backing YoVariableRegistry not added for " + obj.getName());
+            throw new RuntimeException("Backing YoVariableRegistry not added for " + obj.getName() + ", variable: " + yoVar);
          }
          int index = this.yoVariableIndices.get(yoVar);
          objectMessage.getYoVariableIndex().add((short) index);

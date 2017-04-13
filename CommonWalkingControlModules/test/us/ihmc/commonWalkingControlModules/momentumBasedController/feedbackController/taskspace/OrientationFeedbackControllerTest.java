@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInput;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
 import us.ihmc.commons.RandomNumbers;
@@ -75,8 +76,7 @@ public class OrientationFeedbackControllerTest
       spatialFeedbackControlCommand.set(elevator, endEffector);
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForAngularControl();
 
-      MotionQPInputCalculator motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, toolbox.getJointIndexHandler(), null,
-                                                                                    registry);
+      MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       MotionQPInput orientationMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
       MotionQPInput spatialMotionQPInput = new MotionQPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
