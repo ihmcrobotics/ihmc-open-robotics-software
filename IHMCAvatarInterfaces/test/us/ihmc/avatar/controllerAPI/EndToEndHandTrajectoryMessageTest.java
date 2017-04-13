@@ -1,8 +1,6 @@
 package us.ihmc.avatar.controllerAPI;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -24,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerData
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.manipulation.individual.TaskspaceToJointspaceCalculator;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -42,6 +41,7 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -64,7 +64,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTestTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -118,9 +117,20 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          RigidBody chest = fullRobotModel.getChest();
          RigidBody hand = fullRobotModel.getHand(robotSide);
 
+         OneDoFJoint[] armOriginal = ScrewTools.createOneDoFJointPath(chest, hand);
          OneDoFJoint[] armClone = ScrewTools.cloneOneDoFJointPath(chest, hand);
+         for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
+         {
+            OneDoFJoint original = armOriginal[jointIndex];
+            OneDoFJoint clone = armClone[jointIndex]; 
 
-         ScrewTestTools.setRandomPositionsWithinJointLimits(armClone, random);
+            double limitLower = clone.getJointLimitLower();
+            double limitUpper = clone.getJointLimitUpper();
+
+            double randomQ = RandomNumbers.nextDouble(random, original.getQ() - 0.2, original.getQ() + 0.2);
+            randomQ = MathTools.clamp(randomQ, limitLower, limitUpper);
+            clone.setQ(randomQ);
+         }
 
          RigidBody handClone = armClone[armClone.length - 1].getSuccessor();
          FramePose desiredRandomHandPose = new FramePose(handClone.getBodyFixedFrame());
