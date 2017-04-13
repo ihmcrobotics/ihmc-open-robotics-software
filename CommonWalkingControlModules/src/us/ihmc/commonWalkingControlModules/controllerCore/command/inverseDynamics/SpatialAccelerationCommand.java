@@ -476,6 +476,31 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
+    * @param angularX the weight to use for the x-axis of the angular part of this command.
+    * @param angularY the weight to use for the y-axis of the angular part of this command.
+    * @param angularZ the weight to use for the z-axis of the angular part of this command.
+    * @param linearX the weight to use for the x-axis of the linear part of this command.
+    * @param linearY the weight to use for the y-axis of the linear part of this command.
+    * @param linearZ the weight to use for the z-axis of the linear part of this command.
+    */
+   public void setWeights(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
+   {
+      weightVector.set(0, 0, angularX);
+      weightVector.set(1, 0, angularY);
+      weightVector.set(2, 0, angularZ);
+      weightVector.set(3, 0, linearX);
+      weightVector.set(4, 0, linearY);
+      weightVector.set(5, 0, linearZ);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
     * @param weight dense matrix holding the weights to use for each component of the desired
     *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
     *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
