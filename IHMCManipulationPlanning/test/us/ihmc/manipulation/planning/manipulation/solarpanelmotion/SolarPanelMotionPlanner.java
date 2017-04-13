@@ -72,10 +72,10 @@ public class SolarPanelMotionPlanner
          SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
          
          cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.1, -Math.PI*0.2), 5.0);         
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.1, -Math.PI*0.2), 1.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.1, -Math.PI*0.2), 5.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.1, -Math.PI*0.2), 1.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.1, -Math.PI*0.2), 5.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.1, -Math.PI*0.2), 1.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.1, -Math.PI*0.2), 5.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.1, -Math.PI*0.2), 1.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.1, -Math.PI*0.2), 5.0);
                   
          
          this.motionTime = cleaningPath.getArrivalTime().get(cleaningPath.getArrivalTime().size()-1);

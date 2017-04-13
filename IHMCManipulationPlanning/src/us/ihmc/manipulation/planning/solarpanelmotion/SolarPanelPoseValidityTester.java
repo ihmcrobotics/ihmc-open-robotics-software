@@ -18,8 +18,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
 {
    private SolarPanel solarPanel;
    private PacketCommunicator toolboxCommunicator;
-   
-
+  
    public SolarPanelPoseValidityTester(SolarPanel solarPanel, PacketCommunicator toolboxCommunicator, KinematicsToolboxController ikToolboxController)
    {
       super(ikToolboxController);

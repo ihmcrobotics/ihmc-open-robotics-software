@@ -6,6 +6,11 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 
 public abstract class WholeBodyPoseValidityTester
 {
+//   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+//   KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
+   
+   
+   
    protected KinematicsToolboxController ikToolboxController;
    protected FullHumanoidRobotModel ikFullRobotModel;
    protected RobotCollisionModel robotCollisionModel;
