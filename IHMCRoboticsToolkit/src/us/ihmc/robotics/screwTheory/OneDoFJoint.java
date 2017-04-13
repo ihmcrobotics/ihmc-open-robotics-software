@@ -126,6 +126,12 @@ public abstract class OneDoFJoint extends AbstractInverseDynamicsJoint
    }
 
    @Override
+   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   {
+      setTau(matrix.get(rowStart, 0));
+   }
+
+   @Override
    public void getTauMatrix(DenseMatrix64F matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
