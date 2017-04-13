@@ -35,29 +35,30 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    public void set(SpatialForceVector momentumRateOfChange)
    {
       setSelectionMatrixToIdentity();
-      momentumRate.reshape(SpatialForceVector.SIZE, 1);
       momentumRateOfChange.getMatrix(momentumRate);
+   }
+
+   public void setMomentumRate(DenseMatrix64F momentumRate)
+   {
+      this.momentumRate.set(momentumRate);
    }
 
    public void setLinearMomentumRateOfChange(FrameVector linearMomentumRateOfChange)
    {
       setSelectionMatrixForLinearControl();
-      momentumRate.reshape(selectionMatrix.getNumCols(), 1);
-      linearMomentumRateOfChange.getVector().get(3, 0, momentumRate);
+      linearMomentumRateOfChange.get(3, momentumRate);
    }
 
    public void setAngularMomentumRateOfChange(FrameVector angularMomentumRateOfChange)
    {
       setSelectionMatrixToIdentity();
-      momentumRate.reshape(selectionMatrix.getNumCols(), 1);
-      angularMomentumRateOfChange.getVector().get(0, 0, momentumRate);
+      angularMomentumRateOfChange.get(0, momentumRate);
    }
 
    public void setLinearMomentumXYRateOfChange(FrameVector2d linearMomentumRateOfChange)
    {
       setSelectionMatrixForLinearXYControl();
-      momentumRate.reshape(selectionMatrix.getNumCols(), 1);
-      linearMomentumRateOfChange.getVector().get(3, 0, momentumRate);
+      linearMomentumRateOfChange.get(3, momentumRate);
    }
 
    /**
@@ -412,15 +413,10 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    {
       return selectionMatrix;
    }
-   
+
    public DenseMatrix64F getMomentumRate()
    {
       return momentumRate;
-   }
-   
-   public void setMomentumRate(DenseMatrix64F momentumRate)
-   {
-      this.momentumRate.set(momentumRate);
    }
 
    @Override
