@@ -53,7 +53,6 @@ public class MotionQPInputCalculator
 
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-   private final DenseMatrix64F tempTaskAlphaTaskPriority = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
@@ -427,16 +426,6 @@ public class MotionQPInputCalculator
       // Compute the task objective: p = S * ( hDot - ADot qDot )
       CommonOps.subtract(momemtumRate, convectiveTerm, tempTaskObjective);
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
-
-      tempTaskAlphaTaskPriority.reshape(taskSize, 1);
-      CommonOps.mult(selectionMatrix, commandToConvert.getAlphaTaskPriorityVector(), tempTaskAlphaTaskPriority);
-
-      for (int i = taskSize - 1; i >= 0; i--)
-      {
-         double alpha = tempTaskAlphaTaskPriority.get(i, 0);
-         MatrixTools.scaleRow(alpha, i, motionQPInputToPack.taskJacobian);
-         MatrixTools.scaleRow(alpha, i, motionQPInputToPack.taskObjective);
-      }
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
