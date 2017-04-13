@@ -56,9 +56,12 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
 {
    private static final String RAW = "raw";
    private static final String BACKLASH = "bl";
+   private static final String CONSTANT = "cst";
    private static final String ALPHA_FILTER = "filt";
    private static final String FINITE_DIFFERENCE = "fd";
    private static final String ELASTICITY_COMPENSATOR = "stiff";
+
+   private static final ProcessingYoVariable EMPTY_PROCESSOR = () -> {};
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -554,6 +557,75 @@ public class SensorProcessing implements SensorOutputMapReadOnly, SensorRawOutpu
       }
 
       return processorsIDs;
+   }
+
+   /**
+    * Apply a constant position and velocity override on the joints. This can be useful when dealing with a broken robot with sensors going crazy.
+    * @param constantPosition the position value that will be used as the output of the sensor processing.
+    * @param constantVelocity the velocity value that will be used as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    */
+   public void addJointSensorsOverride(double constantPosition, double constantVelocity, boolean forVizOnly)
+   {
+      addJointSensorsOverrideWithJointsToIgnore(constantPosition, constantVelocity, forVizOnly);
+   }
+
+   /**
+    * Apply a constant position and velocity override on the joints. This can be useful when dealing with a broken robot with sensors going crazy.
+    * @param constantPosition the position value that will be used as the output of the sensor processing.
+    * @param constantVelocity the velocity value that will be used as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
+    */
+   public void addJointSensorsOverrideOnlyForSpecifiedJoints(double constantPosition, double constantVelocity, boolean forVizOnly, String... jointsToBeProcessed)
+   {
+      addJointSensorsOverrideWithJointsToIgnore(constantPosition, constantVelocity, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+   }
+
+   /**
+    * Apply a constant position and velocity override on the joints. This can be useful when dealing with a broken robot with sensors going crazy.
+    * @param constantPosition the position value that will be used as the output of the sensor processing.
+    * @param constantVelocity the velocity value that will be used as the output of the sensor processing.
+    * @param forVizOnly if set to true, the result will not be used as the input of the next processing stage, nor as the output of the sensor processing.
+    * @param jointsToIgnore list of the names of the joints to ignore.
+    */
+   public void addJointSensorsOverrideWithJointsToIgnore(double constantPosition, double constantVelocity, boolean forVizOnly, String... jointsToIgnore)
+   {
+      List<String> jointToIgnoreList = new ArrayList<>();
+      if (jointsToIgnore != null && jointsToIgnore.length > 0)
+         jointToIgnoreList.addAll(Arrays.asList(jointsToIgnore));
+
+      for (int i = 0; i < jointSensorDefinitions.size(); i++)
+      {
+         OneDoFJoint oneDoFJoint = jointSensorDefinitions.get(i);
+         String jointName = oneDoFJoint.getName();
+
+         if (jointToIgnoreList.contains(jointName))
+            continue;
+
+         List<ProcessingYoVariable> positionProcessors = processedJointPositions.get(oneDoFJoint);
+         List<ProcessingYoVariable> velocityProcessors = processedJointVelocities.get(oneDoFJoint);
+
+         String positionPrefix = JOINT_POSITION.getProcessorNamePrefix(CONSTANT);
+         String positionSuffix = JOINT_POSITION.getProcessorNameSuffix(jointName, positionProcessors.size());
+         String velocityPrefix = JOINT_VELOCITY.getProcessorNamePrefix(CONSTANT);
+         String velocitySuffix = JOINT_VELOCITY.getProcessorNameSuffix(jointName, velocityProcessors.size());
+
+         DoubleYoVariable yoConstantPosition = new DoubleYoVariable(positionPrefix + positionSuffix, registry);
+         DoubleYoVariable yoConstantVelocity = new DoubleYoVariable(velocityPrefix + velocitySuffix, registry);
+
+         yoConstantPosition.set(constantPosition);
+         yoConstantVelocity.set(constantVelocity);
+
+         positionProcessors.add(EMPTY_PROCESSOR);
+         velocityProcessors.add(EMPTY_PROCESSOR);
+
+         if (!forVizOnly)
+         {
+            outputJointPositions.put(oneDoFJoint, yoConstantPosition);
+            outputJointVelocities.put(oneDoFJoint, yoConstantVelocity);
+         }
+      }
    }
 
    public void addJointPositionElasticyCompensator(Map<OneDoFJoint, DoubleYoVariable> stiffnesses, DoubleYoVariable maximumDeflection, boolean forVizOnly)
