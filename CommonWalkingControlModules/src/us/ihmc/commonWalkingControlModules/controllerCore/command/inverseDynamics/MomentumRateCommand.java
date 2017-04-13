@@ -40,7 +40,6 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
    public void setMomentumRate(SpatialForceVector momentumRateOfChange)
    {
-      setSelectionMatrixToIdentity();
       momentumRateOfChange.getMatrix(momentumRate);
    }
 
@@ -51,19 +50,16 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
 
    public void setLinearMomentumRate(FrameVector linearMomentumRateOfChange)
    {
-      setSelectionMatrixForLinearControl();
       linearMomentumRateOfChange.get(3, momentumRate);
    }
 
    public void setAngularMomentumRate(FrameVector angularMomentumRateOfChange)
    {
-      setSelectionMatrixToIdentity();
       angularMomentumRateOfChange.get(0, momentumRate);
    }
 
    public void setLinearMomentumXYRate(FrameVector2d linearMomentumRateOfChange)
    {
-      setSelectionMatrixForLinearXYControl();
       linearMomentumRateOfChange.get(3, momentumRate);
    }
 

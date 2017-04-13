@@ -318,6 +318,8 @@ public abstract class LinearMomentumRateOfChangeControlModule
          momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
          if (!controlHeightWithMomentum)
             momentumRateCommand.setSelectionMatrix(linearXYSelectionMatrix);
+         else
+            momentumRateCommand.setSelectionMatrixForLinearControl();
       }
 
       momentumRateCommand.setWeights(angularMomentumRateWeight.getX(), angularMomentumRateWeight.getY(), angularMomentumRateWeight.getZ(),
