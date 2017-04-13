@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.solarpanelmotion;
+package us.ihmc.manipulation.planning.manipulation.solarpanelmotion;
 
 import java.util.ArrayList;
 
