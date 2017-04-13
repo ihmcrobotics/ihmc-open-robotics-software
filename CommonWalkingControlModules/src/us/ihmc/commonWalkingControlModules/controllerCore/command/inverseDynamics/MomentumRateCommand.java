@@ -4,24 +4,20 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
-import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
 import us.ihmc.robotics.screwTheory.SpatialForceVector;
 import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 
 public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateCommand>
 {
-   private final DenseMatrix64F alphaTaskPriorityVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F momentumRate = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
 
    public MomentumRateCommand()
    {
-      CommonOps.fill(alphaTaskPriorityVector, 1.0);
    }
 
    @Override
@@ -103,31 +99,6 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       weightVector.set(weights);
    }
 
-   public void setAlphaTaskPriority(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
-   {
-      setAngularAlphasTaskPriority(angularX, angularY, angularZ);
-      setLinearAlphaTaskPriority(linearX, linearY, linearZ);
-   }
-
-   public void setLinearAlphaTaskPriority(double linearX, double linearY, double linearZ)
-   {
-      alphaTaskPriorityVector.set(3, 0, MathTools.clamp(linearX, 0.0, 1.0));
-      alphaTaskPriorityVector.set(4, 0, MathTools.clamp(linearY, 0.0, 1.0));
-      alphaTaskPriorityVector.set(5, 0, MathTools.clamp(linearZ, 0.0, 1.0));
-   }
-
-   public void setAngularAlphasTaskPriority(double angularX, double angularY, double angularZ)
-   {
-      alphaTaskPriorityVector.set(0, 0, MathTools.clamp(angularX, 0.0, 1.0));
-      alphaTaskPriorityVector.set(1, 0, MathTools.clamp(angularY, 0.0, 1.0));
-      alphaTaskPriorityVector.set(2, 0, MathTools.clamp(angularZ, 0.0, 1.0));
-   }
-
-   public void resetAlphaTaskPriority()
-   {
-      CommonOps.fill(alphaTaskPriorityVector, 1.0);
-   }
-
    public DenseMatrix64F getSelectionMatrix()
    {
       return selectionMatrix;
@@ -149,11 +120,6 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       CommonOps.setIdentity(weightMatrix);
       for (int i = 0; i < SpatialAccelerationVector.SIZE; i++)
          weightMatrix.set(i, i, weightVector.get(i, 0));
-   }
-
-   public DenseMatrix64F getAlphaTaskPriorityVector()
-   {
-      return alphaTaskPriorityVector;
    }
 
    public void setMomentumRate(DenseMatrix64F momentumRate)
