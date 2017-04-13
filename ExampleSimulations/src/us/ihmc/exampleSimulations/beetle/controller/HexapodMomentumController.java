@@ -102,8 +102,8 @@ public class HexapodMomentumController
       yoLinearMomentumRateOfChange.set(linearMomentumRateOfChange);
       yoAngularMomentumRateOfChange.set(angularMomentumRateOfChange);
       
-      momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
-      momentumRateCommand.setAngularMomentumRateOfChange(angularMomentumRateOfChange);
+      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
+      momentumRateCommand.setAngularMomentumRate(angularMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumWeight.getX(), angularMomentumWeight.getY(), angularMomentumWeight.getZ(), linearMomentumWeight.getX(),
             linearMomentumWeight.getY(), linearMomentumWeight.getZ());
