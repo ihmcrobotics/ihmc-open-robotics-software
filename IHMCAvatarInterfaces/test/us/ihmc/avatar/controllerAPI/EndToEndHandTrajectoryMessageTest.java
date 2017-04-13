@@ -42,8 +42,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajector
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.StopAllTrajectoryMessage;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.AxisAngleOrientationController;
-import us.ihmc.robotics.controllers.EuclideanPositionController;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -578,11 +576,11 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       assertTrue(success);
 
       // check internal tracking is decent:
-      String nameSpaceRotation = handName + AxisAngleOrientationController.class.getSimpleName();
-      String varnameRotation = handName + "RotationErrorInBody";
+      String nameSpaceRotation = handName + FeedbackControllerToolbox.class.getSimpleName();
+      String varnameRotation = handName + "ErrorRotationVector";
       Vector3D rotationError = findVector3d(nameSpaceRotation, varnameRotation, scs);
 
-      String nameSpacePosition = handName + EuclideanPositionController.class.getSimpleName();
+      String nameSpacePosition = handName + FeedbackControllerToolbox.class.getSimpleName();
       String varnamePosition = handName + "PositionError";
       Vector3D positionError = findVector3d(nameSpacePosition, varnamePosition, scs);
 

@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.obstacleCourseTests.DRCObstacleCourseFlatTest;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationPlan;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
@@ -41,8 +42,7 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    @Override
    protected DoubleYoVariable getPelvisOrientationErrorVariableName(SimulationConstructionSet scs)
    {
-      return (DoubleYoVariable) scs.getVariable("pelvisAxisAngleOrientationController",
-            "pelvisRotationErrorInBodyZ");
+      return (DoubleYoVariable) scs.getVariable(FeedbackControllerToolbox.class.getSimpleName(), "pelvisErrorRotationVectorZ");
    }
 
    @Override
