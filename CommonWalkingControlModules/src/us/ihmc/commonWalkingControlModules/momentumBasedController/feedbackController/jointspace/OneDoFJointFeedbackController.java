@@ -247,6 +247,6 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    @Override
    public JointspaceAccelerationCommand getVirtualModelControlOutput()
    {
-      return getVirtualModelControlOutput();
+      return getInverseDynamicsOutput();
    }
 }
