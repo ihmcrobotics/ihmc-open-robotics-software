@@ -307,7 +307,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       {
          desiredMomentumRate.setToZero(centerOfMassFrame);
          desiredMomentumRate.setLinearPart(linearMomentumRateOfChange);
-         momentumRateCommand.set(desiredMomentumRate);
+         momentumRateCommand.setMomentumRate(desiredMomentumRate);
          if (!controlHeightWithMomentum)
             momentumRateCommand.setSelectionMatrix(linearXYAndAngularZSelectionMatrix);
          else
@@ -315,7 +315,7 @@ public abstract class LinearMomentumRateOfChangeControlModule
       }
       else
       {
-         momentumRateCommand.setLinearMomentumRateOfChange(linearMomentumRateOfChange);
+         momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
          if (!controlHeightWithMomentum)
             momentumRateCommand.setSelectionMatrix(linearXYSelectionMatrix);
       }
