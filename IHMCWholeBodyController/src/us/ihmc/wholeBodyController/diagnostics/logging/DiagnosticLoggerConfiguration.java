@@ -7,10 +7,9 @@ import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.FileHandler;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -34,22 +33,22 @@ public class DiagnosticLoggerConfiguration
 
    public static void setupLogging(DoubleYoVariable yoTime, Class<?> clazz, String robotName, boolean useInternetDate)
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
-      Date time;
+      LocalDateTime now;
 
       if (!useInternetDate)
       {
-         time = getLocalTime();
+         now = LocalDateTime.now();
       }
       else
       {
-         time = getTimeFromServer();
-         if (time == null)
-            time = getLocalTime();
+         now = getTimeFromServer();
+         if (now == null)
+            now = LocalDateTime.now();
       }
 
-      String timestamp = dateFormat.format(time);
+      String timestamp = now.format(dateTimeFormatter);
 
       Path diagnosticOutputDirectory = Paths.get(System.getProperty("user.home"), ".ihmc", "Diagnostic",
             timestamp + "_" + robotName + "_" + clazz.getSimpleName() + "_Outputs");
@@ -68,18 +67,12 @@ public class DiagnosticLoggerConfiguration
       setupLogFiles(diagnosticOutputDirectory, formatter);
    }
 
-   private static Date getLocalTime()
-   {
-      Calendar calendar = Calendar.getInstance();
-      return calendar.getTime();
-   }
-
    public static void main(String[] args)
    {
       System.out.println(getTimeFromServer());
    }
    
-   private static Date getTimeFromServer()
+   private static LocalDateTime getTimeFromServer()
    {
       InetAddress inetAddress;
       try
@@ -92,7 +85,7 @@ public class DiagnosticLoggerConfiguration
          timeInfo.computeDetails();
          long actualTime = timeInfo.getReturnTime() + timeInfo.getOffset();
          System.out.println(timeInfo.getOffset());
-         Date time = new Date(actualTime);
+         LocalDateTime time = LocalDateTime.ofEpochSecond(actualTime, 0, ZoneOffset.UTC);
          return time;
       }
       catch (IOException e)
