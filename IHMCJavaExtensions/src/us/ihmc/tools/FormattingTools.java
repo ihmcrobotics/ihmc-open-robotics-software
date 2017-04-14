@@ -147,6 +147,7 @@ public class FormattingTools
    /**
     * The date as YYYYMMDD in the system's default timezone.
     * 
+    * @see Use {@link java.time.LocalDate}
     * @return The date as YYYYMMDD in the system's default timezone.
     */
    public static String getDateString()
@@ -154,11 +155,23 @@ public class FormattingTools
       return LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
    }
 
+   /**
+    * The date as HHMM in the system's default timezone.
+    * 
+    * @see Use {@link java.time.LocalTime}
+    * @return The date as HHMM in the system's default timezone.
+    */
    public static String getTimeString()
    {
       return LocalTime.now().format(timeHHMMFormatter);
    }
 
+   /**
+    * The date as HHMMSS in the system's default timezone.
+    * 
+    * @see Use {@link java.time.LocalTime}
+    * @return The date as HHMMSS in the system's default timezone.
+    */
    public static String getTimeStringWithSeconds()
    {
       return LocalTime.now().format(timeHHMMSSFormatter);
