@@ -57,7 +57,7 @@ public class SwingExitCMPMatrixTest
       DoubleYoVariable currentSwingSplitFraction = new DoubleYoVariable("currentSwingSplitFraction", registry);
       swingSplitFractions.add(currentSwingSplitFraction);
 
-      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, startOfSplineTime);
+      SwingExitCMPMatrix swingExitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, endOfSplineTime);
 
       for (int i = 0; i < iters; i++)
       {
