@@ -85,22 +85,26 @@ public class ExitCMPRecursionMultipliers
 
       for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
-         double timeSpentOnEntryCMP, timeSpentOnExitCMP;
+         double currentTransferOnEntryCMP, currentSwingOnEntryCMP, currentSwingOnExitCMP, nextTransferOnExitCMP;
+
          if (i < numberOfStepsRegistered)
          { // this is the next step
-            double currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
-            double currentSwingOnEntryCMP = swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
-            double currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(i).getDoubleValue()) * singleSupportDurations.get(i).getDoubleValue();
-            double nextTransferOnExitCMP = transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
+            currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnEntryCMP = swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(i).getDoubleValue()) * singleSupportDurations.get(i).getDoubleValue();
+            nextTransferOnExitCMP = transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
 
-            timeSpentOnEntryCMP = currentTransferOnEntryCMP + currentSwingOnEntryCMP;
-            timeSpentOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
          }
          else
          { // this is the final transfer
-            timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
-            timeSpentOnExitCMP = 0.0;
+            currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnEntryCMP = 0.0;
+            currentSwingOnExitCMP = 0.0;
+            nextTransferOnExitCMP = 0.0;
          }
+
+         double timeSpentOnEntryCMP = currentTransferOnEntryCMP + currentSwingOnEntryCMP;
+         double timeSpentOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
 
          double exitRecursion = Math.exp(-omega0 * (recursionTime + timeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
 

@@ -52,25 +52,36 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
          ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          double omega0)
    {
-      double recursionTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+      double timeSpentOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+            singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+      double recursionTime = timeSpentOnCurrentCMP;
 
-      for (int i = 0; i < numberOfStepsToConsider; i++)
+      for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
-         if (i + 1 < numberOfStepsRegistered)
+         double currentTransferOnCMP, currentSwingOnCMP, nextTransferOnCMP;
+
+         if (i < numberOfStepsRegistered)
          { // this is the next step
-            recursionTime += singleSupportDurations.get(i + 1).getDoubleValue() + doubleSupportDurations.get(i + 1).getDoubleValue();
+            currentTransferOnCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnCMP = singleSupportDurations.get(i).getDoubleValue();
+            nextTransferOnCMP = transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
          }
          else
          { // this is the final transfer
-            recursionTime += doubleSupportDurations.get(i + 1).getDoubleValue();
-            break;
+            currentTransferOnCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnCMP = 0.0;
+            nextTransferOnCMP = 0.0;
          }
+
+         recursionTime += currentTransferOnCMP + currentSwingOnCMP + nextTransferOnCMP;
+
+         if (i >= numberOfStepsRegistered)
+            break;
       }
 
       double icpRecursion = Math.exp(-omega0 * recursionTime);
 
-      this.set(5.0);
-      //this.set(icpRecursion);
+      this.set(icpRecursion);
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
@@ -87,25 +98,31 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
       if (isInTransfer)
          recursionTime += timeSpentOnCurrentEntryCMP;
 
-      for (int i = 0; i < numberOfStepsToConsider; i++)
+      for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
-         if (i + 1 < numberOfStepsRegistered)
+         double currentTransferOnEntryCMP, currentSwingOnEntryCMP, currentSwingOnExitCMP, nextTransferOnExitCMP;
+         if (i < numberOfStepsRegistered)
          { // this is the next step
-            double currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
-            double currentSwingOnEntryCMP = swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
-            double currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(i).getDoubleValue()) * singleSupportDurations.get(i).getDoubleValue();
-            double nextTransferOnExitCMP = transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
-
-            double timeSpentOnEntryCMP = currentTransferOnEntryCMP + currentSwingOnEntryCMP;
-            double timeSpentOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
-
-            recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
+            currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnEntryCMP = swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(i).getDoubleValue()) * singleSupportDurations.get(i).getDoubleValue();
+            nextTransferOnExitCMP = transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
          }
          else
          { // this is the final transfer
-            recursionTime += doubleSupportDurations.get(i).getDoubleValue();
-            break;
+            currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
+            currentSwingOnEntryCMP = 0.0;
+            currentSwingOnExitCMP = 0.0;
+            nextTransferOnExitCMP = 0.0;
          }
+
+         double timeSpentOnEntryCMP = currentTransferOnEntryCMP + currentSwingOnEntryCMP;
+         double timeSpentOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
+
+         recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
+
+         if (i >= numberOfStepsRegistered)
+            break;
       }
 
       double icpRecursion = Math.exp(-omega0 * recursionTime);
