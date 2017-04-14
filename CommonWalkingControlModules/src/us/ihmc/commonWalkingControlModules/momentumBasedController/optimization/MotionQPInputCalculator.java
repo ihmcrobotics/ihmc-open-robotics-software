@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -56,6 +57,10 @@ public class MotionQPInputCalculator
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
 
+   private final FrameVector angularMomentum = new FrameVector();
+   private final FrameVector linearMomentum = new FrameVector();
+   private final ReferenceFrame centerOfMassFrame;
+
    private final JointIndexHandler jointIndexHandler;
 
    private final DenseMatrix64F allTaskJacobian;
@@ -67,6 +72,7 @@ public class MotionQPInputCalculator
                                   JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
                                   YoVariableRegistry parentRegistry)
    {
+      this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
       this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       this.centroidalMomentumHandler = centroidalMomentumHandler;
@@ -420,11 +426,15 @@ public class MotionQPInputCalculator
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
-      DenseMatrix64F momemtumRate = commandToConvert.getMomentumRate();
+      commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
+      angularMomentum.changeFrame(centerOfMassFrame);
+      linearMomentum.changeFrame(centerOfMassFrame);
+      angularMomentum.get(0, tempTaskObjective);
+      linearMomentum.get(3, tempTaskObjective);
       DenseMatrix64F convectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
-      CommonOps.subtract(momemtumRate, convectiveTerm, tempTaskObjective);
+      CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
@@ -460,10 +470,14 @@ public class MotionQPInputCalculator
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
-      DenseMatrix64F momemtum = commandToConvert.getMomentum();
+      commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
+      angularMomentum.changeFrame(centerOfMassFrame);
+      linearMomentum.changeFrame(centerOfMassFrame);
+      angularMomentum.get(0, tempTaskObjective);
+      linearMomentum.get(3, tempTaskObjective);
 
       // Compute the task objective: p = S * h
-      CommonOps.mult(selectionMatrix, momemtum, motionQPInputToPack.taskObjective);
+      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
