@@ -64,8 +64,7 @@ public class ExitCMPRecursionMultipliers
          if (i == numberOfStepsRegistered)
             break;
          else
-            //exitMultipliers.get(i).set(0.0);
-            exitMultipliers.get(i).set(5.0);
+            exitMultipliers.get(i).set(0.0);
       }
    }
 
@@ -84,10 +83,10 @@ public class ExitCMPRecursionMultipliers
          recursionTime += currentTimeSpentOnEntryCMP;
 
 
-      for (int i = 0; i < numberOfStepsToConsider; i++)
+      for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
          double timeSpentOnEntryCMP, timeSpentOnExitCMP;
-         if (i + 1 < numberOfStepsRegistered)
+         if (i < numberOfStepsRegistered)
          { // this is the next step
             double currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
             double currentSwingOnEntryCMP = swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
@@ -105,9 +104,9 @@ public class ExitCMPRecursionMultipliers
 
          double exitRecursion = Math.exp(-omega0 * (recursionTime + timeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
 
-         exitMultipliers.get(i).set(exitRecursion);
+         exitMultipliers.get(i - 1).set(exitRecursion);
 
-         if (i + 1 == numberOfStepsRegistered)
+         if (i >= numberOfStepsRegistered)
             break; // this is the final transfer
 
          recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
