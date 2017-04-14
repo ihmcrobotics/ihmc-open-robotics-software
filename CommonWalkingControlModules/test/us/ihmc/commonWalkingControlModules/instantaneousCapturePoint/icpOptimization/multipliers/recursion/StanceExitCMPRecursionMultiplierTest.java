@@ -70,7 +70,7 @@ public class StanceExitCMPRecursionMultiplierTest
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
          double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-               transferSplitFractions.get(1).getDoubleValue() * transferSplitFractions.get(1).getDoubleValue();
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          double exitCMPMultiplier = (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
@@ -203,7 +203,7 @@ public class StanceExitCMPRecursionMultiplierTest
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
          double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-               transferSplitFractions.get(1).getDoubleValue() * transferSplitFractions.get(1).getDoubleValue();
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          double exitCMPMultiplier = (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
@@ -212,7 +212,7 @@ public class StanceExitCMPRecursionMultiplierTest
          isInTransfer = true;
          exitCMPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
+         exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * exitCMPMultiplier;
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
       }
    }

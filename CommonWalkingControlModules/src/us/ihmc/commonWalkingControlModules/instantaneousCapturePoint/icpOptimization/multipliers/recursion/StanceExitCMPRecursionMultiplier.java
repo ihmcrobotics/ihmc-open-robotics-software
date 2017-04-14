@@ -55,21 +55,24 @@ public class StanceExitCMPRecursionMultiplier
    private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
-      double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-            swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-      double timeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-            transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+      double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+      double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      double currentSwingOnExit = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+      double nextTransferOnExit = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
+      double timeSpentOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+      double timeSpentOnExitCMP = currentSwingOnExit + nextTransferOnExit;
+
+      double exitMultiplier;
       if (isInTransfer)
       {
-         double exitMultiplier = Math.exp(-omega0 * timeSpentOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
-         this.exitMultiplier.set(exitMultiplier);
+         exitMultiplier = Math.exp(-omega0 * timeSpentOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
       }
       else
       {
-         double exitMultiplier = 1.0 - Math.exp(-omega0 * timeSpentOnExitCMP);
-         this.exitMultiplier.set(exitMultiplier);
+         exitMultiplier = 1.0 - Math.exp(-omega0 * timeSpentOnExitCMP);
       }
+      this.exitMultiplier.set(exitMultiplier);
    }
 
    public double getExitMultiplier()
