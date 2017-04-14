@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
@@ -25,9 +26,17 @@ public class EntryCMPCurrentMultiplierTest
    public void testCalculationTwoCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
+
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      DoubleYoVariable currentTransferSplitRatio = new DoubleYoVariable("currentTransferSplitRatio", registry);
+      DoubleYoVariable nextTransferSplitRatio = new DoubleYoVariable("nextTransferSplitRatio", registry);
+      transferSplitFractions.add(currentTransferSplitRatio);
+      transferSplitFractions.add(nextTransferSplitRatio);
+
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      DoubleYoVariable currentSwingSplitRatio = new DoubleYoVariable("currentSwingSplitRatio", registry);
+      swingSplitFractions.add(currentSwingSplitRatio);
+
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -47,10 +56,10 @@ public class EntryCMPCurrentMultiplierTest
       }
 
       boolean projectCMPForward = false;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
 
-      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(defaultSplitRatio);
+      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(transferSplitFractions);
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
@@ -59,12 +68,12 @@ public class EntryCMPCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
+         double swingRatio = 0.7 * random.nextDouble();
+         currentSwingSplitRatio.set(swingRatio);
+         double currentTransferRatio = 0.7 * random.nextDouble();
+         currentTransferSplitRatio.set(currentTransferRatio);
+         double nextTransferRatio = 0.7 * random.nextDouble();
+         nextTransferSplitRatio.set(nextTransferRatio);
 
          for (int step = 0; step < maxSteps; step++)
          {
@@ -105,9 +114,6 @@ public class EntryCMPCurrentMultiplierTest
    public void testCalculationOneCMPTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -119,18 +125,22 @@ public class EntryCMPCurrentMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
          doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
          singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
+         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
       }
 
       boolean projectCMPForward = false;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
 
-      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(defaultSplitRatio);
+      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(transferSplitFractions);
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
@@ -139,12 +149,12 @@ public class EntryCMPCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
+         double swingRatio = 0.7 * random.nextDouble();
+         swingSplitFractions.get(0).set(swingRatio);
+         double currentTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(0).set(currentTransferRatio);
+         double upcomingTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(1).set(upcomingTransferRatio);
 
          for (int step = 0; step < maxSteps; step++)
          {
@@ -185,9 +195,6 @@ public class EntryCMPCurrentMultiplierTest
    public void testCalculationProjectForwardTwoCMPFirstSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -199,26 +206,30 @@ public class EntryCMPCurrentMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
          doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
          singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
+         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
       }
 
       boolean projectCMPForward = true;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
 
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
+         double swingRatio = 0.7 * random.nextDouble();
+         swingSplitFractions.get(0).set(swingRatio);
+         double currentTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(0).set(currentTransferRatio);
+         double upcomingTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(1).set(upcomingTransferRatio);
 
          for (int step = 0; step < maxSteps; step++)
          {
@@ -260,9 +271,6 @@ public class EntryCMPCurrentMultiplierTest
    public void testCalculationTwoCMPSecondSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -274,16 +282,20 @@ public class EntryCMPCurrentMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
          doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
          singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
+         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
       }
 
       boolean projectCMPForward = false;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
 
       SwingEntryCMPMatrix entryCMPMatrix = new SwingEntryCMPMatrix(startOfSplineTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -293,12 +305,12 @@ public class EntryCMPCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
+         double swingRatio = 0.7 * random.nextDouble();
+         swingSplitFractions.get(0).set(swingRatio);
+         double currentTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(0).set(currentTransferRatio);
+         double upcomingTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(1).set(upcomingTransferRatio);
 
          for (int step = 0; step < maxSteps; step++)
          {
@@ -347,9 +359,6 @@ public class EntryCMPCurrentMultiplierTest
    public void testCalculationTwoCMPThirdSegment()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -361,25 +370,29 @@ public class EntryCMPCurrentMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
          doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
          singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
+         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
       }
 
       boolean projectCMPForward = true;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
+         double swingRatio = 0.7 * random.nextDouble();
+         swingSplitFractions.get(0).set(swingRatio);
+         double currentTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(0).set(currentTransferRatio);
+         double upcomingTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(1).set(upcomingTransferRatio);
 
          for (int step = 0; step < maxSteps; step++)
          {
@@ -408,7 +421,6 @@ public class EntryCMPCurrentMultiplierTest
          entryCMPCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
-
          Assert.assertEquals(0.0, entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
       }
    }
@@ -418,9 +430,6 @@ public class EntryCMPCurrentMultiplierTest
    public void testCalculationOneCMPSwing()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable defaultSplitRatio = new DoubleYoVariable("defaultSplitRatio", registry);
-      DoubleYoVariable upcomingSplitRatio = new DoubleYoVariable("upcomingSplitRatio", registry);
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
@@ -432,25 +441,29 @@ public class EntryCMPCurrentMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
          doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
          singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
+         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
       }
 
       boolean projectCMPForward = true;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(upcomingSplitRatio, defaultSplitRatio, exitCMPRatio,
-            startOfSplineTime, endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, projectCMPForward, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-         double defaultSplit = 0.7 * random.nextDouble();
-         defaultSplitRatio.set(defaultSplit);
-         double upcomingSplit = 0.7 * random.nextDouble();
-         upcomingSplitRatio.set(upcomingSplit);
+         double swingRatio = 0.7 * random.nextDouble();
+         swingSplitFractions.get(0).set(swingRatio);
+         double currentTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(0).set(currentTransferRatio);
+         double upcomingTransferRatio = 0.7 * random.nextDouble();
+         transferSplitFractions.get(1).set(upcomingTransferRatio);
 
          for (int step = 0; step < maxSteps; step++)
          {
@@ -476,14 +489,7 @@ public class EntryCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * singleSupportDuration;
 
-         double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
-         double upcomingDoubleSupportDuration = doubleSupportDurations.get(1).getDoubleValue();
-         double stepDuration = singleSupportDuration + currentDoubleSupportDuration;
-
-         double timeSpentOnExitCMP = exitRatio * stepDuration;
-         double upcomingInitialDoubleSupportDuration = upcomingSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-
-         double projectionTime = timeInCurrentState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
+         double projectionTime = timeInCurrentState;
 
          double positionMultiplier = 1.0 - Math.exp(omega * projectionTime);
          double velocityMultiplier = - omega * Math.exp(omega * projectionTime);

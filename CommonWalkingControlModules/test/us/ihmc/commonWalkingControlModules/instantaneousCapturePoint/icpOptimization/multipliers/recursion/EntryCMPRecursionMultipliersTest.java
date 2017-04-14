@@ -19,7 +19,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderOneStepOneRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -32,6 +31,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -41,21 +42,29 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions,
+            registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int i = 0; i < stepsRegistered; i++)
          {
             doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
             singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -63,9 +72,10 @@ public class EntryCMPRecursionMultipliersTest
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
-         double upcomingTimeSpentOnEntryCMP = (1 - exitRatio) * upcomingStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
+               swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
 
          double exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnExitCMP) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
          Assert.assertEquals(exitCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
@@ -90,7 +100,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderOneStepTwoRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -103,6 +112,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -112,14 +123,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
 
          for (int step = 0; step < stepsRegistered; step++)
          {
@@ -134,9 +150,10 @@ public class EntryCMPRecursionMultipliersTest
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
-         double upcomingTimeSpentOnEntryCMP = (1 - exitRatio) * upcomingStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
+               swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
 
          double exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnExitCMP) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
          Assert.assertEquals(exitCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
@@ -161,7 +178,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderOneStepOneRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -174,6 +190,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -183,14 +201,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
 
          for (int step = 0; step < stepsRegistered; step++)
          {
@@ -205,7 +228,7 @@ public class EntryCMPRecursionMultipliersTest
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue();// + singleSupportDurations.get(1).getDoubleValue();
+         double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue();
 
          double entryCMPMultiplier = Math.exp(-omega * currentStepDuration) * (1.0 - Math.exp(-omega * upcomingStepDuration));
          Assert.assertEquals(entryCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
@@ -229,7 +252,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderOneStepTwoRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -242,6 +264,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -251,15 +275,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int step = 0; step < stepsRegistered; step++)
          {
             doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -297,7 +325,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderTwoStepsOneRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -310,6 +337,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -319,15 +348,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int step = 0; step < stepsRegistered; step++)
          {
             doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -341,10 +374,11 @@ public class EntryCMPRecursionMultipliersTest
          entryCMPRecursionMultipliers.compute(2, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue();
 
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
-         double upcomingTimeSpentOnEntryCMP = (1 - exitRatio) * nextStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
+               swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
 
          double firstExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnExitCMP) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
 
@@ -371,7 +405,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderTwoStepsTwoRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -384,6 +417,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -393,15 +428,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int step = 0; step < stepsRegistered; step++)
          {
             doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -416,11 +455,13 @@ public class EntryCMPRecursionMultipliersTest
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
          double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
-         double nextNextStepDuration = doubleSupportDurations.get(2).getDoubleValue();
 
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
-         double upcomingTimeSpentOnEntryCMP = (1 - exitRatio) * nextStepDuration;
-         double nextNextTimeSpentOnEntryCMP = (1 - exitRatio) * nextNextStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
+               swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
+         double nextNextTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(2).getDoubleValue()) * doubleSupportDurations.get(2).getDoubleValue() +
+               swingSplitFractions.get(2).getDoubleValue() * singleSupportDurations.get(2).getDoubleValue();
 
          double firstExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnExitCMP) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
          double secondExitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextStepDuration)) * (1.0 - Math.exp(-omega * nextNextTimeSpentOnEntryCMP));
@@ -453,7 +494,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderTwoStepsThreeRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -466,6 +506,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -475,15 +517,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int step = 0; step < stepsRegistered; step++)
          {
             doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -498,10 +544,13 @@ public class EntryCMPRecursionMultipliersTest
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
          double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
-         double nextNextStepDuration = doubleSupportDurations.get(2).getDoubleValue() + singleSupportDurations.get(2).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
-         double upcomingTimeSpentOnEntryCMP = (1 - exitRatio) * nextStepDuration;
-         double nextNextTimeSpentOnEntryCMP = (1 - exitRatio) * nextNextStepDuration;
+
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
+               swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
+         double nextNextTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(2).getDoubleValue()) * doubleSupportDurations.get(2).getDoubleValue() +
+               swingSplitFractions.get(2).getDoubleValue() * singleSupportDurations.get(2).getDoubleValue();
 
          double firstExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnExitCMP) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
          double secondExitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextStepDuration)) * (1.0 - Math.exp(-omega * nextNextTimeSpentOnEntryCMP));
@@ -534,7 +583,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderTwoStepsOneRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -547,6 +595,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -556,15 +606,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int step = 0; step < stepsRegistered; step++)
          {
             doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -604,7 +658,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderTwoStepsTwoRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -617,6 +670,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -626,15 +681,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int step = 0; step < stepsRegistered; step++)
          {
             doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -679,7 +738,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testConsiderTwoStepsThreeRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -692,6 +750,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -701,15 +761,19 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
          for (int step = 0; step < stepsRegistered; step++)
          {
             doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -755,7 +819,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testNStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -767,6 +830,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -776,17 +841,21 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
             for (int step = 0; step < maxSteps; step++)
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -799,13 +868,15 @@ public class EntryCMPRecursionMultipliersTest
             entryCMPRecursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-            double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+            double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+                  transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
             double recursionTime = currentTimeSpentOnExitCMP;
             for (int i = 0; i < j; i++)
             {
                double stepDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
-               double timeSpentOnEntryCMP = (1.0 - exitRatio) * stepDuration;
+               double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue() +
+                     swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
                double entryMultiplier = Math.exp(-omega * recursionTime) * ( 1.0 - Math.exp(-omega * timeSpentOnEntryCMP));
 
                Assert.assertEquals("j = " + j + ", i = " + i, entryMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(i), epsilon);
@@ -821,7 +892,8 @@ public class EntryCMPRecursionMultipliersTest
             for (int i = 0; i < j; i++)
             {
                double stepDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
-               double timeSpentOnEntryCMP = (1.0 - exitRatio) * stepDuration;
+               double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue() +
+                     swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
                double entryMultiplier = Math.exp(-omega * recursionTime) * ( 1.0 - Math.exp(-omega * timeSpentOnEntryCMP));
 
                Assert.assertEquals("j = " + j + ", i = " + i, entryMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(i), epsilon);
@@ -837,7 +909,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testNStepTwoCMPCalculationFinalTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -849,6 +920,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -858,17 +931,21 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
             for (int step = 0; step < maxSteps; step++)
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -881,7 +958,8 @@ public class EntryCMPRecursionMultipliersTest
             entryCMPRecursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-            double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+            double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+                  transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
             double recursionTime = currentTimeSpentOnExitCMP;
             for (int i = 0; i < j; i++)
@@ -894,7 +972,8 @@ public class EntryCMPRecursionMultipliersTest
                else
                   stepDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
 
-               double timeSpentOnEntryCMP = (1.0 - exitRatio) * stepDuration;
+               double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue() +
+                     swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
                double entryMultiplier = Math.exp(-omega * recursionTime) * ( 1.0 - Math.exp(-omega * timeSpentOnEntryCMP));
 
                Assert.assertEquals("j = " + j + ", i = " + i, entryMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(i), epsilon);
@@ -917,7 +996,8 @@ public class EntryCMPRecursionMultipliersTest
                else
                   stepDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
 
-               double timeSpentOnEntryCMP = (1.0 - exitRatio) * stepDuration;
+               double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue() +
+                     swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
                double entryMultiplier = Math.exp(-omega * recursionTime) * ( 1.0 - Math.exp(-omega * timeSpentOnEntryCMP));
 
                Assert.assertEquals("j = " + j + ", i = " + i, entryMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(i), epsilon);
@@ -933,7 +1013,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testNStepOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -945,6 +1024,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -954,17 +1035,21 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
             for (int step = 0; step < maxSteps; step++)
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
@@ -1014,7 +1099,6 @@ public class EntryCMPRecursionMultipliersTest
    public void testNStepOneCMPCalculationInTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -1026,6 +1110,8 @@ public class EntryCMPRecursionMultipliersTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -1035,17 +1121,21 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, exitCMPRatio, registry);
+      EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
             for (int step = 0; step < maxSteps; step++)
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());

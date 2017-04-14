@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -8,13 +9,13 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class TransferEntryCMPMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final List<DoubleYoVariable> transferSplitFractions;
 
-   public TransferEntryCMPMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio)
+   public TransferEntryCMPMatrix(List<DoubleYoVariable> transferSplitFractions)
    {
       super(4, 1);
 
-      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.transferSplitFractions = transferSplitFractions;
    }
 
    public void reset()
@@ -24,20 +25,13 @@ public class TransferEntryCMPMatrix extends DenseMatrix64F
 
    public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0)
    {
-      this.compute(doubleSupportDurations.get(0).getDoubleValue(), omega0);
-   }
-
-   public void compute(double doubleSupportDuration, double omega0)
-   {
       zero();
 
-      double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+      double endOfDoubleSupportDuration = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
 
-      double endOfDoubleSupportProjection = Math.exp(omega0 * endOfDoubleSupportDuration);
+      double projection = Math.exp(omega0 * endOfDoubleSupportDuration);
 
-      double stepProjection = (1.0 - endOfDoubleSupportProjection);
-
-      set(2, 0, stepProjection);
-      set(3, 0, -omega0 * endOfDoubleSupportProjection);
+      set(2, 0, 1.0 - projection);
+      set(3, 0, -omega0 * projection);
    }
 }

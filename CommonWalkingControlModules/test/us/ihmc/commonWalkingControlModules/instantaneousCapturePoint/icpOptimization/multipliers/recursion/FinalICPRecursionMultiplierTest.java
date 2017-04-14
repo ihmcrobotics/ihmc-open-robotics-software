@@ -19,7 +19,6 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -32,6 +31,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -41,21 +42,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -64,7 +72,8 @@ public class FinalICPRecursionMultiplierTest
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
          double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + upcomingStepDuration));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
@@ -85,7 +94,6 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepTwoCMPCalculationFinalStep()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -98,26 +106,39 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -126,7 +147,8 @@ public class FinalICPRecursionMultiplierTest
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
          double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + upcomingStepDuration));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
@@ -147,7 +169,6 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -160,6 +181,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -169,21 +192,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -211,7 +241,6 @@ public class FinalICPRecursionMultiplierTest
    public void testOneStepOneCMPCalculationFinalStep()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -224,6 +253,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -233,21 +264,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -275,7 +313,6 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepOneStepRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -288,6 +325,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -297,21 +336,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -320,7 +366,8 @@ public class FinalICPRecursionMultiplierTest
 
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
          double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextStepDuration));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
@@ -341,7 +388,6 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepTwoStepRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -354,6 +400,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -363,21 +411,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -387,7 +442,8 @@ public class FinalICPRecursionMultiplierTest
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
          double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
          double nextNextStepDuration = doubleSupportDurations.get(2).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextStepDuration + nextNextStepDuration));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
@@ -408,7 +464,6 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepThreeStepRegisteredTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -421,6 +476,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -430,21 +487,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -454,7 +518,8 @@ public class FinalICPRecursionMultiplierTest
          double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
          double nextStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
          double nextNextStepDuration = doubleSupportDurations.get(2).getDoubleValue() + singleSupportDurations.get(2).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextStepDuration + nextNextStepDuration));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
@@ -476,7 +541,6 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepOneStepRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -489,6 +553,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -498,21 +564,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -541,7 +614,6 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepTwoStepRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -554,6 +626,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -563,21 +637,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -606,7 +687,6 @@ public class FinalICPRecursionMultiplierTest
    public void testConsiderTwoStepThreeStepRegisteredOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -619,6 +699,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -628,21 +710,28 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -672,7 +761,6 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -684,6 +772,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -693,21 +783,27 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
-            for (int step = 0; step < maxSteps; step++)
+            for (int i = 0; i < maxSteps + 1; i++)
             {
-               doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-               singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+               singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+               swingSplitFractions.get(i).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;
@@ -716,7 +812,10 @@ public class FinalICPRecursionMultiplierTest
             finalICPRecursionMultiplier.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-            double recursionTime = exitRatio * currentStepDuration;
+
+            double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+                  transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+            double recursionTime = currentTimeSpentOnExitCMP;
 
             for (int i = 0; i < j; i++)
                recursionTime += doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
@@ -745,7 +844,6 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepTwoCMPCalculationFinalTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -757,6 +855,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -766,21 +866,27 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
-            for (int step = 0; step < maxSteps; step++)
+            for (int i = 0; i < maxSteps + 1; i++)
             {
-               doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-               singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+               singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+               swingSplitFractions.get(i).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;
@@ -789,7 +895,9 @@ public class FinalICPRecursionMultiplierTest
             finalICPRecursionMultiplier.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-            double recursionTime = exitRatio * currentStepDuration;
+            double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+                  transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+            double recursionTime = currentTimeSpentOnExitCMP;
 
             for (int i = 0; i < j; i++)
             {
@@ -831,7 +939,6 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -843,6 +950,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -852,21 +961,27 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
-            for (int step = 0; step < maxSteps; step++)
+            for (int i = 0; i < maxSteps + 1; i++)
             {
-               doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-               singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+               singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+               swingSplitFractions.get(i).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;
@@ -900,7 +1015,6 @@ public class FinalICPRecursionMultiplierTest
    public void testNStepOneCMPCalculationFinalTransfer()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -912,6 +1026,8 @@ public class FinalICPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
@@ -921,21 +1037,27 @@ public class FinalICPRecursionMultiplierTest
          singleSupportDuration.setToNaN();
          doubleSupportDurations.add(doubleSupportDuration);
          singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", exitCMPRatio, registry);
+      FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
          for (int iter = 0; iter < iters; iter++)
          {
-            double exitRatio = 0.7 * random.nextDouble();
-            exitCMPRatio.set(exitRatio);
-
-            for (int step = 0; step < maxSteps; step++)
+            for (int i = 0; i < maxSteps + 1; i++)
             {
-               doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-               singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+               singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+               swingSplitFractions.get(i).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;

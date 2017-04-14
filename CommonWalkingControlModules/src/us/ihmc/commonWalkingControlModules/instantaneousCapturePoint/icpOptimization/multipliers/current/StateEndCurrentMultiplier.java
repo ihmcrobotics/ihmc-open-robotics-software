@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
@@ -23,9 +24,8 @@ public class StateEndCurrentMultiplier
    private final TransferStateEndMatrix transferStateEndMatrix;
    private final SwingStateEndMatrix swingStateEndMatrix;
 
-   private final DoubleYoVariable exitCMPRatio;
-   private final DoubleYoVariable upcomingDoubleSupportSplitRatio;
-   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<DoubleYoVariable> transferSplitFractions;
 
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
@@ -37,22 +37,21 @@ public class StateEndCurrentMultiplier
 
    private final boolean projectForward;
 
-   public StateEndCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean projectForward, YoVariableRegistry registry)
+   public StateEndCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, boolean projectForward, YoVariableRegistry registry)
    {
-      this(upcomingDoubleSupportSplitRatio, defaultDoubleSupportSplitRatio, exitCMPRatio, startOfSplineTime, endOfSplineTime, null, null, projectForward, registry);
+      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, null, null, projectForward, registry);
    }
 
-   public StateEndCurrentMultiplier(DoubleYoVariable upcomingDoubleSupportSplitRatio, DoubleYoVariable defaultDoubleSupportSplitRatio,
-         DoubleYoVariable exitCMPRatio, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix,
-         CubicDerivativeMatrix cubicDerivativeMatrix, boolean projectForward, YoVariableRegistry registry)
+   public StateEndCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
+         DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix,
+         boolean projectForward, YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable("StateEndCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable("StateEndCurrentVelocityMultiplier", registry);
 
-      this.exitCMPRatio = exitCMPRatio;
-      this.upcomingDoubleSupportSplitRatio = upcomingDoubleSupportSplitRatio;
-      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
@@ -81,14 +80,14 @@ public class StateEndCurrentMultiplier
          givenCubicDerivativeMatrix = true;
       }
 
-      transferStateEndMatrix = new TransferStateEndMatrix(defaultDoubleSupportSplitRatio);
-      swingStateEndMatrix = new SwingStateEndMatrix(upcomingDoubleSupportSplitRatio, exitCMPRatio, endOfSplineTime);
+      transferStateEndMatrix = new TransferStateEndMatrix(transferSplitFractions);
+      swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, endOfSplineTime);
    }
 
    public void reset()
    {
-      positionMultiplier.set(0.0);
-      velocityMultiplier.set(0.0);
+      positionMultiplier.setToNaN();
+      velocityMultiplier.setToNaN();
    }
 
    public double getPositionMultiplier()
@@ -115,7 +114,7 @@ public class StateEndCurrentMultiplier
          if (useTwoCMPs)
             positionMultiplier = computeSwingSegmented(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
          else
-            positionMultiplier = computeInSwingOneCMP(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+            positionMultiplier = computeInSwingOneCMP(doubleSupportDurations, timeInState, omega0);
       }
       this.positionMultiplier.set(positionMultiplier);
 
@@ -168,19 +167,11 @@ public class StateEndCurrentMultiplier
 
 
 
-   private double computeInSwingOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeInSwingOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
    {
-      return computeInSwingOneCMP(doubleSupportDurations.get(1).getDoubleValue(), doubleSupportDurations.get(0).getDoubleValue(),
-            singleSupportDurations.get(0).getDoubleValue(), timeInState, omega0);
-   }
+      double currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
 
-   private double computeInSwingOneCMP(double upcomingDoubleSupportDuration, double doubleSupportDuration, double singleSupportDuration, double timeInState, double omega0)
-   {
-      double stepDuration = doubleSupportDuration + singleSupportDuration;
-      double timeSpentOnExitCMP = exitCMPRatio.getDoubleValue() * stepDuration;
-      double upcomingInitialDoubleSupportDuration = upcomingDoubleSupportSplitRatio.getDoubleValue() * upcomingDoubleSupportDuration;
-
-      double duration = timeInState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
+      double duration = timeInState - currentTransferOnEntryCMP;
       return Math.exp(omega0 * duration);
    }
 
@@ -197,15 +188,14 @@ public class StateEndCurrentMultiplier
          double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         return computeSwingFirstSegment(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+         return computeSwingFirstSegment(singleSupportDurations, timeInState, omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
-         return computeSwingThirdSegment(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+         return computeSwingThirdSegment(singleSupportDurations, timeInState, omega0);
       else
          return computeSwingSecondSegment(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
    }
 
-   private double computeSwingFirstSegment(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
-         double timeInState, double omega0)
+   private double computeSwingFirstSegment(ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
       if (projectForward)
       {
@@ -213,26 +203,17 @@ public class StateEndCurrentMultiplier
       }
       else
       {
-         double currentDoubleSupportDuration = doubleSupportDurations.get(0).getDoubleValue();
-         double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
-         double stepDuration = currentDoubleSupportDuration + singleSupportDuration;
+         double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+         double duration = timeInState - currentSwingOnEntryCMP;
 
-
-         double timeSpentOnEntryCMP = (1.0 - exitCMPRatio.getDoubleValue()) * stepDuration;
-         double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * currentDoubleSupportDuration;
-         double initialSingleSupportDuration = timeSpentOnEntryCMP - endOfDoubleSupportDuration;
-
-         double duration = timeInState - initialSingleSupportDuration;
-         double projection = Math.exp(omega0 * duration);
-
-         return projection;
+         return Math.exp(omega0 * duration);
       }
    }
 
    private double computeSwingSecondSegment(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          double timeInState, double omega0)
    {
-      swingStateEndMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
+      swingStateEndMatrix.compute(singleSupportDurations, omega0);
 
       double timeInSpline = timeInState - startOfSplineTime.getDoubleValue();
       double splineDuration = endOfSplineTime.getDoubleValue() - startOfSplineTime.getDoubleValue();
@@ -253,9 +234,12 @@ public class StateEndCurrentMultiplier
       return matrixOut.get(0, 0);
    }
 
-   private double computeSwingThirdSegment(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeSwingThirdSegment(ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
-      return computeInSwingOneCMP(doubleSupportDurations, singleSupportDurations, timeInState, omega0);
+      double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      double duration = timeInState - currentSwingOnEntryCMP;
+
+      return Math.exp(omega0 * duration);
    }
 
 
