@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -80,6 +81,18 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       weightVector.set(other.weightVector);
       selectionMatrix.set(other.selectionMatrix);
       momentum.set(other.momentum);
+   }
+
+   /**
+    * Copies all the fields of the given {@link MomentumRateCommand} into this except for the
+    * desired rate of change of momentum.
+    * 
+    * @param command the command to copy the properties from. Not modified.
+    */
+   public void setProperties(MomentumRateCommand command)
+   {
+      weightVector.set(command.getWeightVector());
+      selectionMatrix.set(command.getSelectionMatrix());
    }
 
    /**
