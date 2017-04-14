@@ -46,6 +46,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final String centerOfMassName = "centerOfMass";
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -61,9 +62,119 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
    private final Map<RigidBody, YoSE3OffsetFrame> endEffectorControlFrames = new HashMap<>();
 
+   private final EnumMap<Type, YoFramePoint> centerOfMassPositions = new EnumMap<>(Type.class);
+   private final EnumMap<Type, EnumMap<Space, YoFrameVector>> centerOfMassDataVectors = new EnumMap<>(Type.class);
+   private final EnumMap<Space, RateLimitedYoFrameVector> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
+   private YoPositionPIDGainsInterface centerOfMassPositionGains;
+
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
+   }
+
+   /**
+    * Retrieves and returns the {@code YoFramePoint} for the center of mass associated with the
+    * given {@code type}, if it does not exist it is created.
+    * 
+    * @param type the type of the data to retrieve.
+    * @return the unique {@code YoFramePoint} matching the search criterion.
+    */
+   public YoFramePoint getCenterOfMassPosition(Type type)
+   {
+      YoFramePoint yoFramePoint = centerOfMassPositions.get(type);
+
+      if (yoFramePoint == null)
+      {
+         String namePrefix = centerOfMassName;
+         namePrefix += type.getName();
+         namePrefix += Space.POSITION.getName();
+         yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
+         centerOfMassPositions.put(type, yoFramePoint);
+         clearableData.add(yoFramePoint);
+      }
+
+      return yoFramePoint;
+   }
+
+   /**
+    * Retrieves and returns the {@code YoFrameVector} for the center of mass associated with the
+    * given {@code type}, and {@code space}, if it does not exist it is created.
+    * 
+    * @param type the type of the data to retrieve.
+    * @param space the space of the data to retrieve.
+    * @return the unique {@code YoFrameVector} matching the search criteria.
+    */
+   public YoFrameVector getCenterOfMassDataVector(Type type, Space space)
+   {
+      EnumMap<Space, YoFrameVector> dataVectors = centerOfMassDataVectors.get(type);
+
+      if (dataVectors == null)
+      {
+         dataVectors = new EnumMap<>(Space.class);
+         centerOfMassDataVectors.put(type, dataVectors);
+      }
+
+      YoFrameVector yoFrameVector = dataVectors.get(space);
+
+      if (yoFrameVector == null)
+      {
+         String namePrefix = centerOfMassName;
+         namePrefix += type.getName();
+         namePrefix += space.getName();
+         yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
+         dataVectors.put(space, yoFrameVector);
+         clearableData.add(yoFrameVector);
+      }
+
+      return yoFrameVector;
+   }
+
+   /**
+    * Retrieves and returns the {@code RateLimitedYoFrameVector} for the center of mass associated
+    * with the given {@code type}, and {@code space}, if it does not exist it is created.
+    * <p>
+    * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not
+    * exist yet.
+    * </p>
+    * 
+    * @param space the space of the data to retrieve.
+    * @param rawDataType the type of the raw vector onto which the rate limit is to be applied.
+    * @param dt the duration of a control tick.
+    * @param maximumRate the maximum rate allowed rate. Not modified.
+    * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
+    */
+   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate)
+   {
+      RateLimitedYoFrameVector rateLimitedYoFrameVector = centerOfMassRateLimitedDataVectors.get(space);
+
+      if (rateLimitedYoFrameVector == null)
+      {
+         String namePrefix = centerOfMassName;
+         namePrefix += "RateLimited";
+         namePrefix += rawDataType.getName();
+         namePrefix += space.getName();
+         YoFrameVector rawYoFrameVector = getCenterOfMassDataVector(rawDataType, space);
+         rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
+         centerOfMassRateLimitedDataVectors.put(space, rateLimitedYoFrameVector);
+         clearableData.add(rateLimitedYoFrameVector);
+      }
+
+      return rateLimitedYoFrameVector;
+   }
+
+   /**
+    * Retrieves and returns the set of gains {@code YoPositionPIDGainsInterface} for the center of
+    * mass, if it does not exist it is created.
+    * 
+    * @return the unique {@code YoPositionPIDGainsInterface} for the center of mass.
+    */
+   public YoPositionPIDGainsInterface getCenterOfMassGains()
+   {
+      if (centerOfMassPositionGains == null)
+      {
+         centerOfMassPositionGains = new YoEuclideanPositionGains(centerOfMassName, registry);
+      }
+      return centerOfMassPositionGains;
    }
 
    /**
@@ -200,7 +311,6 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
       }
 
       RateLimitedYoFrameVector rateLimitedYoFrameVector = endEffectorDataVectors.get(space);
-      YoFrameVector rawYoFrameVector = getDataVector(endEffector, rawDataType, space);
 
       if (rateLimitedYoFrameVector == null)
       {
@@ -208,6 +318,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          namePrefix += "RateLimited";
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
+         YoFrameVector rawYoFrameVector = getDataVector(endEffector, rawDataType, space);
          rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
          endEffectorDataVectors.put(space, rateLimitedYoFrameVector);
          clearableData.add(rateLimitedYoFrameVector);
