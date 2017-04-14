@@ -111,11 +111,8 @@ public class StanceEntryCMPRecursionMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       StanceEntryCMPRecursionMultiplier entryCMPRecursionMultiplier = new StanceEntryCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
@@ -127,7 +124,6 @@ public class StanceEntryCMPRecursionMultiplierTest
             doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
             singleSupportDurations.get(i).set(5.0 * random.nextDouble());
             transferSplitFractions.get(i).set(0.8 * random.nextDouble());
-            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
 
          boolean isInTransfer = false;
@@ -135,9 +131,10 @@ public class StanceEntryCMPRecursionMultiplierTest
 
          entryCMPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+         double timeOnCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue()
+               + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
-         double entryCMPMultiplier = 1.0 - Math.exp(-omega * currentStepDuration);
+         double entryCMPMultiplier = 1.0 - Math.exp(-omega * timeOnCMP);
          Assert.assertEquals(entryCMPMultiplier, entryCMPRecursionMultiplier.getEntryMultiplier(), epsilon);
 
          // setup for in transfer
@@ -245,11 +242,8 @@ public class StanceEntryCMPRecursionMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       StanceEntryCMPRecursionMultiplier entryCMPRecursionMultiplier = new StanceEntryCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
@@ -261,7 +255,6 @@ public class StanceEntryCMPRecursionMultiplierTest
             doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
             singleSupportDurations.get(i).set(5.0 * random.nextDouble());
             transferSplitFractions.get(i).set(0.8 * random.nextDouble());
-            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
 
          boolean isInTransfer = false;
@@ -269,9 +262,10 @@ public class StanceEntryCMPRecursionMultiplierTest
 
          entryCMPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+         double timeOnCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue()
+               + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
-         double entryCMPMultiplier = 1.0 - Math.exp(-omega * currentStepDuration);
+         double entryCMPMultiplier = 1.0 - Math.exp(-omega * timeOnCMP);
          Assert.assertEquals(entryCMPMultiplier, entryCMPRecursionMultiplier.getEntryMultiplier(), epsilon);
 
          // setup for in transfer

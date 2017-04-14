@@ -49,16 +49,22 @@ public class StanceEntryCMPRecursionMultiplier
 
    private void computeWithOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
    {
-      double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-      double entryMultiplier = 1.0 - Math.exp(-omega0 * firstStepTime);
-      //this.entryMultiplier.set(entryMultiplier);
-      this.entryMultiplier.set(5.0);
+      double currentTransferOnCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+      double currentSwingOnCMP = singleSupportDurations.get(0).getDoubleValue();
+      double nextTransferOnCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+
+      double timeOnCurrentCMP = currentTransferOnCMP + currentSwingOnCMP + nextTransferOnCMP;
+
+      double entryMultiplier = 1.0 - Math.exp(-omega0 * timeOnCurrentCMP);
+      this.entryMultiplier.set(entryMultiplier);
    }
 
    private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
    {
-      double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-            swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+      double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+
+      double timeSpentOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
 
       if (isInTransfer)
       {
