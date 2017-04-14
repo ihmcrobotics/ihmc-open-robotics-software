@@ -559,6 +559,20 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
    }
 
    /**
+    * Packs the value of the desired rate of change of momentum into two frame vectors.
+    * 
+    * @param angularPartToPack frame vector to pack the desired rate of change of angular momentum
+    *           at the center of mass. Modified.
+    * @param linearPartToPack frame vector to pack the desired rate of change of linear momentum.
+    *           Modified.
+    */
+   public void getMomentumRate(FrameVector angularPartToPack, FrameVector linearPartToPack)
+   {
+      angularPartToPack.setIncludingFrame(worldFrame, 0, momentumRateOfChange);
+      linearPartToPack.setIncludingFrame(worldFrame, 3, momentumRateOfChange);
+   }
+
+   /**
     * {@inheritDoc}
     * 
     * @return {@link ControllerCoreCommandType#TASKSPACE}.

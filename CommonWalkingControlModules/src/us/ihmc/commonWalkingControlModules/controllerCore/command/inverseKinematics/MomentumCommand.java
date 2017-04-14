@@ -553,6 +553,19 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    }
 
    /**
+    * Packs the value of the desired momentum into two frame vectors.
+    * 
+    * @param angularPartToPack frame vector to pack the desired angular momentum at the center of
+    *           mass. Modified.
+    * @param linearPartToPack frame vector to pack the desired linear momentum. Modified.
+    */
+   public void getMomentumRate(FrameVector angularPartToPack, FrameVector linearPartToPack)
+   {
+      angularPartToPack.setIncludingFrame(worldFrame, 0, momentum);
+      linearPartToPack.setIncludingFrame(worldFrame, 3, momentum);
+   }
+
+   /**
     * {@inheritDoc}
     * 
     * @return {@link ControllerCoreCommandType#TASKSPACE}.
