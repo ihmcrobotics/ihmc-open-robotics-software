@@ -71,13 +71,14 @@ public class EntryCMPRecursionMultipliersTest
 
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
          double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
                transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
-               swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
+         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue();
 
          double exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnExitCMP) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
+
          Assert.assertEquals(exitCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
          Assert.assertFalse(Double.isNaN(exitCMPMultiplier));
          for (int i = 1; i < maxSteps; i++)
@@ -87,7 +88,7 @@ public class EntryCMPRecursionMultipliersTest
          isInTransfer = true;
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         exitCMPMultiplier = Math.exp(-omega * currentStepDuration) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
+         exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * exitCMPMultiplier;
          Assert.assertEquals(exitCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
          Assert.assertFalse(Double.isNaN(exitCMPMultiplier));
          for (int i = 1; i < maxSteps; i++)
@@ -136,20 +137,23 @@ public class EntryCMPRecursionMultipliersTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
 
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
          double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
                transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
          double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
@@ -165,7 +169,7 @@ public class EntryCMPRecursionMultipliersTest
          isInTransfer = true;
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         exitCMPMultiplier = Math.exp(-omega * currentStepDuration) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnEntryCMP));
+         exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * exitCMPMultiplier;
          Assert.assertEquals(exitCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
          Assert.assertFalse(Double.isNaN(exitCMPMultiplier));
          for (int i = 1; i < maxSteps; i++)
@@ -203,34 +207,34 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue();
+         double currentTimeOnCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+               singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double upcomingStepDuration = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue();
 
-         double entryCMPMultiplier = Math.exp(-omega * currentStepDuration) * (1.0 - Math.exp(-omega * upcomingStepDuration));
+         double entryCMPMultiplier = Math.exp(-omega * currentTimeOnCMP) * (1.0 - Math.exp(-omega * upcomingStepDuration));
+
          Assert.assertEquals(entryCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
          Assert.assertFalse(Double.isNaN(entryCMPMultiplier));
          for (int i = 1; i < maxSteps; i++)
@@ -277,33 +281,36 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
          entryCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double upcomingStepDuration = doubleSupportDurations.get(1).getDoubleValue() + singleSupportDurations.get(1).getDoubleValue();
+         double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
+               + singleSupportDurations.get(0).getDoubleValue()
+               + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+         double timeOnNextCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue()
+               + singleSupportDurations.get(1).getDoubleValue()
+               + transferSplitFractions.get(2).getDoubleValue() * doubleSupportDurations.get(2).getDoubleValue();
 
-         double entryCMPMultiplier = Math.exp(-omega * currentStepDuration) * (1.0 - Math.exp(-omega * upcomingStepDuration));
+         double entryCMPMultiplier = Math.exp(-omega * timeOnCurrentCMP) * (1.0 - Math.exp(-omega * timeOnNextCMP));
          Assert.assertEquals(entryCMPMultiplier, entryCMPRecursionMultipliers.getEntryMultiplier(0), epsilon);
          Assert.assertFalse(Double.isNaN(entryCMPMultiplier));
          for (int i = 1; i < maxSteps; i++)
@@ -361,12 +368,15 @@ public class EntryCMPRecursionMultipliersTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -441,12 +451,15 @@ public class EntryCMPRecursionMultipliersTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -530,12 +543,15 @@ public class EntryCMPRecursionMultipliersTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
@@ -608,23 +624,22 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -683,23 +698,22 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -763,23 +777,22 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         for (int step = 0; step < stepsRegistered; step++)
+         for (int i = 0; i < stepsRegistered; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
          doubleSupportDurations.get(stepsRegistered).set(2.0 * random.nextDouble());
+         transferSplitFractions.get(stepsRegistered).set(0.8 * random.nextDouble());
 
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
@@ -860,6 +873,8 @@ public class EntryCMPRecursionMultipliersTest
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
                singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(step).set(0.8 * random.nextDouble());
+               swingSplitFractions.get(step).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;
@@ -950,6 +965,8 @@ public class EntryCMPRecursionMultipliersTest
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
                singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(step).set(0.8 * random.nextDouble());
+               swingSplitFractions.get(step).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;
@@ -1037,11 +1054,8 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
@@ -1054,6 +1068,7 @@ public class EntryCMPRecursionMultipliersTest
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
                singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(step).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;
@@ -1123,11 +1138,8 @@ public class EntryCMPRecursionMultipliersTest
          singleSupportDurations.add(singleSupportDuration);
 
          DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
-         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
          transferSplitFraction.setToNaN();
-         swingSplitFraction.setToNaN();
          transferSplitFractions.add(transferSplitFraction);
-         swingSplitFractions.add(swingSplitFraction);
       }
 
       EntryCMPRecursionMultipliers entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
@@ -1140,6 +1152,7 @@ public class EntryCMPRecursionMultipliersTest
             {
                doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
                singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+               transferSplitFractions.get(step).set(0.8 * random.nextDouble());
             }
 
             boolean isInTransfer = false;
