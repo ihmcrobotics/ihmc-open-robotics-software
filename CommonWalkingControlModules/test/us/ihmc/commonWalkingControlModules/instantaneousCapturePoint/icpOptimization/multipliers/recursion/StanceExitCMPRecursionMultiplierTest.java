@@ -19,7 +19,6 @@ public class StanceExitCMPRecursionMultiplierTest
    public void testOneStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -31,24 +30,36 @@ public class StanceExitCMPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", exitCMPRatio, registry);
+      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < maxSteps; step++)
+         for (int i = 0; i < maxSteps + 1; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
 
          boolean isInTransfer = false;
@@ -56,9 +67,10 @@ public class StanceExitCMPRecursionMultiplierTest
 
          exitCMPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
-         double currentTimeSpentOnEntryCMP = (1.0 - exitRatio) * currentStepDuration;
+         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * transferSplitFractions.get(1).getDoubleValue();
 
          double exitCMPMultiplier = (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
@@ -77,7 +89,6 @@ public class StanceExitCMPRecursionMultiplierTest
    public void testOneStepOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -89,24 +100,36 @@ public class StanceExitCMPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", exitCMPRatio, registry);
+      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < maxSteps; step++)
+         for (int i = 0; i < maxSteps + 1; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
 
          boolean isInTransfer = false;
@@ -129,7 +152,6 @@ public class StanceExitCMPRecursionMultiplierTest
    public void testTwoStepTwoCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -141,24 +163,36 @@ public class StanceExitCMPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", exitCMPRatio, registry);
+      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < maxSteps; step++)
+         for (int i = 0; i < maxSteps + 1; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
 
          boolean isInTransfer = false;
@@ -166,9 +200,10 @@ public class StanceExitCMPRecursionMultiplierTest
 
          exitCMPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
-         double currentStepDuration = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = exitRatio * currentStepDuration;
-         double currentTimeSpentOnEntryCMP = (1.0 - exitRatio) * currentStepDuration;
+         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
+               transferSplitFractions.get(1).getDoubleValue() * transferSplitFractions.get(1).getDoubleValue();
 
          double exitCMPMultiplier = (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
@@ -187,7 +222,6 @@ public class StanceExitCMPRecursionMultiplierTest
    public void testTwoStepOneCMPCalculation()
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
-      DoubleYoVariable exitCMPRatio = new DoubleYoVariable("exitCMPRatio", registry);
       DoubleYoVariable yoOmega = new DoubleYoVariable("omega", registry);
 
       double omega = 3.0;
@@ -199,24 +233,36 @@ public class StanceExitCMPRecursionMultiplierTest
       Random random = new Random();
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
+      ArrayList<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
+      ArrayList<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitFraction = new DoubleYoVariable("transferSplitFraction" + i, registry);
+         DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction" + i, registry);
+         transferSplitFraction.setToNaN();
+         swingSplitFraction.setToNaN();
+         transferSplitFractions.add(transferSplitFraction);
+         swingSplitFractions.add(swingSplitFraction);
       }
 
-      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", exitCMPRatio, registry);
+      StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double exitRatio = 0.7 * random.nextDouble();
-         exitCMPRatio.set(exitRatio);
-
-         for (int step = 0; step < maxSteps; step++)
+         for (int i = 0; i < maxSteps + 1; i++)
          {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
+            doubleSupportDurations.get(i).set(2.0 * random.nextDouble());
+            singleSupportDurations.get(i).set(5.0 * random.nextDouble());
+            transferSplitFractions.get(i).set(0.8 * random.nextDouble());
+            swingSplitFractions.get(i).set(0.8 * random.nextDouble());
          }
 
          boolean isInTransfer = false;

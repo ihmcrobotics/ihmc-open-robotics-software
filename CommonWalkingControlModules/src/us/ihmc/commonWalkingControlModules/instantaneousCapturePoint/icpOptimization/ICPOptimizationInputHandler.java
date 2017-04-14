@@ -41,12 +41,11 @@ public class ICPOptimizationInputHandler
    private final ReferenceCentroidalMomentumPivotLocationsCalculator referenceCMPsCalculator;
    private final StateMultiplierCalculator stateMultiplierCalculator;
 
-   //private final DoubleYoVariable doubleSupportDuration;
-   //private final DoubleYoVariable singleSupportDuration;
    private final List<DoubleYoVariable> transferDurations;
    private final List<DoubleYoVariable> swingDurations;
+   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<DoubleYoVariable> swingSplitFractions;
 
-   private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
 
    private final ArrayList<YoFramePointInMultipleFrames> entryCornerPoints = new ArrayList<>();
    private final ArrayList<YoFramePointInMultipleFrames> exitCornerPoints = new ArrayList<>();
@@ -58,19 +57,16 @@ public class ICPOptimizationInputHandler
 
    public ICPOptimizationInputHandler(CapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
-         StateMultiplierCalculator stateMultiplierCalculator, DoubleYoVariable doubleSupportDuration, DoubleYoVariable singleSupportDuration,
-         List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations, DoubleYoVariable exitCMPDurationInPercentOfStepTime, boolean visualize,
+         StateMultiplierCalculator stateMultiplierCalculator, List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations,
+         List<DoubleYoVariable> transferSplitFractions, List<DoubleYoVariable> swingSplitFractions, boolean visualize,
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.stateMultiplierCalculator = stateMultiplierCalculator;
 
-      //this.doubleSupportDuration = doubleSupportDuration;
-      //this.singleSupportDuration = singleSupportDuration;
       this.transferDurations = transferDurations;
       this.swingDurations = swingDurations;
-      this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
-
-      exitCMPDurationInPercentOfStepTime.set(icpPlannerParameters.getSwingDurationAlpha());
+      this.transferSplitFractions = transferSplitFractions;
+      this.swingSplitFractions = swingSplitFractions;
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
             maximumNumberOfFootstepsToConsider, registry);
@@ -140,7 +136,7 @@ public class ICPOptimizationInputHandler
       referenceCMPsCalculator.computeReferenceCMPsStartingFromDoubleSupport(isStanding, transferToSide);
       referenceCMPsCalculator.update();
 
-      initializeCornerPoints(useTwoCMPs, omega0);
+      initializeCornerPointsDoubleSupport(useTwoCMPs, omega0);
       computeFinalICP(numberOfFootstepsToConsider);
 
       stateMultiplierCalculator.initializeForDoubleSupport();
@@ -155,7 +151,7 @@ public class ICPOptimizationInputHandler
       referenceCMPsCalculator.computeReferenceCMPsStartingFromSingleSupport(supportSide);
       referenceCMPsCalculator.update();
 
-      initializeCornerPoints(useTwoCMPs, omega0);
+      initializeCornerPointsSingleSupport(useTwoCMPs, omega0);
       computeFinalICP(numberOfFootstepsToConsider);
 
       stateMultiplierCalculator.initializeForSingleSupport();
@@ -163,18 +159,33 @@ public class ICPOptimizationInputHandler
       computeCMPOffsetRecursion(upcomingFootstepLocations, numberOfFootstepsToConsider);
    }
 
-   private void initializeCornerPoints(boolean useTwoCMPs, double omega0)
+   private void initializeCornerPointsDoubleSupport(boolean useTwoCMPs, double omega0)
    {
-      //double steppingDuration = doubleSupportDuration.getDoubleValue() + singleSupportDuration.getDoubleValue();
-      double steppingDuration = transferDurations.get(0).getDoubleValue() + swingDurations.get(0).getDoubleValue();
       if (useTwoCMPs)
       {
-         CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, exitCornerPoints, referenceCMPsCalculator.getEntryCMPs(), referenceCMPsCalculator.getExitCMPs(),
-               steppingDuration, exitCMPDurationInPercentOfStepTime.getDoubleValue(), omega0);
+         CapturePointTools.computeDesiredCornerPointsDoubleSupport(entryCornerPoints, exitCornerPoints, referenceCMPsCalculator.getEntryCMPs(),
+               referenceCMPsCalculator.getExitCMPs(), swingDurations, transferDurations, swingSplitFractions, transferSplitFractions,
+               omega0);
       }
       else
       {
-         CapturePointTools.computeDesiredCornerPoints(entryCornerPoints, referenceCMPsCalculator.getEntryCMPs(), false, steppingDuration, omega0);
+         CapturePointTools.computeDesiredCornerPointsDoubleSupport(entryCornerPoints, referenceCMPsCalculator.getEntryCMPs(), transferDurations, swingDurations,
+               transferSplitFractions, omega0);
+      }
+   }
+
+   private void initializeCornerPointsSingleSupport(boolean useTwoCMPs, double omega0)
+   {
+      if (useTwoCMPs)
+      {
+         CapturePointTools.computeDesiredCornerPointsSingleSupport(entryCornerPoints, exitCornerPoints, referenceCMPsCalculator.getEntryCMPs(),
+               referenceCMPsCalculator.getExitCMPs(), swingDurations, transferDurations, swingSplitFractions, transferSplitFractions,
+               omega0);
+      }
+      else
+      {
+         CapturePointTools.computeDesiredCornerPointsSingleSupport(entryCornerPoints, referenceCMPsCalculator.getEntryCMPs(), transferDurations, swingDurations,
+               transferSplitFractions, omega0);
       }
    }
 

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
@@ -22,9 +23,11 @@ public class TransferStateEndMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      transferSplitFractions.add(doubleSupportSplitRatio);
 
-      TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(doubleSupportSplitRatio);
+      TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(transferSplitFractions);
 
       Assert.assertEquals("", 4, stateEndMatrix.numRows);
       Assert.assertEquals("", 1, stateEndMatrix.numCols);
@@ -41,14 +44,16 @@ public class TransferStateEndMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      transferSplitFractions.add(doubleSupportSplitRatio);
 
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       doubleSupportDurations.add(new DoubleYoVariable("currentDoubleSupportDuration", registry));
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(doubleSupportSplitRatio);
+      TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(transferSplitFractions);
 
       for (int i = 0; i < iters; i++)
       {
@@ -61,8 +66,6 @@ public class TransferStateEndMatrixTest
          doubleSupportDurations.get(0).set(doubleSupportDuration);
          singleSupportDurations.get(0).set(singleSupportDuration);
 
-         String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
-
          double projectionTime = (1.0 - splitRatio) * doubleSupportDuration;
          double projection = Math.exp(omega0 * projectionTime);
 
@@ -72,11 +75,11 @@ public class TransferStateEndMatrixTest
          shouldBe.set(2, 0, projection);
          shouldBe.set(3, 0, omega0 * projection);
 
-         JUnitTools.assertMatrixEquals(name, shouldBe, stateEndMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(shouldBe, stateEndMatrix, epsilon);
 
          shouldBe.zero();
          stateEndMatrix.reset();
-         JUnitTools.assertMatrixEquals(name, shouldBe, stateEndMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(shouldBe, stateEndMatrix, epsilon);
       }
    }
 }
