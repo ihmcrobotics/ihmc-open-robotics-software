@@ -82,7 +82,7 @@ public class EntryCMPRecursionMultipliers
          double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * steppingDuration));
          entryMultipliers.get(i - 1).set(entryRecursion);
 
-         if (i + 1 == numberOfStepsRegistered)
+         if (i >= numberOfStepsRegistered)
             break; // this is the final transfer
 
          recursionTime += steppingDuration;
@@ -127,7 +127,7 @@ public class EntryCMPRecursionMultipliers
 
          entryMultipliers.get(i - 1).set(entryRecursion);
 
-         if (i + 1 == numberOfStepsRegistered)
+         if (i >= numberOfStepsRegistered)
             break; // this is the final transfer
 
          recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
