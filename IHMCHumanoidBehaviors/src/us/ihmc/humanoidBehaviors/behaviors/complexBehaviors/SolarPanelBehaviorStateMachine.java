@@ -24,8 +24,6 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
    
    
    
-   SolarPanel solarPanel;
-   SolarPanelMotionPlanner solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
    
    
    
@@ -138,18 +136,6 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
       
    }
    
-   
-   private void setUpSolarPanel()
-   {
-      Pose poseSolarPanel = new Pose();
-      Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
-      quaternionSolarPanel.appendRollRotation(0.0);
-      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
-      poseSolarPanel.setOrientation(quaternionSolarPanel);
-      
-      solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
-   }
    
    
    

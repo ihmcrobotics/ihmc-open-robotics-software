@@ -9,12 +9,12 @@ import us.ihmc.manipulation.planning.robotcollisionmodel.CollisionModelBox;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
+public class SolarPanelPoseValidityTesterOld extends WholeBodyPoseValidityTesterOld
 {
    private SolarPanel solarPanel;
    private PacketCommunicator packetCommunicator;
   
-   public SolarPanelPoseValidityTester(SolarPanel solarPanel, PacketCommunicator packetCommunicator, KinematicsToolboxController ikToolboxController)
+   public SolarPanelPoseValidityTesterOld(SolarPanel solarPanel, PacketCommunicator packetCommunicator, KinematicsToolboxController ikToolboxController)
    {
       super(ikToolboxController);
       this.solarPanel = solarPanel;

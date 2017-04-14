@@ -1,12 +1,12 @@
 package us.ihmc.manipulation.planning.rrttimedomain;
 
-import us.ihmc.manipulation.planning.avatartest.SolarPanelPoseValidityTester;
+import us.ihmc.manipulation.planning.avatartest.SolarPanelPoseValidityTesterOld;
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 
 public class RRTNode1DTimeDomain extends RRTNode
 {
-   public static SolarPanelPoseValidityTester nodeValidityTester;
+   public static SolarPanelPoseValidityTesterOld nodeValidityTester;
    public static SolarPanelPath cleaningPath;
    
    /*
