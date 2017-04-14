@@ -419,7 +419,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
 
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController();      
                   
-      SolarPanelPoseValidityTester solarPanelValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      SolarPanelPoseValidityTesterOld solarPanelValidityTester = new SolarPanelPoseValidityTesterOld(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
       
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 0.2, new Point3D(0.5, -0.35, 1.0), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
       wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
@@ -499,7 +499,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController(); 
       
-      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTesterOld(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
       RRTNode1DTimeDomain nodeOne = new RRTNode1DTimeDomain(0.1, Math.PI*0.2);
       
       PrintTools.info("Node One "+nodeOne.getNodeData(0)+" "+nodeOne.getNodeData(1));
@@ -561,7 +561,7 @@ public abstract class AvatarSolarPanelCleaningMotionTest implements MultiRobotTe
       
       KinematicsToolboxController kinematicsToolBoxController = (KinematicsToolboxController) kinematicsToolboxModule.getToolboxController(); 
       
-      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
+      RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTesterOld(solarPanel, toolboxCommunicator, kinematicsToolBoxController);
       
       // ********** Planning *** //
       

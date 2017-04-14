@@ -163,7 +163,7 @@ public class RRTTestProject
 
       RRTNode startNode = new RRTNode2D(0.0, 0.0);
       RRTNode goalNode = new RRTNode2D(3.0, 2.0);
-      RRTPlanner2D rrtPlanner = new RRTPlanner2D(startNode, goalNode, 0.3);
+      RRTPlanner2D rrtPlanner = new RRTPlanner2D(startNode, goalNode, 0.6);
 
       RRTNode upperBoundNode = new RRTNode2D(5.0, 4.0);
       RRTNode lowerBoundNode = new RRTNode2D(-5.0, -4.0);

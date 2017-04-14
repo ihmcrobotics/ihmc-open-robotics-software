@@ -4,13 +4,8 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.manipulation.planning.robotcollisionmodel.RobotCollisionModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 
-public abstract class WholeBodyPoseValidityTester
+public abstract class WholeBodyPoseValidityTesterOld
 {
-//   private final DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-//   KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
-   
-   
-   
    protected KinematicsToolboxController ikToolboxController;
    protected FullHumanoidRobotModel ikFullRobotModel;
    protected RobotCollisionModel robotCollisionModel;
@@ -19,7 +14,7 @@ public abstract class WholeBodyPoseValidityTester
    protected boolean collisionFree = true;
    protected boolean jointlimitFree = true;
 
-   public WholeBodyPoseValidityTester(KinematicsToolboxController ikToolboxController)
+   public WholeBodyPoseValidityTesterOld(KinematicsToolboxController ikToolboxController)
    {
       this.ikToolboxController = ikToolboxController;
       this.ikFullRobotModel = this.ikToolboxController.getDesiredFullRobotModel();
