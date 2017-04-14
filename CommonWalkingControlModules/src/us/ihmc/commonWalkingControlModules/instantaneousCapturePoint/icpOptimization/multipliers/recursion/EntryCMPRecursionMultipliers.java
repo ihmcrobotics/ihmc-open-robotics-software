@@ -61,23 +61,26 @@ public class EntryCMPRecursionMultipliers
          ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
          double omega0)
    {
-      double recursionTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
+      double timeSpentOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+            singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+      double recursionTime = timeSpentOnCurrentCMP;
 
-      for (int i = 0; i < numberOfStepsToConsider; i++)
+      for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
          double steppingDuration;
-         if (i + 1 < numberOfStepsRegistered)
+         if (i < numberOfStepsRegistered)
          { // this is the next step
-            steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue() + singleSupportDurations.get(i + 1).getDoubleValue();
+            steppingDuration = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue() +
+                  singleSupportDurations.get(i).getDoubleValue() +
+                  transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
          }
          else
          { // this is the final transfer
-            steppingDuration = doubleSupportDurations.get(i + 1).getDoubleValue();
+            steppingDuration = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
          }
 
          double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * steppingDuration));
-         //entryMultipliers.get(i).set(entryRecursion);
-         entryMultipliers.get(i).set(5.0);
+         entryMultipliers.get(i - 1).set(entryRecursion);
 
          if (i + 1 == numberOfStepsRegistered)
             break; // this is the final transfer
@@ -101,10 +104,10 @@ public class EntryCMPRecursionMultipliers
          recursionTime += currentTimeSpentOnEntryCMP;
 
 
-      for (int i = 0; i < numberOfStepsToConsider; i++)
+      for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
          double timeSpentOnEntryCMP, timeSpentOnExitCMP;
-         if (i + 1 < numberOfStepsRegistered)
+         if (i < numberOfStepsRegistered)
          { // this is the next step
             double currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
             double currentSwingOnEntryCMP = swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
@@ -122,7 +125,7 @@ public class EntryCMPRecursionMultipliers
 
          double entryRecursion = Math.exp(-omega0 * recursionTime) * (1.0 - Math.exp(-omega0 * timeSpentOnEntryCMP));
 
-         entryMultipliers.get(i).set(entryRecursion);
+         entryMultipliers.get(i - 1).set(entryRecursion);
 
          if (i + 1 == numberOfStepsRegistered)
             break; // this is the final transfer
