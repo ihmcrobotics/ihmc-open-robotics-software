@@ -42,10 +42,19 @@ public class StateEndCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
-         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
-         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         transferSplitRatio.setToNaN();
+         swingSplitRatio.setToNaN();
+         transferSplitFractions.add(transferSplitRatio);
+         swingSplitFractions.add(swingSplitRatio);
       }
 
       boolean projectForward = true;
@@ -60,18 +69,16 @@ public class StateEndCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double swingRatio = 0.7 * random.nextDouble();
-         swingSplitFractions.get(0).set(swingRatio);
          double currentTransferRatio = 0.7 * random.nextDouble();
+         double currentSwingRatio = 0.7 * random.nextDouble();
+         double nextTransferRatio = 0.7 * random.nextDouble();
          transferSplitFractions.get(0).set(currentTransferRatio);
-         double upcomingTransferRatio = 0.7 * random.nextDouble();
-         transferSplitFractions.get(1).set(upcomingTransferRatio);
+         swingSplitFractions.get(0).set(currentSwingRatio);
+         transferSplitFractions.get(1).set(nextTransferRatio);
 
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
 
@@ -98,6 +105,8 @@ public class StateEndCurrentMultiplierTest
 
          Assert.assertEquals(positionMatrixOut.get(0, 0), stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMatrixOut.get(0, 0), stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -122,10 +131,16 @@ public class StateEndCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
-         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
-         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         transferSplitRatio.setToNaN();
+         transferSplitFractions.add(transferSplitRatio);
       }
 
       boolean projectForward = true;
@@ -140,18 +155,14 @@ public class StateEndCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double swingRatio = 0.7 * random.nextDouble();
-         swingSplitFractions.get(0).set(swingRatio);
          double currentTransferRatio = 0.7 * random.nextDouble();
+         double nextTransferRatio = 0.7 * random.nextDouble();
          transferSplitFractions.get(0).set(currentTransferRatio);
-         double upcomingTransferRatio = 0.7 * random.nextDouble();
-         transferSplitFractions.get(1).set(upcomingTransferRatio);
+         transferSplitFractions.get(1).set(nextTransferRatio);
 
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
 
@@ -178,6 +189,8 @@ public class StateEndCurrentMultiplierTest
 
          Assert.assertEquals(positionMatrixOut.get(0, 0), stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMatrixOut.get(0, 0), stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -202,10 +215,19 @@ public class StateEndCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
-         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
-         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         transferSplitRatio.setToNaN();
+         swingSplitRatio.setToNaN();
+         transferSplitFractions.add(transferSplitRatio);
+         swingSplitFractions.add(swingSplitRatio);
       }
 
       boolean projectForward = true;
@@ -214,18 +236,16 @@ public class StateEndCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double swingRatio = 0.7 * random.nextDouble();
-         swingSplitFractions.get(0).set(swingRatio);
          double currentTransferRatio = 0.7 * random.nextDouble();
+         double currentSwingRatio = 0.7 * random.nextDouble();
+         double nextTransferRatio = 0.7 * random.nextDouble();
          transferSplitFractions.get(0).set(currentTransferRatio);
-         double upcomingTransferRatio = 0.7 * random.nextDouble();
-         transferSplitFractions.get(1).set(upcomingTransferRatio);
+         swingSplitFractions.get(0).set(currentSwingRatio);
+         transferSplitFractions.get(1).set(nextTransferRatio);
 
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -249,6 +269,8 @@ public class StateEndCurrentMultiplierTest
 
          Assert.assertEquals(0.0, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -274,10 +296,19 @@ public class StateEndCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
-         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
-         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         transferSplitRatio.setToNaN();
+         swingSplitRatio.setToNaN();
+         transferSplitFractions.add(transferSplitRatio);
+         swingSplitFractions.add(swingSplitRatio);
       }
 
       boolean projectForward = true;
@@ -292,18 +323,16 @@ public class StateEndCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double swingRatio = 0.7 * random.nextDouble();
-         swingSplitFractions.get(0).set(swingRatio);
          double currentTransferRatio = 0.7 * random.nextDouble();
+         double currentSwingRatio = 0.7 * random.nextDouble();
+         double nextTransferRatio = 0.7 * random.nextDouble();
          transferSplitFractions.get(0).set(currentTransferRatio);
-         double upcomingTransferRatio = 0.7 * random.nextDouble();
-         transferSplitFractions.get(1).set(upcomingTransferRatio);
+         swingSplitFractions.get(0).set(currentSwingRatio);
+         transferSplitFractions.get(1).set(nextTransferRatio);
 
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -337,8 +366,10 @@ public class StateEndCurrentMultiplierTest
 
          stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
-         Assert.assertEquals("iter = " + iter, positionMatrixOut.get(0, 0), stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals("iter = " + iter, velocityMatrixOut.get(0, 0), stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertEquals(positionMatrixOut.get(0, 0), stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(velocityMatrixOut.get(0, 0), stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -363,10 +394,19 @@ public class StateEndCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
-         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
-         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         DoubleYoVariable swingSplitRatio = new DoubleYoVariable("swingSplitRatio" + i, registry);
+         transferSplitRatio.setToNaN();
+         swingSplitRatio.setToNaN();
+         transferSplitFractions.add(transferSplitRatio);
+         swingSplitFractions.add(swingSplitRatio);
       }
 
       boolean projectForward = true;
@@ -375,18 +415,16 @@ public class StateEndCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double swingRatio = 0.7 * random.nextDouble();
-         swingSplitFractions.get(0).set(swingRatio);
          double currentTransferRatio = 0.7 * random.nextDouble();
+         double currentSwingRatio = 0.7 * random.nextDouble();
+         double nextTransferRatio = 0.7 * random.nextDouble();
          transferSplitFractions.get(0).set(currentTransferRatio);
-         double upcomingTransferRatio = 0.7 * random.nextDouble();
-         transferSplitFractions.get(1).set(upcomingTransferRatio);
+         swingSplitFractions.get(0).set(currentSwingRatio);
+         transferSplitFractions.get(1).set(nextTransferRatio);
 
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -406,16 +444,18 @@ public class StateEndCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * (singleSupportDuration - endOfSpline) + endOfSpline;
 
-         double upcomingInitialDoubleSupportDuration = upcomingTransferRatio * doubleSupportDurations.get(1).getDoubleValue();
-         double timeSpentOnExitCMP = (1.0 - swingRatio) * singleSupportDuration + upcomingInitialDoubleSupportDuration;
+         double upcomingInitialDoubleSupportDuration = nextTransferRatio * doubleSupportDurations.get(1).getDoubleValue();
+         double timeSpentOnExitCMP = (1.0 - currentSwingRatio) * singleSupportDuration + upcomingInitialDoubleSupportDuration;
 
          stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          double projectionTime = timeInCurrentState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
          double projection = Math.exp(omega * projectionTime);
 
-         Assert.assertEquals("iter = " + iter, projection, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals("iter = " + iter, omega * projection, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertEquals(projection, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(omega * projection, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 
@@ -440,10 +480,16 @@ public class StateEndCurrentMultiplierTest
 
       for (int i = 0 ; i < maxSteps + 1; i++)
       {
-         doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration" + i, registry));
-         transferSplitFractions.add(new DoubleYoVariable("transferSplitFraction" + i, registry));
-         swingSplitFractions.add(new DoubleYoVariable("swingSplitFraction" + i, registry));
+         DoubleYoVariable doubleSupportDuration = new DoubleYoVariable("doubleSupportDuration" + i, registry);
+         DoubleYoVariable singleSupportDuration = new DoubleYoVariable("singleSupportDuration" + i, registry);
+         doubleSupportDuration.setToNaN();
+         singleSupportDuration.setToNaN();
+         doubleSupportDurations.add(doubleSupportDuration);
+         singleSupportDurations.add(singleSupportDuration);
+
+         DoubleYoVariable transferSplitRatio = new DoubleYoVariable("transferSplitRatio" + i, registry);
+         transferSplitRatio.setToNaN();
+         transferSplitFractions.add(transferSplitRatio);
       }
 
       boolean projectForward = true;
@@ -452,18 +498,14 @@ public class StateEndCurrentMultiplierTest
 
       for (int iter = 0; iter < iters; iter++)
       {
-         double swingRatio = 0.7 * random.nextDouble();
-         swingSplitFractions.get(0).set(swingRatio);
          double currentTransferRatio = 0.7 * random.nextDouble();
+         double nextTransferRatio = 0.7 * random.nextDouble();
          transferSplitFractions.get(0).set(currentTransferRatio);
-         double upcomingTransferRatio = 0.7 * random.nextDouble();
-         transferSplitFractions.get(1).set(upcomingTransferRatio);
+         transferSplitFractions.get(1).set(nextTransferRatio);
 
-         for (int step = 0; step < maxSteps; step++)
-         {
-            doubleSupportDurations.get(step).set(2.0 * random.nextDouble());
-            singleSupportDurations.get(step).set(5.0 * random.nextDouble());
-         }
+         doubleSupportDurations.get(0).set(2.0 * random.nextDouble());
+         singleSupportDurations.get(0).set(5.0 * random.nextDouble());
+         doubleSupportDurations.get(1).set(2.0 * random.nextDouble());
 
          double singleSupportDuration = singleSupportDurations.get(0).getDoubleValue();
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -482,16 +524,15 @@ public class StateEndCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * singleSupportDuration;
 
-         double upcomingInitialDoubleSupportDuration = upcomingTransferRatio * doubleSupportDurations.get(1).getDoubleValue();
-         double timeSpentOnExitCMP = (1.0 - swingRatio) * singleSupportDuration + upcomingInitialDoubleSupportDuration;
-
          stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInCurrentState, false, isInTransfer, omega);
 
-         double projectionTime = timeInCurrentState - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
+         double projectionTime = timeInCurrentState + (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
          double projection = Math.exp(omega * projectionTime);
 
-         Assert.assertEquals("iter = " + iter, projection, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
-         Assert.assertEquals("iter = " + iter, omega * projection, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertEquals(projection, stateEndCurrentMultiplier.getPositionMultiplier(), epsilon);
+         Assert.assertEquals(omega * projection, stateEndCurrentMultiplier.getVelocityMultiplier(), epsilon);
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getPositionMultiplier()));
+         Assert.assertFalse(Double.isNaN(stateEndCurrentMultiplier.getVelocityMultiplier()));
       }
    }
 }

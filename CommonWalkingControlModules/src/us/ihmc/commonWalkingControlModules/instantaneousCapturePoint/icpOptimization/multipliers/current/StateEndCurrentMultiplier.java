@@ -171,7 +171,7 @@ public class StateEndCurrentMultiplier
    {
       double currentTransferOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
 
-      double duration = timeInState - currentTransferOnEntryCMP;
+      double duration = timeInState + currentTransferOnEntryCMP;
       return Math.exp(omega0 * duration);
    }
 
