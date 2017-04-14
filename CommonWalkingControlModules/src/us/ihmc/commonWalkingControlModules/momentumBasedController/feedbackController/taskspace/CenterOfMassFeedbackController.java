@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type.*;
+
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -90,25 +91,24 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       isEnabled.set(false);
 
-      yoDesiredPosition = feedbackControllerToolbox.getCenterOfMassPosition(Type.DESIRED);
-      yoCurrentPosition = feedbackControllerToolbox.getCenterOfMassPosition(Type.CURRENT);
-      yoErrorPosition = feedbackControllerToolbox.getCenterOfMassDataVector(Type.ERROR, Space.POSITION);
+      yoDesiredPosition = feedbackControllerToolbox.getCenterOfMassPosition(DESIRED);
+      yoCurrentPosition = feedbackControllerToolbox.getCenterOfMassPosition(CURRENT);
+      yoErrorPosition = feedbackControllerToolbox.getCenterOfMassDataVector(ERROR, POSITION);
 
-      yoErrorPositionIntegrated = feedbackControllerToolbox.getCenterOfMassDataVector(Type.ERROR_INTEGRATED, Space.POSITION);
+      yoErrorPositionIntegrated = feedbackControllerToolbox.getCenterOfMassDataVector(ERROR_INTEGRATED, POSITION);
 
-      yoDesiredLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(Type.DESIRED, Space.LINEAR_VELOCITY);
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(DESIRED, LINEAR_VELOCITY);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(Type.CURRENT, Space.LINEAR_VELOCITY);
-         yoErrorLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(Type.ERROR, Space.LINEAR_VELOCITY);
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(CURRENT, LINEAR_VELOCITY);
+         yoErrorLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(ERROR, LINEAR_VELOCITY);
 
-         yoDesiredLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(Type.DESIRED, Space.LINEAR_ACCELERATION);
-         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
-         yoFeedbackLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(Type.FEEDBACK, Space.LINEAR_ACCELERATION);
-         rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox.getCenterOfMassRateLimitedDataVector(Type.FEEDBACK, Space.LINEAR_ACCELERATION, dt,
-                                                                                                                maximumRate);
-         yoAchievedLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(Type.ACHIEVED, Space.LINEAR_ACCELERATION);
+         yoDesiredLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(DESIRED, LINEAR_ACCELERATION);
+         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(FEEDFORWARD, LINEAR_ACCELERATION);
+         yoFeedbackLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(FEEDBACK, LINEAR_ACCELERATION);
+         rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox.getCenterOfMassRateLimitedDataVector(FEEDBACK, LINEAR_ACCELERATION, dt, maximumRate);
+         yoAchievedLinearAcceleration = feedbackControllerToolbox.getCenterOfMassDataVector(ACHIEVED, LINEAR_ACCELERATION);
       }
       else
       {
@@ -124,10 +124,9 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedbackLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(Type.FEEDBACK, Space.LINEAR_VELOCITY);
-         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
-         rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox.getCenterOfMassRateLimitedDataVector(Type.FEEDBACK, Space.LINEAR_VELOCITY, dt,
-                                                                                                            maximumRate);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(FEEDBACK, LINEAR_VELOCITY);
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getCenterOfMassDataVector(FEEDFORWARD, LINEAR_VELOCITY);
+         rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox.getCenterOfMassRateLimitedDataVector(FEEDBACK, LINEAR_VELOCITY, dt, maximumRate);
       }
       else
       {
