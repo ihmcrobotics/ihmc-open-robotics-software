@@ -50,30 +50,32 @@ public class ICPOptimizationSolutionHandler
    private final StateMultiplierCalculator stateMultiplierCalculator;
 
    private final boolean debug;
+   private final String yoNamePrefix;
 
    public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, StateMultiplierCalculator stateMultiplierCalculator,
-         boolean visualize, boolean debug, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         boolean visualize, boolean debug, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.stateMultiplierCalculator = stateMultiplierCalculator;
       this.debug = debug;
+      this.yoNamePrefix = yoNamePrefix;
 
-      actualEndOfStateICP = new YoFramePoint2d("actualEndOfStateICP", worldFrame, registry);
+      actualEndOfStateICP = new YoFramePoint2d(yoNamePrefix + "ActualEndOfStateICP", worldFrame, registry);
 
-      controllerReferenceICP = new YoFramePoint2d("controllerReferenceICP", worldFrame, registry);
-      controllerReferenceICPVelocity = new YoFrameVector2d("controllerReferenceICPVelocity", worldFrame, registry);
-      controllerReferenceCMP = new YoFramePoint2d("controllerReferenceCMP", worldFrame, registry);
+      controllerReferenceICP = new YoFramePoint2d(yoNamePrefix + "ReferenceICP", worldFrame, registry);
+      controllerReferenceICPVelocity = new YoFrameVector2d(yoNamePrefix + "ReferenceICPVelocity", worldFrame, registry);
+      controllerReferenceCMP = new YoFramePoint2d(yoNamePrefix + "ReferenceCMP", worldFrame, registry);
 
       if (debug)
       {
-         nominalEndOfStateICP = new YoFramePoint2d("nominalEndOfStateICP", worldFrame, registry);
-         nominalReferenceICP = new YoFramePoint2d("nominalReferenceICP", worldFrame, registry);
-         nominalReferenceICPVelocity = new YoFrameVector2d("nominalReferenceICPVelocity", worldFrame, registry);
-         nominalReferenceCMP = new YoFramePoint2d("nominalReferenceCMP", worldFrame, registry);
+         nominalEndOfStateICP = new YoFramePoint2d(yoNamePrefix + "NominalEndOfStateICP", worldFrame, registry);
+         nominalReferenceICP = new YoFramePoint2d(yoNamePrefix + "NominalReferenceICP", worldFrame, registry);
+         nominalReferenceICPVelocity = new YoFrameVector2d(yoNamePrefix + "NominalReferenceICPVelocity", worldFrame, registry);
+         nominalReferenceCMP = new YoFramePoint2d(yoNamePrefix + "NominalReferenceCMP", worldFrame, registry);
 
-         controllerCostToGo = new DoubleYoVariable("costToGo", registry);
-         controllerFootstepCostToGo = new DoubleYoVariable("footstepCostToGo", registry);
-         controllerFeedbackCostToGo = new DoubleYoVariable("feedbackCostToGo", registry);
-         controllerDynamicRelaxationCostToGo = new DoubleYoVariable("dynamicRelaxationCostToGo", registry);
+         controllerCostToGo = new DoubleYoVariable(yoNamePrefix + "CostToGo", registry);
+         controllerFootstepCostToGo = new DoubleYoVariable(yoNamePrefix + "FootstepCostToGo", registry);
+         controllerFeedbackCostToGo = new DoubleYoVariable(yoNamePrefix + "FeedbackCostToGo", registry);
+         controllerDynamicRelaxationCostToGo = new DoubleYoVariable(yoNamePrefix + "DynamicRelaxationCostToGo", registry);
       }
       else
       {
@@ -88,16 +90,16 @@ public class ICPOptimizationSolutionHandler
          controllerDynamicRelaxationCostToGo = null;
       }
 
-      footstepDeadband = new DoubleYoVariable("footstepDeadband", registry);
-      footstepSolutionResolution = new DoubleYoVariable("footstepSolutionResolution", registry);
+      footstepDeadband = new DoubleYoVariable(yoNamePrefix + "FootstepDeadband", registry);
+      footstepSolutionResolution = new DoubleYoVariable(yoNamePrefix + "FootstepSolutionResolution", registry);
 
-      footstepWasAdjusted = new BooleanYoVariable("footstepWasAdjusted", registry);
-      footstepAdjustment = new YoFrameVector2d("footstepAdjustment", worldFrame, registry);
+      footstepWasAdjusted = new BooleanYoVariable(yoNamePrefix + "FootstepWasAdjusted", registry);
+      footstepAdjustment = new YoFrameVector2d(yoNamePrefix + "FootstepAdjustment", worldFrame, registry);
 
       footstepDeadband.set(icpOptimizationParameters.getAdjustmentDeadband());
       footstepSolutionResolution.set(icpOptimizationParameters.getFootstepSolutionResolution());
 
-      if (visualize && yoGraphicsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry, visualize);
    }
 
@@ -106,14 +108,14 @@ public class ICPOptimizationSolutionHandler
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition actualEndOfStateICP = new YoGraphicPosition("actualEndOfStateICP", this.actualEndOfStateICP, 0.005, YoAppearance.Aquamarine(),
+      YoGraphicPosition actualEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "ActualEndOfStateICP", this.actualEndOfStateICP, 0.005, YoAppearance.Aquamarine(),
             GraphicType.SOLID_BALL);
 
       if (debug)
       {
-         YoGraphicPosition nominalReferenceICP = new YoGraphicPosition("nominalReferenceICP", this.nominalReferenceICP, 0.01, YoAppearance.LightYellow(),
+         YoGraphicPosition nominalReferenceICP = new YoGraphicPosition(yoNamePrefix + "NominalReferenceICP", this.nominalReferenceICP, 0.01, YoAppearance.LightYellow(),
                GraphicType.BALL);
-         YoGraphicPosition nominalEndOfStateICP = new YoGraphicPosition("nominalEndOfStateICP", this.nominalEndOfStateICP, 0.01, YoAppearance.Green(),
+         YoGraphicPosition nominalEndOfStateICP = new YoGraphicPosition(yoNamePrefix + "NominalEndOfStateICP", this.nominalEndOfStateICP, 0.01, YoAppearance.Green(),
                GraphicType.SOLID_BALL);
          yoGraphicsList.add(nominalReferenceICP);
          yoGraphicsList.add(nominalEndOfStateICP);
@@ -127,8 +129,8 @@ public class ICPOptimizationSolutionHandler
       yoGraphicsList.setVisible(visualize);
       artifactList.setVisible(visualize);
 
-      YoGraphicPosition referenceICP = new YoGraphicPosition("controllerReferenceICP", controllerReferenceICP, 0.005, YoAppearance.Yellow(), GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition referenceCMP = new YoGraphicPosition("controllerReferenceCMP", controllerReferenceCMP, 0.005, YoAppearance.Beige(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition referenceICP = new YoGraphicPosition(yoNamePrefix + "ReferenceICP", controllerReferenceICP, 0.005, YoAppearance.Yellow(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition referenceCMP = new YoGraphicPosition(yoNamePrefix + "ReferenceCMP", controllerReferenceCMP, 0.005, YoAppearance.Beige(), GraphicType.BALL_WITH_CROSS);
 
       String name = "ICPOptimization";
       yoGraphicsListRegistry.registerArtifact(name, referenceICP.createArtifact());
