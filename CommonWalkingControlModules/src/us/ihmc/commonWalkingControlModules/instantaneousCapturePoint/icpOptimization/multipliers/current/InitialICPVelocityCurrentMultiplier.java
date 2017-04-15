@@ -26,15 +26,15 @@ public class InitialICPVelocityCurrentMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   public InitialICPVelocityCurrentMultiplier(YoVariableRegistry registry)
+   public InitialICPVelocityCurrentMultiplier(String yoNamePrefix, YoVariableRegistry registry)
    {
-      this(null, null, registry);
+      this(null, null, yoNamePrefix, registry);
    }
 
-   public InitialICPVelocityCurrentMultiplier(CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, YoVariableRegistry registry)
+   public InitialICPVelocityCurrentMultiplier(CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
    {
-      positionMultiplier = new DoubleYoVariable("InitialICPVelocityCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable("InitialICPCVelocityCurrentVelocityMultiplier", registry);
+      positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPVelocityCurrentMultiplier", registry);
+      velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCVelocityCurrentVelocityMultiplier", registry);
 
       if (cubicMatrix == null)
       {

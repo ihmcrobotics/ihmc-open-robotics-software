@@ -32,16 +32,16 @@ public class ExitCMPCurrentMultiplier
    private final DoubleYoVariable velocityMultiplier;
 
    public ExitCMPCurrentMultiplier( List<DoubleYoVariable> swingSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
-         YoVariableRegistry registry)
+         String yoNamePrefix, YoVariableRegistry registry)
    {
-      this(swingSplitFractions, startOfSplineTime, endOfSplineTime, null, null, registry);
+      this(swingSplitFractions, startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, registry);
    }
 
    public ExitCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
-         CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, YoVariableRegistry registry)
+         CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
    {
-      positionMultiplier = new DoubleYoVariable("ExitCMPCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable("ExitCMPCurrentVelocityMultiplier", registry);
+      positionMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentMultiplier", registry);
+      velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "ExitCMPCurrentVelocityMultiplier", registry);
 
       this.swingSplitFractions = swingSplitFractions;
 
