@@ -31,7 +31,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class ICPOptimizationInputHandler
 {
    private static final String namePrefix = "icpOptimizationController";
-   private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoFramePoint finalICP;
@@ -58,7 +57,7 @@ public class ICPOptimizationInputHandler
    public ICPOptimizationInputHandler(CapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
          StateMultiplierCalculator stateMultiplierCalculator, List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations,
-         List<DoubleYoVariable> transferSplitFractions, List<DoubleYoVariable> swingSplitFractions, boolean visualize,
+         List<DoubleYoVariable> transferSplitFractions, List<DoubleYoVariable> swingSplitFractions, boolean visualize, String yoNamePrefix,
          YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.stateMultiplierCalculator = stateMultiplierCalculator;
@@ -93,7 +92,7 @@ public class ICPOptimizationInputHandler
          exitOffsets.add(new FrameVector2d(worldFrame));
       }
 
-      if (visualize && yoGraphicsListRegistry != null)
+      if (yoGraphicsListRegistry != null)
          setupVisualizers(yoGraphicsListRegistry, visualize);
    }
 
