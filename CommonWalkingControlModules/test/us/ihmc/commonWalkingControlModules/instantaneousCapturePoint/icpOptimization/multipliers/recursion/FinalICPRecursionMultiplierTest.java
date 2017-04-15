@@ -52,6 +52,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -69,6 +70,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = true;
 
          finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -81,14 +83,17 @@ public class FinalICPRecursionMultiplierTest
 
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP + nextTimeSpentOnExitCMP));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
          finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          finalICPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * finalICPMultiplier;
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -131,6 +136,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -148,6 +154,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = true;
 
          finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -158,14 +165,17 @@ public class FinalICPRecursionMultiplierTest
 
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP + nextTimeSpentOnExitCMP));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
          finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          finalICPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * finalICPMultiplier;
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -205,6 +215,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -221,6 +232,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = false;
 
          finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
                + singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -229,13 +241,16 @@ public class FinalICPRecursionMultiplierTest
 
          double finalICPMultiplier = Math.exp(-omega * (timeOnCurrentCMP + timeOnNextCMP));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
          finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -275,6 +290,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -291,6 +307,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = false;
 
          finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
                + singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -298,13 +315,16 @@ public class FinalICPRecursionMultiplierTest
 
          double finalICPMultiplier = Math.exp(-omega * (timeOnCurrentCMP + timeOnNextCMP));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
-         finalICPRecursionMultiplier.compute(1, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         finalICPRecursionMultiplier.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -347,6 +367,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -363,7 +384,8 @@ public class FinalICPRecursionMultiplierTest
          boolean isInTransfer = false;
          boolean useTwoCMPs = true;
 
-         finalICPRecursionMultiplier.compute(2, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -374,15 +396,18 @@ public class FinalICPRecursionMultiplierTest
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP));
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
-         finalICPRecursionMultiplier.compute(2, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          finalICPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * finalICPMultiplier;
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -425,6 +450,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -442,6 +468,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = true;
 
          finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -456,15 +483,18 @@ public class FinalICPRecursionMultiplierTest
          double finalICPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP + nextTimeSpentOnExitCMP + nextNextTimeSpentOnEntryCMP));
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
          finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          finalICPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * finalICPMultiplier;
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -507,6 +537,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -524,6 +555,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = true;
 
          finalICPRecursionMultiplier.compute(2, 3, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, 3, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -542,14 +574,17 @@ public class FinalICPRecursionMultiplierTest
                nextNextTimeSpentOnEntryCMP + nextNextTimeSpentOnExitCMP));
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
          finalICPRecursionMultiplier.compute(2, 3, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, 3, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          finalICPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * finalICPMultiplier;
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -590,6 +625,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -606,6 +642,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = false;
 
          finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
                + singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -614,13 +651,16 @@ public class FinalICPRecursionMultiplierTest
          double finalICPMultiplier = Math.exp(-omega * (timeOnCurrentCMP + timeOnNextCMP));
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
          finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -661,6 +701,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -677,6 +718,7 @@ public class FinalICPRecursionMultiplierTest
          boolean useTwoCMPs = false;
 
          finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
                + singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -686,13 +728,16 @@ public class FinalICPRecursionMultiplierTest
 
          double finalICPMultiplier = Math.exp(-omega * (timeOnCurrentCMP + timeOnNextCMP + timeOnNextNextCMP));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
          finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -732,6 +777,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -747,7 +793,8 @@ public class FinalICPRecursionMultiplierTest
          boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
-         finalICPRecursionMultiplier.compute(2, 3, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
                + singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -758,13 +805,16 @@ public class FinalICPRecursionMultiplierTest
 
          double finalICPMultiplier = Math.exp(-omega * (timeOnCurrentCMP + timeOnNextCMP + timeOnNextNextCMP));
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
          // setup for in transfer
          isInTransfer = true;
-         finalICPRecursionMultiplier.compute(2, 3, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         finalICPRecursionMultiplier.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+         Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          Assert.assertFalse(Double.isNaN(finalICPMultiplier));
       }
    }
@@ -807,6 +857,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
@@ -824,6 +875,7 @@ public class FinalICPRecursionMultiplierTest
             boolean useTwoCMPs = true;
 
             finalICPRecursionMultiplier.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                   swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -843,15 +895,18 @@ public class FinalICPRecursionMultiplierTest
 
             double finalICPMultiplier = Math.exp(-omega * recursionTime);
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
             // setup for in transfer
             isInTransfer = true;
             finalICPRecursionMultiplier.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             finalICPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * finalICPMultiplier;
 
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
          }
       }
@@ -894,6 +949,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
@@ -911,6 +967,7 @@ public class FinalICPRecursionMultiplierTest
             boolean useTwoCMPs = true;
 
             finalICPRecursionMultiplier.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                   swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -944,15 +1001,18 @@ public class FinalICPRecursionMultiplierTest
             double finalICPMultiplier = Math.exp(-omega * recursionTime);
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
 
             // setup for in transfer
             isInTransfer = true;
             finalICPRecursionMultiplier.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             finalICPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * finalICPMultiplier;
 
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
          }
       }
    }
@@ -991,6 +1051,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
@@ -1007,6 +1068,7 @@ public class FinalICPRecursionMultiplierTest
             boolean useTwoCMPs = false;
 
             finalICPRecursionMultiplier.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
                   + singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -1021,13 +1083,16 @@ public class FinalICPRecursionMultiplierTest
 
             double finalICPMultiplier = Math.exp(-omega * recursionTime);
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
             // setup for in transfer
             isInTransfer = true;
             finalICPRecursionMultiplier.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
          }
       }
@@ -1067,6 +1132,7 @@ public class FinalICPRecursionMultiplierTest
       }
 
       FinalICPRecursionMultiplier finalICPRecursionMultiplier = new FinalICPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int j = 1; j < maxSteps; j++)
       {
@@ -1083,6 +1149,7 @@ public class FinalICPRecursionMultiplierTest
             boolean useTwoCMPs = false;
 
             finalICPRecursionMultiplier.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             double timeOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue()
                   + singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
@@ -1104,13 +1171,16 @@ public class FinalICPRecursionMultiplierTest
 
             double finalICPMultiplier = Math.exp(-omega * recursionTime);
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
 
             // setup for in transfer
             isInTransfer = true;
             finalICPRecursionMultiplier.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
             Assert.assertEquals(finalICPMultiplier, finalICPRecursionMultiplier.getDoubleValue(), epsilon);
+            Assert.assertEquals(finalICPMultiplier, recursionMultipliers.getFinalICPMultiplier(), epsilon);
             Assert.assertFalse(Double.isNaN(finalICPMultiplier));
          }
       }

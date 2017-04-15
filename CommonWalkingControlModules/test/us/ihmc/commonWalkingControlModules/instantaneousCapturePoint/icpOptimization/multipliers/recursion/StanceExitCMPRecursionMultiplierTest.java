@@ -51,6 +51,7 @@ public class StanceExitCMPRecursionMultiplierTest
       }
 
       StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -66,6 +67,7 @@ public class StanceExitCMPRecursionMultiplierTest
          boolean useTwoCMPs = true;
 
          exitCMPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -74,13 +76,16 @@ public class StanceExitCMPRecursionMultiplierTest
 
          double exitCMPMultiplier = (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getStanceExitMultiplier(), epsilon);
 
          // setup for in transfer
          isInTransfer = true;
          exitCMPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getStanceExitMultiplier(), epsilon);
       }
    }
 
@@ -121,6 +126,7 @@ public class StanceExitCMPRecursionMultiplierTest
       }
 
       StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -136,14 +142,18 @@ public class StanceExitCMPRecursionMultiplierTest
          boolean useTwoCMPs = false;
 
          exitCMPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(0.0, recursionMultipliers.getStanceExitMultiplier(), epsilon);
 
          // setup for in transfer
          isInTransfer = true;
          exitCMPRecursionMultiplier.compute(1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(1, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(0.0, recursionMultipliers.getStanceExitMultiplier(), epsilon);
       }
    }
 
@@ -184,6 +194,7 @@ public class StanceExitCMPRecursionMultiplierTest
       }
 
       StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -199,6 +210,7 @@ public class StanceExitCMPRecursionMultiplierTest
          boolean useTwoCMPs = true;
 
          exitCMPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
                swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
@@ -207,13 +219,16 @@ public class StanceExitCMPRecursionMultiplierTest
 
          double exitCMPMultiplier = (1.0 - Math.exp(-omega * currentTimeSpentOnExitCMP));
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getStanceExitMultiplier(), epsilon);
 
          // setup for in transfer
          isInTransfer = true;
          exitCMPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * exitCMPMultiplier;
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getStanceExitMultiplier(), epsilon);
       }
    }
 
@@ -254,6 +269,7 @@ public class StanceExitCMPRecursionMultiplierTest
       }
 
       StanceExitCMPRecursionMultiplier exitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier("", swingSplitFractions, transferSplitFractions, registry);
+      RecursionMultipliers recursionMultipliers = new RecursionMultipliers("", maxSteps, swingSplitFractions, transferSplitFractions, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -269,14 +285,18 @@ public class StanceExitCMPRecursionMultiplierTest
          boolean useTwoCMPs = false;
 
          exitCMPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(0.0, recursionMultipliers.getStanceExitMultiplier(), epsilon);
 
          // setup for in transfer
          isInTransfer = true;
          exitCMPRecursionMultiplier.compute(2, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         recursionMultipliers.compute(2, 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultiplier.getExitMultiplier(), epsilon);
+         Assert.assertEquals(0.0, recursionMultipliers.getStanceExitMultiplier(), epsilon);
       }
    }
 }

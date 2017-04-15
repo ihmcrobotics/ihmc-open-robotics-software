@@ -1,36 +1,50 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
-public class EntryCMPRecursionMultipliers
-{
-   private static final String name = "CMPEntryRecursionMultiplier";
+import java.util.ArrayList;
+import java.util.List;
 
+public class RecursionMultipliers
+{
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final ArrayList<DoubleYoVariable> entryMultipliers = new ArrayList<>();
+   private final ArrayList<DoubleYoVariable> exitMultipliers = new ArrayList<>();
+
+   private final DoubleYoVariable finalICPMultiplier;
+   private final DoubleYoVariable stanceEntryCMPMultiplier;
+   private final DoubleYoVariable stanceExitCMPMultiplier;
 
    private final List<DoubleYoVariable> swingSplitFractions;
    private final List<DoubleYoVariable> transferSplitFractions;
 
    private final int maximumNumberOfFootstepsToConsider;
 
-   public EntryCMPRecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, List<DoubleYoVariable> swingSplitFractions,
+   public RecursionMultipliers(String namePrefix, int maximumNumberOfFootstepsToConsider, List<DoubleYoVariable> swingSplitFractions,
          List<DoubleYoVariable> transferSplitFractions, YoVariableRegistry parentRegistry)
    {
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
       this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
 
+      finalICPMultiplier = new DoubleYoVariable(namePrefix + "FinalICPRecursionMultiplier", registry);
+      stanceEntryCMPMultiplier = new DoubleYoVariable(namePrefix + "StanceEntryCMPRecursionMultiplier", registry);
+      stanceExitCMPMultiplier = new DoubleYoVariable(namePrefix + "StanceExitCMPRecursionMultiplier", registry);
+
+      finalICPMultiplier.setToNaN();
+      stanceEntryCMPMultiplier.setToNaN();
+      stanceExitCMPMultiplier.setToNaN();
+
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
-         DoubleYoVariable entryMultiplier = new DoubleYoVariable(namePrefix + name + i, registry);
+         DoubleYoVariable entryMultiplier = new DoubleYoVariable(namePrefix + "CMPEntryRecursionMultiplier" + i, registry);
+         DoubleYoVariable exitMultiplier = new DoubleYoVariable(namePrefix + "CMPExitRecursionMultiplier" + i, registry);
          entryMultiplier.setToNaN();
+         exitMultiplier.setToNaN();
          entryMultipliers.add(entryMultiplier);
+         exitMultipliers.add(exitMultiplier);
       }
 
       parentRegistry.addChild(registry);
@@ -38,8 +52,12 @@ public class EntryCMPRecursionMultipliers
 
    public void reset()
    {
+      finalICPMultiplier.setToNaN();
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
+      {
          entryMultipliers.get(i).setToNaN();
+         exitMultipliers.get(i).setToNaN();
+      }
    }
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
@@ -50,6 +68,14 @@ public class EntryCMPRecursionMultipliers
          throw new RuntimeException("Double Support Durations list is not long enough");
       if (numberOfStepsToConsider > singleSupportDurations.size())
          throw new RuntimeException("Single Support Durations list is not long enough");
+
+      if (numberOfStepsToConsider == 0)
+      {
+         finalICPMultiplier.set(1.0);
+         stanceEntryCMPMultiplier.set(0.0);
+         stanceExitCMPMultiplier.set(0.0);
+         return;
+      }
 
       if (useTwoCMPs)
          computeWithTwoCMPs(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
@@ -84,29 +110,44 @@ public class EntryCMPRecursionMultipliers
 
          double timeOnCMP = currentTransferOnCMP + currentSwingOnCMP + nextTransferOnCMP;
 
-         double entryRecursion = computeEntryRecursionMultiplierOneCMP(recursionTime, timeOnCMP, omega0);
+         double entryRecursion = EntryCMPRecursionMultipliers.computeEntryRecursionMultiplierOneCMP(recursionTime, timeOnCMP, omega0);
+         double exitRecursion = ExitCMPRecursionMultipliers.computeExitRecursionMultiplierOneCMP();
+
          entryMultipliers.get(i - 1).set(entryRecursion);
+         exitMultipliers.get(i - 1).set(exitRecursion);
+
+         recursionTime += timeOnCMP;
 
          if (i >= numberOfStepsRegistered)
             break; // this is the final transfer
-
-         recursionTime += timeOnCMP;
       }
+
+      double stanceEntryRecursion = StanceEntryCMPRecursionMultiplier.computeStanceEntryCMPRecursionMultiplierOneCMP(timeSpentOnCurrentCMP, omega0);
+      double stanceExitRecursion = StanceExitCMPRecursionMultiplier.computeStanceExitCMPRecursionOneCMP();
+      double finalICPRecursion = FinalICPRecursionMultiplier.computeFinalICPRecursionMultiplier(recursionTime, omega0);
+      stanceEntryCMPMultiplier.set(stanceEntryRecursion);
+      stanceExitCMPMultiplier.set(stanceExitRecursion);
+      finalICPMultiplier.set(finalICPRecursion);
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
          List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
-      double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-            swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      double currentTimeSpentOnEntryCMP;
       double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
             transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
-      double recursionTime = currentTimeSpentOnExitCMP;
-
       if (isInTransfer)
-         recursionTime += currentTimeSpentOnEntryCMP;
+      {
+         currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
+               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      }
+      else
+      {
+         currentTimeSpentOnEntryCMP = 0.0;
+      }
+      double recursionTime = currentTimeSpentOnExitCMP + currentTimeSpentOnEntryCMP;
 
 
       for (int i = 1; i < numberOfStepsToConsider + 1; i++)
@@ -132,29 +173,48 @@ public class EntryCMPRecursionMultipliers
          double timeSpentOnEntryCMP = currentTransferOnEntryCMP + currentSwingOnEntryCMP;
          double timeSpentOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
 
-         double entryRecursion = computeEntryRecursionMultiplierTwoCMPs(recursionTime, timeSpentOnEntryCMP, omega0);
+         double entryRecursion = EntryCMPRecursionMultipliers.computeEntryRecursionMultiplierTwoCMPs(recursionTime, timeSpentOnEntryCMP, omega0);
+         double exitRecursion = ExitCMPRecursionMultipliers.computeExitRecursionMultiplierTwoCMPs(recursionTime, timeSpentOnEntryCMP, timeSpentOnExitCMP, omega0);
 
          entryMultipliers.get(i - 1).set(entryRecursion);
+         exitMultipliers.get(i - 1).set(exitRecursion);
+
+         recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
 
          if (i >= numberOfStepsRegistered)
             break; // this is the final transfer
-
-         recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
       }
-   }
 
-   public static double computeEntryRecursionMultiplierTwoCMPs(double totalRecursionTime, double timeSpentOnEntryCMP, double omega0)
-   {
-      return Math.exp(-omega0 * totalRecursionTime) * (1.0 - Math.exp(-omega0 * timeSpentOnEntryCMP));
-   }
-
-   public static double computeEntryRecursionMultiplierOneCMP(double totalRecursionTime, double timeOnCMP, double omega0)
-   {
-      return Math.exp(-omega0 * totalRecursionTime) * (1.0 - Math.exp(-omega0 * timeOnCMP));
+      double stanceEntryRecursion = StanceEntryCMPRecursionMultiplier.computeStanceEntryCMPRecursionMultiplierTwoCMPs(currentTimeSpentOnEntryCMP, omega0);
+      double stanceExitRecursion = StanceExitCMPRecursionMultiplier.computeStanceExitCMPRecursionTwoCMPs(currentTimeSpentOnEntryCMP, currentTimeSpentOnExitCMP, omega0);
+      double finalICPRecursion = FinalICPRecursionMultiplier.computeFinalICPRecursionMultiplier(recursionTime, omega0);
+      stanceEntryCMPMultiplier.set(stanceEntryRecursion);
+      stanceExitCMPMultiplier.set(stanceExitRecursion);
+      finalICPMultiplier.set(finalICPRecursion);
    }
 
    public double getEntryMultiplier(int footstepIndex)
    {
       return entryMultipliers.get(footstepIndex).getDoubleValue();
+   }
+
+   public double getExitMultiplier(int footstepIndex)
+   {
+      return exitMultipliers.get(footstepIndex).getDoubleValue();
+   }
+
+   public double getFinalICPMultiplier()
+   {
+      return finalICPMultiplier.getDoubleValue();
+   }
+
+   public double getStanceEntryMultiplier()
+   {
+      return stanceEntryCMPMultiplier.getDoubleValue();
+   }
+
+   public double getStanceExitMultiplier()
+   {
+      return stanceExitCMPMultiplier.getDoubleValue();
    }
 }
