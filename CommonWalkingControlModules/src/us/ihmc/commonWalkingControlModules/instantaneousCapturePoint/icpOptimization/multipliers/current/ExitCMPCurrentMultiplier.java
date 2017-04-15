@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -90,7 +89,7 @@ public class ExitCMPCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void compute(List<DoubleYoVariable> singleSupportDurations, double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
@@ -141,7 +140,7 @@ public class ExitCMPCurrentMultiplier
       return 0.0;
    }
 
-   private double computeSegmentedSwing(ArrayList<DoubleYoVariable> singleSupportDurations,
+   private double computeSegmentedSwing(List<DoubleYoVariable> singleSupportDurations,
          double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
@@ -161,7 +160,7 @@ public class ExitCMPCurrentMultiplier
       return 0.0;
    }
 
-   private double computeSwingSecondSegment(ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeSwingSecondSegment(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
       swingExitCMPMatrix.compute(singleSupportDurations, omega0);
 
@@ -185,7 +184,7 @@ public class ExitCMPCurrentMultiplier
       return matrixOut.get(0, 0);
    }
 
-   private double computeSwingThirdSegment(ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeSwingThirdSegment(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
       double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
 

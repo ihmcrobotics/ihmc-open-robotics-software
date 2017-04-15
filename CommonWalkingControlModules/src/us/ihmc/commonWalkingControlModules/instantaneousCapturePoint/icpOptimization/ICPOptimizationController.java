@@ -55,11 +55,9 @@ public class ICPOptimizationController
 
    private final BooleanYoVariable isStanding = new BooleanYoVariable(yoNamePrefix + "IsStanding", registry);
    private final BooleanYoVariable isInTransfer = new BooleanYoVariable(yoNamePrefix + "IsInTransfer", registry);
-   private final BooleanYoVariable isInitialTransfer = new BooleanYoVariable(yoNamePrefix + "IsInitialTransfer", registry);
 
    private final List<DoubleYoVariable> swingDurations = new ArrayList<>();
    private final List<DoubleYoVariable> transferDurations = new ArrayList<>();
-   private final DoubleYoVariable initialTransferDuration = new DoubleYoVariable(yoNamePrefix + "InitialTransferDuration", registry);
    private final DoubleYoVariable finalTransferDuration = new DoubleYoVariable(yoNamePrefix + "FinalTransferDuration", registry);
 
    private final List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
@@ -158,8 +156,6 @@ public class ICPOptimizationController
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
       numberOfFootstepsToConsider.set(icpOptimizationParameters.numberOfFootstepsToConsider());
 
-      initialTransferDuration.set(walkingControllerParameters.getDefaultInitialTransferTime());
-
       int totalVertices = 0;
       for (RobotSide robotSide : RobotSide.values)
          totalVertices += contactableFeet.get(robotSide).getTotalNumberOfContactPoints();
@@ -206,8 +202,8 @@ public class ICPOptimizationController
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
-      stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, transferSplitFractions, swingSplitFractions,
-            maximumNumberOfFootstepsToConsider, registry);
+      stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, transferDurations, swingDurations, transferSplitFractions,
+            swingSplitFractions, maximumNumberOfFootstepsToConsider, registry);
 
       cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
       reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
@@ -283,7 +279,7 @@ public class ICPOptimizationController
    private final FramePoint2d tmpFramePoint2d = new FramePoint2d();
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
-      if (footstep != null && !footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
+      if (footstep != null)
       {
          if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
          {
@@ -323,17 +319,15 @@ public class ICPOptimizationController
       this.initialTime.set(initialTime);
       isStanding.set(true);
       isInTransfer.set(false);
-      isInitialTransfer.set(true);
 
       setProblemBooleans();
-
-      stateMultiplierCalculator.resetTimes();
 
       cmpConstraintHandler.updateCMPConstraintForDoubleSupport(solver);
       reachabilityConstraintHandler.updateReachabilityConstraintForDoubleSupport(solver);
 
       speedUpTime.set(0.0);
       transferDurations.get(0).set(finalTransferDuration.getDoubleValue());
+      transferSplitFractions.get(0).set(defaultTransferSplitFraction.getDoubleValue());
    }
 
    public void initializeForTransfer(double initialTime, RobotSide transferToSide, double omega0)
@@ -344,22 +338,10 @@ public class ICPOptimizationController
       isInTransfer.set(true);
 
       int numberOfFootstepRegistered = upcomingFootsteps.size();
-      if (numberOfFootstepRegistered == numberOfFootstepsToConsider.getIntegerValue())
-         transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      transferSplitFractions.get(numberOfFootstepRegistered).set(defaultTransferSplitFraction.getDoubleValue());
 
       int numberOfFootstepsToConsider = initializeOnContactChange(initialTime);
-
-      stateMultiplierCalculator.resetTimes();
-      if (isInitialTransfer.getBooleanValue())
-         stateMultiplierCalculator.submitTimes(0, initialTransferDuration.getDoubleValue(), swingDurations.get(0).getDoubleValue());
-      else
-         stateMultiplierCalculator.submitTimes(0, transferDurations.get(0).getDoubleValue(), swingDurations.get(0).getDoubleValue());
-
-      for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
-         stateMultiplierCalculator.submitTimes(i, transferDurations.get(i).getDoubleValue(), swingDurations.get(i).getDoubleValue());
-
-      stateMultiplierCalculator.submitTimes(numberOfFootstepsToConsider + 1, transferDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue(),
-            swingDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue());
 
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 
@@ -380,22 +362,12 @@ public class ICPOptimizationController
       this.supportSide.set(supportSide);
       isStanding.set(false);
       isInTransfer.set(false);
-      isInitialTransfer.set(false);
 
       int numberOfFootstepRegistered = upcomingFootsteps.size();
-      if (numberOfFootstepRegistered == numberOfFootstepsToConsider.getIntegerValue())
-         transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
+      transferSplitFractions.get(numberOfFootstepRegistered).set(defaultTransferSplitFraction.getDoubleValue());
 
       int numberOfFootstepsToConsider = initializeOnContactChange(initialTime);
-
-      stateMultiplierCalculator.resetTimes();
-      stateMultiplierCalculator.submitTimes(0, transferDurations.get(0).getDoubleValue(), swingDurations.get(0).getDoubleValue());
-
-      for (int i = 1; i < numberOfFootstepsToConsider + 1; i++)
-         stateMultiplierCalculator.submitTimes(i, transferDurations.get(i).getDoubleValue(), swingDurations.get(i).getDoubleValue());
-
-      stateMultiplierCalculator.submitTimes(numberOfFootstepsToConsider + 1, transferDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue(),
-            swingDurations.get(numberOfFootstepsToConsider + 1).getDoubleValue());
 
       stateMultiplierCalculator.computeRecursionMultipliers(numberOfFootstepsToConsider, numberOfFootstepRegistered, isInTransfer.getBooleanValue(), useTwoCMPs, omega0);
 

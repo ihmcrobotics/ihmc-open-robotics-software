@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -28,7 +27,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
    }
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
@@ -49,7 +48,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
    }
 
    private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          double omega0)
    {
       double timeSpentOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
@@ -85,7 +84,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
       double timeSpentOnCurrentEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +

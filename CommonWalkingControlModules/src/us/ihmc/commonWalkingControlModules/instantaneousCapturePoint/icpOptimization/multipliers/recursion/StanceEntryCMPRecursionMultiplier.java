@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -32,7 +31,7 @@ public class StanceEntryCMPRecursionMultiplier
       entryMultiplier.setToNaN();
    }
 
-   public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void compute(int numberOfFootstepsToConsider, List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfFootstepsToConsider == 0)
@@ -47,7 +46,7 @@ public class StanceEntryCMPRecursionMultiplier
          computeWithOneCMP(doubleSupportDurations, singleSupportDurations, omega0);
    }
 
-   private void computeWithOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   private void computeWithOneCMP(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
    {
       double currentTransferOnCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
       double currentSwingOnCMP = singleSupportDurations.get(0).getDoubleValue();
@@ -59,7 +58,7 @@ public class StanceEntryCMPRecursionMultiplier
       this.entryMultiplier.set(entryMultiplier);
    }
 
-   private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
+   private void computeWithTwoCMPs(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
    {
       double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
       double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();

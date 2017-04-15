@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
@@ -10,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.List;
 
 public class InitialICPVelocityCurrentMultiplier
 {
@@ -77,7 +77,7 @@ public class InitialICPVelocityCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
+   public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean isInTransfer)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
@@ -94,7 +94,7 @@ public class InitialICPVelocityCurrentMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState)
+   private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState)
    {
       transferInitialICPVelocityMatrix.compute();
 
