@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.rrttimedomain;
+package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
 import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.rrt.RRTNode;

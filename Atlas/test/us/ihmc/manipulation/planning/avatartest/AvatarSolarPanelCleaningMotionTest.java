@@ -49,6 +49,7 @@ import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerSolarPanelCleaning;
 import us.ihmc.manipulation.planning.rrttimedomain.RRTTreeTimeDomain;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.tobeDeleted.SolarPanelPoseValidityTesterOld;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;

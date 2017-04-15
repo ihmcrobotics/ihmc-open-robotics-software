@@ -17,16 +17,14 @@ import us.ihmc.communication.packetCommunicator.PacketCommunicator;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
-import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.WholeBodyPoseValidityTester;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyTrajectoryCommand;
+import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.WholeBodyPoseValidityTesterTwo;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -96,7 +94,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    @Test
    public void testAPose() throws SimulationExceededMaximumTimeException, IOException
    {
-      //ThreadTools.sleep(10000);
+      ThreadTools.sleep(10000);
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
       assertTrue(success);
 
@@ -108,44 +106,107 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       
       PrintTools.info("Initiate Behavior");
-      WholeBodyPoseValidityTester tester = new WholeBodyPoseValidityTester(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+      WholeBodyPoseValidityTesterTwo tester = new WholeBodyPoseValidityTesterTwo(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
                                                                            drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                            drcBehaviorTestHelper.getSDFFullRobotModel());
       PrintTools.info("Success to initiate Behavior");
-      HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 0.001, new Point3D(0.6, -0.35, 1.2), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-      WholeBodyTrajectoryMessage wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-      wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
       
       drcBehaviorTestHelper.dispatchBehavior(tester);
-      tester.setWholeBodyPose(wholebodyTrajectoryMessage);
+      PrintTools.info("Set Yo Time "+ drcBehaviorTestHelper.getYoTime());
+      
+      
+      ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
+      FramePose desiredHandPose = new FramePose(handControlFrame);
+      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPose.setPosition(new Point3D(0.8, -0.35, 1.2));
+      desiredHandPose.setOrientation(new Quaternion());
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      tester.holdCurrentChestOrientation();
+      tester.holdCurrentPelvisOrientation();
+      tester.holdCurrentPelvisHeight();
+      
+      tester.setUpIsDone();
       
       PrintTools.info("Start Yo Time "+ drcBehaviorTestHelper.getYoTime());
       
-      success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(0.001);
-      int cnt = 0;
+      int cnt;
+      cnt = 0;
       while(true)
       {
-         cnt++;
-         ThreadTools.sleep(1);
-         PrintTools.info(""+cnt+" "+ drcBehaviorTestHelper.getYoTime() +" SQ "+ tester.getOutputStatus().getSolutionQuality() + " Hand "+ tester.getFullHumanoidRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
-                         +" "+ tester.getFullHumanoidRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
-                         +" "+ tester.getFullHumanoidRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
-         
-         if(cnt > 1000)
+         cnt++;         
+         ThreadTools.sleep(10);
+         if(tester.isDone() == true)
          {
-            //PrintTools.info("End Yo Time "+ drcBehaviorTestHelper.getYoTime());
-            
+            PrintTools.info("escape whileloop "+cnt);
             break;
          }
+         if(cnt == 100)
+         {
+            tester.forceOut();
+            break;
+         }  
       }
+      
+      PrintTools.info("Done ");
+      
+      
+      
+      
+      handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
+      desiredHandPose = new FramePose(handControlFrame);
+      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPose.setPosition(new Point3D(1.6, -0.35, 1.2));
+      desiredHandPose.setOrientation(new Quaternion());
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      tester.holdCurrentChestOrientation();
+      tester.holdCurrentPelvisOrientation();
+      tester.holdCurrentPelvisHeight();
+      
+      tester.setUpIsDone();
+      
+      cnt = 0;
+      while(true)
+      {
+         cnt++;         
+         ThreadTools.sleep(10);
+         if(tester.isDone() == true)
+         {
+            PrintTools.info("escape whileloop "+cnt);
+            break;
+         }
+         if(cnt == 100)
+         {
+            tester.forceOut();
+            break;
+         }  
+      }
+      
+      
+      
+      
+      
+//      //ThreadTools.sleep(3000);
+//      
+//             
+//      
+//      cnt = 0;
+//      for(int i=0;i<1000;i++)
+//      {
+//         cnt++;         
+//         ThreadTools.sleep(10);
+//         if(tester.isDone() == true)
+//         {
+//            PrintTools.info("escape whileloop "+cnt);
+//            break;
+//         }
+//      }
+
+      
+      tester.onBehaviorExited();
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.4);
       
 
-//      handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, 0.001, new Point3D(0.6, -0.35, 1.5), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-//      wholebodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-//      wholebodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
-//      
-//      tester.setWholeBodyPose(wholebodyTrajectoryMessage);
+
 //      drcBehaviorTestHelper.dispatchBehavior(tester);
 
       

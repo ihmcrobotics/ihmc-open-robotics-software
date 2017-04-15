@@ -1,4 +1,4 @@
-package us.ihmc.manipulation.planning.avatartest;
+package us.ihmc.manipulation.planning.tobeDeleted;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
