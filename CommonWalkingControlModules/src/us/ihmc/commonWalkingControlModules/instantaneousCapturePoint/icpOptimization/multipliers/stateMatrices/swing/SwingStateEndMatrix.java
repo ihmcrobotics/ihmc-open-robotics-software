@@ -27,7 +27,7 @@ public class SwingStateEndMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   public void compute(List<DoubleYoVariable> singleSupportDurations, double omega0)
    {
       double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
 

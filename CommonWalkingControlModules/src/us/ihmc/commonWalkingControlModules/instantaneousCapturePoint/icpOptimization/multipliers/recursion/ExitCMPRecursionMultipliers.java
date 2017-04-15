@@ -43,7 +43,7 @@ public class ExitCMPRecursionMultipliers
    }
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
@@ -69,7 +69,7 @@ public class ExitCMPRecursionMultipliers
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
       double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
@@ -93,7 +93,6 @@ public class ExitCMPRecursionMultipliers
             currentSwingOnEntryCMP = swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
             currentSwingOnExitCMP = (1.0 - swingSplitFractions.get(i).getDoubleValue()) * singleSupportDurations.get(i).getDoubleValue();
             nextTransferOnExitCMP = transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
-
          }
          else
          { // this is the final transfer

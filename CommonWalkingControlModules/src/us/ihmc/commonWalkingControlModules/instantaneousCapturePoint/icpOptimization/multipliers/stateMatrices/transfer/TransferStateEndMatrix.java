@@ -23,7 +23,7 @@ public class TransferStateEndMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0)
+   public void compute(List<DoubleYoVariable> doubleSupportDurations, double omega0)
    {
       zero();
 

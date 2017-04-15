@@ -30,10 +30,8 @@ public class StateMultiplierCalculator
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-   private final ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-
-   private final List<DoubleYoVariable> transferSplitFractions;
+   private final List<DoubleYoVariable> doubleSupportDurations;
+   private final List<DoubleYoVariable> singleSupportDurations;
    private final List<DoubleYoVariable> swingSplitFractions;
 
    private final DoubleYoVariable maximumSplineDuration;
@@ -63,18 +61,14 @@ public class StateMultiplierCalculator
 
    private final int maxNumberOfFootstepsToConsider;
 
-   public StateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, List<DoubleYoVariable> transferSplitFractions,
+   public StateMultiplierCalculator(CapturePointPlannerParameters icpPlannerParameters, List<DoubleYoVariable> doubleSupportDurations,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> transferSplitFractions,
          List<DoubleYoVariable> swingSplitFractions, int maxNumberOfFootstepsToConsider, YoVariableRegistry parentRegistry)
    {
       this.maxNumberOfFootstepsToConsider = maxNumberOfFootstepsToConsider;
-      this.transferSplitFractions = transferSplitFractions;
+      this.doubleSupportDurations = doubleSupportDurations;
+      this.singleSupportDurations = singleSupportDurations;
       this.swingSplitFractions = swingSplitFractions;
-
-      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
-      {
-         doubleSupportDurations.add(new DoubleYoVariable("recursionCalculatorDoubleSupportDuration" + i, registry));
-         singleSupportDurations.add(new DoubleYoVariable("recursionCalculatorSingleSupportDuration" + i, registry));
-      }
 
       maximumSplineDuration = new DoubleYoVariable(namePrefix + "MaximumSplineDuration", registry);
       minimumSplineDuration = new DoubleYoVariable(namePrefix + "MinimumSplineDuration", registry);
@@ -91,8 +85,6 @@ public class StateMultiplierCalculator
       endOfSplineTime = new DoubleYoVariable(namePrefix + "EndOfSplineTime", registry);
       currentSwingSegment = new IntegerYoVariable(namePrefix + "CurrentSegment", registry);
 
-
-      //// FIXME: 4/13/17 get working for one cmp
       finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(namePrefix, swingSplitFractions, transferSplitFractions, registry);
       stanceExitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier(namePrefix, swingSplitFractions, transferSplitFractions, registry);
       stanceEntryCMPRecursionMultiplier = new StanceEntryCMPRecursionMultiplier(namePrefix, swingSplitFractions, transferSplitFractions, registry);
@@ -113,21 +105,6 @@ public class StateMultiplierCalculator
             cubicDerivativeMatrix, PROJECT_FORWARD, registry);
 
       parentRegistry.addChild(registry);
-   }
-
-   public void resetTimes()
-   {
-      for (int i = 0; i < maxNumberOfFootstepsToConsider; i++)
-      {
-         doubleSupportDurations.get(i).setToNaN();
-         singleSupportDurations.get(i).setToNaN();
-      }
-   }
-
-   public void submitTimes(int footstepIndex, double doubleSupportDuration, double singleSupportDuration)
-   {
-      doubleSupportDurations.get(footstepIndex).set(doubleSupportDuration);
-      singleSupportDurations.get(footstepIndex).set(singleSupportDuration);
    }
 
    public void resetRecursionMultipliers()

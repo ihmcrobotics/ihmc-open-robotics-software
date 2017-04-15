@@ -179,8 +179,7 @@ public class ICPOptimizationInputHandler
       if (useTwoCMPs)
       {
          CapturePointTools.computeDesiredCornerPointsSingleSupport(entryCornerPoints, exitCornerPoints, referenceCMPsCalculator.getEntryCMPs(),
-               referenceCMPsCalculator.getExitCMPs(), swingDurations, transferDurations, swingSplitFractions, transferSplitFractions,
-               omega0);
+               referenceCMPsCalculator.getExitCMPs(), swingDurations, transferDurations, swingSplitFractions, transferSplitFractions, omega0);
       }
       else
       {
@@ -225,7 +224,10 @@ public class ICPOptimizationInputHandler
 
    private void computeFinalICP(int numberOfFootstepsToConsider)
    {
-      finalICP.set(entryCornerPoints.get(numberOfFootstepsToConsider + 1));
+      if (!entryCornerPoints.get(numberOfFootstepsToConsider + 1).containsNaN())
+         finalICP.set(entryCornerPoints.get(numberOfFootstepsToConsider + 1));
+      else
+         finalICP.set(referenceCMPsCalculator.getEntryCMPs().get(numberOfFootstepsToConsider + 1));
    }
 
    private final FramePoint2d stanceCMPProjection = new FramePoint2d();

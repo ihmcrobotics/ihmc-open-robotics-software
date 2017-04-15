@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
@@ -32,7 +31,7 @@ public class StanceExitCMPRecursionMultiplier
       exitMultiplier.setToNaN();
    }
 
-   public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void compute(int numberOfFootstepsToConsider, List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfFootstepsToConsider == 0)
@@ -52,7 +51,7 @@ public class StanceExitCMPRecursionMultiplier
       exitMultiplier.set(0.0);
    }
 
-   private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   private void computeWithTwoCMPs(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
       double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();

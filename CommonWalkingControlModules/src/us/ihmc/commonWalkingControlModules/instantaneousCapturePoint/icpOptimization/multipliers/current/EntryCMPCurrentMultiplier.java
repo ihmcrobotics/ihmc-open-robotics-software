@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
@@ -103,7 +102,7 @@ public class EntryCMPCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState,
+   public void compute(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double timeInState,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
@@ -138,7 +137,7 @@ public class EntryCMPCurrentMultiplier
 
 
 
-   private double computeInTransfer(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
+   private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
    {
       transferEntryCMPMatrix.compute(doubleSupportDurations, omega0);
 
@@ -170,7 +169,7 @@ public class EntryCMPCurrentMultiplier
 
 
 
-   private double computeInSwingOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
+   private double computeInSwingOneCMP(List<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
    {
       double currentTransferSpentOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
 
@@ -187,7 +186,7 @@ public class EntryCMPCurrentMultiplier
 
 
 
-   private double computeSegmentedSwing(ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeSegmentedSwing(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
          return computeSwingFirstSegment(singleSupportDurations, timeInState, omega0);
@@ -200,7 +199,7 @@ public class EntryCMPCurrentMultiplier
 
 
 
-   private double computeSwingFirstSegment(ArrayList<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeSwingFirstSegment(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
    {
       if (!projectForward)
       {

@@ -43,7 +43,7 @@ public class EntryCMPRecursionMultipliers
    }
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
@@ -58,7 +58,7 @@ public class EntryCMPRecursionMultipliers
    }
 
    private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          double omega0)
    {
       double timeSpentOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
@@ -95,7 +95,7 @@ public class EntryCMPRecursionMultipliers
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
       double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
