@@ -78,8 +78,7 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
             break;
       }
 
-      double icpRecursion = Math.exp(-omega0 * recursionTime);
-
+      double icpRecursion = computeFinalICPRecursionMultiplier(recursionTime, omega0);
       this.set(icpRecursion);
    }
 
@@ -124,8 +123,13 @@ public class FinalICPRecursionMultiplier extends DoubleYoVariable
             break;
       }
 
-      double icpRecursion = Math.exp(-omega0 * recursionTime);
+      double icpRecursion = computeFinalICPRecursionMultiplier(recursionTime, omega0);
       this.set(icpRecursion);
+   }
+
+   public static double computeFinalICPRecursionMultiplier(double totalRecursionTime, double omega0)
+   {
+      return Math.exp(-omega0 * totalRecursionTime);
    }
 }
 

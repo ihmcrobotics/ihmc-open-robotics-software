@@ -48,30 +48,43 @@ public class StanceExitCMPRecursionMultiplier
 
    private void computeWithOneCMP()
    {
-      exitMultiplier.set(0.0);
+      exitMultiplier.set(computeStanceExitCMPRecursionOneCMP());
    }
 
    private void computeWithTwoCMPs(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean isInTransfer, double omega0)
    {
-      double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
-      double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
       double currentSwingOnExit = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
       double nextTransferOnExit = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+
+      double currentTransferOnEntry, currentSwingOnEntry;
+
+      if (isInTransfer)
+      {
+         currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+         currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+      }
+      else
+      {
+         currentTransferOnEntry = 0.0;
+         currentSwingOnEntry = 0.0;
+      }
 
       double timeSpentOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
       double timeSpentOnExitCMP = currentSwingOnExit + nextTransferOnExit;
 
-      double exitMultiplier;
-      if (isInTransfer)
-      {
-         exitMultiplier = Math.exp(-omega0 * timeSpentOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
-      }
-      else
-      {
-         exitMultiplier = 1.0 - Math.exp(-omega0 * timeSpentOnExitCMP);
-      }
+      double exitMultiplier = computeStanceExitCMPRecursionTwoCMPs(timeSpentOnEntryCMP, timeSpentOnExitCMP, omega0);
       this.exitMultiplier.set(exitMultiplier);
+   }
+
+   public static double computeStanceExitCMPRecursionOneCMP()
+   {
+      return 0.0;
+   }
+
+   public static double computeStanceExitCMPRecursionTwoCMPs(double currentTimeSpentOnEntryCMP, double currentTimeSpentOnExitCMP, double omega0)
+   {
+      return Math.exp(-omega0 * currentTimeSpentOnEntryCMP) * (1.0 - Math.exp(-omega0 * currentTimeSpentOnExitCMP));
    }
 
    public double getExitMultiplier()

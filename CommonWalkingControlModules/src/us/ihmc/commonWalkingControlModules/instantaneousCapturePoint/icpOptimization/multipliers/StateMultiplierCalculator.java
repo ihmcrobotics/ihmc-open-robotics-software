@@ -11,11 +11,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.StateEndCurrentMultiplier;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.EntryCMPRecursionMultipliers;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.ExitCMPRecursionMultipliers;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.FinalICPRecursionMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.StanceEntryCMPRecursionMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.StanceExitCMPRecursionMultiplier;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.*;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
@@ -27,8 +23,6 @@ public class StateMultiplierCalculator
 {
    private static final boolean PROJECT_FORWARD = true;
    private static final String namePrefix = "controller";
-
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final List<DoubleYoVariable> doubleSupportDurations;
    private final List<DoubleYoVariable> singleSupportDurations;
@@ -44,11 +38,7 @@ public class StateMultiplierCalculator
    private final DoubleYoVariable endOfSplineTime;
    private final IntegerYoVariable currentSwingSegment;
 
-   private final FinalICPRecursionMultiplier finalICPRecursionMultiplier;
-   private final StanceExitCMPRecursionMultiplier stanceExitCMPRecursionMultiplier;
-   private final StanceEntryCMPRecursionMultiplier stanceEntryCMPRecursionMultiplier;
-   private final ExitCMPRecursionMultipliers exitCMPRecursionMultipliers;
-   private final EntryCMPRecursionMultipliers entryCMPRecursionMultipliers;
+   private final RecursionMultipliers recursionMultipliers;
 
    private final ExitCMPCurrentMultiplier exitCMPCurrentMultiplier;
    private final EntryCMPCurrentMultiplier entryCMPCurrentMultiplier;
@@ -70,6 +60,8 @@ public class StateMultiplierCalculator
       this.singleSupportDurations = singleSupportDurations;
       this.swingSplitFractions = swingSplitFractions;
 
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+
       maximumSplineDuration = new DoubleYoVariable(namePrefix + "MaximumSplineDuration", registry);
       minimumSplineDuration = new DoubleYoVariable(namePrefix + "MinimumSplineDuration", registry);
       minimumTimeToSpendOnExitCMP = new DoubleYoVariable(namePrefix + "MinimumTimeToSpendOnExitCMP", registry);
@@ -85,11 +77,7 @@ public class StateMultiplierCalculator
       endOfSplineTime = new DoubleYoVariable(namePrefix + "EndOfSplineTime", registry);
       currentSwingSegment = new IntegerYoVariable(namePrefix + "CurrentSegment", registry);
 
-      finalICPRecursionMultiplier = new FinalICPRecursionMultiplier(namePrefix, swingSplitFractions, transferSplitFractions, registry);
-      stanceExitCMPRecursionMultiplier = new StanceExitCMPRecursionMultiplier(namePrefix, swingSplitFractions, transferSplitFractions, registry);
-      stanceEntryCMPRecursionMultiplier = new StanceEntryCMPRecursionMultiplier(namePrefix, swingSplitFractions, transferSplitFractions, registry);
-      exitCMPRecursionMultipliers = new ExitCMPRecursionMultipliers(namePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions, registry);
-      entryCMPRecursionMultipliers = new EntryCMPRecursionMultipliers(namePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions, registry);
+      recursionMultipliers = new RecursionMultipliers(namePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions, registry);
 
       cubicMatrix = new CubicMatrix();
       cubicDerivativeMatrix = new CubicDerivativeMatrix();
@@ -109,11 +97,7 @@ public class StateMultiplierCalculator
 
    public void resetRecursionMultipliers()
    {
-      finalICPRecursionMultiplier.reset();
-      stanceExitCMPRecursionMultiplier.reset();
-      stanceEntryCMPRecursionMultiplier.reset();
-      exitCMPRecursionMultipliers.reset();
-      entryCMPRecursionMultipliers.reset();
+      recursionMultipliers.reset();
    }
 
    public void computeRecursionMultipliers(int numberOfStepsToConsider, int numberOfStepsRegistered, boolean isInTransfer, boolean useTwoCMPs, double omega0)
@@ -123,39 +107,32 @@ public class StateMultiplierCalculator
       if (numberOfStepsToConsider > maxNumberOfFootstepsToConsider)
          throw new RuntimeException("Requesting too many steps.");
 
-      finalICPRecursionMultiplier.compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations,
-            useTwoCMPs, isInTransfer, omega0);
-      stanceExitCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
-      stanceEntryCMPRecursionMultiplier.compute(numberOfStepsToConsider, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
-      exitCMPRecursionMultipliers
-            .compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
-      entryCMPRecursionMultipliers
-            .compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
+         recursionMultipliers.compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
    }
 
    public double getFinalICPRecursionMultiplier()
    {
-      return finalICPRecursionMultiplier.getDoubleValue();
+      return recursionMultipliers.getFinalICPMultiplier();
    }
 
    public double getStanceExitCMPRecursionMultiplier()
    {
-      return stanceExitCMPRecursionMultiplier.getExitMultiplier();
+      return recursionMultipliers.getStanceExitMultiplier();
    }
 
    public double getStanceEntryCMPRecursionMultiplier()
    {
-      return stanceEntryCMPRecursionMultiplier.getEntryMultiplier();
+      return recursionMultipliers.getStanceEntryMultiplier();
    }
 
    public double getExitCMPRecursionMultiplier(int footstepIndex)
    {
-      return exitCMPRecursionMultipliers.getExitMultiplier(footstepIndex);
+      return recursionMultipliers.getExitMultiplier(footstepIndex);
    }
 
    public double getEntryCMPRecursionMultiplier(int footstepIndex)
    {
-      return entryCMPRecursionMultipliers.getEntryMultiplier(footstepIndex);
+      return recursionMultipliers.getEntryMultiplier(footstepIndex);
    }
 
 

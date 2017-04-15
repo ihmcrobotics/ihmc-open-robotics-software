@@ -64,7 +64,7 @@ public class ExitCMPRecursionMultipliers
          if (i == numberOfStepsRegistered)
             break;
          else
-            exitMultipliers.get(i).set(0.0);
+            exitMultipliers.get(i).set(computeExitRecursionMultiplierOneCMP());
       }
    }
 
@@ -105,7 +105,7 @@ public class ExitCMPRecursionMultipliers
          double timeSpentOnEntryCMP = currentTransferOnEntryCMP + currentSwingOnEntryCMP;
          double timeSpentOnExitCMP = currentSwingOnExitCMP + nextTransferOnExitCMP;
 
-         double exitRecursion = Math.exp(-omega0 * (recursionTime + timeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
+         double exitRecursion = computeExitRecursionMultiplierTwoCMPs(recursionTime, timeSpentOnEntryCMP, timeSpentOnExitCMP, omega0);
 
          exitMultipliers.get(i - 1).set(exitRecursion);
 
@@ -114,6 +114,16 @@ public class ExitCMPRecursionMultipliers
 
          recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
       }
+   }
+
+   public static double computeExitRecursionMultiplierTwoCMPs(double totalRecursionTime, double timeSpentOnEntryCMP, double timeSpentOnExitCMP, double omega0)
+   {
+      return Math.exp(-omega0 * (totalRecursionTime + timeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
+   }
+
+   public static double computeExitRecursionMultiplierOneCMP()
+   {
+      return 0.0;
    }
 
    public double getExitMultiplier(int footstepIndex)
