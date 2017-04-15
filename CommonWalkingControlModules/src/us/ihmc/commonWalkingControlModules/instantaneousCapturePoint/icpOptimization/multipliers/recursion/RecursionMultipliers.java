@@ -8,8 +8,6 @@ import java.util.List;
 
 public class RecursionMultipliers
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-
    private final ArrayList<DoubleYoVariable> entryMultipliers = new ArrayList<>();
    private final ArrayList<DoubleYoVariable> exitMultipliers = new ArrayList<>();
 
@@ -28,6 +26,8 @@ public class RecursionMultipliers
       this.maximumNumberOfFootstepsToConsider = maximumNumberOfFootstepsToConsider;
       this.swingSplitFractions = swingSplitFractions;
       this.transferSplitFractions = transferSplitFractions;
+
+      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
       finalICPMultiplier = new DoubleYoVariable(namePrefix + "FinalICPRecursionMultiplier", registry);
       stanceEntryCMPMultiplier = new DoubleYoVariable(namePrefix + "StanceEntryCMPRecursionMultiplier", registry);
