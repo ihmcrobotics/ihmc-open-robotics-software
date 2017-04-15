@@ -203,10 +203,10 @@ public class ICPOptimizationController
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
 
       stateMultiplierCalculator = new StateMultiplierCalculator(icpPlannerParameters, transferDurations, swingDurations, transferSplitFractions,
-            swingSplitFractions, maximumNumberOfFootstepsToConsider, registry);
+            swingSplitFractions, maximumNumberOfFootstepsToConsider, yoNamePrefix, registry);
 
-      cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
-      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, registry);
+      cmpConstraintHandler = new ICPOptimizationCMPConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
+      reachabilityConstraintHandler = new ICPOptimizationReachabilityConstraintHandler(bipedSupportPolygons, icpOptimizationParameters, yoNamePrefix, registry);
       solutionHandler = new ICPOptimizationSolutionHandler(icpOptimizationParameters, stateMultiplierCalculator, VISUALIZE, DEBUG, yoNamePrefix, registry, yoGraphicsListRegistry);
       inputHandler = new ICPOptimizationInputHandler(icpPlannerParameters, bipedSupportPolygons, contactableFeet, maximumNumberOfFootstepsToConsider,
             stateMultiplierCalculator, transferDurations, swingDurations, transferSplitFractions, swingSplitFractions, VISUALIZE, yoNamePrefix, registry, yoGraphicsListRegistry);
@@ -480,7 +480,7 @@ public class ICPOptimizationController
 
          solver.getCMPFeedbackDifference(desiredCMPDelta);
 
-         if (COMPUTE_COST_TO_GO && DEBUG)
+         if (COMPUTE_COST_TO_GO)
             solutionHandler.updateCostsToGo(solver);
       }
 

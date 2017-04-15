@@ -23,8 +23,6 @@ public class InitialICPCurrentMultiplier
    private final TransferInitialICPMatrix transferInitialICPMatrix;
    private final SwingInitialICPMatrix swingInitialICPMatrix;
 
-   private final List<DoubleYoVariable> swingSplitFractions;
-
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
 
@@ -33,26 +31,19 @@ public class InitialICPCurrentMultiplier
    private final DoubleYoVariable positionMultiplier;
    private final DoubleYoVariable velocityMultiplier;
 
-   private final boolean projectForward;
-
-   public InitialICPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
-         boolean projectForward, YoVariableRegistry registry)
+   public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, String yoNamePrefix, YoVariableRegistry registry)
    {
-      this(swingSplitFractions, startOfSplineTime, endOfSplineTime, null, null, projectForward, registry);
+      this(startOfSplineTime, endOfSplineTime, null, null, yoNamePrefix, registry);
    }
 
-   public InitialICPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
-         CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, boolean projectForward, YoVariableRegistry registry)
+   public InitialICPCurrentMultiplier(DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime, CubicMatrix cubicMatrix,
+         CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
    {
-      positionMultiplier = new DoubleYoVariable("InitialICPCurrentMultiplier", registry);
-      velocityMultiplier = new DoubleYoVariable("InitialICPCurrentVelocityMultiplier", registry);
-
-      this.swingSplitFractions = swingSplitFractions;
+      positionMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentMultiplier", registry);
+      velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "InitialICPCurrentVelocityMultiplier", registry);
 
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
-
-      this.projectForward = projectForward;
 
       if (cubicMatrix == null)
       {
@@ -96,8 +87,7 @@ public class InitialICPCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double timeInState,
-         boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
@@ -107,7 +97,7 @@ public class InitialICPCurrentMultiplier
       else
       {
          if (useTwoCMPs)
-            positionMultiplier = computeSwingSegmented(singleSupportDurations, timeInState, omega0);
+            positionMultiplier = computeSwingSegmented(timeInState, omega0);
          else
             positionMultiplier = computeInSwingOneCMP();
       }
@@ -174,29 +164,19 @@ public class InitialICPCurrentMultiplier
 
 
 
-   private double computeSwingSegmented(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeSwingSegmented(double timeInState, double omega0)
    {
       if (timeInState < startOfSplineTime.getDoubleValue())
-         return computeSwingFirstSegment(singleSupportDurations, timeInState, omega0);
+         return computeSwingFirstSegment(timeInState, omega0);
       else if (timeInState >= endOfSplineTime.getDoubleValue())
          return computeSwingThirdSegment();
       else
          return computeSwingSecondSegment(timeInState, omega0);
    }
 
-   private double computeSwingFirstSegment(List<DoubleYoVariable> singleSupportDurations, double timeInState, double omega0)
+   private double computeSwingFirstSegment(double timeInState, double omega0)
    {
-      if (projectForward)
-      {
-         return Math.exp(omega0 * timeInState);
-      }
-      else
-      {
-         double currentSwingOnEntryCMP = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         double duration = timeInState - currentSwingOnEntryCMP;
-
-         return Math.exp(omega0 * duration);
-      }
+      return Math.exp(omega0 * timeInState);
    }
 
    private double computeSwingSecondSegment(double timeInState, double omega0)
