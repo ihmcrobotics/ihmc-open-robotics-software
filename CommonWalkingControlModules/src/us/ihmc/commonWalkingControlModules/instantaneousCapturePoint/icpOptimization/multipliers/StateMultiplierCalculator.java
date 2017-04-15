@@ -254,63 +254,72 @@ public class StateMultiplierCalculator
    private final FramePoint2d tmpEntry = new FramePoint2d();
    private final FramePoint2d tmpExit = new FramePoint2d();
 
-   public void reconstructICPCornerPoint(FramePoint2d predictedICPCornerPoint, FramePoint2d finalICP, ArrayList<FramePoint2d> footstepLocations,
+   public void reconstructICPCornerPoint(FramePoint2d predictedICPCornerPointToPack, FramePoint2d finalICP, ArrayList<FramePoint2d> footstepLocations,
          ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets, FramePoint2d entryCMP, FramePoint2d exitCMP, int numberOfFootstepsToConsider)
    {
-      predictedICPCornerPoint.set(finalICP);
-      predictedICPCornerPoint.scale(getFinalICPRecursionMultiplier());
+      predictedICPCornerPointToPack.set(finalICP);
+      predictedICPCornerPointToPack.scale(getFinalICPRecursionMultiplier());
 
       tmpPoint.set(entryCMP);
       tmpPoint.scale(getStanceEntryCMPRecursionMultiplier());
-      predictedICPCornerPoint.add(tmpPoint);
-
-      tmpPoint.set(exitCMP);
-      tmpPoint.scale(getStanceExitCMPRecursionMultiplier());
-      predictedICPCornerPoint.add(tmpPoint);
+      predictedICPCornerPointToPack.add(tmpPoint);
 
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
          tmpEntry.set(footstepLocations.get(i));
-         tmpExit.set(footstepLocations.get(i));
-
          tmpEntry.add(entryOffsets.get(i));
-         tmpExit.add(exitOffsets.get(i));
-
          tmpEntry.scale(getEntryCMPRecursionMultiplier(i));
-         tmpExit.scale(getExitCMPRecursionMultiplier(i));
+         predictedICPCornerPointToPack.add(tmpEntry);
+      }
 
-         predictedICPCornerPoint.add(tmpEntry);
-         predictedICPCornerPoint.add(tmpExit);
+      if (!exitCMP.containsNaN())
+      {
+         tmpPoint.set(exitCMP);
+         tmpPoint.scale(getStanceExitCMPRecursionMultiplier());
+         predictedICPCornerPointToPack.add(tmpPoint);
+
+         for (int i = 0; i < numberOfFootstepsToConsider; i++)
+         {
+            tmpExit.set(footstepLocations.get(i));
+            tmpExit.add(exitOffsets.get(i));
+            tmpExit.scale(getExitCMPRecursionMultiplier(i));
+            predictedICPCornerPointToPack.add(tmpExit);
+         }
       }
    }
 
-   public void yoReconstructICPCornerPoint(FramePoint2d predictedICPCornerPoint, FramePoint2d finalICP, ArrayList<YoFramePoint2d> footstepLocations,
+   public void yoReconstructICPCornerPoint(FramePoint2d predictedICPCornerPointToPack, FramePoint2d finalICP, ArrayList<YoFramePoint2d> footstepLocations,
          ArrayList<FrameVector2d> entryOffsets, ArrayList<FrameVector2d> exitOffsets, FramePoint2d entryCMP, FramePoint2d exitCMP, int numberOfFootstepsToConsider)
    {
-      predictedICPCornerPoint.set(finalICP);
-      predictedICPCornerPoint.scale(getFinalICPRecursionMultiplier());
+      predictedICPCornerPointToPack.set(finalICP);
+      predictedICPCornerPointToPack.scale(getFinalICPRecursionMultiplier());
 
       tmpPoint.set(entryCMP);
       tmpPoint.scale(getStanceEntryCMPRecursionMultiplier());
-      predictedICPCornerPoint.add(tmpPoint);
-
-      tmpPoint.set(exitCMP);
-      tmpPoint.scale(getStanceExitCMPRecursionMultiplier());
-      predictedICPCornerPoint.add(tmpPoint);
+      predictedICPCornerPointToPack.add(tmpPoint);
 
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
          tmpEntry.set(footstepLocations.get(i).getFrameTuple2d());
-         tmpExit.set(footstepLocations.get(i).getFrameTuple2d());
-
          tmpEntry.add(entryOffsets.get(i));
-         tmpExit.add(exitOffsets.get(i));
-
          tmpEntry.scale(getEntryCMPRecursionMultiplier(i));
-         tmpExit.scale(getExitCMPRecursionMultiplier(i));
+         predictedICPCornerPointToPack.add(tmpEntry);
+      }
 
-         predictedICPCornerPoint.add(tmpEntry);
-         predictedICPCornerPoint.add(tmpExit);
+      if (!exitCMP.containsNaN())
+      {
+         tmpPoint.set(exitCMP);
+         tmpPoint.scale(getStanceExitCMPRecursionMultiplier());
+         predictedICPCornerPointToPack.add(tmpPoint);
+
+         for (int i = 0; i < numberOfFootstepsToConsider; i++)
+         {
+            tmpExit.set(footstepLocations.get(i).getFrameTuple2d());
+            tmpExit.add(exitOffsets.get(i));
+            tmpExit.scale(getExitCMPRecursionMultiplier(i));
+
+            predictedICPCornerPointToPack.add(tmpExit);
+         }
       }
    }
 
@@ -323,18 +332,15 @@ public class StateMultiplierCalculator
       referenceICPVelocityToPack.set(predictedICPCornerPoint);
       referenceICPVelocityToPack.scale(stateEndCurrentMultiplier.getVelocityMultiplier());
 
-      if (!entryCMP.containsNaN())
-      {
-         tmpPoint.setToZero();
-         tmpPoint.set(entryCMP);
-         tmpPoint.scale(entryCMPCurrentMultiplier.getPositionMultiplier());
-         referenceICPToPack.add(tmpPoint);
+      tmpPoint.setToZero();
+      tmpPoint.set(entryCMP);
+      tmpPoint.scale(entryCMPCurrentMultiplier.getPositionMultiplier());
+      referenceICPToPack.add(tmpPoint);
 
-         tmpPoint.setToZero();
-         tmpPoint.set(entryCMP);
-         tmpPoint.scale(entryCMPCurrentMultiplier.getVelocityMultiplier());
-         referenceICPVelocityToPack.add(tmpPoint);
-      }
+      tmpPoint.setToZero();
+      tmpPoint.set(entryCMP);
+      tmpPoint.scale(entryCMPCurrentMultiplier.getVelocityMultiplier());
+      referenceICPVelocityToPack.add(tmpPoint);
 
       if (!exitCMP.containsNaN())
       {
@@ -349,30 +355,24 @@ public class StateMultiplierCalculator
          referenceICPVelocityToPack.add(tmpPoint);
       }
 
-      if (!initialICP.containsNaN())
-      {
-         tmpPoint.setToZero();
-         tmpPoint.set(initialICP);
-         tmpPoint.scale(initialICPCurrentMultiplier.getPositionMultiplier());
-         referenceICPToPack.add(tmpPoint);
+      tmpPoint.setToZero();
+      tmpPoint.set(initialICP);
+      tmpPoint.scale(initialICPCurrentMultiplier.getPositionMultiplier());
+      referenceICPToPack.add(tmpPoint);
 
-         tmpPoint.setToZero();
-         tmpPoint.set(initialICP);
-         tmpPoint.scale(initialICPCurrentMultiplier.getVelocityMultiplier());
-         referenceICPVelocityToPack.add(tmpPoint);
-      }
+      tmpPoint.setToZero();
+      tmpPoint.set(initialICP);
+      tmpPoint.scale(initialICPCurrentMultiplier.getVelocityMultiplier());
+      referenceICPVelocityToPack.add(tmpPoint);
 
-      if (!initialICPVelocity.containsNaN())
-      {
-         tmpPoint.setToZero();
-         tmpPoint.set(initialICPVelocity);
-         tmpPoint.scale(initialICPVelocityCurrentMultiplier.getPositionMultiplier());
-         referenceICPToPack.add(tmpPoint);
+      tmpPoint.setToZero();
+      tmpPoint.set(initialICPVelocity);
+      tmpPoint.scale(initialICPVelocityCurrentMultiplier.getPositionMultiplier());
+      referenceICPToPack.add(tmpPoint);
 
-         tmpPoint.setToZero();
-         tmpPoint.set(initialICPVelocity);
-         tmpPoint.scale(initialICPVelocityCurrentMultiplier.getVelocityMultiplier());
-         referenceICPVelocityToPack.add(tmpPoint);
-      }
+      tmpPoint.setToZero();
+      tmpPoint.set(initialICPVelocity);
+      tmpPoint.scale(initialICPVelocityCurrentMultiplier.getVelocityMultiplier());
+      referenceICPVelocityToPack.add(tmpPoint);
    }
 }
