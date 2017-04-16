@@ -600,6 +600,35 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    }
 
    @Override
+   public boolean getCenterOfMassPositionData(FramePoint positionDataToPack, Type type)
+   {
+      Pair<YoFramePoint, List<BooleanYoVariable>> positionData = centerOfMassPositions.get(type);
+
+      if (positionData == null || !hasData(positionData.getRight()))
+         return false;
+
+      positionData.getLeft().getFrameTupleIncludingFrame(positionDataToPack);
+      return true;
+   }
+
+   @Override
+   public boolean getCenterOfMassVectorData(FrameVector vectorDataToPack, Type type, Space space)
+   {
+      EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>> endEffectorDataTyped = centerOfMassDataVectors.get(type);
+
+      if (endEffectorDataTyped == null)
+         return false;
+
+      Pair<YoFrameVector, List<BooleanYoVariable>> vectorData = endEffectorDataTyped.get(space);
+
+      if (vectorData == null || !hasData(vectorData.getRight()))
+         return false;
+
+      vectorData.getLeft().getFrameTupleIncludingFrame(vectorDataToPack);
+      return true;
+   }
+
+   @Override
    public boolean getPositionData(RigidBody endEffector, FramePoint positionDataToPack, Type type)
    {
       EnumMap<Type, Pair<YoFramePoint, List<BooleanYoVariable>>> endEffectorData = endEffectorPositions.get(endEffector);
@@ -652,7 +681,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          return false;
 
       vectorData.getLeft().getFrameTupleIncludingFrame(vectorDataToPack);
-      return false;
+      return true;
    }
 
    private static boolean hasData(List<BooleanYoVariable> enabledList)
