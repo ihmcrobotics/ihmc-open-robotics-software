@@ -1,0 +1,56 @@
+package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer;
+
+import org.ejml.data.DenseMatrix64F;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.List;
+
+public class NewTransferStateEndMatrix extends DenseMatrix64F
+{
+   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<DoubleYoVariable> transferSplitFractions;
+
+   public NewTransferStateEndMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions)
+   {
+      super(4, 1);
+
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
+   }
+
+   public void reset()
+   {
+      zero();
+   }
+
+   public void compute(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+         boolean useTwoCMPs, double omega0)
+   {
+      zero();
+
+      double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+      double nextTransferOnExit = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+
+      double timeOnEntryCMP, timeOnExitCMP;
+      if (useTwoCMPs)
+      {
+         // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
+         // project forward to the end of double support
+         double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+         double currentSwingOnExit = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+         timeOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+         timeOnExitCMP = currentSwingOnExit + nextTransferOnExit;
+      }
+      else
+      {
+         timeOnEntryCMP = currentTransferOnEntry + singleSupportDurations.get(0).getDoubleValue() + nextTransferOnExit;
+         timeOnExitCMP = 0.0;
+      }
+
+      double projection = Math.exp(omega0 * (currentTransferOnEntry - timeOnExitCMP - timeOnEntryCMP));
+
+      set(2, 0, projection);
+      set(3, 0, omega0 * projection);
+   }
+}
+
