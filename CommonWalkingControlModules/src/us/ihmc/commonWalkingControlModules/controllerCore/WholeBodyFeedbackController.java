@@ -343,4 +343,9 @@ public class WholeBodyFeedbackController
    {
       return virtualModelControlOutput;
    }
+
+   public FeedbackControllerDataReadOnly getWholeBodyFeedbackControllerDataHolder()
+   {
+      return feedbackControllerToolbox;
+   }
 }
