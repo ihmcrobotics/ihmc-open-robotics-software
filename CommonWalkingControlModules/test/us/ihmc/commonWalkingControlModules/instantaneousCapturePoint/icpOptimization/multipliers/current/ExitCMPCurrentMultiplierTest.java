@@ -56,7 +56,7 @@ public class ExitCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, registry);
+      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, "", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -122,7 +122,7 @@ public class ExitCMPCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, registry);
+      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, "", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -189,7 +189,7 @@ public class ExitCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, registry);
+      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, "", registry);
 
 
       for (int iter = 0; iter < iters; iter++)
@@ -270,7 +270,7 @@ public class ExitCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, registry);
+      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, "", registry);
 
       SwingExitCMPMatrix exitCMPMatrix = new SwingExitCMPMatrix(swingSplitFractions, endOfSplineTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -366,7 +366,7 @@ public class ExitCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, registry);
+      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, "", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -449,7 +449,7 @@ public class ExitCMPCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, registry);
+      ExitCMPCurrentMultiplier exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, "", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
