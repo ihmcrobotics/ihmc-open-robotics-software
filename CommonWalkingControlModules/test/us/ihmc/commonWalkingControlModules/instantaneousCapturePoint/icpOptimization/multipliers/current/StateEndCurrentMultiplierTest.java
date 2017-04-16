@@ -57,9 +57,8 @@ public class StateEndCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions,
-            startOfSplineTime, endOfSplineTime, projectForward, registry);
+            startOfSplineTime, endOfSplineTime, "", registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -143,9 +142,8 @@ public class StateEndCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, projectForward, registry);
+            endOfSplineTime, "", registry);
 
       TransferStateEndMatrix stateEndMatrix = new TransferStateEndMatrix(transferSplitFractions);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -230,9 +228,8 @@ public class StateEndCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, projectForward, registry);
+            endOfSplineTime, "", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -311,9 +308,8 @@ public class StateEndCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, projectForward, registry);
+            endOfSplineTime, "", registry);
 
       SwingStateEndMatrix stateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, endOfSplineTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -409,9 +405,8 @@ public class StateEndCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, projectForward, registry);
+            endOfSplineTime, "", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -492,9 +487,8 @@ public class StateEndCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      boolean projectForward = true;
       StateEndCurrentMultiplier stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, projectForward, registry);
+            endOfSplineTime, "", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {

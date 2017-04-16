@@ -44,7 +44,7 @@ public class InitialICPVelocityCurrentMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       TransferInitialICPVelocityMatrix initialICPMatrix = new TransferInitialICPVelocityMatrix();
 
@@ -113,7 +113,7 @@ public class InitialICPVelocityCurrentMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       TransferInitialICPVelocityMatrix initialICPMatrix = new TransferInitialICPVelocityMatrix();
 
@@ -184,7 +184,7 @@ public class InitialICPVelocityCurrentMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -247,7 +247,7 @@ public class InitialICPVelocityCurrentMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -310,7 +310,7 @@ public class InitialICPVelocityCurrentMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -372,7 +372,7 @@ public class InitialICPVelocityCurrentMultiplierTest
          singleSupportDurations.add(singleSupportDuration);
       }
 
-      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(registry);
+      InitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier("", registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
