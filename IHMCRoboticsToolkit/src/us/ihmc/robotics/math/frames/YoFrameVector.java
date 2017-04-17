@@ -1,8 +1,10 @@
 package us.ihmc.robotics.math.frames;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.interfaces.VectorInterface;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -91,4 +93,21 @@ public class YoFrameVector extends YoFrameTuple<YoFrameVector, FrameVector> impl
       this.set(vector);
    }
 
+   public void setAsRotationVector(QuaternionReadOnly quaternion)
+   {
+      quaternion.get(tempVector);
+      set(tempVector);
+   }
+
+   public void setAsRotationVector(FrameOrientation frameOrientation)
+   {
+      frameOrientation.getRotationVector(getFrameTuple());
+      getYoValuesFromFrameTuple();
+   }
+
+   public void setAsRotationVector(YoFrameQuaternion yoFrameQuaternion)
+   {
+      yoFrameQuaternion.getRotationVector(getFrameTuple());
+      getYoValuesFromFrameTuple();
+   }
 }

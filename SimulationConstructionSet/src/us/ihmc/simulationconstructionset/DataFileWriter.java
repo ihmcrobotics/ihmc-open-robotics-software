@@ -9,8 +9,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
 import com.jmatio.io.MatFileIncrementalWriter;
@@ -26,6 +27,8 @@ public class DataFileWriter
    @SuppressWarnings("unused")
    private static final boolean DEBUG = true;
 
+   private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy");
+   
    private final File outFile;
 
    public DataFileWriter(File file)    // String filename)
@@ -184,13 +187,11 @@ public class DataFileWriter
       dataOutputStream.writeBytes("$BEGIN_HEADER\n");
 
       // Calendar cal = Calendar.getInstance();
-      Date today = new Date();
-
       // cal.setTime(today);
       // cal.get(cal.DATE);
 
       // dataStream.write
-      dataOutputStream.writeBytes("$WHEN " + today.toString() + "\n");
+      dataOutputStream.writeBytes("$WHEN " + ZonedDateTime.now().format(dateTimeFormatter) + "\n");
       dataOutputStream.writeBytes("$MODEL " + model + "\n");
 
       dataOutputStream.writeBytes("$INDIVIDUAL\n");
@@ -640,13 +641,11 @@ public class DataFileWriter
          dataStream.writeBytes("$BEGIN_HEADER\n");
 
          // Calendar cal = Calendar.getInstance();
-         Date today = new Date();
-
          // cal.setTime(today);
          // cal.get(cal.DATE);
 
          // dataStream.write
-         dataStream.writeBytes("$WHEN " + today.toString() + "\n");
+         dataStream.writeBytes("$WHEN " + ZonedDateTime.now().format(dateTimeFormatter) + "\n");
          dataStream.writeBytes("$MODEL " + model + "\n");
 
          dataStream.writeBytes("$INDIVIDUAL\n");

@@ -48,9 +48,8 @@ public class SpatialAccelerationCalculatorTest
          rootAcceleration.setLinearPart(rootLinearAcceleration);
          rootAcceleration.setAngularPart(rootAngularAcceleration);
          boolean useDesireds = random.nextBoolean();
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, worldFrame, rootAcceleration,
-                                                                                                         twistCalculator, doVelocityTerms, doAccelerationTerms,
-                                                                                                         useDesireds);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, doVelocityTerms,
+                                                                                                         doAccelerationTerms, useDesireds);
 
          ScrewTestTools.setRandomPositions(prismaticJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomVelocities(prismaticJoints, random, -10.0, 10.0);
@@ -116,9 +115,8 @@ public class SpatialAccelerationCalculatorTest
          rootAcceleration.setLinearPart(rootLinearAcceleration);
          rootAcceleration.setAngularPart(rootAngularAcceleration);
          boolean useDesireds = random.nextBoolean();
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, worldFrame, rootAcceleration,
-                                                                                                         twistCalculator, doVelocityTerms, doAccelerationTerms,
-                                                                                                         useDesireds);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, doVelocityTerms,
+                                                                                                         doAccelerationTerms, useDesireds);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, 0.0, 0.0);
@@ -163,9 +161,8 @@ public class SpatialAccelerationCalculatorTest
          rootAcceleration.setLinearPart(rootLinearAcceleration);
          rootAcceleration.setAngularPart(rootAngularAcceleration);
          boolean useDesireds = random.nextBoolean();
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, worldFrame, rootAcceleration,
-                                                                                                         twistCalculator, doVelocityTerms, doAccelerationTerms,
-                                                                                                         useDesireds);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, doVelocityTerms,
+                                                                                                         doAccelerationTerms, useDesireds);
 
          ScrewTestTools.setRandomPositions(revoluteJoints, random, -10.0, 10.0);
          ScrewTestTools.setRandomVelocities(revoluteJoints, random, -10.0, 10.0);
@@ -236,8 +233,8 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          rootAcceleration.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random));
          rootAcceleration.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random));
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, worldFrame, rootAcceleration,
-                                                                                                         twistCalculator, true, true, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true,
+                                                                                                         true, false);
 
          ScrewTestTools.setRandomPositions(joints, random, -1.0, 1.0);
          ScrewTestTools.setRandomVelocities(joints, random, -1.0, 1.0);
@@ -308,8 +305,8 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          rootAcceleration.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random));
          rootAcceleration.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random));
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, worldFrame, rootAcceleration,
-                                                                                                         twistCalculator, true, true, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true,
+                                                                                                         true, false);
 
          floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
          floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
@@ -401,8 +398,8 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          rootAcceleration.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random));
          rootAcceleration.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random));
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, worldFrame, rootAcceleration,
-                                                                                                         twistCalculator, true, true, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true,
+                                                                                                         true, false);
 
          floatingJoint.setRotation(RandomGeometry.nextQuaternion(random));
          floatingJoint.setPosition(RandomGeometry.nextPoint3D(random, -10.0, 10.0));
@@ -508,17 +505,16 @@ public class SpatialAccelerationCalculatorTest
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          rootAcceleration.setLinearPart(EuclidCoreRandomTools.generateRandomVector3D(random));
          rootAcceleration.setAngularPart(EuclidCoreRandomTools.generateRandomVector3D(random));
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(randomBody, worldFrame, rootAcceleration,
-                                                                                                         twistCalculator, false, true, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, false,
+                                                                                                         true, false);
 
          SpatialAccelerationVector rootAccelerationNoVelocity = new SpatialAccelerationVector(rootBodyNoVelocity.getBodyFixedFrame(), worldFrame,
                                                                                               rootBodyNoVelocity.getBodyFixedFrame());
          rootAccelerationNoVelocity.setLinearPart(rootAcceleration.getLinearPart());
          rootAccelerationNoVelocity.setAngularPart(rootAcceleration.getAngularPart());
-         SpatialAccelerationCalculator spatialAccelerationCalculatorNoVelocity = new SpatialAccelerationCalculator(randomBodyNoVelocity, worldFrame,
-                                                                                                                   rootAccelerationNoVelocity,
-                                                                                                                   twistCalculatorNoVelocity, true, true,
-                                                                                                                   false);
+         SpatialAccelerationCalculator spatialAccelerationCalculatorNoVelocity = new SpatialAccelerationCalculator(rootAccelerationNoVelocity, twistCalculatorNoVelocity,
+                                                                                                                   true,
+                                                                                                                   true, false);
 
          Quaternion floatingJointRotation = RandomGeometry.nextQuaternion(random);
          Point3D floatingJointPosition = RandomGeometry.nextPoint3D(random, -10.0, 10.0);

@@ -37,7 +37,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * <p>
     * It is {@code false} by default and this method should be overridden to return otherwise.
     * </p>
-    * 
+    *
     * @return {@code true} if the desired acceleration should be integrated into desired velocity
     *         and position for all the joints.
     */
@@ -438,7 +438,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Determined whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
+    * Determines whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
     */
    public boolean useSupportState()
    {
@@ -447,7 +447,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /**
     *
-    * Determined whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
+    * Determines whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
     */
    public boolean useCenterOfMassVelocityFromEstimator()
    {
@@ -473,6 +473,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return 0.0;
    }
 
+   @Override
    public double getMinSwingHeightFromStanceFoot()
    {
       return 0.1;

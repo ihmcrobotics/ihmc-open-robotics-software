@@ -278,6 +278,61 @@ public class YoFrameQuaternion extends AbstractReferenceFrameHolder implements C
       return new FrameOrientation(frameOrientation);
    }
 
+   /**
+    * Computes and packs the orientation described by this {@code YoFrameQuaternion} as a rotation
+    * vector.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
+    *           frame it is expressed in are stored. Modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@code this.referenceFrame}.
+    */
+   public void getRotationVector(FrameVector frameRotationVectorToPack)
+   {
+      getFrameOrientation().getRotationVector(frameRotationVectorToPack);
+   }
+
+   /**
+    * Computes and packs the orientation described by this {@code YoFrameQuaternion} as a rotation
+    * vector including the reference frame it is expressed in.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
+    *           frame it is expressed in are stored. Modified.
+    */
+   public void getRotationVectorIncludingFrame(FrameVector frameRotationVectorToPack)
+   {
+      getFrameOrientation().getRotationVectorIncludingFrame(frameRotationVectorToPack);
+   }
+
+   /**
+    * Computes and packs the orientation described by this {@code YoFrameQuaternion} as a rotation
+    * vector.
+    * <p>
+    * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
+    * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
+    * of the same axis-angle.
+    * </p>
+    *
+    * @param yoFrameRotationVectorToPack the vector in which the rotation vector and the reference
+    *           frame it is expressed in are stored. Modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@code this.referenceFrame}.
+    */
+   public void getRotationVector(YoFrameVector yoFrameRotationVectorToPack)
+   {
+      yoFrameRotationVectorToPack.setAsRotationVector(getFrameOrientation());
+   }
+
    public DoubleYoVariable getYoQx()
    {
       return qx;
