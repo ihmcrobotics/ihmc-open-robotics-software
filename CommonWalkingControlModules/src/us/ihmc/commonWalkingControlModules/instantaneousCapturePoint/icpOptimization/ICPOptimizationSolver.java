@@ -21,7 +21,9 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class ICPOptimizationSolver
 {
-   private static final boolean USE_EFFICIENT_CONSTRAINTS = true;
+   private static final boolean USE_EFFICIENT_CONSTRAINTS = false;
+   private static final boolean FORMULATE_DYNAMICS_AS_CONSTRAINT = false;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double betaSmoothing = 0.01;
    private static final double betaMinimum = 0.0001;
@@ -36,6 +38,7 @@ public class ICPOptimizationSolver
    private final ICPQPInput feedbackTaskInput;
    private final ICPQPInput dynamicRelaxationTask;
    private final ICPQPInput footstepTaskInput;
+   private final ICPQPInput dynamicObjectiveTask;
 
    private final DynamicsConstraintInput dynamicsConstraintInput;
    private final ConstraintToConvexRegion cmpLocationConstraint;
@@ -107,7 +110,7 @@ public class ICPOptimizationSolver
    public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
       this.computeCostToGo = computeCostToGo;
-      indexHandler = new ICPQPIndexHandler(USE_EFFICIENT_CONSTRAINTS);
+      indexHandler = new ICPQPIndexHandler(USE_EFFICIENT_CONSTRAINTS, FORMULATE_DYNAMICS_AS_CONSTRAINT);
       inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
@@ -123,8 +126,17 @@ public class ICPOptimizationSolver
       solverInputResidualCost = new DenseMatrix64F(1, 1);
 
       feedbackTaskInput = new ICPQPInput(2);
-      dynamicRelaxationTask = new ICPQPInput(2);
       footstepTaskInput = new ICPQPInput(2 * maximumNumberOfFootstepsToConsider);
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+      {
+         dynamicRelaxationTask = new ICPQPInput(2);
+         dynamicObjectiveTask = null;
+      }
+      else
+      {
+         dynamicRelaxationTask = null;
+         dynamicObjectiveTask = new ICPQPInput(2);
+      }
 
       dynamicsConstraintInput = new DynamicsConstraintInput(maximumNumberOfFreeVariables);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices, USE_EFFICIENT_CONSTRAINTS);
@@ -229,8 +241,11 @@ public class ICPOptimizationSolver
       solverInput_AineqTrans.zero();
       solverInput_bineq.zero();
 
-      dynamicRelaxationTask.reset();
       dynamicsConstraintInput.reset();
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+         dynamicRelaxationTask.reset();
+      else
+         dynamicObjectiveTask.reset();
 
       footstepTaskInput.reset();
       feedbackTaskInput.reset();
@@ -273,7 +288,8 @@ public class ICPOptimizationSolver
       solverInput_h.reshape(problemSize, 1);
 
       feedbackTaskInput.reshape(2);
-      dynamicRelaxationTask.reshape(2);
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+         dynamicRelaxationTask.reshape(2);
       footstepTaskInput.reshape(2 * numberOfFootstepsToConsider);
 
       solverInput_Aeq.reshape(problemSize, numberOfEqualityConstraints);
@@ -443,8 +459,11 @@ public class ICPOptimizationSolver
       this.cmpConstantEffect.set(1, 0, cmpConstantEffect.getY());
 
       addFeedbackTask();
-      addDynamicRelaxationTask();
       addDynamicConstraint();
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+         addDynamicRelaxationTask();
+      else
+         addDynamicObjectiveTask();
 
       if (indexHandler.constrainCMP())
          addCMPLocationConstraint();
@@ -479,7 +498,9 @@ public class ICPOptimizationSolver
 
          extractFeedbackDeltaSolution(feedbackDeltaSolution);
          setPreviousFeedbackDeltaSolution(feedbackDeltaSolution);
-         extractDynamicRelaxationSolution(dynamicRelaxationSolution);
+
+         if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+            extractDynamicRelaxationSolution(dynamicRelaxationSolution);
 
          if (computeCostToGo)
             computeCostToGo();
@@ -502,6 +523,12 @@ public class ICPOptimizationSolver
    {
       inputCalculator.computeDynamicRelaxationTask(dynamicRelaxationTask, dynamicRelaxationWeight);
       inputCalculator.submitDynamicRelaxationTask(dynamicRelaxationTask, solverInput_H, solverInput_h);
+   }
+
+   protected void addDynamicObjectiveTask()
+   {
+      inputCalculator.convertEqualityConstraintToObjective(dynamicsConstraintInput, dynamicObjectiveTask, dynamicRelaxationWeight.get(0, 0));
+      inputCalculator.submitDynamicObjectiveTask(dynamicObjectiveTask, solverInput_H, solverInput_h);
    }
 
    private void addCMPLocationConstraint()
@@ -579,12 +606,16 @@ public class ICPOptimizationSolver
 
    private void addDynamicConstraint()
    {
-      inputCalculator.computeDynamicsConstraint(dynamicsConstraintInput, currentICP, finalICPRecursion, cmpConstantEffect, feedbackGain, footstepRecursionMultipliers);
+      inputCalculator.computeDynamicsConstraint(dynamicsConstraintInput, currentICP, finalICPRecursion, cmpConstantEffect, feedbackGain,
+            footstepRecursionMultipliers);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, 0, currentEqualityConstraintIndex, dynamicsConstraintInput.Aeq, 0, 0, indexHandler.getNumberOfFreeVariables(), 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.beq, 0, 0, 2, 1, 1.0);
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+      {
+         MatrixTools.setMatrixBlock(solverInput_Aeq, 0, currentEqualityConstraintIndex, dynamicsConstraintInput.Aeq, 0, 0, indexHandler.getNumberOfFreeVariables(), 2, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, dynamicsConstraintInput.beq, 0, 0, 2, 1, 1.0);
 
-      currentEqualityConstraintIndex += 2;
+         currentEqualityConstraintIndex += 2;
+      }
    }
 
 
@@ -670,8 +701,11 @@ public class ICPOptimizationSolver
       CommonOps.mult(feedbackTaskInput.quadraticTerm, feedbackDeltaSolution, tmpFeedbackCost);
       CommonOps.multTransA(feedbackDeltaSolution, tmpFeedbackCost, feedbackCostToGo);
 
-      CommonOps.mult(dynamicRelaxationTask.quadraticTerm, dynamicRelaxationSolution, tmpFeedbackCost);
-      CommonOps.multTransA(dynamicRelaxationSolution, tmpFeedbackCost, dynamicRelaxationCostToGo);
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+      {
+         CommonOps.mult(dynamicRelaxationTask.quadraticTerm, dynamicRelaxationSolution, tmpFeedbackCost);
+         CommonOps.multTransA(dynamicRelaxationSolution, tmpFeedbackCost, dynamicRelaxationCostToGo);
+      }
 
       // linear cost
       CommonOps.multTransA(solverInput_h, freeVariableSolution, tmpCostScalar);
@@ -683,8 +717,11 @@ public class ICPOptimizationSolver
       CommonOps.multTransA(-1.0, feedbackTaskInput.linearTerm, feedbackDeltaSolution, tmpCostScalar);
       CommonOps.addEquals(feedbackCostToGo, tmpCostScalar);
 
-      CommonOps.multTransA(-1.0, dynamicRelaxationTask.linearTerm, dynamicRelaxationSolution, tmpCostScalar);
-      CommonOps.addEquals(dynamicRelaxationCostToGo, tmpCostScalar);
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+      {
+         CommonOps.multTransA(-1.0, dynamicRelaxationTask.linearTerm, dynamicRelaxationSolution, tmpCostScalar);
+         CommonOps.addEquals(dynamicRelaxationCostToGo, tmpCostScalar);
+      }
 
       // residual cost
       CommonOps.addEquals(costToGo, solverInputResidualCost);
@@ -698,7 +735,8 @@ public class ICPOptimizationSolver
    {
       referenceICPReconstruction.set(finalICPRecursion);
       CommonOps.addEquals(referenceICPReconstruction, cmpConstantEffect);
-      CommonOps.addEquals(referenceICPReconstruction, dynamicRelaxationSolution);
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+         CommonOps.addEquals(referenceICPReconstruction, dynamicRelaxationSolution);
 
       for (int i = 0; i < indexHandler.getNumberOfFootstepsToConsider(); i++)
       {
@@ -732,8 +770,15 @@ public class ICPOptimizationSolver
 
    public void getDynamicRelaxation(FramePoint2d dynamicRelaxationToPack)
    {
-      dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
-      dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
+      if (FORMULATE_DYNAMICS_AS_CONSTRAINT)
+      {
+         dynamicRelaxationToPack.setX(dynamicRelaxationSolution.get(0, 0));
+         dynamicRelaxationToPack.setY(dynamicRelaxationSolution.get(1, 0));
+      }
+      else
+      {
+         dynamicRelaxationToPack.setToZero();
+      }
    }
 
    public double getCostToGo()
