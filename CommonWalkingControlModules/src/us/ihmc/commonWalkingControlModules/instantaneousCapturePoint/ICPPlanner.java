@@ -118,7 +118,7 @@ public class ICPPlanner
    /** Whether to display by default the various artifacts for debug or not. */
    private static final boolean VISUALIZE = true;
    /** Visualization parameter. */
-   private static final double ICP_CORNER_POINT_SIZE = 0.01;
+   private static final double ICP_CORNER_POINT_SIZE = 0.008;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
