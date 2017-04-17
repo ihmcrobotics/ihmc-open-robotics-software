@@ -22,10 +22,12 @@ public class ICPQPIndexHandler
    private boolean useStepAdjustment;
 
    private final boolean useEfficientConstraints;
+   private final boolean formulateDynamicsAsConstraint;
 
-   public ICPQPIndexHandler(boolean useEfficientConstraints)
+   public ICPQPIndexHandler(boolean useEfficientConstraints, boolean formulateDynamicsAsConstraint)
    {
       this.useEfficientConstraints = useEfficientConstraints;
+      this.formulateDynamicsAsConstraint = formulateDynamicsAsConstraint;
    }
 
    public void resetConstraints()
@@ -100,11 +102,15 @@ public class ICPQPIndexHandler
    {
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
 
-      numberOfLagrangeMultipliers = 2;
       numberOfFreeVariables = numberOfFootstepVariables + 2;
 
+      numberOfLagrangeMultipliers = 0;
       feedbackCMPIndex = numberOfFootstepVariables;
-      dynamicRelaxationIndex = feedbackCMPIndex + 2;
+
+      if (formulateDynamicsAsConstraint)
+         dynamicRelaxationIndex = feedbackCMPIndex + 2;
+      else
+         dynamicRelaxationIndex = 0;
 
       if (!useEfficientConstraints)
       {
@@ -115,7 +121,11 @@ public class ICPQPIndexHandler
             numberOfLagrangeMultipliers += 3;
       }
 
-      numberOfFreeVariables += 2;
+      if (formulateDynamicsAsConstraint)
+      {
+         numberOfFreeVariables += 2;
+         numberOfLagrangeMultipliers += 2;
+      }
 
       cmpConstraintIndex = dynamicRelaxationIndex + 2;
       if (!useEfficientConstraints)
