@@ -19,7 +19,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelPoseValidityTester;
+import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
@@ -131,7 +131,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       tester.holdCurrentPelvisHeight();
       
       PrintTools.info("Start Yo Time "+ drcBehaviorTestHelper.getYoTime());
-      PrintTools.info(""+tester.getIKResult());
+      PrintTools.info("");
+      PrintTools.info("Final Result is "+tester.getIKResult());
       
       
       
@@ -146,9 +147,38 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       tester.holdCurrentPelvisOrientation();
       tester.holdCurrentPelvisHeight();
       
-      PrintTools.info(""+tester.getIKResult());
+      PrintTools.info("");
+      PrintTools.info("Final Result is "+tester.getIKResult());
       
       
+      
+      handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
+      desiredHandPose = new FramePose(handControlFrame);
+      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPose.setPosition(new Point3D(0.8, -0.35, 1.2));
+      desiredHandPose.setOrientation(new Quaternion());
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      tester.holdCurrentChestOrientation();
+      tester.holdCurrentPelvisOrientation();
+      tester.holdCurrentPelvisHeight();
+      
+      PrintTools.info("");
+      PrintTools.info("Final Result is "+tester.getIKResult());
+      
+      
+      
+      handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
+      desiredHandPose = new FramePose(handControlFrame);
+      desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredHandPose.setPosition(new Point3D(0.9, -0.4, 0.9));
+      desiredHandPose.setOrientation(new Quaternion());
+      tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
+      tester.holdCurrentChestOrientation();
+      tester.holdCurrentPelvisOrientation();
+      tester.holdCurrentPelvisHeight();
+      
+      PrintTools.info("");
+      PrintTools.info("Final Result is "+tester.getIKResult());
       
       
       tester.onBehaviorExited();

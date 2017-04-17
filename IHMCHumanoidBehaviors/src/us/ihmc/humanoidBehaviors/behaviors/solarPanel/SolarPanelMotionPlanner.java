@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
-import us.ihmc.manipulation.planning.rrttimedomain.RRTNode1DTimeDomain;
-import us.ihmc.manipulation.planning.rrttimedomain.RRTPlannerSolarPanelCleaning;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotics.geometry.transformables.Pose;
 
@@ -97,7 +95,7 @@ public class SolarPanelMotionPlanner
             }   
          }
                
-         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
+         // PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
 
          // *** message *** //
          PrintTools.info("Putting on Message");

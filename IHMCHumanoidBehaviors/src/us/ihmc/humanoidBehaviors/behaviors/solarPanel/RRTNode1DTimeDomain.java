@@ -1,12 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
+import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.manipulation.planning.tobeDeleted.SolarPanelPoseValidityTesterOld;
 
 public class RRTNode1DTimeDomain extends RRTNode
 {
-   public static SolarPanelPoseValidityTesterOld nodeValidityTester;
+   public static SolarPanelPoseValidityTester nodeValidityTester;
    public static SolarPanelPath cleaningPath;
    
    /*
@@ -28,7 +27,7 @@ public class RRTNode1DTimeDomain extends RRTNode
    @Override
    public boolean isValidNode()
    {
-      nodeValidityTester.setSolarPanelWholeBodyPose(cleaningPath, getNodeData(0), getNodeData(1));
+      // nodeValidityTester.setSolarPanelWholeBodyPose(cleaningPath, getNodeData(0), getNodeData(1));
 
       return nodeValidityTester.isValid;
    }
