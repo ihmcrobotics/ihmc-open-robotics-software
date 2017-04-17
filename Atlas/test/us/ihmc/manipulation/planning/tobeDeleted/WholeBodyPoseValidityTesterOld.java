@@ -58,6 +58,6 @@ public abstract class WholeBodyPoseValidityTesterOld
       return robotCollisionModel;
    }
 
-   public abstract void addEnvironmentCollisionModel();
+   
 
 }

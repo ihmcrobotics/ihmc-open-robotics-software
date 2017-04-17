@@ -125,29 +125,8 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       tester.holdCurrentPelvisOrientation();
       tester.holdCurrentPelvisHeight();
       
-      tester.setUpIsDone();
-      
       PrintTools.info("Start Yo Time "+ drcBehaviorTestHelper.getYoTime());
-      
-      int cnt;
-      cnt = 0;
-      while(true)
-      {
-         cnt++;         
-         ThreadTools.sleep(10);
-         if(tester.isDone() == true)
-         {
-            PrintTools.info("escape whileloop "+cnt);
-            break;
-         }
-         if(cnt == 100)
-         {
-            tester.forceOut();
-            break;
-         }  
-      }
-      
-      PrintTools.info("Done ");
+      PrintTools.info(""+tester.getIKResult());
       
       
       
@@ -162,45 +141,10 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       tester.holdCurrentPelvisOrientation();
       tester.holdCurrentPelvisHeight();
       
-      tester.setUpIsDone();
-      
-      cnt = 0;
-      while(true)
-      {
-         cnt++;         
-         ThreadTools.sleep(10);
-         if(tester.isDone() == true)
-         {
-            PrintTools.info("escape whileloop "+cnt);
-            break;
-         }
-         if(cnt == 100)
-         {
-            tester.forceOut();
-            break;
-         }  
-      }
+      PrintTools.info(""+tester.getIKResult());
       
       
       
-      
-      
-//      //ThreadTools.sleep(3000);
-//      
-//             
-//      
-//      cnt = 0;
-//      for(int i=0;i<1000;i++)
-//      {
-//         cnt++;         
-//         ThreadTools.sleep(10);
-//         if(tester.isDone() == true)
-//         {
-//            PrintTools.info("escape whileloop "+cnt);
-//            break;
-//         }
-//      }
-
       
       tester.onBehaviorExited();
       success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(2.4);
