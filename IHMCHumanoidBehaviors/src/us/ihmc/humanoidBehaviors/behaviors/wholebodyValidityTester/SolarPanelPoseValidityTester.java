@@ -12,10 +12,10 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
 {
    private SolarPanel solarPanel;
    
-   public SolarPanelPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
-                                       CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel, SolarPanel solarPanel)
+   public SolarPanelPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, 
+                                       FullHumanoidRobotModel fullRobotModel, SolarPanel solarPanel)
    {
-      super(fullRobotModelFactory, yoTime, outgoingCommunicationBridge, fullRobotModel);
+      super(fullRobotModelFactory, outgoingCommunicationBridge, fullRobotModel);
       
       this.solarPanel = solarPanel;
       addEnvironmentCollisionModel();

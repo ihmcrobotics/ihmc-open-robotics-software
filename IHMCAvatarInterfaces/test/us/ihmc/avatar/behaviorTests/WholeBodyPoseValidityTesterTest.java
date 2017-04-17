@@ -111,15 +111,14 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       setUpSolarPanel();
       PrintTools.info("Solar Panel Built");
       
-      SolarPanelPoseValidityTester tester = new SolarPanelPoseValidityTester(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+      SolarPanelPoseValidityTester tester = new SolarPanelPoseValidityTester(getRobotModel(), 
                                                                            drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
                                                                            drcBehaviorTestHelper.getSDFFullRobotModel(), solarPanel);
       PrintTools.info("Success to initiate Behavior");
       
       drcBehaviorTestHelper.dispatchBehavior(tester);
       PrintTools.info("Set Yo Time "+ drcBehaviorTestHelper.getYoTime());
-      
-      
+            
       ReferenceFrame handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
       FramePose desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -186,7 +185,6 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
 
 
-//      drcBehaviorTestHelper.dispatchBehavior(tester);
 
       
    }

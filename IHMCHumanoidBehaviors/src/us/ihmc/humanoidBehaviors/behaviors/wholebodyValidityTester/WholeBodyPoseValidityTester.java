@@ -67,18 +67,15 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    private final ReferenceFrame pelvisZUpFrame;
    private final ReferenceFrame chestFrame;
 
-   private final DoubleYoVariable yoTime;
    
    private static boolean Debug = true;
    
    protected FullHumanoidRobotModel ikFullRobotModel;
    protected RobotCollisionModel robotCollisionModel;
    
-   public WholeBodyPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
-                                             CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
+   public WholeBodyPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
    {
       super(null, outgoingCommunicationBridge);
-      this.yoTime = yoTime;
       this.fullRobotModel = fullRobotModel;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
@@ -264,11 +261,6 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       }
    }
    
-   
-   
-   
-   
-   
    public void holdCurrentChestOrientation()
    {
       FrameOrientation currentChestOrientation = new FrameOrientation(fullRobotModel.getChest().getBodyFixedFrame());
@@ -309,6 +301,14 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       getMessage = true;
    }
    
+   public void reInitialize()
+   {
+      PrintTools.info("REinitialize");
+      ToolboxStateMessage message = new ToolboxStateMessage(ToolboxState.REINITIALIZE);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+      sendPacket(message);
+   }
+   
    public boolean getIKResult()
    {
       setUpIsDone();
@@ -319,6 +319,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          {
             if(Debug)
                PrintTools.info("Solution Get "+i);
+            reInitialize();
             return true;
          }
       }
@@ -326,7 +327,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          PrintTools.info("No solution ");
       
       forceOut();
-      
+      reInitialize();
+      ThreadTools.sleep(1000);
       return false;
    }
    
@@ -338,8 +340,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
          if(getMessage == true)
          {
             if(isSentToToolbox == false)
-            {
-               
+            {               
                for (RobotSide robotSide : RobotSide.values)
                {
                   if (handTrajectoryMessage.get(robotSide) != null)
@@ -381,10 +382,8 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                isSentToToolbox = true;
                
             }
-
             
             KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
-         
             
             double deltaSolutionQuality = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality();
             boolean isSolutionStable = Math.abs(deltaSolutionQuality) < 0.002;
@@ -431,6 +430,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
                isReceived = false;               
                getMessage = false;
                forceOut = false;
+               
             }
          }
       }
