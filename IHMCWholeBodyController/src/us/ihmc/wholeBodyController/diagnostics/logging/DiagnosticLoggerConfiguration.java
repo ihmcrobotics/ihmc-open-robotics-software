@@ -66,11 +66,6 @@ public class DiagnosticLoggerConfiguration
       setupSystemOut(diagnosticOutputDirectory);
       setupLogFiles(diagnosticOutputDirectory, formatter);
    }
-
-   public static void main(String[] args)
-   {
-      System.out.println(getTimeFromServer());
-   }
    
    private static LocalDateTime getTimeFromServer()
    {
@@ -84,8 +79,7 @@ public class DiagnosticLoggerConfiguration
          TimeInfo timeInfo = timeClient.getTime(inetAddress);
          timeInfo.computeDetails();
          long actualTime = timeInfo.getReturnTime() + timeInfo.getOffset();
-         System.out.println(timeInfo.getOffset());
-         LocalDateTime time = LocalDateTime.ofEpochSecond(actualTime, 0, ZoneOffset.UTC);
+         LocalDateTime time = LocalDateTime.ofEpochSecond(actualTime / 1000, (int) (actualTime % 1000) * 1000000, ZoneOffset.UTC);
          return time;
       }
       catch (IOException e)
@@ -215,5 +209,4 @@ public class DiagnosticLoggerConfiguration
          e.printStackTrace();
       }
    }
-
 }
