@@ -180,6 +180,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFramePoint} associated with the given end-effector and
     * {@code type}, if it does not exist it is created.
+    * <p>
+    * The name prefix of the created variable is created as follows:<br>
+    * {@code namePrefix = endEffector.getName() + type.getName() +}
+    * {@link Space#POSITION}{@code .getName()}<br>
+    * Such that the desired position for the rigid-body 'rightHand' will have the prefix:
+    * "rightHandDesiredPosition".
+    * </p>
     * 
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
@@ -213,6 +220,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFrameQuaternion} associated with the given end-effector and
     * {@code type}, if it does not exist it is created.
+    * <p>
+    * The name prefix of the created variable is created as follows:<br>
+    * {@code namePrefix = endEffector.getName() + type.getName() +}
+    * {@link Space#ORIENTATION}{@code .getName()}<br>
+    * Such that the current orientation for the rigid-body 'rightHand' will have the prefix:
+    * "rightHandCurrentOrientation".
+    * </p>
     * 
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
@@ -246,6 +260,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
    /**
     * Retrieves and returns the {@code YoFrameVector} associated with the given end-effector,
     * {@code type}, and {@code space}, if it does not exist it is created.
+    * <p>
+    * The name prefix of the created variable is created as follows:<br>
+    * {@code namePrefix = endEffector.getName() + type.getName() + space.getName()}<br>
+    * Such that the desired linear velocity for the rigid-body 'rightHand' will have the prefix:
+    * "rightHandDesiredLinearVelocity".
+    * </p>
     * 
     * @param endEffector the end-effector to which the returned data is associated.
     * @param type the type of the data to retrieve.
@@ -291,6 +311,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * <p>
     * Note: the arguments {@code dt} and {@code maximumRate} are only used if the data does not
     * exist yet.
+    * </p>
+    * <p>
+    * The name prefix of the created variable is created as follows:<br>
+    * {@code namePrefix = endEffector.getName() + "RateLimited" + rawDataType.getName() + space.getName()}<br>
+    * Such that the rate-limited vector of the desired linear acceleration for the rigid-body
+    * 'rightHand' will have the prefix: "rightHandRateLimitedDesiredLinearAcceleration".
     * </p>
     * 
     * @param endEffector the end-effector to which the returned data is associated.

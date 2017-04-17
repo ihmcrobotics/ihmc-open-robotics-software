@@ -16,15 +16,16 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry registry)
+   public ICPOptimizationReachabilityConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
+         String yoNamePrefix, YoVariableRegistry registry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      lateralReachabilityOuterLimit = new DoubleYoVariable("lateralReachabilityOuterLimit", registry);
-      lateralReachabilityInnerLimit = new DoubleYoVariable("lateralReachabilityInnerLimit", registry);
+      lateralReachabilityOuterLimit = new DoubleYoVariable(yoNamePrefix + "LateralReachabilityOuterLimit", registry);
+      lateralReachabilityInnerLimit = new DoubleYoVariable(yoNamePrefix + "LateralReachabilityInnerLimit", registry);
 
-      forwardReachabilityLimit = new DoubleYoVariable("forwardReachabilityLimit", registry);
-      backwardReachabilityLimit = new DoubleYoVariable("backwardReachabilityLimit", registry);
+      forwardReachabilityLimit = new DoubleYoVariable(yoNamePrefix + "ForwardReachabilityLimit", registry);
+      backwardReachabilityLimit = new DoubleYoVariable(yoNamePrefix + "BackwardReachabilityLimit", registry);
 
       lateralReachabilityInnerLimit.set(icpOptimizationParameters.getLateralReachabilityInnerLimit());
       lateralReachabilityOuterLimit.set(Math.max(lateralReachabilityInnerLimit.getDoubleValue(), icpOptimizationParameters.getLateralReachabilityOuterLimit()));

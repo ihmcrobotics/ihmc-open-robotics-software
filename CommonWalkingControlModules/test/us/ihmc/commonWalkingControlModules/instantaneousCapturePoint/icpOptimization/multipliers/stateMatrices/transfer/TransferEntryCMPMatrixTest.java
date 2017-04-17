@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
@@ -22,9 +23,11 @@ public class TransferEntryCMPMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
       DoubleYoVariable doubleYoVariable = new DoubleYoVariable("doubleYoVariable", registry);
+      transferSplitFractions.add(doubleYoVariable);
 
-      TransferEntryCMPMatrix transferEntryCMPMatrix = new TransferEntryCMPMatrix(doubleYoVariable);
+      TransferEntryCMPMatrix transferEntryCMPMatrix = new TransferEntryCMPMatrix(transferSplitFractions);
 
       Assert.assertEquals("", 4, transferEntryCMPMatrix.numRows);
       Assert.assertEquals("", 1, transferEntryCMPMatrix.numCols);
@@ -41,14 +44,14 @@ public class TransferEntryCMPMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
+      List<DoubleYoVariable> transferSplitFractions = new ArrayList<>();
       DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
+      transferSplitFractions.add(doubleSupportSplitRatio);
 
       ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
-      ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
       doubleSupportDurations.add(new DoubleYoVariable("doubleSupportDuration", registry));
-      singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      TransferEntryCMPMatrix transferEntryCMPMatrix = new TransferEntryCMPMatrix(doubleSupportSplitRatio);
+      TransferEntryCMPMatrix transferEntryCMPMatrix = new TransferEntryCMPMatrix(transferSplitFractions);
 
       for (int i = 0; i < iters; i++)
       {
@@ -57,11 +60,7 @@ public class TransferEntryCMPMatrixTest
          doubleSupportSplitRatio.set(splitRatio);
 
          double doubleSupportDuration = 2.0 * random.nextDouble();
-         double singleSupportDuration = 5.0 * random.nextDouble();
          doubleSupportDurations.get(0).set(doubleSupportDuration);
-         singleSupportDurations.get(0).set(singleSupportDuration);
-
-         String name = "splitRatio = " + splitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
          double endOfDoubleSupportDuration = (1 - splitRatio) * doubleSupportDuration;
          double projection = Math.exp(omega0 * endOfDoubleSupportDuration);
@@ -72,11 +71,11 @@ public class TransferEntryCMPMatrixTest
          shouldBe.set(2, 0, 1.0 - projection);
          shouldBe.set(3, 0, -omega0 * projection);
 
-         JUnitTools.assertMatrixEquals(name, shouldBe, transferEntryCMPMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(shouldBe, transferEntryCMPMatrix, epsilon);
 
          shouldBe.zero();
          transferEntryCMPMatrix.reset();
-         JUnitTools.assertMatrixEquals(name, shouldBe, transferEntryCMPMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(shouldBe, transferEntryCMPMatrix, epsilon);
       }
    }
 }
