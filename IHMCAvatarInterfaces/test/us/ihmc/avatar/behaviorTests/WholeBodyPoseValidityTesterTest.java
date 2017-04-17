@@ -19,10 +19,10 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.continuousIntegration.ContinuousIntegrationTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.WholeBodyPoseValidityTesterTwo;
-import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
-import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
+import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelPoseValidityTester;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotics.geometry.FramePose;
+import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -41,6 +41,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    private KinematicsToolboxModule kinematicsToolboxModule;
    private PacketCommunicator toolboxCommunicator;
 
+   SolarPanel solarPanel;
    @Before
    public void showMemoryUsageBeforeTest()
    {
@@ -106,9 +107,13 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       
       PrintTools.info("Initiate Behavior");
-      WholeBodyPoseValidityTesterTwo tester = new WholeBodyPoseValidityTesterTwo(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
+      
+      setUpSolarPanel();
+      PrintTools.info("Solar Panel Built");
+      
+      SolarPanelPoseValidityTester tester = new SolarPanelPoseValidityTester(getRobotModel(), drcBehaviorTestHelper.getYoTime(),
                                                                            drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                           drcBehaviorTestHelper.getSDFFullRobotModel());
+                                                                           drcBehaviorTestHelper.getSDFFullRobotModel(), solarPanel);
       PrintTools.info("Success to initiate Behavior");
       
       drcBehaviorTestHelper.dispatchBehavior(tester);
@@ -134,7 +139,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       handControlFrame = drcBehaviorTestHelper.getReferenceFrames().getHandFrame(robotSide);
       desiredHandPose = new FramePose(handControlFrame);
       desiredHandPose.changeFrame(ReferenceFrame.getWorldFrame());
-      desiredHandPose.setPosition(new Point3D(1.6, -0.35, 1.2));
+      desiredHandPose.setPosition(new Point3D(1.0, -0.15, 1.0));
       desiredHandPose.setOrientation(new Quaternion());
       tester.setDesiredHandPose(RobotSide.RIGHT, desiredHandPose);
       tester.holdCurrentChestOrientation();
@@ -168,4 +173,18 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
       toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
    }
+   
+   
+   private void setUpSolarPanel()
+   {
+      Pose poseSolarPanel = new Pose();
+      Quaternion quaternionSolarPanel = new Quaternion();
+      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
+      quaternionSolarPanel.appendRollRotation(0.0);
+      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+      poseSolarPanel.setOrientation(quaternionSolarPanel);
+      
+      solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
+   }
+   
 }

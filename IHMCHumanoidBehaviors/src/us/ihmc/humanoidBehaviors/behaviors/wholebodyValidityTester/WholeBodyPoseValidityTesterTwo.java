@@ -34,7 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.ThreadTools;
 
-public class WholeBodyPoseValidityTesterTwo extends AbstractBehavior
+public abstract class WholeBodyPoseValidityTesterTwo extends AbstractBehavior
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -71,7 +71,8 @@ public class WholeBodyPoseValidityTesterTwo extends AbstractBehavior
    
    private static boolean Debug = true;
    
-   
+   protected FullHumanoidRobotModel ikFullRobotModel;
+   protected RobotCollisionModel robotCollisionModel;
    
    public WholeBodyPoseValidityTesterTwo(FullHumanoidRobotModelFactory fullRobotModelFactory, DoubleYoVariable yoTime,
                                              CommunicationBridgeInterface outgoingCommunicationBridge, FullHumanoidRobotModel fullRobotModel)
@@ -111,6 +112,10 @@ public class WholeBodyPoseValidityTesterTwo extends AbstractBehavior
       attachNetworkListeningQueue(kinematicsToolboxOutputQueue, KinematicsToolboxOutputStatus.class);
 
       clear();
+      
+      this.ikFullRobotModel = getFullHumanoidRobotModel();
+
+      this.robotCollisionModel = new RobotCollisionModel(this.ikFullRobotModel);
    }
    
    public FullHumanoidRobotModel getFullHumanoidRobotModel()
@@ -551,7 +556,6 @@ public class WholeBodyPoseValidityTesterTwo extends AbstractBehavior
    
    
    
-   protected RobotCollisionModel robotCollisionModel;
 
    public boolean isValid = true;
    protected boolean collisionFree = true;
@@ -594,6 +598,6 @@ public class WholeBodyPoseValidityTesterTwo extends AbstractBehavior
    }
    
    
-   
+   public abstract void addEnvironmentCollisionModel();
 
 }
