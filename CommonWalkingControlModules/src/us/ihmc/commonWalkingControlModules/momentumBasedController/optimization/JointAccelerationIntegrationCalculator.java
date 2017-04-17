@@ -7,6 +7,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -51,20 +52,21 @@ public class JointAccelerationIntegrationCalculator
       {
          OneDoFJoint jointToComputeDesierdPositionFor = command.getJointToComputeDesiredPositionFor(commandJointIndex);
          int localJointIndex = jointsToComputeDesiredPositionFor.indexOf(jointToComputeDesierdPositionFor);
+         JointAccelerationIntegrationParametersReadOnly jointParameters = command.getJointParameters(commandJointIndex);
 
-         double newAlphaPosition = command.getJointAlphaPosition(commandJointIndex);
+         double newAlphaPosition = jointParameters.getAlphaPosition();
          if (Double.isNaN(newAlphaPosition) || !MathTools.intervalContains(newAlphaPosition, 0.0, 1.0))
             newAlphaPosition = defaultAlphaPositionIntegration.getDoubleValue();
 
-         double newAlphaVelocity = command.getJointAlphaVelocity(commandJointIndex);
+         double newAlphaVelocity = jointParameters.getAlphaVelocity();
          if (Double.isNaN(newAlphaVelocity) || !MathTools.intervalContains(newAlphaVelocity, 0.0, 1.0))
             newAlphaVelocity = defaultAlphaVelocityIntegration.getDoubleValue();
 
-         double newMaxPositionError = command.getJointMaxPositionError(commandJointIndex);
+         double newMaxPositionError = jointParameters.getMaxPositionError();
          if (Double.isNaN(newMaxPositionError) || newMaxPositionError < 0.0)
             newMaxPositionError = defaultIntegrationMaxPositionError.getDoubleValue();
 
-         double newMaxVelocity = command.getJointMaxVelocity(commandJointIndex);
+         double newMaxVelocity = jointParameters.getMaxVelocity();
          if (Double.isNaN(newMaxVelocity) || newMaxVelocity < 0.0)
             newMaxVelocity = defaultIntegrationMaxVelocity.getDoubleValue();
 
