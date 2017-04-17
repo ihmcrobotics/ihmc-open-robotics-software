@@ -14,7 +14,7 @@ import us.ihmc.robotics.screwTheory.OneDoFJoint;
 
 public class JointAccelerationIntegrationCalculator
 {
-   public static final double DEFAUTL_ALPHA_POSITION = 0.9996;
+   public static final double DEFAULT_ALPHA_POSITION = 0.9996;
    public static final double DEFAULT_ALPHA_VELOCITY = 0.95;
    public static final double DEFAULT_MAX_POSITION_ERROR = 0.2;
    public static final double DEFAULT_MAX_VELOCITY = 2.0;
@@ -37,7 +37,7 @@ public class JointAccelerationIntegrationCalculator
    public JointAccelerationIntegrationCalculator(double controlDT, YoVariableRegistry parentRegistry)
    {
       this.controlDT = controlDT;
-      defaultAlphaPositionIntegration.set(DEFAUTL_ALPHA_POSITION);
+      defaultAlphaPositionIntegration.set(DEFAULT_ALPHA_POSITION);
       defaultAlphaVelocityIntegration.set(DEFAULT_ALPHA_VELOCITY);
       defaultIntegrationMaxPositionError.set(DEFAULT_MAX_POSITION_ERROR);
       defaultIntegrationMaxVelocity.set(DEFAULT_MAX_VELOCITY);
