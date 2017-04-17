@@ -86,7 +86,7 @@ public class DynamicsMatrixCalculatorTest
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          update();
-         DynamicsMatrixCalculatorTools.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
@@ -115,7 +115,7 @@ public class DynamicsMatrixCalculatorTest
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          update();
-         DynamicsMatrixCalculatorTools.computeQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
@@ -215,7 +215,7 @@ public class DynamicsMatrixCalculatorTest
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          update();
-         DynamicsMatrixCalculatorTools.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
@@ -243,7 +243,7 @@ public class DynamicsMatrixCalculatorTest
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          update();
-         DynamicsMatrixCalculatorTools.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
@@ -271,7 +271,7 @@ public class DynamicsMatrixCalculatorTest
          DenseMatrix64F qddotSolution = new DenseMatrix64F(degreesOfFreedom, 1);
 
          update();
-         DynamicsMatrixCalculatorTools.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
+         dynamicsMatrixCalculator.computeRequiredRhoAndAchievableQddotGivenRho(dynamicsMatrixCalculator, qddotSolution, rhoSolution);
 
          solveAndCompare(qddotSolution, rhoSolution, true);
       }
@@ -410,10 +410,10 @@ public class DynamicsMatrixCalculatorTest
       ScrewTools.setDesiredAccelerations(jointIndexHandler.getIndexedJoints(), qddotSolution);
       inverseDynamicsCalculator.compute();
 
-      DynamicsMatrixCalculatorTools.extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);
+      dynamicsMatrixCalculator.extractTorqueMatrix(jointIndexHandler.getIndexedJoints(), inverseDynamicsTauSolution);
 
       if (checkRigidBodyDynamics)
-         Assert.assertTrue(DynamicsMatrixCalculatorTools.checkFloatingBaseRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, qddotSolution, dynamicsMatrixTauSolution, rhoSolution));
+         Assert.assertTrue(dynamicsMatrixCalculator.checkFloatingBaseRigidBodyDynamicsSatisfied(dynamicsMatrixCalculator, qddotSolution, dynamicsMatrixTauSolution, rhoSolution));
 
       for(int i = 0; i < inverseDynamicsTauSolution.getNumRows(); i++)
       {
