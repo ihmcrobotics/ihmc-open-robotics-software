@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import us.ihmc.commonWalkingControlModules.controlModules.RigidBodyLinearAccelerationControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -10,108 +9,147 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.math.frames.YoFrameVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
+import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
+import us.ihmc.robotics.screwTheory.Twist;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 
 public class PointFeedbackController implements FeedbackControllerInterface
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoVariableRegistry registry;
 
    private final BooleanYoVariable isEnabled;
 
    private final YoFramePoint yoDesiredPosition;
    private final YoFramePoint yoCurrentPosition;
+   private final YoFrameVector yoErrorPosition;
+
+   private final YoFrameVector yoErrorPositionIntegrated;
 
    private final YoFrameVector yoDesiredLinearVelocity;
    private final YoFrameVector yoCurrentLinearVelocity;
-
+   private final YoFrameVector yoErrorLinearVelocity;
    private final YoFrameVector yoFeedForwardLinearVelocity;
-   private final YoFrameVector yoFeedForwardLinearAcceleration;
-
    private final YoFrameVector yoFeedbackLinearVelocity;
+   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearVelocity;
 
    private final YoFrameVector yoDesiredLinearAcceleration;
+   private final YoFrameVector yoFeedForwardLinearAcceleration;
+   private final YoFrameVector yoFeedbackLinearAcceleration;
+   private final RateLimitedYoFrameVector rateLimitedFeedbackLinearAcceleration;
    private final YoFrameVector yoAchievedLinearAcceleration;
 
+   private final FramePoint desiredPosition = new FramePoint();
+   private final FramePoint currentPosition = new FramePoint();
+
+   private final FrameVector desiredLinearVelocity = new FrameVector();
+   private final FrameVector currentLinearVelocity = new FrameVector();
+   private final FrameVector currentAngularVelocity = new FrameVector();
+   private final FrameVector feedForwardLinearVelocity = new FrameVector();
+
+   private final FrameVector desiredLinearAcceleration = new FrameVector();
+   private final FrameVector feedForwardLinearAcceleration = new FrameVector();
+   private final FrameVector biasLinearAcceleration = new FrameVector();
    private final FrameVector achievedLinearAcceleration = new FrameVector();
 
-   private final FramePoint tempPosition = new FramePoint();
-   private final FrameOrientation tempOrientation = new FrameOrientation();
-   private final FrameVector tempLinearVelocity = new FrameVector();
-   private final FrameVector feedForwardLinearAcceleration = new FrameVector();
-   private final FrameVector desiredLinearVelocity = new FrameVector();
-   private final FrameVector desiredLinearAcceleration = new FrameVector();
+   private final Twist currentTwist = new Twist();
 
    private final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
    private final SpatialVelocityCommand inverseKinematicsOutput = new SpatialVelocityCommand();
 
    private final YoPositionPIDGainsInterface gains;
+   private final Matrix3DReadOnly kp, kd, ki;
    private final YoSE3OffsetFrame controlFrame;
-   private final RigidBodyLinearAccelerationControlModule accelerationControlModule;
+
+   private final TwistCalculator twistCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
    private RigidBody base;
 
    private final RigidBody endEffector;
 
+   private final double dt;
+
    public PointFeedbackController(RigidBody endEffector, WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox,
                                   YoVariableRegistry parentRegistry)
    {
       this.endEffector = endEffector;
+
+      twistCalculator = toolbox.getTwistCalculator();
       spatialAccelerationCalculator = toolbox.getSpatialAccelerationCalculator();
 
       String endEffectorName = endEffector.getName();
       registry = new YoVariableRegistry(endEffectorName + "PointFBController");
-      TwistCalculator twistCalculator = toolbox.getTwistCalculator();
-      double dt = toolbox.getControlDT();
+      dt = toolbox.getControlDT();
       gains = feedbackControllerToolbox.getPositionGains(endEffector);
+      kp = gains.createProportionalGainMatrix();
+      kd = gains.createDerivativeGainMatrix();
+      ki = gains.createIntegralGainMatrix();
+      DoubleYoVariable maximumRate = gains.getYoMaximumFeedbackRate();
+
       controlFrame = feedbackControllerToolbox.getControlFrame(endEffector);
 
       isEnabled = new BooleanYoVariable(endEffectorName + "isPointFBControllerEnabled", registry);
       isEnabled.set(false);
 
-      yoDesiredPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.DESIRED);
-      yoCurrentPosition = feedbackControllerToolbox.getOrCreatePosition(endEffector, Type.CURRENT);
+      yoDesiredPosition = feedbackControllerToolbox.getPosition(endEffector, Type.DESIRED);
+      yoCurrentPosition = feedbackControllerToolbox.getPosition(endEffector, Type.CURRENT);
+      yoErrorPosition = feedbackControllerToolbox.getDataVector(endEffector, Type.ERROR, Space.POSITION);
 
-      yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
+      yoErrorPositionIntegrated = feedbackControllerToolbox.getDataVector(endEffector, Type.ERROR_INTEGRATED, Space.POSITION);
+
+      yoDesiredLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_VELOCITY);
 
       if (toolbox.isEnableInverseDynamicsModule() || toolbox.isEnableVirtualModelControlModule())
       {
-         yoCurrentLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
+         yoCurrentLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.CURRENT, Space.LINEAR_VELOCITY);
+         yoErrorLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.ERROR, Space.LINEAR_VELOCITY);
 
-         accelerationControlModule = new RigidBodyLinearAccelerationControlModule(endEffectorName, twistCalculator, endEffector, controlFrame, dt, gains, registry);
-         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
-         yoDesiredLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
-         yoAchievedLinearAcceleration = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
+         yoDesiredLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.DESIRED, Space.LINEAR_ACCELERATION);
+         yoFeedForwardLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_ACCELERATION);
+         yoFeedbackLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_ACCELERATION);
+         rateLimitedFeedbackLinearAcceleration = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_ACCELERATION, dt,
+                                                                                                    maximumRate);
+         yoAchievedLinearAcceleration = feedbackControllerToolbox.getDataVector(endEffector, Type.ACHIEVED, Space.LINEAR_ACCELERATION);
       }
       else
       {
          yoCurrentLinearVelocity = null;
+         yoErrorLinearVelocity = null;
 
-         accelerationControlModule = null;
-         yoFeedForwardLinearAcceleration = null;
          yoDesiredLinearAcceleration = null;
+         yoFeedForwardLinearAcceleration = null;
+         yoFeedbackLinearAcceleration = null;
+         rateLimitedFeedbackLinearAcceleration = null;
          yoAchievedLinearAcceleration = null;
       }
 
       if (toolbox.isEnableInverseKinematicsModule())
       {
-         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
-         yoFeedbackLinearVelocity = feedbackControllerToolbox.getOrCreateDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
+         yoFeedbackLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY);
+         yoFeedForwardLinearVelocity = feedbackControllerToolbox.getDataVector(endEffector, Type.FEEDFORWARD, Space.LINEAR_VELOCITY);
+         rateLimitedFeedbackLinearVelocity = feedbackControllerToolbox.getRateLimitedDataVector(endEffector, Type.FEEDBACK, Space.LINEAR_VELOCITY, dt,
+                                                                                                maximumRate);
       }
       else
       {
-         yoFeedForwardLinearVelocity = null;
          yoFeedbackLinearVelocity = null;
+         yoFeedForwardLinearVelocity = null;
+         rateLimitedFeedbackLinearVelocity = null;
       }
 
       parentRegistry.addChild(registry);
@@ -128,15 +166,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       gains.set(command.getGains());
 
-      command.getBodyFixedPointIncludingFrame(tempPosition);
-      tempOrientation.setToZero(endEffector.getBodyFixedFrame());
-      controlFrame.setOffsetToParent(tempPosition, tempOrientation);
+      command.getBodyFixedPointIncludingFrame(desiredPosition);
+      controlFrame.setOffsetToParentToTranslationOnly(desiredPosition);
 
-      command.getIncludingFrame(tempPosition, tempLinearVelocity, feedForwardLinearAcceleration);
-      yoDesiredPosition.setAndMatchFrame(tempPosition);
-      yoDesiredLinearVelocity.setAndMatchFrame(tempLinearVelocity);
+      command.getIncludingFrame(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      yoDesiredPosition.setAndMatchFrame(desiredPosition);
+      yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
       if (yoFeedForwardLinearVelocity != null)
-         yoFeedForwardLinearVelocity.setAndMatchFrame(tempLinearVelocity);
+         yoFeedForwardLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
       if (yoFeedForwardLinearAcceleration != null)
          yoFeedForwardLinearAcceleration.setAndMatchFrame(feedForwardLinearAcceleration);
    }
@@ -150,9 +187,15 @@ public class PointFeedbackController implements FeedbackControllerInterface
    @Override
    public void initialize()
    {
-      if (accelerationControlModule != null)
-         accelerationControlModule.reset();
+      if (rateLimitedFeedbackLinearAcceleration != null)
+         rateLimitedFeedbackLinearAcceleration.reset();
+      if (rateLimitedFeedbackLinearVelocity != null)
+         rateLimitedFeedbackLinearVelocity.reset();
    }
+
+   private final FrameVector proportionalFeedback = new FrameVector();
+   private final FrameVector derivativeFeedback = new FrameVector();
+   private final FrameVector integralFeedback = new FrameVector();
 
    @Override
    public void computeInverseDynamics()
@@ -160,21 +203,27 @@ public class PointFeedbackController implements FeedbackControllerInterface
       if (!isEnabled())
          return;
 
-      yoDesiredPosition.getFrameTupleIncludingFrame(tempPosition);
-      yoDesiredLinearVelocity.getFrameTupleIncludingFrame(tempLinearVelocity);
+      computeProportionalTerm(proportionalFeedback);
+      computeDerivativeTerm(derivativeFeedback);
+      computeIntegralTerm(integralFeedback);
       yoFeedForwardLinearAcceleration.getFrameTupleIncludingFrame(feedForwardLinearAcceleration);
+      feedForwardLinearAcceleration.changeFrame(controlFrame);
 
-      accelerationControlModule.compute(desiredLinearAcceleration, tempPosition, tempLinearVelocity, feedForwardLinearAcceleration, base);
+      desiredLinearAcceleration.setIncludingFrame(proportionalFeedback);
+      desiredLinearAcceleration.add(derivativeFeedback);
+      desiredLinearAcceleration.add(integralFeedback);
+      desiredLinearAcceleration.limitLength(gains.getMaximumFeedback());
+      yoFeedbackLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
+      rateLimitedFeedbackLinearAcceleration.update();
+      rateLimitedFeedbackLinearAcceleration.getFrameTupleIncludingFrame(desiredLinearAcceleration);
+
+      desiredLinearAcceleration.changeFrame(controlFrame);
+      desiredLinearAcceleration.add(feedForwardLinearAcceleration);
 
       yoDesiredLinearAcceleration.setAndMatchFrame(desiredLinearAcceleration);
 
-      tempPosition.setToZero(controlFrame);
-      yoCurrentPosition.setAndMatchFrame(tempPosition);
+      addCoriolisAcceleration(desiredLinearAcceleration);
 
-      accelerationControlModule.getCurrentLinearVelocity(tempLinearVelocity);
-      yoCurrentLinearVelocity.setAndMatchFrame(tempLinearVelocity);
-
-      desiredLinearAcceleration.changeFrame(controlFrame);
       inverseDynamicsOutput.setLinearAcceleration(controlFrame, desiredLinearAcceleration);
    }
 
@@ -186,22 +235,22 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       inverseKinematicsOutput.setProperties(inverseDynamicsOutput);
 
-      yoDesiredPosition.getFrameTupleIncludingFrame(tempPosition);
-      yoFeedForwardLinearVelocity.getFrameTupleIncludingFrame(tempLinearVelocity);
-      tempLinearVelocity.changeFrame(controlFrame);
+      yoFeedForwardLinearVelocity.getFrameTupleIncludingFrame(feedForwardLinearVelocity);
+      computeProportionalTerm(proportionalFeedback);
+      computeIntegralTerm(integralFeedback);
 
-      tempPosition.changeFrame(controlFrame);
-      double[] kp = gains.getProportionalGains();
-      desiredLinearVelocity.setToZero(controlFrame);
-      desiredLinearVelocity.set(kp[0] * tempPosition.getX(), kp[1] * tempPosition.getY(), kp[2] * tempPosition.getZ());
+      desiredLinearVelocity.setIncludingFrame(proportionalFeedback);
+      desiredLinearVelocity.add(integralFeedback);
+      desiredLinearVelocity.limitLength(gains.getMaximumFeedback());
       yoFeedbackLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
+      rateLimitedFeedbackLinearVelocity.update();
+      rateLimitedFeedbackLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
 
-      desiredLinearVelocity.add(tempLinearVelocity);
+      desiredLinearVelocity.add(feedForwardLinearVelocity);
+
       yoDesiredLinearVelocity.setAndMatchFrame(desiredLinearVelocity);
 
-      tempPosition.setToZero(controlFrame);
-      yoCurrentPosition.setAndMatchFrame(tempPosition);
-
+      desiredLinearVelocity.changeFrame(controlFrame);
       inverseKinematicsOutput.setLinearVelocity(controlFrame, desiredLinearVelocity);
    }
 
@@ -211,13 +260,173 @@ public class PointFeedbackController implements FeedbackControllerInterface
       computeInverseDynamics();
    }
 
+   private final SpatialAccelerationVector achievedSpatialAccelerationVector = new SpatialAccelerationVector();
+
    @Override
    public void computeAchievedAcceleration()
    {
-      tempPosition.setToZero(controlFrame);
-      tempPosition.changeFrame(endEffector.getBodyFixedFrame());
-      spatialAccelerationCalculator.getLinearAccelerationOfBodyFixedPoint(base, endEffector, tempPosition, achievedLinearAcceleration);
+      spatialAccelerationCalculator.getRelativeAcceleration(base, endEffector, achievedSpatialAccelerationVector);
+      achievedSpatialAccelerationVector.changeFrameNoRelativeMotion(controlFrame);
+      achievedSpatialAccelerationVector.getLinearPart(achievedLinearAcceleration);
+      subtractCoriolisAcceleration(achievedLinearAcceleration);
       yoAchievedLinearAcceleration.setAndMatchFrame(achievedLinearAcceleration);
+   }
+
+   /**
+    * Computes the feedback term resulting from the error in position:<br>
+    * x<sub>FB</sub> = kp * (x<sub>desired</sub> - x<sub>current</sub>)
+    * <p>
+    * The desired position of the {@code controlFrame} is obtained from {@link #yoDesiredPosition}.
+    * </p>
+    * <p>
+    * This method also updates {@link #yoCurrentPosition} and {@link #yoErrorPosition}.
+    * </p>
+    * 
+    * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
+    */
+   private void computeProportionalTerm(FrameVector feedbackTermToPack)
+   {
+      currentPosition.setToZero(controlFrame);
+      currentPosition.changeFrame(worldFrame);
+      yoCurrentPosition.set(currentPosition);
+
+      yoDesiredPosition.getFrameTupleIncludingFrame(desiredPosition);
+
+      feedbackTermToPack.setToZero(worldFrame);
+      feedbackTermToPack.sub(desiredPosition, currentPosition);
+      feedbackTermToPack.limitLength(gains.getMaximumProportionalError());
+      yoErrorPosition.set(feedbackTermToPack);
+
+      feedbackTermToPack.changeFrame(controlFrame);
+      kp.transform(feedbackTermToPack.getVector());
+   }
+
+   /**
+    * Computes the feedback term resulting from the error in linear velocity:<br>
+    * x<sub>FB</sub> = kd * (xDot<sub>desired</sub> - xDot<sub>current</sub>)
+    * <p>
+    * The desired linear velocity of the {@code controlFrame}'s origin relative to the {@code base}
+    * is obtained from {@link #yoDesiredLinearVelocity}.
+    * </p>
+    * <p>
+    * This method also updates {@link #yoCurrentLinearVelocity} and {@link #yoErrorLinearVelocity}.
+    * </p>
+    * 
+    * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified
+    */
+   private void computeDerivativeTerm(FrameVector feedbackTermToPack)
+   {
+      currentPosition.setToZero(controlFrame);
+      currentPosition.changeFrame(endEffector.getBodyFixedFrame());
+
+      twistCalculator.getLinearVelocityOfBodyFixedPoint(base, endEffector, currentPosition, currentLinearVelocity);
+      currentLinearVelocity.changeFrame(worldFrame);
+      yoCurrentLinearVelocity.set(currentLinearVelocity);
+
+      yoDesiredLinearVelocity.getFrameTupleIncludingFrame(desiredLinearVelocity);
+
+      feedbackTermToPack.setToZero(worldFrame);
+      feedbackTermToPack.sub(desiredLinearVelocity, currentLinearVelocity);
+      feedbackTermToPack.limitLength(gains.getMaximumDerivativeError());
+      yoErrorLinearVelocity.set(feedbackTermToPack);
+
+      feedbackTermToPack.changeFrame(controlFrame);
+      kd.transform(feedbackTermToPack.getVector());
+   }
+
+   /**
+    * Computes the feedback term resulting from the integrated error in position:<br>
+    * x<sub>FB</sub> = ki * &int;<sup>t</sup> (x<sub>desired</sub> - x<sub>current</sub>)
+    * <p>
+    * The current error in position of the {@code controlFrame} is obtained from
+    * {@link #yoErrorPosition}.
+    * </p>
+    * <p>
+    * This method also updates {@link #yoErrorPositionIntegrated}.
+    * </p>
+    * 
+    * @param feedbackTermToPack the value of the feedback term x<sub>FB</sub>. Modified.
+    */
+   private void computeIntegralTerm(FrameVector feedbackTermToPack)
+   {
+      double maximumIntegralError = gains.getMaximumIntegralError();
+
+      if (maximumIntegralError < 1.0e-5)
+      {
+         feedbackTermToPack.setToZero(controlFrame);
+         yoErrorPositionIntegrated.setToZero();
+         return;
+      }
+
+      yoErrorPosition.getFrameTupleIncludingFrame(feedbackTermToPack);
+      feedbackTermToPack.scale(dt);
+      feedbackTermToPack.add(yoErrorPositionIntegrated.getFrameTuple());
+      feedbackTermToPack.limitLength(maximumIntegralError);
+      yoErrorPositionIntegrated.set(feedbackTermToPack);
+
+      feedbackTermToPack.changeFrame(controlFrame);
+      ki.transform(feedbackTermToPack.getVector());
+   }
+
+   /**
+    * Computes and adds the bias acceleration resulting from the combination of the current linear
+    * and angular velocity of the control frame.
+    * <p>
+    * This is needed when going from a linear acceleration expressed in an inertial frame to a
+    * moving frame attached to the end-effector.
+    * </p>
+    * <p>
+    * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a
+    * moving frame, here a frame attache to the end-effector.
+    * </p>
+    * 
+    * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
+    *           subtracted. Its frame is changed to {@code controlFrame}. Modified.
+    */
+   private void addCoriolisAcceleration(FrameVector linearAccelerationToModify)
+   {
+      twistCalculator.getTwistOfBody(endEffector, currentTwist);
+      currentTwist.changeBodyFrameNoRelativeTwist(controlFrame);
+      currentTwist.changeFrame(controlFrame);
+
+      currentTwist.getAngularPart(currentAngularVelocity);
+      currentTwist.getLinearPart(currentLinearVelocity);
+
+      biasLinearAcceleration.setToZero(controlFrame);
+      biasLinearAcceleration.cross(currentLinearVelocity, currentAngularVelocity);
+      linearAccelerationToModify.changeFrame(controlFrame);
+      linearAccelerationToModify.add(biasLinearAcceleration);
+   }
+
+   /**
+    * Computes and subtracts the bias acceleration resulting from the combination of the current
+    * linear and angular velocity of the control frame.
+    * <p>
+    * This is needed when going from a linear acceleration expressed in a moving frame attached to
+    * the end-effector to an inertial frame.
+    * </p>
+    * <p>
+    * Intuitively, the Coriolis acceleration only appears when measuring the acceleration from a
+    * moving frame, here a frame attache to the end-effector.
+    * </p>
+    * 
+    * @param linearAccelerationToModify the linear acceleration vector to which the bias is to be
+    *           added. Its frame is changed to {@code worldFrame}. Modified.
+    */
+   private void subtractCoriolisAcceleration(FrameVector linearAccelerationToModify)
+   {
+      twistCalculator.getTwistOfBody(endEffector, currentTwist);
+      currentTwist.changeBodyFrameNoRelativeTwist(controlFrame);
+      currentTwist.changeFrame(controlFrame);
+
+      currentTwist.getAngularPart(currentAngularVelocity);
+      currentTwist.getLinearPart(currentLinearVelocity);
+
+      biasLinearAcceleration.setToZero(controlFrame);
+      biasLinearAcceleration.cross(currentLinearVelocity, currentAngularVelocity);
+      linearAccelerationToModify.changeFrame(controlFrame);
+      linearAccelerationToModify.sub(biasLinearAcceleration);
+      linearAccelerationToModify.changeFrame(worldFrame);
    }
 
    @Override

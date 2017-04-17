@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.CentroidalMomentumHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.InverseDynamicsQPBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
@@ -25,7 +26,6 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.InverseDynamicsCalculator;
 import us.ihmc.robotics.screwTheory.InverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.SpatialAccelerationCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
@@ -46,6 +46,7 @@ public class WholeBodyControlCoreToolbox
 
    private final JointIndexHandler jointIndexHandler;
    private final double totalRobotMass;
+   private final CentroidalMomentumHandler centroidalMomentumHandler;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
    private final SpatialAccelerationCalculator spatialAccelerationCalculator;
 
@@ -126,8 +127,10 @@ public class WholeBodyControlCoreToolbox
       this.optimizationSettings = momentumOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      RigidBody rootBody = twistCalculator.getRootBody();
       jointIndexHandler = new JointIndexHandler(controlledJoints);
-      totalRobotMass = TotalMassCalculator.computeSubTreeMass(ScrewTools.getRootBody(controlledJoints[0].getPredecessor()));
+      totalRobotMass = TotalMassCalculator.computeSubTreeMass(rootBody);
+      centroidalMomentumHandler = new CentroidalMomentumHandler(rootBody, centerOfMassFrame);
       inverseDynamicsCalculator = new InverseDynamicsCalculator(twistCalculator, gravityZ);
       spatialAccelerationCalculator = inverseDynamicsCalculator.getSpatialAccelerationCalculator();
 
@@ -243,8 +246,8 @@ public class WholeBodyControlCoreToolbox
    {
       if (motionQPInputCalculator == null)
       {
-         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, jointIndexHandler, jointPrivilegedConfigurationParameters,
-                                                               registry);
+         motionQPInputCalculator = new MotionQPInputCalculator(centerOfMassFrame, twistCalculator, centroidalMomentumHandler, jointIndexHandler,
+                                                               jointPrivilegedConfigurationParameters, registry);
       }
       return motionQPInputCalculator;
    }
@@ -288,6 +291,30 @@ public class WholeBodyControlCoreToolbox
    public InverseDynamicsCalculator getInverseDynamicsCalculator()
    {
       return inverseDynamicsCalculator;
+   }
+
+   /**
+    * <b>Important note</b>: the {@code CentroidalMomentumHandler} is updated every control tick in
+    * {@link MotionQPInputCalculator#initialize()}.
+    * <p>
+    * Gets the {@code CentroidalMomentumHandler} which allows to calculate:
+    * <ul>
+    * <li>the robot momentum, often denoted 'h', and center of mass velocity.
+    * <li>the centroidal momentum matrix, often denoted 'A', which is the N-by-6 Jacobian matrix
+    * mapping joint velocities to momentum. N is equal to the number of degrees of freedom for the
+    * robot.
+    * <li>the convective term in the equation of the rate of change of momentum 'hDot':<br>
+    * hDot = A * vDot + ADot * v<br>
+    * where v and vDot are the vectors of joint velocities and accelerations respectively.<br>
+    * The convective term is: ADot * v.
+    * </ul>
+    * </p>
+    * 
+    * @return the centroidalMomentumHandler.
+    */
+   public CentroidalMomentumHandler getCentroidalMomentumHandler()
+   {
+      return centroidalMomentumHandler;
    }
 
    public FloatingInverseDynamicsJoint getRootJoint()

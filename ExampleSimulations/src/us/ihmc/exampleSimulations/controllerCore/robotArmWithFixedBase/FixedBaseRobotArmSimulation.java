@@ -6,15 +6,15 @@ import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
-public class RobotArmSimulation
+public class FixedBaseRobotArmSimulation
 {
    public static void main(String[] args)
    {
       double controlDT = 5.0e-5;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      RobotArm robotArm = new RobotArm();
-      RobotArmController robotArmController = new RobotArmController(robotArm, controlDT, yoGraphicsListRegistry);
+      FixedBaseRobotArm robotArm = new FixedBaseRobotArm(controlDT);
+      FixedBaseRobotArmController robotArmController = new FixedBaseRobotArmController(robotArm, controlDT, yoGraphicsListRegistry);
       robotArmController.registerControllerCoreModeChangedListener((mode) -> robotArm.setDynamic(mode == WholeBodyControllerCoreMode.INVERSE_DYNAMICS));
       robotArm.setController(robotArmController);
 

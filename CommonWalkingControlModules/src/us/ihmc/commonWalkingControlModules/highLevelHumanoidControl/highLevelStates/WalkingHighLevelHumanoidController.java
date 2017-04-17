@@ -805,6 +805,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          FootTrajectoryCommand trajectoryCommand = new FootTrajectoryCommand();
          trajectoryCommand.setRobotSide(state.getSupportSide().getOppositeSide());
          trajectoryCommand.addTrajectoryPoint(new FrameSE3TrajectoryPoint());
+         trajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
          commands.add(trajectoryCommand);
          walkingMessageHandler.handleFootTrajectoryCommand(commands);
          break;

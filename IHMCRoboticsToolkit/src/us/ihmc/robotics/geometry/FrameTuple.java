@@ -68,30 +68,77 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
       set(x, y, z);
    }
 
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given array
+    * {@code tupleArray} and sets this tuple frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param tupleArray the array containing the new values for this tuple's components. Not
+    *           modified.
+    */
    public final void setIncludingFrame(ReferenceFrame referenceFrame, double[] tupleArray)
    {
       this.referenceFrame = referenceFrame;
       tuple.set(tupleArray);
    }
 
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given array
+    * {@code tupleArray} and sets this tuple frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param startIndex the first index to start reading from in the array.
+    * @param tupleArray the array containing the new values for this tuple's components. Not
+    *           modified.
+    */
    public final void setIncludingFrame(ReferenceFrame referenceFrame, int startIndex, double[] tupleArray)
    {
       this.referenceFrame = referenceFrame;
       tuple.set(startIndex, tupleArray);
    }
 
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given column
+    * vector starting to read from its first row index and sets this tuple frame to
+    * {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
    public final void setIncludingFrame(ReferenceFrame referenceFrame, DenseMatrix64F tupleDenseMatrix)
    {
       this.referenceFrame = referenceFrame;
       tuple.set(tupleDenseMatrix);
    }
 
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given column
+    * vector starting to read from {@code startRow} and sets this tuple frame to
+    * {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
    public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, DenseMatrix64F tupleDenseMatrix)
    {
       this.referenceFrame = referenceFrame;
       tuple.set(startRow, tupleDenseMatrix);
    }
-   
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given matrix
+    * starting to read from {@code startRow} at the column index {@code column} and sets this tuple
+    * frame to {@code referenceFrame}.
+    *
+    * @param referenceFrame the new reference frame for this tuple.
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param column the column index to read in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
    public final void setIncludingFrame(ReferenceFrame referenceFrame, int startRow, int column, DenseMatrix64F tupleDenseMatrix)
    {
       this.referenceFrame = referenceFrame;
@@ -175,6 +222,22 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    }
 
    /**
+    * Selects a component of this tuple based on {@code index} and sets it to {@code value}.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to set.
+    * @param value the new value of the selected component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public void setElement(int index, double value)
+   {
+      tuple.setElement(index, value);
+   }
+
+   /**
     * Set the x and y components of this frameTuple to tuple2d.x and tuple2d.y respectively, and sets the z component to zero.
     * @param tuple2d
     */
@@ -199,6 +262,22 @@ public abstract class FrameTuple<S extends FrameTuple<S, T>, T extends Tuple3DBa
    public final double get(Direction direction)
    {
       return Direction.get(tuple, direction);
+   }
+
+   /**
+    * Selects a component of this tuple based on {@code index} and returns its value.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to get.
+    * @return the value of the component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public double getElement(int index)
+   {
+      return tuple.getElement(index);
    }
 
    public final void scale(double scaleFactor)

@@ -1,6 +1,7 @@
 package us.ihmc.robotics.math.frames;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ejml.data.DenseMatrix64F;
 
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -62,6 +63,45 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       putYoValuesIntoFrameTuple();
       frameTuple.get(tuple3dToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * its first row index.
+    *
+    * @param tupleMatrixToPack the array in which this tuple is stored. Modified.
+    */
+   public void get(DenseMatrix64F tupleMatrixToPack)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.get(tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param tupleMatrixToPack the column vector in which this tuple is stored. Modified.
+    */
+   public void get(int startRow, DenseMatrix64F tupleMatrixToPack)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.get(startRow, tupleMatrixToPack);
+   }
+
+   /**
+    * Packs the components {@code x}, {@code y}, {@code z} in order in a column vector starting from
+    * {@code startRow} at the column index {@code column}.
+    *
+    * @param startRow the first row index to start writing in the dense-matrix.
+    * @param column the column index to write in the dense-matrix.
+    * @param tupleMatrixToPack the matrix in which this tuple is stored. Modified.
+    */
+   public void get(int startRow, int column, DenseMatrix64F tupleMatrixToPack)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.get(startRow, column, tupleMatrixToPack);
    }
 
    public final Vector3D getVector3dCopy()
@@ -158,6 +198,23 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       }
    }
 
+   /**
+    * Selects a component of this tuple based on {@code index} and returns its value.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to get.
+    * @return the value of the component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public double getElement(int index)
+   {
+      putYoValuesIntoFrameTuple();
+      return frameTuple.getElement(index);
+   }
+
    public final DoubleYoVariable getYoX()
    {
       return x;
@@ -194,7 +251,49 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
       y.set(newY);
       z.set(newZ);
    }
-   
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given column
+    * vector starting to read from its first row index.
+    *
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void set(DenseMatrix64F tupleDenseMatrix)
+   {
+      frameTuple.setIncludingFrame(getReferenceFrame(), tupleDenseMatrix);
+      getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given column
+    * vector starting to read from {@code startRow}.
+    *
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void set(int startRow, DenseMatrix64F tupleDenseMatrix)
+   {
+      frameTuple.setIncludingFrame(getReferenceFrame(), startRow, tupleDenseMatrix);
+      getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Sets this tuple's components {@code x}, {@code y}, {@code z} in order from the given matrix
+    * starting to read from {@code startRow} at the column index {@code column}.
+    *
+    * @param startRow the first row index to start reading in the dense-matrix.
+    * @param column the column index to read in the dense-matrix.
+    * @param matrix the column vector containing the new values for this tuple's components. Not
+    *           modified.
+    */
+   public final void set(int startRow, int column, DenseMatrix64F tupleDenseMatrix)
+   {
+      frameTuple.setIncludingFrame(getReferenceFrame(), startRow, column, tupleDenseMatrix);
+      getYoValuesFromFrameTuple();
+   }
+
    /**
     * Sets x, y, and z with no checks for reference frame matches.
     * @deprecated the user should simply use {@link #set(Tuple3DBasics)} instead.
@@ -596,6 +695,24 @@ public abstract class YoFrameTuple<S, T extends FrameTuple<?, ?>> extends Abstra
    {
       putYoValuesIntoFrameTuple();
       frameTuple.set(direction, value);
+      getYoValuesFromFrameTuple();
+   }
+
+   /**
+    * Selects a component of this tuple based on {@code index} and sets it to {@code value}.
+    * <p>
+    * For an {@code index} of 0, the corresponding component is {@code x}, 1 it is {@code y}, 2 it
+    * is {@code z}.
+    * </p>
+    *
+    * @param index the index of the component to set.
+    * @param value the new value of the selected component.
+    * @throws IndexOutOfBoundsException if {@code index} &notin; [0, 2].
+    */
+   public void setElement(int index, double value)
+   {
+      putYoValuesIntoFrameTuple();
+      frameTuple.setElement(index, value);
       getYoValuesFromFrameTuple();
    }
 
