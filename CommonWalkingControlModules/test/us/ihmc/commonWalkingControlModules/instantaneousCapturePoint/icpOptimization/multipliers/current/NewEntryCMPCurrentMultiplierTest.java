@@ -95,12 +95,12 @@ public class NewEntryCMPCurrentMultiplierTest
          positionMatrix.update(timeInCurrentState);
          velocityMatrix.update(timeInCurrentState);
 
-         entryCMPMatrix.compute(singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
+         entryCMPMatrix.compute(1, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
 
          CommonOps.mult(positionMatrix, entryCMPMatrix, position);
          CommonOps.mult(velocityMatrix, entryCMPMatrix, velocity);
 
-         entryCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(position.get(0, 0), entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocity.get(0, 0), entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -177,12 +177,12 @@ public class NewEntryCMPCurrentMultiplierTest
          positionMatrix.update(timeInCurrentState);
          velocityMatrix.update(timeInCurrentState);
 
-         entryCMPMatrix.compute(singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
+         entryCMPMatrix.compute(1, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
 
          CommonOps.mult(positionMatrix, entryCMPMatrix, position);
          CommonOps.mult(velocityMatrix, entryCMPMatrix, velocity);
 
-         entryCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(position.get(0, 0), entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocity.get(0, 0), entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -264,7 +264,7 @@ public class NewEntryCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * startOfSpline;
 
-         entryCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          double projection = Math.exp(omega * timeInCurrentState);
          Assert.assertEquals(1.0 - projection, entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
@@ -362,7 +362,7 @@ public class NewEntryCMPCurrentMultiplierTest
          CommonOps.mult(cubicMatrix, entryCMPMatrix, positionMatrixOut);
          CommonOps.mult(cubicDerivativeMatrix, entryCMPMatrix, velocityMatrixOut);
 
-         entryCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(positionMatrixOut.get(0, 0), entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMatrixOut.get(0, 0), entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -443,7 +443,7 @@ public class NewEntryCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * (currentSingleSupportDuration - endOfSpline) + endOfSpline;
 
-         entryCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -527,7 +527,7 @@ public class NewEntryCMPCurrentMultiplierTest
          double positionMultiplier = 1.0 - Math.exp(-omega * projectionTime);
          double velocityMultiplier = -omega * Math.exp(-omega * projectionTime);
 
-         entryCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(positionMultiplier, entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMultiplier, entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);

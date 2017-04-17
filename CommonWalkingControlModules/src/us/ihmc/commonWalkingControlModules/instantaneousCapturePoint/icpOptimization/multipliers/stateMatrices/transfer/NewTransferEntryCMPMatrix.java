@@ -23,7 +23,8 @@ public class NewTransferEntryCMPMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+   public void compute(int numberOfFootstepsToConsider,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
          boolean useTwoCMPs, double omega0)
    {
       zero();
@@ -31,19 +32,26 @@ public class NewTransferEntryCMPMatrix extends DenseMatrix64F
       double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
       double timeOnEntryCMP;
 
-      if (useTwoCMPs)
-      {
-         // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
-         // project forward to the end of double support
-         double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         timeOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+      if (numberOfFootstepsToConsider == 0)
+      { // the ending corner point is the current entry corner point
+         timeOnEntryCMP = 0.0;
       }
       else
-      {
-         // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
-         // project forward to the end of double support
-         double nextTransferOnEntry = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-         timeOnEntryCMP = currentTransferOnEntry + singleSupportDurations.get(0).getDoubleValue() + nextTransferOnEntry;
+      { // the ending corner point is after the next step
+         if (useTwoCMPs)
+         {
+            // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
+            // project forward to the end of double support
+            double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+            timeOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+         }
+         else
+         {
+            // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
+            // project forward to the end of double support
+            double nextTransferOnEntry = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+            timeOnEntryCMP = currentTransferOnEntry + singleSupportDurations.get(0).getDoubleValue() + nextTransferOnEntry;
+         }
       }
 
       double projection = Math.exp(omega0 * (currentTransferOnEntry - timeOnEntryCMP));

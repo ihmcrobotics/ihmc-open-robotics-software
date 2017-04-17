@@ -54,6 +54,8 @@ public class ICPOptimizationInputHandler
 
    private final FramePoint2d cmpOffsetRecursion = new FramePoint2d();
 
+   private final String yoNamePrefix;
+
    public ICPOptimizationInputHandler(CapturePointPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons,
          SideDependentList<? extends ContactablePlaneBody> contactableFeet, int maximumNumberOfFootstepsToConsider,
          StateMultiplierCalculator stateMultiplierCalculator, List<DoubleYoVariable> transferDurations, List<DoubleYoVariable> swingDurations,
@@ -66,6 +68,8 @@ public class ICPOptimizationInputHandler
       this.swingDurations = swingDurations;
       this.transferSplitFractions = transferSplitFractions;
       this.swingSplitFractions = swingSplitFractions;
+
+      this.yoNamePrefix = yoNamePrefix;
 
       referenceCMPsCalculator = new ReferenceCentroidalMomentumPivotLocationsCalculator(namePrefix, bipedSupportPolygons, contactableFeet,
             maximumNumberOfFootstepsToConsider, registry);
@@ -101,9 +105,9 @@ public class ICPOptimizationInputHandler
       YoGraphicsList yoGraphicsList = new YoGraphicsList(getClass().getSimpleName());
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
-      YoGraphicPosition entryCMP = new YoGraphicPosition("entryCMP", stanceEntryCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
-      YoGraphicPosition exitCMP = new YoGraphicPosition("exitCMP", stanceExitCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
-      YoGraphicPosition finalICP = new YoGraphicPosition("finalICP", this.finalICP, 0.005, YoAppearance.Black(), GraphicType.SOLID_BALL);
+      YoGraphicPosition entryCMP = new YoGraphicPosition(yoNamePrefix + "EntryCMP", stanceEntryCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
+      YoGraphicPosition exitCMP = new YoGraphicPosition(yoNamePrefix + "ExitCMP", stanceExitCMP, 0.01, YoAppearance.Red(), GraphicType.SQUARE);
+      YoGraphicPosition finalICP = new YoGraphicPosition(yoNamePrefix + "FinalICP", this.finalICP, 0.01, YoAppearance.Black(), GraphicType.SOLID_BALL);
 
       yoGraphicsList.add(finalICP);
 
@@ -208,9 +212,9 @@ public class ICPOptimizationInputHandler
       }
    }
 
-   public void update(double timeInCurrentState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void update(int numberOfFootstepsToConsider, double timeInCurrentState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
-      stateMultiplierCalculator.computeCurrentMultipliers(timeInCurrentState, useTwoCMPs, isInTransfer, omega0);
+      stateMultiplierCalculator.computeCurrentMultipliers(numberOfFootstepsToConsider, timeInCurrentState, useTwoCMPs, isInTransfer, omega0);
    }
 
    public void computeFinalICPRecursion(FramePoint2d finalICPRecursionToPack)

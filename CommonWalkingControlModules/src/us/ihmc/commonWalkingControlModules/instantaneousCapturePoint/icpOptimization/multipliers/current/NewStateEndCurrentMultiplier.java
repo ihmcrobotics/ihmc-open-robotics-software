@@ -100,14 +100,15 @@ public class NewStateEndCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double timeInState,
-         boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void compute(int numberOfFootstepsToConsider,
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
+         double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
 
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(singleSupportDurations, doubleSupportDurations, omega0, useTwoCMPs, timeInState);
+         positionMultiplier = computeInTransfer(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, omega0, useTwoCMPs, timeInState);
       }
       else
       {
@@ -133,10 +134,11 @@ public class NewStateEndCurrentMultiplier
       this.velocityMultiplier.set(velocityMultiplier);
    }
 
-   private double computeInTransfer(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+   private double computeInTransfer(int numberOfFootstepsToConsider,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
          double omega0, boolean useTwoCMPs, double timeInState)
    {
-      transferStateEndMatrix.compute(singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega0);
+      transferStateEndMatrix.compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega0);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
