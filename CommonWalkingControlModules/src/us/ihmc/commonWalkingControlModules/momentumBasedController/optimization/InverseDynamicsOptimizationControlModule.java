@@ -110,7 +110,7 @@ public class InverseDynamicsOptimizationControlModule
       }
 
       rhoMin.set(optimizationSettings.getRhoMin());
-      
+
       momentumModuleSolution = new MomentumModuleSolution();
 
       boolean hasFloatingBase = toolbox.getRootJoint() != null;
@@ -177,9 +177,11 @@ public class InverseDynamicsOptimizationControlModule
       SpatialForceVector centroidalMomentumRateSolution = motionQPInputCalculator.computeCentroidalMomentumRateFromSolution(qDDotSolution);
       Map<RigidBody, Wrench> externalWrenchSolution = externalWrenchHandler.getExternalWrenchMap();
       List<RigidBody> rigidBodiesWithExternalWrench = externalWrenchHandler.getRigidBodiesWithExternalWrench();
+
       momentumModuleSolution.setCentroidalMomentumRateSolution(centroidalMomentumRateSolution);
       momentumModuleSolution.setExternalWrenchSolution(externalWrenchSolution);
       momentumModuleSolution.setJointAccelerations(qDDotSolution);
+      momentumModuleSolution.setRhoSolution(rhoSolution);
       momentumModuleSolution.setJointsToOptimizeFor(jointsToOptimizeFor);
       momentumModuleSolution.setRigidBodiesWithExternalWrench(rigidBodiesWithExternalWrench);
 

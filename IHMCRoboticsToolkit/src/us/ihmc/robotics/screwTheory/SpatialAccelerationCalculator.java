@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * {@code RigidBody} composing a rigid-body system.
  * <p>
  * A new spatial acceleration calculator can be constructed via the constructor
- * {@link #SpatialAccelerationCalculator(RigidBody, ReferenceFrame, SpatialAccelerationVector, TwistCalculator, boolean, boolean, boolean)}.
+ * {@link #SpatialAccelerationCalculator(SpatialAccelerationVector, TwistCalculator, boolean, boolean, boolean)}.
  * Every time the system's state is changing, the spatial acceleration calculator can be notified
  * via {@link #compute()}. Finally, the spatial acceleration of any rigid-body can be obtained as
  * follows:
@@ -106,18 +106,13 @@ public class SpatialAccelerationCalculator
     */
    public SpatialAccelerationCalculator(RigidBody body, TwistCalculator twistCalculator, double gravity, boolean useDesiredAccelerations)
    {
-      this(body, ReferenceFrame.getWorldFrame(), createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), twistCalculator, true,
-           useDesiredAccelerations);
+      this(createGravitationalSpatialAcceleration(ScrewTools.getRootBody(body), gravity), twistCalculator, true, useDesiredAccelerations);
    }
 
    /**
     * Creates a new {@code SpatialAccelerationCalculator} that will compute all the spatial
     * accelerations of all the rigid-bodies of the system to which {@code body} belongs.
     * 
-    * @param body a body that belongs to the system this spatial acceleration calculator will be
-    *           available for.
-    * @param inertialFrame non-moving frame with respect to which the spatial accelerations are
-    *           computed. Typically {@link ReferenceFrame#getWorldFrame()} is used here.
     * @param rootAcceleration the spatial acceleration of the root. Even though the root is assumed
     *           to be non-moving, the {@code rootAcceleration} is usually set to the opposite of the
     *           gravitational acceleration, such the effect of the gravity is naturally propagated
@@ -130,20 +125,16 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration,
-                                        TwistCalculator twistCalculator, boolean doVelocityTerms, boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(SpatialAccelerationVector rootAcceleration, TwistCalculator twistCalculator, boolean doVelocityTerms,
+                                        boolean useDesiredAccelerations)
    {
-      this(body, inertialFrame, rootAcceleration, twistCalculator, doVelocityTerms, true, useDesiredAccelerations);
+      this(rootAcceleration, twistCalculator, doVelocityTerms, true, useDesiredAccelerations);
    }
 
    /**
     * Creates a new {@code SpatialAccelerationCalculator} that will compute all the spatial
     * accelerations of all the rigid-bodies of the system to which {@code body} belongs.
     * 
-    * @param body a body that belongs to the system this spatial acceleration calculator will be
-    *           available for.
-    * @param inertialFrame non-moving frame with respect to which the spatial accelerations are
-    *           computed. Typically {@link ReferenceFrame#getWorldFrame()} is used here.
     * @param rootAcceleration the spatial acceleration of the root. Even though the root is assumed
     *           to be non-moving, the {@code rootAcceleration} is usually set to the opposite of the
     *           gravitational acceleration, such the effect of the gravity is naturally propagated
@@ -158,11 +149,11 @@ public class SpatialAccelerationCalculator
     * @param useDesiredAccelerations whether the desired or actual joint accelerations are used to
     *           compute the rigid-body accelerations.
     */
-   public SpatialAccelerationCalculator(RigidBody body, ReferenceFrame inertialFrame, SpatialAccelerationVector rootAcceleration,
-                                        TwistCalculator twistCalculator, boolean doVelocityTerms, boolean doAccelerationTerms, boolean useDesiredAccelerations)
+   public SpatialAccelerationCalculator(SpatialAccelerationVector rootAcceleration, TwistCalculator twistCalculator, boolean doVelocityTerms,
+                                        boolean doAccelerationTerms, boolean useDesiredAccelerations)
    {
-      this.inertialFrame = inertialFrame;
-      this.rootBody = ScrewTools.getRootBody(body);
+      this.inertialFrame = twistCalculator.getInertialFrame();
+      this.rootBody = twistCalculator.getRootBody();
       this.rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), inertialFrame, rootBody.getBodyFixedFrame());
       setRootAcceleration(rootAcceleration);
       this.twistCalculator = twistCalculator;
@@ -311,7 +302,7 @@ public class SpatialAccelerationCalculator
          twistCalculator.getRelativeTwist(body, base, twistOfCurrentWithRespectToNew);
          twistOfCurrentWithRespectToNew.changeFrame(baseFrame);
          twistCalculator.getTwistOfBody(base, twistOfBodyWithRespectToBase);
-         
+
          baseAcceleration.changeFrame(bodyFrame, twistOfCurrentWithRespectToNew, twistOfBodyWithRespectToBase);
       }
       else

@@ -246,9 +246,9 @@ public class GeometricJacobianCalculator
       if (base == null || endEffector == null)
          throw new RuntimeException("The base and end-effector have to be set first.");
 
-      ReferenceFrame endEffectorFrame = endEffector.getBodyFixedFrame();
+      ReferenceFrame endEffectorFrame = getEndEffectorFrame();
       twistOfCurrentWithRespectToBase.setToZero(endEffectorFrame, endEffectorFrame, endEffectorFrame);
-      biasAcceleration.setToZero(endEffectorFrame, endEffectorFrame, endEffectorFrame);
+      biasAcceleration.setToZero(endEffectorFrame, endEffectorFrame, jacobianFrame);
 
       RigidBody currentBody = endEffector;
 
@@ -261,6 +261,7 @@ public class GeometricJacobianCalculator
 
          zeroAcceleration.setToZero(bodyFixedFrame, jointTwist.getBaseFrame(), bodyFixedFrame);
          zeroAcceleration.changeFrame(endEffectorFrame, twistOfCurrentWithRespectToBase, jointTwist);
+         zeroAcceleration.changeFrameNoRelativeMotion(jacobianFrame);
          zeroAcceleration.add(biasAcceleration);
          biasAcceleration.set(zeroAcceleration);
 
@@ -269,8 +270,6 @@ public class GeometricJacobianCalculator
 
          currentBody = joint.getPredecessor();
       }
-
-      biasAcceleration.changeBodyFrameNoRelativeAcceleration(endEffectorFrame);
 
       convectiveTerm.reshape(6, 1);
       biasAcceleration.getMatrix(convectiveTerm, 0);
@@ -504,7 +503,7 @@ public class GeometricJacobianCalculator
       if (convectiveTerm.getNumRows() == 0)
          throw new RuntimeException("The convective term has to be computed first.");
 
-      convectiveTermToPack.set(getEndEffectorFrame(), getBaseFrame(), getEndEffectorFrame(), convectiveTerm, 0);
+      convectiveTermToPack.set(getEndEffectorFrame(), getBaseFrame(), jacobianFrame, convectiveTerm, 0);
    }
 
    /**

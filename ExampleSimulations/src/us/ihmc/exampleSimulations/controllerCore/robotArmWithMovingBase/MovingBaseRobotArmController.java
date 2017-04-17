@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.controllerCore.robotArmWithFixedBase;
+package us.ihmc.exampleSimulations.controllerCore.robotArmWithMovingBase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.trajectories.StraightLinePoseTrajectoryGenerator;
+import us.ihmc.exampleSimulations.controllerCore.ControllerCoreModeChangedListener;
+import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -49,15 +51,15 @@ import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
 import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 
-public class RobotArmController implements RobotController
+public class MovingBaseRobotArmController implements RobotController
 {
-   private static final boolean USE_PRIVILEGED_CONFIGURATION = false;
+   private static final boolean USE_PRIVILEGED_CONFIGURATION = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
-   private final RobotArm robotArm;
+   private final MovingBaseRobotArm robotArm;
    private final DoubleYoVariable yoTime;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
    private final TwistCalculator twistCalculator;
@@ -73,6 +75,11 @@ public class RobotArmController implements RobotController
    private final List<ControllerCoreModeChangedListener> controllerModeListeners = new ArrayList<>();
    private final EnumYoVariable<FeedbackControlType> feedbackControlToUse = new EnumYoVariable<>("feedbackControlToUse", registry, FeedbackControlType.class,
                                                                                                  false);
+
+   private final DoubleYoVariable baseWeight = new DoubleYoVariable("baseWeight", registry);
+   private final YoSymmetricSE3PIDGains basePositionGains = new YoSymmetricSE3PIDGains("basePosition", registry);
+   private final PointFeedbackControlCommand basePointCommand = new PointFeedbackControlCommand();
+   private final YoSineGenerator3D sineGenerator = new YoSineGenerator3D("baseTrajectory", worldFrame, registry);
 
    private final PointFeedbackControlCommand handPointCommand = new PointFeedbackControlCommand();
    private final OrientationFeedbackControlCommand handOrientationCommand = new OrientationFeedbackControlCommand();
@@ -105,7 +112,7 @@ public class RobotArmController implements RobotController
 
    private final BooleanYoVariable setRandomConfiguration = new BooleanYoVariable("setRandomConfiguration", registry);
 
-   public RobotArmController(RobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public MovingBaseRobotArmController(MovingBaseRobotArm robotArm, double controlDT, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robotArm = robotArm;
 
@@ -115,6 +122,7 @@ public class RobotArmController implements RobotController
       yoTime = robotArm.getYoTime();
       double gravityZ = robotArm.getGravity();
       RigidBody hand = robotArm.getHand();
+      RigidBody base = robotArm.getBase();
       RigidBody elevator = robotArm.getElevator();
       InverseDynamicsJoint[] controlledJoints = ScrewTools.computeSupportAndSubtreeJoints(elevator);
       centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", worldFrame, elevator);
@@ -133,9 +141,12 @@ public class RobotArmController implements RobotController
 
       FeedbackControlCommandList allPossibleCommands = new FeedbackControlCommandList();
 
-      handPointCommand.set(elevator, hand);
-      handOrientationCommand.set(elevator, hand);
-      handSpatialCommand.set(elevator, hand);
+      basePointCommand.set(elevator, base);
+
+      handPointCommand.set(base, hand);
+      handOrientationCommand.set(base, hand);
+      handSpatialCommand.set(base, hand);
+      allPossibleCommands.addCommand(basePointCommand);
       allPossibleCommands.addCommand(handPointCommand);
       allPossibleCommands.addCommand(handOrientationCommand);
       allPossibleCommands.addCommand(handSpatialCommand);
@@ -166,7 +177,13 @@ public class RobotArmController implements RobotController
    {
       robotArm.updateIDRobot();
 
-      handWeight.set(1.0);
+      baseWeight.set(100.0);
+
+      basePositionGains.setProportionalGain(100.0);
+      basePositionGains.setDampingRatio(1.0);
+      basePositionGains.createDerivativeGainUpdater(true);
+
+      handWeight.set(10.0);
 
       handPositionGains.setProportionalGain(100.0);
       handPositionGains.setDampingRatio(1.0);
@@ -176,17 +193,24 @@ public class RobotArmController implements RobotController
       handOrientationGains.setDampingRatio(1.0);
       handOrientationGains.createDerivativeGainUpdater(true);
 
-      FramePoint initialPosition = new FramePoint(robotArm.getHandControlFrame());
-      initialPosition.changeFrame(worldFrame);
-      FrameOrientation initialOrientation = new FrameOrientation(robotArm.getHandControlFrame());
-      initialOrientation.changeFrame(worldFrame);
+      FramePoint initialHandPosition = new FramePoint(robotArm.getHandControlFrame());
+      initialHandPosition.changeFrame(worldFrame);
+      FrameOrientation initialHandOrientation = new FrameOrientation(robotArm.getHandControlFrame());
+      initialHandOrientation.changeFrame(worldFrame);
 
-      handTargetPosition.setAndMatchFrame(initialPosition);
-      handTargetOrientation.setAndMatchFrame(initialOrientation);
+      handTargetPosition.setAndMatchFrame(initialHandPosition);
+      handTargetOrientation.setAndMatchFrame(initialHandOrientation);
+
+      FramePoint initialBasePosition = new FramePoint(robotArm.getBase().getBodyFixedFrame());
+      initialBasePosition.changeFrame(worldFrame);
+      sineGenerator.setOffset(initialBasePosition);
+      sineGenerator.setAmplitude(0.2, 0.2, 0.1);
+      sineGenerator.setFrequency(1.5, 1.5, 1.0);
+      sineGenerator.setPhase(0.0, Math.PI / 2.0, Math.PI);
 
       trajectoryDuration.set(0.5);
-      trajectory.setInitialPose(initialPosition, initialOrientation);
-      trajectory.setFinalPose(initialPosition, initialOrientation);
+      trajectory.setInitialPose(initialHandPosition, initialHandOrientation);
+      trajectory.setFinalPose(initialHandPosition, initialHandOrientation);
       trajectory.setTrajectoryTime(trajectoryDuration.getDoubleValue());
 
       controlLinearX.set(true);
@@ -208,14 +232,19 @@ public class RobotArmController implements RobotController
    @Override
    public void doControl()
    {
+      robotArm.updateControlFrameAcceleration();
       robotArm.updateIDRobot();
       centerOfMassFrame.update();
       twistCalculator.compute();
 
-      updateTrajectory();
-      updateFeedbackCommands();
+      updateBaseTrajectoryAndCommands();
+      updateHandTrajectory();
+      updateHandFeedbackCommands();
 
       controllerCoreCommand.clear();
+
+      controllerCoreCommand.addFeedbackControlCommand(basePointCommand);
+
       if (feedbackControlToUse.getEnumValue() == FeedbackControlType.SPATIAL)
       {
          controllerCoreCommand.addFeedbackControlCommand(handSpatialCommand);
@@ -225,6 +254,7 @@ public class RobotArmController implements RobotController
          controllerCoreCommand.addFeedbackControlCommand(handPointCommand);
          controllerCoreCommand.addFeedbackControlCommand(handOrientationCommand);
       }
+
       if (USE_PRIVILEGED_CONFIGURATION)
          controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -256,7 +286,20 @@ public class RobotArmController implements RobotController
       robotJointLimitWatcher.doControl();
    }
 
-   public void updateFeedbackCommands()
+   private void updateBaseTrajectoryAndCommands()
+   {
+      basePointCommand.resetBodyFixedPoint();
+      basePointCommand.setWeightForSolver(baseWeight.getDoubleValue());
+      basePointCommand.setGains(basePositionGains);
+      FramePoint desiredPosition = new FramePoint();
+      FrameVector desiredLinearVelocity = new FrameVector();
+      FrameVector feedForwardLinearAcceleration = new FrameVector();
+      sineGenerator.compute(yoTime.getDoubleValue());
+      sineGenerator.getLinearData(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+      basePointCommand.set(desiredPosition, desiredLinearVelocity, feedForwardLinearAcceleration);
+   }
+
+   public void updateHandFeedbackCommands()
    {
       FramePose controlFramePose = new FramePose(robotArm.getHandControlFrame());
       controlFramePose.changeFrame(robotArm.getHand().getBodyFixedFrame());
@@ -284,7 +327,7 @@ public class RobotArmController implements RobotController
       handSpatialCommand.set(orientation, angularVelocity, angularAcceleration);
    }
 
-   public void updateTrajectory()
+   public void updateHandTrajectory()
    {
       if (goToTarget.getBooleanValue())
       {
