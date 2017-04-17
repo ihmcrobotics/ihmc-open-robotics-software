@@ -21,8 +21,11 @@ public class ICPQPIndexHandler
 
    private boolean useStepAdjustment;
 
-   public ICPQPIndexHandler()
+   private final boolean useEfficientConstraints;
+
+   public ICPQPIndexHandler(boolean useEfficientConstraints)
    {
+      this.useEfficientConstraints = useEfficientConstraints;
    }
 
    public void resetConstraints()
@@ -93,18 +96,6 @@ public class ICPQPIndexHandler
       return useStepAdjustment;
    }
 
-   public void submitProblemConditions(int numberOfFootstepsToConsider, boolean useStepAdjustment)
-   {
-      if (!useStepAdjustment)
-         this.numberOfFootstepsToConsider = 0;
-      else
-         this.numberOfFootstepsToConsider = numberOfFootstepsToConsider;
-
-      this.useStepAdjustment = useStepAdjustment;
-
-      computeProblemSize();
-   }
-
    public void computeProblemSize()
    {
       numberOfFootstepVariables = 2 * numberOfFootstepsToConsider;
@@ -115,19 +106,33 @@ public class ICPQPIndexHandler
       feedbackCMPIndex = numberOfFootstepVariables;
       dynamicRelaxationIndex = feedbackCMPIndex + 2;
 
-      if (numberOfCMPVertices > 0)
-         numberOfLagrangeMultipliers += 3;
+      if (!useEfficientConstraints)
+      {
+         if (numberOfCMPVertices > 0)
+            numberOfLagrangeMultipliers += 3;
+
+         if (numberOfReachabilityVertices > 0)
+            numberOfLagrangeMultipliers += 3;
+      }
 
       numberOfFreeVariables += 2;
 
-      if (numberOfReachabilityVertices > 0)
-         numberOfLagrangeMultipliers += 3;
-
       cmpConstraintIndex = dynamicRelaxationIndex + 2;
-      reachabilityConstraintIndex = cmpConstraintIndex + numberOfCMPVertices;
-      lagrangeMultiplierIndex = reachabilityConstraintIndex + numberOfReachabilityVertices;
+      if (!useEfficientConstraints)
+      {
+         reachabilityConstraintIndex = cmpConstraintIndex + numberOfCMPVertices;
+         lagrangeMultiplierIndex = reachabilityConstraintIndex + numberOfReachabilityVertices;
 
-      problemSize = numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices;
+         problemSize = numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices;
+      }
+      else
+      {
+         reachabilityConstraintIndex = cmpConstraintIndex;
+         lagrangeMultiplierIndex = reachabilityConstraintIndex;
+
+         problemSize = numberOfFreeVariables;
+      }
+
       numberOfEqualityConstraints = numberOfLagrangeMultipliers;
       numberOfInequalityConstraints = numberOfCMPVertices + numberOfReachabilityVertices;
    }
