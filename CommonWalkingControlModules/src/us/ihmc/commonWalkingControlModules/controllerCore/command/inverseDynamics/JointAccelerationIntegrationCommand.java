@@ -90,8 +90,8 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * qDot<sub>des</sub><sup>t</sup> = &alpha;<sub>V</sub> qDot<sub>des</sub><sup>t - &Delta;t</sup>
     * + &Delta;t qDDot<sub>des</sub><sup>t</sup> <br>
     * Desired position:<br>
-    * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t - &Delta;t</sup>
-    * + &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
+    * q<sub>des</sub><sup>t</sup> = (1 - &alpha;<sub>P</sub>) q<sub>cur</sub><sup>t</sup> +
+    * &alpha;<sub>P</sub> (q<sub>des</sub><sup>t - &Delta;t</sup> + &Delta;t
     * qDot<sub>des</sub><sup>t</sup>)
     * </p>
     * <p>
@@ -109,7 +109,7 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * cause the joint to never settle by having stick-slip behavior around the "true" desired
     * position the high-level controller is trying to achieve. It can simply be downtuned until this
     * undesirable effect disappear. If not specified otherwise, &alpha;<sub>P</sup> =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_ALPHA_VELOCITY}.
+    * {@link JointAccelerationIntegrationCalculator#DEFAUTL_ALPHA_POSITION}.
     * </p>
     * 
     * @param jointIndex the index of the joint to provide parameters for.
@@ -146,7 +146,8 @@ public class JointAccelerationIntegrationCommand implements InverseDynamicsComma
     * </p>
     * 
     * @param jointIndex the index of the joint to provide parameters for.
-    * @param maxPositionError limits the gap between the desired joint position and the actual joint position.
+    * @param maxPositionError limits the gap between the desired joint position and the actual joint
+    *           position.
     * @param maxVelocity limits the maximum value of the desired joint velocity.
     */
    public void setJointMaxima(int jointIndex, double maxPositionError, double maxVelocity)
