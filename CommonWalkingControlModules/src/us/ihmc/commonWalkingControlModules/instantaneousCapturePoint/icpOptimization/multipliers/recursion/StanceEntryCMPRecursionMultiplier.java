@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -12,12 +12,14 @@ public class StanceEntryCMPRecursionMultiplier
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DoubleYoVariable entryMultiplier;
-   private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
+   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<DoubleYoVariable> transferSplitFractions;
 
-   public StanceEntryCMPRecursionMultiplier(String namePrefix, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
+   public StanceEntryCMPRecursionMultiplier(String namePrefix, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          YoVariableRegistry parentRegistry)
    {
-      this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
 
       entryMultiplier = new DoubleYoVariable(namePrefix + name, registry);
 
@@ -26,10 +28,10 @@ public class StanceEntryCMPRecursionMultiplier
 
    public void reset()
    {
-      entryMultiplier.set(0.0);
+      entryMultiplier.setToNaN();
    }
 
-   public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations,
+   public void compute(int numberOfFootstepsToConsider, List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
          boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfFootstepsToConsider == 0)
@@ -44,27 +46,46 @@ public class StanceEntryCMPRecursionMultiplier
          computeWithOneCMP(doubleSupportDurations, singleSupportDurations, omega0);
    }
 
-   private void computeWithOneCMP(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, double omega0)
+   private void computeWithOneCMP(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
    {
-      double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-      double entryMultiplier = 1.0 - Math.exp(-omega0 * firstStepTime);
+      double currentTransferOnCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+      double currentSwingOnCMP = singleSupportDurations.get(0).getDoubleValue();
+      double nextTransferOnCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+
+      double timeOnCurrentCMP = currentTransferOnCMP + currentSwingOnCMP + nextTransferOnCMP;
+
+      double entryMultiplier = computeStanceEntryCMPRecursionMultiplierOneCMP(timeOnCurrentCMP, omega0);
       this.entryMultiplier.set(entryMultiplier);
    }
 
-   private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
+   private void computeWithTwoCMPs(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
    {
-      double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-      double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * firstStepTime;
-
+      double currentTransferOnEntry, currentSwingOnEntry;
       if (isInTransfer)
       {
-         double entryMultiplier = 1.0 - Math.exp(-omega0 * timeSpentOnEntryCMP);
-         this.entryMultiplier.set(entryMultiplier);
+         currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+         currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
       }
       else
       {
-         this.entryMultiplier.set(0.0);
+         currentTransferOnEntry = 0.0;
+         currentSwingOnEntry = 0.0;
       }
+
+      double timeSpentOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+
+      double entryMultiplier = computeStanceEntryCMPRecursionMultiplierTwoCMPs(timeSpentOnEntryCMP, omega0);
+      this.entryMultiplier.set(entryMultiplier);
+   }
+
+   public static double computeStanceEntryCMPRecursionMultiplierTwoCMPs(double timeSpentOnEntryCMP, double omega0)
+   {
+      return 1.0 - Math.exp(-omega0 * timeSpentOnEntryCMP);
+   }
+
+   public static double computeStanceEntryCMPRecursionMultiplierOneCMP(double timeSpentOnCMP, double omega0)
+   {
+      return 1.0 - Math.exp(-omega0 * timeSpentOnCMP);
    }
 
    public double getEntryMultiplier()
