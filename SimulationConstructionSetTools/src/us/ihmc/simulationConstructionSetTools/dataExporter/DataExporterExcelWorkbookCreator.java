@@ -2,6 +2,7 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -119,7 +120,7 @@ public class DataExporterExcelWorkbookCreator
       int row = 0;
 
       addStringToSheet(infoSheet, labelColumn, row, "Date: ", headerCellFormat);
-      WritableCell dateCell = new DateTime(dataColumn, row, new Date());
+      WritableCell dateCell = new DateTime(dataColumn, row, Date.from(ZonedDateTime.now().toInstant()));
       addCell(infoSheet, dateCell);
       row++;
 
