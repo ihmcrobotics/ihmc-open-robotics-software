@@ -34,6 +34,7 @@ public class ICPOptimizationController
    private static final boolean VISUALIZE = true;
    private static final boolean COMPUTE_COST_TO_GO = false;
    private static final boolean RECONSTRUCT_CMP_FROM_UNCLIPPED = true;
+   private static final boolean ALLOW_ADJUSTMENT_IN_TRANSFER = false;
    private static final boolean DEBUG = true;
 
    private static final String yoNamePrefix = "controller";
@@ -392,7 +393,6 @@ public class ICPOptimizationController
       this.initialTime.set(initialTime);
       speedUpTime.set(0.0);
 
-
       beginningOfStateICP.set(solutionHandler.getControllerReferenceICP());
       beginningOfStateICPVelocity.set(solutionHandler.getControllerReferenceICPVelocity());
 
@@ -557,7 +557,7 @@ public class ICPOptimizationController
       if (useFeedbackRegularization)
          solver.setFeedbackRegularizationWeight(feedbackRegularizationWeight.getDoubleValue() / controlDT);
 
-      if (localUseStepAdjustment && !isInTransfer.getBooleanValue())
+      if (localUseStepAdjustment && (!isInTransfer.getBooleanValue() || ALLOW_ADJUSTMENT_IN_TRANSFER))
       {
          for (int footstepIndex = 0; footstepIndex < numberOfFootstepsToConsider; footstepIndex++)
             submitFootstepConditionsToSolver(footstepIndex);
@@ -597,7 +597,7 @@ public class ICPOptimizationController
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, upcomingFootsteps.size());
       numberOfFootstepsToConsider = Math.min(numberOfFootstepsToConsider, maximumNumberOfFootstepsToConsider);
 
-      if (!localUseStepAdjustment || isInTransfer.getBooleanValue() || isStanding.getBooleanValue())
+      if (!localUseStepAdjustment || (isInTransfer.getBooleanValue() && !ALLOW_ADJUSTMENT_IN_TRANSFER) || isStanding.getBooleanValue())
          numberOfFootstepsToConsider = 0;
 
       return numberOfFootstepsToConsider;
