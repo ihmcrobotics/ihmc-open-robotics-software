@@ -8,6 +8,8 @@ import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -29,10 +31,10 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class ICPOptimizationController
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
    private static final boolean COMPUTE_COST_TO_GO = false;
    private static final boolean RECONSTRUCT_CMP_FROM_UNCLIPPED = true;
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -65,7 +67,7 @@ public class ICPOptimizationController
    private final DoubleYoVariable defaultTransferSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultTransferSplitFraction", registry);
    private final DoubleYoVariable defaultSwingSplitFraction = new DoubleYoVariable(yoNamePrefix + "DefaultSwingSplitFraction", registry);
 
-   private final DoubleYoVariable doubleSupportSplitFractionUnderDisturbance;
+   private final DoubleYoVariable transferSplitFractionUnderDisturbance;
 
    private final EnumYoVariable<RobotSide> transferToSide = new EnumYoVariable<>(yoNamePrefix + "TransferToSide", registry, RobotSide.class, true);
    private final EnumYoVariable<RobotSide> supportSide = new EnumYoVariable<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
@@ -194,10 +196,10 @@ public class ICPOptimizationController
       defaultSwingSplitFraction.set(icpPlannerParameters.getSwingDurationAlpha());
       defaultTransferSplitFraction.set(icpPlannerParameters.getTransferDurationAlpha());
 
-      doubleSupportSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
+      transferSplitFractionUnderDisturbance = new DoubleYoVariable(yoNamePrefix + "DoubleSupportSplitFractionUnderDisturbance", registry);
       magnitudeForBigAdjustment = new DoubleYoVariable(yoNamePrefix + "MagnitudeForBigAdjustment", registry);
 
-      doubleSupportSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
+      transferSplitFractionUnderDisturbance.set(icpOptimizationParameters.getDoubleSupportSplitFractionForBigAdjustment());
       magnitudeForBigAdjustment.set(icpOptimizationParameters.getMagnitudeForBigAdjustment());
       useDifferentSplitRatioForBigAdjustment = icpOptimizationParameters.useDifferentSplitRatioForBigAdjustment();
       minimumTimeOnInitialCMPForBigAdjustment = icpOptimizationParameters.getMinimumTimeOnInitialCMPForBigAdjustment();
@@ -233,6 +235,10 @@ public class ICPOptimizationController
          swingSplitFraction.setToNaN();
          swingSplitFractions.add(swingSplitFraction);
       }
+
+      YoGraphicPosition beginningOfStateICP = new YoGraphicPosition(yoNamePrefix + "BeginningOfStateICP`", this.beginningOfStateICP, 0.01, YoAppearance.MidnightBlue(),
+            YoGraphicPosition.GraphicType.SOLID_BALL);
+      yoGraphicsListRegistry.registerArtifact("icpOptimizationController", beginningOfStateICP.createArtifact());
 
       parentRegistry.addChild(registry);
    }
@@ -530,7 +536,7 @@ public class ICPOptimizationController
 
    private int setConditionsForSteppingControl(int numberOfFootstepsToConsider, double omega0)
    {
-      inputHandler.update(timeInCurrentState.getDoubleValue(), useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
+      inputHandler.update(numberOfFootstepsToConsider, timeInCurrentState.getDoubleValue(), useTwoCMPs, isInTransfer.getBooleanValue(), omega0);
       inputHandler.computeFinalICPRecursion(finalICPRecursion);
       inputHandler.computeCMPConstantEffects(cmpConstantEffects, beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d(),
             useTwoCMPs, isInTransfer.getBooleanValue());
@@ -685,7 +691,7 @@ public class ICPOptimizationController
       double footstepAdjustmentSize = solutionHandler.getFootstepAdjustment().length();
 
       double minimumDoubleSupportSplitFraction = minimumTimeOnInitialCMPForBigAdjustment / transferDurations.get(0).getDoubleValue();
-      minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, doubleSupportSplitFractionUnderDisturbance.getDoubleValue());
+      minimumDoubleSupportSplitFraction = Math.max(minimumDoubleSupportSplitFraction, transferSplitFractionUnderDisturbance.getDoubleValue());
 
       if (footstepAdjustmentSize > magnitudeForBigAdjustment.getDoubleValue() && !doingBigAdjustment.getBooleanValue())
       {

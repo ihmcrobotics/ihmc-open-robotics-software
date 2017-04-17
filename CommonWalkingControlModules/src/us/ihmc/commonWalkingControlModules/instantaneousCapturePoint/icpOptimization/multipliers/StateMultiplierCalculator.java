@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.EntryCMPCurrentMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.ExitCMPCurrentMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.InitialICPCurrentMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.InitialICPVelocityCurrentMultiplier;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.StateEndCurrentMultiplier;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current.*;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion.*;
@@ -21,6 +17,8 @@ import us.ihmc.robotics.math.frames.YoFramePoint2d;
 
 public class StateMultiplierCalculator
 {
+   private static final boolean USE_NEW_CALCULATOR = true;
+
    private final List<DoubleYoVariable> doubleSupportDurations;
    private final List<DoubleYoVariable> singleSupportDurations;
    private final List<DoubleYoVariable> swingSplitFractions;
@@ -34,6 +32,14 @@ public class StateMultiplierCalculator
    private final DoubleYoVariable startOfSplineTime;
    private final DoubleYoVariable endOfSplineTime;
    private final IntegerYoVariable currentSwingSegment;
+
+   private final NewRecursionMultipliers newRecursionMultipliers;
+
+   private final NewExitCMPCurrentMultiplier newExitCMPCurrentMultiplier;
+   private final NewEntryCMPCurrentMultiplier newEntryCMPCurrentMultiplier;
+   private final NewInitialICPCurrentMultiplier newInitialICPCurrentMultiplier;
+   private final NewInitialICPVelocityCurrentMultiplier newInitialICPVelocityCurrentMultiplier;
+   private final NewStateEndCurrentMultiplier newStateEndCurrentMultiplier;
 
    private final RecursionMultipliers recursionMultipliers;
 
@@ -74,26 +80,68 @@ public class StateMultiplierCalculator
       endOfSplineTime = new DoubleYoVariable(yoNamePrefix + "EndOfSplineTime", registry);
       currentSwingSegment = new IntegerYoVariable(yoNamePrefix + "CurrentSegment", registry);
 
-      recursionMultipliers = new RecursionMultipliers(yoNamePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions, registry);
 
       cubicMatrix = new CubicMatrix();
       cubicDerivativeMatrix = new CubicDerivativeMatrix();
 
-      exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix,
-            yoNamePrefix, registry);
-      entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
-      initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
-      initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
-      stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, cubicMatrix,
-            cubicDerivativeMatrix, yoNamePrefix, registry);
+      boolean clipTime = true;
+
+      if (!USE_NEW_CALCULATOR)
+      {
+         exitCMPCurrentMultiplier = new ExitCMPCurrentMultiplier(swingSplitFractions, startOfSplineTime, endOfSplineTime, cubicMatrix,
+               cubicDerivativeMatrix, yoNamePrefix, registry);
+         entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime, endOfSplineTime,
+               totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
+         initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix,
+               registry);
+         initialICPVelocityCurrentMultiplier = new InitialICPVelocityCurrentMultiplier(cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
+         stateEndCurrentMultiplier = new StateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
+               cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
+
+         recursionMultipliers = new RecursionMultipliers(yoNamePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions,
+               registry);
+
+         newExitCMPCurrentMultiplier = null;
+         newEntryCMPCurrentMultiplier = null;
+         newInitialICPCurrentMultiplier = null;
+         newInitialICPVelocityCurrentMultiplier = null;
+         newStateEndCurrentMultiplier = null;
+
+         newRecursionMultipliers = null;
+      }
+      else
+      {
+         newExitCMPCurrentMultiplier = new NewExitCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, cubicMatrix,
+               cubicDerivativeMatrix, yoNamePrefix, clipTime, registry);
+         newEntryCMPCurrentMultiplier = new NewEntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
+               totalTrajectoryTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, registry);
+         newInitialICPCurrentMultiplier = new NewInitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, cubicMatrix, cubicDerivativeMatrix, yoNamePrefix,
+               registry);
+         newInitialICPVelocityCurrentMultiplier = new NewInitialICPVelocityCurrentMultiplier(cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, registry);
+         newStateEndCurrentMultiplier = new NewStateEndCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
+               cubicMatrix, cubicDerivativeMatrix, yoNamePrefix, clipTime, registry);
+
+         newRecursionMultipliers = new NewRecursionMultipliers(yoNamePrefix, maxNumberOfFootstepsToConsider, swingSplitFractions, transferSplitFractions,
+               registry);
+
+         exitCMPCurrentMultiplier = null;
+         entryCMPCurrentMultiplier = null;
+         initialICPCurrentMultiplier = null;
+         initialICPVelocityCurrentMultiplier = null;
+         stateEndCurrentMultiplier = null;
+
+         recursionMultipliers = null;
+      }
 
       parentRegistry.addChild(registry);
    }
 
    public void resetRecursionMultipliers()
    {
-      recursionMultipliers.reset();
+      if (USE_NEW_CALCULATOR)
+         newRecursionMultipliers.reset();
+      else
+         recursionMultipliers.reset();
    }
 
    public void computeRecursionMultipliers(int numberOfStepsToConsider, int numberOfStepsRegistered, boolean isInTransfer, boolean useTwoCMPs, double omega0)
@@ -103,42 +151,71 @@ public class StateMultiplierCalculator
       if (numberOfStepsToConsider > maxNumberOfFootstepsToConsider)
          throw new RuntimeException("Requesting too many steps.");
 
+      if (USE_NEW_CALCULATOR)
+         newRecursionMultipliers.compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega0);
+      else
          recursionMultipliers.compute(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega0);
    }
 
    public double getFinalICPRecursionMultiplier()
    {
-      return recursionMultipliers.getFinalICPMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newRecursionMultipliers.getFinalICPMultiplier();
+      else
+         return recursionMultipliers.getFinalICPMultiplier();
    }
 
    public double getStanceExitCMPRecursionMultiplier()
    {
-      return recursionMultipliers.getStanceExitMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newRecursionMultipliers.getStanceExitMultiplier();
+      else
+         return recursionMultipliers.getStanceExitMultiplier();
    }
 
    public double getStanceEntryCMPRecursionMultiplier()
    {
-      return recursionMultipliers.getStanceEntryMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newRecursionMultipliers.getStanceEntryMultiplier();
+      else
+         return recursionMultipliers.getStanceEntryMultiplier();
    }
 
    public double getExitCMPRecursionMultiplier(int footstepIndex)
    {
-      return recursionMultipliers.getExitMultiplier(footstepIndex);
+      if (USE_NEW_CALCULATOR)
+         return newRecursionMultipliers.getExitMultiplier(footstepIndex);
+      else
+         return recursionMultipliers.getExitMultiplier(footstepIndex);
    }
 
    public double getEntryCMPRecursionMultiplier(int footstepIndex)
    {
-      return recursionMultipliers.getEntryMultiplier(footstepIndex);
+      if (USE_NEW_CALCULATOR)
+         return newRecursionMultipliers.getEntryMultiplier(footstepIndex);
+      else
+         return recursionMultipliers.getEntryMultiplier(footstepIndex);
    }
 
 
    public void resetCurrentMultipliers()
    {
-      exitCMPCurrentMultiplier.reset();
-      entryCMPCurrentMultiplier.reset();
-      initialICPCurrentMultiplier.reset();
-      initialICPVelocityCurrentMultiplier.reset();
-      stateEndCurrentMultiplier.reset();
+      if (USE_NEW_CALCULATOR)
+      {
+         newExitCMPCurrentMultiplier.reset();
+         newEntryCMPCurrentMultiplier.reset();
+         newInitialICPCurrentMultiplier.reset();
+         newInitialICPVelocityCurrentMultiplier.reset();
+         newStateEndCurrentMultiplier.reset();
+      }
+      else
+      {
+         exitCMPCurrentMultiplier.reset();
+         entryCMPCurrentMultiplier.reset();
+         initialICPCurrentMultiplier.reset();
+         initialICPVelocityCurrentMultiplier.reset();
+         stateEndCurrentMultiplier.reset();
+      }
    }
 
    public void initializeForDoubleSupport()
@@ -188,7 +265,7 @@ public class StateMultiplierCalculator
       cubicDerivativeMatrix.setSegmentDuration(splineDuration);
    }
 
-   public void computeCurrentMultipliers(double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void computeCurrentMultipliers(int numberOfFootstepsToConsider, double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       resetCurrentMultipliers();
 
@@ -204,11 +281,22 @@ public class StateMultiplierCalculator
       cubicMatrix.update(timeInSpline);
       cubicDerivativeMatrix.update(timeInSpline);
 
-      exitCMPCurrentMultiplier.compute(singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
-      entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
-      initialICPCurrentMultiplier.compute(doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
-      initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeInState, isInTransfer);
-      stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+      if (USE_NEW_CALCULATOR)
+      {
+         newExitCMPCurrentMultiplier.compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+         newEntryCMPCurrentMultiplier.compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+         newInitialICPCurrentMultiplier.compute(doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+         newInitialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeInState, isInTransfer);
+         newStateEndCurrentMultiplier.compute(numberOfFootstepsToConsider, doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+      }
+      else
+      {
+         exitCMPCurrentMultiplier.compute(singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+         entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+         initialICPCurrentMultiplier.compute(doubleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+         initialICPVelocityCurrentMultiplier.compute(doubleSupportDurations, timeInState, isInTransfer);
+         stateEndCurrentMultiplier.compute(doubleSupportDurations, singleSupportDurations, timeInState, useTwoCMPs, isInTransfer, omega0);
+      }
    }
 
    private void updateSegmentedSingleSupportTrajectory(double timeInState)
@@ -223,27 +311,82 @@ public class StateMultiplierCalculator
 
    public double getExitCMPCurrentMultiplier()
    {
-      return exitCMPCurrentMultiplier.getPositionMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newExitCMPCurrentMultiplier.getPositionMultiplier();
+      else
+         return exitCMPCurrentMultiplier.getPositionMultiplier();
+   }
+
+   public double getExitCMPCurrentVelocityMultiplier()
+   {
+      if (USE_NEW_CALCULATOR)
+         return newExitCMPCurrentMultiplier.getVelocityMultiplier();
+      else
+         return exitCMPCurrentMultiplier.getVelocityMultiplier();
    }
 
    public double getEntryCMPCurrentMultiplier()
    {
-      return entryCMPCurrentMultiplier.getPositionMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newEntryCMPCurrentMultiplier.getPositionMultiplier();
+      else
+         return entryCMPCurrentMultiplier.getPositionMultiplier();
+   }
+
+   public double getEntryCMPCurrentVelocityMultiplier()
+   {
+      if (USE_NEW_CALCULATOR)
+         return newEntryCMPCurrentMultiplier.getVelocityMultiplier();
+      else
+         return entryCMPCurrentMultiplier.getVelocityMultiplier();
    }
 
    public double getInitialICPCurrentMultiplier()
    {
-      return initialICPCurrentMultiplier.getPositionMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newInitialICPCurrentMultiplier.getPositionMultiplier();
+      else
+         return initialICPCurrentMultiplier.getPositionMultiplier();
+   }
+
+   public double getInitialICPCurrentVelocityMultiplier()
+   {
+      if (USE_NEW_CALCULATOR)
+         return newInitialICPCurrentMultiplier.getVelocityMultiplier();
+      else
+         return initialICPCurrentMultiplier.getVelocityMultiplier();
    }
 
    public double getInitialICPVelocityCurrentMultiplier()
    {
-      return initialICPVelocityCurrentMultiplier.getPositionMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newInitialICPVelocityCurrentMultiplier.getPositionMultiplier();
+      else
+         return initialICPVelocityCurrentMultiplier.getPositionMultiplier();
+   }
+
+   public double getInitialICPVelocityCurrentVelocityMultiplier()
+   {
+      if (USE_NEW_CALCULATOR)
+         return newInitialICPVelocityCurrentMultiplier.getVelocityMultiplier();
+      else
+         return initialICPVelocityCurrentMultiplier.getVelocityMultiplier();
    }
 
    public double getStateEndCurrentMultiplier()
    {
-      return stateEndCurrentMultiplier.getPositionMultiplier();
+      if (USE_NEW_CALCULATOR)
+         return newStateEndCurrentMultiplier.getPositionMultiplier();
+      else
+         return stateEndCurrentMultiplier.getPositionMultiplier();
+   }
+
+   public double getStateEndCurrentVelocityMultiplier()
+   {
+      if (USE_NEW_CALCULATOR)
+         return newStateEndCurrentMultiplier.getVelocityMultiplier();
+      else
+         return stateEndCurrentMultiplier.getVelocityMultiplier();
    }
 
    private final FramePoint2d tmpPoint = new FramePoint2d();
@@ -313,7 +456,6 @@ public class StateMultiplierCalculator
             tmpExit.set(footstepLocations.get(i).getFrameTuple2d());
             tmpExit.add(exitOffsets.get(i));
             tmpExit.scale(getExitCMPRecursionMultiplier(i));
-
             predictedICPCornerPointToPack.add(tmpExit);
          }
       }
@@ -323,52 +465,52 @@ public class StateMultiplierCalculator
          FramePoint2d entryCMP, FramePoint2d exitCMP, FramePoint2d initialICP, FrameVector2d initialICPVelocity)
    {
       referenceICPToPack.set(predictedICPCornerPoint);
-      referenceICPToPack.scale(stateEndCurrentMultiplier.getPositionMultiplier());
+      referenceICPToPack.scale(getStateEndCurrentMultiplier());
 
       referenceICPVelocityToPack.set(predictedICPCornerPoint);
-      referenceICPVelocityToPack.scale(stateEndCurrentMultiplier.getVelocityMultiplier());
+      referenceICPVelocityToPack.scale(getStateEndCurrentVelocityMultiplier());
 
       tmpPoint.setToZero();
       tmpPoint.set(entryCMP);
-      tmpPoint.scale(entryCMPCurrentMultiplier.getPositionMultiplier());
+      tmpPoint.scale(getEntryCMPCurrentMultiplier());
       referenceICPToPack.add(tmpPoint);
 
       tmpPoint.setToZero();
       tmpPoint.set(entryCMP);
-      tmpPoint.scale(entryCMPCurrentMultiplier.getVelocityMultiplier());
+      tmpPoint.scale(getEntryCMPCurrentVelocityMultiplier());
       referenceICPVelocityToPack.add(tmpPoint);
 
       if (!exitCMP.containsNaN())
       {
          tmpPoint.setToZero();
          tmpPoint.set(exitCMP);
-         tmpPoint.scale(exitCMPCurrentMultiplier.getPositionMultiplier());
+         tmpPoint.scale(getExitCMPCurrentMultiplier());
          referenceICPToPack.add(tmpPoint);
 
          tmpPoint.setToZero();
          tmpPoint.set(exitCMP);
-         tmpPoint.scale(exitCMPCurrentMultiplier.getVelocityMultiplier());
+         tmpPoint.scale(getExitCMPCurrentVelocityMultiplier());
          referenceICPVelocityToPack.add(tmpPoint);
       }
 
       tmpPoint.setToZero();
       tmpPoint.set(initialICP);
-      tmpPoint.scale(initialICPCurrentMultiplier.getPositionMultiplier());
+      tmpPoint.scale(getInitialICPCurrentMultiplier());
       referenceICPToPack.add(tmpPoint);
 
       tmpPoint.setToZero();
       tmpPoint.set(initialICP);
-      tmpPoint.scale(initialICPCurrentMultiplier.getVelocityMultiplier());
+      tmpPoint.scale(getInitialICPCurrentVelocityMultiplier());
       referenceICPVelocityToPack.add(tmpPoint);
 
       tmpPoint.setToZero();
       tmpPoint.set(initialICPVelocity);
-      tmpPoint.scale(initialICPVelocityCurrentMultiplier.getPositionMultiplier());
+      tmpPoint.scale(getInitialICPVelocityCurrentMultiplier());
       referenceICPToPack.add(tmpPoint);
 
       tmpPoint.setToZero();
       tmpPoint.set(initialICPVelocity);
-      tmpPoint.scale(initialICPVelocityCurrentMultiplier.getVelocityMultiplier());
+      tmpPoint.scale(getInitialICPVelocityCurrentVelocityMultiplier());
       referenceICPVelocityToPack.add(tmpPoint);
    }
 }

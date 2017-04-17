@@ -23,24 +23,34 @@ public class NewTransferExitCMPMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+   public void compute(int numberOfFootstepsToConsider,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
          boolean useTwoCMPs, double omega0)
    {
       zero();
 
-
       double timeOnEntryCMP, timeOnExitCMP, splineOnEntryCMP;
       if (useTwoCMPs)
       {
-         // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
-         // project forward to the end of double support
          double currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
-         double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         double currentSwingOnExit = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
-         double nextTransferOnExit = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-         timeOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
-         timeOnExitCMP = currentSwingOnExit + nextTransferOnExit;
-         splineOnEntryCMP = currentTransferOnEntry;
+
+         if (numberOfFootstepsToConsider == 0)
+         { // the ending corner point is the current entry corner point
+            timeOnEntryCMP = 0.0;
+            timeOnExitCMP = 0.0;
+            splineOnEntryCMP = currentTransferOnEntry;
+         }
+         else
+         { // the ending corner is the Nth entry corner
+            // first must recurse back from the ending corner point on the upcoming foot, then from the exit corner to the entry corner, then
+            // project forward to the end of double support
+            double currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
+            double currentSwingOnExit = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+            double nextTransferOnExit = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+            timeOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+            timeOnExitCMP = currentSwingOnExit + nextTransferOnExit;
+            splineOnEntryCMP = currentTransferOnEntry;
+         }
       }
       else
       {
@@ -50,7 +60,7 @@ public class NewTransferExitCMPMatrix extends DenseMatrix64F
          splineOnEntryCMP = 0.0;
       }
 
-      double projection = Math.exp(omega0 * -(splineOnEntryCMP - timeOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
+      double projection = Math.exp(omega0 * (splineOnEntryCMP - timeOnEntryCMP)) * (1.0 - Math.exp(-omega0 * timeOnExitCMP));
 
       set(2, 0, projection);
       set(3, 0, omega0 * projection);

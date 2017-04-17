@@ -93,11 +93,11 @@ public class NewExitCMPCurrentMultiplierTest
          cubicMatrix.update(timeInCurrentState);
          cubicDerivativeMatrix.update(timeInCurrentState);
 
-         exitCMPMatrix.compute(singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
+         exitCMPMatrix.compute(1, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
          CommonOps.mult(cubicMatrix, exitCMPMatrix, positionMatrixOut);
          CommonOps.mult(cubicDerivativeMatrix, exitCMPMatrix, velocityMatrixOut);
 
-         exitCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(positionMatrixOut.get(0, 0), exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMatrixOut.get(0, 0), exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -161,7 +161,7 @@ public class NewExitCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * currentDoubleSupportDuration;
 
-         exitCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -241,7 +241,7 @@ public class NewExitCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * startOfSpline;
 
-         exitCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -338,7 +338,7 @@ public class NewExitCMPCurrentMultiplierTest
          CommonOps.mult(cubicMatrix, exitCMPMatrix, positionMatrixOut);
          CommonOps.mult(cubicDerivativeMatrix, exitCMPMatrix, velocityMatrixOut);
 
-         exitCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(positionMatrixOut.get(0, 0), exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMatrixOut.get(0, 0), exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -420,7 +420,7 @@ public class NewExitCMPCurrentMultiplierTest
 
          double nextTransferOnExit = nextTransferRatio * nextDoubleSupportDuration;
 
-         exitCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          double timeRemaining = currentSingleSupportDuration - timeInCurrentState;
          double projectionTime = nextTransferOnExit + timeRemaining;
@@ -499,7 +499,7 @@ public class NewExitCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * (currentSingleSupportDuration - endOfSpline) + endOfSpline;
 
-         exitCMPCurrentMultiplier.compute(singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         exitCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, exitCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
