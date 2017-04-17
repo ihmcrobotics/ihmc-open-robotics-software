@@ -3,8 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelLinearPath;
-import us.ihmc.manipulation.planning.manipulation.solarpanelmotion.SolarPanelPath;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 
 public class RRTPlannerSolarPanelCleaning
