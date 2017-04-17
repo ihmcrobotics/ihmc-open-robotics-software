@@ -21,6 +21,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 
 public class ICPOptimizationSolver
 {
+   private static final boolean USE_EFFICIENT_CONSTRAINTS = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double betaSmoothing = 0.01;
    private static final double betaMinimum = 0.0001;
@@ -106,7 +107,7 @@ public class ICPOptimizationSolver
    public ICPOptimizationSolver(ICPOptimizationParameters icpOptimizationParameters, int maximumNumberOfCMPVertices, boolean computeCostToGo)
    {
       this.computeCostToGo = computeCostToGo;
-      indexHandler = new ICPQPIndexHandler();
+      indexHandler = new ICPQPIndexHandler(USE_EFFICIENT_CONSTRAINTS);
       inputCalculator = new ICPQPInputCalculator(indexHandler);
 
       maximumNumberOfFootstepsToConsider = icpOptimizationParameters.getMaximumNumberOfFootstepsToConsider();
@@ -126,8 +127,8 @@ public class ICPOptimizationSolver
       footstepTaskInput = new ICPQPInput(2 * maximumNumberOfFootstepsToConsider);
 
       dynamicsConstraintInput = new DynamicsConstraintInput(maximumNumberOfFreeVariables);
-      cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
-      reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
+      cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices, USE_EFFICIENT_CONSTRAINTS);
+      reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices, USE_EFFICIENT_CONSTRAINTS);
 
       solverInput_Aeq = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfLagrangeMultipliers);
       solverInput_AeqTrans = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, maximumNumberOfFreeVariables);
@@ -254,9 +255,19 @@ public class ICPOptimizationSolver
    private void reshape()
    {
       int problemSize = indexHandler.getProblemSize();
-      int numberOfInequalityConstraints = indexHandler.getNumberOfInequalityConstraints();
       int numberOfEqualityConstraints = indexHandler.getNumberOfEqualityConstraints();
       int numberOfFootstepsToConsider = indexHandler.getNumberOfFootstepsToConsider();
+      int numberOfInequalityConstraints;
+      if (!USE_EFFICIENT_CONSTRAINTS)
+      {
+         numberOfInequalityConstraints = indexHandler.getNumberOfInequalityConstraints();
+      }
+      else
+      {
+         cmpLocationConstraint.setPolygon();
+         reachabilityConstraint.setPolygon();
+         numberOfInequalityConstraints = cmpLocationConstraint.getNumberOfVertices() + reachabilityConstraint.getNumberOfVertices();
+      }
 
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
@@ -502,20 +513,31 @@ public class ICPOptimizationSolver
       cmpLocationConstraint.formulateConstraint();
 
       int numberOfVertices = cmpLocationConstraint.getNumberOfVertices();
-      int cmpContstraintIndex = indexHandler.getCMPConstraintIndex();
-      MatrixTools.addMatrixBlock(solverInput_H, cmpContstraintIndex, cmpContstraintIndex, cmpLocationConstraint.quadraticTerm, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      if (!USE_EFFICIENT_CONSTRAINTS)
+      {
+         int cmpContstraintIndex = indexHandler.getCMPConstraintIndex();
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, cmpLocationConstraint.getIndexOfVariableToConstrain(), currentEqualityConstraintIndex, cmpLocationConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aeq, cmpContstraintIndex, currentEqualityConstraintIndex, cmpLocationConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, cmpLocationConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
+         MatrixTools.addMatrixBlock(solverInput_H, cmpContstraintIndex, cmpContstraintIndex, cmpLocationConstraint.quadraticTerm, 0, 0, numberOfVertices,
+               numberOfVertices, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, cmpContstraintIndex, currentEqualityConstraintIndex + 2, cmpLocationConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex + 2, 0, cmpLocationConstraint.sum_beq, 0, 0, 1, 1, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_Aeq, cmpLocationConstraint.getIndexOfVariableToConstrain(), currentEqualityConstraintIndex, cmpLocationConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_Aeq, cmpContstraintIndex, currentEqualityConstraintIndex, cmpLocationConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, cmpLocationConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, indexHandler.getCMPConstraintIndex(), currentInequalityConstraintIndex, cmpLocationConstraint.Aineq, 0, 0, numberOfVertices, numberOfVertices, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_Aeq, cmpContstraintIndex, currentEqualityConstraintIndex + 2, cmpLocationConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex + 2, 0, cmpLocationConstraint.sum_beq, 0, 0, 1, 1, 1.0);
 
-      currentEqualityConstraintIndex += 3;
+         currentEqualityConstraintIndex += 3;
+
+         MatrixTools.setMatrixBlock(solverInput_Aineq, indexHandler.getFeedbackCMPIndex(), currentInequalityConstraintIndex, cmpLocationConstraint.Aineq, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+      }
+      else
+      {
+         MatrixTools.setMatrixBlock(solverInput_AineqTrans, currentInequalityConstraintIndex, indexHandler.getFeedbackCMPIndex(), cmpLocationConstraint.Aineq, 0, 0, numberOfVertices, 2, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+      }
+
       currentInequalityConstraintIndex += cmpLocationConstraint.getNumberOfVertices();
    }
 
@@ -528,19 +550,30 @@ public class ICPOptimizationSolver
 
       int numberOfVertices = reachabilityConstraint.getNumberOfVertices();
       int reachabilityConstraintIndex = indexHandler.getReachabilityConstraintIndex();
-      MatrixTools.addMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, reachabilityConstraint.quadraticTerm, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+      if (!USE_EFFICIENT_CONSTRAINTS)
+      {
+         MatrixTools.addMatrixBlock(solverInput_H, reachabilityConstraintIndex, reachabilityConstraintIndex, reachabilityConstraint.quadraticTerm, 0, 0,
+               numberOfVertices, numberOfVertices, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, indexHandler.getFootstepStartIndex(), currentEqualityConstraintIndex, reachabilityConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex, reachabilityConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, reachabilityConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_Aeq, indexHandler.getFootstepStartIndex(), currentEqualityConstraintIndex, reachabilityConstraint.indexSelectionMatrix, 0, 0, 2, 2, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex, reachabilityConstraint.dynamics_Aeq, 0, 0, numberOfVertices, 2, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex, 0, reachabilityConstraint.dynamics_beq, 0, 0, 2, 1, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex + 2, reachabilityConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex + 2, 0, reachabilityConstraint.sum_beq, 0, 0, 1, 1, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_Aeq, reachabilityConstraintIndex, currentEqualityConstraintIndex + 2, reachabilityConstraint.sum_Aeq, 0, 0, numberOfVertices, 1, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_beq, currentEqualityConstraintIndex + 2, 0, reachabilityConstraint.sum_beq, 0, 0, 1, 1, 1.0);
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, reachabilityConstraintIndex, currentInequalityConstraintIndex, reachabilityConstraint.Aineq, 0, 0, numberOfVertices, numberOfVertices, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+         currentEqualityConstraintIndex += 3;
 
-      currentEqualityConstraintIndex += 3;
+         MatrixTools.setMatrixBlock(solverInput_Aineq, reachabilityConstraintIndex, currentInequalityConstraintIndex, reachabilityConstraint.Aineq, 0, 0, numberOfVertices, numberOfVertices, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+      }
+      else
+      {
+         MatrixTools.setMatrixBlock(solverInput_AineqTrans, currentInequalityConstraintIndex, indexHandler.getFootstepStartIndex(), reachabilityConstraint.Aineq, 0, 0, numberOfVertices, 2, 1.0);
+         MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, reachabilityConstraint.bineq, 0, 0, numberOfVertices, 1, 1.0);
+      }
+
+
       currentInequalityConstraintIndex += reachabilityConstraint.getNumberOfVertices();
    }
 
@@ -562,7 +595,8 @@ public class ICPOptimizationSolver
       activeSetSolver.clear();
 
       CommonOps.transpose(solverInput_Aeq, solverInput_AeqTrans);
-      CommonOps.transpose(solverInput_Aineq, solverInput_AineqTrans);
+      if (!USE_EFFICIENT_CONSTRAINTS)
+         CommonOps.transpose(solverInput_Aineq, solverInput_AineqTrans);
 
       activeSetSolver.setQuadraticCostFunction(solverInput_H, solverInput_h, 0.0);
       activeSetSolver.setLinearEqualityConstraints(solverInput_AeqTrans, solverInput_beq);

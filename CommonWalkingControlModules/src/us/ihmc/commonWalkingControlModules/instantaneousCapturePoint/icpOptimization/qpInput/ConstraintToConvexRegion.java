@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.footstepPlanning.polygonWiggling.PolygonWiggler;
+import us.ihmc.robotics.geometry.ConvexPolygon2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -34,50 +36,78 @@ public class ConstraintToConvexRegion
    private double smoothingWeight = 0.001;
    private double vertexMinimum = 0.0;
 
-   public ConstraintToConvexRegion(int maximumNumberOfVertices)
+   private final ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
+   private final boolean useEfficientFormulation;
+
+   public ConstraintToConvexRegion(int maximumNumberOfVertices, boolean useEfficientFormulation)
    {
       this.maximumNumberOfVertices = maximumNumberOfVertices;
+      this.useEfficientFormulation = useEfficientFormulation;
 
-      quadraticTerm = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
       CommonOps.scale(-1.0, indexSelectionMatrix);
 
-      dynamics_Aeq = new DenseMatrix64F(maximumNumberOfVertices, 2);
       dynamics_beq = new DenseMatrix64F(2, 1);
+      if (!useEfficientFormulation)
+      {
+         quadraticTerm = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
 
-      sum_Aeq = new DenseMatrix64F(maximumNumberOfVertices, 1);
-      sum_beq = new DenseMatrix64F(1, 1);
+         dynamics_Aeq = new DenseMatrix64F(maximumNumberOfVertices, 2);
+
+         sum_Aeq = new DenseMatrix64F(maximumNumberOfVertices, 1);
+         sum_beq = new DenseMatrix64F(1, 1);
+
+         for (int i = 0; i < maximumNumberOfVertices; i++)
+            vertexLocations.add(new DenseMatrix64F(1, 2));
+      }
+      else
+      {
+         quadraticTerm = null;
+
+         dynamics_Aeq = null;
+
+         sum_Aeq = null;
+         sum_beq = null;
+      }
 
       Aineq = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
       bineq = new DenseMatrix64F(maximumNumberOfVertices, 1);
-
-      for (int i = 0; i < maximumNumberOfVertices; i++)
-         vertexLocations.add(new DenseMatrix64F(1, 2));
    }
 
    public void reset()
    {
-      quadraticTerm.zero();
-
-      dynamics_Aeq.zero();
       dynamics_beq.zero();
+      if (!useEfficientFormulation)
+      {
+         quadraticTerm.zero();
 
-      sum_Aeq.zero();
-      sum_beq.zero();
+         dynamics_Aeq.zero();
+
+         sum_Aeq.zero();
+         sum_beq.zero();
+
+         for (int i = 0; i < maximumNumberOfVertices; i++)
+            vertexLocations.get(i).zero();
+      }
+      else
+      {
+         convexPolygon.clear();
+      }
 
       Aineq.zero();
       bineq.zero();
 
       numberOfVertices = 0;
-      for (int i = 0; i < maximumNumberOfVertices; i++)
-         vertexLocations.get(i).zero();
    }
 
    private void reshape()
    {
-      quadraticTerm.reshape(numberOfVertices, numberOfVertices);
+      if (!useEfficientFormulation)
+      {
+         quadraticTerm.reshape(numberOfVertices, numberOfVertices);
 
-      dynamics_Aeq.reshape(numberOfVertices, 2);
-      sum_Aeq.reshape(numberOfVertices, 1);
+         dynamics_Aeq.reshape(numberOfVertices, 2);
+         sum_Aeq.reshape(numberOfVertices, 1);
+      }
 
       Aineq.reshape(numberOfVertices, numberOfVertices);
       bineq.reshape(numberOfVertices, 1);
@@ -90,7 +120,9 @@ public class ConstraintToConvexRegion
 
    public void addVertex(DenseMatrix64F vertex)
    {
-      vertexLocations.get(numberOfVertices).set(vertex);
+      if (!useEfficientFormulation)
+         vertexLocations.get(numberOfVertices).set(vertex);
+
       numberOfVertices++;
    }
 
@@ -99,22 +131,38 @@ public class ConstraintToConvexRegion
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      tmpPoint.zero();
-      tmpPoint.set(0, 0, vertex.getX());
-      tmpPoint.set(0, 1, vertex.getY());
+      if (!useEfficientFormulation)
+      {
+         tmpPoint.zero();
+         tmpPoint.set(0, 0, vertex.getX());
+         tmpPoint.set(0, 1, vertex.getY());
 
-      addVertex(tmpPoint);
+         addVertex(tmpPoint);
+      }
+      else
+      {
+         convexPolygon.addVertex(vertex.getPoint());
+         numberOfVertices++;
+      }
    }
 
    public void addVertex(FramePoint vertex)
    {
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-      tmpPoint.zero();
-      tmpPoint.set(0, 0, vertex.getX());
-      tmpPoint.set(0, 1, vertex.getY());
+      if (!useEfficientFormulation)
+      {
+         tmpPoint.zero();
+         tmpPoint.set(0, 0, vertex.getX());
+         tmpPoint.set(0, 1, vertex.getY());
 
-      addVertex(tmpPoint);
+         addVertex(tmpPoint);
+      }
+      else
+      {
+         convexPolygon.addVertex(vertex.getX(), vertex.getY());
+         numberOfVertices++;
+      }
    }
 
    public void setPositionOffset(DenseMatrix64F offset)
@@ -136,20 +184,27 @@ public class ConstraintToConvexRegion
    {
       reshape();
 
-      for (int i = 0; i < numberOfVertices; i++)
+      if (!useEfficientFormulation)
       {
-         dynamics_Aeq.set(i, 0, vertexLocations.get(i).get(0, 0));
-         dynamics_Aeq.set(i, 1, vertexLocations.get(i).get(0, 1));
+         for (int i = 0; i < numberOfVertices; i++)
+         {
+            dynamics_Aeq.set(i, 0, vertexLocations.get(i).get(0, 0));
+            dynamics_Aeq.set(i, 1, vertexLocations.get(i).get(0, 1));
 
-         sum_Aeq.set(i, 0, 1.0);
+            sum_Aeq.set(i, 0, 1.0);
 
-         Aineq.set(i, i, -1.0);
-         bineq.set(i, 0, -vertexMinimum);
+            Aineq.set(i, i, -1.0);
+            bineq.set(i, 0, -vertexMinimum);
+         }
+         sum_beq.set(0, 0, 1.0);
+
+         setSmoothingCost();
       }
-      sum_beq.set(0, 0, 1.0);
-
-      setSmoothingCost();
-
+      else
+      {
+         PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, vertexMinimum);
+         CommonOps.multAdd(-1.0, Aineq, dynamics_beq, bineq);
+      }
    }
 
    private void setSmoothingCost()
@@ -158,9 +213,18 @@ public class ConstraintToConvexRegion
       CommonOps.scale(smoothingWeight, quadraticTerm);
    }
 
+   public void setPolygon()
+   {
+      if (useEfficientFormulation)
+         convexPolygon.update();
+   }
+
    public int getNumberOfVertices()
    {
-      return numberOfVertices;
+      if (useEfficientFormulation)
+         return convexPolygon.getNumberOfVertices();
+      else
+         return numberOfVertices;
    }
 
    public int getIndexOfVariableToConstrain()
