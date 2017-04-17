@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -12,12 +12,14 @@ public class StanceExitCMPRecursionMultiplier
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final DoubleYoVariable exitMultiplier;
-   private final DoubleYoVariable exitCMPDurationInPercentOfStepTime;
+   private final List<DoubleYoVariable> swingSplitFractions;
+   private final List<DoubleYoVariable> transferSplitFractions;
 
-   public StanceExitCMPRecursionMultiplier(String namePrefix, DoubleYoVariable exitCMPDurationInPercentOfStepTime,
+   public StanceExitCMPRecursionMultiplier(String namePrefix, List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions,
          YoVariableRegistry parentRegistry)
    {
-      this.exitCMPDurationInPercentOfStepTime = exitCMPDurationInPercentOfStepTime;
+      this.swingSplitFractions = swingSplitFractions;
+      this.transferSplitFractions = transferSplitFractions;
 
       exitMultiplier = new DoubleYoVariable(namePrefix + name, registry);
 
@@ -26,11 +28,11 @@ public class StanceExitCMPRecursionMultiplier
 
    public void reset()
    {
-      exitMultiplier.set(0.0);
+      exitMultiplier.setToNaN();
    }
 
-   public void compute(int numberOfFootstepsToConsider, ArrayList<DoubleYoVariable> doubleSupportDurations,
-         ArrayList<DoubleYoVariable> singleSupportDurations, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void compute(int numberOfFootstepsToConsider, List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
+         boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       if (numberOfFootstepsToConsider == 0)
       {
@@ -46,25 +48,43 @@ public class StanceExitCMPRecursionMultiplier
 
    private void computeWithOneCMP()
    {
-      exitMultiplier.set(0.0);
+      exitMultiplier.set(computeStanceExitCMPRecursionOneCMP());
    }
 
-   private void computeWithTwoCMPs(ArrayList<DoubleYoVariable> doubleSupportDurations, ArrayList<DoubleYoVariable> singleSupportDurations, boolean isInTransfer, double omega0)
+   private void computeWithTwoCMPs(List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
+         boolean isInTransfer, double omega0)
    {
-      double firstStepTime = doubleSupportDurations.get(0).getDoubleValue() + singleSupportDurations.get(0).getDoubleValue();
-      double timeSpentOnEntryCMP = (1.0 - exitCMPDurationInPercentOfStepTime.getDoubleValue()) * firstStepTime;
-      double timeSpentOnExitCMP = exitCMPDurationInPercentOfStepTime.getDoubleValue() * firstStepTime;
+      double currentSwingOnExit = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue();
+      double nextTransferOnExit = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+
+      double currentTransferOnEntry, currentSwingOnEntry;
 
       if (isInTransfer)
       {
-         double exitMultiplier = Math.exp(-omega0 * timeSpentOnEntryCMP) * (1.0 - Math.exp(-omega0 * timeSpentOnExitCMP));
-         this.exitMultiplier.set(exitMultiplier);
+         currentTransferOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+         currentSwingOnEntry = swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
       }
       else
       {
-         double exitMultiplier = 1.0 - Math.exp(-omega0 * timeSpentOnExitCMP);
-         this.exitMultiplier.set(exitMultiplier);
+         currentTransferOnEntry = 0.0;
+         currentSwingOnEntry = 0.0;
       }
+
+      double timeSpentOnEntryCMP = currentTransferOnEntry + currentSwingOnEntry;
+      double timeSpentOnExitCMP = currentSwingOnExit + nextTransferOnExit;
+
+      double exitMultiplier = computeStanceExitCMPRecursionTwoCMPs(timeSpentOnEntryCMP, timeSpentOnExitCMP, omega0);
+      this.exitMultiplier.set(exitMultiplier);
+   }
+
+   public static double computeStanceExitCMPRecursionOneCMP()
+   {
+      return 0.0;
+   }
+
+   public static double computeStanceExitCMPRecursionTwoCMPs(double currentTimeSpentOnEntryCMP, double currentTimeSpentOnExitCMP, double omega0)
+   {
+      return Math.exp(-omega0 * currentTimeSpentOnEntryCMP) * (1.0 - Math.exp(-omega0 * currentTimeSpentOnExitCMP));
    }
 
    public double getExitMultiplier()

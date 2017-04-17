@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -8,13 +9,13 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 public class TransferStateEndMatrix extends DenseMatrix64F
 {
-   private final DoubleYoVariable defaultDoubleSupportSplitRatio;
+   private final List<DoubleYoVariable> transferSplitFractions;
 
-   public TransferStateEndMatrix(DoubleYoVariable defaultDoubleSupportSplitRatio)
+   public TransferStateEndMatrix(List<DoubleYoVariable> transferSplitFractions)
    {
       super(4, 1);
 
-      this.defaultDoubleSupportSplitRatio = defaultDoubleSupportSplitRatio;
+      this.transferSplitFractions = transferSplitFractions;
    }
 
    public void reset()
@@ -22,16 +23,11 @@ public class TransferStateEndMatrix extends DenseMatrix64F
       zero();
    }
 
-   public void compute(ArrayList<DoubleYoVariable> doubleSupportDurations, double omega0)
-   {
-      compute(doubleSupportDurations.get(0).getDoubleValue(), omega0);
-   }
-
-   public void compute(double doubleSupportDuration, double omega0)
+   public void compute(List<DoubleYoVariable> doubleSupportDurations, double omega0)
    {
       zero();
 
-      double endOfDoubleSupportDuration = (1.0 - defaultDoubleSupportSplitRatio.getDoubleValue()) * doubleSupportDuration;
+      double endOfDoubleSupportDuration = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
 
       double endOfDoubleSupportProjection = Math.exp(omega0 * endOfDoubleSupportDuration);
 
