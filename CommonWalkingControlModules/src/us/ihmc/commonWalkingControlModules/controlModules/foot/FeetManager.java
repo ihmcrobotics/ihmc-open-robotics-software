@@ -295,7 +295,7 @@ public class FeetManager
     * {@link WalkOnTheEdgesManager#updateToeOffStatus(RobotSide, FramePoint, FramePoint2d, FramePoint2d, FramePoint2d)}
     * @return {@link WalkOnTheEdgesManager#doToeOff}
     */
-   public boolean checkIfToeOffSafe(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   public boolean checkIfToeOffSafeDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
       walkOnTheEdgesManager.inDoubleSupport();
       walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
