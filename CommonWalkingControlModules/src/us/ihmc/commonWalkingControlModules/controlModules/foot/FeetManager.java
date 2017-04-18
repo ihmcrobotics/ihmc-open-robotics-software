@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ICPPlanToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.WrapperForMultipleToeOffCalculators;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -29,6 +30,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
+import java.util.ArrayList;
+
 public class FeetManager
 {
    private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
@@ -39,8 +42,7 @@ public class FeetManager
 
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
 
-   private final ToeOffCalculator centroidProjectionToeOffCalculator;
-   private final ToeOffCalculator ICPPlanToeOffCalculator;
+   private final ToeOffCalculator toeOffCalculator;
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
@@ -63,9 +65,13 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
          contactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
 
-      centroidProjectionToeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters, registry);
-      ICPPlanToeOffCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(controllerToolbox, centroidProjectionToeOffCalculator, walkingControllerParameters, feet, registry);
+
+      ArrayList<ToeOffCalculator> toeOffCalculators = new ArrayList<>();
+      toeOffCalculators.add(new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters, registry));
+      toeOffCalculators.add(new ICPPlanToeOffCalculator(contactStates, feet, registry));
+      toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
+
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry);
 
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -80,7 +86,7 @@ public class FeetManager
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, centroidProjectionToeOffCalculator, walkingControllerParameters, swingFootControlGains,
+         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, controllerToolbox, registry);
 
          footControlModules.put(robotSide, footControlModule);
@@ -331,8 +337,8 @@ public class FeetManager
 
    public void computeToeOffContactPoint(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
-      centroidProjectionToeOffCalculator.setExitCMP(exitCMP, trailingLeg);
-      centroidProjectionToeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
+      toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
+      toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
    public void reset()
