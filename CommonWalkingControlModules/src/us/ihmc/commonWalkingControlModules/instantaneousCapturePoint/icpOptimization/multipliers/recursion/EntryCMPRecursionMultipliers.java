@@ -1,10 +1,10 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EntryCMPRecursionMultipliers
 {
@@ -44,7 +44,7 @@ public class EntryCMPRecursionMultipliers
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
          List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
-         boolean useTwoCMPs, boolean isInTransfer, double omega0)
+         boolean useTwoCMPs, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
          throw new RuntimeException("Double Support Durations list is not long enough");
@@ -52,19 +52,15 @@ public class EntryCMPRecursionMultipliers
          throw new RuntimeException("Single Support Durations list is not long enough");
 
       if (useTwoCMPs)
-         computeWithTwoCMPs(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
+         computeWithTwoCMPs(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, omega0);
       else
          computeWithOneCMP(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, omega0);
    }
 
    private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
-         double omega0)
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
    {
-      double timeSpentOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-            singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-      double recursionTime = timeSpentOnCurrentCMP;
-
+      double recursionTime = 0.0;
       for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
          double currentTransferOnCMP, currentSwingOnCMP, nextTransferOnCMP;
@@ -95,19 +91,9 @@ public class EntryCMPRecursionMultipliers
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
-         boolean isInTransfer, double omega0)
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
    {
-      double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-            swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-      double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-            transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-
-      double recursionTime = currentTimeSpentOnExitCMP;
-
-      if (isInTransfer)
-         recursionTime += currentTimeSpentOnEntryCMP;
-
+      double recursionTime = 0.0;
 
       for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {

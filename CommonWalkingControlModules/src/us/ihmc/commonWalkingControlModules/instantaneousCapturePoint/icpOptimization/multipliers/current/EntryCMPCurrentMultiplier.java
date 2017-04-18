@@ -1,16 +1,15 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.List;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingEntryCMPMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferEntryCMPMatrix;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.List;
 
 public class EntryCMPCurrentMultiplier
 {
@@ -33,15 +32,17 @@ public class EntryCMPCurrentMultiplier
 
    private final boolean givenCubicMatrix;
    private final boolean givenCubicDerivativeMatrix;
+   private final boolean clipTime;
 
-   public EntryCMPCurrentMultiplier(List<DoubleYoVariable> transferSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
-         DoubleYoVariable totalTrajectoryTime, String yoNamePrefix, YoVariableRegistry registry)
+   public EntryCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
+         DoubleYoVariable totalTrajectoryTime, String yoNamePrefix, boolean clipTime, YoVariableRegistry registry)
    {
-      this(transferSplitFractions, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, null, null, yoNamePrefix, registry);
+      this(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime, totalTrajectoryTime, null, null, yoNamePrefix, clipTime, registry);
    }
 
-   public EntryCMPCurrentMultiplier(List<DoubleYoVariable> transferSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
-         DoubleYoVariable totalTrajectoryTime, CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, YoVariableRegistry registry)
+   public EntryCMPCurrentMultiplier(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions, DoubleYoVariable startOfSplineTime, DoubleYoVariable endOfSplineTime,
+         DoubleYoVariable totalTrajectoryTime, CubicMatrix cubicMatrix, CubicDerivativeMatrix cubicDerivativeMatrix, String yoNamePrefix, boolean clipTime,
+         YoVariableRegistry registry)
    {
       positionMultiplier = new DoubleYoVariable(yoNamePrefix + "EntryCMPCurrentMultiplier", registry);
       velocityMultiplier = new DoubleYoVariable(yoNamePrefix + "EntryCMPCurrentVelocityMultiplier", registry);
@@ -51,6 +52,8 @@ public class EntryCMPCurrentMultiplier
       this.startOfSplineTime = startOfSplineTime;
       this.endOfSplineTime = endOfSplineTime;
       this.totalTrajectoryTime = totalTrajectoryTime;
+
+      this.clipTime = clipTime;
 
       if (cubicMatrix == null)
       {
@@ -74,7 +77,7 @@ public class EntryCMPCurrentMultiplier
          givenCubicDerivativeMatrix = true;
       }
 
-      transferEntryCMPMatrix = new TransferEntryCMPMatrix(transferSplitFractions);
+      transferEntryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
       swingEntryCMPMatrix = new SwingEntryCMPMatrix(startOfSplineTime);
    }
 
@@ -94,19 +97,21 @@ public class EntryCMPCurrentMultiplier
       return velocityMultiplier.getDoubleValue();
    }
 
-   public void compute(List<DoubleYoVariable> doubleSupportDurations, double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
+   public void compute(int numberOfFootstepsToConsider,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+         double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
       if (isInTransfer)
       {
-         positionMultiplier = computeInTransfer(doubleSupportDurations, timeInState, omega0);
+         positionMultiplier = computeInTransfer(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, timeInState, useTwoCMPs, omega0);
       }
       else
       {
          if (useTwoCMPs)
             positionMultiplier = computeSegmentedSwing(timeInState, omega0);
          else
-            positionMultiplier = computeInSwingOneCMP(doubleSupportDurations, timeInState, omega0);
+            positionMultiplier = computeInSwingOneCMP(singleSupportDurations, doubleSupportDurations, timeInState, omega0);
       }
       this.positionMultiplier.set(positionMultiplier);
 
@@ -128,9 +133,11 @@ public class EntryCMPCurrentMultiplier
 
 
 
-   private double computeInTransfer(List<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
+   private double computeInTransfer(int numberOfFootstepsToConsider,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+         double timeInState, boolean useTwoCMPs, double omega0)
    {
-      transferEntryCMPMatrix.compute(doubleSupportDurations, omega0);
+      transferEntryCMPMatrix.compute(numberOfFootstepsToConsider, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega0);
 
       double splineDuration = doubleSupportDurations.get(0).getDoubleValue();
 
@@ -160,13 +167,16 @@ public class EntryCMPCurrentMultiplier
 
 
 
-   private double computeInSwingOneCMP(List<DoubleYoVariable> doubleSupportDurations, double timeInState, double omega0)
+   private double computeInSwingOneCMP(List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
+         double timeInState, double omega0)
    {
-      double currentTransferSpentOnEntry = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
+      double timeRemaining = singleSupportDurations.get(0).getDoubleValue() - timeInState;
+      double nextTransferOnCurrent = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
-      double projectionTime = timeInState + currentTransferSpentOnEntry;
+      if (clipTime)
+         timeRemaining = Math.max(timeRemaining, 0.0);
 
-      return 1.0 - Math.exp(omega0 * projectionTime);
+      return 1.0 - Math.exp(-omega0 * (nextTransferOnCurrent + timeRemaining));
    }
 
    private double computeInSwingOneCMPVelocity(double omega0)
