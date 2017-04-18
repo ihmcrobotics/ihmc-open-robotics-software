@@ -250,7 +250,6 @@ public class ICPOptimizationController
 
       YoGraphicPosition beginningOfStateICP = new YoGraphicPosition(yoNamePrefix + "BeginningOfStateICP`", this.beginningOfStateICP, 0.01, YoAppearance.MidnightBlue(),
             YoGraphicPosition.GraphicType.SOLID_BALL);
-      yoGraphicsListRegistry.registerArtifact("icpOptimizationController", beginningOfStateICP.createArtifact());
 
       artifactList.add(beginningOfStateICP.createArtifact());
       artifactList.setVisible(visualize);
