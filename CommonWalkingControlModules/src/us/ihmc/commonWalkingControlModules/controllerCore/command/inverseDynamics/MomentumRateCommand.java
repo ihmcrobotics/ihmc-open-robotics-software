@@ -363,10 +363,10 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * commands value will be treated as more important than the other commands.
     * </p>
     * 
-    * @param weight dense matrix holding the weights to use for each component of the desired
-    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
-    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
-    *           {@code linearZ}. Not modified.
+    * @param weight dense matrix holding the weights to use for each component of the desired rate
+    *           of change of momentum. It is expected to be a 6-by-1 vector ordered as:
+    *           {@code angularX}, {@code angularY}, {@code angularZ}, {@code linearX},
+    *           {@code linearY}, {@code linearZ}. Not modified.
     */
    public void setWeights(DenseMatrix64F weight)
    {
