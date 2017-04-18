@@ -16,7 +16,7 @@ import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
-@ContinuousIntegrationPlan(categories = {IntegrationCategory.IN_DEVELOPMENT})
+@ContinuousIntegrationPlan(categories = {IntegrationCategory.FAST})
 public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 {
    protected DRCRobotModel getRobotModel()
@@ -184,7 +184,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                      @Override
                      public double getBentLegPrivilegedConfigurationGain()
                      {
-                        return 40.0;
+                        return 150.0;
                      }
 
                      @Override
