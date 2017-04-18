@@ -8,6 +8,8 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
@@ -32,7 +34,7 @@ public class OnToesState extends AbstractFootControlState
    private final FramePoint desiredContactPointPosition = new FramePoint();
    private final YoVariableDoubleProvider maximumToeOffAngleProvider;
 
-   private final ToeOffHelper toeOffHelper;
+   private final ToeOffCalculator toeOffCalculator;
 
    private final Twist footTwist = new Twist();
 
@@ -52,11 +54,11 @@ public class OnToesState extends AbstractFootControlState
 
    private final TwistCalculator twistCalculator;
 
-   public OnToesState(FootControlHelper footControlHelper, ToeOffHelper toeOffHelper, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
+   public OnToesState(FootControlHelper footControlHelper, ToeOffCalculator toeOffCalculator, YoSE3PIDGainsInterface gains, YoVariableRegistry registry)
    {
       super(ConstraintType.TOES, footControlHelper);
 
-      this.toeOffHelper = toeOffHelper;
+      this.toeOffCalculator = toeOffCalculator;
 
       twistCalculator = controllerToolbox.getTwistCalculator();
 
@@ -172,7 +174,7 @@ public class OnToesState extends AbstractFootControlState
    {
       super.doTransitionIntoAction();
 
-      toeOffHelper.getToeOffContactPoint(toeOffContactPoint2d, robotSide);
+      toeOffCalculator.getToeOffContactPoint(toeOffContactPoint2d, robotSide);
 
       contactPointPosition.setXYIncludingFrame(toeOffContactPoint2d);
       contactPointPosition.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -199,7 +201,7 @@ public class OnToesState extends AbstractFootControlState
       toeOffCurrentPitchAngle.set(Double.NaN);
       toeOffCurrentPitchVelocity.set(Double.NaN);
 
-      toeOffHelper.clear();
+      toeOffCalculator.clear();
    }
 
    @Override

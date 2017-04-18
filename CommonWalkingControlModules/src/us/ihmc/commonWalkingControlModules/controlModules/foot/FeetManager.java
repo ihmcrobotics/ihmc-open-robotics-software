@@ -4,6 +4,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkOnTheEdgesManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ICPPlanToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -36,7 +39,8 @@ public class FeetManager
 
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
 
-   private final ToeOffHelper toeOffHelper;
+   private final ToeOffCalculator centroidProjectionToeOffCalculator;
+   private final ToeOffCalculator ICPPlanToeOffCalculator;
    private final WalkOnTheEdgesManager walkOnTheEdgesManager;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
@@ -59,8 +63,9 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
          contactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
 
-      toeOffHelper = new ToeOffHelper(contactStates, feet, walkingControllerParameters, registry);
-      walkOnTheEdgesManager = new WalkOnTheEdgesManager(controllerToolbox, toeOffHelper, walkingControllerParameters, feet, registry);
+      centroidProjectionToeOffCalculator = new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters, registry);
+      ICPPlanToeOffCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
+      walkOnTheEdgesManager = new WalkOnTheEdgesManager(controllerToolbox, centroidProjectionToeOffCalculator, walkingControllerParameters, feet, registry);
 
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -75,7 +80,7 @@ public class FeetManager
       walkingControllerParameters.getOrCreateExplorationParameters(registry);
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffHelper, walkingControllerParameters, swingFootControlGains,
+         FootControlModule footControlModule = new FootControlModule(robotSide, centroidProjectionToeOffCalculator, walkingControllerParameters, swingFootControlGains,
                holdPositionFootControlGains, toeOffFootControlGains, edgeTouchdownFootControlGains, controllerToolbox, registry);
 
          footControlModules.put(robotSide, footControlModule);
@@ -326,8 +331,8 @@ public class FeetManager
 
    public void computeToeOffContactPoint(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredCMP)
    {
-      toeOffHelper.setExitCMP(exitCMP, trailingLeg);
-      toeOffHelper.computeToeOffContactPoint(desiredCMP, trailingLeg);
+      centroidProjectionToeOffCalculator.setExitCMP(exitCMP, trailingLeg);
+      centroidProjectionToeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
    }
 
    public void reset()

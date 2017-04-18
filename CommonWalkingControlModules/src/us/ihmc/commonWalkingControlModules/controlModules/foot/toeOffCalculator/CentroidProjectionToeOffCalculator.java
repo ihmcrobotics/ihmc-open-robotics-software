@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class ToeOffHelper
+public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -38,7 +38,7 @@ public class ToeOffHelper
 
    private final FramePoint2d[] intersectionWithRay = new FramePoint2d[] {new FramePoint2d(), new FramePoint2d()};
 
-   public ToeOffHelper(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
+   public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
                        WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
