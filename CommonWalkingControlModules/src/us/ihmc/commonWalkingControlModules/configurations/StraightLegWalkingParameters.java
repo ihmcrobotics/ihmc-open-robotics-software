@@ -65,7 +65,7 @@ public class StraightLegWalkingParameters
 
    public double getBentLegPrivilegedConfigurationGain()
    {
-      return 40.0;
+      return 200.0;
    }
 
    public double getBentLegPrivilegedVelocityGain()
@@ -75,7 +75,7 @@ public class StraightLegWalkingParameters
 
    public double getBentLegPrivilegedWeight()
    {
-      return 5.0;
+      return 10.0;
    }
 
    public double getPrivilegedMaxVelocity()
