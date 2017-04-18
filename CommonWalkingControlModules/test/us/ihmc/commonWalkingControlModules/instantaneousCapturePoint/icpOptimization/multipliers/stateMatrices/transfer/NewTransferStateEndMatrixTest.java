@@ -192,8 +192,7 @@ public class NewTransferStateEndMatrixTest
          useTwoCMPs = false;
          stateEndMatrix.compute(0, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega0);
 
-         double timeOnCMP = nextTransferOnExit + singleSupportDuration + transferOnEntry;
-         projection = Math.exp(omega0 * (transferOnEntry - timeOnCMP));
+         projection = Math.exp(omega0 * transferOnEntry);
 
          shouldBe.zero();
          shouldBe.set(2, 0, projection);
