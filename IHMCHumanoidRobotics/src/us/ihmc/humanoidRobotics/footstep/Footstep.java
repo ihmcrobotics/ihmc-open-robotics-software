@@ -5,13 +5,12 @@ import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -28,6 +27,9 @@ public class Footstep
    private FootstepType footstepType = FootstepType.FULL_FOOTSTEP;
    
    private final FramePose footstepPose = new FramePose();
+   
+   private final FramePose tempPose = new FramePose();
+   private final PoseReferenceFrame footstepSoleFrame;
 
    private final List<Point2D> predictedContactPoints = new ArrayList<>();
    private final RecyclingArrayList<FramePoint> customPositionWaypoints = new RecyclingArrayList<>(FramePoint.class);
@@ -87,6 +89,7 @@ public class Footstep
       setPredictedContactPointsFromPoint2ds(predictedContactPoints);
       this.trajectoryType = trajectoryType;
       this.swingHeight = swingHeight;
+      footstepSoleFrame = new PoseReferenceFrame(id + "_FootstepSoleFrame", ReferenceFrame.getWorldFrame());
    }
 
    public TrajectoryType getTrajectoryType()
@@ -275,12 +278,6 @@ public class Footstep
       footstepPose.setPoseIncludingFrame(position, orientation);
    }
 
-   public void setPose(Point3D positionInWorld, Quaternion orientationInWorld)
-   {
-      footstepPose.setToNaN(ReferenceFrame.getWorldFrame());
-      footstepPose.setPose(positionInWorld, orientationInWorld);
-   }
-
    public void setPositionChangeOnlyXY(FramePoint2d position2d)
    {
       position2d.checkReferenceFrameMatch(footstepPose);
@@ -378,5 +375,13 @@ public class Footstep
    public String toString()
    {
       return "id: " + id + " - pose: " + footstepPose + " - trustHeight = " + trustHeight;
+   }
+
+   public ReferenceFrame getSoleReferenceFrame()
+   {
+      tempPose.setIncludingFrame(footstepPose);
+      tempPose.changeFrame(footstepSoleFrame.getParent());
+      footstepSoleFrame.setPoseAndUpdate(tempPose);
+      return footstepSoleFrame;
    }
 }

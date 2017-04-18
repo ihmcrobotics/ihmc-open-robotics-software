@@ -165,7 +165,7 @@ public class ICPOptimizationSolutionHandler
       {
          solver.getFootstepSolutionLocation(i, locationSolution);
 
-         upcomingFootsteps.get(i).getPosition2d(upcomingFootstepLocation);
+         upcomingFootsteps.get(i).getFootstepPose().getPosition2dIncludingFrame(upcomingFootstepLocation);
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
          FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();

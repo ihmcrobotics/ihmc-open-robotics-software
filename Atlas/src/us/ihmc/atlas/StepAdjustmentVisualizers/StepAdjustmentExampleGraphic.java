@@ -176,8 +176,8 @@ public class StepAdjustmentExampleGraphic
       {
          currentSide = currentSide.getOppositeSide();
 
-         plannedFootsteps.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide, contactableFeet.get(currentSide).getSoleFrame()));
-         footstepSolutions.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide, contactableFeet.get(currentSide).getSoleFrame()));
+         plannedFootsteps.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide));
+         footstepSolutions.add(new Footstep(contactableFeet.get(currentSide).getRigidBody(), currentSide));
       }
 
 
@@ -289,7 +289,7 @@ public class StepAdjustmentExampleGraphic
       midFeetZUpFrame.update();
       bipedSupportPolygons = new BipedSupportPolygons(ankleZUpFrames, midFeetZUpFrame, ankleZUpFrames, registry, yoGraphicsListRegistry);
 
-      footstepTestHelper = new FootstepTestHelper(contactableFeet, ankleFrames);
+      footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
    }
 

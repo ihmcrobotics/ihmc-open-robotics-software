@@ -49,31 +49,37 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
             bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
    }
 
+   @Override
    public void clearPlan()
    {
       icpOptimizationController.clearPlan();
    }
 
+   @Override
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       icpOptimizationController.addFootstepToPlan(footstep, timing);
    }
 
+   @Override
    public void setFinalTransferDuration(double finalTransferDuration)
    {
       icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
    }
 
+   @Override
    public void initializeForStanding()
    {
       icpOptimizationController.initializeForStanding(yoTime.getDoubleValue());
    }
 
+   @Override
    public void initializeForSingleSupport()
    {
       icpOptimizationController.initializeForSingleSupport(yoTime.getDoubleValue(), supportSide, omega0);
    }
 
+   @Override
    public void initializeForTransfer()
    {
       icpOptimizationController.initializeForTransfer(yoTime.getDoubleValue(), transferToSide, omega0);
@@ -104,7 +110,8 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
    private final FramePose footstepPose = new FramePose();
    private final FramePoint2d footstepPositionSolution = new FramePoint2d();
 
-   @Override public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
+   @Override
+   public boolean getUpcomingFootstepSolution(Footstep footstepToPack)
    {
       if (icpOptimizationController.getNumberOfFootstepsToConsider() > 0)
       {
