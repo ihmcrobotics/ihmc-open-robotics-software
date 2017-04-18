@@ -46,7 +46,7 @@ public class FootstepTestHelper
             x += stepLength;
          double y = lastFootstepPosition.getY() + currentSide.negateIfRightSide(stepWidth);
          Footstep footstep = createFootstep(currentSide, x, y);
-         footstep.getPositionIncludingFrame(lastFootstepPosition);
+         footstep.getPosition(lastFootstepPosition);
          lastFootstepPosition.changeFrame(worldFrame);
          footsteps.add(footstep);
       }
@@ -67,21 +67,10 @@ public class FootstepTestHelper
       return createFootstep(robotSide, footstepPose);
    }
 
-   public Footstep createFootstep(RobotSide robotSide, Point3D position, double[] orientationYawPitchRoll)
-   {
-      FramePose footstepPose = new FramePose();
-      footstepPose.setPosition(position);
-      footstepPose.setYawPitchRoll(orientationYawPitchRoll);
-
-      return createFootstep(robotSide, footstepPose);
-   }
-
    public Footstep createFootstep(RobotSide robotSide, FramePose footstepPose)
    {
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
-      ReferenceFrame soleFrame = contactableFeet.get(robotSide).getSoleFrame();
-      Footstep ret = new Footstep(foot, robotSide, soleFrame);
-      ret.setPose(footstepPose);
+      Footstep ret = new Footstep(foot, robotSide, footstepPose);
       ret.setPredictedContactPointsFromFramePoint2ds(contactableFeet.get(robotSide).getContactPoints2d());
 
       return ret;
@@ -96,10 +85,8 @@ public class FootstepTestHelper
    {
       RobotSide robotSide = footstepDataMessage.getRobotSide();
       RigidBody foot = contactableFeet.get(robotSide).getRigidBody();
-      ReferenceFrame soleFrame = contactableFeet.get(robotSide).getSoleFrame();
-      Footstep footstep = new Footstep(foot, robotSide, soleFrame);
       FramePose solePose = new FramePose(worldFrame, footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
-      footstep.setSolePose(solePose);
+      Footstep footstep = new Footstep(foot, robotSide, solePose);
       if (footstepDataMessage.getPredictedContactPoints() != null && !footstepDataMessage.getPredictedContactPoints().isEmpty())
          footstep.setPredictedContactPointsFromPoint2ds(footstepDataMessage.getPredictedContactPoints());
       else

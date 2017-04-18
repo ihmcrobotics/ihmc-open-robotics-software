@@ -49,14 +49,12 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelState;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -107,8 +105,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
-
-   private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private final GenericStateMachine<WalkingStateEnum, WalkingState> stateMachine;
 
@@ -165,8 +161,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       super(controllerState);
 
       this.managerFactory = managerFactory;
-
-      this.yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       // Getting parameters from the HighLevelHumanoidControllerToolbox
       this.controllerToolbox = controllerToolbox;
@@ -849,7 +843,6 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          footStepCommand.setRobotSide(state.getTransferToSide() == null ? state.getSupportSide() : state.getTransferToSide());
          footStepCommand.setTrajectoryType(TrajectoryType.DEFAULT);
          footStepCommand.setSwingHeight(0);
-         footStepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          cmd.addFootstep(footStepCommand);
          
          walkingMessageHandler.handleFootstepDataListCommand(cmd);

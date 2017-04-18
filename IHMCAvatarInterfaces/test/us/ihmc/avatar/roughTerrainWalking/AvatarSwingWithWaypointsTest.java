@@ -18,21 +18,20 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.Axis;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.thread.ThreadTools;
 
 public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInterface
@@ -67,7 +66,6 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
          Point3D location = new Point3D(footstepX, footstepY, 0.0);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          footsteps.add(footstepData);
       }
 
@@ -205,7 +203,6 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       transform.transform(stepPosition);
       transform.getRotation(stepOrientation);
       FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, stepPosition, stepOrientation);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footsteps.add(footstepData);
 
       // this should be a regular step

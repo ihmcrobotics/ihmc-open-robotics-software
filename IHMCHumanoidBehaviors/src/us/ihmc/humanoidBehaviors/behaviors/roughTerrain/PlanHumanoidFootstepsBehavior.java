@@ -25,7 +25,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -354,7 +353,6 @@ public class PlanHumanoidFootstepsBehavior extends AbstractBehavior
 
          FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition),
                                                                             new Quaternion(tempFirstFootstepPoseOrientation));
-         firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
          footstepDataListMessage.add(firstFootstepMessage);
       }

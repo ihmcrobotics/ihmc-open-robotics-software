@@ -6,25 +6,29 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
-public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>
+public class FootstepDataCommand implements Command<FootstepDataCommand, FootstepDataMessage>, FrameBasedCommand<FootstepDataMessage>
 {
    private RobotSide robotSide;
-   private FootstepOrigin origin;
    private TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   private final RecyclingArrayList<Point3D> customPositionWaypoints = new RecyclingArrayList<>(2, Point3D.class);
+   private final RecyclingArrayList<FramePoint> customPositionWaypoints = new RecyclingArrayList<>(2, FramePoint.class);
    private double swingHeight = 0.0;
-   private final Point3D position = new Point3D();
-   private final Quaternion orientation = new Quaternion();
+   private final FramePoint position = new FramePoint();
+   private final FrameOrientation orientation = new FrameOrientation();
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(4, Point2D.class);
 
    private double swingDuration = Double.NaN;
    private double transferDuration = Double.NaN;
+   
+   private ReferenceFrame trajectoryFrame;
 
    public FootstepDataCommand()
    {
@@ -35,7 +39,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void clear()
    {
       robotSide = null;
-      origin = null;
       trajectoryType = TrajectoryType.DEFAULT;
       swingHeight = 0.0;
       position.set(0.0, 0.0, 0.0);
@@ -51,18 +54,17 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void set(FootstepDataMessage message)
    {
       robotSide = message.getRobotSide();
-      origin = message.getOrigin();
       trajectoryType = message.getTrajectoryType();
       Point3D[] originalWaypointList = message.getCustomPositionWaypoints();
       customPositionWaypoints.clear();
       if (originalWaypointList != null)
       {
          for (int i = 0; i < originalWaypointList.length; i++)
-            customPositionWaypoints.add().set(originalWaypointList[i]);
+            customPositionWaypoints.add().setIncludingFrame(trajectoryFrame, originalWaypointList[i]);
       }
       swingHeight = message.getSwingHeight();
-      position.set(message.getLocation());
-      orientation.set(message.getOrientation());
+      position.setIncludingFrame(trajectoryFrame, message.getLocation());
+      orientation.setIncludingFrame(trajectoryFrame, message.getOrientation());
       ArrayList<Point2D> originalPredictedContactPoints = message.getPredictedContactPoints();
       predictedContactPoints.clear();
       if (originalPredictedContactPoints != null)
@@ -79,15 +81,14 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void set(FootstepDataCommand other)
    {
       robotSide = other.robotSide;
-      origin = other.origin;
       trajectoryType = other.trajectoryType;
-      RecyclingArrayList<Point3D> otherWaypointList = other.customPositionWaypoints;
+      RecyclingArrayList<FramePoint> otherWaypointList = other.customPositionWaypoints;
       customPositionWaypoints.clear();
       for (int i = 0; i < otherWaypointList.size(); i++)
-         customPositionWaypoints.add().set(otherWaypointList.get(i));
+         customPositionWaypoints.add().setIncludingFrame(otherWaypointList.get(i));
       swingHeight = other.swingHeight;
-      position.set(other.position);
-      orientation.set(other.orientation);
+      position.setIncludingFrame(other.position);
+      orientation.setIncludingFrame(other.orientation);
       RecyclingArrayList<Point2D> otherPredictedContactPoints = other.predictedContactPoints;
       predictedContactPoints.clear();
       for (int i = 0; i < otherPredictedContactPoints.size(); i++)
@@ -95,6 +96,16 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
 
       swingDuration = other.swingDuration;
       transferDuration = other.transferDuration;
+   }
+   
+   @Override
+   public void set(ReferenceFrame dataFrame, ReferenceFrame trajectoryFrame, FootstepDataMessage message)
+   {
+      // footsteps do not allow the use of a data frame
+      dataFrame.checkReferenceFrameMatch(trajectoryFrame);
+
+      this.trajectoryFrame = trajectoryFrame;
+      set(message);
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -111,11 +122,6 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    public void setSwingHeight(double swingHeight)
    {
       this.swingHeight = swingHeight;
-   }
-
-   public void setOrigin(FootstepOrigin origin)
-   {
-      this.origin = origin;
    }
 
    public void setTrajectoryType(TrajectoryType trajectoryType)
@@ -135,17 +141,17 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return robotSide;
    }
 
-   public FootstepOrigin getOrigin()
-   {
-      return origin;
-   }
-
    public TrajectoryType getTrajectoryType()
    {
       return trajectoryType;
    }
+   
+   public ReferenceFrame getTrajectoryFrame()
+   {
+      return trajectoryFrame;
+   }
 
-   public RecyclingArrayList<Point3D> getCustomPositionWaypoints()
+   public RecyclingArrayList<FramePoint> getCustomPositionWaypoints()
    {
       return customPositionWaypoints;
    }
@@ -155,12 +161,12 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
       return swingHeight;
    }
 
-   public Point3D getPosition()
+   public FramePoint getPosition()
    {
       return position;
    }
 
-   public Quaternion getOrientation()
+   public FrameOrientation getOrientation()
    {
       return orientation;
    }
@@ -189,6 +195,7 @@ public class FootstepDataCommand implements Command<FootstepDataCommand, Footste
    @Override
    public boolean isCommandValid()
    {
-      return origin != null && robotSide != null;
+      return robotSide != null;
    }
+
 }

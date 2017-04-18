@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -34,7 +34,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.OneDoFJointTr
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -50,6 +49,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotController.RobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
@@ -57,10 +58,8 @@ import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -903,7 +902,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       FootstepDataListMessage message = new FootstepDataListMessage(swingTime, transferTime);
       FootstepDataMessage footstepData = new FootstepDataMessage();
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footstepData.setLocation(new Point3D(0.50, 0.10, 0.0));
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.LEFT;
@@ -916,7 +914,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       message = new FootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footstepData.setLocation(new Point3D(1.0, -0.10, 0.0));
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.RIGHT;
@@ -929,7 +926,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       message = new FootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footstepData.setLocation(new Point3D(1.5, 0.10, 0.0));
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.LEFT;
@@ -942,7 +938,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       message = new FootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footstepData.setLocation(new Point3D(1.5, -0.1, 0.0));
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.RIGHT;
@@ -955,7 +950,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       message = new FootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footstepData.setLocation(new Point3D(1.5, 0.4, 0.0));
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.LEFT;
@@ -968,7 +962,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
       message = new FootstepDataListMessage(swingTime, transferTime);
       footstepData = new FootstepDataMessage();
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       footstepData.setLocation(new Point3D(1.5, 0.2, 0.0));
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       robotSide = RobotSide.RIGHT;
@@ -1038,7 +1031,6 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       footstepData.setLocation(placeToStepInWorld.getPointCopy());
       footstepData.setOrientation(new Quaternion(0.0, 0.0, 0.0, 1.0));
       footstepData.setRobotSide(robotSide);
-      footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
       if (setPredictedContactPoints && (contactPointsInAnkleFrame != null))
       {
