@@ -18,9 +18,9 @@ public class AtlasStraightLegWalkingParameters extends StraightLegWalkingParamet
    }
 
    /** {@inheritDoc} */
-   public double getStraightLegPrivilegedConfigurationGain()
+   public double getBentLegPrivilegedConfigurationGain()
    {
-      return runningOnRealRobot ? 40.0 : 150.0;
+      return runningOnRealRobot ? 40.0 : 100.0;
    }
 
    /** {@inheritDoc} */
