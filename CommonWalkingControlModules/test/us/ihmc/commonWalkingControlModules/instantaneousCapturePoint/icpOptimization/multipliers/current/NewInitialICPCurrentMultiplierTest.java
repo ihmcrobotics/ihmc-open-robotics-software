@@ -6,8 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingInitialICPMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.NewSwingInitialICPMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.NewTransferInitialICPMatrix;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -58,7 +58,7 @@ public class NewInitialICPCurrentMultiplierTest
 
       NewInitialICPCurrentMultiplier initialICPCurrentMultiplier = new NewInitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, "", registry);
 
-      TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
+      NewTransferInitialICPMatrix initialICPMatrix = new NewTransferInitialICPMatrix();
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
@@ -146,7 +146,7 @@ public class NewInitialICPCurrentMultiplierTest
 
       NewInitialICPCurrentMultiplier initialICPCurrentMultiplier = new NewInitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, "", registry);
 
-      TransferInitialICPMatrix initialICPMatrix = new TransferInitialICPMatrix();
+      NewTransferInitialICPMatrix initialICPMatrix = new NewTransferInitialICPMatrix();
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
@@ -319,7 +319,7 @@ public class NewInitialICPCurrentMultiplierTest
 
       NewInitialICPCurrentMultiplier initialICPCurrentMultiplier = new NewInitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, "", registry);
 
-      SwingInitialICPMatrix entryCMPMatrix = new SwingInitialICPMatrix(startOfSplineTime);
+      NewSwingInitialICPMatrix initialICPMatrix = new NewSwingInitialICPMatrix(startOfSplineTime);
 
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
@@ -366,9 +366,9 @@ public class NewInitialICPCurrentMultiplierTest
          cubicMatrix.update(timeInCurrentState - startOfSpline);
          cubicDerivativeMatrix.update(timeInCurrentState - startOfSpline);
 
-         entryCMPMatrix.compute(omega);
-         CommonOps.mult(cubicMatrix, entryCMPMatrix, positionMatrixOut);
-         CommonOps.mult(cubicDerivativeMatrix, entryCMPMatrix, velocityMatrixOut);
+         initialICPMatrix.compute(omega);
+         CommonOps.mult(cubicMatrix, initialICPMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, initialICPMatrix, velocityMatrixOut);
 
          initialICPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 

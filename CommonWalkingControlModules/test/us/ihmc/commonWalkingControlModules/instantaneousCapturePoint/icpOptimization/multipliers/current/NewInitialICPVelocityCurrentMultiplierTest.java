@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
-import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.TransferInitialICPVelocityMatrix;
+import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.transfer.NewTransferInitialICPVelocityMatrix;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -44,7 +44,7 @@ public class NewInitialICPVelocityCurrentMultiplierTest
 
       NewInitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new NewInitialICPVelocityCurrentMultiplier("", registry);
 
-      TransferInitialICPVelocityMatrix initialICPMatrix = new TransferInitialICPVelocityMatrix();
+      NewTransferInitialICPVelocityMatrix initialICPMatrix = new NewTransferInitialICPVelocityMatrix();
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
@@ -113,7 +113,7 @@ public class NewInitialICPVelocityCurrentMultiplierTest
 
       NewInitialICPVelocityCurrentMultiplier initialICPVelocityCurrentMultiplier = new NewInitialICPVelocityCurrentMultiplier("", registry);
 
-      TransferInitialICPVelocityMatrix initialICPMatrix = new TransferInitialICPVelocityMatrix();
+      NewTransferInitialICPVelocityMatrix initialICPMatrix = new NewTransferInitialICPVelocityMatrix();
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
