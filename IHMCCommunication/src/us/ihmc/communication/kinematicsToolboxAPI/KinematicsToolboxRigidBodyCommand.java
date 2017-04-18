@@ -66,6 +66,31 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       message.getWeightVector(weightVector);
    }
 
+   public RigidBody getEndEffector()
+   {
+      return endEffector;
+   }
+
+   public DenseMatrix64F getWeightVector()
+   {
+      return weightVector;
+   }
+
+   public DenseMatrix64F getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+
+   public FramePose getDesiredPose()
+   {
+      return desiredPose;
+   }
+
+   public FramePose getControlFramePose()
+   {
+      return controlFramePose;
+   }
+
    @Override
    public Class<KinematicsToolboxRigidBodyMessage> getMessageClass()
    {
