@@ -431,7 +431,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
 
    /**
     * Computes and packs the orientation described by this {@code FrameOrientation} as a rotation
-    * vector including the reference frame it is expressed in.
+    * vector.
     * <p>
     * WARNING: a rotation vector is different from a yaw-pitch-roll or Euler angles representation.
     * A rotation vector is equivalent to the axis of an axis-angle that is multiplied by the angle
@@ -440,7 +440,7 @@ public class FrameOrientation extends AbstractFrameObject<FrameOrientation, Quat
     *
     * @param frameRotationVectorToPack the vector in which the rotation vector and the reference
     *           frame it is expressed in are stored. Modified.
-    * @throws ReferenceFrameMismatchException if the argument's is not equal to
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
     *            {@code this.referenceFrame}.
     */
    public void getRotationVector(FrameVector frameRotationVectorToPack)

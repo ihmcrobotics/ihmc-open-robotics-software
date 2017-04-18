@@ -1,10 +1,12 @@
 package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.robotics.dataStructures.registry.NameSpace;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -314,8 +316,8 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       if (numTicks > 50000)
       {
          numTicks = 0;
-         Date today = new Date();
-         System.out.println(today.toString());
+         
+         PrintTools.info(LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
       }
 
    }

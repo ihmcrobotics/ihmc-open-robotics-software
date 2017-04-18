@@ -22,8 +22,6 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
 
 /**
@@ -383,7 +381,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
       CommonOps.setIdentity(selectionMatrix);
    }
 
@@ -650,7 +648,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeightsToZero()
    {
-      for (int i = 3; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 3; i < Twist.SIZE; i++)
          weightVector.set(i, 0, 0.0);
    }
 

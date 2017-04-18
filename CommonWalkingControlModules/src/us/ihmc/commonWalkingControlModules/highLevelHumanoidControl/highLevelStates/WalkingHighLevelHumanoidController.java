@@ -2,7 +2,9 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.CapturePointPlannerParameters;
@@ -20,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
@@ -135,6 +138,26 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
+   /**
+    * This command is used only when
+    * {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
+    * {@code true}. It works along with {@link #jointAccelerationIntegrationParameters}.
+    * <p>
+    * It is set to {@code null} when {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
+    * {@code false}.
+    * </p>
+    */
+   private final JointAccelerationIntegrationCommand accelerationIntegrationCommand;
+   /**
+    * Sets of joints for which specific parameters are to be used during the acceleration
+    * integration calculation.
+    * <p>
+    * It is set to {@code null} when {@link WalkingControllerParameters#enableJointAccelerationIntegrationForAllJoints()} returns
+    * {@code false}.
+    * </p>
+    */
+   private final Map<OneDoFJoint, JointAccelerationIntegrationParametersReadOnly> jointAccelerationIntegrationParameters;
+
    public WalkingHighLevelHumanoidController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
          HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
          CapturePointPlannerParameters capturePointPlannerParameters, HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -220,15 +243,26 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
 
       if (walkingControllerParameters.enableJointAccelerationIntegrationForAllJoints())
       {
-         JointAccelerationIntegrationCommand accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+         accelerationIntegrationCommand = new JointAccelerationIntegrationCommand();
+         jointAccelerationIntegrationParameters = new HashMap<>();
+         Map<String, JointAccelerationIntegrationParametersReadOnly> parameters = walkingControllerParameters.getJointAccelerationIntegrationParameters(registry);
 
          for (InverseDynamicsJoint joint : controllerToolbox.getControlledJoints())
          {
             if (joint instanceof OneDoFJoint)
-               accelerationIntegrationCommand.addJointToComputeDesiredPositionFor((OneDoFJoint) joint);
-         }
+            {
+               OneDoFJoint oneDoFJoint = (OneDoFJoint) joint;
+               accelerationIntegrationCommand.addJointToComputeDesiredPositionFor(oneDoFJoint);
 
-         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+               if (parameters != null && parameters.containsKey(oneDoFJoint.getName()))
+                  jointAccelerationIntegrationParameters.put(oneDoFJoint, parameters.get(oneDoFJoint.getName()));
+            }
+         }
+      }
+      else
+      {
+         accelerationIntegrationCommand = null;
+         jointAccelerationIntegrationParameters = null;
       }
    }
 
@@ -697,6 +731,22 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
       controllerCoreCommand.addFeedbackControlCommand(pelvisOrientationManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(balanceManager.getInverseDynamicsCommand());
+
+      if (accelerationIntegrationCommand != null)
+      {
+         if (!jointAccelerationIntegrationParameters.isEmpty())
+         {
+            int numberOfJointsToComputeDesiredPositionFor = accelerationIntegrationCommand.getNumberOfJointsToComputeDesiredPositionFor();
+            for (int jointIndex = 0; jointIndex < numberOfJointsToComputeDesiredPositionFor; jointIndex++)
+            {
+               OneDoFJoint joint = accelerationIntegrationCommand.getJointToComputeDesiredPositionFor(jointIndex);
+               JointAccelerationIntegrationParametersReadOnly parameters = jointAccelerationIntegrationParameters.get(joint);
+               if (parameters != null)
+                  accelerationIntegrationCommand.setJointParameters(jointIndex, parameters);
+            }
+         }
+         controllerCoreCommand.addInverseDynamicsCommand(accelerationIntegrationCommand);
+      }
    }
 
    public void reinitializePelvisOrientation(boolean reinitialize)
@@ -812,6 +862,7 @@ public class WalkingHighLevelHumanoidController extends HighLevelBehavior
          FootTrajectoryCommand trajectoryCommand = new FootTrajectoryCommand();
          trajectoryCommand.setRobotSide(state.getSupportSide().getOppositeSide());
          trajectoryCommand.addTrajectoryPoint(new FrameSE3TrajectoryPoint());
+         trajectoryCommand.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
          commands.add(trajectoryCommand);
          walkingMessageHandler.handleFootTrajectoryCommand(commands);
          break;

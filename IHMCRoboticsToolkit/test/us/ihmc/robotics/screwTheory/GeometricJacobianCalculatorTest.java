@@ -10,6 +10,8 @@ import org.ejml.ops.CommonOps;
 import org.junit.Test;
 
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.ScrewTestTools.RandomFloatingChain;
@@ -201,7 +203,7 @@ public class GeometricJacobianCalculatorTest
       }
    }
 
-   @ContinuousIntegrationTest(estimatedDuration = 1.1)
+   @ContinuousIntegrationTest(estimatedDuration = 1.5)
    @Test(timeout = 30000)
    public void testConvectiveTerm() throws Exception
    {
@@ -228,8 +230,8 @@ public class GeometricJacobianCalculatorTest
          RigidBody rootBody = ScrewTools.getRootBody(body);
          SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
          TwistCalculator twistCalculator = new TwistCalculator(worldFrame, body);
-         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(body, worldFrame, rootAcceleration, twistCalculator,
-                                                                                                         true, false, false);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false,
+                                                                                                         false);
 
          twistCalculator.compute();
          spatialAccelerationCalculator.compute();
@@ -248,6 +250,48 @@ public class GeometricJacobianCalculatorTest
          spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector, expectedConvectiveTerm);
 
          SpatialMotionVectorTest.assertSpatialMotionVectorEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-12);
+      }
+
+      for (int i = 0; i < 1000; i++)
+      { // Test computing the convective term at fixed frame in the end-effector.
+         ScrewTestTools.setRandomPositionAndOrientation(floatingJoint, random);
+         ScrewTestTools.setRandomVelocity(floatingJoint, random);
+         ScrewTestTools.setRandomAcceleration(floatingJoint, random);
+
+         ScrewTestTools.setRandomPositions(revoluteJoints, random, -10.0, 10.0);
+         ScrewTestTools.setRandomVelocities(revoluteJoints, random, -1.0, 1.0);
+         ScrewTestTools.setRandomAccelerations(revoluteJoints, random, -10.0, 10.0);
+
+         RigidBody body = joints.get(0).getPredecessor();
+         RigidBody rootBody = ScrewTools.getRootBody(body);
+         SpatialAccelerationVector rootAcceleration = new SpatialAccelerationVector(rootBody.getBodyFixedFrame(), worldFrame, rootBody.getBodyFixedFrame());
+         TwistCalculator twistCalculator = new TwistCalculator(worldFrame, body);
+         SpatialAccelerationCalculator spatialAccelerationCalculator = new SpatialAccelerationCalculator(rootAcceleration, twistCalculator, true, false,
+                                                                                                         false);
+
+         twistCalculator.compute();
+         spatialAccelerationCalculator.compute();
+
+         int randomEndEffectorIndex = random.nextInt(numberOfRevoluteJoints + 1);
+         RigidBody randomEndEffector = joints.get(randomEndEffectorIndex).getSuccessor();
+         RigidBody randomBase = joints.get(random.nextInt(randomEndEffectorIndex + 1)).getPredecessor();
+
+         RigidBodyTransform transformToParent = new RigidBodyTransform();
+         transformToParent.setTranslation(EuclidCoreRandomTools.generateRandomPoint3D(random, 10.0));
+         ReferenceFrame fixedInEndEffector = ReferenceFrame.constructFrameWithUnchangingTransformToParent("fixedFrame" + i, randomEndEffector.getBodyFixedFrame(), transformToParent);
+
+         jacobianCalculator.clear();
+         jacobianCalculator.setKinematicChain(randomBase, randomEndEffector);
+         jacobianCalculator.setJacobianFrame(fixedInEndEffector);
+         jacobianCalculator.computeConvectiveTerm();
+         SpatialAccelerationVector actualConvectiveTerm = new SpatialAccelerationVector();
+         jacobianCalculator.getConvectiveTerm(actualConvectiveTerm);
+
+         SpatialAccelerationVector expectedConvectiveTerm = new SpatialAccelerationVector();
+         spatialAccelerationCalculator.getRelativeAcceleration(randomBase, randomEndEffector, expectedConvectiveTerm);
+         expectedConvectiveTerm.changeFrameNoRelativeMotion(fixedInEndEffector);
+
+         SpatialMotionVectorTest.assertSpatialMotionVectorEquals(expectedConvectiveTerm, actualConvectiveTerm, 1.0e-11);
       }
    }
 

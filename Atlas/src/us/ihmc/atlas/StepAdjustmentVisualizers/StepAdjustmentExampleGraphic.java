@@ -319,10 +319,9 @@ public class StepAdjustmentExampleGraphic
       icpPlanner.addFootstepToPlan(plannedFootsteps.get(2), timing);
 
       icpOptimizationController.clearPlan();
-      icpOptimizationController.setStepDurations(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(0));
-      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(1));
-      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(2));
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(0), timing);
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(1), timing);
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(2), timing);
 
       RobotSide supportSide = plannedFootsteps.get(0).getRobotSide().getOppositeSide();
 
@@ -357,10 +356,9 @@ public class StepAdjustmentExampleGraphic
       icpPlanner.addFootstepToPlan(plannedFootsteps.get(2), timing);
 
       icpOptimizationController.clearPlan();
-      icpOptimizationController.setStepDurations(doubleSupportDuration.getDoubleValue(), singleSupportDuration.getDoubleValue());
-      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(0));
-      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(1));
-      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(2));
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(0), timing);
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(1), timing);
+      icpOptimizationController.addFootstepToPlan(plannedFootsteps.get(2), timing);
 
       icpPlanner.setSupportLeg(supportSide);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.ExplorationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationSettings;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
@@ -39,13 +40,47 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
     * <p>
     * It is {@code false} by default and this method should be overridden to return otherwise.
     * </p>
-    * 
+    *
     * @return {@code true} if the desired acceleration should be integrated into desired velocity
     *         and position for all the joints.
     */
    public boolean enableJointAccelerationIntegrationForAllJoints()
    {
       return false;
+   }
+
+   /**
+    * Returns a map from joint name to joint acceleration integration parameters.
+    * <p>
+    * Note that this method is only called if
+    * {@link #enableJointAccelerationIntegrationForAllJoints()} returns {@code true}.
+    * </p>
+    * <p>
+    * This method is called by the controller to know the set of joints for which specific
+    * parameters are to be used.
+    * </p>
+    * <p>
+    * If a joint is not added to this map, the default parameters will be used.
+    * </p>
+    * 
+    * @param registry the controller registry allowing to create {@code YoVariable}s for the
+    *           parameters.
+    * @return the map from the names of the joints with their specific parameters to use.
+    */
+   public Map<String, JointAccelerationIntegrationParametersReadOnly> getJointAccelerationIntegrationParameters(YoVariableRegistry registry)
+   {
+      /* @formatter:off
+       * Example a robot for which we want to provide specific parameters for the elbow joints only:
+       * Map<String, JointAccelerationIntegrationParametersReadOnly> jointParameters = new HashMap<>();
+       * JointAccelerationIntegrationParametersReadOnly elbowParameters = new YoJointAccelerationIntegrationParameters("elbow", 0.999, 0.95, 0.1, 0.1, registry);
+       * jointParameters.put("leftElbow", elbowParameters);
+       * jointParameters.put("rightElbow", elbowParameters);
+       * return jointParameters;
+       * 
+       * Note that it is better to save the created Map as a field such that the next time this method is called, the same instance of the map is used.
+       * @formatter:on
+       */
+      return null;
    }
 
    public abstract SideDependentList<RigidBodyTransform> getDesiredHandPosesWithRespectToChestFrame();
@@ -456,7 +491,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Determined whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
+    * Determines whether the robot should use the 'support state' or the 'fully constrained' & 'hold position' states (new feature to be tested with Atlas)
     */
    public boolean useSupportState()
    {
@@ -465,7 +500,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    /**
     *
-    * Determined whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
+    * Determines whether the robot should use the velocity to be computed in the estimator, or just compute it from the robot state in the controller (new feature to be tested with Atlas)
     */
    public boolean useCenterOfMassVelocityFromEstimator()
    {
@@ -491,6 +526,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
       return 0.0;
    }
 
+   @Override
    public double getMinSwingHeightFromStanceFoot()
    {
       return 0.1;
