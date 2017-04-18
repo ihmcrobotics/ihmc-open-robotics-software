@@ -1,14 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingInitialICPMatrix;
@@ -16,6 +11,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class InitialICPCurrentMultiplierTest
 {
@@ -320,7 +319,7 @@ public class InitialICPCurrentMultiplierTest
 
       InitialICPCurrentMultiplier initialICPCurrentMultiplier = new InitialICPCurrentMultiplier(startOfSplineTime, endOfSplineTime, "", registry);
 
-      SwingInitialICPMatrix entryCMPMatrix = new SwingInitialICPMatrix(startOfSplineTime);
+      SwingInitialICPMatrix initialICPMatrix = new SwingInitialICPMatrix(startOfSplineTime);
 
       CubicMatrix cubicMatrix = new CubicMatrix();
       CubicDerivativeMatrix cubicDerivativeMatrix = new CubicDerivativeMatrix();
@@ -367,9 +366,9 @@ public class InitialICPCurrentMultiplierTest
          cubicMatrix.update(timeInCurrentState - startOfSpline);
          cubicDerivativeMatrix.update(timeInCurrentState - startOfSpline);
 
-         entryCMPMatrix.compute(omega);
-         CommonOps.mult(cubicMatrix, entryCMPMatrix, positionMatrixOut);
-         CommonOps.mult(cubicDerivativeMatrix, entryCMPMatrix, velocityMatrixOut);
+         initialICPMatrix.compute(omega);
+         CommonOps.mult(cubicMatrix, initialICPMatrix, positionMatrixOut);
+         CommonOps.mult(cubicDerivativeMatrix, initialICPMatrix, velocityMatrixOut);
 
          initialICPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 

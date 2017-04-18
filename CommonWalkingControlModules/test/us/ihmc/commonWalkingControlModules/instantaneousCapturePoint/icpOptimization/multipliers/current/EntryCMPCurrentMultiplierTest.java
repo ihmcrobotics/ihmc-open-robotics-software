@@ -1,14 +1,9 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.current;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.junit.Assert;
 import org.junit.Test;
-
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicDerivativeMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.interpolation.CubicMatrix;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing.SwingEntryCMPMatrix;
@@ -16,6 +11,10 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class EntryCMPCurrentMultiplierTest
 {
@@ -58,10 +57,10 @@ public class EntryCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime, endOfSplineTime,
-            totalTrajectoryTime, "", registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime, endOfSplineTime,
+            totalTrajectoryTime, "", true, registry);
 
-      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(transferSplitFractions);
+      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
@@ -95,12 +94,12 @@ public class EntryCMPCurrentMultiplierTest
          positionMatrix.update(timeInCurrentState);
          velocityMatrix.update(timeInCurrentState);
 
-         entryCMPMatrix.compute(doubleSupportDurations, omega);
+         entryCMPMatrix.compute(1, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
 
          CommonOps.mult(positionMatrix, entryCMPMatrix, position);
          CommonOps.mult(velocityMatrix, entryCMPMatrix, velocity);
 
-         entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(position.get(0, 0), entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocity.get(0, 0), entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -142,10 +141,10 @@ public class EntryCMPCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, "", true, registry);
 
-      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(transferSplitFractions);
+      TransferEntryCMPMatrix entryCMPMatrix = new TransferEntryCMPMatrix(swingSplitFractions, transferSplitFractions);
 
       CubicMatrix positionMatrix = new CubicMatrix();
       CubicDerivativeMatrix velocityMatrix = new CubicDerivativeMatrix();
@@ -177,12 +176,12 @@ public class EntryCMPCurrentMultiplierTest
          positionMatrix.update(timeInCurrentState);
          velocityMatrix.update(timeInCurrentState);
 
-         entryCMPMatrix.compute(doubleSupportDurations, omega);
+         entryCMPMatrix.compute(1, singleSupportDurations, doubleSupportDurations, useTwoCMPs, omega);
 
          CommonOps.mult(positionMatrix, entryCMPMatrix, position);
          CommonOps.mult(velocityMatrix, entryCMPMatrix, velocity);
 
-         entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(position.get(0, 0), entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocity.get(0, 0), entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -227,9 +226,8 @@ public class EntryCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      boolean projectCMPForward = true;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, "", true, registry);
 
 
       for (int iter = 0; iter < iters; iter++)
@@ -265,7 +263,7 @@ public class EntryCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * startOfSpline;
 
-         entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          double projection = Math.exp(omega * timeInCurrentState);
          Assert.assertEquals(1.0 - projection, entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
@@ -312,8 +310,8 @@ public class EntryCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, "", true, registry);
 
       SwingEntryCMPMatrix entryCMPMatrix = new SwingEntryCMPMatrix(startOfSplineTime);
       CubicMatrix cubicMatrix = new CubicMatrix();
@@ -363,7 +361,7 @@ public class EntryCMPCurrentMultiplierTest
          CommonOps.mult(cubicMatrix, entryCMPMatrix, positionMatrixOut);
          CommonOps.mult(cubicDerivativeMatrix, entryCMPMatrix, velocityMatrixOut);
 
-         entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(positionMatrixOut.get(0, 0), entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMatrixOut.get(0, 0), entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -409,8 +407,8 @@ public class EntryCMPCurrentMultiplierTest
          swingSplitFractions.add(swingSplitRatio);
       }
 
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, "", true, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -444,7 +442,7 @@ public class EntryCMPCurrentMultiplierTest
 
          double timeInCurrentState = random.nextDouble() * (currentSingleSupportDuration - endOfSpline) + endOfSpline;
 
-         entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(0.0, entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(0.0, entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
@@ -487,9 +485,8 @@ public class EntryCMPCurrentMultiplierTest
          transferSplitFractions.add(transferSplitRatio);
       }
 
-      boolean projectCMPForward = true;
-      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(transferSplitFractions, startOfSplineTime,
-            endOfSplineTime, totalTrajectoryTime, "", registry);
+      EntryCMPCurrentMultiplier entryCMPCurrentMultiplier = new EntryCMPCurrentMultiplier(swingSplitFractions, transferSplitFractions, startOfSplineTime,
+            endOfSplineTime, totalTrajectoryTime, "", true, registry);
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -520,14 +517,16 @@ public class EntryCMPCurrentMultiplierTest
          boolean useTwoCMPs = false;
 
          double timeInCurrentState = random.nextDouble() * currentSingleSupportDuration;
-         double transferTimeOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue();
 
-         double projectionTime = timeInCurrentState + transferTimeOnEntryCMP;
+         double timeRemaining = currentSingleSupportDuration - timeInCurrentState;
+         double nextTransferOnCMP = transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
 
-         double positionMultiplier = 1.0 - Math.exp(omega * projectionTime);
-         double velocityMultiplier = -omega * Math.exp(omega * projectionTime);
+         double projectionTime = timeRemaining + nextTransferOnCMP;
 
-         entryCMPCurrentMultiplier.compute(doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
+         double positionMultiplier = 1.0 - Math.exp(-omega * projectionTime);
+         double velocityMultiplier = -omega * Math.exp(-omega * projectionTime);
+
+         entryCMPCurrentMultiplier.compute(1, singleSupportDurations, doubleSupportDurations, timeInCurrentState, useTwoCMPs, isInTransfer, omega);
 
          Assert.assertEquals(positionMultiplier, entryCMPCurrentMultiplier.getPositionMultiplier(), epsilon);
          Assert.assertEquals(velocityMultiplier, entryCMPCurrentMultiplier.getVelocityMultiplier(), epsilon);
