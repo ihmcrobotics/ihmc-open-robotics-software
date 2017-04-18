@@ -237,9 +237,12 @@ public class ICPOptimizationController
          swingSplitFractions.add(swingSplitFraction);
       }
 
-      YoGraphicPosition beginningOfStateICP = new YoGraphicPosition(yoNamePrefix + "BeginningOfStateICP`", this.beginningOfStateICP, 0.01, YoAppearance.MidnightBlue(),
-            YoGraphicPosition.GraphicType.SOLID_BALL);
-      yoGraphicsListRegistry.registerArtifact("icpOptimizationController", beginningOfStateICP.createArtifact());
+      if (yoGraphicsListRegistry != null)
+      {
+         YoGraphicPosition beginningOfStateICP = new YoGraphicPosition(yoNamePrefix + "BeginningOfStateICP`", this.beginningOfStateICP, 0.01, YoAppearance.MidnightBlue(),
+               YoGraphicPosition.GraphicType.SOLID_BALL);
+         yoGraphicsListRegistry.registerArtifact("icpOptimizationController", beginningOfStateICP.createArtifact());
+      }
 
       parentRegistry.addChild(registry);
    }
