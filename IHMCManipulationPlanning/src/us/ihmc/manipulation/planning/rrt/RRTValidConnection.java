@@ -62,10 +62,10 @@ public class RRTValidConnection
       return true;
    }
    
-   public void initialize(int numberOfPiece)
+   public void reInitialize(int numberOfPiece)
    {
       nodes.clear();
       this.numberOfPiece = numberOfPiece;
       initialize();
-   }
+   }   
 }

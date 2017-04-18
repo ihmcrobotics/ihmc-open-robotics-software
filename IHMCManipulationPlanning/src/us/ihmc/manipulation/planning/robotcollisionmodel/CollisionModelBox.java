@@ -13,7 +13,7 @@ import us.ihmc.simulationconstructionset.physics.collision.simple.SimpleCollisio
 
 public class CollisionModelBox extends AbstractCollisionModel
 {
-   private ReferenceFrame referenceFrame;
+   public ReferenceFrame referenceFrame;
 
    private Point3D translationToCenter;
    private double sizeX;

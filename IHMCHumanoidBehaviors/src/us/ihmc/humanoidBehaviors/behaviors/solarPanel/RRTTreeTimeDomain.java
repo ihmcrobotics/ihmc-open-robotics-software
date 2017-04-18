@@ -12,8 +12,8 @@ public class RRTTreeTimeDomain extends RRTTree
    protected double motionMaximumTime;
    protected double timeScaleForMatric = 0.5;
 
-   protected double maximumDisplacementOfStep = 0.4;   
-   protected double maximumTimeGapOfStep = 0.4;
+   protected double maximumDisplacementOfStep = 0.8;   
+   protected double maximumTimeGapOfStep = 0.8;
 
    public RRTTreeTimeDomain(RRTNode rootNode)
    {
@@ -132,6 +132,7 @@ public class RRTTreeTimeDomain extends RRTTree
       if (this.newNode.isValidNode() == true)
       {
          RRTValidConnection rrtValidConnection = new RRTValidConnection(this.nearNode, this.newNode);
+         rrtValidConnection.reInitialize(3);
          if (rrtValidConnection.isValidConnection())
          {
               nearNode.addChildNode(this.newNode);
