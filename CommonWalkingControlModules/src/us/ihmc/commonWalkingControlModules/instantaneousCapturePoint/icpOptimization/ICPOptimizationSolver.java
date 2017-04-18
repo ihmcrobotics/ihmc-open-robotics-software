@@ -22,8 +22,7 @@ import us.ihmc.tools.exceptions.NoConvergenceException;
 public class ICPOptimizationSolver
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double betaSmoothing = 0.01;
-   private static final double betaMinimum = 0.0001;
+   private static final double deltaInside = 0.0001;
 
    private final ICPQPIndexHandler indexHandler;
    private final ICPQPInputCalculator inputCalculator;
@@ -68,7 +67,6 @@ public class ICPOptimizationSolver
 
    protected final DenseMatrix64F solution;
    protected final DenseMatrix64F freeVariableSolution;
-   protected final DenseMatrix64F lagrangeMultiplierSolution;
    protected final DenseMatrix64F footstepLocationSolution;
    protected final DenseMatrix64F feedbackDeltaSolution;
    protected final DenseMatrix64F dynamicRelaxationSolution;
@@ -147,7 +145,6 @@ public class ICPOptimizationSolver
       }
 
       solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      lagrangeMultiplierSolution = new DenseMatrix64F(maximumNumberOfLagrangeMultipliers, 1);
       freeVariableSolution = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
       footstepLocationSolution = new DenseMatrix64F(2 * maximumNumberOfFootstepsToConsider, 1);
       feedbackDeltaSolution = new DenseMatrix64F(2, 1);
@@ -170,7 +167,6 @@ public class ICPOptimizationSolver
    public void resetSupportPolygonConstraint()
    {
       cmpLocationConstraint.reset();
-      indexHandler.resetSupportPolygonConstraint();
    }
 
    private final FramePoint tmpPoint = new FramePoint();
@@ -192,13 +188,11 @@ public class ICPOptimizationSolver
       tmpPoint.changeFrame(worldFrame);
 
       cmpLocationConstraint.addVertex(tmpPoint);
-      indexHandler.registerCMPVertex();
    }
 
    public void resetReachabilityConstraint()
    {
       reachabilityConstraint.reset();
-      indexHandler.resetReachabilityConstraint();
    }
 
    public void addReachabilityVertex(FramePoint2d vertexLocation, ReferenceFrame frame)
@@ -208,7 +202,6 @@ public class ICPOptimizationSolver
       tmpPoint.changeFrame(worldFrame);
 
       reachabilityConstraint.addVertex(tmpPoint);
-      indexHandler.registerReachabilityVertex();
    }
 
 
@@ -241,7 +234,6 @@ public class ICPOptimizationSolver
       perfectCMP.zero();
 
       solution.zero();
-      lagrangeMultiplierSolution.zero();
       freeVariableSolution.zero();
       footstepLocationSolution.zero();
       feedbackDeltaSolution.zero();
@@ -281,7 +273,6 @@ public class ICPOptimizationSolver
 
       solution.reshape(problemSize + numberOfEqualityConstraints, 1);
       freeVariableSolution.reshape(problemSize, 1);
-      lagrangeMultiplierSolution.reshape(numberOfEqualityConstraints, 1);
       footstepLocationSolution.reshape(2 * numberOfFootstepsToConsider, 1);
    }
 
@@ -439,10 +430,10 @@ public class ICPOptimizationSolver
       addDynamicConstraint();
       addDynamicRelaxationTask();
 
-      if (indexHandler.constrainCMP())
+      if (cmpLocationConstraint.getNumberOfVertices() > 0)
          addCMPLocationConstraint();
 
-      if (indexHandler.constrainReachability())
+      if (reachabilityConstraint.getNumberOfVertices() > 0)
          addReachabilityConstraint();
 
       if (indexHandler.useStepAdjustment())
@@ -461,7 +452,6 @@ public class ICPOptimizationSolver
 
       if (noConvergenceException == null)
       {
-         extractLagrangeMultiplierSolution(lagrangeMultiplierSolution);
          extractFreeVariableSolution(freeVariableSolution);
 
          if (indexHandler.useStepAdjustment())
@@ -502,7 +492,7 @@ public class ICPOptimizationSolver
    {
       cmpLocationConstraint.setPositionOffset(perfectCMP);
       cmpLocationConstraint.setIndexOfVariableToConstrain(indexHandler.getFeedbackCMPIndex());
-      cmpLocationConstraint.setVertexMinimum(betaMinimum / indexHandler.getNumberOfCMPVertices());
+      cmpLocationConstraint.setDeltaInside(deltaInside);
       cmpLocationConstraint.formulateConstraint();
 
       int numberOfVertices = cmpLocationConstraint.getNumberOfVertices();
@@ -515,7 +505,7 @@ public class ICPOptimizationSolver
    private void addReachabilityConstraint()
    {
       reachabilityConstraint.setIndexOfVariableToConstrain(indexHandler.getFootstepStartIndex());
-      reachabilityConstraint.setVertexMinimum(betaMinimum / indexHandler.getNumberOfReachabilityVertices());
+      reachabilityConstraint.setDeltaInside(deltaInside);
       reachabilityConstraint.formulateConstraint();
 
       int numberOfVertices = reachabilityConstraint.getNumberOfVertices();
@@ -568,11 +558,6 @@ public class ICPOptimizationSolver
    private void extractDynamicRelaxationSolution(DenseMatrix64F dynamicRelaxationSolutionToPack)
    {
       MatrixTools.setMatrixBlock(dynamicRelaxationSolutionToPack, 0, 0, solution, indexHandler.getDynamicRelaxationIndex(), 0, 2, 1, 1.0);
-   }
-
-   private void extractLagrangeMultiplierSolution(DenseMatrix64F lagrangeMultiplierSolutionToPack)
-   {
-      MatrixTools.setMatrixBlock(lagrangeMultiplierSolutionToPack, 0, 0, solution, indexHandler.getLagrangeMultiplierIndex(), 0, indexHandler.getNumberOfEqualityConstraints(), 1, 1.0);
    }
 
    private void extractFreeVariableSolution(DenseMatrix64F freeVariableSolution)

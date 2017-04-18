@@ -14,15 +14,14 @@ public class ConstraintToConvexRegion
 {
    public final DenseMatrix64F indexSelectionMatrix = CommonOps.identity(2, 2);
 
-   public final DenseMatrix64F dynamics_beq;
+   public final DenseMatrix64F positionOffset;
 
    public final DenseMatrix64F Aineq;
    public final DenseMatrix64F bineq;
 
    private int indexOfVariableToConstrain;
-   private int numberOfVertices = 0;
 
-   private double vertexMinimum = 0.0;
+   private double deltaInside = 0.0;
 
    private final ConvexPolygon2d convexPolygon = new ConvexPolygon2d();
 
@@ -30,7 +29,7 @@ public class ConstraintToConvexRegion
    {
       CommonOps.scale(-1.0, indexSelectionMatrix);
 
-      dynamics_beq = new DenseMatrix64F(2, 1);
+      positionOffset = new DenseMatrix64F(2, 1);
 
       Aineq = new DenseMatrix64F(maximumNumberOfVertices, maximumNumberOfVertices);
       bineq = new DenseMatrix64F(maximumNumberOfVertices, 1);
@@ -38,24 +37,11 @@ public class ConstraintToConvexRegion
 
    public void reset()
    {
-      dynamics_beq.zero();
+      positionOffset.zero();
       convexPolygon.clear();
 
       Aineq.zero();
       bineq.zero();
-
-      numberOfVertices = 0;
-   }
-
-   private void reshape()
-   {
-      Aineq.reshape(numberOfVertices, numberOfVertices);
-      bineq.reshape(numberOfVertices, 1);
-   }
-
-   public void setIndexOfVariableToConstrain(int index)
-   {
-      indexOfVariableToConstrain = index;
    }
 
    public void addVertex(FramePoint2d vertex)
@@ -63,7 +49,6 @@ public class ConstraintToConvexRegion
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       convexPolygon.addVertex(vertex.getPoint());
-      numberOfVertices++;
    }
 
    public void addVertex(FramePoint vertex)
@@ -71,30 +56,42 @@ public class ConstraintToConvexRegion
       vertex.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
       convexPolygon.addVertex(vertex.getX(), vertex.getY());
-      numberOfVertices++;
    }
+
+   public void setPolygon()
+   {
+      convexPolygon.update();
+   }
+
+   public void setIndexOfVariableToConstrain(int index)
+   {
+      indexOfVariableToConstrain = index;
+   }
+
 
    public void setPositionOffset(DenseMatrix64F offset)
    {
-      MatrixTools.setMatrixBlock(dynamics_beq, 0, 0, offset, 0, 0, 2, 1, 1.0);
+      MatrixTools.setMatrixBlock(positionOffset, 0, 0, offset, 0, 0, 2, 1, 1.0);
    }
 
-   public void setVertexMinimum(double vertexMinimum)
+   public void setDeltaInside(double deltaInside)
    {
-      this.vertexMinimum = vertexMinimum;
+      this.deltaInside = deltaInside;
+   }
+
+   private void reshape()
+   {
+      int numberOfVertices = convexPolygon.getNumberOfVertices();
+      Aineq.reshape(numberOfVertices, numberOfVertices);
+      bineq.reshape(numberOfVertices, 1);
    }
 
    public void formulateConstraint()
    {
       reshape();
 
-      PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, vertexMinimum);
-      CommonOps.multAdd(-1.0, Aineq, dynamics_beq, bineq);
-   }
-
-   public void setPolygon()
-   {
-      convexPolygon.update();
+      PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, deltaInside);
+      CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
    }
 
    public int getNumberOfVertices()
