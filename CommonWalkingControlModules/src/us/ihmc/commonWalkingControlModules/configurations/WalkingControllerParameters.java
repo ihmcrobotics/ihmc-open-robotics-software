@@ -29,6 +29,8 @@ import us.ihmc.sensorProcessing.stateEstimation.FootSwitchType;
 
 public abstract class WalkingControllerParameters implements HeadOrientationControllerParameters, SteppingParameters
 {
+   private StraightLegWalkingParameters straightLegWalkingParameters;
+
    protected JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    protected DynamicReachabilityParameters dynamicReachabilityParameters;
 
@@ -115,7 +117,22 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
 
    public abstract boolean doToeOffIfPossibleInSingleSupport();
 
+   /**
+    * Whether or not the location of the ECMP must be close enough to the support polygon before allowing toe off.
+    *
+    * @return whether or not to check the ECMP location.
+    */
    public abstract boolean checkECMPLocationToTriggerToeOff();
+
+   /**
+    * Maximum distance of the ECMP to the toe off support polygon before allowing toe off.
+    *
+    * @return ECMP distance (m).
+    */
+   public double getECMPProximityForToeOff()
+   {
+      return 0.0;
+   }
 
    /**
     * Minimum stance length in double support to enable toe off.
@@ -146,6 +163,7 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    {
       return -1.0;
    }
+
    /**
     * Sets the maximum pitch of the foot during toe off to be fed into the whole-body controller
     * @return maximum pitch angle
@@ -535,6 +553,17 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
+    * Returns the parameters used for straight leg walking
+    */
+   public StraightLegWalkingParameters getStraightLegWalkingParameters()
+   {
+      if (straightLegWalkingParameters == null)
+         straightLegWalkingParameters = new StraightLegWalkingParameters();
+
+      return straightLegWalkingParameters;
+   }
+
+   /**
     * Returns the parameters in the dynamic reachability calculator.
     */
    public DynamicReachabilityParameters getDynamicReachabilityParameters()
@@ -558,25 +587,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Determines whether or not to attempt to use straight legs when controlling the height in the nullspace.
-    * This will not do anything noticeable unless {@link WalkingControllerParameters#controlHeightWithMomentum()} returns true.
-    * @return boolean (true = try and straighten, false = do not try and straighten)
-    */
-   public boolean attemptToStraightenLegs()
-   {
-      return false;
-   }
-
-   /**
-    * Returns a percent of the swing state to switch the privileged configuration to having straight knees
-    * @return ratio of swing state (0.0 to 1.0)
-    */
-   public double getPercentOfSwingToStraightenLeg()
-   {
-      return 0.8;
-   }
-
-   /**
     * In transfer, this determines maximum distance from the ICP to the leading foot support polygon to allow toe-off.
     * This distance is determined by finding the stance length, and multiplying it by the returned variable.
     * If it is further than this, do not allow toe-off, as more control authority is needed from the trailing foot.
@@ -596,24 +606,6 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public double getICPPercentOfStanceForSSToeOff()
    {
       return 0.0;
-   }
-
-   /**
-    * This is the duration used to straighten the desire privileged configuration of the stance leg's knee.
-    * @return time in seconds for straightening
-    */
-   public double getDurationForStanceLegStraightening()
-   {
-      return 1.3;
-   }
-
-   /**
-    * Angle used by the privileged configuration that is defined as straight for the knees.
-    * @return angle in radians
-    */
-   public double getStraightKneeAngle()
-   {
-      return 0.05;
    }
 
    /**
@@ -647,5 +639,16 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    public boolean editStepTimingForReachability()
    {
       return false;
+   }
+
+   /**
+    * The duration to use only the joints between the pelvis (the primary base) and the swing foot for controlling
+    * the swing foot acceleration during swing.
+    *
+    * @return duration in seconds.
+    */
+   public double getPrimaryBaseControlDurationInSwing()
+   {
+      return 0.0;
    }
 }

@@ -614,8 +614,8 @@ public class KinematicsToolboxController extends ToolboxController
       PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
       privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
-      privilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
-      privilegedConfigurationCommand.setMaxVelocity(privilegedMaxVelocity.getDoubleValue());
+      privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
+      privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
 
       return true;

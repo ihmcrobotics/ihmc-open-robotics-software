@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.kneeAngle.KneeAngleManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -41,6 +42,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
+   private final KneeAngleManager kneeAngleManager;
+
+   private final DoubleYoVariable percentOfSwingToStraightenLeg = new DoubleYoVariable("percentOfSwingToStraightenLeg", registry);
 
    private final DoubleYoVariable remainingSwingTimeAccordingToPlan = new DoubleYoVariable("remainingSwingTimeAccordingToPlan", registry);
    private final DoubleYoVariable estimatedRemainingSwingTimeUnderDisturbance = new DoubleYoVariable("estimatedRemainingSwingTimeUnderDisturbance", registry);
@@ -62,6 +66,9 @@ public class WalkingSingleSupportState extends SingleSupportState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+      kneeAngleManager = managerFactory.getOrCreateKneeAngleManager();
+
+      percentOfSwingToStraightenLeg.set(walkingControllerParameters.getStraightLegWalkingParameters().getPercentOfSwingToStraightenLeg());
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
@@ -137,6 +144,11 @@ public class WalkingSingleSupportState extends SingleSupportState
          balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
       }
 
+      if (getTimeInCurrentState() > percentOfSwingToStraightenLeg.getDoubleValue() * swingTime)
+      {
+         kneeAngleManager.straightenLegDuringSwing(swingSide);
+      }
+
       walkingMessageHandler.clearFootTrajectory();
 
       switchToToeOffIfPossible(supportSide);
@@ -195,6 +207,8 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       feetManager.requestSwing(swingSide, nextFootstep, swingTime);
+
+      kneeAngleManager.startSwing(swingSide);
 
       nextFootstep.getPose(desiredFootPoseInWorld);
       desiredFootPoseInWorld.changeFrame(worldFrame);
