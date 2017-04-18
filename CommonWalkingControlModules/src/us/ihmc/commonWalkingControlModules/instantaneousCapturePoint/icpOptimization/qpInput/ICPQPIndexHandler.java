@@ -21,13 +21,8 @@ public class ICPQPIndexHandler
 
    private boolean useStepAdjustment;
 
-   private final boolean useEfficientConstraints;
-   private final boolean formulateDynamicsAsConstraint;
-
-   public ICPQPIndexHandler(boolean useEfficientConstraints, boolean formulateDynamicsAsConstraint)
+   public ICPQPIndexHandler()
    {
-      this.useEfficientConstraints = useEfficientConstraints;
-      this.formulateDynamicsAsConstraint = formulateDynamicsAsConstraint;
    }
 
    public void resetConstraints()
@@ -107,49 +102,19 @@ public class ICPQPIndexHandler
       numberOfLagrangeMultipliers = 0;
       feedbackCMPIndex = numberOfFootstepVariables;
 
-      if (formulateDynamicsAsConstraint)
-         dynamicRelaxationIndex = feedbackCMPIndex + 2;
-      else
-         dynamicRelaxationIndex = 0;
+      dynamicRelaxationIndex = feedbackCMPIndex + 2;
 
-      if (!useEfficientConstraints)
-      {
-         if (numberOfCMPVertices > 0)
-            numberOfLagrangeMultipliers += 3;
-
-         if (numberOfReachabilityVertices > 0)
-            numberOfLagrangeMultipliers += 3;
-      }
-
-      if (formulateDynamicsAsConstraint)
-      {
-         numberOfFreeVariables += 2;
-         numberOfLagrangeMultipliers += 2;
-      }
+      numberOfFreeVariables += 2; // add in the dynamic relaxation variable
+      numberOfLagrangeMultipliers += 2;
 
       cmpConstraintIndex = dynamicRelaxationIndex + 2;
-      if (!useEfficientConstraints)
-      {
-         reachabilityConstraintIndex = cmpConstraintIndex + numberOfCMPVertices;
-         lagrangeMultiplierIndex = reachabilityConstraintIndex + numberOfReachabilityVertices;
+      reachabilityConstraintIndex = cmpConstraintIndex;
+      lagrangeMultiplierIndex = reachabilityConstraintIndex;
 
-         problemSize = numberOfFreeVariables + numberOfCMPVertices + numberOfReachabilityVertices;
-      }
-      else
-      {
-         reachabilityConstraintIndex = cmpConstraintIndex;
-         lagrangeMultiplierIndex = reachabilityConstraintIndex;
+      problemSize = numberOfFreeVariables;
 
-         problemSize = numberOfFreeVariables;
-      }
-
-      numberOfEqualityConstraints = numberOfLagrangeMultipliers;
+      numberOfEqualityConstraints = 2; // this is the dynamics
       numberOfInequalityConstraints = numberOfCMPVertices + numberOfReachabilityVertices;
-   }
-
-   public int getProblemSize()
-   {
-      return problemSize;
    }
 
    public int getNumberOfEqualityConstraints()
