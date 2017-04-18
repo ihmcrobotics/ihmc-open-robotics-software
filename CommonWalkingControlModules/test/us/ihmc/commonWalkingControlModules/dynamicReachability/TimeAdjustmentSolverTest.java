@@ -20,7 +20,15 @@ public class TimeAdjustmentSolverTest
    {
       int maximumNumberOfSteps = 3;
 
-      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, new DynamicReachabilityParameters());
+      DynamicReachabilityParameters parameters = new DynamicReachabilityParameters()
+      {
+         @Override
+         public boolean useHigherOrderSteps()
+         {
+            return false;
+         }
+      };
+      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, parameters);
 
       solver.setNumberOfFootstepsToConsider(maximumNumberOfSteps);
       solver.setNumberOfFootstepsRegistered(1);
@@ -99,12 +107,12 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
-      assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       // initial swing adjustment should be third largest
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       caughtError = false;
       try
@@ -221,12 +229,12 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
-      assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       // initial swing adjustment should be third largest
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       caughtError = false;
       try
@@ -264,7 +272,15 @@ public class TimeAdjustmentSolverTest
    {
       int maximumNumberOfSteps = 4;
 
-      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, new DynamicReachabilityParameters());
+      DynamicReachabilityParameters parameters = new DynamicReachabilityParameters()
+      {
+         @Override
+         public boolean useHigherOrderSteps()
+         {
+            return true;
+         }
+      };
+      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, parameters);
 
       solver.setNumberOfFootstepsToConsider(maximumNumberOfSteps);
       solver.setNumberOfFootstepsRegistered(2);
@@ -343,12 +359,12 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
-      assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       // initial swing adjustment should be third largest
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       // should be able to get first higher swing adjustment
       caughtError = false;
@@ -393,7 +409,15 @@ public class TimeAdjustmentSolverTest
    {
       int maximumNumberOfSteps = 4;
 
-      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, new DynamicReachabilityParameters());
+      DynamicReachabilityParameters parameters = new DynamicReachabilityParameters()
+      {
+         @Override
+         public boolean useHigherOrderSteps()
+         {
+            return true;
+         }
+      };
+      TimeAdjustmentSolver solver = new TimeAdjustmentSolver(maximumNumberOfSteps, parameters);
 
       solver.setNumberOfFootstepsToConsider(maximumNumberOfSteps);
       solver.setNumberOfFootstepsRegistered(2);
@@ -481,12 +505,12 @@ public class TimeAdjustmentSolverTest
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
       assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(currentInitialSwingAdjustment));
-      assertTrue(Math.abs(currentEndSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentEndSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       // initial swing adjustment should be third largest
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentInitialTransferAdjustment));
       assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(currentEndTransferAdjustment));
-      assertTrue(Math.abs(currentInitialSwingAdjustment) > Math.abs(nextEndTransferAdjustment));
+      assertTrue(Math.abs(currentInitialSwingAdjustment) < Math.abs(nextEndTransferAdjustment));
 
       // should be able to get first higher swing adjustment
       caughtError = false;

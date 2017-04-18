@@ -1,90 +1,358 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.HARD_CONSTRAINT;
+import static us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels.*;
 
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.SolverWeightLevels;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.ReferenceFrameMismatchException;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialForceVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.Momentum;
 
+/**
+ * {@link MomentumCommand} is a command meant to be submitted to the {@link WholeBodyControllerCore}
+ * via the {@link ControllerCoreCommand}.
+ * <p>
+ * The objective of a {@link MomentumCommand} is to notify the inverse kinematics optimization
+ * module to get the robot to achieve the desired momentum during the next control tick.
+ * </p>
+ * <p>
+ * This command can notably be used to control the center of mass velocity by using the linear part
+ * of the momentum.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ *
+ */
 public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand>
 {
-   private final DenseMatrix64F weightVector = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
-   private final DenseMatrix64F momentum = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   /**
+    * It defines the 6-components of the desired momentum to achieve for the next control.
+    * <p>
+    * More precisely, it represents the desired momentum at the center of mass while the data is
+    * expressed in world frame.
+    * </p>
+    */
+   private final DenseMatrix64F momentum = new DenseMatrix64F(Momentum.SIZE, 1);
+   /**
+    * Weights on a per component basis to use in the optimization function. A higher weight means
+    * higher priority of this task.
+    */
+   private final DenseMatrix64F weightVector = new DenseMatrix64F(Momentum.SIZE, 1);
+   /**
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that
+    * are to be controlled. A 6-by-6 identity matrix will request the control of all the 6 degrees
+    * of freedom.
+    * <p>
+    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
+    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
+    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
+    * specific DoF for the momentum.
+    * </p>
+    */
+   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(Momentum.SIZE, Momentum.SIZE);
+
+   /**
+    * Creates an empty command. It needs to be configured before being submitted to the controller
+    * core.
+    */
    public MomentumCommand()
    {
    }
 
-   public MomentumCommand(MomentumCommand momentumCommand)
-   {
-      this();
-      set(momentumCommand);
-   }
-
+   /**
+    * Performs a full-depth copy of the data contained in the other command.
+    */
    @Override
    public void set(MomentumCommand other)
    {
+      weightVector.set(other.weightVector);
       selectionMatrix.set(other.selectionMatrix);
       momentum.set(other.momentum);
    }
 
-   public void set(SpatialForceVector momentum)
+   /**
+    * Copies all the fields of the given {@link MomentumRateCommand} into this except for the
+    * desired rate of change of momentum.
+    * 
+    * @param command the command to copy the properties from. Not modified.
+    */
+   public void setProperties(MomentumRateCommand command)
    {
-      selectionMatrix.reshape(SpatialForceVector.SIZE, SpatialForceVector.SIZE);
-      CommonOps.setIdentity(selectionMatrix);
-      this.momentum.reshape(SpatialForceVector.SIZE, 1);
-      momentum.getMatrix(this.momentum);
+      weightVector.set(command.getWeightVector());
+      selectionMatrix.set(command.getSelectionMatrix());
    }
 
+   /**
+    * Sets the desired momentum to submit for the optimization to zero.
+    */
+   public void setMomentumToZero()
+   {
+      momentum.zero();
+   }
+
+   /**
+    * Sets the desired momentum to submit for the optimization.
+    * <p>
+    * It is assumed to represent the desired momentum at the center of mass while the data is
+    * expressed in world frame.
+    * </p>
+    * 
+    * @param momentum the desired momentum at the center of mass expressed in world frame. Not
+    *           modified.
+    */
+   public void setMomentum(DenseMatrix64F momentum)
+   {
+      this.momentum.set(momentum);
+   }
+
+   /**
+    * Sets the desired momentum to submit for the optimization.
+    * <p>
+    * It is assumed to represent the desired momentum at the center of mass while the data is
+    * expressed in world frame.
+    * </p>
+    * 
+    * @param angularMomentum the desired angular momentum at the center of mass expressed in world
+    *           frame. Not modified.
+    * @param linearMomentum the desired linear momentum in world frame. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code angularMomentum} or {@code linearMomentum}
+    *            is not expressed in world frame.
+    */
+   public void setMomentum(FrameVector angularMomentum, FrameVector linearMomentum)
+   {
+      angularMomentum.checkReferenceFrameMatch(worldFrame);
+      linearMomentum.checkReferenceFrameMatch(worldFrame);
+
+      angularMomentum.get(0, momentum);
+      linearMomentum.get(3, momentum);
+   }
+
+   /**
+    * Sets the desired angular momentum to submit for the optimization and sets the linear part to
+    * zero.
+    * <p>
+    * It is assumed to represent the desired momentum at the center of mass while the data is
+    * expressed in world frame.
+    * </p>
+    * 
+    * @param angularMomentum the desired angular momentum at the center of mass expressed in world
+    *           frame. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code angularMomentum} is not expressed in world
+    *            frame.
+    */
+   public void setAngularMomentum(FrameVector angularMomentum)
+   {
+      angularMomentum.checkReferenceFrameMatch(worldFrame);
+
+      momentum.zero();
+      angularMomentum.get(0, momentum);
+   }
+
+   /**
+    * Sets the desired linear momentum to submit for the optimization and sets the angular part to
+    * zero.
+    * 
+    * @param linearMomentum the desired linear momentum in world frame. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code linearMomentum} is not expressed in world
+    *            frame.
+    */
    public void setLinearMomentum(FrameVector linearMomentum)
    {
-      selectionMatrix.reshape(3, SpatialMotionVector.SIZE);
+      linearMomentum.checkReferenceFrameMatch(worldFrame);
+
+      momentum.zero();
+      linearMomentum.get(3, momentum);
+   }
+
+   /**
+    * Sets the desired linear momentum in the XY-plane to submit for the optimization and sets the
+    * angular part and the z component of the linear part to zero.
+    * 
+    * @param linearMomentum the desired linear momentum in world frame. Not modified.
+    * @throws ReferenceFrameMismatchException if {@code linearMomentum} is not expressed in world
+    *            frame.
+    */
+   public void setLinearMomentumXY(FrameVector2d linearMomentum)
+   {
+      linearMomentum.checkReferenceFrameMatch(worldFrame);
+
+      momentum.zero();
+      linearMomentum.get(3, momentum);
+   }
+
+   /**
+    * Sets the selection matrix to be used for the next control tick to the 6-by-6 identity matrix.
+    * <p>
+    * This specifies that the 6 degrees of freedom for the momentum are to be controlled.
+    * </p>
+    */
+   public void setSelectionMatrixToIdentity()
+   {
+      selectionMatrix.reshape(Momentum.SIZE, Momentum.SIZE);
+      CommonOps.setIdentity(selectionMatrix);
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix such that only the linear part of this
+    * command will be considered in the optimization.
+    *
+    * <pre>
+    *     / 0 0 0 1 0 0 \
+    * S = | 0 0 0 0 1 0 |
+    *     \ 0 0 0 0 0 1 /
+    * </pre>
+    */
+   public void setSelectionMatrixForLinearControl()
+   {
+      selectionMatrix.reshape(3, Momentum.SIZE);
+      selectionMatrix.zero();
       selectionMatrix.set(0, 3, 1.0);
       selectionMatrix.set(1, 4, 1.0);
       selectionMatrix.set(2, 5, 1.0);
-
-      momentum.reshape(selectionMatrix.getNumCols(), 1);
-      linearMomentum.getVector().get(3, 0, momentum);
    }
 
-   public void setLinearMomentumXY(FrameVector2d linearMomentum)
+   /**
+    * Convenience method that sets up the selection matrix such that only the x and y components of
+    * the linear part of this command will be considered in the optimization.
+    *
+    * <pre>
+    *     / 0 0 0 1 0 0 \
+    * S = |             |
+    *     \ 0 0 0 0 1 0 /
+    * </pre>
+    */
+   public void setSelectionMatrixForLinearXYControl()
    {
-      selectionMatrix.reshape(2, SpatialMotionVector.SIZE);
+      selectionMatrix.reshape(2, Momentum.SIZE);
+      selectionMatrix.zero();
       selectionMatrix.set(0, 3, 1.0);
       selectionMatrix.set(1, 4, 1.0);
-
-      momentum.reshape(selectionMatrix.getNumCols(), 1);
-      linearMomentum.getVector().get(3, 0, momentum);
    }
 
-   public void setEmpty()
+   /**
+    * Convenience method that sets up the selection matrix such that only the angular part of this
+    * command will be considered in the optimization.
+    *
+    * <pre>
+    *     / 1 0 0 0 0 0 \
+    * S = | 0 1 0 0 0 0 |
+    *     \ 0 0 1 0 0 0 /
+    * </pre>
+    */
+   public void setSelectionMatrixForAngularControl()
    {
-      selectionMatrix.reshape(0, SpatialForceVector.SIZE);
-      momentum.reshape(0, 1);
+      selectionMatrix.reshape(3, Momentum.SIZE);
+      selectionMatrix.zero();
+      selectionMatrix.set(0, 0, 1.0);
+      selectionMatrix.set(1, 1, 1.0);
+      selectionMatrix.set(2, 2, 1.0);
    }
 
+   /**
+    * Sets the selection matrix to be used for the next control tick.
+    * <p>
+    * The selection matrix is used to describe the DoFs (Degrees Of Freedom) for the momentum that
+    * are to be controlled. A 6-by-6 identity matrix will request the control of all the 6 degrees
+    * of freedom.
+    * </p>
+    * <p>
+    * The three first rows refer to the 3 rotational DoFs and the 3 last rows refer to the 3
+    * translational DoFs of the end-effector. Removing a row to the selection matrix using for
+    * instance {@link MatrixTools#removeRow(DenseMatrix64F, int)} is the quickest way to ignore a
+    * specific DoF for the momentum.
+    * </p>
+    *
+    * @param selectionMatrix the new selection matrix to be used. Not modified.
+    * @throws RuntimeException if the selection matrix has a number of rows greater than 6 or has a
+    *            number of columns different to 6.
+    */
+   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   {
+      if (selectionMatrix.getNumRows() > Momentum.SIZE)
+         throw new RuntimeException("Unexpected number of rows: " + selectionMatrix.getNumRows());
+      if (selectionMatrix.getNumCols() != Momentum.SIZE)
+         throw new RuntimeException("Unexpected number of columns: " + selectionMatrix.getNumCols());
+
+      this.selectionMatrix.set(selectionMatrix);
+   }
+
+   /**
+    * Sets all the weights to {@link SolverWeightLevels#HARD_CONSTRAINT} such that this command will
+    * be treated as a hard constraint.
+    * <p>
+    * This is usually undesired as with improper commands setup as hard constraints the optimization
+    * problem can simply be impossible to solve.
+    * </p>
+    */
+   public void setAsHardConstraint()
+   {
+      setWeight(HARD_CONSTRAINT);
+   }
+
+   /**
+    * Sets the weight to use in the optimization problem.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param weight the weight value to use for this command.
+    */
    public void setWeight(double weight)
    {
-      setWeights(weight, weight);
+      for (int i = 0; i < Momentum.SIZE; i++)
+         weightVector.set(i, 0, weight);
    }
 
-   public void setWeights(double linear, double angular)
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param angular the weight to use for the angular part of this command. Not modified.
+    * @param linear the weight to use for the linear part of this command. Not modified.
+    */
+   public void setWeight(double angular, double linear)
    {
       for (int i = 0; i < 3; i++)
          weightVector.set(i, 0, angular);
-      for (int i = 3; i < SpatialMotionVector.SIZE; i++)
+      for (int i = 3; i < Momentum.SIZE; i++)
          weightVector.set(i, 0, linear);
    }
 
-   public void setWeights(double linearX, double linearY, double linearZ, double angularX, double angularY, double angularZ)
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param angularX the weight to use for the x-axis of the angular part of this command.
+    * @param angularY the weight to use for the y-axis of the angular part of this command.
+    * @param angularZ the weight to use for the z-axis of the angular part of this command.
+    * @param linearX the weight to use for the x-axis of the linear part of this command.
+    * @param linearY the weight to use for the y-axis of the linear part of this command.
+    * @param linearZ the weight to use for the z-axis of the linear part of this command.
+    */
+   public void setWeights(double angularX, double angularY, double angularZ, double linearX, double linearY, double linearZ)
    {
       weightVector.set(0, 0, angularX);
       weightVector.set(1, 0, angularY);
@@ -94,9 +362,125 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       weightVector.set(5, 0, linearZ);
    }
 
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param weight dense matrix holding the weights to use for each component of the desired
+    *           acceleration. It is expected to be a 6-by-1 vector ordered as: {@code angularX},
+    *           {@code angularY}, {@code angularZ}, {@code linearX}, {@code linearY},
+    *           {@code linearZ}. Not modified.
+    */
+   public void setWeights(DenseMatrix64F weight)
+   {
+      for (int i = 0; i < Momentum.SIZE; i++)
+      {
+         weightVector.set(i, 0, weight.get(i, 0));
+      }
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each rotational degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param angular the weights to use for the angular part of this command. Not modified.
+    */
+   public void setAngularWeights(Tuple3DReadOnly angular)
+   {
+      weightVector.set(0, 0, angular.getX());
+      weightVector.set(1, 0, angular.getY());
+      weightVector.set(2, 0, angular.getZ());
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each translational degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param linear the weights to use for the angular part of this command. Not modified.
+    */
+   public void setLinearWeights(Tuple3DReadOnly linear)
+   {
+      weightVector.set(3, 0, linear.getX());
+      weightVector.set(4, 0, linear.getY());
+      weightVector.set(5, 0, linear.getZ());
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each individual degree of freedom.
+    * <p>
+    * WARNING: It is not the value of each individual command's weight that is relevant to how the
+    * optimization will behave but the ratio between them. A command with a higher weight than other
+    * commands value will be treated as more important than the other commands.
+    * </p>
+    * 
+    * @param angular the weights to use for the angular part of this command. Not modified.
+    * @param linear the weights to use for the linear part of this command. Not modified.
+    */
+   public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
+   {
+      weightVector.set(0, 0, angular.getX());
+      weightVector.set(1, 0, angular.getY());
+      weightVector.set(2, 0, angular.getZ());
+      weightVector.set(3, 0, linear.getX());
+      weightVector.set(4, 0, linear.getY());
+      weightVector.set(5, 0, linear.getZ());
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each rotational degree of freedom to
+    * zero.
+    * <p>
+    * By doing so, the angular part of this command will be ignored during the optimization. Note
+    * that it is less expensive to call {@link #setSelectionMatrixForLinearControl()} as by doing so
+    * the angular part will not be submitted to the optimization.
+    * </p>
+    */
+   public void setAngularWeightsToZero()
+   {
+      for (int i = 0; i < 3; i++)
+         weightVector.set(i, 0, 0.0);
+   }
+
+   /**
+    * Sets the weights to use in the optimization problem for each translational degree of freedom
+    * to zero.
+    * <p>
+    * By doing so, the linear part of this command will be ignored during the optimization. Note
+    * that it is less expensive to call {@link #setSelectionMatrixForAngularControl()} as by doing
+    * so the linear part will not be submitted to the optimization.
+    * </p>
+    */
+   public void setLinearWeightsToZero()
+   {
+      for (int i = 3; i < Momentum.SIZE; i++)
+         weightVector.set(i, 0, 0.0);
+   }
+
+   /**
+    * Finds if this command is to be considered as a hard constraint during the optimization.
+    * <p>
+    * This command is considered to be a hard constraint if at least one of the weights is equal to
+    * {@link SolverWeightLevels#HARD_CONSTRAINT}.
+    * </p>
+    * 
+    * @return {@code true} if this command should be considered as a hard constraint, {@code false}
+    *         is it should be part of the optimization objective.
+    */
    public boolean isHardConstraint()
    {
-      for (int i = 0; i < weightVector.getNumRows(); i++)
+      for (int i = 0; i < Momentum.SIZE; i++)
       {
          if (weightVector.get(i, 0) == HARD_CONSTRAINT)
             return true;
@@ -104,39 +488,101 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       return false;
    }
 
-   public DenseMatrix64F getSelectionMatrix()
+   /**
+    * Packs the weights to use for this command in {@code weightMatrixToPack} as follows:
+    * 
+    * <pre>
+    *     / w0 0  0  0  0  0  \
+    *     | 0  w1 0  0  0  0  |
+    * W = | 0  0  w2 0  0  0  |
+    *     | 0  0  0  w3 0  0  |
+    *     | 0  0  0  0  w4 0  |
+    *     \ 0  0  0  0  0  w5 /
+    * </pre>
+    * <p>
+    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
+    * command. The three others (w3, w4, w5) are for the linear part.
+    * </p>
+    * <p>
+    * The packed matrix is a 6-by-6 matrix independently from the selection matrix.
+    * </p>
+    * 
+    * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
+    *           reshaped to ensure proper size. Modified.
+    */
+   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
    {
-      return selectionMatrix;
+      weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
+      CommonOps.setIdentity(weightMatrixToPack);
+      for (int i = 0; i < Momentum.SIZE; i++)
+         weightMatrixToPack.set(i, i, weightVector.get(i, 0));
    }
 
-   public DenseMatrix64F getMomentum()
-   {
-      return momentum;
-   }
-
+   /**
+    * Returns the reference to the 6-by-1 weight vector to use with this command:
+    * 
+    * <pre>
+    *     / w0 \
+    *     | w1 |
+    * W = | w2 |
+    *     | w3 |
+    *     | w4 |
+    *     \ w5 /
+    * </pre>
+    * <p>
+    * The three first weights (w0, w1, w2) are the weights to use for the angular part of this
+    * command. The three others (w3, w4, w5) are for the linear part.
+    * </p>
+    * 
+    * @return the reference to the weights to use with this command.
+    */
    public DenseMatrix64F getWeightVector()
    {
       return weightVector;
    }
 
-   public void getWeightMatrix(DenseMatrix64F weightMatrix)
+   /**
+    * Gets the reference to the selection matrix to use with this command.
+    * 
+    * @return the selection matrix.
+    */
+   public DenseMatrix64F getSelectionMatrix()
    {
-      weightMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
-      CommonOps.setIdentity(weightMatrix);
-      for (int i = 0; i < SpatialMotionVector.SIZE; i++)
-         weightMatrix.set(i, i, weightVector.get(i, 0));
+      return selectionMatrix;
    }
 
-   public void setMomentum(DenseMatrix64F momentum)
+   /**
+    * Gets the reference to the desired momentum carried by this command.
+    * <p>
+    * It represents the desired momentum at the center of mass while the data is expressed in world
+    * frame.
+    * </p>
+    * 
+    * @return the desired momentum.
+    */
+   public DenseMatrix64F getMomentum()
    {
-      momentum.set(momentum);
+      return momentum;
    }
 
-   public void setSelectionMatrix(DenseMatrix64F selectionMatrix)
+   /**
+    * Packs the value of the desired momentum into two frame vectors.
+    * 
+    * @param angularPartToPack frame vector to pack the desired angular momentum at the center of
+    *           mass. Modified.
+    * @param linearPartToPack frame vector to pack the desired linear momentum. Modified.
+    */
+   public void getMomentumRate(FrameVector angularPartToPack, FrameVector linearPartToPack)
    {
-      this.selectionMatrix.set(selectionMatrix);
+      angularPartToPack.setIncludingFrame(worldFrame, 0, momentum);
+      linearPartToPack.setIncludingFrame(worldFrame, 3, momentum);
    }
 
+   /**
+    * {@inheritDoc}
+    * 
+    * @return {@link ControllerCoreCommandType#TASKSPACE}.
+    */
    @Override
    public ControllerCoreCommandType getCommandType()
    {
@@ -146,6 +592,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
    @Override
    public String toString()
    {
-      return getClass().getSimpleName() + ": selection matrix = " + selectionMatrix;
+      String stringOfMomentum = EuclidCoreIOTools.getStringOf("(", ")", ",", momentum.getData());
+      return getClass().getSimpleName() + ": momentum: " + stringOfMomentum + ", selection matrix = " + selectionMatrix;
    }
 }

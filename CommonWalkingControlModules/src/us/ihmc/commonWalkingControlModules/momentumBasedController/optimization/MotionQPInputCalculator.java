@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -53,9 +54,12 @@ public class MotionQPInputCalculator
 
    private final DenseMatrix64F tempTaskJacobian = new DenseMatrix64F(SpatialMotionVector.SIZE, 12);
    private final DenseMatrix64F tempTaskObjective = new DenseMatrix64F(SpatialMotionVector.SIZE, 1);
-   private final DenseMatrix64F tempTaskAlphaTaskPriority = new DenseMatrix64F(SpatialAccelerationVector.SIZE, 1);
    private final DenseMatrix64F tempTaskWeight = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
    private final DenseMatrix64F tempTaskWeightSubspace = new DenseMatrix64F(SpatialAccelerationVector.SIZE, SpatialAccelerationVector.SIZE);
+
+   private final FrameVector angularMomentum = new FrameVector();
+   private final FrameVector linearMomentum = new FrameVector();
+   private final ReferenceFrame centerOfMassFrame;
 
    private final JointIndexHandler jointIndexHandler;
 
@@ -64,13 +68,15 @@ public class MotionQPInputCalculator
 
    private final int numberOfDoFs;
 
-   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, JointIndexHandler jointIndexHandler,
-                                  JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters, YoVariableRegistry parentRegistry)
+   public MotionQPInputCalculator(ReferenceFrame centerOfMassFrame, TwistCalculator twistCalculator, CentroidalMomentumHandler centroidalMomentumHandler,
+                                  JointIndexHandler jointIndexHandler, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
+                                  YoVariableRegistry parentRegistry)
    {
+      this.centerOfMassFrame = centerOfMassFrame;
       this.jointIndexHandler = jointIndexHandler;
       this.jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
+      this.centroidalMomentumHandler = centroidalMomentumHandler;
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      centroidalMomentumHandler = new CentroidalMomentumHandler(twistCalculator.getRootBody(), centerOfMassFrame);
 
       if (jointPrivilegedConfigurationParameters != null)
          privilegedConfigurationHandler = new JointPrivilegedConfigurationHandler(oneDoFJoints, jointPrivilegedConfigurationParameters, registry);
@@ -266,8 +272,12 @@ public class MotionQPInputCalculator
 
                for (int dofIndex : jointIndices)
                {
+                  double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
+                  if (commandToConvert.usePrimaryBaseForControl())
+                     scaleFactor = 0.0;
+
                   // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), dofIndex, motionQPInputToPack.taskJacobian);
+                  MatrixTools.scaleColumn(scaleFactor, dofIndex, motionQPInputToPack.taskJacobian);
                   // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
                   MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
                }
@@ -376,8 +386,12 @@ public class MotionQPInputCalculator
 
                for (int dofIndex : jointIndices)
                {
+                  double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
+                  if (commandToConvert.usePrimaryBaseForControl())
+                     scaleFactor = 0.0;
+
                   // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
-                  MatrixTools.scaleColumn(secondaryTaskJointsWeight.getDoubleValue(), dofIndex, motionQPInputToPack.taskJacobian);
+                  MatrixTools.scaleColumn(scaleFactor, dofIndex, motionQPInputToPack.taskJacobian);
                   // Zero out the task Jacobian at the joint's column(s) so it is removed from the nullspace calculation for applying the privileged configuration.
                   MatrixTools.zeroColumn(dofIndex, tempPrimaryTaskJacobian);
                }
@@ -420,22 +434,16 @@ public class MotionQPInputCalculator
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
-      DenseMatrix64F momemtumRate = commandToConvert.getMomentumRate();
+      commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
+      angularMomentum.changeFrame(centerOfMassFrame);
+      linearMomentum.changeFrame(centerOfMassFrame);
+      angularMomentum.get(0, tempTaskObjective);
+      linearMomentum.get(3, tempTaskObjective);
       DenseMatrix64F convectiveTerm = centroidalMomentumHandler.getCentroidalMomentumConvectiveTerm();
 
       // Compute the task objective: p = S * ( hDot - ADot qDot )
-      CommonOps.subtract(momemtumRate, convectiveTerm, tempTaskObjective);
+      CommonOps.subtractEquals(tempTaskObjective, convectiveTerm);
       CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
-
-      tempTaskAlphaTaskPriority.reshape(taskSize, 1);
-      CommonOps.mult(selectionMatrix, commandToConvert.getAlphaTaskPriorityVector(), tempTaskAlphaTaskPriority);
-
-      for (int i = taskSize - 1; i >= 0; i--)
-      {
-         double alpha = tempTaskAlphaTaskPriority.get(i, 0);
-         MatrixTools.scaleRow(alpha, i, motionQPInputToPack.taskJacobian);
-         MatrixTools.scaleRow(alpha, i, motionQPInputToPack.taskObjective);
-      }
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 
@@ -470,10 +478,14 @@ public class MotionQPInputCalculator
       DenseMatrix64F centroidalMomentumMatrix = getCentroidalMomentumMatrix();
       CommonOps.mult(selectionMatrix, centroidalMomentumMatrix, motionQPInputToPack.taskJacobian);
 
-      DenseMatrix64F momemtum = commandToConvert.getMomentum();
+      commandToConvert.getMomentumRate(angularMomentum, linearMomentum);
+      angularMomentum.changeFrame(centerOfMassFrame);
+      linearMomentum.changeFrame(centerOfMassFrame);
+      angularMomentum.get(0, tempTaskObjective);
+      linearMomentum.get(3, tempTaskObjective);
 
       // Compute the task objective: p = S * h
-      CommonOps.mult(selectionMatrix, momemtum, motionQPInputToPack.taskObjective);
+      CommonOps.mult(selectionMatrix, tempTaskObjective, motionQPInputToPack.taskObjective);
 
       recordTaskJacobian(motionQPInputToPack.taskJacobian);
 

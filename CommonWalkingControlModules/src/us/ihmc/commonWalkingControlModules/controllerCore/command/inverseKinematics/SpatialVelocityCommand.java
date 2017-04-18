@@ -22,8 +22,6 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
-import us.ihmc.robotics.screwTheory.SpatialAccelerationVector;
-import us.ihmc.robotics.screwTheory.SpatialMotionVector;
 import us.ihmc.robotics.screwTheory.Twist;
 
 /**
@@ -90,6 +88,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    private String baseName;
    private String endEffectorName;
    private String optionalPrimaryBaseName;
+
+   /**
+    * Flag to indicate whether or not to use the intermediate base {@code optionalPrimaryBase} to
+    * control against, as opposed to using the {@code base}.
+    */
+   private boolean useOptionalPrimaryBaseForControl = false;
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -185,6 +189,18 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    {
       optionalPrimaryBase = primaryBase;
       optionalPrimaryBaseName = primaryBase.getName();
+   }
+
+   /**
+    * Indicates that we would like to use only the joints in the kinematic chain between the
+    * {@code primaryBase} and the {@code endEffector} for controlling the {@code endEffector}.
+    * This is counter to allowing the {@code base} to move to move the {@code endEffector}.
+    *
+    * @param usePrimaryBaseForController whether or not to use the primary base for control. Optional.
+    */
+   public void setUsePrimaryBaseForControl(boolean usePrimaryBaseForController)
+   {
+      useOptionalPrimaryBaseForControl = usePrimaryBaseForController;
    }
 
    /**
@@ -365,7 +381,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setSelectionMatrixToIdentity()
    {
-      selectionMatrix.reshape(SpatialMotionVector.SIZE, SpatialMotionVector.SIZE);
+      selectionMatrix.reshape(Twist.SIZE, Twist.SIZE);
       CommonOps.setIdentity(selectionMatrix);
    }
 
@@ -632,7 +648,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setLinearWeightsToZero()
    {
-      for (int i = 3; i < SpatialAccelerationVector.SIZE; i++)
+      for (int i = 3; i < Twist.SIZE; i++)
          weightVector.set(i, 0, 0.0);
    }
 
@@ -871,6 +887,24 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    public String getPrimaryBaseName()
    {
       return optionalPrimaryBaseName;
+   }
+
+   /**
+    * Gets whether or not to control the {@code endEffector} using only the {@code primaryBase}
+    * or the full {@code base}.
+    *
+    * <p>
+    *    This parameter is optional. If provided, it is only uses those joints in the kinematic
+    *    chain between the {@code primaryBase} and the {@code endEffector} to control the
+    *    {@code endEffector}.
+    * </p>
+    *
+    * @return whether or not to control against the {@code primaryBase} (true) or the regular
+    * base (false and default).
+    */
+   public boolean usePrimaryBaseForControl()
+   {
+      return useOptionalPrimaryBaseForControl;
    }
 
    /**

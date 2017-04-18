@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimiza
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -48,24 +49,19 @@ public class ICPOptimizationLinearMomentumRateOfChangeControlModule extends Line
             bipedSupportPolygons, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
    }
 
-   public void setDoubleSupportDuration(double doubleSupportDuration)
-   {
-      icpOptimizationController.setDoubleSupportDuration(doubleSupportDuration);
-   }
-
-   public void setSingleSupportDuration(double singleSupportDuration)
-   {
-      icpOptimizationController.setSingleSupportDuration(singleSupportDuration);
-   }
-
    public void clearPlan()
    {
       icpOptimizationController.clearPlan();
    }
 
-   public void addFootstepToPlan(Footstep footstep)
+   public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
-      icpOptimizationController.addFootstepToPlan(footstep);
+      icpOptimizationController.addFootstepToPlan(footstep, timing);
+   }
+
+   public void setFinalTransferDuration(double finalTransferDuration)
+   {
+      icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
    }
 
    public void initializeForStanding()

@@ -5,13 +5,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 
 public class FormattingToolsTest
@@ -111,11 +111,10 @@ public class FormattingToolsTest
       String dateToolsDateString = FormattingTools.getDateString();
       StringBuilder dateBuilder = new StringBuilder();
 
-      Calendar calendar = new GregorianCalendar(TimeZone.getDefault());
-
-      int year = calendar.get(GregorianCalendar.YEAR);
-      int month = calendar.get(GregorianCalendar.MONTH) + 1;
-      int day = calendar.get(GregorianCalendar.DAY_OF_MONTH);
+      LocalDate now = LocalDate.now();
+      int year = now.getYear();
+      int month = now.getMonthValue();
+      int day = now.getDayOfMonth();
 
       dateBuilder.append(year);
       if (month / 10 < 1)
@@ -129,6 +128,9 @@ public class FormattingToolsTest
          dateBuilder.append(day);
 
       assertEquals(dateBuilder.toString(), dateToolsDateString);
+      
+      
+      PrintTools.debug(this, FormattingTools.getDateString());
    }
 
    @ContinuousIntegrationTest(estimatedDuration = 0.0)
@@ -136,11 +138,14 @@ public class FormattingToolsTest
    public void testGetTimeString()
    {
       StringBuilder timeBuilder = new StringBuilder();
-      Calendar calendar = new GregorianCalendar(TimeZone.getDefault());
-
-      int hours = calendar.get(GregorianCalendar.HOUR_OF_DAY);
-      int minutes = calendar.get(GregorianCalendar.MINUTE);
+      
+      LocalTime now = LocalTime.now();
+      int hours = now.getHour();
+      int minutes = now.getMinute();
+      int seconds = now.getSecond();
+      
       String timeString = FormattingTools.getTimeString();
+      String timeSecondsString = FormattingTools.getTimeStringWithSeconds();
 
       if (hours / 10 < 1)
          timeBuilder.append("0" + hours);
@@ -153,5 +158,15 @@ public class FormattingToolsTest
          timeBuilder.append(minutes);
 
       assertEquals(timeBuilder.toString(), timeString);
+      PrintTools.debug(this, FormattingTools.getTimeString());
+      
+      if (seconds / 10 < 1)
+         timeBuilder.append("0" + seconds);
+      else
+         timeBuilder.append(seconds);
+      
+      assertEquals(timeBuilder.toString(), timeSecondsString);
+      
+      PrintTools.debug(this, FormattingTools.getTimeStringWithSeconds());
    }
 }
