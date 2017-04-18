@@ -332,10 +332,7 @@ public class HoldPositionState extends AbstractFootControlState
    @Override
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      if (attemptToStraightenLegs)
-         return straightLegsPrivilegedConfigurationCommand;
-      else
-         return bentLegsPrivilegedConfigurationCommand;
+      return null;
    }
 
    @Override
