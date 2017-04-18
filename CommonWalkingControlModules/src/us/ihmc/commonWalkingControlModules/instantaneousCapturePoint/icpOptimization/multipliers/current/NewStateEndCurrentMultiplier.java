@@ -101,7 +101,7 @@ public class NewStateEndCurrentMultiplier
    }
 
    public void compute(int numberOfFootstepsToConsider,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
+         List<DoubleYoVariable> singleSupportDurations, List<DoubleYoVariable> doubleSupportDurations,
          double timeInState, boolean useTwoCMPs, boolean isInTransfer, double omega0)
    {
       double positionMultiplier, velocityMultiplier;
