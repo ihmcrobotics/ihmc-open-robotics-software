@@ -71,7 +71,7 @@ public abstract class RigidBodyControlState extends FinishableState<RigidBodyCon
 
          if (!isEmpty() && wantToQueue && !previousIdMatch)
          {
-            PrintTools.warn(warningPrefix + "Unexpected command ID.");
+            PrintTools.warn(warningPrefix + "Unexpected command ID. Msg previous id: " + queueableCommand.getPreviousCommandId() + " but was " + lastCommandId.getLongValue());
             return false;
          }
 
