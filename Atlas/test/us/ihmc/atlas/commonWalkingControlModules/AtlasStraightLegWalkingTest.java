@@ -123,9 +123,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                }
 
                @Override
-               public double getPrimaryBaseControlDurationInSwing()
+               public boolean applySecondaryJointScaleDuringSwing()
                {
-                  return 0.25;
+                  return true;
                }
 
                @Override
