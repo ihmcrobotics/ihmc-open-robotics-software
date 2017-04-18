@@ -359,7 +359,7 @@ public class ICPOptimizationController
    }
 
    /**
-    * Notifies the icp optimization controller that teh robot is now in single support
+    * Notifies the icp optimization controller that the robot is now in single support
     * @param initialTime controller time at the start of the current single support phase
     * @param supportSide sets the side of the support foot for the upcoming single support
     * @param omega0 current inverted pendulum natural frequency
