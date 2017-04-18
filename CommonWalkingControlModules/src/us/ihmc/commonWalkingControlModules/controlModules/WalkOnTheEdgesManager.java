@@ -36,7 +36,7 @@ public class WalkOnTheEdgesManager
    private static final boolean ENABLE_TOE_OFF_FOR_STEP_DOWN = true;
 
    private static final int largeGlitchWindowSize = 10;
-   private static final int smallGlitchWindowSize = 5;
+   private static final int smallGlitchWindowSize = 2;
 
    private final BooleanYoVariable doToeOffIfPossibleInDoubleSupport = new BooleanYoVariable("doToeOffIfPossibleInDoubleSupport", registry);
    private final BooleanYoVariable doToeOffIfPossibleInSingleSupport = new BooleanYoVariable("doToeOffIfPossibleInSingleSupport", registry);
@@ -293,7 +293,7 @@ public class WalkOnTheEdgesManager
       if (walkingControllerParameters.checkECMPLocationToTriggerToeOff())
       {
          desiredECMP.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
-         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.distance(desiredECMP) < ecmpProximityForToeOff.getDoubleValue());
+         isDesiredECMPOKForToeOff.set(onToesSupportPolygon.distance(desiredECMP) <= ecmpProximityForToeOff.getDoubleValue());
          isDesiredECMPOKForToeOffFilt.update();
       }
       else
@@ -307,9 +307,9 @@ public class WalkOnTheEdgesManager
    {
       double proximityState;
       if (isInSingleSupport.getBooleanValue())
-         proximityState = icpPercentOfStanceForDSToeOff.getDoubleValue();
-      else
          proximityState = icpPercentOfStanceForSSToeOff.getDoubleValue();
+      else
+         proximityState = icpPercentOfStanceForDSToeOff.getDoubleValue();
 
       boolean isDesiredICPOKForToeOff, isCurrentICPOKForToeOff;
       if (proximityState > 0.0)
