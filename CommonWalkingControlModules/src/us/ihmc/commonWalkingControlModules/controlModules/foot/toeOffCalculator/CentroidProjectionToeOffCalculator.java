@@ -39,7 +39,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
    private final FramePoint2d[] intersectionWithRay = new FramePoint2d[] {new FramePoint2d(), new FramePoint2d()};
 
    public CentroidProjectionToeOffCalculator(SideDependentList<YoPlaneContactState> contactStates, SideDependentList<? extends ContactablePlaneBody> feet,
-                       WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
