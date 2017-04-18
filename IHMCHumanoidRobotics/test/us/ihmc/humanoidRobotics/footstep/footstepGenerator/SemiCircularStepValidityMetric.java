@@ -244,8 +244,6 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
 
    private FrameVector offCenterVectorToSwingEnd(Footstep stance, Footstep swingEnd, FrameVector translationFromFootCenterToCircleCenter)
    {
-      ReferenceFrame stanceFootFrame = stance.getParentFrame();
-
       FramePoint circleCenter;
       FramePose stanceSole = new FramePose();
       FramePose swingEndSole = new FramePose();
@@ -255,7 +253,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       circleCenter = stanceSole.getFramePointCopy();
       circleCenter.add(translationFromFootCenterToCircleCenter);//change frame of translation first?
 
-      FrameVector vectorToSwingEnd = new FrameVector(stanceFootFrame);
+      FrameVector vectorToSwingEnd = new FrameVector(ReferenceFrame.getWorldFrame());
       vectorToSwingEnd.set(swingEndSole.getFramePointCopy().getPoint());
       vectorToSwingEnd.sub(circleCenter);
 
@@ -269,7 +267,7 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       double yCenterDisplacementTowardsExpectedOtherFoot = (stanceSide == RobotSide.LEFT) ? -circleCenterOffset : circleCenterOffset;
       FrameVector translationFromFootCenterToCircleCenter = new FrameVector(stance.getSoleReferenceFrame(), 0.0, yCenterDisplacementTowardsExpectedOtherFoot,
             0.0);
-      translationFromFootCenterToCircleCenter.changeFrame(stance.getParentFrame());
+      translationFromFootCenterToCircleCenter.changeFrame(ReferenceFrame.getWorldFrame());
       return translationFromFootCenterToCircleCenter;
    }
 

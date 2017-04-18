@@ -19,14 +19,12 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 
 public class FootstepTestHelper
 {
-   private final SideDependentList<ReferenceFrame> ankleFrames;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
-   public FootstepTestHelper(SideDependentList<? extends ContactablePlaneBody> contactableFeet, SideDependentList<ReferenceFrame> ankleFrames)
+   public FootstepTestHelper(SideDependentList<? extends ContactablePlaneBody> contactableFeet)
    {
       this.contactableFeet = contactableFeet;
-      this.ankleFrames = ankleFrames;
    }
 
    public List<Footstep> createFootsteps(double stepWidth, double stepLength, int numberOfSteps)
@@ -35,7 +33,7 @@ public class FootstepTestHelper
 
       RobotSide currentSide = RobotSide.LEFT;
 
-      FramePoint lastFootstepPosition = new FramePoint(ankleFrames.get(currentSide));
+      FramePoint lastFootstepPosition = new FramePoint(contactableFeet.get(currentSide).getSoleFrame());
       lastFootstepPosition.changeFrame(worldFrame);
 
       for (int i = 0; i < numberOfSteps; i++)

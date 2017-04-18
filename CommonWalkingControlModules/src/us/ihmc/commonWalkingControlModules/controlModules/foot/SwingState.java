@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule
 import us.ihmc.commonWalkingControlModules.trajectories.SoftTouchdownPositionTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -397,9 +396,9 @@ public class SwingState extends AbstractUnconstrainedState
       this.positionWaypointsForSole.clear();
       if (trajectoryType == TrajectoryType.CUSTOM)
       {
-         List<Point3D> positionWaypoints = footstep.getCustomPositionWaypoints();
+         List<FramePoint> positionWaypoints = footstep.getCustomPositionWaypoints();
          for (int i = 0; i < positionWaypoints.size(); i++)
-            this.positionWaypointsForSole.add().setIncludingFrame(worldFrame, positionWaypoints.get(i));
+            this.positionWaypointsForSole.add().setIncludingFrame(positionWaypoints.get(i));
          trajectoryParametersProvider.set(new TrajectoryParameters(trajectoryType));
          return;
       }
