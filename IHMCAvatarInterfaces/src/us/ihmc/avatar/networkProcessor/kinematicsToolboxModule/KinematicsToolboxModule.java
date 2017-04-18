@@ -8,6 +8,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxInputCommand;
+import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.StatusPacket;
@@ -30,7 +33,8 @@ public class KinematicsToolboxModule extends ToolboxModule
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer) throws IOException
    {
       super(robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, PACKET_DESTINATION, NETWORK_PORT);
-      kinematicsToolBoxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, robotModel, yoGraphicsListRegistry, registry);
+      kinematicsToolBoxController = new KinematicsToolboxController(commandInputManager, statusOutputManager, fullRobotModel, robotModel,
+                                                                    yoGraphicsListRegistry, registry);
       packetCommunicator.attachListener(RobotConfigurationData.class, kinematicsToolBoxController.createRobotConfigurationDataConsumer());
       startYoVariableServer();
    }
@@ -45,6 +49,11 @@ public class KinematicsToolboxModule extends ToolboxModule
       commands.add(PelvisOrientationTrajectoryCommand.class);
       commands.add(WholeBodyTrajectoryCommand.class);
       commands.add(TrackingWeightsCommand.class);
+
+      commands.add(KinematicsToolboxInputCommand.class);
+      commands.add(KinematicsToolboxCenterOfMassCommand.class);
+      commands.add(KinematicsToolboxRigidBodyCommand.class);
+
       return commands;
    }
 
