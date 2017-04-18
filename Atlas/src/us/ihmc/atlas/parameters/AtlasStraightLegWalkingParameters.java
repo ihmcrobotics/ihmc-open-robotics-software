@@ -22,10 +22,4 @@ public class AtlasStraightLegWalkingParameters extends StraightLegWalkingParamet
    {
       return runningOnRealRobot ? 40.0 : 100.0;
    }
-
-   /** {@inheritDoc} */
-   public double getBentLegPrivilegedWeight()
-   {
-      return 10.0;
-   }
 }
