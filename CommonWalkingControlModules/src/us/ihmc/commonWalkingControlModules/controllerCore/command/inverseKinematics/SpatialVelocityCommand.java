@@ -90,10 +90,18 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    private String optionalPrimaryBaseName;
 
    /**
-    * Flag to indicate whether or not to use the intermediate base {@code optionalPrimaryBase} to
-    * control against, as opposed to using the {@code base}.
+    * Flag to indicate whether or not to custom scale the weights below the intermediate base
+    * {@code optionalPrimaryBase} to control against, as opposed to using the default weight in
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
     */
-   private boolean useOptionalPrimaryBaseForControl = false;
+   private boolean scaleSecondaryTaskJointWeight = false;
+
+   /**
+    * Scale factor to apply to the weights on the task below the {@code optionalPrimaryBase}.
+    * This weight replaces the scale factor in
+    * {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
+    */
+   private double secondaryTaskJointWeightScale = 1.0;
 
    /**
     * Creates an empty command. It needs to be configured before being submitted to the controller
@@ -120,6 +128,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
 
       optionalPrimaryBase = other.optionalPrimaryBase;
       optionalPrimaryBaseName = other.optionalPrimaryBaseName;
+      scaleSecondaryTaskJointWeight = other.scaleSecondaryTaskJointWeight;
+      secondaryTaskJointWeightScale = other.secondaryTaskJointWeightScale;
 
       controlFramePose.setPoseIncludingFrame(endEffector.getBodyFixedFrame(), other.controlFramePose.getPosition(), other.controlFramePose.getOrientation());
       desiredAngularVelocity.set(other.desiredAngularVelocity);
@@ -192,15 +202,18 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    /**
-    * Indicates that we would like to use only the joints in the kinematic chain between the
-    * {@code primaryBase} and the {@code endEffector} for controlling the {@code endEffector}.
-    * This is counter to allowing the {@code base} to move to move the {@code endEffector}.
+    * Indicates that we would like to custom scale the weights on the joints in the kinematic chain
+    * below the {@code primaryBase} when controlling the {@code endEffector}.
     *
-    * @param usePrimaryBaseForController whether or not to use the primary base for control. Optional.
+    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the joints
+    *                                      below the primary base. Optional.
+    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary base.
+    *                                      Optional.
     */
-   public void setUsePrimaryBaseForControl(boolean usePrimaryBaseForController)
+   public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
    {
-      useOptionalPrimaryBaseForControl = usePrimaryBaseForController;
+      this.scaleSecondaryTaskJointWeight = scaleSecondaryTaskJointWeight;
+      this.secondaryTaskJointWeightScale = secondaryTaskJointWeightScale;
    }
 
    /**
@@ -890,21 +903,44 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    /**
-    * Gets whether or not to control the {@code endEffector} using only the {@code primaryBase}
-    * or the full {@code base}.
+    * Gets whether or not to scale the weights on the joints below the {@code primaryBase}
+    * when controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will
+    * use the joints in the kinematic chain between the {@code primaryBase} and the
+    * {@code endEffector} more to control the {@code endEffector}, while a factor larger than
+    * 1.0 makes it more likely to use the joints before the {@code primaryBase} (such as the
+    * floating base) to control the {@code endEffector}.
     *
     * <p>
-    *    This parameter is optional. If provided, it is only uses those joints in the kinematic
-    *    chain between the {@code primaryBase} and the {@code endEffector} to control the
-    *    {@code endEffector}.
+    *    This parameter is optional. If provided, it will scale the weights before the
+    *    {@code primaryBase} by the factor defined in {@code secondaryTaskJointWeightScale}
+    *    to control the {@code endEffector}.
     * </p>
     *
-    * @return whether or not to control against the {@code primaryBase} (true) or the regular
-    * base (false and default).
+    * @return whether or not to scale the joints below the {@code primaryBase} (true) or not (false and default).
     */
-   public boolean usePrimaryBaseForControl()
+   public boolean scaleSecondaryTaskJointWeight()
    {
-      return useOptionalPrimaryBaseForControl;
+      return scaleSecondaryTaskJointWeight;
+   }
+
+   /**
+    * Gets the scaling factor for the weights on the joints below the {@code primaryBase}
+    * when controlling the {@code endEffector}. A smaller scale (less than 1.0) means it will
+    * use the joints in the kinematic chain between the {@code primaryBase} and the
+    * {@code endEffector} more to control the {@code endEffector}, while a factor larger than
+    * 1.0 makes it more likely to use the joints before the {@code primaryBase} (such as the
+    * floating base) to control the {@code endEffector}.
+    *
+    * <p>
+    *    This parameter is optional. If provided, it will be used to scale the weights before the
+    *    {@code primaryBase} to control the {@code endEffector}.
+    * </p>
+    *
+    * @return scale factor for the joints below the {@code primaryBase}.
+    */
+   public double getSecondaryTaskJointWeightScale()
+   {
+      return secondaryTaskJointWeightScale;
    }
 
    /**
