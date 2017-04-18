@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class RRTNode1DTimeDomain extends RRTNode
 {
@@ -27,9 +28,9 @@ public class RRTNode1DTimeDomain extends RRTNode
    @Override
    public boolean isValidNode()
    {
-      // nodeValidityTester.setSolarPanelWholeBodyPose(cleaningPath, getNodeData(0), getNodeData(1));
-
-      return nodeValidityTester.isValid;
+      nodeValidityTester.setWholeBodyPose(cleaningPath, getNodeData(0), getNodeData(1));
+      
+      return nodeValidityTester.isValid();
    }
 
    @Override

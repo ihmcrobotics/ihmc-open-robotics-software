@@ -68,7 +68,7 @@ public class RRTPlannerTimeDomain
    public void updateOptimalPath(int sizeOfPiecewisePath, int numberOfIteration)
    {
       PrintTools.info("Buliding Started");      
-      if(firstShortCut() == true)
+      if(firstShortCut(sizeOfPiecewisePath) == true)
       {
          
       }
@@ -103,7 +103,7 @@ public class RRTPlannerTimeDomain
       int sizeOfPiecewisePath = optimalPath.size() * 4;
       
       PrintTools.info("Buliding Started");
-      if(firstShortCut() == true)
+      if(firstShortCut(sizeOfPiecewisePath) == true)
       {
          PrintTools.info("First cut Success");
       }
@@ -134,10 +134,10 @@ public class RRTPlannerTimeDomain
       PrintTools.info("OptimalPath is Built");
    }
    
-   private boolean firstShortCut()
+   private boolean firstShortCut(int numberOfPiece)
    {
       RRTValidConnection fastShortCut = new RRTValidConnection(optimalPath.get(0), optimalPath.get(optimalPath.size()-1));
-      fastShortCut.initialize(200);
+      fastShortCut.reInitialize(numberOfPiece);
       if(fastShortCut.isValidConnection() == true)
       {
          ArrayList<RRTNode> tempPath = new ArrayList<RRTNode>();

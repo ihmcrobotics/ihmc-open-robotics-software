@@ -58,7 +58,6 @@ public class RRTPlannerSolarPanelCleaning
          
          getPlanner(i).updateOptimalPath(30);
          
-         PrintTools.info("check");
          if(i < getNumberOfPlanners()-1)
          {
             ArrayList<RRTNode> optimalPath = getPlanner(i).getOptimalPath();
