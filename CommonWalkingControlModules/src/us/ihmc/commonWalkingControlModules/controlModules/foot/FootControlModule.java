@@ -6,6 +6,8 @@ import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -73,16 +75,16 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
-   private final ToeOffHelper toeOffHelper;
+   private final ToeOffCalculator toeOffCalculator;
 
    private final BooleanYoVariable requestExploration;
    private final BooleanYoVariable resetFootPolygon;
 
-   public FootControlModule(RobotSide robotSide, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
+   public FootControlModule(RobotSide robotSide, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters, YoSE3PIDGainsInterface swingFootControlGains,
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      this.toeOffHelper = toeOffHelper;
+      this.toeOffCalculator = toeOffCalculator;
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
@@ -124,7 +126,7 @@ public class FootControlModule
 
       List<AbstractFootControlState> states = new ArrayList<AbstractFootControlState>();
 
-      onToesState = new OnToesState(footControlHelper, toeOffHelper, toeOffFootControlGains, registry);
+      onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       states.add(onToesState);
 
       supportStateNew = new SupportState(footControlHelper, holdPositionFootControlGains, registry);

@@ -5,7 +5,8 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeOffHelper;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
@@ -93,18 +94,18 @@ public class WalkOnTheEdgesManager
    private final WalkingControllerParameters walkingControllerParameters;
 
    private final FullHumanoidRobotModel fullRobotModel;
-   private final ToeOffHelper toeOffHelper;
+   private final ToeOffCalculator toeOffCalculator;
 
    private final double inPlaceWidth;
    private final double footLength;
 
-   public WalkOnTheEdgesManager(HighLevelHumanoidControllerToolbox controllerToolbox, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters,
+   public WalkOnTheEdgesManager(HighLevelHumanoidControllerToolbox controllerToolbox, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
          SideDependentList<? extends ContactablePlaneBody> feet, YoVariableRegistry parentRegistry)
    {
-      this(controllerToolbox.getFullRobotModel(), toeOffHelper, walkingControllerParameters, feet, createFootContactStates(controllerToolbox), parentRegistry);
+      this(controllerToolbox.getFullRobotModel(), toeOffCalculator, walkingControllerParameters, feet, createFootContactStates(controllerToolbox), parentRegistry);
    }
 
-   public WalkOnTheEdgesManager(FullHumanoidRobotModel fullRobotModel, ToeOffHelper toeOffHelper, WalkingControllerParameters walkingControllerParameters,
+   public WalkOnTheEdgesManager(FullHumanoidRobotModel fullRobotModel, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
          SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<YoPlaneContactState> footContactStates,
          YoVariableRegistry parentRegistry)
    {
@@ -118,7 +119,7 @@ public class WalkOnTheEdgesManager
 
       this.ecmpProximityForToeOff.set(walkingControllerParameters.getECMPProximityForToeOff());
 
-      this.toeOffHelper = toeOffHelper;
+      this.toeOffCalculator = toeOffCalculator;
       this.walkingControllerParameters = walkingControllerParameters;
 
       this.fullRobotModel = fullRobotModel;
@@ -532,11 +533,11 @@ public class WalkOnTheEdgesManager
    private final FramePoint2d middleToePoint = new FramePoint2d();
    private void computeToePoints(FramePoint exitCMP, FramePoint2d desiredECMP, RobotSide supportSide)
    {
-      toeOffHelper.setExitCMP(exitCMP, supportSide);
-      toeOffHelper.computeToeOffContactPoint(desiredECMP, supportSide);
+      toeOffCalculator.setExitCMP(exitCMP, supportSide);
+      toeOffCalculator.computeToeOffContactPoint(desiredECMP, supportSide);
 
       middleToePoint.setToZero(feet.get(supportSide).getSoleFrame());
-      toeOffHelper.getToeOffContactPoint(middleToePoint, supportSide);
+      toeOffCalculator.getToeOffContactPoint(middleToePoint, supportSide);
    }
 
    private final FramePoint[] toePoints = new FramePoint[] {new FramePoint(), new FramePoint()};
