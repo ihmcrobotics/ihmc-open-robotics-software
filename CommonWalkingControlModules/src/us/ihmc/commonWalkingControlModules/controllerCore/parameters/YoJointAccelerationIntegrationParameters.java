@@ -36,6 +36,13 @@ public class YoJointAccelerationIntegrationParameters implements JointAccelerati
     * <p>
     * The parameters are initialized to the given values.
     * </p>
+    * 
+    * @param namePrefix the {@code String} to be prepended to each {@code YoVariable} of this class.
+    * @param alphaPosition the leak ratio used to compute the desired position, see {@link #getAlphaPosition()}.
+    * @param alphaVelocity the leak ratio used to compute the desired velocity, see {@link #getAlphaVelocity()}.
+    * @param maxPositionError the maximum position error used to saturate the desired position, see {@link #getMaxPositionError()}.
+    * @param maxVelocity the maximum desired velocity, see {@link #getMaxVelocity()}.
+    * @param registry the registry to which the {@code YoVariable}s of this class are registered to.
     */
    public YoJointAccelerationIntegrationParameters(String namePrefix, double alphaPosition, double alphaVelocity, double maxPositionError, double maxVelocity,
                                                    YoVariableRegistry registry)
