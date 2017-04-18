@@ -273,8 +273,8 @@ public class MotionQPInputCalculator
                for (int dofIndex : jointIndices)
                {
                   double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
-                  if (commandToConvert.usePrimaryBaseForControl())
-                     scaleFactor = 0.0;
+                  if (commandToConvert.scaleSecondaryTaskJointWeight())
+                     scaleFactor = commandToConvert.getSecondaryTaskJointWeightScale();
 
                   // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
                   MatrixTools.scaleColumn(scaleFactor, dofIndex, motionQPInputToPack.taskJacobian);
@@ -387,8 +387,8 @@ public class MotionQPInputCalculator
                for (int dofIndex : jointIndices)
                {
                   double scaleFactor = secondaryTaskJointsWeight.getDoubleValue();
-                  if (commandToConvert.usePrimaryBaseForControl())
-                     scaleFactor = 0.0;
+                  if (commandToConvert.scaleSecondaryTaskJointWeight())
+                     scaleFactor = commandToConvert.getSecondaryTaskJointWeightScale();
 
                   // Apply a down-scale on the task Jacobian for the joint's column(s) so it has lower priority in the optimization.
                   MatrixTools.scaleColumn(scaleFactor, dofIndex, motionQPInputToPack.taskJacobian);
