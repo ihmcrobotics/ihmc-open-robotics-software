@@ -40,17 +40,6 @@ public class ICPQPInputCalculator
       MatrixTools.addMatrixBlock(icpQPInput.quadraticTerm, 0, 0, dynamicRelaxationWeight, 0, 0, 2, 2, 1.0);
    }
 
-   public void convertEqualityConstraintToObjective(ICPEqualityConstraintInput constraint, ICPQPInput icpQPInput, double weight)
-   {
-      int taskSize = constraint.Aeq.getNumRows();
-      icpQPInput.reshape(taskSize);
-
-      CommonOps.multTransB(weight, constraint.Aeq, constraint.Aeq, icpQPInput.quadraticTerm);
-      CommonOps.mult(weight, constraint.Aeq, constraint.beq, icpQPInput.linearTerm);
-      CommonOps.multTransA(weight, constraint.beq, constraint.beq, icpQPInput.residualCost);
-   }
-
-
    public void computeFootstepTask(int footstepNumber, ICPQPInput icpQPInput, DenseMatrix64F footstepWeight, DenseMatrix64F objective)
    {
       MatrixTools.addMatrixBlock(icpQPInput.quadraticTerm, 2 * footstepNumber, 2 * footstepNumber, footstepWeight, 0, 0, 2, 2, 1.0);
@@ -111,12 +100,6 @@ public class ICPQPInputCalculator
       int dynamicRelaxationIndex = indexHandler.getDynamicRelaxationIndex();
       MatrixTools.addMatrixBlock(solverInput_H, dynamicRelaxationIndex, dynamicRelaxationIndex, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
       MatrixTools.addMatrixBlock(solverInput_h, dynamicRelaxationIndex, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
-   }
-
-   public void submitDynamicObjectiveTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
-   {
-      MatrixTools.addMatrixBlock(solverInput_H, 0, 0, icpQPInput.quadraticTerm, 0, 0, 2, 2, 1.0);
-      MatrixTools.addMatrixBlock(solverInput_h, 0, 0, icpQPInput.linearTerm, 0, 0, 2, 1, 1.0);
    }
 
    public void submitFootstepTask(ICPQPInput icpQPInput, DenseMatrix64F solverInput_H, DenseMatrix64F solverInput_h)
