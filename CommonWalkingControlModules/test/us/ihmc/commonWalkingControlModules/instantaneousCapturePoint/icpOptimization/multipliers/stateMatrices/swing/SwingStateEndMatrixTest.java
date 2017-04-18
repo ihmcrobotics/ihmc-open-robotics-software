@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.stateMatrices.swing;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
@@ -22,12 +23,14 @@ public class SwingStateEndMatrixTest
    {
       YoVariableRegistry registry = new YoVariableRegistry("registry");
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
-      DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction", registry);
+      swingSplitFractions.add(swingSplitFraction);
+
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
 
-      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(doubleSupportSplitRatio,
-            exitCMPDurationInPercentOfStepTime, startOfSplineTime);
+
+      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, startOfSplineTime);
 
       Assert.assertEquals("", 4, swingStateEndMatrix.numRows);
       Assert.assertEquals("", 1, swingStateEndMatrix.numCols);
@@ -44,33 +47,25 @@ public class SwingStateEndMatrixTest
       int iters = 100;
       double omega0 = 3.0;
 
-      DoubleYoVariable doubleSupportSplitRatio = new DoubleYoVariable("doubleSupportSplitRatio", registry);
-      DoubleYoVariable exitCMPDurationInPercentOfStepTime = new DoubleYoVariable("exitCMPDurationInPercentOfStepTime", registry);
+      List<DoubleYoVariable> swingSplitFractions = new ArrayList<>();
+      DoubleYoVariable swingSplitFraction = new DoubleYoVariable("swingSplitFraction", registry);
+      swingSplitFractions.add(swingSplitFraction);
+
       DoubleYoVariable startOfSplineTime = new DoubleYoVariable("startOfSplineTime", registry);
       DoubleYoVariable endOfSplineTime = new DoubleYoVariable("endOfSplineTime", registry);
       DoubleYoVariable totalTrajectoryTime = new DoubleYoVariable("totalTrajectoryTime", registry);
 
-      ArrayList<DoubleYoVariable> doubleSupportDurations = new ArrayList<>();
       ArrayList<DoubleYoVariable> singleSupportDurations = new ArrayList<>();
-      doubleSupportDurations.add(new DoubleYoVariable("currentDoubleSupportDuration", registry));
-      doubleSupportDurations.add(new DoubleYoVariable("upcomingDoubleSupportDuration", registry));
       singleSupportDurations.add(new DoubleYoVariable("singleSupportDuration", registry));
 
-      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(doubleSupportSplitRatio, exitCMPDurationInPercentOfStepTime, endOfSplineTime);
+      SwingStateEndMatrix swingStateEndMatrix = new SwingStateEndMatrix(swingSplitFractions, endOfSplineTime);
 
       for (int i = 0; i < iters; i++)
       {
-         double splitRatio = 0.5 * random.nextDouble();
-         double exitRatio = 0.5 * random.nextDouble();
+         double splitRatio = 0.7 * random.nextDouble();
+         swingSplitFraction.set(splitRatio);
 
-         doubleSupportSplitRatio.set(splitRatio);
-         exitCMPDurationInPercentOfStepTime.set(exitRatio);
-
-         double doubleSupportDuration = 2.0 * random.nextDouble();
-         double upcomingDoubleSupportDuration = 2.0 * random.nextDouble();
          double singleSupportDuration = 5.0 * random.nextDouble();
-         doubleSupportDurations.get(0).set(doubleSupportDuration);
-         doubleSupportDurations.get(1).set(upcomingDoubleSupportDuration);
          singleSupportDurations.get(0).set(singleSupportDuration);
 
          double minimumSplineTime = Math.min(singleSupportDuration, 0.5);
@@ -84,25 +79,23 @@ public class SwingStateEndMatrixTest
          startOfSplineTime.set(startOfSpline);
          endOfSplineTime.set(endOfSpline);
          totalTrajectoryTime.set(singleSupportDuration);
-         String name = "splitRatio = " + splitRatio + ", exitRatio = " + exitRatio + ",\n doubleSupportDuration = " + doubleSupportDuration + ", singleSupportDuration = " + singleSupportDuration;
 
-         double upcomingInitialDoubleSupportDuration = splitRatio * upcomingDoubleSupportDuration;
-         double timeSpentOnExitCMP = exitRatio * (singleSupportDuration + doubleSupportDuration);
+         double swingTimeSpentOnEntryCMP =  splitRatio * singleSupportDuration;
 
-         double projectionTime = endOfSpline - singleSupportDuration + timeSpentOnExitCMP - upcomingInitialDoubleSupportDuration;
+         double projectionTime = endOfSpline - swingTimeSpentOnEntryCMP;
          double projection = Math.exp(omega0 * projectionTime);
 
-         swingStateEndMatrix.compute(doubleSupportDurations, singleSupportDurations, omega0);
+         swingStateEndMatrix.compute(singleSupportDurations, omega0);
 
          shouldBe.zero();
          shouldBe.set(2, 0, projection);
          shouldBe.set(3, 0, omega0 * projection);
 
-         JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(shouldBe, swingStateEndMatrix, epsilon);
 
          shouldBe.zero();
          swingStateEndMatrix.reset();
-         JUnitTools.assertMatrixEquals(name, shouldBe, swingStateEndMatrix, epsilon);
+         JUnitTools.assertMatrixEquals(shouldBe, swingStateEndMatrix, epsilon);
       }
    }
 }

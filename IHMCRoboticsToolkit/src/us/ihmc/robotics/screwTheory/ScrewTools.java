@@ -74,9 +74,9 @@ public class ScrewTools
       return new PassiveRevoluteJoint(afterJointName, parentBody, frameBeforeJoint, new FrameVector(frameBeforeJoint, jointAxis), isPartOfClosedKinematicLoop);
    }
 
-   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D parentJointAxis)
+   public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, Vector3D jointOffset, Vector3D jointAxis)
    {
-      return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), parentJointAxis);
+      return addPrismaticJoint(jointName, parentBody, TransformTools.createTranslationTransform(jointOffset), jointAxis);
    }
 
    public static PrismaticJoint addPrismaticJoint(String jointName, RigidBody parentBody, RigidBodyTransform transformToParent, Vector3D jointAxis)
@@ -826,6 +826,26 @@ public class ScrewTools
       }
    }
 
+   public static void setDesiredAccelerations(Iterable<? extends InverseDynamicsJoint> jointList, DenseMatrix64F jointAccelerations)
+   {
+      int rowStart = 0;
+      for (InverseDynamicsJoint joint : jointList)
+      {
+         joint.setDesiredAcceleration(jointAccelerations, rowStart);
+         rowStart += joint.getDegreesOfFreedom();
+      }
+   }
+
+   public static void setJointTorques(InverseDynamicsJoint[] jointList, DenseMatrix64F jointTorques)
+   {
+      int rowStart = 0;
+      for (InverseDynamicsJoint joint : jointList)
+      {
+         joint.setJointTorque(jointTorques, rowStart);
+         rowStart += joint.getDegreesOfFreedom();
+      }
+   }
+
    public static void setVelocities(InverseDynamicsJoint[] jointList, DenseMatrix64F jointVelocities)
    {
       int rowStart = 0;
@@ -869,7 +889,7 @@ public class ScrewTools
       }
    }
 
-   public static void computeIndexForJoint(List<InverseDynamicsJoint> jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
+   public static void computeIndexForJoint(List<? extends InverseDynamicsJoint> jointsInOrder, TIntArrayList listToPackIndices, InverseDynamicsJoint jointToComputeIndicesFor)
    {
       int startIndex = 0;
       for (int i = 0; i < jointsInOrder.size(); i++)

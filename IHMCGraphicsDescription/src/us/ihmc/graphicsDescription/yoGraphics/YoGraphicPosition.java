@@ -344,7 +344,14 @@ public class YoGraphicPosition extends YoGraphic implements RemoteYoGraphic
 
    public YoVariable<?>[] getVariables()
    {
-      return new DoubleYoVariable[] { x, y, z };
+      if (z != null)
+      {
+         return new DoubleYoVariable[] { x, y, z };
+      }
+      else
+      {
+         return new DoubleYoVariable[] { x, y };
+      }
    }
 
    public double[] getConstants()

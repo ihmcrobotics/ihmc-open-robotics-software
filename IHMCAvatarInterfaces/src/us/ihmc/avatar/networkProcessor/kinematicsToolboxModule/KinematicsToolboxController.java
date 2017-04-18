@@ -337,7 +337,9 @@ public class KinematicsToolboxController extends ToolboxController
          FrameVector2d desiredMomentumXY = computeDesiredMomentumXY(desiredCoMXY, tempErrorMagnitude);
          newSolutionQuality += momentumWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          MomentumCommand momentumCommand = new MomentumCommand();
+         desiredMomentumXY.changeFrame(worldFrame);
          momentumCommand.setLinearMomentumXY(desiredMomentumXY);
+         momentumCommand.setSelectionMatrixForLinearXYControl();
          momentumCommand.setWeight(momentumWeight.getDoubleValue());
          ret.addCommand(momentumCommand);
       }
@@ -612,8 +614,8 @@ public class KinematicsToolboxController extends ToolboxController
       PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
       privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
       privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
-      privilegedConfigurationCommand.setConfigurationGain(privilegedConfigurationGain.getDoubleValue());
-      privilegedConfigurationCommand.setMaxVelocity(privilegedMaxVelocity.getDoubleValue());
+      privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
+      privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
       privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
 
       return true;

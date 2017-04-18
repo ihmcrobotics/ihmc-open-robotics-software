@@ -145,6 +145,11 @@ public class SixDoFJoint extends AbstractInverseDynamicsJoint implements Floatin
    }
 
    @Override
+   public void setJointTorque(DenseMatrix64F matrix, int rowStart)
+   {
+      successorWrench.set(successorWrench.getBodyFrame(), successorWrench.getExpressedInFrame(), matrix, rowStart);
+   }
+
    public void setPositionAndRotation(RigidBodyTransform transform)
    {
       transform.getRotation(jointRotation);

@@ -113,7 +113,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double percentWeight = 0.25;
+      double percentWeight = 0.4;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
@@ -372,7 +372,7 @@ public abstract class ICPOptimizationPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double percentWeight = 0.23;
+      double percentWeight = 0.18;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);

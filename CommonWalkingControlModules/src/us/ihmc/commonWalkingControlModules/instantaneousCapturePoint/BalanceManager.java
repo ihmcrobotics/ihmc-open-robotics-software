@@ -258,7 +258,7 @@ public class BalanceManager
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
    {
       icpPlanner.addFootstepToPlan(footstep, timing);
-      linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep);
+      linearMomentumRateOfChangeControlModule.addFootstepToPlan(footstep, timing);
    }
 
    /**
@@ -485,15 +485,13 @@ public class BalanceManager
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
-   public void initializeICPPlanForSingleSupport(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
+   public void initializeICPPlanForSingleSupport(double swingTime, double transferTime, double finalTransferTime)
    {
-      setDefaultSingleSupportTime(defaultSwingTime);
-      setDefaultDoubleSupportTime(defaultTransferTime);
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      if (ENABLE_DYN_REACHABILITY && Double.isFinite(defaultSwingTime))
+      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInSwing();
          
@@ -504,34 +502,30 @@ public class BalanceManager
       }
    }
 
-   public void initializeICPPlanForStanding(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
+   public void initializeICPPlanForStanding(double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setDefaultSingleSupportTime(defaultSwingTime);
-      setDefaultDoubleSupportTime(defaultTransferTime);
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForStanding(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
-   public void initializeICPPlanForTransfer(double defaultSwingTime, double defaultTransferTime, double finalTransferTime)
+   public void initializeICPPlanForTransfer(double swingTime, double transferTime, double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
          holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
       }
-      setDefaultSingleSupportTime(defaultSwingTime);
-      setDefaultDoubleSupportTime(defaultTransferTime);
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      if (ENABLE_DYN_REACHABILITY && Double.isFinite(defaultSwingTime))
+      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInTransfer();
          
@@ -647,19 +641,10 @@ public class BalanceManager
       icpPlanner.holdCurrentICP(centerOfMassPosition);
    }
 
-   private void setDefaultDoubleSupportTime(double defaultDoubleSupportTime)
-   {
-      linearMomentumRateOfChangeControlModule.setDoubleSupportDuration(defaultDoubleSupportTime);
-   }
-
-   private void setDefaultSingleSupportTime(double defaultSingleSupportTime)
-   {
-      linearMomentumRateOfChangeControlModule.setSingleSupportDuration(defaultSingleSupportTime);
-   }
-
    private void setFinalTransferTime(double finalTransferTime)
    {
       icpPlanner.setFinalTransferDuration(finalTransferTime);
+      linearMomentumRateOfChangeControlModule.setFinalTransferDuration(finalTransferTime);
    }
 
    /**
