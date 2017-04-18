@@ -131,7 +131,7 @@ public class VelocityFootRotationCalculator implements FootRotationCalculator
       this.soleFrame = rotatingFoot.getSoleFrame();
       this.controllerDt = dt;
 
-      currentDesiredFootstep = new Footstep(rotatingFoot.getRigidBody(), null, soleFrame);
+      currentDesiredFootstep = new Footstep(rotatingFoot.getRigidBody(), null);
 
       footPolygonInSoleFrame.setIncludingFrameAndUpdate(rotatingFoot.getContactPoints2d());
 

@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -120,7 +119,6 @@ public class ComponentBasedDesiredFootstepCalculator extends AbstractDesiredFoot
       footstepPosition.changeFrame(worldFrame);
 
       FootstepDataMessage predictedFootstep = new FootstepDataMessage();
-      predictedFootstep.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
       predictedFootstep.setRobotSide(futureSwingLegSide);
       predictedFootstep.setLocation(footstepPosition.getPoint());
       predictedFootstep.setOrientation(footstepOrientation.getQuaternion());

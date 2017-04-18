@@ -381,7 +381,7 @@ public class SwingState extends AbstractUnconstrainedState
    public void setFootstep(Footstep footstep, double swingTime)
    {
       swingTimeProvider.setValue(swingTime);
-      footstep.getSolePose(footstepSolePose);
+      footstep.getPose(footstepSolePose);
 
       footstepSolePose.setZ(footstepSolePose.getZ() + finalSwingHeightOffset.getDoubleValue());
       finalConfigurationProvider.setPose(footstepSolePose);

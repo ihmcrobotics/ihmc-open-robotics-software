@@ -72,7 +72,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       Vector3D position = new Vector3D();
       Quaternion orientation = new Quaternion();
       RigidBodyTransform solePose = new RigidBodyTransform();
-      footstep.getSolePose(solePose);
+      footstep.getPose(solePose);
       solePose.get(orientation, position);
       originalFootstep.setLocation(new Point3D(position));
       originalFootstep.setOrientation(orientation);
@@ -82,7 +82,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
-      footstep.setSolePose(solePoseInWorld);
+      footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
       footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
@@ -226,6 +226,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       searchLength = boundingBoxDimension;
    }
 
+   @Override
    public List<Point3D> getPointList()
    {
       return pointList;

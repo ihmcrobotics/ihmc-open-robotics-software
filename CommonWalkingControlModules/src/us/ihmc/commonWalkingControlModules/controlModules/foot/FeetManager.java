@@ -42,7 +42,7 @@ public class FeetManager
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
    private final ReferenceFrame pelvisZUpFrame;
-   private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   private final SideDependentList<ReferenceFrame> soleZUpFrames;
 
    private final SideDependentList<FootSwitchInterface> footSwitches;
 
@@ -65,7 +65,7 @@ public class FeetManager
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       pelvisZUpFrame = referenceFrames.getPelvisZUpFrame();
-      ankleZUpFrames = referenceFrames.getAnkleZUpReferenceFrames();
+      soleZUpFrames = referenceFrames.getSoleZUpFrames();
 
       YoSE3PIDGainsInterface swingFootControlGains = walkingControllerParameters.createSwingFootControlGains(registry);
       YoSE3PIDGainsInterface holdPositionFootControlGains = walkingControllerParameters.createHoldPositionFootControlGains(registry);
@@ -123,9 +123,9 @@ public class FeetManager
    {
       if (!footstep.getTrustHeight())
       {
-         FramePoint supportAnklePosition = new FramePoint(ankleZUpFrames.get(upcomingSwingSide.getOppositeSide()));
-         supportAnklePosition.changeFrame(footstep.getParentFrame());
-         double newHeight = supportAnklePosition.getZ();
+         FramePoint supportSolePosition = new FramePoint(soleZUpFrames.get(upcomingSwingSide.getOppositeSide()));
+         supportSolePosition.changeFrame(footstep.getFootstepPose().getReferenceFrame());
+         double newHeight = supportSolePosition.getZ();
          footstep.setZ(newHeight);
       }
 

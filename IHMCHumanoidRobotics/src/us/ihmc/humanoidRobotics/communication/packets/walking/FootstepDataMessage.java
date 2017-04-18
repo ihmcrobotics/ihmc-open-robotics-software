@@ -7,7 +7,6 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,10 +16,12 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.TransformableDataObject;
+import us.ihmc.humanoidRobotics.communication.packets.FrameBasedMessage;
 import us.ihmc.humanoidRobotics.communication.packets.PacketValidityChecker;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.MathTools;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.TransformTools;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -29,48 +30,33 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 @RosMessagePacket(documentation = "This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.",
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
-public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>
+public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>, FrameBasedMessage
 {
-   public enum FootstepOrigin
-   {
-      @Deprecated
-      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the ankle frame."
-            + " The ankle frame is fixed in the foot, centered at the last ankle joint."
-            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-            + " This option is for backward compatibility only and will be gone in an upcoming release."
-            + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.")
-      AT_ANKLE_FRAME,
-      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the sole frame."
-            + " The sole frame is fixed in the foot, centered at the center of the sole."
-            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-            + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.")
-      AT_SOLE_FRAME
-   }
-
-   @RosExportedField(documentation = "Specifies whether the given location is the location of the ankle or the sole.")
-   public FootstepOrigin origin;
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
-   @RosExportedField(documentation = "Specifies the position of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the position of the footstep.")
    public Point3D location;
-   @RosExportedField(documentation = "Specifies the orientation of the footstep. It is expressed in world frame.")
+   @RosExportedField(documentation = "Specifies the orientation of the footstep.")
    public Quaternion orientation;
+   
+   @RosExportedField(documentation = "The ID of the reference frame to execute the swing in. This is also the expected frame of all pose data in this message.")
+   public long trajectoryReferenceFrameId = ReferenceFrame.getWorldFrame().getNameBasedHashCode();
 
    @RosExportedField(documentation = "predictedContactPoints specifies the vertices of the expected contact polygon between the foot and\n"
-         + "the world. A value of null or an empty list will default to using the entire foot. Contact points  are expressed in sole frame. This ordering does not matter.\n"
+         + "the world. A value of null or an empty list will default to using the entire foot. Contact points are expressed in sole frame. This ordering does not matter.\n"
          + "For example: to tell the controller to use the entire foot, the predicted contact points would be:\n" + "predicted_contact_points:\n"
          + "- {x: 0.5 * foot_length, y: -0.5 * toe_width}\n" + "- {x: 0.5 * foot_length, y: 0.5 * toe_width}\n"
          + "- {x: -0.5 * foot_length, y: -0.5 * heel_width}\n" + "- {x: -0.5 * foot_length, y: 0.5 * heel_width}\n")
    public ArrayList<Point2D> predictedContactPoints;
 
-   @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.\n")
+   @RosExportedField(documentation = "This contains information on what the swing trajectory should be for each step. Recomended is DEFAULT.")
    public TrajectoryType trajectoryType = TrajectoryType.DEFAULT;
-   @RosExportedField(documentation = "In case the trajectory type is set to custom the swing waypoints can be specified here (As of Dec 2016 only two waypoints are supported).\n"
-         + "The waypoints specify the sole position in the world frame.")
-   public Point3D[] positionWaypoints = new Point3D[0];
-   @RosExportedField(documentation = "Contains information on how high the robot should step. This affects trajectory types default and obstacle clearance."
-         + "Recommended values are between 0.1 (minimum swing height, default) and 0.25.\n")
+   @RosExportedField(documentation = "Contains information on how high the robot should swing its foot. This affects trajectory types DEFAULT and OBSTACLE_CLEARANCE.")
    public double swingHeight = 0.0;
+   @RosExportedField(documentation = "In case the trajectory type is set to CUSTOM two swing waypoints can be specified here. The waypoints define sole positions in workd."
+   		+ "The controller will compute times and velocities at the waypoints. This is a convinient way to shape the trajectory of the swing. If full control over the swing"
+   		+ "trajectory is desired use the trajectory type WAYPOINTS instead.")
+   public Point3D[] positionWaypoints = new Point3D[0];
 
    @RosExportedField(documentation = "The swingDuration is the time a foot is not in ground contact during a step."
          + "\nIf the value of this field is invalid (not positive) it will be replaced by a default swingDuration.")
@@ -84,7 +70,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
     */
    public FootstepDataMessage()
    {
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
    }
 
    public FootstepDataMessage(RobotSide robotSide, Point3DReadOnly location, QuaternionReadOnly orientation)
@@ -110,7 +95,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public FootstepDataMessage(RobotSide robotSide, Point3D location, Quaternion orientation, ArrayList<Point2D> predictedContactPoints,
          TrajectoryType trajectoryType, double swingHeight)
    {
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = robotSide;
       this.location = location;
       this.orientation = orientation;
@@ -124,7 +108,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(FootstepDataMessage footstepData)
    {
-      this.origin = footstepData.origin;
       this.robotSide = footstepData.robotSide;
       this.location = new Point3D(footstepData.location);
       this.orientation = new Quaternion(footstepData.orientation);
@@ -163,12 +146,15 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
    public FootstepDataMessage(Footstep footstep)
    {
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       robotSide = footstep.getRobotSide();
-      location = new Point3D();
-      orientation = new Quaternion();
-      footstep.getPositionInWorldFrame(location);
-      footstep.getOrientationInWorldFrame(orientation);
+
+      FramePoint location = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(location, orientation);
+      ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
+      setTrajectoryReferenceFrameId(trajectoryFrame);
+      this.location = location.getPoint();
+      this.orientation = orientation.getQuaternion();
 
       List<Point2D> footstepContactPoints = footstep.getPredictedContactPoints();
       if (footstepContactPoints != null)
@@ -197,13 +183,12 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       {
          positionWaypoints = new Point3D[footstep.getCustomPositionWaypoints().size()];
          for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
-            positionWaypoints[i] = new Point3D(footstep.getCustomPositionWaypoints().get(i));
+         {
+            FramePoint framePoint = footstep.getCustomPositionWaypoints().get(i);
+            framePoint.checkReferenceFrameMatch(trajectoryFrame);
+            positionWaypoints[i] = new Point3D(framePoint.getPoint());
+         }
       }
-   }
-
-   public FootstepOrigin getOrigin()
-   {
-      return origin;
    }
 
    public ArrayList<Point2D> getPredictedContactPoints()
@@ -244,11 +229,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    public void setRobotSide(RobotSide robotSide)
    {
       this.robotSide = robotSide;
-   }
-
-   public void setOrigin(FootstepOrigin origin)
-   {
-      this.origin = origin;
    }
 
    public void setLocation(Point3D location)
@@ -355,6 +335,11 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    @Override
    public boolean epsilonEquals(FootstepDataMessage footstepData, double epsilon)
    {
+      if (trajectoryReferenceFrameId != footstepData.getTrajectoryReferenceFrameId())
+      {
+         return false;
+      }
+      
       boolean robotSideEquals = robotSide == footstepData.robotSide;
       boolean locationEquals = location.epsilonEquals(footstepData.location, epsilon);
 
@@ -446,7 +431,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       TrajectoryType[] trajectoryTypes = TrajectoryType.values();
       int randomOrdinal = random.nextInt(trajectoryTypes.length);
 
-      origin = FootstepOrigin.AT_ANKLE_FRAME;
       this.robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
       this.location = RandomGeometry.nextPoint3DWithEdgeCases(random, 0.05);
       this.orientation = RandomGeometry.nextQuaternion(random);
@@ -478,4 +462,64 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
    {
       return PacketValidityChecker.validateFootstepDataMessage(this);
    }
+
+   /** {@inheritDoc} */
+   @Override
+   public long getTrajectoryReferenceFrameId()
+   {
+      return trajectoryReferenceFrameId;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setTrajectoryReferenceFrameId(long trajectoryReferenceFrameId)
+   {
+      this.trajectoryReferenceFrameId = trajectoryReferenceFrameId;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setTrajectoryReferenceFrameId(ReferenceFrame trajectoryReferenceFrame)
+   {
+      trajectoryReferenceFrameId = trajectoryReferenceFrame.getNameBasedHashCode();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public long getDataReferenceFrameId()
+   {
+      // the data frame is not supported by footsteps
+      return trajectoryReferenceFrameId;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setDataReferenceFrameId(long dataReferenceFrameId)
+   {
+      throw new RuntimeException("The data frame is not supported by footsteps");
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setDataReferenceFrameId(ReferenceFrame dataReferenceFrame)
+   {
+      throw new RuntimeException("The data frame is not supported by footsteps");
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Point3D getControlFramePosition()
+   {
+      // The choice of control frame is not implemented for stepping. Waypoints need to be defined for the sole frame.
+      return null;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Quaternion getControlFrameOrientation()
+   {
+      // The choice of control frame is not implemented for stepping. Waypoints need to be defined for the sole frame.
+      return null;
+   }
+
 }

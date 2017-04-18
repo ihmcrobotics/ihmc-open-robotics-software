@@ -63,16 +63,19 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       this.leftFootBody = leftFootBody;
    }
 
+   @Override
    public boolean assertValid(Footstep swingStart, Footstep stance, Footstep swingEnd)
    {
       return checkIfValid(swingStart, stance, swingEnd, true);
    }
 
+   @Override
    public boolean assertValid(String message, Footstep swingStart, Footstep stance, Footstep swingEnd)
    {
       return checkIfValid(message, swingStart, stance, swingEnd, true);
    }
 
+   @Override
    public boolean isValid(Footstep swingStart, Footstep stance, Footstep swingEnd)
    {
       return checkIfValid(swingStart, stance, swingEnd, false);
@@ -112,9 +115,9 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
    private void checkFootMeetsAngleRequirement(Footstep stance, Footstep swingEnd)
    {
       FramePose stancePose = new FramePose();
-      stance.getSolePose(stancePose);
+      stance.getPose(stancePose);
       FramePose swingEndPose = new FramePose();
-      swingEnd.getSolePose(swingEndPose);
+      swingEnd.getPose(swingEndPose);
       FrameOrientation2d stanceOrientation = new FrameOrientation2d();
       FrameOrientation2d swingOrientation = new FrameOrientation2d();
       stancePose.getOrientation2dIncludingFrame(stanceOrientation);
@@ -177,9 +180,9 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       FramePose initialFramePose = new FramePose();
       FramePose stanceFramePose = new FramePose();
       FramePose endingFramePose = new FramePose();
-      swingStart.getSolePose(initialFramePose);
-      stance.getSolePose(stanceFramePose);
-      swingEnd.getSolePose(endingFramePose);
+      swingStart.getPose(initialFramePose);
+      stance.getPose(stanceFramePose);
+      swingEnd.getPose(endingFramePose);
 
       FramePoint2d initialPoint = new FramePoint2d();
       initialFramePose.getPosition2dIncludingFrame(initialPoint);
@@ -246,8 +249,8 @@ public class SemiCircularStepValidityMetric implements FootstepValidityMetric
       FramePoint circleCenter;
       FramePose stanceSole = new FramePose();
       FramePose swingEndSole = new FramePose();
-      stance.getSolePose(stanceSole);
-      swingEnd.getSolePose(swingEndSole);
+      stance.getPose(stanceSole);
+      swingEnd.getPose(swingEndSole);
 
       circleCenter = stanceSole.getFramePointCopy();
       circleCenter.add(translationFromFootCenterToCircleCenter);//change frame of translation first?
