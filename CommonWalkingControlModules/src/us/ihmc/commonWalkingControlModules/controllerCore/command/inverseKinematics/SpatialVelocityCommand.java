@@ -944,6 +944,15 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    /**
+    * Resets the secondary task joint weight scaling factor on the joints below the {@code primaryBase} to its
+    * default value.
+    */
+   public void resetSecondaryTaskJointWeightScale()
+   {
+      secondaryTaskJointWeightScale = 1.0;
+   }
+
+   /**
     * {@inheritDoc}
     * 
     * @return {@link ControllerCoreCommandType#TASKSPACE}.

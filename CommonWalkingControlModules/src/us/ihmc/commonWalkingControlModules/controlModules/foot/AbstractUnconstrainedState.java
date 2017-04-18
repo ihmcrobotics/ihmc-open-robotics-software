@@ -132,6 +132,7 @@ public abstract class AbstractUnconstrainedState extends AbstractFootControlStat
    {
       super.doTransitionIntoAction();
       legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+      spatialFeedbackControlCommand.resetSecondaryTaskJointWeightScale();
 
       initializeTrajectory();
    }

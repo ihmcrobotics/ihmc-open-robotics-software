@@ -176,6 +176,15 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
+    * Resets the secondary task joint weight scaling factor on the joints below the {@code primaryBase} to its
+    * default value.
+    */
+   public void resetSecondaryTaskJointWeightScale()
+   {
+      spatialAccelerationCommand.resetSecondaryTaskJointWeightScale();
+   }
+
+   /**
     * Sets the gains for both the position and orientation to use during the next control tick.
     * 
     * @param gains the new set of gains to use. Not modified.

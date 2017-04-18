@@ -642,7 +642,8 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * Whether or not to use a secondary joint scaling factor during swing.
+    * Whether or not to use a secondary joint scaling factor during swing, where the secondary joint is any joint located in the kinematic chain between
+    * the base and the optional primary base of a SpatialAccelerationCommand and a SpatialVelocityCommand.
     */
    public boolean applySecondaryJointScaleDuringSwing()
    {
