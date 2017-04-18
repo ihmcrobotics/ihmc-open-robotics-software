@@ -172,14 +172,4 @@ public class RecursionMultipliers
    {
       return finalICPMultiplier.getDoubleValue();
    }
-
-   public double getStanceEntryMultiplier()
-   {
-      return 0.0;
-   }
-
-   public double getStanceExitMultiplier()
-   {
-      return 0.0;
-   }
 }
