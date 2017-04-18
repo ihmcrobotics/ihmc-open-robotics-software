@@ -125,11 +125,14 @@ public class FlamingoStanceState extends SingleSupportState
       balanceManager.setNextFootstep(null);
       feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
 
-      footstepTiming.setTimings(Double.POSITIVE_INFINITY, walkingMessageHandler.getDefaultTransferTime());
+      double swingTime = Double.POSITIVE_INFINITY;
+      double transferTime = walkingMessageHandler.getDefaultTransferTime();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      footstepTiming.setTimings(swingTime, transferTime);
+
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      balanceManager.initializeICPPlanForSingleSupport(finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport(swingTime, transferTime, finalTransferTime);
 
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
@@ -168,12 +171,16 @@ public class FlamingoStanceState extends SingleSupportState
       loadFoot.set(true);
       loadFootStartTime.set(getTimeInCurrentState());
       balanceManager.clearICPPlan();
-      footstepTiming.setTimings(loadFootDuration.getDoubleValue(), loadFootTransferDuration.getDoubleValue());
+
+      double swingTime = loadFootDuration.getDoubleValue();
+      double transferTime = loadFootTransferDuration.getDoubleValue();
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      footstepTiming.setTimings(swingTime, transferTime);
+
       balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
       balanceManager.setICPPlanSupportSide(supportSide);
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      balanceManager.initializeICPPlanForSingleSupport(finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport(swingTime, transferTime, finalTransferTime);
 
       balanceManager.freezePelvisXYControl();
    }
