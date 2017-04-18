@@ -14,7 +14,7 @@ public class KinematicsToolboxInputCommand implements Command<KinematicsToolboxI
     * of mass. By 'current', it means that the solver will use the robot configuration data
     * broadcasted by the controller to obtain the center of mass position.
     */
-   public boolean holdCurrentCenterOfMassXYPosition = true;
+   private boolean holdCurrentCenterOfMassXYPosition = true;
    /**
     * When set to {@code true}, the solver will hold the pose of the active support foot/feet.
     */
