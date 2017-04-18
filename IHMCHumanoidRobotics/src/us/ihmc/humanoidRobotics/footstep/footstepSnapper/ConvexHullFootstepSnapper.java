@@ -3,10 +3,10 @@ package us.ihmc.humanoidRobotics.footstep.footstepSnapper;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -47,7 +47,7 @@ public class ConvexHullFootstepSnapper implements FootstepSnapper
       public PointWriter(String basicName)
       {
          String filename = "FootstepPointsLists" + File.separator;
-         filename += basicName + new Date().getTime() + ".txt";
+         filename += basicName + Instant.now().toEpochMilli() + ".txt";
          outputFile = new File(filename);
       }
 

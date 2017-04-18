@@ -15,18 +15,19 @@ public class ICPOptimizationCMPConstraintHandler
    private final DoubleYoVariable maxCMPSingleSupportExitSideways;
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   public ICPOptimizationCMPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters, YoVariableRegistry registry)
+   public ICPOptimizationCMPConstraintHandler(BipedSupportPolygons bipedSupportPolygons, ICPOptimizationParameters icpOptimizationParameters,
+         String yoNamePrefix, YoVariableRegistry registry)
    {
       this.bipedSupportPolygons = bipedSupportPolygons;
 
-      maxCMPDoubleSupportExitForward = new DoubleYoVariable("maxCMPDoubleSupportForwardExit", registry);
-      maxCMPDoubleSupportExitSideways = new DoubleYoVariable("maxCMPDoubleSupportLateralExit", registry);
+      maxCMPDoubleSupportExitForward = new DoubleYoVariable(yoNamePrefix + "MaxCMPDoubleSupportForwardExit", registry);
+      maxCMPDoubleSupportExitSideways = new DoubleYoVariable(yoNamePrefix + "MaxCMPDoubleSupportLateralExit", registry);
 
       maxCMPDoubleSupportExitForward.set(icpOptimizationParameters.getDoubleSupportMaxCMPForwardExit());
       maxCMPDoubleSupportExitSideways.set(icpOptimizationParameters.getDoubleSupportMaxCMPLateralExit());
 
-      maxCMPSingleSupportExitForward = new DoubleYoVariable("maxCMPSingleSupportForwardExit", registry);
-      maxCMPSingleSupportExitSideways = new DoubleYoVariable("maxCMPSingleSupportLateralExit", registry);
+      maxCMPSingleSupportExitForward = new DoubleYoVariable(yoNamePrefix + "MaxCMPSingleSupportForwardExit", registry);
+      maxCMPSingleSupportExitSideways = new DoubleYoVariable(yoNamePrefix + "MaxCMPSingleSupportLateralExit", registry);
 
       maxCMPSingleSupportExitForward.set(icpOptimizationParameters.getSingleSupportMaxCMPForwardExit());
       maxCMPSingleSupportExitSideways.set(icpOptimizationParameters.getSingleSupportMaxCMPLateralExit());

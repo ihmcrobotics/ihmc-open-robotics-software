@@ -337,7 +337,9 @@ public class KinematicsToolboxController extends ToolboxController
          FrameVector2d desiredMomentumXY = computeDesiredMomentumXY(desiredCoMXY, tempErrorMagnitude);
          newSolutionQuality += momentumWeight.getDoubleValue() * tempErrorMagnitude.doubleValue();
          MomentumCommand momentumCommand = new MomentumCommand();
+         desiredMomentumXY.changeFrame(worldFrame);
          momentumCommand.setLinearMomentumXY(desiredMomentumXY);
+         momentumCommand.setSelectionMatrixForLinearXYControl();
          momentumCommand.setWeight(momentumWeight.getDoubleValue());
          ret.addCommand(momentumCommand);
       }

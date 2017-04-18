@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.math.frames.YoFramePoint;
@@ -55,12 +56,12 @@ public class KinematicPoint implements java.io.Serializable
       this(name, null, registry);
    }
 
-   public KinematicPoint(String name, Vector3D offset, Robot robot)
+   public KinematicPoint(String name, Vector3DReadOnly offset, Robot robot)
    {
       this(name, offset, robot.getRobotsYoVariableRegistry());
    }
 
-   public KinematicPoint(String name, Vector3D offset, YoVariableRegistry registry)
+   public KinematicPoint(String name, Vector3DReadOnly offset, YoVariableRegistry registry)
    {
       this.name = name;
       this.registry = registry;

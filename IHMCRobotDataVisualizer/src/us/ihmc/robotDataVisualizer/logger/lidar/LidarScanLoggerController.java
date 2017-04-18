@@ -2,10 +2,8 @@ package us.ihmc.robotDataVisualizer.logger.lidar;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
@@ -186,9 +184,9 @@ public class LidarScanLoggerController
 
    private String getDate()
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss_");
-      Date time = Calendar.getInstance().getTime();
-      return dateFormat.format(time);
+      DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_");
+      LocalDateTime now = LocalDateTime.now();
+      return now.format(dateTimeFormatter);
    }
 
    private void toggleReading(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue)
