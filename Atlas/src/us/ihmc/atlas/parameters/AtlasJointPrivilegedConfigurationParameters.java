@@ -15,7 +15,7 @@ public class AtlasJointPrivilegedConfigurationParameters extends JointPrivileged
    @Override
    public double getDefaultConfigurationGain()
    {
-      return 40.0;
+      return runningOnRealRobot ? 40.0 : 100.0;
    }
 
    /** {@inheritDoc} */
