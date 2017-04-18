@@ -131,7 +131,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
                @Override
                public AtlasStraightLegWalkingParameters getStraightLegWalkingParameters()
                {
-                  return new AtlasStraightLegWalkingParameters()
+                  return new AtlasStraightLegWalkingParameters(false)
                   {
                      @Override
                      public double getSpeedForStanceLegStraightening()

@@ -96,7 +96,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       runningOnRealRobot = target == DRCRobotModel.RobotTarget.REAL_ROBOT;
 
       jointPrivilegedConfigurationParameters = new AtlasJointPrivilegedConfigurationParameters(runningOnRealRobot);
-      straightLegWalkingParameters = new AtlasStraightLegWalkingParameters();
+      straightLegWalkingParameters = new AtlasStraightLegWalkingParameters(runningOnRealRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
