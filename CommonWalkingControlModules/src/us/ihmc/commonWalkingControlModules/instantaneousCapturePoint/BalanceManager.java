@@ -485,13 +485,13 @@ public class BalanceManager
       pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
-   public void initializeICPPlanForSingleSupport(double finalTransferTime)
+   public void initializeICPPlanForSingleSupport(double swingTime, double transferTime, double finalTransferTime)
    {
       setFinalTransferTime(finalTransferTime);
       icpPlanner.initializeForSingleSupport(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForSingleSupport();
 
-      if (ENABLE_DYN_REACHABILITY)
+      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInSwing();
          
@@ -514,7 +514,7 @@ public class BalanceManager
       linearMomentumRateOfChangeControlModule.initializeForStanding();
    }
 
-   public void initializeICPPlanForTransfer(double finalTransferTime)
+   public void initializeICPPlanForTransfer(double swingTime, double transferTime, double finalTransferTime)
    {
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
@@ -525,7 +525,7 @@ public class BalanceManager
       icpPlanner.initializeForTransfer(yoTime.getDoubleValue());
       linearMomentumRateOfChangeControlModule.initializeForTransfer();
 
-      if (ENABLE_DYN_REACHABILITY)
+      if (!Double.isFinite(swingTime) && !Double.isFinite(transferTime) && ENABLE_DYN_REACHABILITY)
       {
          dynamicReachabilityCalculator.setInTransfer();
          
