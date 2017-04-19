@@ -1,5 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
+import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
@@ -9,6 +10,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.screwTheory.CenterOfMassCalculator;
 import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -18,6 +20,8 @@ public class KinematicsToolboxInputHelper
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public static final double DEFAULT_LOW_WEIGHT = 0.02;
+
+   public static final double DEFAULT_CENTER_OF_MASS_WEIGHT = 1.0;
 
    /**
     * Convenience method to create a {@link KinematicsToolboxRigidBodyMessage} that can be used to
@@ -65,6 +69,30 @@ public class KinematicsToolboxInputHelper
       message.setDesiredOrientation(currentOrientation);
       message.setSelectionMatrixForAngularControl();
       message.setWeight(DEFAULT_LOW_WEIGHT);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+
+      return message;
+   }
+
+   /**
+    * Convenience method to create a {@link KinematicsToolboxCenterOfMassMessage} that can be used
+    * to hold the current center of mass of a robot given its root body.
+    * 
+    * @param rootBody the root body of the robot for which the center of mass is to be held in
+    *           place.
+    * @param holdX whether the x-coordinate should be maintained.
+    * @param holdY whether the y-coordinate should be maintained.
+    * @param holdZ whether the z-coordinate should be maintained.
+    * @return the message ready to send to the {@code KinematicsToolbosModule}.
+    */
+   public static KinematicsToolboxCenterOfMassMessage holdCenterOfMassCurrentPosition(RigidBody rootBody, boolean holdX, boolean holdY, boolean holdZ)
+   {
+      KinematicsToolboxCenterOfMassMessage message = new KinematicsToolboxCenterOfMassMessage();
+      CenterOfMassCalculator calculator = new CenterOfMassCalculator(rootBody, worldFrame);
+      calculator.compute();
+      message.setDesiredPosition(calculator.getCenterOfMass());
+      message.setWeight(DEFAULT_CENTER_OF_MASS_WEIGHT);
+      message.setSelectionMatrix(holdX, holdY, holdZ);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;
