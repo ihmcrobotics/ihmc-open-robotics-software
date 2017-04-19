@@ -16,12 +16,14 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
       this.referenceFrameHashCodeResolver = referenceFrameHashCodeResolver;
    }
 
+   /** {@inheritDoc} */
    @Override
    public <C extends Command<?, M>, M extends Packet<M>> boolean isConvertible(C command, M message)
    {
       return command instanceof FrameBasedCommand && message instanceof FrameBasedMessage;
    }
    
+   /** {@inheritDoc} */
    @SuppressWarnings("unchecked")
    @Override
    public <C extends Command<?, M>, M extends Packet<M>> void process(C command, M message)
@@ -36,5 +38,20 @@ public class FrameMessageCommandConverter implements CommandConversionInterface
       ReferenceFrame expressedInReferenceFrame = referenceFrameHashCodeResolver.getReferenceFrameFromNameBaseHashCode(expressedInReferenceFrameID);
       
       frameBasedCommand.set(expressedInReferenceFrame, trajectoryReferenceFrame, message);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public <C extends Command<?, M>, M extends Packet<M>> boolean isFrameBasedCommandHolder(C command)
+   {
+      return command instanceof FrameBasedCommandHolder;
+   }
+
+   /** {@inheritDoc} */
+   @SuppressWarnings("unchecked")
+   @Override
+   public <C extends Command<?, M>, M extends Packet<M>> void processFrameBasedCommandHolder(C command, M message)
+   {
+      ((FrameBasedCommandHolder<M>) command).set(this, message);
    }
 }
