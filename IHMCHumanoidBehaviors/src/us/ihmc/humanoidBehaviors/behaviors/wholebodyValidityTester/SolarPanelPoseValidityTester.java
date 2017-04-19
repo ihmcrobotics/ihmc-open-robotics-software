@@ -1,14 +1,12 @@
 package us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester;
 
-import java.util.ArrayList;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelCleaningPose;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelPath;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.manipulation.planning.robotcollisionmodel.CollisionModelBox;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -17,17 +15,19 @@ import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.physics.CollisionShape;
 
 public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
 {
    private SolarPanel solarPanel;
    
    public SolarPanelPoseValidityTester(FullHumanoidRobotModelFactory fullRobotModelFactory, CommunicationBridgeInterface outgoingCommunicationBridge, 
-                                       FullHumanoidRobotModel fullRobotModel, SolarPanel solarPanel)
+                                       FullHumanoidRobotModel fullRobotModel)
    {
       super(fullRobotModelFactory, outgoingCommunicationBridge, fullRobotModel);
-      
+   }
+   
+   public void setSolarPanel(SolarPanel solarPanel)
+   {
       this.solarPanel = solarPanel;
       addEnvironmentCollisionModel();  
    }
@@ -62,7 +62,7 @@ public class SolarPanelPoseValidityTester extends WholeBodyPoseValidityTester
       SolarPanelCleaningPose cleaningPose = cleaningPath.getCleaningPose(time);
             
       Pose aPose = new Pose(cleaningPose.getDesiredHandPosition(), cleaningPose.getDesiredHandOrientation());
-      
+      PrintTools.info("IN "+cleaningPose.getDesiredHandPosition().getX()+" "+cleaningPose.getDesiredHandPosition().getY()+" "+cleaningPose.getDesiredHandPosition().getZ());
       setWholeBodyPose(aPose, pelvisYaw);
    }
    

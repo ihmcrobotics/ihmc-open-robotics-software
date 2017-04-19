@@ -7,12 +7,19 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SolarPanelBehaviorStateMachine.SolarPanelStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
+import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
+import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner;
+import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner.CleaningMotion;
+import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -22,9 +29,9 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private BehaviorAction<SolarPanelStates> bahaviorAction;
    
+   private SolarPanel solarPanel;
    
-   
-   
+   private SolarPanelMotionPlanner solarPanelPlanner;
    
    
    
@@ -32,7 +39,7 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
    
    public enum SolarPanelStates
    {
-      GOTO_READYPOSE, CLEANING_LINEARPATH, CLEANING_MULTIPLEPATH
+      GOTO_READYPOSE, PLANNING, CLEANING
    }
    
    public SolarPanelBehaviorStateMachine(CommunicationBridge communicationBridge, DoubleYoVariable yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
@@ -43,26 +50,29 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
       
       // ************************* Immigration ******************************* //
 
+      setUpSolarPanel();
+      this.atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.setSolarPanel(solarPanel);
+      this.solarPanelPlanner = new SolarPanelMotionPlanner(solarPanel);
+      
+      RRTNode1DTimeDomain.nodeValidityTester = this.atlasPrimitiveActions.solarPanelPoseValidityTestBehavior;
+      
+      RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
+
       
       
       
       
       
       
-      setUpMotionPlanner();
       
       
-      
-      
-      
-      
-      
+      PrintTools.info("Check");
       setUpStateMachine();
    }
    
    private void setUpStateMachine()
    {
-      BehaviorAction<SolarPanelStates> gotoReadyPoseAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.GOTO_READYPOSE, atlasPrimitiveActions.rightHandTrajectoryBehavior)
+      BehaviorAction<SolarPanelStates> gotoReadyPoseAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.GOTO_READYPOSE, atlasPrimitiveActions.wholeBodyBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -70,46 +80,65 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
 
             TextToSpeechPacket p1 = new TextToSpeechPacket("Goto Ready Pose");
             sendPacket(p1);
-            PrintTools.info("Goto Ready Pose");
+            PrintTools.info("gotoReadyPoseAction");
             
-
+            WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
+                            
+            if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.ReadyPose) == true)
+            {
+               wholeBodyTrajectoryMessage = solarPanelPlanner.getWholeBodyTrajectoryMessage();
+            }
           
-          PrintTools.info("send message");
-          
-          
-          double motionTime = 3.0;
-          WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
-          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage(RobotSide.RIGHT, motionTime, new Point3D(0.6, -0.3, 1.2), new Quaternion(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
-          wholeBodyTrajectoryMessage.setHandTrajectoryMessage(handTrajectoryMessage);
-          atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(wholeBodyTrajectoryMessage.getHandTrajectoryMessage(RobotSide.RIGHT));
-          
-          PrintTools.info("sent message");
-
+            FramePoint rHandPoint = new FramePoint(ReferenceFrame.getWorldFrame(), 0.7, -0.35, 1.2);
+            FrameOrientation rHandOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), new Quaternion());
             
+//            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(solarPanelPlanner.getMotionTime());
+//            atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rHandPoint, rHandOrientation);
+//            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentChestOrientation();
+//            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisHeight();
+//            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisOrientation();
+          
+
+            PrintTools.info("gotoReadyPoseAction");
          }
       };
       
-      BehaviorAction<SolarPanelStates> cleaningAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.CLEANING_LINEARPATH, atlasPrimitiveActions.wholeBodyBehavior)
+      BehaviorAction<SolarPanelStates> planningAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.PLANNING, atlasPrimitiveActions.solarPanelPoseValidityTestBehavior)
       {
          @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Cleaning Linear Path");
             sendPacket(p1);
-            PrintTools.info("Cleaning Linear Path");
-            //super.setBehaviorInput();
+            PrintTools.info("Cleaning Linear Path");            
             
-//            DRCRobotModel robotModel = getRobotModel();      
-//            kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, true);
-//            toolboxCommunicator = drcBehaviorTestHelper.createAndStartPacketCommunicator(NetworkPorts.KINEMATICS_TOOLBOX_MODULE_PORT, PacketDestination.KINEMATICS_TOOLBOX_MODULE);
+            
+            if(solarPanelPlanner.setWholeBodyTrajectoryMessage(CleaningMotion.LinearCleaningMotion) == true)
+            {
+               // atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.onBehaviorExited();
+            }
+            
+         }
+      };
+      
+      
+      
+      BehaviorAction<SolarPanelStates> cleaningAction = new BehaviorAction<SolarPanelStates>(SolarPanelStates.CLEANING, atlasPrimitiveActions.wholeBodyBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            TextToSpeechPacket p1 = new TextToSpeechPacket("Cleaning Linear Path");
+            sendPacket(p1);
+            PrintTools.info("cleaningAction");            
             
 
          }
       };
 
-      //statemachine.addStateWithDoneTransition(gotoReadyPoseAction, SolarPanelStates.CLEANING_LINEARPATH);
-      //statemachine.addState(cleaningAction);
-      statemachine.addState(gotoReadyPoseAction);
+      statemachine.addStateWithDoneTransition(gotoReadyPoseAction, SolarPanelStates.PLANNING);
+      statemachine.addStateWithDoneTransition(planningAction, SolarPanelStates.CLEANING);
+      statemachine.addState(cleaningAction);      
       
       statemachine.setStartState(SolarPanelStates.GOTO_READYPOSE);
 
@@ -131,11 +160,18 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
    }
    
    
-   public void setUpMotionPlanner()
-   {
-      
-   }
    
+   public void setUpSolarPanel()
+   {
+      Pose poseSolarPanel = new Pose();
+      Quaternion quaternionSolarPanel = new Quaternion();
+      poseSolarPanel.setPosition(0.75, -0.05, 1.0);
+      quaternionSolarPanel.appendRollRotation(0.0);
+      quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
+      poseSolarPanel.setOrientation(quaternionSolarPanel);
+      
+      solarPanel = new SolarPanel(poseSolarPanel, 0.6, 0.6);
+   }
    
    
    

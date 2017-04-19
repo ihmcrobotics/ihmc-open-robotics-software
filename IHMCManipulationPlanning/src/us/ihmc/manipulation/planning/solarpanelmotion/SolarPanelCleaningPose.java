@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;

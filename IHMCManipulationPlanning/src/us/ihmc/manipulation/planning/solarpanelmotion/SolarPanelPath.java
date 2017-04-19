@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
+package us.ihmc.manipulation.planning.solarpanelmotion;
 
 import java.util.ArrayList;
 

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotics.geometry.transformables.Pose;
 
 public class SolarPanelMotionPlanner
@@ -29,10 +31,7 @@ public class SolarPanelMotionPlanner
    public enum CleaningMotion
    {
       ReadyPose,
-      LinearCleaningMotion,
-      LinearCleaningMotionWhole,
-      RRTTimeDomainLinearMotion,
-      RRTTimeDomainLinearWhole,
+      LinearCleaningMotion
    }
       
    public WholeBodyTrajectoryMessage getWholeBodyTrajectoryMessage()
@@ -48,7 +47,7 @@ public class SolarPanelMotionPlanner
    public boolean setWholeBodyTrajectoryMessage(CleaningMotion motion)
    {      
       this.wholeBodyTrajectoryMessage.clear();
-      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.2, -Math.PI*0.2);
+      SolarPanelCleaningPose readyPose = new SolarPanelCleaningPose(solarPanel, 0.5, 0.1, -0.15, -Math.PI*0.2);
       
       
            
@@ -69,11 +68,11 @@ public class SolarPanelMotionPlanner
          
          SolarPanelPath cleaningPath = new SolarPanelPath(readyPose);
          
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.2, -Math.PI*0.2), 4.0);         
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.2, -Math.PI*0.2), 1.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.2, -Math.PI*0.2), 4.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.2, -Math.PI*0.2), 1.0);
-         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.2, -Math.PI*0.2), 4.0);
+         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.1, -0.15, -Math.PI*0.3), 4.0);         
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.2, -0.15, -Math.PI*0.3), 1.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.2, -0.15, -Math.PI*0.2), 4.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.5, 0.3, -0.15, -Math.PI*0.2), 1.0);
+//         cleaningPath.addCleaningPose(new SolarPanelCleaningPose(solarPanel, 0.1, 0.3, -0.15, -Math.PI*0.3), 4.0);
                   
          
          this.motionTime = cleaningPath.getArrivalTime().get(cleaningPath.getArrivalTime().size()-1);
@@ -86,19 +85,13 @@ public class SolarPanelMotionPlanner
          
          rrtPlanner = new RRTPlannerSolarPanelCleaning(nodeRoot, cleaningPath);
          
-//         RRTNode1DTimeDomain node1 = new RRTNode1DTimeDomain(0.3, Math.PI*0.3);   
-//         RRTNode1DTimeDomain node2 = new RRTNode1DTimeDomain(1.3, Math.PI*0.3);
-//         RRTNode1DTimeDomain node3 = new RRTNode1DTimeDomain(2.3, Math.PI*0.3);
-//         RRTNode1DTimeDomain node4 = new RRTNode1DTimeDomain(0.3, Math.PI*0.3);
-//         RRTNode1DTimeDomain node5 = new RRTNode1DTimeDomain(0.3, Math.PI*0.3);
-//         RRTNode1DTimeDomain node6 = new RRTNode1DTimeDomain(2.3, Math.PI*0.3);
-//         RRTNode1DTimeDomain node7 = new RRTNode1DTimeDomain(2.3, Math.PI*0.3);
-//         RRTNode1DTimeDomain node8 = new RRTNode1DTimeDomain(0.3, Math.PI*0.3);
-//         RRTNode1DTimeDomain node9 = new RRTNode1DTimeDomain(2.3, Math.PI*0.3);
-//         nodeRoot.isValidNode();
-//         PrintTools.info(" "+node1.isValidNode() +" "+node2.isValidNode()+" "+node3.isValidNode()+" "+node4.isValidNode()+" "+node5.isValidNode()+" "+node6.isValidNode()
-//         +" "+node7.isValidNode()+" "+node8.isValidNode()+" "+node9.isValidNode());
-         
+//         RRTNode1DTimeDomain node1 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
+//         RRTNode1DTimeDomain node2 = new RRTNode1DTimeDomain(0.3, Math.PI*0.8);
+//         RRTNode1DTimeDomain node3 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
+//         
+//         node1.isValidNode();
+//         node2.isValidNode();
+//         node3.isValidNode();
          
          rrtPlanner.expandingTreesAndShortCut(200);
          
@@ -115,26 +108,6 @@ public class SolarPanelMotionPlanner
          
          break;
          
-      case LinearCleaningMotionWhole:
-         
-         
-         
-         
-         break;
-         
-      case RRTTimeDomainLinearMotion:
-         
-         
-         
-         
-         break;
-         
-      case RRTTimeDomainLinearWhole:
-         
-         
-         
-         
-         break;
          
       default:
          PrintTools.info("setTrajectoryMessage -> NONE");
