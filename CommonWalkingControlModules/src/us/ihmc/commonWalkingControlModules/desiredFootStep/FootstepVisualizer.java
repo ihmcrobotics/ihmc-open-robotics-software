@@ -58,7 +58,7 @@ public class FootstepVisualizer
 
    public void update(Footstep footstep)
    {
-      footstep.getSolePose(footstepPose);
+      footstep.getPose(footstepPose);
       yoFootstepPose.setAndMatchFrame(footstepPose);
 
       List<Point2D> predictedContactPoints = footstep.getPredictedContactPoints();

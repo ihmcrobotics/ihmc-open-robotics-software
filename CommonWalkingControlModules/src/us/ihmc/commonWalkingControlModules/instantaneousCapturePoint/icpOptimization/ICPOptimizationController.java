@@ -305,7 +305,7 @@ public class ICPOptimizationController
          if (!footstep.getSoleReferenceFrame().getTransformToRoot().containsNaN())
          {
             upcomingFootsteps.add(footstep);
-            footstep.getPosition2d(tmpFramePoint2d);
+            footstep.getFootstepPose().getPosition2dIncludingFrame(tmpFramePoint2d);
             upcomingFootstepLocations.get(upcomingFootsteps.size() - 1).set(tmpFramePoint2d);
             inputHandler.addFootstepToPlan(footstep);
 

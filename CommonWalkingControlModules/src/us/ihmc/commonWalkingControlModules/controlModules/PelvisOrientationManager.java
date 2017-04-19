@@ -554,14 +554,14 @@ public class PelvisOrientationManager
       desiredPelvisOrientation.getFrameOrientationIncludingFrame(tempOrientation);
       initialPelvisOrientation.set(tempOrientation);
 
-      upcomingFootstep.getOrientationIncludingFrame(upcomingFootstepOrientation);
+      upcomingFootstep.getOrientation(upcomingFootstepOrientation);
       upcomingFootstepOrientation.changeFrame(worldFrame);
       tempOrientation.setToZero(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
       tempOrientation.changeFrame(worldFrame);
 
       double finalDesiredPelvisYawAngle = AngleTools.computeAngleAverage(upcomingFootstepOrientation.getYaw(), tempOrientation.getYaw());
 
-      upcomingFootstep.getPositionIncludingFrame(upcomingFootstepLocation);
+      upcomingFootstep.getPosition(upcomingFootstepLocation);
       upcomingFootstepLocation.changeFrame(ankleZUpFrames.get(upcomingFootstepSide.getOppositeSide()));
 
       double desiredSwingPelvisYawAngle = 0.0;

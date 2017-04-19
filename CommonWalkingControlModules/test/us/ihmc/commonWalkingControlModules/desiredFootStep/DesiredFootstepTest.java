@@ -4,6 +4,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.After;
@@ -11,7 +12,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactablePlaneBodyTools;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTools;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -22,6 +22,7 @@ import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.Continuous
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.continuousIntegration.IntegrationCategory;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -34,7 +35,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.geometry.FramePose;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
@@ -299,7 +299,6 @@ public class DesiredFootstepTest
       netClassList.registerPacketField(Point3D.class);
       netClassList.registerPacketField(Point3D[].class);
       netClassList.registerPacketField(Quaternion.class);
-      netClassList.registerPacketField(FootstepDataMessage.FootstepOrigin.class);
       netClassList.registerPacketField(PacketDestination.class);
       netClassList.registerPacketField(FootstepStatus.Status.class);
       netClassList.registerPacketField(TrajectoryType.class);
@@ -338,10 +337,8 @@ public class DesiredFootstepTest
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(footstepNumber, 0.0, 0.0),
                new Quaternion(random.nextDouble(), random.nextDouble(), random.nextDouble(), random.nextDouble()));
 
-         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
-
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), robotSide, contactablePlaneBody.getSoleFrame(), poseReferenceFrame, trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), robotSide, pose, trustHeight);
          footsteps.add(footstep);
       }
 
@@ -397,11 +394,9 @@ public class DesiredFootstepTest
                ReferenceFrame.getWorldFrame());
 
          FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), packet.getLocation(), packet.getOrientation());
-         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("test", pose);
 
          boolean trustHeight = true;
-         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), contactablePlaneBody.getSoleFrame(), poseReferenceFrame,
-               trustHeight);
+         Footstep footstep = new Footstep(contactablePlaneBody.getRigidBody(), packet.getRobotSide(), pose, trustHeight);
          reconstructedFootsteps.add(footstep);
       }
 
@@ -421,10 +416,14 @@ public class DesiredFootstepTest
          for (FootstepDataMessage footstepData : packet)
          {
             RigidBody endEffector = createRigidBody(footstepData.getRobotSide());
-            ContactablePlaneBody contactablePlaneBody = ContactablePlaneBodyTools.createTypicalContactablePlaneBodyForTests(endEffector,
-                  ReferenceFrame.getWorldFrame());
+            List<Point2D> contactPoints = footstepData.getPredictedContactPoints();
+            if (contactPoints != null && contactPoints.size() == 0)
+               contactPoints = null;
+            FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), footstepData.getLocation(), footstepData.getOrientation());
 
-            Footstep footstep = FootstepTools.generateFootstepFromFootstepData(footstepData, contactablePlaneBody);
+            Footstep footstep = new Footstep(endEffector, robotSide, footstepPose, true, contactPoints);
+            footstep.setTrajectoryType(footstepData.getTrajectoryType());
+            footstep.setSwingHeight(footstepData.getSwingHeight());
             reconstructedFootstepPath.add(footstep);
          }
       }

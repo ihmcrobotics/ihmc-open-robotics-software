@@ -11,6 +11,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -65,24 +67,26 @@ public class SimpleFootstepSnapper implements FootstepSnapper
    }
 
    @Override
-   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap){
+   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
+   {
+      // can only snap footsteps in world frame
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      
       FootstepDataMessage originalFootstep = new FootstepDataMessage(footstep);
 
       //set to the sole pose
-      Vector3D position = new Vector3D();
-      Quaternion orientation = new Quaternion();
-      RigidBodyTransform solePose = new RigidBodyTransform();
-      footstep.getSolePose(solePose);
-      solePose.get(orientation, position);
-      originalFootstep.setLocation(new Point3D(position));
-      originalFootstep.setOrientation(orientation);
+      FramePoint position = new FramePoint();
+      FrameOrientation orientation = new FrameOrientation();
+      footstep.getPose(position, orientation);
+      originalFootstep.setLocation(position.getPoint());
+      originalFootstep.setOrientation(orientation.getQuaternion());
 
       //get the footstep
       Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
       footstep.setPredictedContactPointsFromPoint2ds(originalFootstep.getPredictedContactPoints());
       footstep.setFootstepType(type);
       FramePose solePoseInWorld = new FramePose(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
-      footstep.setSolePose(solePoseInWorld);
+      footstep.setPose(solePoseInWorld);
 
       footstep.setSwingHeight(originalFootstep.getSwingHeight());
       footstep.setTrajectoryType(originalFootstep.getTrajectoryType());
@@ -183,17 +187,21 @@ public class SimpleFootstepSnapper implements FootstepSnapper
    @Override
    public void adjustFootstepWithoutHeightmap(Footstep footstep, double height, Vector3D planeNormal)
    {
-      Vector3D position = new Vector3D();
-      Quaternion orientation = new Quaternion();
-      RigidBodyTransform solePose = new RigidBodyTransform();
-      footstep.getSolePose(solePose);
-      solePose.get(orientation, position);
-      double yaw = orientation.getYaw();
+      // can only snap footsteps in world frame
+      footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      
+      FramePose footstepPose = new FramePose();
+      footstep.getPose(footstepPose);
+      
+      Point3D position = new Point3D(footstepPose.getPosition());
+      double yaw = footstep.getFootstepPose().getYaw();
 
+      Quaternion orientation = new Quaternion();
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
       position.setZ(height);
 
-      footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), new Point3D(position), orientation));
+      footstepPose.setPose(new Point3D(position), orientation);
+      footstep.setPose(footstepPose);
    }
 
    @Override
@@ -205,8 +213,8 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       Quaternion orientation = new Quaternion();
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
-      Footstep footstep = new Footstep(foot, robotSide, soleFrame);
-      footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), position, orientation));
+      FramePose solePose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
+      Footstep footstep = new Footstep(foot, robotSide, solePose);
 
       return footstep;
    }
@@ -226,6 +234,7 @@ public class SimpleFootstepSnapper implements FootstepSnapper
       searchLength = boundingBoxDimension;
    }
 
+   @Override
    public List<Point3D> getPointList()
    {
       return pointList;
