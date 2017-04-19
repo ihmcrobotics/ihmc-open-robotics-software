@@ -52,7 +52,7 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
 
    public KinematicsToolboxCenterOfMassMessage()
    {
-      // empty constructor for deserialization
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
