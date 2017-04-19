@@ -296,11 +296,6 @@ public class ICPOptimizationInputHandler
       entryMultiplier = stateMultiplierCalculator.getEntryCMPCurrentMultiplier();
       exitMultiplier = stateMultiplierCalculator.getExitCMPCurrentMultiplier();
 
-      double currentStateProjectionMultiplier = stateMultiplierCalculator.getStateEndCurrentMultiplier();
-
-      entryMultiplier += currentStateProjectionMultiplier * stateMultiplierCalculator.getStanceEntryCMPRecursionMultiplier();
-      exitMultiplier += currentStateProjectionMultiplier * stateMultiplierCalculator.getStanceExitCMPRecursionMultiplier();
-
       stanceEntryCMP2d.scale(entryMultiplier);
       stanceExitCMP2d.scale(exitMultiplier);
 

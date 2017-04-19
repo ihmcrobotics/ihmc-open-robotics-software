@@ -167,9 +167,6 @@ public class WholeBodyFeedbackController
 
    public void reset()
    {
-      // FIXME This results into discontinuities in the remote visualizer, need to change it such as the YoVariables change only once per tick.
-//      feedbackControllerToolbox.clearData();
-
       for (int i = 0; i < allControllers.size(); i++)
       {
          FeedbackControllerInterface controller = allControllers.get(i);
@@ -208,6 +205,7 @@ public class WholeBodyFeedbackController
             inverseKinematicsOutput.addCommand(controller.getInverseKinematicsOutput());
          }
       }
+      feedbackControllerToolbox.clearUnusedData();
       feedbackControllerTimer.stopMeasurement();
    }
 
@@ -225,6 +223,7 @@ public class WholeBodyFeedbackController
             virtualModelControlOutput.addCommand(controller.getVirtualModelControlOutput());
          }
       }
+      feedbackControllerToolbox.clearUnusedData();
       feedbackControllerTimer.stopMeasurement();
    }
 
@@ -342,5 +341,10 @@ public class WholeBodyFeedbackController
    public InverseDynamicsCommandList getVirtualModelControlOutput()
    {
       return virtualModelControlOutput;
+   }
+
+   public FeedbackControllerDataReadOnly getWholeBodyFeedbackControllerDataHolder()
+   {
+      return feedbackControllerToolbox;
    }
 }

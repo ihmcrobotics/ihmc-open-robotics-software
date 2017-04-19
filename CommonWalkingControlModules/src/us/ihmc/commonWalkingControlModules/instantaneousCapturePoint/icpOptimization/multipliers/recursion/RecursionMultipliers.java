@@ -12,8 +12,6 @@ public class RecursionMultipliers
    private final ArrayList<DoubleYoVariable> exitMultipliers = new ArrayList<>();
 
    private final DoubleYoVariable finalICPMultiplier;
-   private final DoubleYoVariable stanceEntryCMPMultiplier;
-   private final DoubleYoVariable stanceExitCMPMultiplier;
 
    private final List<DoubleYoVariable> swingSplitFractions;
    private final List<DoubleYoVariable> transferSplitFractions;
@@ -30,12 +28,8 @@ public class RecursionMultipliers
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
       finalICPMultiplier = new DoubleYoVariable(namePrefix + "FinalICPRecursionMultiplier", registry);
-      stanceEntryCMPMultiplier = new DoubleYoVariable(namePrefix + "StanceEntryCMPRecursionMultiplier", registry);
-      stanceExitCMPMultiplier = new DoubleYoVariable(namePrefix + "StanceExitCMPRecursionMultiplier", registry);
 
       finalICPMultiplier.setToNaN();
-      stanceEntryCMPMultiplier.setToNaN();
-      stanceExitCMPMultiplier.setToNaN();
 
       for (int i = 0; i < maximumNumberOfFootstepsToConsider; i++)
       {
@@ -62,7 +56,7 @@ public class RecursionMultipliers
 
    public void compute(int numberOfStepsToConsider, int numberOfStepsRegistered,
          List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
-         boolean useTwoCMPs, boolean isInTransfer, double omega0)
+         boolean useTwoCMPs, double omega0)
    {
       if (numberOfStepsToConsider > doubleSupportDurations.size())
          throw new RuntimeException("Double Support Durations list is not long enough");
@@ -72,24 +66,19 @@ public class RecursionMultipliers
       if (numberOfStepsToConsider == 0)
       {
          finalICPMultiplier.set(1.0);
-         stanceEntryCMPMultiplier.set(0.0);
-         stanceExitCMPMultiplier.set(0.0);
          return;
       }
 
       if (useTwoCMPs)
-         computeWithTwoCMPs(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, isInTransfer, omega0);
+         computeWithTwoCMPs(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, omega0);
       else
          computeWithOneCMP(numberOfStepsToConsider, numberOfStepsRegistered, doubleSupportDurations, singleSupportDurations, omega0);
    }
 
    private void computeWithOneCMP(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
-         double omega0)
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
    {
-      double timeSpentOnCurrentCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-            singleSupportDurations.get(0).getDoubleValue() + transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-      double recursionTime = timeSpentOnCurrentCMP;
+      double recursionTime = 0.0;
 
       for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
@@ -121,34 +110,14 @@ public class RecursionMultipliers
          if (i >= numberOfStepsRegistered)
             break; // this is the final transfer
       }
-
-      double stanceEntryRecursion = StanceEntryCMPRecursionMultiplier.computeStanceEntryCMPRecursionMultiplierOneCMP(timeSpentOnCurrentCMP, omega0);
-      double stanceExitRecursion = StanceExitCMPRecursionMultiplier.computeStanceExitCMPRecursionOneCMP();
       double finalICPRecursion = FinalICPRecursionMultiplier.computeFinalICPRecursionMultiplier(recursionTime, omega0);
-      stanceEntryCMPMultiplier.set(stanceEntryRecursion);
-      stanceExitCMPMultiplier.set(stanceExitRecursion);
       finalICPMultiplier.set(finalICPRecursion);
    }
 
    private void computeWithTwoCMPs(int numberOfStepsToConsider, int numberOfStepsRegistered,
-         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations,
-         boolean isInTransfer, double omega0)
+         List<DoubleYoVariable> doubleSupportDurations, List<DoubleYoVariable> singleSupportDurations, double omega0)
    {
-      double currentTimeSpentOnEntryCMP;
-      double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-            transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-
-      if (isInTransfer)
-      {
-         currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-      }
-      else
-      {
-         currentTimeSpentOnEntryCMP = 0.0;
-      }
-      double recursionTime = currentTimeSpentOnExitCMP + currentTimeSpentOnEntryCMP;
-
+      double recursionTime = 0.0;
 
       for (int i = 1; i < numberOfStepsToConsider + 1; i++)
       {
@@ -185,11 +154,7 @@ public class RecursionMultipliers
             break; // this is the final transfer
       }
 
-      double stanceEntryRecursion = StanceEntryCMPRecursionMultiplier.computeStanceEntryCMPRecursionMultiplierTwoCMPs(currentTimeSpentOnEntryCMP, omega0);
-      double stanceExitRecursion = StanceExitCMPRecursionMultiplier.computeStanceExitCMPRecursionTwoCMPs(currentTimeSpentOnEntryCMP, currentTimeSpentOnExitCMP, omega0);
       double finalICPRecursion = FinalICPRecursionMultiplier.computeFinalICPRecursionMultiplier(recursionTime, omega0);
-      stanceEntryCMPMultiplier.set(stanceEntryRecursion);
-      stanceExitCMPMultiplier.set(stanceExitRecursion);
       finalICPMultiplier.set(finalICPRecursion);
    }
 
@@ -206,15 +171,5 @@ public class RecursionMultipliers
    public double getFinalICPMultiplier()
    {
       return finalICPMultiplier.getDoubleValue();
-   }
-
-   public double getStanceEntryMultiplier()
-   {
-      return stanceEntryCMPMultiplier.getDoubleValue();
-   }
-
-   public double getStanceExitMultiplier()
-   {
-      return stanceExitCMPMultiplier.getDoubleValue();
    }
 }

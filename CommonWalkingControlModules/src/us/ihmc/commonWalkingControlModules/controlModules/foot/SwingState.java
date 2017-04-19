@@ -52,6 +52,10 @@ public class SwingState extends AbstractUnconstrainedState
 
    private final CurrentConfigurationProvider stanceConfigurationProvider;
 
+   private static final double maxScalingFactor = 1.2;
+   private static final double minScalingFactor = 0.1;
+   private static final double exponentialScalingRate = 5.0;
+
    private final TwoWaypointSwingGenerator swingTrajectoryGenerator;
 
    private final VectorProvider touchdownVelocityProvider;
@@ -78,8 +82,6 @@ public class SwingState extends AbstractUnconstrainedState
    private final BooleanYoVariable isSwingSpeedUpEnabled;
    private final DoubleYoVariable currentTime;
    private final DoubleYoVariable currentTimeWithSwingSpeedUp;
-
-   private final DoubleYoVariable primaryBaseControlDuration;
 
    private final VectorProvider currentAngularVelocityProvider;
    private final FrameOrientation initialOrientation = new FrameOrientation();
@@ -130,8 +132,6 @@ public class SwingState extends AbstractUnconstrainedState
       velocityAdjustmentDamping = new DoubleYoVariable(namePrefix + "VelocityAdjustmentDamping", registry);
       velocityAdjustmentDamping.set(footControlHelper.getWalkingControllerParameters().getSwingFootVelocityAdjustmentDamping());
       adjustmentVelocityCorrection = new YoFrameVector(namePrefix + "AdjustmentVelocityCorrection", worldFrame, registry);
-
-      primaryBaseControlDuration = new DoubleYoVariable(namePrefix + "PrimaryBaseControlDuration", registry);
 
       // todo make a smarter distinction on this as a way to work with the push recovery module
       doContinuousReplanning = new BooleanYoVariable(namePrefix + "DoContinuousReplanning", registry);
@@ -187,7 +187,7 @@ public class SwingState extends AbstractUnconstrainedState
       isSwingSpeedUpEnabled = new BooleanYoVariable(namePrefix + "IsSwingSpeedUpEnabled", registry);
       isSwingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
 
-      primaryBaseControlDuration.set(walkingControllerParameters.getPrimaryBaseControlDurationInSwing());
+      scaleSecondaryJointWeights.set(walkingControllerParameters.applySecondaryJointScaleDuringSwing());
 
       FramePose controlFramePose = new FramePose(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -286,7 +286,9 @@ public class SwingState extends AbstractUnconstrainedState
 
       double time;
       if (!isSwingSpeedUpEnabled.getBooleanValue() || currentTimeWithSwingSpeedUp.isNaN())
+      {
          time = currentTime.getDoubleValue();
+      }
       else
       {
          currentTimeWithSwingSpeedUp.add(swingTimeSpeedUpFactor.getDoubleValue() * controlDT);
@@ -337,10 +339,7 @@ public class SwingState extends AbstractUnconstrainedState
 
       transformDesiredsFromSoleFrameToControlFrame();
 
-      if (time > primaryBaseControlDuration.getDoubleValue())
-         usePrimaryBaseForControl.set(false);
-      else
-         usePrimaryBaseForControl.set(true);
+      secondaryJointWeightScale.set(computeScaleFactor(time));
    }
 
    private void transformDesiredsFromSoleFrameToControlFrame()
@@ -372,6 +371,13 @@ public class SwingState extends AbstractUnconstrainedState
       desiredSpatialAcceleration.getAngularPart(desiredAngularAcceleration);
       desiredLinearAcceleration.changeFrame(worldFrame);
       desiredAngularAcceleration.changeFrame(worldFrame);
+   }
+
+   private double computeScaleFactor(double time)
+   {
+      double phaseInSwingState = time / swingTimeProvider.getValue();
+
+      return  (maxScalingFactor - minScalingFactor) * (1.0 - Math.exp(-exponentialScalingRate * phaseInSwingState)) + minScalingFactor;
    }
 
    private final FramePose footstepSolePose = new FramePose();

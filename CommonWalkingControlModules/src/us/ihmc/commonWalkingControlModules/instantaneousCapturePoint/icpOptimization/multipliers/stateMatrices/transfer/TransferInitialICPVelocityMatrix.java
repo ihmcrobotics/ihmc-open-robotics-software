@@ -16,6 +16,7 @@ public class TransferInitialICPVelocityMatrix extends DenseMatrix64F
 
    public void compute()
    {
+      // this is the initial spline rate
       set(1, 0, 1);
    }
 }

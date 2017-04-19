@@ -1,12 +1,12 @@
-package us.ihmc.atlas.parameters;
+package us.ihmc.valkyrie.parameters;
 
 import us.ihmc.commonWalkingControlModules.configurations.StraightLegWalkingParameters;
 
-public class AtlasStraightLegWalkingParameters extends StraightLegWalkingParameters
+public class ValkyrieStraightLegWalkingParameters extends StraightLegWalkingParameters
 {
    private final boolean runningOnRealRobot;
 
-   public AtlasStraightLegWalkingParameters(boolean runningOnRealRobot)
+   public ValkyrieStraightLegWalkingParameters(boolean runningOnRealRobot)
    {
       this.runningOnRealRobot = runningOnRealRobot;
    }

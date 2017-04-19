@@ -297,6 +297,11 @@ public class PointFeedbackControlCommand implements FeedbackControlCommand<Point
       spatialAccelerationCommand.setAngularWeightsToZero();
    }
 
+   public void getIncludingFrame(FramePoint desiredPositionToPack)
+   {
+      desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
+   }
+
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)
    {
       desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
