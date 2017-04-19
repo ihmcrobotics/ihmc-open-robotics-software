@@ -26,6 +26,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -329,6 +330,13 @@ public class KinematicsToolboxController extends ToolboxController
 
    private FeedbackControlCommandList consumeCommands()
    {
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
+      {
+         KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
+         holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
+         holdSupportFootPose.set(command.holdSupporFootPositions());
+      }
+
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);

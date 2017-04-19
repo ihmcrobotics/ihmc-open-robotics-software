@@ -12,6 +12,7 @@ import us.ihmc.communication.packets.HeatMapPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
 import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
+import us.ihmc.communication.packets.KinematicsToolboxConfigurationMessage;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.LidarScanMessage;
@@ -328,6 +329,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(KinematicsToolboxOutputStatus.class);
       registerPacketClass(KinematicsToolboxCenterOfMassMessage.class);
       registerPacketClass(KinematicsToolboxRigidBodyMessage.class);
+      registerPacketClass(KinematicsToolboxConfigurationMessage.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);

@@ -24,7 +24,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
- * {@link KinematicsToolboxRigidBodyMessage} is part of the API {@code KinematicsToolboxController}.
+ * {@link KinematicsToolboxRigidBodyMessage} is part of the API of the
+ * {@code KinematicsToolboxController}.
  * <p>
  * It holds all the information needed for the {@code KinematicsToolboxController} to constrain the
  * given end-effector to certain number of task-space constraints, i.e. desired
@@ -202,7 +203,8 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
     *           reach. The data is assumed to be expressed in world frame. Not modified.
     */
-   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector, ReferenceFrame controlFrame, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
+   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector, ReferenceFrame controlFrame, Point3DReadOnly desiredPosition,
+                                            QuaternionReadOnly desiredOrientation)
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setDesiredPose(desiredPosition, desiredOrientation);
