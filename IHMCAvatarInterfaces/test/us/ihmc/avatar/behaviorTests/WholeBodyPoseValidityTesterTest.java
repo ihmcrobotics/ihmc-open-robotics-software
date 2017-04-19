@@ -33,14 +33,14 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTNode1DTimeDomain;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTPlannerSolarPanelCleaning;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.RRTTreeTimeDomain;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelLinearPath;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner;
 import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelMotionPlanner.CleaningMotion;
-import us.ihmc.humanoidBehaviors.behaviors.solarPanel.SolarPanelPath;
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.transformables.Pose;
@@ -49,7 +49,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -190,7 +189,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
       
       SolarPanelPoseValidityTester tester = new SolarPanelPoseValidityTester(getRobotModel(), 
                                                                            drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                           drcBehaviorTestHelper.getSDFFullRobotModel(), solarPanel);
+                                                                           drcBehaviorTestHelper.getSDFFullRobotModel());
+      
+      tester.setSolarPanel(solarPanel);
       PrintTools.info("Success to initiate Behavior");
       
       drcBehaviorTestHelper.dispatchBehavior(tester);
@@ -290,9 +291,9 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
             
       RRTNode1DTimeDomain.nodeValidityTester = new SolarPanelPoseValidityTester(getRobotModel(), 
                                                                                 drcBehaviorTestHelper.getBehaviorCommunicationBridge(),
-                                                                                sdfFullRobotModel, solarPanel);
+                                                                                sdfFullRobotModel);
       
-      
+      RRTNode1DTimeDomain.nodeValidityTester.setSolarPanel(solarPanel);
       
       drcBehaviorTestHelper.dispatchBehavior(RRTNode1DTimeDomain.nodeValidityTester);
       
@@ -367,7 +368,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
    {
       Pose poseSolarPanel = new Pose();
       Quaternion quaternionSolarPanel = new Quaternion();
-      poseSolarPanel.setPosition(0.8, -0.05, 1.0);
+      poseSolarPanel.setPosition(0.7, -0.05, 1.0);
       quaternionSolarPanel.appendRollRotation(0.0);
       quaternionSolarPanel.appendPitchRotation(-Math.PI*0.25);
       poseSolarPanel.setOrientation(quaternionSolarPanel);
@@ -433,7 +434,7 @@ public abstract class WholeBodyPoseValidityTesterTest implements MultiRobotTestI
              
              g.setColor(Color.RED);
              ArrayList<RRTNode> nodeFail = tree.failNodes;
-             PrintTools.info("whole "+wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
+             PrintTools.info("whole "+ j +" "+wholeNode.size() + " path " + nodePath.size() + " nodeShort " + nodeShort.size() + " fail " + nodeFail.size());
              for(int i =0;i<nodeFail.size();i++)
              {
                 RRTNode rrtNode1 = nodeFail.get(i);

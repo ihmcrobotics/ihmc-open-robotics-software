@@ -3,14 +3,14 @@ package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.HandTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.ChestTrajectoryMessage;
 import us.ihmc.humanoidRobotics.communication.packets.wholebody.WholeBodyTrajectoryMessage;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 

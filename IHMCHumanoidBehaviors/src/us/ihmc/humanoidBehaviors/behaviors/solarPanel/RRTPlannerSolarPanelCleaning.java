@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 import us.ihmc.commons.PrintTools;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelLinearPath;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 
 public class RRTPlannerSolarPanelCleaning
 {

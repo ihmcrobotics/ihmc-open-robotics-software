@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridge;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -36,6 +37,7 @@ public class AtlasPrimitiveActions
    public final WalkToLocationBehavior walkToLocationBehavior;
    public final WholeBodyInverseKinematicsBehavior wholeBodyBehavior;
    public final WalkToLocationPlannedBehavior walkToLocationPlannedBehavior;
+   public final SolarPanelPoseValidityTester solarPanelPoseValidityTestBehavior;
    private final YoVariableRegistry behaviorRegistry;
 
    public HumanoidReferenceFrames referenceFrames;
@@ -97,6 +99,9 @@ public class AtlasPrimitiveActions
       addPrimitive(walkToLocationBehavior);
       wholeBodyBehavior = new WholeBodyInverseKinematicsBehavior("atlas", wholeBodyControllerParameters, yoTime, outgoingCommunicationBridge, fullRobotModel);
       addPrimitive(wholeBodyBehavior);
+      
+      solarPanelPoseValidityTestBehavior = new SolarPanelPoseValidityTester(wholeBodyControllerParameters, outgoingCommunicationBridge, fullRobotModel);
+      addPrimitive(solarPanelPoseValidityTestBehavior);
 
    }
    private void addPrimitive(AbstractBehavior behavior)

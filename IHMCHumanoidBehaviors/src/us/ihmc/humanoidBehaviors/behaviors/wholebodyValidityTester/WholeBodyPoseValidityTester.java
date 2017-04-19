@@ -113,7 +113,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       
       this.ikFullRobotModel = getFullHumanoidRobotModel();
 
-      this.robotCollisionModel = new RobotCollisionModel(this.ikFullRobotModel);      
+      this.robotCollisionModel = new RobotCollisionModel(this.ikFullRobotModel); 
    }
    
    public FullHumanoidRobotModel getFullHumanoidRobotModel()
@@ -295,7 +295,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    private boolean isReceived = false;
    private boolean isSolved = false;
    
-   private boolean isGoodSolutionOld = false;
+   //private boolean wasStable = false;
    
    public void setUpIsDone()
    {  
@@ -312,6 +312,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       setUpIsDone();
       for(int i=0;i<100;i++)
       {
+//         PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
          ThreadTools.sleep(5);
          if(isDone() == true)
          {
@@ -323,6 +324,10 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
       }
       if(Debug)
          PrintTools.info("No solution ");
+      
+      PrintTools.info("Solution "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM03()
+                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM13()
+                      +" "+outputConverter.getFullRobotModel().getHand(RobotSide.RIGHT).getBodyFixedFrame().getTransformToWorldFrame().getM23());
       
       forceOut();
       ThreadTools.sleep(10);
@@ -371,14 +376,15 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             KinematicsToolboxOutputStatus newestSolution = kinematicsToolboxOutputQueue.poll();
             
             double deltaSolutionQuality = currentSolutionQuality.getDoubleValue() - newestSolution.getSolutionQuality();
-            boolean isSolutionStable = Math.abs(deltaSolutionQuality) < 0.002;
+            boolean isSolutionStable = Math.abs(deltaSolutionQuality) < 0.001;
             boolean isSolutionGoodEnough = newestSolution.getSolutionQuality() < solutionQualityThreshold.getDoubleValue();
             boolean isGoodSolutionCur = isSolutionStable && isSolutionGoodEnough;
             
-            if(isGoodSolutionCur == false && isGoodSolutionOld == true)
+            if(isReceived == false)
             {
-               isReceived = true;
+               isReceived = deltaSolutionQuality < -0.005;               
             }
+            
             
             if(isReceived == true)
             {
@@ -393,16 +399,16 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
             
             
             
-            isGoodSolutionOld = isGoodSolutionCur;
             currentSolutionQuality.set(newestSolution.getSolutionQuality());
             
             cnt++;
-            if(Debug)
-               PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality());
-            if(Debug)
-               PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality()+" isSolutionStable "+isSolutionStable+" isSolutionGoodEnough "+isSolutionGoodEnough
-                            +" isReceived "+isReceived
-                            +" isSolved "+isSolved);
+            if(false)
+               PrintTools.info(""+cnt+" SQ "+ newestSolution.getSolutionQuality() + " dSQ " + deltaSolutionQuality);
+            if(false)
+               PrintTools.info(""+cnt+" isSolutionStable "+isSolutionStable+" isSolutionGoodEnough "+isSolutionGoodEnough
+                               +" isReceived "+isReceived
+                               +" isGoodSolutionCur "+isGoodSolutionCur                            
+                               +" isSolved "+isSolved);
 
             if(isSolved == true || forceOut == true)
             {
@@ -424,7 +430,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public void onBehaviorEntered()
    {
-      System.out.println("init whole body behavior");
+      PrintTools.info("Validity Tester start! ");      
       isPaused.set(false);
       isStopped.set(false);
       isDone.set(false);

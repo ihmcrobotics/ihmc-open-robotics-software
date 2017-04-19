@@ -1,8 +1,9 @@
 package us.ihmc.humanoidBehaviors.behaviors.solarPanel;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidBehaviors.behaviors.wholebodyValidityTester.SolarPanelPoseValidityTester;
 import us.ihmc.manipulation.planning.rrt.RRTNode;
-import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 
 public class RRTNode1DTimeDomain extends RRTNode
 {
