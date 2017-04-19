@@ -1,5 +1,5 @@
 <object-stream>
-  <long>1492618805969</long>
+  <long>1492627391908</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
@@ -7,7 +7,6 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.27134708390623097</x>
@@ -30,7 +29,6 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>0.5658686945004905</x>
@@ -53,7 +51,6 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
           <x>0.8756173675969479</x>
@@ -76,7 +73,6 @@
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
         <destination>0</destination>
-        <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
           <x>1.1541445436624365</x>
@@ -103,13 +99,13 @@
     <defaultTransferDuration>0.0</defaultTransferDuration>
     <finalTransferDuration>0.0</finalTransferDuration>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
-  <long>1492618805970</long>
+  <long>1492627391910</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
-  <long>1492618805970</long>
+  <long>1492627391910</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
     <destination>0</destination>

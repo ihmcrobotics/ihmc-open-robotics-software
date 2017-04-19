@@ -1,5 +1,5 @@
 <object-stream>
-  <long>1492618805906</long>
+  <long>1492627391853</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
     <uniqueId>0</uniqueId>
     <destination>0</destination>
@@ -38,7 +38,7 @@
     <useCustomControlFrame>false</useCustomControlFrame>
     <robotSide>RIGHT</robotSide>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootTrajectoryMessage>
-  <long>1492618805907</long>
+  <long>1492627391854</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
     <destination>0</destination>
