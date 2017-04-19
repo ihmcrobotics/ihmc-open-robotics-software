@@ -15,7 +15,7 @@ import us.ihmc.robotics.screwTheory.FloatingInverseDynamicsJoint;
 import us.ihmc.robotics.screwTheory.OneDoFJoint;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
-public class KinematicsToolboxInputHelper
+public class KinematicsToolboxMessageFactory
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
