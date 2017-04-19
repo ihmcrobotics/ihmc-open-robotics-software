@@ -2,14 +2,16 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.ArrayList;
 
+import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommandHolder;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
 
-public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>
+public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>, FrameBasedCommandHolder<FootstepDataListMessage>
 {
    private double defaultSwingDuration;
    private double defaultTransferDuration;
@@ -35,6 +37,13 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    @Override
    public void set(FootstepDataListMessage message)
    {
+      // since the footsteps are frame based this method should not be called anymore.
+      throw new RuntimeException(getClass().getSimpleName() + " is a frame based command. This setter can not be used.");
+   }
+   
+   @Override
+   public void set(CommandConversionInterface commandConverter, FootstepDataListMessage message)
+   {
       clear();
 
       defaultSwingDuration = message.defaultSwingDuration;
@@ -46,7 +55,7 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
       if (dataList != null)
       {
          for (int i = 0; i < dataList.size(); i++)
-            footsteps.add().set(dataList.get(i));
+            commandConverter.process(footsteps.add(), dataList.get(i));
       }
    }
 
@@ -149,4 +158,5 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    {
       return getNumberOfFootsteps() > 0;
    }
+
 }
