@@ -46,6 +46,21 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       message.getWeightVector(weightVector);
    }
 
+   public DenseMatrix64F getWeightVector()
+   {
+      return weightVector;
+   }
+
+   public DenseMatrix64F getSelectionMatrix()
+   {
+      return selectionMatrix;
+   }
+
+   public FramePoint getDesiredPosition()
+   {
+      return desiredPosition;
+   }
+
    @Override
    public Class<KinematicsToolboxCenterOfMassMessage> getMessageClass()
    {
