@@ -31,6 +31,11 @@ public class PoseReferenceFrame extends ReferenceFrame
       setPoseAndUpdate(pose);
    }
 
+   public boolean containsNaN()
+   {
+      return originPose.containsNaN();
+   }
+
    public void setX(double x)
    {
       originPose.setX(x);
