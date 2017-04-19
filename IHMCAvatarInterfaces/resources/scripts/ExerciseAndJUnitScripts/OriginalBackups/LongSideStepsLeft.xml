@@ -1,5 +1,5 @@
 <object-stream>
-  <long>1492618805932</long>
+  <long>1457583856379</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
@@ -10,22 +10,18 @@
         <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>0.225</x>
-          <y>-0.1</y>
-          <z>0.02099999999999999</z>
+          <x>-0.007977634140345953</x>
+          <y>0.23399720370467728</y>
+          <z>0.08396597995877197</z>
         </location>
         <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
+          <x>-1.591304765447381E-4</x>
+          <y>-2.581897453172097E-4</y>
+          <z>0.0014759171161893463</z>
+          <s>0.9999988648414622</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
@@ -33,22 +29,18 @@
         <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>0.435</x>
-          <y>-0.52</y>
-          <z>0.14100000000000001</z>
+          <x>-0.007603803074850883</x>
+          <y>0.10800116095278178</y>
+          <z>0.08400857972948073</z>
         </location>
         <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
+          <x>-2.256309062557937E-4</x>
+          <y>-2.4697718662275106E-4</y>
+          <z>0.0014758995128799943</z>
+          <s>0.99999885490614</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
@@ -56,22 +48,18 @@
         <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>0.725</x>
-          <y>-0.13</y>
-          <z>0.14100000000000001</z>
+          <x>-0.009007453144055462</x>
+          <y>0.5828767341791065</y>
+          <z>0.08387359897352842</z>
         </location>
         <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
+          <x>-1.5913047654515338E-4</x>
+          <y>-2.581897453165707E-4</y>
+          <z>0.0014759171161893463</z>
+          <s>0.9999988648414622</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
@@ -79,22 +67,18 @@
         <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>0.9568021800344485</x>
-          <y>-0.5173231118026214</y>
-          <z>0.02099999999999999</z>
+          <x>-0.008638152921127419</x>
+          <y>0.45776611967775427</y>
+          <z>0.08390672743427907</z>
         </location>
         <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
+          <x>-1.591304765451549E-4</x>
+          <y>-2.581897453174589E-4</y>
+          <z>0.0014759171161893459</z>
+          <s>0.9999988648414622</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
@@ -102,22 +86,18 @@
         <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>1.3412268406702583</x>
-          <y>-0.20091956082893264</y>
-          <z>0.02099999999999999</z>
+          <x>-0.010039918738899369</x>
+          <y>0.9326528702403761</y>
+          <z>0.08378098057307537</z>
         </location>
         <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
+          <x>-1.5913047654568437E-4</x>
+          <y>-2.5818974531876285E-4</y>
+          <z>0.001475917116189346</z>
+          <s>0.9999988648414622</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
@@ -125,22 +105,18 @@
         <origin>AT_ANKLE_FRAME</origin>
         <robotSide>RIGHT</robotSide>
         <location>
-          <x>1.5691048863799313</x>
-          <y>-0.4279145573420012</y>
-          <z>0.02099999999999999</z>
+          <x>-0.009670618515970909</x>
+          <y>0.8075422557390238</y>
+          <z>0.0838141090338258</z>
         </location>
         <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
+          <x>-1.5913047654526544E-4</x>
+          <y>-2.5818974531718154E-4</y>
+          <z>0.0014759171161893463</z>
+          <s>0.9999988648414622</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
@@ -148,37 +124,30 @@
         <origin>AT_ANKLE_FRAME</origin>
         <robotSide>LEFT</robotSide>
         <location>
-          <x>1.59044003680388</x>
-          <y>-0.21746384957600445</y>
-          <z>0.02099999999999999</z>
+          <x>-0.010556151536320934</x>
+          <y>1.1075409382710106</y>
+          <z>0.08373467137284818</z>
         </location>
         <orientation>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>0.0</z>
-          <s>1.0</s>
+          <x>-1.5913047654482192E-4</x>
+          <y>-2.581897453175427E-4</y>
+          <z>0.001475917116189346</z>
+          <s>0.9999988648414622</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <trajectoryType>DEFAULT</trajectoryType>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
-    <executionMode>OVERRIDE</executionMode>
-    <executionTiming>CONTROL_DURATIONS</executionTiming>
-    <defaultSwingDuration>0.0</defaultSwingDuration>
-    <defaultTransferDuration>0.0</defaultTransferDuration>
-    <finalTransferDuration>0.0</finalTransferDuration>
+    <swingTime>0.0</swingTime>
+    <transferTime>0.0</transferTime>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
-  <long>1492618805934</long>
+  <long>1457583856381</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
     <pause>true</pause>
   </us.ihmc.humanoidRobotics.communication.packets.walking.PauseWalkingMessage>
-  <long>1492618805934</long>
+  <long>1457583856381</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
     <destination>0</destination>

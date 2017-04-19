@@ -1,8 +1,10 @@
 <object-stream>
-  <long>1492618805868</long>
+  <long>1457583856455</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
     <uniqueId>-1</uniqueId>
     <destination>0</destination>
+    <previousMessageId>0</previousMessageId>
+    <executionMode>OVERRIDE</executionMode>
     <footstepDataList>
       <us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
         <uniqueId>0</uniqueId>
@@ -20,20 +22,13 @@
           <z>0.0</z>
           <s>1.0</s>
         </orientation>
-        <trajectoryReferenceFrameId>83766130</trajectoryReferenceFrameId>
         <swingHeight>0.0</swingHeight>
-        <positionWaypoints/>
-        <swingDuration>0.0</swingDuration>
-        <transferDuration>0.0</transferDuration>
       </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage>
     </footstepDataList>
-    <executionMode>OVERRIDE</executionMode>
-    <executionTiming>CONTROL_DURATIONS</executionTiming>
-    <defaultSwingDuration>0.0</defaultSwingDuration>
-    <defaultTransferDuration>0.0</defaultTransferDuration>
-    <finalTransferDuration>0.0</finalTransferDuration>
+    <swingTime>3.0</swingTime>
+    <transferTime>1.0</transferTime>
   </us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage>
-  <long>1492618805869</long>
+  <long>1457583856456</long>
   <us.ihmc.humanoidRobotics.communication.packets.walking.EndOfScriptCommand>
     <uniqueId>0</uniqueId>
     <destination>0</destination>
