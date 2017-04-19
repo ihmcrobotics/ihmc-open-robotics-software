@@ -188,7 +188,6 @@ public class WholeBodyFeedbackController
             inverseDynamicsOutput.addCommand(controller.getInverseDynamicsOutput());
          }
       }
-      feedbackControllerToolbox.clearUnusedData();
       feedbackControllerTimer.stopMeasurement();
    }
 
