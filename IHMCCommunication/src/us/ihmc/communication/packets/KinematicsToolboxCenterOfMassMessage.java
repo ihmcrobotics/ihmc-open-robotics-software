@@ -99,6 +99,84 @@ public class KinematicsToolboxCenterOfMassMessage extends TrackablePacket<Kinema
       setDesiredPosition(desiredPosition.getPoint());
    }
 
+   /** Ensures that the array for the weights is initialized. */
+   private void initializeWeight()
+   {
+      if (weights == null)
+         weights = new float[3];
+   }
+
+   /**
+    * Sets the weight to use for this task.
+    * <p>
+    * The weight relates to the priority of a task relative to the other active tasks. A higher
+    * weight refers to a higher priority.
+    * </p>
+    * 
+    * @param weight the weight value for this task.
+    */
+   public void setWeight(double weight)
+   {
+      initializeWeight();
+      for (int i = 0; i < 3; i++)
+         weights[i] = (float) weight;
+   }
+
+   /**
+    * Ensures that the array for the selection matrix is initialized.
+    * <p>
+    * If the array has to be created, it is initialized with {@code true}s.
+    * </p>
+    */
+   private void initializeSelectionMatrix()
+   {
+      if (selectionMatrix == null)
+      {
+         selectionMatrix = new boolean[3];
+         Arrays.fill(selectionMatrix, true);
+      }
+   }
+
+   /**
+    * Enables the control of all the degrees of freedom of the end-effector.
+    */
+   public void setSelectionMatrixToIdentity()
+   {
+      initializeSelectionMatrix();
+      Arrays.fill(selectionMatrix, true);
+   }
+
+   /**
+    * Sets the selection matrix by setting individually which axis is to be controlled.
+    * 
+    * @param enableAxesControl array of 3 booleans specifying whether each axis is to be controlled,
+    *           in order: linearX, linearY, linearZ. Not modified.
+    * @throws RuntimeException if the given array has length different than 3.
+    */
+   public void setSelectionMatrix(boolean[] enableAxesControl)
+   {
+      if (enableAxesControl.length != 3)
+         throw new RuntimeException("Unexpected size. Expected 3, was: " + enableAxesControl.length);
+      initializeSelectionMatrix();
+      for (int i = 0; i < 3; i++)
+         selectionMatrix[i] = enableAxesControl[i];
+   }
+
+   /**
+    * Sets the selection matrix by setting individually which axis is to be controlled.
+    * 
+    * @param enableX whether to control the x-axis.
+    * @param enableY whether to control the y-axis.
+    * @param enableZ whether to control the z-axis.
+    */
+   public void setSelectionMatrix(boolean enableX, boolean enableY, boolean enableZ)
+   {
+      initializeSelectionMatrix();
+      selectionMatrix[0] = enableX;
+      selectionMatrix[1] = enableY;
+      selectionMatrix[2] = enableZ;
+   }
+
    public void getDesiredPosition(FramePoint desiredPositionToPack)
    {
       desiredPositionToPack.setIncludingFrame(ReferenceFrame.getWorldFrame(), desiredPositionInWorld);
