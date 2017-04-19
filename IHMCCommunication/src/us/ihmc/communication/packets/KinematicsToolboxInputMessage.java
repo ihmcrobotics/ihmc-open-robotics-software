@@ -23,6 +23,7 @@ public class KinematicsToolboxInputMessage extends TrackablePacket<KinematicsToo
 
    public KinematicsToolboxInputMessage()
    {
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**

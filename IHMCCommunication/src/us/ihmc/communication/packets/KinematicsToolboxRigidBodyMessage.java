@@ -117,6 +117,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    public KinematicsToolboxRigidBodyMessage(RigidBody endEffector)
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -139,6 +140,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setDesiredPosition(desiredPosition);
       setSelectionMatrixForLinearControl();
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -161,6 +163,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setDesiredOrientation(desiredOrientation);
       setSelectionMatrixForAngularControl();
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -181,6 +184,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setDesiredPose(desiredPosition, desiredOrientation);
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
@@ -206,6 +210,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
       setControlFramePose(transformToBodyFixedFrame.getTranslationVector(), transformToBodyFixedFrame.getRotationMatrix());
+      setUniqueId(Packet.VALID_MESSAGE_DEFAULT_ID);
    }
 
    /**
