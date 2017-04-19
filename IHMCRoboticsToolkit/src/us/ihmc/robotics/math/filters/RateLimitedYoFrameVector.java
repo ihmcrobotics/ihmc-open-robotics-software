@@ -103,7 +103,7 @@ public class RateLimitedYoFrameVector extends YoFrameVector
 
    public void update(double xUnfiltered, double yUnfiltered, double zUnfiltered)
    {
-      if (!hasBeenCalled.getBooleanValue())
+      if (!hasBeenCalled.getBooleanValue() || containsNaN())
       {
          hasBeenCalled.set(true);
          set(xUnfiltered, yUnfiltered, zUnfiltered);
