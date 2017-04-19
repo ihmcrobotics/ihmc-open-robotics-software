@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -105,6 +106,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final ReferenceFrame pelvisFrame;
    private final ReferenceFrame centerOfMassFrame;
    private final SideDependentList<ReferenceFrame> ankleZUpFrames;
+   
+   private final SideDependentList<Point3D> anklePositionsInSoleFrame;
 
    private final LongYoVariable lastCommandId;
 
@@ -114,14 +117,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
          double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame, ReferenceFrame pelvisFrame,
-         SideDependentList<ReferenceFrame> ankleZUpFrames, final DoubleYoVariable yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoVariableRegistry parentRegistry)
+         SideDependentList<ReferenceFrame> ankleZUpFrames, SideDependentList<Point3D> anklePositionsInSoleFrame, final DoubleYoVariable yoTime,
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
       this.centerOfMassFrame = centerOfMassFrame;
       this.ankleZUpFrames = ankleZUpFrames;
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
+      this.anklePositionsInSoleFrame = anklePositionsInSoleFrame;
       offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
       offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
       offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
@@ -351,8 +355,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
       else
          hasBeenInitializedWithNextStep.set(false);
 
-      FramePoint transferFromContactFramePosition = new FramePoint(transferFromFootstep.getSoleReferenceFrame());
-      FramePoint transferToContactFramePosition = new FramePoint(transferToFootstep.getSoleReferenceFrame());
+      FramePoint transferFromContactFramePosition = new FramePoint(transferFromFootstep.getSoleReferenceFrame(),
+                                                                   anklePositionsInSoleFrame.get(transferFromFootstep.getRobotSide()));
+      FramePoint transferToContactFramePosition = new FramePoint(transferToFootstep.getSoleReferenceFrame(),
+                                                                 anklePositionsInSoleFrame.get(transferToFootstep.getRobotSide()));
 
       FrameVector fromContactFrameDrift = null;
 
@@ -369,7 +375,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          else
          {
-            FramePoint transferFromDesiredContactFramePosition = new FramePoint(transferFromDesiredFootstep.getSoleReferenceFrame());
+            FramePoint transferFromDesiredContactFramePosition = new FramePoint(transferFromDesiredFootstep.getSoleReferenceFrame(),
+                                                                                anklePositionsInSoleFrame.get(transferFromDesiredFootstep.getRobotSide()));
             transferFromDesiredContactFramePosition.changeFrame(transferFromContactFramePosition.getReferenceFrame());
 
             fromContactFrameDrift = new FrameVector(transferFromContactFramePosition.getReferenceFrame());
@@ -385,7 +392,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       FramePoint nextContactFramePosition = null;
       if (nextFootstep != null)
       {
-         nextContactFramePosition = new FramePoint(nextFootstep.getSoleReferenceFrame());
+         nextContactFramePosition = new FramePoint(nextFootstep.getSoleReferenceFrame(), anklePositionsInSoleFrame.get(nextFootstep.getRobotSide()));
 
          if (fromContactFrameDrift != null)
          {
