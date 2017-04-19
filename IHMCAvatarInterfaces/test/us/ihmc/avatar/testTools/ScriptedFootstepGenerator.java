@@ -3,6 +3,7 @@ package us.ihmc.avatar.testTools;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.RectangularContactableBody;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -10,8 +11,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.FrameOrientation;
-import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,20 +72,20 @@ public class ScriptedFootstepGenerator
       return generateFootstepFromLocationAndOrientation(robotSide, location, orientation);
    }
 
-   private Footstep generateFootstepFromLocationAndOrientation(RobotSide robotSide, double[] location, double[] orientation)
+   private Footstep generateFootstepFromLocationAndOrientation(RobotSide robotSide, double[] positionArray, double[] orientationArray)
    {
       RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
       boolean trustHeight = true;
-      Quaternion quaternion = new Quaternion(orientation);
-
-      FramePoint footstepPosition = new FramePoint(ReferenceFrame.getWorldFrame(), location);
-      FrameOrientation footstepOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), quaternion);
-      FramePose footstepPose = new FramePose(footstepPosition, footstepOrientation);
-      footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
+      Point3D position = new Point3D(positionArray);
+      Quaternion orientation = new Quaternion(orientationArray);
       
-      footstepPose.applyTransform(transformsFromSoleToAnkle.get(robotSide));
-
-      Footstep footstep = new Footstep(foot, robotSide, footstepPose, trustHeight);
+      RigidBodyTransform footstepPose = new RigidBodyTransform();
+      footstepPose.setRotation(orientation);
+      footstepPose.setTranslation(position);
+      footstepPose.multiply(transformsFromSoleToAnkle.get(robotSide));
+      
+      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepPose);
+      Footstep footstep = new Footstep(foot, robotSide, pose, trustHeight);
 
       return footstep;
    }
