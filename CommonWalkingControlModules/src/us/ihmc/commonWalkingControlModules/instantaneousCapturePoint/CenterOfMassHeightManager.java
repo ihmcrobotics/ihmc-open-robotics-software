@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -101,20 +102,21 @@ public class CenterOfMassHeightManager
    public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames)
    {
-      // It would make sense to change the walking controller parameters to return the height above sole instead of computing
-      // the offset here.
-      RobotSide robotSide = RobotSide.LEFT;
-      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
-      ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-      ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-      FramePoint anklePoint = new FramePoint(ankleFrame);
-      anklePoint.changeFrame(soleFrame);
-      double ankleSoleZOffset = anklePoint.getZ();
-
-      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleSoleZOffset;
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleSoleZOffset;
-      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle() + ankleSoleZOffset;
-      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle() + ankleSoleZOffset;
+      SideDependentList<Point3D> anklePositionsInSoleFrame = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+         ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
+         ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+         FramePoint anklePoint = new FramePoint(ankleFrame);
+         anklePoint.changeFrame(soleFrame);
+         anklePositionsInSoleFrame.put(robotSide, anklePoint.getPointCopy());
+      }
+      
+      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();
+      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
+      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
 
       double doubleSupportPercentageIn = 0.3;
       boolean activateDriftCompensation = walkingControllerParameters.getCoMHeightDriftCompensation();
@@ -125,7 +127,7 @@ public class CenterOfMassHeightManager
 
       LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
             nominalHeightAboveGround, maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, centerOfMassFrame, pelvisFrame,
-            ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
+            ankleZUpFrames, anklePositionsInSoleFrame, yoTime, yoGraphicsListRegistry, registry);
       centerOfMassTrajectoryGenerator.setCoMHeightDriftCompensation(activateDriftCompensation);
       return centerOfMassTrajectoryGenerator;
    }

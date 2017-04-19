@@ -82,10 +82,11 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       Robot robot = new Robot("Dummy");
       DoubleYoVariable yoTime = robot.getYoTime();
+      SideDependentList<Point3D> anklePositionsInSoleFrame = new SideDependentList<>(new Point3D(), new Point3D());
 
       setupStuff(yoGraphicsListRegistry, registry);
       LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround, nominalHeightAboveGround,
-            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, pelvisFrame, ankleZUpFrames, yoTime, yoGraphicsListRegistry, registry);
+            maximumHeightAboveGround, 0.0, doubleSupportPercentageIn, pelvisFrame, pelvisFrame, ankleZUpFrames, anklePositionsInSoleFrame, yoTime, yoGraphicsListRegistry, registry);
 
       lookAheadCoMHeightTrajectoryGenerator.setCoMHeightDriftCompensation(true);
 
