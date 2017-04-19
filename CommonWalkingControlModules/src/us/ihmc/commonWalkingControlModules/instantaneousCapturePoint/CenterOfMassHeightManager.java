@@ -101,10 +101,21 @@ public class CenterOfMassHeightManager
    public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames)
    {
-      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
-      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();
-      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
-      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
+      // It would make sense to change the walking controller parameters to return the height above sole instead of computing
+      // the offset here.
+      RobotSide robotSide = RobotSide.LEFT;
+      RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
+      ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
+      ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
+      FramePoint anklePoint = new FramePoint(ankleFrame);
+      anklePoint.changeFrame(soleFrame);
+      double ankleSoleZOffset = anklePoint.getZ();
+
+      double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleSoleZOffset;
+      double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleSoleZOffset;
+      double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle() + ankleSoleZOffset;
+      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle() + ankleSoleZOffset;
+
       double doubleSupportPercentageIn = 0.3;
       boolean activateDriftCompensation = walkingControllerParameters.getCoMHeightDriftCompensation();
       ReferenceFrame pelvisFrame = referenceFrames.getPelvisFrame();
