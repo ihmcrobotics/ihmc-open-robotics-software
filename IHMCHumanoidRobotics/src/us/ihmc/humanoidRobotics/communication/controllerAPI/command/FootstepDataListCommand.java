@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
 import java.util.ArrayList;
 
+import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameBasedCommandHolder;
@@ -10,6 +11,7 @@ import us.ihmc.humanoidRobotics.communication.packets.ExecutionTiming;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
 import us.ihmc.robotics.lists.RecyclingArrayList;
+import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class FootstepDataListCommand implements Command<FootstepDataListCommand, FootstepDataListMessage>, FrameBasedCommandHolder<FootstepDataListMessage>
 {
@@ -37,8 +39,23 @@ public class FootstepDataListCommand implements Command<FootstepDataListCommand,
    @Override
    public void set(FootstepDataListMessage message)
    {
-      // since the footsteps are frame based this method should not be called anymore.
-      throw new RuntimeException(getClass().getSimpleName() + " is a frame based command. This setter can not be used.");
+      // this is so scripts work.
+      PrintTools.warn(getClass().getSimpleName() + " contains frame information. No frame resolver was provided. Assuming all data is in world frame.");
+      ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      
+      clear();
+
+      defaultSwingDuration = message.defaultSwingDuration;
+      defaultTransferDuration = message.defaultTransferDuration;
+      finalTransferDuration = message.finalTransferDuration;
+      executionMode = message.executionMode;
+      executionTiming = message.executionTiming;
+      ArrayList<FootstepDataMessage> dataList = message.getDataList();
+      if (dataList != null)
+      {
+         for (int i = 0; i < dataList.size(); i++)
+            footsteps.add().set(worldFrame, worldFrame, dataList.get(i));
+      }
    }
    
    @Override
