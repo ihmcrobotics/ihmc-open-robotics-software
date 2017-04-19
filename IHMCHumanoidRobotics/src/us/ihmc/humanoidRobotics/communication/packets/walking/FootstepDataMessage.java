@@ -7,7 +7,6 @@ import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.communication.ros.generators.RosEnumValueDocumentation;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -33,33 +32,6 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
                   rosPackage = RosMessagePacket.CORE_IHMC_PACKAGE)
 public class FootstepDataMessage extends Packet<FootstepDataMessage> implements TransformableDataObject<FootstepDataMessage>, FrameBasedMessage
 {
-   public enum FootstepOrigin
-   {
-      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the ankle frame."
-            + " The ankle frame is fixed in the foot, centered at the last ankle joint."
-            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-            + " This option is for backward compatibility only and will be gone in an upcoming release."
-            + " This origin is deprecated as it directly depends on the robot structure and is not directly related to the actual foot sole.")
-      AT_ANKLE_FRAME,
-      @RosEnumValueDocumentation(documentation = "The location of the footstep refers to the location of the sole frame."
-            + " The sole frame is fixed in the foot, centered at the center of the sole."
-            + " The orientation = [qx = 0.0, qy = 0.0, qz = 0.0, qs = 1.0] corresponds to: x-axis pointing forward, y-axis pointing left, z-axis pointing upward."
-            + " This origin is preferred as it directly depends on the actual foot sole and is less dependent on the robot structure.")
-      AT_SOLE_FRAME
-   }
-   @RosExportedField(documentation = "Specifies whether the given location is the location of the ankle or the sole.")
-   public FootstepOrigin origin;
-   
-   public FootstepOrigin getOrigin()
-   {
-      return origin;
-   }
-   
-   public void setOrigin(FootstepOrigin origin)
-   {
-      this.origin = origin;
-   }
-   
    @RosExportedField(documentation = "Specifies which foot will swing to reach the foostep.")
    public RobotSide robotSide;
    @RosExportedField(documentation = "Specifies the position of the footstep.")
@@ -164,8 +136,6 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
 
       this.swingDuration = footstepData.swingDuration;
       this.transferDuration = footstepData.transferDuration;
-      
-      this.origin = footstepData.origin;
    }
 
    @Override
