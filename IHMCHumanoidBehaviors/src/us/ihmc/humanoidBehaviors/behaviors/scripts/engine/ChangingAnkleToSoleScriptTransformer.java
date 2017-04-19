@@ -3,11 +3,8 @@ package us.ihmc.humanoidBehaviors.behaviors.scripts.engine;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 
 public class ChangingAnkleToSoleScriptTransformer extends ScriptTransformer
 {
@@ -39,29 +36,29 @@ public class ChangingAnkleToSoleScriptTransformer extends ScriptTransformer
    
    private void transformFootstepFromAnkleToSole(FootstepDataMessage footstep)
    {
-      if (footstep.origin == FootstepOrigin.AT_SOLE_FRAME)
-      {
-         return;
-      }
-      else if (footstep.origin == FootstepOrigin.AT_ANKLE_FRAME)
-      {
-         RigidBodyTransform footstepPose = new RigidBodyTransform();
-         footstepPose.setRotation(footstep.getOrientation());
-         footstepPose.setTranslation(footstep.getLocation());
-//         PrintTools.info("Before:\n" + footstepPose.toString());
-
-         RigidBodyTransform offsetInAnkleFrame = new RigidBodyTransform();
-         offsetInAnkleFrame.setTranslation(0.025, 0.0, -0.084);
-         footstepPose.multiply(offsetInAnkleFrame);
-//         PrintTools.info("After:\n" + footstepPose.toString());
-         
-         footstepPose.getRotation(footstep.getOrientation());
-         footstepPose.getTranslation(footstep.getLocation());
-      }
-      else
-      {
-         PrintTools.error("Unknown reference!");
-      }
+//      if (footstep.origin == FootstepOrigin.AT_SOLE_FRAME)
+//      {
+//         return;
+//      }
+//      else if (footstep.origin == FootstepOrigin.AT_ANKLE_FRAME)
+//      {
+//         RigidBodyTransform footstepPose = new RigidBodyTransform();
+//         footstepPose.setRotation(footstep.getOrientation());
+//         footstepPose.setTranslation(footstep.getLocation());
+////         PrintTools.info("Before:\n" + footstepPose.toString());
+//
+//         RigidBodyTransform offsetInAnkleFrame = new RigidBodyTransform();
+//         offsetInAnkleFrame.setTranslation(0.025, 0.0, -0.084);
+//         footstepPose.multiply(offsetInAnkleFrame);
+////         PrintTools.info("After:\n" + footstepPose.toString());
+//         
+//         footstepPose.getRotation(footstep.getOrientation());
+//         footstepPose.getTranslation(footstep.getLocation());
+//      }
+//      else
+//      {
+//         PrintTools.error("Unknown reference!");
+//      }
    }
    
    public static void main(String[] args) throws IOException, InterruptedException
