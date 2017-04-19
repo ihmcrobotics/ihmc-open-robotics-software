@@ -2,6 +2,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 
 import us.ihmc.communication.packets.KinematicsToolboxInputMessage;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -33,6 +34,7 @@ public class KinematicsToolboxInputHelper
       message.setDesiredPose(currentPose);
       message.setSelectionMatrixToIdentity();
       message.setWeight(DEFAULT_LOW_WEIGHT);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;
    }
@@ -58,6 +60,7 @@ public class KinematicsToolboxInputHelper
       message.setDesiredOrientation(currentOrientation);
       message.setSelectionMatrixForAngularControl();
       message.setWeight(DEFAULT_LOW_WEIGHT);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE);
 
       return message;
    }

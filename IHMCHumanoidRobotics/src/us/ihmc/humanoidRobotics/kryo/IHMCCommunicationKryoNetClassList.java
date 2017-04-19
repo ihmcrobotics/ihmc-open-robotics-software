@@ -11,7 +11,10 @@ import us.ihmc.communication.packets.ControllerCrashNotificationPacket;
 import us.ihmc.communication.packets.HeatMapPacket;
 import us.ihmc.communication.packets.IMUPacket;
 import us.ihmc.communication.packets.InvalidPacketNotificationPacket;
+import us.ihmc.communication.packets.KinematicsToolboxCenterOfMassMessage;
+import us.ihmc.communication.packets.KinematicsToolboxInputMessage;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
+import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.LidarScanMessage;
 import us.ihmc.communication.packets.ObjectDetectorResultPacket;
 import us.ihmc.communication.packets.Packet;
@@ -320,10 +323,15 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       // Toolbox modules
       registerPacketClass(ToolboxStateMessage.class);
       registerPacketField(ToolboxState.class);
-      registerPacketClass(KinematicsToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningToolboxOutputStatus.class);
       registerPacketClass(FootstepPlanningRequestPacket.class);
       registerPacketClass(FootstepPlanningResult.class);
+
+      // Packets for the kinematics toolbox
+      registerPacketClass(KinematicsToolboxOutputStatus.class);
+      registerPacketClass(KinematicsToolboxInputMessage.class);
+      registerPacketClass(KinematicsToolboxCenterOfMassMessage.class);
+      registerPacketClass(KinematicsToolboxRigidBodyMessage.class);
 
       // Joint data
       registerPacketClass(RobotConfigurationData.class);
@@ -540,6 +548,5 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(BoundingBoxesPacket.class);
 
       registerPacketClass(ObjectDetectorResultPacket.class);
-
    }
 }
