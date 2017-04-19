@@ -8,6 +8,7 @@ import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanel;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelCleaningPose;
 import us.ihmc.manipulation.planning.solarpanelmotion.SolarPanelPath;
 import us.ihmc.robotics.geometry.transformables.Pose;
+import us.ihmc.tools.thread.ThreadTools;
 
 public class SolarPanelMotionPlanner
 {
@@ -85,26 +86,29 @@ public class SolarPanelMotionPlanner
          
          rrtPlanner = new RRTPlannerSolarPanelCleaning(nodeRoot, cleaningPath);
          
-//         RRTNode1DTimeDomain node1 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
-//         RRTNode1DTimeDomain node2 = new RRTNode1DTimeDomain(0.3, Math.PI*0.8);
-//         RRTNode1DTimeDomain node3 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
+         RRTNode1DTimeDomain node1 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
+         RRTNode1DTimeDomain node2 = new RRTNode1DTimeDomain(0.3, Math.PI*0.8);
+         RRTNode1DTimeDomain node3 = new RRTNode1DTimeDomain(0.5, Math.PI*0.2);
+         
+         node1.isValidNode();
+         ThreadTools.sleep(5000);
+         node2.isValidNode();
+         ThreadTools.sleep(5000);
+         node3.isValidNode();
+         ThreadTools.sleep(5000);
+         
+//         rrtPlanner.expandingTreesAndShortCut(200);
 //         
-//         node1.isValidNode();
-//         node2.isValidNode();
-//         node3.isValidNode();
-         
-         rrtPlanner.expandingTreesAndShortCut(200);
-         
-        
-         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
-
-         // *** message *** //
-         PrintTools.info("Putting on Message");
-         motionFactory.setCleaningPath(cleaningPath);         
-         motionFactory.setMessage(rrtPlanner.getRRTPath());
-         
-         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
-         PrintTools.info("Complete putting on message");
+//        
+//         PrintTools.info("END shortcutting "+RRTNode1DTimeDomain.nodeValidityTester.cnt);
+//
+//         // *** message *** //
+//         PrintTools.info("Putting on Message");
+//         motionFactory.setCleaningPath(cleaningPath);         
+//         motionFactory.setMessage(rrtPlanner.getRRTPath());
+//         
+//         wholeBodyTrajectoryMessage = motionFactory.getWholeBodyTrajectoryMessage();
+//         PrintTools.info("Complete putting on message");
          
          break;
          
