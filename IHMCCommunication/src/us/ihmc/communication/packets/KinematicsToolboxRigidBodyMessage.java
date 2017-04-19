@@ -24,8 +24,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.RigidBody;
 
 /**
- * {@link KinematicsToolboxRigidBodyMessage} is a sub-message of
- * {@link KinematicsToolboxInputMessage}.
+ * {@link KinematicsToolboxRigidBodyMessage} is part of the API {@code KinematicsToolboxController}.
  * <p>
  * It holds all the information needed for the {@code KinematicsToolboxController} to constrain the
  * given end-effector to certain number of task-space constraints, i.e. desired

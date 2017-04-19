@@ -9,7 +9,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxInputCommand;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.PacketDestination;
@@ -39,7 +38,6 @@ public class KinematicsToolboxModule extends ToolboxModule
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      commands.add(KinematicsToolboxInputCommand.class);
       commands.add(KinematicsToolboxCenterOfMassCommand.class);
       commands.add(KinematicsToolboxRigidBodyCommand.class);
       return commands;
