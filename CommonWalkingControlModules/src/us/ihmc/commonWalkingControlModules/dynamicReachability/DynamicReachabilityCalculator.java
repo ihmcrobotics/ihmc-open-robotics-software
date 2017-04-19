@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
+import java.util.ArrayList;
+
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.ICPPlanner;
@@ -18,7 +20,12 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
-import us.ihmc.robotics.geometry.*;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
+import us.ihmc.robotics.geometry.FramePoint2d;
+import us.ihmc.robotics.geometry.FrameVector;
+import us.ihmc.robotics.geometry.FrameVector2d;
+import us.ihmc.robotics.geometry.LineSegment1d;
 import us.ihmc.robotics.math.frames.YoFramePoint;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
@@ -27,8 +34,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.tools.exceptions.NoConvergenceException;
-
-import java.util.ArrayList;
 
 public class DynamicReachabilityCalculator
 {
@@ -295,7 +300,7 @@ public class DynamicReachabilityCalculator
       predictedCoMPosition.setXY(tempFinalCoM);
 
       stanceFootOrientation.setToZero(fullRobotModel.getFoot(stanceSide).getBodyFixedFrame());
-      nextFootstep.getOrientationIncludingFrame(footstepOrientation);
+      nextFootstep.getOrientation(footstepOrientation);
 
       ReferenceFrame pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       stanceFootOrientation.changeFrame(pelvisFrame);
@@ -306,7 +311,7 @@ public class DynamicReachabilityCalculator
       FramePoint stanceAnkleLocation = ankleLocations.get(stanceSide);
       FramePoint upcomingStepLocation = ankleLocations.get(swingSide);
       stanceAnkleLocation.setToZero(fullRobotModel.getLegJoint(stanceSide, LegJointName.ANKLE_PITCH).getFrameAfterJoint());
-      nextFootstep.getPositionIncludingFrame(upcomingStepLocation);
+      nextFootstep.getPosition(upcomingStepLocation);
       upcomingStepLocation.changeFrame(worldFrame);
       stanceAnkleLocation.changeFrame(worldFrame);
 

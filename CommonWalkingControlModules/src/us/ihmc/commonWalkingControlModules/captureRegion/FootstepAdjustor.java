@@ -111,12 +111,16 @@ public class FootstepAdjustor
     */
    private void projectFootstepInCaptureRegion(Footstep footstep, FramePoint2d projectionPoint, FrameConvexPolygon2d captureRegion)
    {
+      // this is only tested with footsteps in world frame
+      ReferenceFrame footstepFrame = footstep.getFootstepPose().getReferenceFrame();
+      footstepFrame.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      
       projection.setIncludingFrame(projectionPoint);
-      projection.changeFrame(footstep.getParentFrame());
+      projection.changeFrame(footstepFrame);
 
       // move the position of the footstep to the capture region centroid
       nextStep2d.setIncludingFrame(captureRegion.getCentroid());
-      nextStep2d.changeFrame(footstep.getParentFrame());
+      nextStep2d.changeFrame(footstepFrame);
 
       // move the position as far away from the projectionPoint as possible
       direction.setIncludingFrame(nextStep2d);
@@ -127,7 +131,7 @@ public class FootstepAdjustor
 
       nextStep2d.changeFrame(captureRegion.getReferenceFrame());
       captureRegion.orthogonalProjection(nextStep2d);
-      nextStep2d.changeFrame(footstep.getParentFrame());
+      nextStep2d.changeFrame(footstepFrame);
 
       footstep.setPositionChangeOnlyXY(nextStep2d);
 
@@ -143,7 +147,7 @@ public class FootstepAdjustor
     */
    private void calculateTouchdownFootPolygon(Footstep footstep, ReferenceFrame desiredFrame, FrameConvexPolygon2d polygonToPack)
    {
-      footstep.getPositionIncludingFrame(centroid3d);
+      footstep.getPosition(centroid3d);
       centroid3d.getFramePoint2d(centroid2d);
       centroid2d.changeFrame(desiredFrame);
 

@@ -108,7 +108,6 @@ public class IHMCROSTranslationRuntimeTools
    {
       FootstepDataMessage ihmcMessage = new FootstepDataMessage();
 
-      ihmcMessage.setOrigin(FootstepDataMessage.FootstepOrigin.values()[message.getOrigin()]);
       ihmcMessage.setRobotSide(RobotSide.values[message.getRobotSide()]);
       ihmcMessage.setLocation(new Point3D(GenericROSTranslationTools.convertVector3(message.getLocation())));
       ihmcMessage.setOrientation(new us.ihmc.euclid.tuple4D.Quaternion(GenericROSTranslationTools.convertQuaternion(message.getOrientation())));
@@ -131,7 +130,7 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       ihmcMessage.setPredictedContactPoints(predictedContactPoints);
-      ihmcMessage.setTrajectoryWaypoints(trajectoryWaypoints);
+      ihmcMessage.setCustomPositionWaypoints(trajectoryWaypoints);
 
       return ihmcMessage;
    }
@@ -244,7 +243,6 @@ public class IHMCROSTranslationRuntimeTools
       message.setUniqueId(footstep.getUniqueId());
       message.setLocation(GenericROSTranslationTools.convertTuple3d(footstep.getLocation()));
       message.setOrientation(GenericROSTranslationTools.convertTuple4d(footstep.getOrientation()));
-      message.setOrigin((byte) footstep.getOrigin().ordinal());
       message.setRobotSide((byte) footstep.getRobotSide().ordinal());
       message.setSwingHeight(footstep.getSwingHeight());
       message.setTrajectoryType((byte) footstep.getTrajectoryType().ordinal());
@@ -261,9 +259,9 @@ public class IHMCROSTranslationRuntimeTools
       }
 
       List<Vector3> trajectoryWaypoints = new ArrayList<>();
-      if(footstep.trajectoryWaypoints != null)
+      if(footstep.getCustomPositionWaypoints() != null)
       {
-         for (Point3D trajectoryWaypoint : footstep.trajectoryWaypoints)
+         for (Point3D trajectoryWaypoint : footstep.getCustomPositionWaypoints())
          {
             trajectoryWaypoints.add(GenericROSTranslationTools.convertTuple3d(trajectoryWaypoint));
          }

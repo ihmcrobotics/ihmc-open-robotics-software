@@ -1,6 +1,6 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,7 +21,6 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
@@ -31,21 +30,23 @@ import us.ihmc.humanoidRobotics.footstep.footstepSnapper.BasicFootstepMask;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.FootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.GenericFootstepSnappingParameters;
 import us.ihmc.humanoidRobotics.footstep.footstepSnapper.SimpleFootstepSnapper;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
 import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.quadTree.Box;
 import us.ihmc.robotics.quadTree.QuadTreeForGroundParameters;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.pointClouds.combinationQuadTreeOctTree.QuadTreeForGroundHeightMap;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -118,6 +119,8 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
 
       FootstepDataListMessage corruptedFootstepDataList = createFootstepsForWalkingUpRamp(scriptedFootstepGenerator);
       
+      ReferenceFrameHashCodeResolver resolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
+      
       // Corrupt the footsteps by adding a big z offset and coorupting the pitch and roll
       FrameOrientation tempFrameOrientation = new FrameOrientation();
       for (int i = 0; i < corruptedFootstepDataList.getDataList().size(); i++)
@@ -140,11 +143,10 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          FootstepDataMessage footstepData = corruptedFootstepDataList.getDataList().get(i);
          RobotSide robotSide = footstepData.getRobotSide();
          RigidBody endEffector = fullRobotModel.getFoot(robotSide);
-         ReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
-         FramePose pose = new FramePose(ReferenceFrame.getWorldFrame());
+         ReferenceFrame trajectoryFrame = resolver.getReferenceFrameFromNameBaseHashCode(footstepData.getTrajectoryReferenceFrameId());
+         FramePose pose = new FramePose(trajectoryFrame);
          pose.setPose(footstepData.getLocation(), footstepData.getOrientation());
-         PoseReferenceFrame poseReferenceFrame = new PoseReferenceFrame("footstep" + i, pose);
-         corruptedFootstepList.add(new Footstep(endEffector, robotSide, soleFrame, poseReferenceFrame));
+         corruptedFootstepList.add(new Footstep(endEffector, robotSide, pose));
       }
 
       // Build the BoundingBox2D containing all the footsteps
@@ -190,11 +192,12 @@ public abstract class DRCObstacleCourseRampFootstepSnapperTest implements MultiR
          footstepSnapper.snapFootstep(footstep, heightMap);
          
          RobotSide robotSide = footstep.getRobotSide();
-         Point3D location = new Point3D();
-         Quaternion orientation = new Quaternion();
-         footstep.getPosition(location);
-         footstep.getOrientation(orientation);
-         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, location, orientation);
+         FramePoint position = new FramePoint();
+         FrameOrientation orientation = new FrameOrientation();
+         footstep.getPose(position, orientation);
+         ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
+         FootstepDataMessage footstepData = new FootstepDataMessage(robotSide, position.getPoint(), orientation.getQuaternion());
+         footstepData.setTrajectoryReferenceFrameId(trajectoryFrame);
          snappedFootstepDataList.add(footstepData);
       }
 

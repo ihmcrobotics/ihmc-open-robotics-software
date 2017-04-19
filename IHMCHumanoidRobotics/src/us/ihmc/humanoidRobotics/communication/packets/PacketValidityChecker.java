@@ -38,14 +38,6 @@ public abstract class PacketValidityChecker
    {
       ObjectErrorType packetFieldErrorType;
 
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getOrigin());
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = packetToCheck.getClass().getSimpleName();
-         String errorMessage = messageClassName + "'s origin field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
-
       packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
       if (packetFieldErrorType != null)
       {
@@ -159,14 +151,6 @@ public abstract class PacketValidityChecker
    public static String validateFootstepDataMessage(AdjustFootstepMessage packetToCheck)
    {
       ObjectErrorType packetFieldErrorType;
-
-      packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getOrigin());
-      if (packetFieldErrorType != null)
-      {
-         String messageClassName = packetToCheck.getClass().getSimpleName();
-         String errorMessage = messageClassName + "'s origin field " + packetFieldErrorType.getMessage();
-         return errorMessage;
-      }
 
       packetFieldErrorType = ObjectValidityChecker.validateEnum(packetToCheck.getRobotSide());
       if (packetFieldErrorType != null)

@@ -1,6 +1,7 @@
 package us.ihmc.avatar.behaviorTests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,8 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessag
 import us.ihmc.humanoidRobotics.communication.subscribers.HumanoidRobotDataReceiver;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.FrameOrientation;
+import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePose;
 import us.ihmc.robotics.geometry.FramePose2d;
 import us.ihmc.robotics.geometry.RotationTools;
@@ -34,13 +37,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.RigidBody;
+import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.tools.thread.ThreadTools;
 
@@ -254,12 +257,15 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       for (int i = 0; i < desiredFootsteps.size(); i++)
       {
          Footstep footstep = desiredFootsteps.get(i);
-         Point3D location = new Point3D(footstep.getX(), footstep.getY(), footstep.getZ());
-         Quaternion orientation = new Quaternion();
-         footstep.getOrientation(orientation);
+         ReferenceFrame trajectoryFrame = footstep.getFootstepPose().getReferenceFrame();
+         
+         FramePoint position = new FramePoint();
+         FrameOrientation orientation = new FrameOrientation();
+         footstep.getPose(position, orientation);
 
          RobotSide footstepSide = footstep.getRobotSide();
-         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, location, orientation);
+         FootstepDataMessage footstepData = new FootstepDataMessage(footstepSide, position.getPoint(), orientation.getQuaternion());
+         footstepData.setTrajectoryReferenceFrameId(trajectoryFrame);
          ret.add(footstepData);
       }
 
@@ -386,8 +392,8 @@ public abstract class DRCFootstepListBehaviorTest implements MultiRobotTestInter
       Quaternion orientation = new Quaternion();
       RotationTools.computeQuaternionFromYawAndZNormal(yaw, planeNormal, orientation);
 
-      Footstep footstep = new Footstep(foot, robotSide, soleFrame);
-      footstep.setSolePose(new FramePose(ReferenceFrame.getWorldFrame(), position, orientation));
+      FramePose footstepPose = new FramePose(ReferenceFrame.getWorldFrame(), position, orientation);
+      Footstep footstep = new Footstep(foot, robotSide, footstepPose);
 
       return footstep;
    }

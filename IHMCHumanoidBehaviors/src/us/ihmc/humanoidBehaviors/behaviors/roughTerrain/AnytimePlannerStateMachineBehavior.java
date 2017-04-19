@@ -38,7 +38,6 @@ import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearComm
 import us.ihmc.humanoidRobotics.communication.packets.sensing.DepthDataClearCommand.DepthDataTree;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -179,6 +178,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       BehaviorAction<AnytimePlanningState> locateGoalAction = new BehaviorAction<AnytimePlanningState>(
             AnytimePlanningState.LOCATE_GOAL, locateGoalBehavior)
       {
+         @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Starting to locate goal");
@@ -202,6 +202,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       BehaviorAction<AnytimePlanningState> requestPlanarRegionsAction = new BehaviorAction<AnytimePlanningState>(
             AnytimePlanningState.REQUEST_AND_WAIT_FOR_PLANAR_REGIONS, requestAndWaitForPlanarRegionsListBehavior)
       {
+         @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Requesting planar regions");
@@ -211,6 +212,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
       BehaviorAction<AnytimePlanningState> sleepAction = new BehaviorAction<AnytimePlanningState>(AnytimePlanningState.SLEEP, sleepBehavior)
       {
+         @Override
          protected void setBehaviorInput()
          {
             TextToSpeechPacket p1 = new TextToSpeechPacket("Received planar regions, giving planner time to think...");
@@ -480,9 +482,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
    private class SendOverFootstepAndWaitForCompletionBehavior extends AbstractBehavior
    {
-      private final FramePose tempFirstFootstepPose = new FramePose();
-      private final Point3D tempFootstepPosePosition = new Point3D();
-      private final Quaternion tempFirstFootstepPoseOrientation = new Quaternion();
       private final FramePose stanceFootPose = new FramePose();
       private final FramePose swingStartPose = new FramePose();
       private final FramePose swingEndPose = new FramePose();
@@ -601,35 +600,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
       {
          return false;
       }
-
-      private FootstepDataListMessage createFootstepDataListFromPlan(FootstepPlan plan, int startIndex, int maxNumberOfStepsToTake, double swingTime,
-                                                                     double transferTime)
-      {
-         FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-         footstepDataListMessage.setDefaultSwingDuration(swingTime);
-         footstepDataListMessage.setDefaultTransferDuration(transferTime);
-         int numSteps = plan.getNumberOfSteps();
-         int lastStepIndex = Math.min(startIndex + maxNumberOfStepsToTake + 1, numSteps);
-         for (int i = 1 + startIndex; i < lastStepIndex; i++)
-         {
-            SimpleFootstep footstep = plan.getFootstep(i);
-            footstep.getSoleFramePose(tempFirstFootstepPose);
-            tempFirstFootstepPose.getPosition(tempFootstepPosePosition);
-            tempFirstFootstepPose.getOrientation(tempFirstFootstepPoseOrientation);
-
-            FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(tempFootstepPosePosition),
-                                                                               new Quaternion(tempFirstFootstepPoseOrientation));
-            firstFootstepMessage.setOrigin(FootstepDataMessage.FootstepOrigin.AT_SOLE_FRAME);
-            System.out.println("sending footstep of side " + footstep.getRobotSide());
-
-            footstepDataListMessage.add(firstFootstepMessage);
-
-            lastFootstepSentForExecution = new SimpleFootstep(footstep.getRobotSide(), tempFirstFootstepPose);
-         }
-
-         footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
-         return footstepDataListMessage;
-      }
       
       private FootstepDataListMessage createFootstepDataListFromPlanOverPlanarRegions(FootstepPlan plan, int startIndex, int maxNumberOfStepsToTake, double swingTime,
                                                                      double transferTime, PlanarRegionsList planarRegionsList)
@@ -650,7 +620,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
 
             FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()),
                                                                                new Quaternion(swingEndPose.getOrientation()));
-            firstFootstepMessage.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
 
             swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
 
@@ -659,7 +628,7 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
             Point3D waypointTwo = new Point3D();
             swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0).get(waypointOne);
             swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1).get(waypointTwo);
-            firstFootstepMessage.setTrajectoryWaypoints(new Point3D[] {waypointOne, waypointTwo});
+            firstFootstepMessage.setCustomPositionWaypoints(new Point3D[] {waypointOne, waypointTwo});
             System.out.println("sending footstep of side " + footstep.getRobotSide());
 
             footstepDataListMessage.add(firstFootstepMessage);
@@ -719,7 +688,6 @@ public class AnytimePlannerStateMachineBehavior extends StateMachineBehavior<Any
          stepPose.getPosition(position);
          stepPose.getOrientation(orientation);
          FootstepDataMessage firstFootstepMessage = new FootstepDataMessage(stanceSide.getOppositeSide(), position, orientation);
-         firstFootstepMessage.setOrigin(FootstepDataMessage.FootstepOrigin.AT_SOLE_FRAME);
          footstepDataListMessage.add(firstFootstepMessage);
          footstepDataListMessage.setExecutionMode(ExecutionMode.OVERRIDE);
 

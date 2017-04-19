@@ -9,7 +9,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.ExecutionMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
@@ -108,6 +107,7 @@ public class UserDesiredFootstepDataMessageGenerator
 
       sendSteps.addVariableChangedListener(new VariableChangedListener()
       {
+         @Override
          public void variableChanged(YoVariable<?> v)
          {
             if (sendSteps.getBooleanValue())
@@ -139,7 +139,6 @@ public class UserDesiredFootstepDataMessageGenerator
          swingFoot = bipedFeet.get(swingSide);
 
          desiredFootstepCommand.clear();
-         desiredFootstepCommand.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          desiredFootstepCommand.setRobotSide(swingSide);
          desiredFootstepCommand.setSwingHeight(swingHeight.getDoubleValue());
 

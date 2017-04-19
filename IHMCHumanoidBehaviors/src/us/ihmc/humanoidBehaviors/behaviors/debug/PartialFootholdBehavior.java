@@ -9,7 +9,6 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.CommunicationBridgeInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataListMessage;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepDataMessage.FootstepOrigin;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class PartialFootholdBehavior extends AbstractBehavior
@@ -57,7 +56,6 @@ public class PartialFootholdBehavior extends AbstractBehavior
          }
 
          FootstepDataMessage footstepData = new FootstepDataMessage(side, location, new Quaternion(0.0, 0.0, 0.0, 1.0), contactPoints);
-         footstepData.setOrigin(FootstepOrigin.AT_SOLE_FRAME);
          message.add(footstepData);
          side = side.getOppositeSide();
       }
