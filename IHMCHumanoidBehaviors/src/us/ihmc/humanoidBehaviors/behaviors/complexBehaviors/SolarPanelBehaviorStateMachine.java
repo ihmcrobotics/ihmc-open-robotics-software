@@ -92,11 +92,13 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
             FramePoint rHandPoint = new FramePoint(ReferenceFrame.getWorldFrame(), 0.7, -0.35, 1.2);
             FrameOrientation rHandOrientation = new FrameOrientation(ReferenceFrame.getWorldFrame(), new Quaternion());
             
-//            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(solarPanelPlanner.getMotionTime());
-//            atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rHandPoint, rHandOrientation);
-//            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentChestOrientation();
-//            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisHeight();
-//            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisOrientation();
+            
+            
+            atlasPrimitiveActions.wholeBodyBehavior.setTrajectoryTime(solarPanelPlanner.getMotionTime());
+            atlasPrimitiveActions.wholeBodyBehavior.setDesiredHandPose(RobotSide.RIGHT, rHandPoint, rHandOrientation);
+            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentChestOrientation();
+            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisHeight();
+            atlasPrimitiveActions.wholeBodyBehavior.holdCurrentPelvisOrientation();
           
 
             PrintTools.info("gotoReadyPoseAction");
@@ -118,6 +120,7 @@ public class SolarPanelBehaviorStateMachine extends StateMachineBehavior<SolarPa
                // atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.onBehaviorExited();
             }
             
+            //atlasPrimitiveActions.solarPanelPoseValidityTestBehavior.setIsDone(true);
          }
       };
       

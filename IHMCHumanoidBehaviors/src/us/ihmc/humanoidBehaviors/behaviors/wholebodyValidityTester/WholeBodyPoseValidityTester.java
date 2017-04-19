@@ -297,7 +297,7 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    //private boolean wasStable = false;
    
-   public void setUpIsDone()
+   public void setUpHasBeenDone()
    {  
       isSolved = false;
       isSendingPacket = true;
@@ -309,12 +309,13 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    
    public boolean getIKResult()
    {
-      setUpIsDone();
+      setUpHasBeenDone();
+      ThreadTools.sleep(1000);
       for(int i=0;i<100;i++)
       {
-//         PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
+         //PrintTools.info("SQ "+ i +" "+currentSolutionQuality);
          ThreadTools.sleep(5);
-         if(isDone() == true)
+         if(isSolved == true)
          {
             //PrintTools.info("SQ "+ currentSolutionQuality);
             if(Debug)
@@ -544,9 +545,14 @@ public abstract class WholeBodyPoseValidityTester extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      return isSolved;
+      PrintTools.info("Isdone Returned "+isDone.getBooleanValue());
+      return isDone.getBooleanValue();
    }
    
+   public void setIsDone(boolean value)
+   {
+      isDone.set(value);
+   }
    
    
    
