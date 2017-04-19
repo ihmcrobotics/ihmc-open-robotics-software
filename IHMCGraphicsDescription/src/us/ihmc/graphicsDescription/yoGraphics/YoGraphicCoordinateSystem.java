@@ -1,11 +1,14 @@
 package us.ihmc.graphicsDescription.yoGraphics;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
@@ -22,6 +25,8 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    protected final DoubleYoVariable x, y, z, yaw, pitch, roll;
    protected final double scale;
    protected AppearanceDefinition arrowColor = YoAppearance.Gray();
+   private double colorRGB32BitInt = arrowColor.getAwtColor().getRGB();
+   private double transparency = arrowColor.getTransparency();
 
    private final double[] tempYawPitchRoll = new double[3];
 
@@ -39,6 +44,25 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       this.roll = roll;
 
       this.scale = scale;
+   }
+
+   YoGraphicCoordinateSystem(String name, DoubleYoVariable x, DoubleYoVariable y, DoubleYoVariable z, DoubleYoVariable yaw, DoubleYoVariable pitch,
+         DoubleYoVariable roll, double[] constants)
+   {
+      super(name);
+
+      this.x = x;
+      this.y = y;
+      this.z = z;
+
+      this.yaw = yaw;
+      this.pitch = pitch;
+      this.roll = roll;
+
+      this.scale = constants[0];
+      // Ensuring backward compatibility
+      if (constants.length == 3)
+         setArrowColor(new YoAppearanceRGBColor(new Color((int) constants[1]), constants[2]));
    }
 
    public YoGraphicCoordinateSystem(String name, YoFramePoint framePoint, YoFrameOrientation orientation, double scale)
@@ -68,13 +92,13 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
    {
       this(namePrefix + nameSuffix, new YoFramePoint(namePrefix, nameSuffix, ReferenceFrame.getWorldFrame(), registry), new YoFrameOrientation(namePrefix,
             nameSuffix, ReferenceFrame.getWorldFrame(), registry), scale);
-      this.arrowColor = arrowColor;
+      setArrowColor(arrowColor);
    }
 
    public YoGraphicCoordinateSystem(String name, YoFramePoint framePoint, YoFrameOrientation orientation, double scale, AppearanceDefinition arrowColor)
    {
       this(name, framePoint, orientation, scale);
-      this.arrowColor = arrowColor;
+      setArrowColor(arrowColor);
    }
 
    public YoGraphicCoordinateSystem(String name, YoFramePose yoFramePose, double scale)
@@ -176,6 +200,13 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
       z.set(pose.getZ());
    }
 
+   public void setArrowColor(AppearanceDefinition arrowColor)
+   {
+      this.arrowColor = arrowColor;
+      this.colorRGB32BitInt = arrowColor.getAwtColor().getRGB();
+      this.transparency = arrowColor.getTransparency();
+   }
+
    public void hide()
    {
       x.set(Double.NaN);
@@ -254,7 +285,7 @@ public class YoGraphicCoordinateSystem extends YoGraphic implements RemoteYoGrap
 
    public double[] getConstants()
    {
-      return new double[] { scale };
+      return new double[] { scale, colorRGB32BitInt, transparency };
    }
 
    public AppearanceDefinition getAppearance()

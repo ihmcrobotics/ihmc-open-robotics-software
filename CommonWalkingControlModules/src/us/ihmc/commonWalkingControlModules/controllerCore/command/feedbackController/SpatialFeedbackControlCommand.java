@@ -140,22 +140,48 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    }
 
    /**
-    * Sets whether or not to use the intermediate base defined by {@link #setPrimaryBase(RigidBody)} as
-    * base for control.
+    * Sets whether or not to scale the weights on the joints below the intermediate base defined by
+    * {@link #setPrimaryBase(RigidBody)}. Indicates that we would like to custom scale the weights on the joints
+    * in the kinematic chain below the {@code primaryBase} when controlling the {@code endEffector}.
     * <p>
-    *    If false, as is the case in the default setting, the controller can use the floating base to help
-    *    achieve the desired spatial acceleration.
+    *    If false, as is the case in the default setting, the controller uses the default scaling factor
+    *    {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator#secondaryTaskJointsWeight}.
     * </p>
     * <p>
-    *    If true, the controller can only use the joints in the kinematic chain between the
-    *    {@code endEffector} and the {@code primaryBase}.
+    *    If true, the controller uses the custom defined scaling factor {@param secondaryTaskJointWeightScale}
+    *    to scale the weights before the {@code primaryBase} in the kinematic chain between the {@code base}
+    *    and {@code endEffector}.
+    * </p>
+    * <p>
+    *    A scale factor greater than 1.0 indicates that it is desired to use the joints in the kinematic
+    *    chain between {@code base} and {@code primaryBase} to control the {@code endEffector} more than
+    *    the joints between the {@code primaryBase} and the {@code endEffector}. For example, this can be used
+    *    to say that we would prefer to use the pelvis to control the foot acceleration than the leg joints.
+    * </p>
+    * <p>
+    *    A scale factor less than 1.0 indicates that it is desired to use the joints in the kinematic
+    *    chain between {@code primaryBase} and {@code endEffector} to control the {@code endEffector} more than
+    *    the joints between the {@code base} and the {@code primaryBase}. For example, this can be used to say
+    *    that we would prefer to use the leg joints to control the foot acceleration than the pelvis.
     * </p>
     *
-    * @param usePrimaryBaseForControl
+    * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the joints
+    *                                      below the primary base. Optional.
+    * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary base.
+    *                                      Optional.
     */
-   public void setUsePrimaryBaseForControl(boolean usePrimaryBaseForControl)
+   public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
    {
-      spatialAccelerationCommand.setUsePrimaryBaseForControl(usePrimaryBaseForControl);
+      spatialAccelerationCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryTaskJointWeight, secondaryTaskJointWeightScale);
+   }
+
+   /**
+    * Resets the secondary task joint weight scaling factor on the joints below the {@code primaryBase} to its
+    * default value.
+    */
+   public void resetSecondaryTaskJointWeightScale()
+   {
+      spatialAccelerationCommand.resetSecondaryTaskJointWeightScale();
    }
 
    /**
@@ -560,6 +586,12 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
    public void setWeightsForSolver(Vector3DReadOnly angular, Vector3DReadOnly linear)
    {
       spatialAccelerationCommand.setWeights(angular, linear);
+   }
+
+   public void getIncludingFrame(FramePoint desiredPositionToPack, FrameOrientation desiredOrientationToPack)
+   {
+      desiredPositionToPack.setIncludingFrame(worldFrame, desiredPositionInWorld);
+      desiredOrientationToPack.setIncludingFrame(worldFrame, desiredOrientationInWorld);
    }
 
    public void getIncludingFrame(FramePoint desiredPositionToPack, FrameVector desiredLinearVelocityToPack, FrameVector feedForwardLinearAccelerationToPack)

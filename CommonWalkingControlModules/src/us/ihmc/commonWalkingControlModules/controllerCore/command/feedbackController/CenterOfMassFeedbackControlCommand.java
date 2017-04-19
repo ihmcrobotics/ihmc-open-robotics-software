@@ -20,8 +20,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
  * {@link CenterOfMassFeedbackControlCommand} is a command meant to be submit to the
  * {@link WholeBodyControllerCore} via the {@link ControllerCoreCommand}.
  * <p>
- * The objective of a {@link CenterOfMassFeedbackControlCommand} is to notify the center of mass feedback
- * controller that it is requested to run during the next control tick.
+ * The objective of a {@link CenterOfMassFeedbackControlCommand} is to notify the center of mass
+ * feedback controller that it is requested to run during the next control tick.
  * </p>
  * <p>
  * From control tick to control tick each feedback controller can be entirely configured or
@@ -90,6 +90,26 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
 
    /**
     * Sets the desired data expressed in world frame to be used during the next control tick.
+    * <p>
+    * The desired linear velocity and feed-forward linear acceleration are set to zero.
+    * </p>
+    * 
+    * @param desiredPosition describes the position that the center of mass should reach. Not
+    *           modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in
+    *            {@link ReferenceFrame#getWorldFrame()}.
+    */
+   public void set(FramePoint desiredPosition)
+   {
+      desiredPosition.checkReferenceFrameMatch(worldFrame);
+
+      desiredPosition.get(desiredPositionInWorld);
+      desiredLinearVelocityInWorld.setToZero();
+      feedForwardLinearAccelerationInWorld.setToZero();
+   }
+
+   /**
+    * Sets the desired data expressed in world frame to be used during the next control tick.
     * 
     * @param desiredPosition describes the position that the center of mass should reach. Not
     *           modified.
@@ -127,6 +147,21 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    public void setSelectionMatrixToIdentity()
    {
       momentumRateCommand.setSelectionMatrixForLinearControl();
+   }
+
+   /**
+    * Convenience method that sets up the selection matrix such that only the x and y components of
+    * the linear part of this command will be considered in the optimization.
+    *
+    * <pre>
+    *     / 0 0 0 1 0 0 \
+    * S = |             |
+    *     \ 0 0 0 0 1 0 /
+    * </pre>
+    */
+   public void setSelectionMatrixForLinearXYControl()
+   {
+      momentumRateCommand.setSelectionMatrixForLinearXYControl();
    }
 
    /**

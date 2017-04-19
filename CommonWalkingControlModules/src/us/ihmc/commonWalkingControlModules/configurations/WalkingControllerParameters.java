@@ -642,13 +642,11 @@ public abstract class WalkingControllerParameters implements HeadOrientationCont
    }
 
    /**
-    * The duration to use only the joints between the pelvis (the primary base) and the swing foot for controlling
-    * the swing foot acceleration during swing.
-    *
-    * @return duration in seconds.
+    * Whether or not to use a secondary joint scaling factor during swing, where the secondary joint is any joint located in the kinematic chain between
+    * the base and the optional primary base of a SpatialAccelerationCommand and a SpatialVelocityCommand.
     */
-   public double getPrimaryBaseControlDurationInSwing()
+   public boolean applySecondaryJointScaleDuringSwing()
    {
-      return 0.0;
+      return false;
    }
 }

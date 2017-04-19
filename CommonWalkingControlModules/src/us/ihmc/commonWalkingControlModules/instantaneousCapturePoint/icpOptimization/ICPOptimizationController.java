@@ -11,6 +11,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactablePlaneBody;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -238,14 +239,24 @@ public class ICPOptimizationController
       }
 
       if (yoGraphicsListRegistry != null)
-      {
-         YoGraphicPosition beginningOfStateICP = new YoGraphicPosition(yoNamePrefix + "BeginningOfStateICP`", this.beginningOfStateICP, 0.01, YoAppearance.MidnightBlue(),
-               YoGraphicPosition.GraphicType.SOLID_BALL);
-         yoGraphicsListRegistry.registerArtifact("icpOptimizationController", beginningOfStateICP.createArtifact());
-      }
+         setupVisualizers(yoGraphicsListRegistry, VISUALIZE);
 
       parentRegistry.addChild(registry);
    }
+
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry, boolean visualize)
+   {
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+      YoGraphicPosition beginningOfStateICP = new YoGraphicPosition(yoNamePrefix + "BeginningOfStateICP`", this.beginningOfStateICP, 0.01, YoAppearance.MidnightBlue(),
+            YoGraphicPosition.GraphicType.SOLID_BALL);
+
+      artifactList.add(beginningOfStateICP.createArtifact());
+      artifactList.setVisible(visualize);
+
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
+   }
+
 
    public void setFootstepWeights(double forwardWeight, double lateralWeight)
    {

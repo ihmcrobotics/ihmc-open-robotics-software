@@ -1,14 +1,13 @@
 package us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.recursion;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import org.junit.Assert;
 import org.junit.Test;
-
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class ExitCMPRecursionMultipliersTest
 {
@@ -68,35 +67,12 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = true;
 
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
-         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-         double upcomingTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue();
-         double upcomingTimeSpentOnExitCMP = 0.0;
-
-         double exitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + upcomingTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * upcomingTimeSpentOnExitCMP));
-         Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertFalse(Double.isNaN(exitCMPMultiplier));
-         for (int i = 1; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * exitCMPMultiplier;
+         double exitCMPMultiplier = 0.0;
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertFalse(Double.isNaN(exitCMPMultiplier));
@@ -162,38 +138,17 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = true;
 
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
-         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
          double nextTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
                swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
          double nextTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(1).getDoubleValue()) * singleSupportDurations.get(1).getDoubleValue() +
                transferSplitFractions.get(2).getDoubleValue() * doubleSupportDurations.get(2).getDoubleValue();
 
-         double exitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * nextTimeSpentOnExitCMP));
-
-         Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertFalse(Double.isNaN(exitCMPMultiplier));
-         for (int i = 1; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         exitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * exitCMPMultiplier;
+         double exitCMPMultiplier = Math.exp(-omega * (nextTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * nextTimeSpentOnExitCMP));
 
          Assert.assertEquals(exitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(exitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
@@ -256,24 +211,10 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
-         for (int i = 1; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
@@ -335,24 +276,10 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
-         for (int i = 1; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(1, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
@@ -418,36 +345,12 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = true;
 
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
-         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
-         double nextTimeSpentOnEntryCMP = (1.0 - doubleSupportDurations.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue();
-         double nextTimeSpentOnExitCMP = 0.0;
-
-         double firstExitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * nextTimeSpentOnExitCMP));
-
-         Assert.assertEquals(firstExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(firstExitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertFalse(Double.isNaN(firstExitCMPMultiplier));
-         for (int i = 1; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         firstExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * firstExitCMPMultiplier;
+         double firstExitCMPMultiplier = 0.0;
 
          Assert.assertEquals(firstExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(firstExitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
@@ -514,47 +417,19 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = true;
 
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
 
-         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
          double nextTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
                swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
          double nextTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(1).getDoubleValue()) * singleSupportDurations.get(1).getDoubleValue() +
                transferSplitFractions.get(2).getDoubleValue() * doubleSupportDurations.get(2).getDoubleValue();
-         double nextNextTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(2).getDoubleValue()) * doubleSupportDurations.get(2).getDoubleValue();
-         double nextNextTimeSpentOnExitCMP = 0.0;
 
-         double firstExitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * nextTimeSpentOnExitCMP));
-         double secondExitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP + nextTimeSpentOnExitCMP + nextNextTimeSpentOnEntryCMP))
-               * (1.0 - Math.exp(-omega * nextNextTimeSpentOnExitCMP));
-
-         Assert.assertEquals(firstExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(secondExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
-         Assert.assertEquals(firstExitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(secondExitCMPMultiplier, recursionMultipliers.getExitMultiplier(1), epsilon);
-         Assert.assertFalse(Double.isNaN(firstExitCMPMultiplier));
-         Assert.assertFalse(Double.isNaN(secondExitCMPMultiplier));
-         for (int i = 2; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         firstExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * firstExitCMPMultiplier;
-         secondExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * secondExitCMPMultiplier;
+         double firstExitCMPMultiplier = Math.exp(-omega * (nextTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * nextTimeSpentOnExitCMP));
+         double secondExitCMPMultiplier = 0.0;
 
          Assert.assertEquals(firstExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(secondExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
@@ -624,16 +499,11 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = true;
 
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
-         double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-               swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-         double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-               transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
          double nextTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(1).getDoubleValue()) * doubleSupportDurations.get(1).getDoubleValue() +
                swingSplitFractions.get(1).getDoubleValue() * singleSupportDurations.get(1).getDoubleValue();
          double nextTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(1).getDoubleValue()) * singleSupportDurations.get(1).getDoubleValue() +
@@ -643,29 +513,9 @@ public class ExitCMPRecursionMultipliersTest
          double nextNextTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(2).getDoubleValue()) * singleSupportDurations.get(2).getDoubleValue() +
                transferSplitFractions.get(3).getDoubleValue() * doubleSupportDurations.get(3).getDoubleValue();
 
-         double firstExitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * nextTimeSpentOnExitCMP));
-         double secondExitCMPMultiplier = Math.exp(-omega * (currentTimeSpentOnExitCMP + nextTimeSpentOnEntryCMP + nextTimeSpentOnExitCMP + nextNextTimeSpentOnEntryCMP))
+         double firstExitCMPMultiplier = Math.exp(-omega * (nextTimeSpentOnEntryCMP)) * (1.0 - Math.exp(-omega * nextTimeSpentOnExitCMP));
+         double secondExitCMPMultiplier = Math.exp(-omega * (nextTimeSpentOnEntryCMP + nextTimeSpentOnExitCMP + nextNextTimeSpentOnEntryCMP))
                * (1.0 - Math.exp(-omega * nextNextTimeSpentOnExitCMP));
-
-         Assert.assertEquals(firstExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(secondExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
-         Assert.assertEquals(firstExitCMPMultiplier, recursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(secondExitCMPMultiplier, recursionMultipliers.getExitMultiplier(1), epsilon);
-         Assert.assertFalse(Double.isNaN(firstExitCMPMultiplier));
-         Assert.assertFalse(Double.isNaN(secondExitCMPMultiplier));
-         for (int i = 2; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         firstExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * firstExitCMPMultiplier;
-         secondExitCMPMultiplier = Math.exp(-omega * currentTimeSpentOnEntryCMP) * secondExitCMPMultiplier;
 
          Assert.assertEquals(firstExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(secondExitCMPMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
@@ -732,25 +582,10 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
-         for (int i = 1; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
@@ -812,26 +647,10 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
-         Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(1), epsilon);
-         for (int i = 2; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
@@ -895,11 +714,10 @@ public class ExitCMPRecursionMultipliersTest
 
 
          // setup for in swing
-         boolean isInTransfer = false;
          boolean useTwoCMPs = false;
 
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
          Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
          Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
@@ -907,21 +725,6 @@ public class ExitCMPRecursionMultipliersTest
          Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(1), epsilon);
          for (int i = 2; i < maxSteps; i++)
          {
-            Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
-         }
-
-         // setup for in transfer
-         isInTransfer = true;
-         exitCMPRecursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-         recursionMultipliers.compute(2, stepsRegistered, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-         Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(1), epsilon);
-         Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(0), epsilon);
-         Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(1), epsilon);
-         for (int i = 2; i < maxSteps; i++)
-         {
-            Assert.assertTrue(Double.isNaN(exitCMPRecursionMultipliers.getExitMultiplier(i)));
             Assert.assertTrue(Double.isNaN(recursionMultipliers.getExitMultiplier(i)));
          }
       }
@@ -981,41 +784,13 @@ public class ExitCMPRecursionMultipliersTest
             transferSplitFractions.get(maxSteps).set(0.8 * random.nextDouble());
 
             // setup for in swing
-            boolean isInTransfer = false;
             boolean useTwoCMPs = true;
 
-            exitCMPRecursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            exitCMPRecursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
-            double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-                  swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-            double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-                  transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+            double recursionTime = 0.0;
 
-            double recursionTime = currentTimeSpentOnExitCMP;
-
-            for (int i = 1; i < j + 1; i++)
-            {
-               double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue() +
-                     swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
-               double timeSpentOnExitCMP = (1.0 - swingSplitFractions.get(i).getDoubleValue()) * singleSupportDurations.get(i).getDoubleValue() +
-                     transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
-
-               double exitMultiplier = Math.exp(-omega * (timeSpentOnEntryCMP + recursionTime)) * ( 1.0 - Math.exp(-omega * timeSpentOnExitCMP));
-
-               Assert.assertEquals(exitMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(i - 1), epsilon);
-               Assert.assertEquals(exitMultiplier, recursionMultipliers.getExitMultiplier(i - 1), epsilon);
-               Assert.assertFalse(Double.isNaN(exitMultiplier));
-
-               recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
-            }
-
-            // setup for in transfer
-            isInTransfer = true;
-            exitCMPRecursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-            recursionTime = currentTimeSpentOnEntryCMP + currentTimeSpentOnExitCMP;
             for (int i = 1; i < j + 1; i++)
             {
                double timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue() +
@@ -1089,50 +864,13 @@ public class ExitCMPRecursionMultipliersTest
             transferSplitFractions.get(maxSteps).set(0.8 * random.nextDouble());
 
             // setup for in swing
-            boolean isInTransfer = false;
             boolean useTwoCMPs = true;
 
-            exitCMPRecursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            exitCMPRecursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
-            double currentTimeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(0).getDoubleValue()) * doubleSupportDurations.get(0).getDoubleValue() +
-                  swingSplitFractions.get(0).getDoubleValue() * singleSupportDurations.get(0).getDoubleValue();
-            double currentTimeSpentOnExitCMP = (1.0 - swingSplitFractions.get(0).getDoubleValue()) * singleSupportDurations.get(0).getDoubleValue() +
-                  transferSplitFractions.get(1).getDoubleValue() * doubleSupportDurations.get(1).getDoubleValue();
+            double recursionTime = 0.0;
 
-            double recursionTime = currentTimeSpentOnExitCMP;
-
-            for (int i = 1; i < j + 1; i++)
-            {
-               double timeSpentOnEntryCMP, timeSpentOnExitCMP;
-               if (i == j)
-               {
-                  timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue();
-                  timeSpentOnExitCMP = 0.0;
-               }
-               else
-               {
-                  timeSpentOnEntryCMP = (1.0 - transferSplitFractions.get(i).getDoubleValue()) * doubleSupportDurations.get(i).getDoubleValue()
-                        + swingSplitFractions.get(i).getDoubleValue() * singleSupportDurations.get(i).getDoubleValue();
-                  timeSpentOnExitCMP = (1.0 - swingSplitFractions.get(i).getDoubleValue()) * singleSupportDurations.get(i).getDoubleValue()
-                        + transferSplitFractions.get(i + 1).getDoubleValue() * doubleSupportDurations.get(i + 1).getDoubleValue();
-               }
-
-               double exitMultiplier = Math.exp(-omega * (timeSpentOnEntryCMP + recursionTime)) * ( 1.0 - Math.exp(-omega * timeSpentOnExitCMP));
-
-               Assert.assertEquals(exitMultiplier, exitCMPRecursionMultipliers.getExitMultiplier(i - 1), epsilon);
-               Assert.assertEquals(exitMultiplier, recursionMultipliers.getExitMultiplier(i - 1), epsilon);
-               Assert.assertFalse(Double.isNaN(exitMultiplier));
-
-               recursionTime += timeSpentOnEntryCMP + timeSpentOnExitCMP;
-            }
-
-            // setup for in transfer
-            isInTransfer = true;
-            exitCMPRecursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-            recursionTime = currentTimeSpentOnExitCMP + currentTimeSpentOnEntryCMP;
             for (int i = 1; i < j + 1; i++)
             {
                double timeSpentOnEntryCMP, timeSpentOnExitCMP;
@@ -1211,22 +949,10 @@ public class ExitCMPRecursionMultipliersTest
             transferSplitFractions.get(maxSteps).set(0.8 * random.nextDouble());
 
             // setup for in swing
-            boolean isInTransfer = false;
             boolean useTwoCMPs = false;
 
-            exitCMPRecursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-            for (int i = 0; i < j ; i++)
-            {
-               Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(i), epsilon);
-               Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(i), epsilon);
-            }
-
-            // setup for in transfer
-            isInTransfer = true;
-            exitCMPRecursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            exitCMPRecursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+            recursionMultipliers.compute(j, j + 1, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
             for (int i = 0; i < j ; i++)
             {
@@ -1287,22 +1013,10 @@ public class ExitCMPRecursionMultipliersTest
             transferSplitFractions.get(maxSteps).set(0.8 * random.nextDouble());
 
             // setup for in swing
-            boolean isInTransfer = false;
             boolean useTwoCMPs = false;
 
-            exitCMPRecursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-
-            for (int i = 0; i < j ; i++)
-            {
-               Assert.assertEquals(0.0, exitCMPRecursionMultipliers.getExitMultiplier(i), epsilon);
-               Assert.assertEquals(0.0, recursionMultipliers.getExitMultiplier(i), epsilon);
-            }
-
-            // setup for in transfer
-            isInTransfer = true;
-            exitCMPRecursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
-            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, isInTransfer, omega);
+            exitCMPRecursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
+            recursionMultipliers.compute(j, j, doubleSupportDurations, singleSupportDurations, useTwoCMPs, omega);
 
             for (int i = 0; i < j ; i++)
             {

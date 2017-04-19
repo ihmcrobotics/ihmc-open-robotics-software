@@ -16,6 +16,7 @@ public class TransferInitialICPMatrix extends DenseMatrix64F
 
    public void compute()
    {
+      // this is the inital spline bound
       set(0, 0, 1);
    }
 }

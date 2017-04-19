@@ -5,12 +5,12 @@ import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 
 import java.util.List;
 
-public class NewTransferExitCMPMatrix extends DenseMatrix64F
+public class TransferExitCMPMatrix extends DenseMatrix64F
 {
    private final List<DoubleYoVariable> swingSplitFractions;
    private final List<DoubleYoVariable> transferSplitFractions;
 
-   public NewTransferExitCMPMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions)
+   public TransferExitCMPMatrix(List<DoubleYoVariable> swingSplitFractions, List<DoubleYoVariable> transferSplitFractions)
    {
       super(4, 1);
 

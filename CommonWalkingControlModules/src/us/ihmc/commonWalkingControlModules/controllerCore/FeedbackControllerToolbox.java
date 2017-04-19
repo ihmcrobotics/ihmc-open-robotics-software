@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.euclid.interfaces.Clearable;
 import us.ihmc.robotics.controllers.OrientationPIDGainsInterface;
@@ -17,6 +20,7 @@ import us.ihmc.robotics.controllers.YoOrientationPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoPositionPIDGainsInterface;
 import us.ihmc.robotics.controllers.YoSE3PIDGainsInterface;
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FramePoint;
@@ -50,21 +54,21 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final List<Clearable> clearableData = new ArrayList<>();
+   private final List<Pair<? extends Clearable, List<BooleanYoVariable>>> clearableData = new ArrayList<>();
 
-   private final Map<RigidBody, EnumMap<Type, YoFramePoint>> endEffectorPositions = new HashMap<>();
-   private final Map<RigidBody, EnumMap<Type, YoFrameQuaternion>> endEffectorOrientations = new HashMap<>();
-   private final Map<RigidBody, EnumMap<Type, EnumMap<Space, YoFrameVector>>> endEffectorDataVectors = new HashMap<>();
-   private final Map<RigidBody, EnumMap<Space, RateLimitedYoFrameVector>> endEffectorRateLimitedDataVectors = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Type, Pair<YoFramePoint, List<BooleanYoVariable>>>> endEffectorPositions = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Type, Pair<YoFrameQuaternion, List<BooleanYoVariable>>>> endEffectorOrientations = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>>>> endEffectorDataVectors = new HashMap<>();
+   private final Map<RigidBody, EnumMap<Space, Pair<RateLimitedYoFrameVector, List<BooleanYoVariable>>>> endEffectorRateLimitedDataVectors = new HashMap<>();
 
    private final Map<RigidBody, YoOrientationPIDGainsInterface> endEffectorOrientationGains = new HashMap<>();
    private final Map<RigidBody, YoPositionPIDGainsInterface> endEffectorPositionGains = new HashMap<>();
 
    private final Map<RigidBody, YoSE3OffsetFrame> endEffectorControlFrames = new HashMap<>();
 
-   private final EnumMap<Type, YoFramePoint> centerOfMassPositions = new EnumMap<>(Type.class);
-   private final EnumMap<Type, EnumMap<Space, YoFrameVector>> centerOfMassDataVectors = new EnumMap<>(Type.class);
-   private final EnumMap<Space, RateLimitedYoFrameVector> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
+   private final EnumMap<Type, Pair<YoFramePoint, List<BooleanYoVariable>>> centerOfMassPositions = new EnumMap<>(Type.class);
+   private final EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>>> centerOfMassDataVectors = new EnumMap<>(Type.class);
+   private final EnumMap<Space, Pair<RateLimitedYoFrameVector, List<BooleanYoVariable>>> centerOfMassRateLimitedDataVectors = new EnumMap<>(Space.class);
    private YoPositionPIDGainsInterface centerOfMassPositionGains;
 
    public FeedbackControllerToolbox(YoVariableRegistry parentRegistry)
@@ -79,21 +83,25 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criterion.
     */
-   public YoFramePoint getCenterOfMassPosition(Type type)
+   public YoFramePoint getCenterOfMassPosition(Type type, BooleanYoVariable enabled)
    {
-      YoFramePoint yoFramePoint = centerOfMassPositions.get(type);
+      Pair<YoFramePoint, List<BooleanYoVariable>> yoFramePointEnabledPair = centerOfMassPositions.get(type);
 
-      if (yoFramePoint == null)
+      if (yoFramePointEnabledPair == null)
       {
          String namePrefix = centerOfMassName;
          namePrefix += type.getName();
          namePrefix += Space.POSITION.getName();
-         yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
-         centerOfMassPositions.put(type, yoFramePoint);
-         clearableData.add(yoFramePoint);
+         YoFramePoint yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
+         List<BooleanYoVariable> endabledList = new ArrayList<>();
+         yoFramePointEnabledPair = new ImmutablePair<>(yoFramePoint, endabledList);
+         centerOfMassPositions.put(type, yoFramePointEnabledPair);
+         clearableData.add(yoFramePointEnabledPair);
       }
 
-      return yoFramePoint;
+      yoFramePointEnabledPair.getRight().add(enabled);
+
+      return yoFramePointEnabledPair.getLeft();
    }
 
    /**
@@ -104,9 +112,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param space the space of the data to retrieve.
     * @return the unique {@code YoFrameVector} matching the search criteria.
     */
-   public YoFrameVector getCenterOfMassDataVector(Type type, Space space)
+   public YoFrameVector getCenterOfMassDataVector(Type type, Space space, BooleanYoVariable enabled)
    {
-      EnumMap<Space, YoFrameVector> dataVectors = centerOfMassDataVectors.get(type);
+      EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>> dataVectors = centerOfMassDataVectors.get(type);
 
       if (dataVectors == null)
       {
@@ -114,19 +122,23 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          centerOfMassDataVectors.put(type, dataVectors);
       }
 
-      YoFrameVector yoFrameVector = dataVectors.get(space);
+      Pair<YoFrameVector, List<BooleanYoVariable>> yoFrameVectorEnabledPair = dataVectors.get(space);
 
-      if (yoFrameVector == null)
+      if (yoFrameVectorEnabledPair == null)
       {
          String namePrefix = centerOfMassName;
          namePrefix += type.getName();
          namePrefix += space.getName();
-         yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
-         dataVectors.put(space, yoFrameVector);
-         clearableData.add(yoFrameVector);
+         YoFrameVector yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
+         List<BooleanYoVariable> endabledList = new ArrayList<>();
+         yoFrameVectorEnabledPair = new ImmutablePair<>(yoFrameVector, endabledList);
+         dataVectors.put(space, yoFrameVectorEnabledPair);
+         clearableData.add(yoFrameVectorEnabledPair);
       }
 
-      return yoFrameVector;
+      yoFrameVectorEnabledPair.getRight().add(enabled);
+
+      return yoFrameVectorEnabledPair.getLeft();
    }
 
    /**
@@ -143,23 +155,28 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
     */
-   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate)
+   public RateLimitedYoFrameVector getCenterOfMassRateLimitedDataVector(Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate,
+                                                                        BooleanYoVariable enabled)
    {
-      RateLimitedYoFrameVector rateLimitedYoFrameVector = centerOfMassRateLimitedDataVectors.get(space);
+      Pair<RateLimitedYoFrameVector, List<BooleanYoVariable>> rateLimitedYoFrameVectorEnabledPair = centerOfMassRateLimitedDataVectors.get(space);
 
-      if (rateLimitedYoFrameVector == null)
+      if (rateLimitedYoFrameVectorEnabledPair == null)
       {
          String namePrefix = centerOfMassName;
          namePrefix += "RateLimited";
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
-         YoFrameVector rawYoFrameVector = getCenterOfMassDataVector(rawDataType, space);
-         rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
-         centerOfMassRateLimitedDataVectors.put(space, rateLimitedYoFrameVector);
-         clearableData.add(rateLimitedYoFrameVector);
+         YoFrameVector rawYoFrameVector = getCenterOfMassDataVector(rawDataType, space, enabled);
+         RateLimitedYoFrameVector rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
+         List<BooleanYoVariable> endabledList = new ArrayList<>();
+         rateLimitedYoFrameVectorEnabledPair = new ImmutablePair<>(rateLimitedYoFrameVector, endabledList);
+         centerOfMassRateLimitedDataVectors.put(space, rateLimitedYoFrameVectorEnabledPair);
+         clearableData.add(rateLimitedYoFrameVectorEnabledPair);
       }
 
-      return rateLimitedYoFrameVector;
+      rateLimitedYoFrameVectorEnabledPair.getRight().add(enabled);
+
+      return rateLimitedYoFrameVectorEnabledPair.getLeft();
    }
 
    /**
@@ -192,9 +209,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoint} matching the search criteria.
     */
-   public YoFramePoint getPosition(RigidBody endEffector, Type type)
+   public YoFramePoint getPosition(RigidBody endEffector, Type type, BooleanYoVariable enabled)
    {
-      EnumMap<Type, YoFramePoint> typeDependentPositions = endEffectorPositions.get(endEffector);
+      EnumMap<Type, Pair<YoFramePoint, List<BooleanYoVariable>>> typeDependentPositions = endEffectorPositions.get(endEffector);
 
       if (typeDependentPositions == null)
       {
@@ -202,19 +219,23 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          endEffectorPositions.put(endEffector, typeDependentPositions);
       }
 
-      YoFramePoint yoFramePoint = typeDependentPositions.get(type);
+      Pair<YoFramePoint, List<BooleanYoVariable>> yoFramePointEnabledPair = typeDependentPositions.get(type);
 
-      if (yoFramePoint == null)
+      if (yoFramePointEnabledPair == null)
       {
          String namePrefix = endEffector.getName();
          namePrefix += type.getName();
          namePrefix += Space.POSITION.getName();
-         yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
-         typeDependentPositions.put(type, yoFramePoint);
-         clearableData.add(yoFramePoint);
+         YoFramePoint yoFramePoint = new YoFramePoint(namePrefix, worldFrame, registry);
+         List<BooleanYoVariable> endabledList = new ArrayList<>();
+         yoFramePointEnabledPair = new ImmutablePair<>(yoFramePoint, endabledList);
+         typeDependentPositions.put(type, yoFramePointEnabledPair);
+         clearableData.add(yoFramePointEnabledPair);
       }
 
-      return yoFramePoint;
+      yoFramePointEnabledPair.getRight().add(enabled);
+
+      return yoFramePointEnabledPair.getLeft();
    }
 
    /**
@@ -232,9 +253,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFrameQuaternion} matching the search criteria.
     */
-   public YoFrameQuaternion getOrientation(RigidBody endEffector, Type type)
+   public YoFrameQuaternion getOrientation(RigidBody endEffector, Type type, BooleanYoVariable enabled)
    {
-      EnumMap<Type, YoFrameQuaternion> typeDependentOrientations = endEffectorOrientations.get(endEffector);
+      EnumMap<Type, Pair<YoFrameQuaternion, List<BooleanYoVariable>>> typeDependentOrientations = endEffectorOrientations.get(endEffector);
 
       if (typeDependentOrientations == null)
       {
@@ -242,19 +263,23 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          endEffectorOrientations.put(endEffector, typeDependentOrientations);
       }
 
-      YoFrameQuaternion yoFrameQuaternion = typeDependentOrientations.get(type);
+      Pair<YoFrameQuaternion, List<BooleanYoVariable>> yoFrameQuaternionEnabledPair = typeDependentOrientations.get(type);
 
-      if (yoFrameQuaternion == null)
+      if (yoFrameQuaternionEnabledPair == null)
       {
          String namePrefix = endEffector.getName();
          namePrefix += type.getName();
          namePrefix += Space.ORIENTATION.getName();
-         yoFrameQuaternion = new YoFrameQuaternion(namePrefix, worldFrame, registry);
-         typeDependentOrientations.put(type, yoFrameQuaternion);
-         clearableData.add(yoFrameQuaternion);
+         YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion(namePrefix, worldFrame, registry);
+         List<BooleanYoVariable> endabledList = new ArrayList<>();
+         yoFrameQuaternionEnabledPair = new ImmutablePair<>(yoFrameQuaternion, endabledList);
+         typeDependentOrientations.put(type, yoFrameQuaternionEnabledPair);
+         clearableData.add(yoFrameQuaternionEnabledPair);
       }
 
-      return yoFrameQuaternion;
+      yoFrameQuaternionEnabledPair.getRight().add(enabled);
+
+      return yoFrameQuaternionEnabledPair.getLeft();
    }
 
    /**
@@ -272,9 +297,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param space the space of the data to retrieve.
     * @return the unique {@code YoFrameVector} matching the search criteria.
     */
-   public YoFrameVector getDataVector(RigidBody endEffector, Type type, Space space)
+   public YoFrameVector getDataVector(RigidBody endEffector, Type type, Space space, BooleanYoVariable enabled)
    {
-      EnumMap<Type, EnumMap<Space, YoFrameVector>> dataVectorStep1 = endEffectorDataVectors.get(endEffector);
+      EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>>> dataVectorStep1 = endEffectorDataVectors.get(endEffector);
 
       if (dataVectorStep1 == null)
       {
@@ -282,7 +307,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          endEffectorDataVectors.put(endEffector, dataVectorStep1);
       }
 
-      EnumMap<Space, YoFrameVector> dataVectorStep2 = dataVectorStep1.get(type);
+      EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>> dataVectorStep2 = dataVectorStep1.get(type);
 
       if (dataVectorStep2 == null)
       {
@@ -290,19 +315,23 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          dataVectorStep1.put(type, dataVectorStep2);
       }
 
-      YoFrameVector yoFrameVector = dataVectorStep2.get(space);
+      Pair<YoFrameVector, List<BooleanYoVariable>> yoFrameVectorEnabledPair = dataVectorStep2.get(space);
 
-      if (yoFrameVector == null)
+      if (yoFrameVectorEnabledPair == null)
       {
          String namePrefix = endEffector.getName();
          namePrefix += type.getName();
          namePrefix += space.getName();
-         yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
-         dataVectorStep2.put(space, yoFrameVector);
-         clearableData.add(yoFrameVector);
+         YoFrameVector yoFrameVector = new YoFrameVector(namePrefix, worldFrame, registry);
+         List<BooleanYoVariable> endabledList = new ArrayList<>();
+         yoFrameVectorEnabledPair = new ImmutablePair<>(yoFrameVector, endabledList);
+         dataVectorStep2.put(space, yoFrameVectorEnabledPair);
+         clearableData.add(yoFrameVectorEnabledPair);
       }
 
-      return yoFrameVector;
+      yoFrameVectorEnabledPair.getRight().add(enabled);
+
+      return yoFrameVectorEnabledPair.getLeft();
    }
 
    /**
@@ -326,9 +355,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param maximumRate the maximum rate allowed rate. Not modified.
     * @return the unique {@code RateLimitedYoFrameVector} matching the search criteria.
     */
-   public RateLimitedYoFrameVector getRateLimitedDataVector(RigidBody endEffector, Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate)
+   public RateLimitedYoFrameVector getRateLimitedDataVector(RigidBody endEffector, Type rawDataType, Space space, double dt, DoubleYoVariable maximumRate,
+                                                            BooleanYoVariable enabled)
    {
-      EnumMap<Space, RateLimitedYoFrameVector> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
+      EnumMap<Space, Pair<RateLimitedYoFrameVector, List<BooleanYoVariable>>> endEffectorDataVectors = endEffectorRateLimitedDataVectors.get(endEffector);
 
       if (endEffectorDataVectors == null)
       {
@@ -336,21 +366,25 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
          endEffectorRateLimitedDataVectors.put(endEffector, endEffectorDataVectors);
       }
 
-      RateLimitedYoFrameVector rateLimitedYoFrameVector = endEffectorDataVectors.get(space);
+      Pair<RateLimitedYoFrameVector, List<BooleanYoVariable>> rateLimitedYoFrameVectorEnabledPair = endEffectorDataVectors.get(space);
 
-      if (rateLimitedYoFrameVector == null)
+      if (rateLimitedYoFrameVectorEnabledPair == null)
       {
          String namePrefix = endEffector.getName();
          namePrefix += "RateLimited";
          namePrefix += rawDataType.getName();
          namePrefix += space.getName();
-         YoFrameVector rawYoFrameVector = getDataVector(endEffector, rawDataType, space);
-         rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
-         endEffectorDataVectors.put(space, rateLimitedYoFrameVector);
-         clearableData.add(rateLimitedYoFrameVector);
+         YoFrameVector rawYoFrameVector = getDataVector(endEffector, rawDataType, space, enabled);
+         RateLimitedYoFrameVector rateLimitedYoFrameVector = new RateLimitedYoFrameVector(namePrefix, "", registry, maximumRate, dt, rawYoFrameVector);
+         List<BooleanYoVariable> endabledList = new ArrayList<>();
+         rateLimitedYoFrameVectorEnabledPair = new ImmutablePair<>(rateLimitedYoFrameVector, endabledList);
+         endEffectorDataVectors.put(space, rateLimitedYoFrameVectorEnabledPair);
+         clearableData.add(rateLimitedYoFrameVectorEnabledPair);
       }
 
-      return rateLimitedYoFrameVector;
+      rateLimitedYoFrameVectorEnabledPair.getRight().add(enabled);
+
+      return rateLimitedYoFrameVectorEnabledPair.getLeft();
    }
 
    /**
@@ -361,9 +395,9 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoFramePoseUsingQuaternions} matching the search criteria.
     */
-   public YoFramePoseUsingQuaternions getPose(RigidBody endEffector, Type type)
+   public YoFramePoseUsingQuaternions getPose(RigidBody endEffector, Type type, BooleanYoVariable enabled)
    {
-      return new YoFramePoseUsingQuaternions(getPosition(endEffector, type), getOrientation(endEffector, type));
+      return new YoFramePoseUsingQuaternions(getPosition(endEffector, type, enabled), getOrientation(endEffector, type, enabled));
    }
 
    /**
@@ -375,9 +409,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoSpatialVector} matching the search criteria.
     */
-   public YoSpatialVector getVelocity(RigidBody endEffector, Type type)
+   public YoSpatialVector getVelocity(RigidBody endEffector, Type type, BooleanYoVariable enabled)
    {
-      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_VELOCITY), getDataVector(endEffector, type, Space.ANGULAR_VELOCITY));
+      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_VELOCITY, enabled),
+                                 getDataVector(endEffector, type, Space.ANGULAR_VELOCITY, enabled));
    }
 
    /**
@@ -389,9 +424,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @param type the type of the data to retrieve.
     * @return the unique {@code YoSpatialVector} matching the search criteria.
     */
-   public YoSpatialVector getAcceleration(RigidBody endEffector, Type type)
+   public YoSpatialVector getAcceleration(RigidBody endEffector, Type type, BooleanYoVariable enabled)
    {
-      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_ACCELERATION), getDataVector(endEffector, type, Space.ANGULAR_ACCELERATION));
+      return new YoSpatialVector(getDataVector(endEffector, type, Space.LINEAR_ACCELERATION, enabled),
+                                 getDataVector(endEffector, type, Space.ANGULAR_ACCELERATION, enabled));
    }
 
    /**
@@ -410,10 +446,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
    public RateLimitedYoSpatialVector getRateLimitedVelocity(RigidBody endEffector, Type rawDataType, double dt, DoubleYoVariable maximumLinearRate,
-                                                            DoubleYoVariable maximumAngularRate)
+                                                            DoubleYoVariable maximumAngularRate, BooleanYoVariable enabled)
    {
-      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, maximumLinearRate),
-                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, maximumAngularRate));
+      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_VELOCITY, dt, maximumLinearRate, enabled),
+                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_VELOCITY, dt, maximumAngularRate, enabled));
    }
 
    /**
@@ -432,10 +468,10 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * @return the unique {@code RateLimitedYoSpatialVector} matching the search criteria.
     */
    public RateLimitedYoSpatialVector getRateLimitedAcceleration(RigidBody endEffector, Type rawDataType, double dt, DoubleYoVariable maximumLinearRate,
-                                                                DoubleYoVariable maximumAngularRate)
+                                                                DoubleYoVariable maximumAngularRate, BooleanYoVariable enabled)
    {
-      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate),
-                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate));
+      return new RateLimitedYoSpatialVector(getRateLimitedDataVector(endEffector, rawDataType, Space.LINEAR_ACCELERATION, dt, maximumLinearRate, enabled),
+                                            getRateLimitedDataVector(endEffector, rawDataType, Space.ANGULAR_ACCELERATION, dt, maximumAngularRate, enabled));
    }
 
    /**
@@ -553,64 +589,108 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataReadOnly
     * part of the data will be {@link Double#NaN} making it clear what it is used and what is not.
     * </p>
     */
-   public void clearData()
+   public void clearUnusedData()
    {
       for (int i = 0; i < clearableData.size(); i++)
-         clearableData.get(i).setToNaN();
+      {
+         Pair<? extends Clearable, List<BooleanYoVariable>> pair = clearableData.get(i);
+         if (!hasData(pair.getRight()))
+            pair.getLeft().setToNaN();
+      }
+   }
+
+   @Override
+   public boolean getCenterOfMassPositionData(FramePoint positionDataToPack, Type type)
+   {
+      Pair<YoFramePoint, List<BooleanYoVariable>> positionData = centerOfMassPositions.get(type);
+
+      if (positionData == null || !hasData(positionData.getRight()))
+         return false;
+
+      positionData.getLeft().getFrameTupleIncludingFrame(positionDataToPack);
+      return true;
+   }
+
+   @Override
+   public boolean getCenterOfMassVectorData(FrameVector vectorDataToPack, Type type, Space space)
+   {
+      EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>> endEffectorDataTyped = centerOfMassDataVectors.get(type);
+
+      if (endEffectorDataTyped == null)
+         return false;
+
+      Pair<YoFrameVector, List<BooleanYoVariable>> vectorData = endEffectorDataTyped.get(space);
+
+      if (vectorData == null || !hasData(vectorData.getRight()))
+         return false;
+
+      vectorData.getLeft().getFrameTupleIncludingFrame(vectorDataToPack);
+      return true;
    }
 
    @Override
    public boolean getPositionData(RigidBody endEffector, FramePoint positionDataToPack, Type type)
    {
-      EnumMap<Type, YoFramePoint> endEffectorData = endEffectorPositions.get(endEffector);
+      EnumMap<Type, Pair<YoFramePoint, List<BooleanYoVariable>>> endEffectorData = endEffectorPositions.get(endEffector);
 
       if (endEffectorData == null)
          return false;
 
-      YoFramePoint positionData = endEffectorData.get(type);
+      Pair<YoFramePoint, List<BooleanYoVariable>> positionData = endEffectorData.get(type);
 
-      if (positionData == null)
+      if (positionData == null || !hasData(positionData.getRight()))
          return false;
 
-      positionData.getFrameTupleIncludingFrame(positionDataToPack);
+      positionData.getLeft().getFrameTupleIncludingFrame(positionDataToPack);
       return true;
    }
 
    @Override
    public boolean getOrientationData(RigidBody endEffector, FrameOrientation orientationDataToPack, Type type)
    {
-      EnumMap<Type, YoFrameQuaternion> endEffectorData = endEffectorOrientations.get(endEffector);
+      EnumMap<Type, Pair<YoFrameQuaternion, List<BooleanYoVariable>>> endEffectorData = endEffectorOrientations.get(endEffector);
 
       if (endEffectorData == null)
          return false;
 
-      YoFrameQuaternion orientationData = endEffectorData.get(type);
+      Pair<YoFrameQuaternion, List<BooleanYoVariable>> orientationData = endEffectorData.get(type);
 
-      if (orientationData == null)
+      if (orientationData == null || !hasData(orientationData.getRight()))
          return false;
 
-      orientationData.getFrameOrientationIncludingFrame(orientationDataToPack);
+      orientationData.getLeft().getFrameOrientationIncludingFrame(orientationDataToPack);
       return true;
    }
 
    @Override
    public boolean getVectorData(RigidBody endEffector, FrameVector vectorDataToPack, Type type, Space space)
    {
-      EnumMap<Type, EnumMap<Space, YoFrameVector>> endEffectorData = endEffectorDataVectors.get(endEffector);
+      EnumMap<Type, EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>>> endEffectorData = endEffectorDataVectors.get(endEffector);
 
       if (endEffectorData == null)
          return false;
 
-      EnumMap<Space, YoFrameVector> endEffectorDataTyped = endEffectorData.get(type);
+      EnumMap<Space, Pair<YoFrameVector, List<BooleanYoVariable>>> endEffectorDataTyped = endEffectorData.get(type);
 
       if (endEffectorDataTyped == null)
          return false;
 
-      YoFrameVector vectorData = endEffectorDataTyped.get(space);
+      Pair<YoFrameVector, List<BooleanYoVariable>> vectorData = endEffectorDataTyped.get(space);
 
-      if (vectorData == null)
+      if (vectorData == null || !hasData(vectorData.getRight()))
          return false;
 
+      vectorData.getLeft().getFrameTupleIncludingFrame(vectorDataToPack);
+      return true;
+   }
+
+   private static boolean hasData(List<BooleanYoVariable> enabledList)
+   {
+      for (int i = 0; i < enabledList.size(); i++)
+      {
+         if (enabledList.get(i).getBooleanValue())
+            return true;
+      }
       return false;
    }
 }

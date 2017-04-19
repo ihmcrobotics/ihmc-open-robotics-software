@@ -264,7 +264,7 @@ public class ICPOptimizationSolutionHandler
          YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
    {
       finalICP.getFrameTuple2d(finalICP2d);
-      stateMultiplierCalculator.reconstructICPCornerPoint(tmpEndPoint, finalICP2d, footstepSolutions, entryOffsets, exitOffsets, stanceEntryCMP, stanceExitCMP,
+      stateMultiplierCalculator.reconstructICPCornerPoint(tmpEndPoint, finalICP2d, footstepSolutions, entryOffsets, exitOffsets,
             numberOfFootstepsToConsider);
       stateMultiplierCalculator.reconstructReferenceICP(tmpReferencePoint, tmpReferenceVelocity, tmpEndPoint, stanceEntryCMP, stanceExitCMP,
                   beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d());
@@ -289,7 +289,7 @@ public class ICPOptimizationSolutionHandler
          YoFrameVector2d beginningOfStateICPVelocity, double omega0, int numberOfFootstepsToConsider)
    {
       finalICP.getFrameTuple2d(finalICP2d);
-      stateMultiplierCalculator.yoReconstructICPCornerPoint(tmpEndPoint, finalICP2d, footstepSolutions, entryOffsets, exitOffsets, stanceEntryCMP, stanceExitCMP,
+      stateMultiplierCalculator.yoReconstructICPCornerPoint(tmpEndPoint, finalICP2d, footstepSolutions, entryOffsets, exitOffsets,
             numberOfFootstepsToConsider);
       stateMultiplierCalculator.reconstructReferenceICP(tmpReferencePoint, tmpReferenceVelocity, tmpEndPoint, stanceEntryCMP, stanceExitCMP,
             beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d());
@@ -321,7 +321,7 @@ public class ICPOptimizationSolutionHandler
       {
          finalICP.getFrameTuple2d(finalICP2d);
          stateMultiplierCalculator
-               .yoReconstructICPCornerPoint(tmpEndPoint, finalICP2d, upcomingFootstepLocations, entryOffsets, exitOffsets, stanceEntryCMP, stanceExitCMP,
+               .yoReconstructICPCornerPoint(tmpEndPoint, finalICP2d, upcomingFootstepLocations, entryOffsets, exitOffsets,
                      numberOfFootstepsToConsider);
          stateMultiplierCalculator.reconstructReferenceICP(tmpReferencePoint, tmpReferenceVelocity, tmpEndPoint, stanceEntryCMP, stanceExitCMP,
                beginningOfStateICP.getFrameTuple2d(), beginningOfStateICPVelocity.getFrameTuple2d());
