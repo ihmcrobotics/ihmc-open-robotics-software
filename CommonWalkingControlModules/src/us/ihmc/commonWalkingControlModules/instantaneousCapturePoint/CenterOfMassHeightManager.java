@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivatives
 import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesSmoother;
 import us.ihmc.commonWalkingControlModules.trajectories.CoMXYTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
-import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -102,15 +102,15 @@ public class CenterOfMassHeightManager
    public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
          WalkingControllerParameters walkingControllerParameters, CommonHumanoidReferenceFrames referenceFrames)
    {
-      SideDependentList<Point3D> anklePositionsInSoleFrame = new SideDependentList<>();
+      SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBody foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         FramePoint anklePoint = new FramePoint(ankleFrame);
-         anklePoint.changeFrame(soleFrame);
-         anklePositionsInSoleFrame.put(robotSide, anklePoint.getPointCopy());
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
       
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
@@ -127,7 +127,7 @@ public class CenterOfMassHeightManager
 
       LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
             nominalHeightAboveGround, maximumHeightAboveGround, defaultOffsetHeightAboveGround, doubleSupportPercentageIn, centerOfMassFrame, pelvisFrame,
-            ankleZUpFrames, anklePositionsInSoleFrame, yoTime, yoGraphicsListRegistry, registry);
+            ankleZUpFrames, transformsFromAnkleToSole, yoTime, yoGraphicsListRegistry, registry);
       centerOfMassTrajectoryGenerator.setCoMHeightDriftCompensation(activateDriftCompensation);
       return centerOfMassTrajectoryGenerator;
    }
