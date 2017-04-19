@@ -77,6 +77,11 @@ public class KinematicsToolboxMessageFactory
    /**
     * Convenience method to create a {@link KinematicsToolboxCenterOfMassMessage} that can be used
     * to hold the current center of mass of a robot given its root body.
+    * <p>
+    * By default the weight of the task is set to {@value #DEFAULT_CENTER_OF_MASS_WEIGHT} which it a
+    * rather strong weight for the center of mass. As result, the solution should be very close to
+    * the current center of mass position.
+    * </p>
     * 
     * @param rootBody the root body of the robot for which the center of mass is to be held in
     *           place.
