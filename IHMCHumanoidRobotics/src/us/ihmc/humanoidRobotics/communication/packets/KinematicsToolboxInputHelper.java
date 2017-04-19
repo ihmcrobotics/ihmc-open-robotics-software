@@ -1,6 +1,5 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import us.ihmc.communication.packets.KinematicsToolboxInputMessage;
 import us.ihmc.communication.packets.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.robotics.geometry.FrameOrientation;
@@ -23,7 +22,7 @@ public class KinematicsToolboxInputHelper
     * </p>
     * 
     * @param rigidBody the rigid-body to hold the current pose of.
-    * @return the message ready to pack into a {@link KinematicsToolboxInputMessage}.
+    * @return the message ready to send to the {@code KinematicsToolbosModule}.
     */
    public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentPose(RigidBody rigidBody)
    {
@@ -49,7 +48,7 @@ public class KinematicsToolboxInputHelper
     * </p>
     * 
     * @param rigidBody the rigid-body to hold the current orientation of.
-    * @return the message ready to pack into a {@link KinematicsToolboxInputMessage}.
+    * @return the message ready to send to the {@code KinematicsToolbosModule}.
     */
    public static KinematicsToolboxRigidBodyMessage holdRigidBodyCurrentOrientation(RigidBody rigidBody)
    {

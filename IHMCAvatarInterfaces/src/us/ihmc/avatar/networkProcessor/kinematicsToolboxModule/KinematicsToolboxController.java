@@ -26,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxInputCommand;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.communication.packets.KinematicsToolboxOutputStatus;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -111,7 +110,7 @@ public class KinematicsToolboxController extends ToolboxController
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationDataReference = new AtomicReference<>(null);
    private final AtomicReference<CapturabilityBasedStatus> latestCapturabilityBasedStatusReference = new AtomicReference<>(null);
 
-   private final Map<String, FeedbackControlCommand<?>> activeFeedbackCommands = new HashMap<>();
+   private final Map<String, FeedbackControlCommand<?>> userFeedbackCommands = new HashMap<>();
 
    public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                       FullHumanoidRobotModel desiredFullRobotModel, YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -237,7 +236,7 @@ public class KinematicsToolboxController extends ToolboxController
    @Override
    protected boolean initialize()
    {
-      activeFeedbackCommands.clear();
+      userFeedbackCommands.clear();
 
       RobotConfigurationData robotConfigurationData = latestRobotConfigurationDataReference.get();
 
@@ -300,7 +299,8 @@ public class KinematicsToolboxController extends ToolboxController
       controllerCoreCommand.addInverseKinematicsCommand(createJointLimitReductionCommand());
       controllerCoreCommand.addInverseKinematicsCommand(privilegedConfigurationCommandReference.getAndSet(null));
 
-      solutionQuality.set(KinematicsToolboxHelper.calculateSolutionQuality(controllerCoreCommand.getFeedbackControlCommandList(), feedbackControllerDataHolder));
+      solutionQuality.set(KinematicsToolboxHelper.calculateSolutionQuality(controllerCoreCommand.getFeedbackControlCommandList(),
+                                                                           feedbackControllerDataHolder));
 
       controllerCore.reset();
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
@@ -329,28 +329,10 @@ public class KinematicsToolboxController extends ToolboxController
 
    private FeedbackControlCommandList consumeCommands()
    {
-
-      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxInputCommand.class))
-      {
-         KinematicsToolboxInputCommand newestCommand = commandInputManager.pollNewestCommand(KinematicsToolboxInputCommand.class);
-
-         holdCenterOfMassXYPosition.set(newestCommand.holdCurrentCenterOfMassXYPosition());
-         holdSupportFootPose.set(newestCommand.holdSupporFootPositions());
-
-         if (newestCommand.hasCenterOfMassTaskBeenSet())
-            activeFeedbackCommands.put(centerOfMassName, KinematicsToolboxHelper.consumeCenterOfMassCommand(newestCommand.getCenterOfMassTask(), gains));
-
-         for (int i = 0; i < newestCommand.getNumberOfEndEffectorTasks(); i++)
-         {
-            SpatialFeedbackControlCommand rigidBodyCommand = KinematicsToolboxHelper.consumeRigidBodyCommand(newestCommand.getEndEffectorTask(i), elevator, gains);
-            activeFeedbackCommands.put(rigidBodyCommand.getEndEffector().getName(), rigidBodyCommand);
-         }
-      }
-
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
       {
          KinematicsToolboxCenterOfMassCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxCenterOfMassCommand.class);
-         activeFeedbackCommands.put(centerOfMassName, KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains));
+         userFeedbackCommands.put(centerOfMassName, KinematicsToolboxHelper.consumeCenterOfMassCommand(command, gains));
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxRigidBodyCommand.class))
@@ -359,12 +341,13 @@ public class KinematicsToolboxController extends ToolboxController
          for (int i = 0; i < commands.size(); i++)
          {
             SpatialFeedbackControlCommand rigidBodyCommand = KinematicsToolboxHelper.consumeRigidBodyCommand(commands.get(i), elevator, gains);
-            activeFeedbackCommands.put(rigidBodyCommand.getEndEffector().getName(), rigidBodyCommand);
+            String endEffectorName = rigidBodyCommand.getEndEffector().getName();
+            userFeedbackCommands.put(endEffectorName, rigidBodyCommand);
          }
       }
 
       FeedbackControlCommandList inputs = new FeedbackControlCommandList();
-      activeFeedbackCommands.values().forEach(inputs::addCommand);
+      userFeedbackCommands.values().forEach(inputs::addCommand);
       return inputs;
    }
 
@@ -381,6 +364,11 @@ public class KinematicsToolboxController extends ToolboxController
             continue;
 
          RigidBody foot = desiredFullRobotModel.getFoot(robotSide);
+
+         // Do not hold the foot position if the user is already controlling it.
+         if (userFeedbackCommands.containsKey(foot.getName()))
+            continue;
+
          FramePose poseToHold = new FramePose();
          initialFootPoses.get(robotSide).getFramePoseIncludingFrame(poseToHold);
 
@@ -398,6 +386,13 @@ public class KinematicsToolboxController extends ToolboxController
    {
       if (!holdCenterOfMassXYPosition.getBooleanValue())
          return null;
+
+      // Do not hold the CoM position if the user is already controlling it.
+      if (userFeedbackCommands.containsKey(centerOfMassName))
+      {
+         holdCenterOfMassXYPosition.set(false);
+         return null;
+      }
 
       FramePoint positionToHold = new FramePoint();
       initialCenterOfMassPosition.getFrameTupleIncludingFrame(positionToHold);
