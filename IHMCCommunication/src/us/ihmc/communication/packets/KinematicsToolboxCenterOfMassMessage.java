@@ -15,7 +15,8 @@ import us.ihmc.robotics.linearAlgebra.MatrixTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 /**
- * {@link KinematicsToolboxCenterOfMassMessage} is a sub-message of {@link KinematicsToolboxInputMessage}.
+ * {@link KinematicsToolboxCenterOfMassMessage} is part of the API of the
+ * {@code KinematicsToolboxController}.
  * <p>
  * It holds all the information needed for the {@code KinematicsToolboxController} to constrain the
  * center of mass to a desired location.
