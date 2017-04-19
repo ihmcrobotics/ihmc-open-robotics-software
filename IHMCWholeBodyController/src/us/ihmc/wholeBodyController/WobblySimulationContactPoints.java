@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -96,6 +97,20 @@ public class WobblySimulationContactPoints implements FootContactPoints
 
       for (RobotSide robotSide : RobotSide.values)
          ret.put(robotSide, new Point2D(footLength / 2.0, 0.0));
+
+      return ret;
+   }
+
+   @Override
+   public SideDependentList<LineSegment2d> getToeOffContactLines(double footLength, double footWidth, double toeWidth)
+   {
+      SideDependentList<LineSegment2d> ret = new SideDependentList<>();
+
+      double footForward = footLength / 2.0;
+      double halfToeWidth = toeWidth / 2.0;
+
+      for (RobotSide robotSide : RobotSide.values)
+         ret.put(robotSide, new LineSegment2d(new Point2D(footForward, -halfToeWidth), new Point2D(footForward, halfToeWidth)));
 
       return ret;
    }

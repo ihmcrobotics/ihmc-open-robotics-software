@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.robotics.geometry.LineSegment2d;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -28,6 +29,7 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
 
    protected final SideDependentList<ArrayList<Point2D>> controllerFootGroundContactPoints = new SideDependentList<>();
    protected final SideDependentList<Point2D> controllerToeContactPoints = new SideDependentList<>();
+   protected final SideDependentList<LineSegment2d> controllerToeContactLines = new SideDependentList<>();
 
    private final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<ImmutablePair<String, Vector3D>>();
 
@@ -68,12 +70,15 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
       }
 
       SideDependentList<Tuple2DBasics> toeOffContactPoints = footContactPoints.getToeOffContactPoints(footLength, footWidth, toeWidth);
+      SideDependentList<LineSegment2d> toeOffContactLines = footContactPoints.getToeOffContactLines(footLength, footWidth, toeWidth);
       for (RobotSide robotSide : RobotSide.values)
       {
          controllerToeContactPoints.put(robotSide, new Point2D(toeOffContactPoints.get(robotSide)));
+         controllerToeContactLines.put(robotSide, new LineSegment2d(toeOffContactLines.get(robotSide)));
       }
 
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+
+      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
 
       useSoftGroundContactParameters = footContactPoints.useSoftContactPointParameters();
    }
@@ -103,7 +108,7 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
    {
       controllerFootGroundContactPoints.get(robotSide).add(contactPoint);
       // Update the factory with the new set of contact points.
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
    }
 
    protected final void setControllerFootContactPoint(RobotSide robotSide, List<Point2D> contactPoints)
@@ -111,14 +116,21 @@ public abstract class RobotContactPointParameters implements ContactPointDefinit
       controllerFootGroundContactPoints.get(robotSide).clear();
       controllerFootGroundContactPoints.get(robotSide).addAll(contactPoints);
       // Update the factory with the new set of contact points.
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
    }
 
    protected final void setControllerToeContactPoint(RobotSide robotSide, Point2D toeContactPoint)
    {
       controllerToeContactPoints.get(robotSide).set(toeContactPoint);
       // Update the factory with the new set of contact points.
-      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints);
+      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
+   }
+
+   protected final void setControllerToeContacLine(RobotSide robotSide, LineSegment2d toeContactLine)
+   {
+      controllerToeContactLines.get(robotSide).set(toeContactLine);
+      // Update the factory with the new set of contact points.
+      contactableBodiesFactory.addFootContactParameters(controllerFootGroundContactPoints, controllerToeContactPoints, controllerToeContactLines);
    }
 
    public final List<ImmutablePair<String, Vector3D>> getJointNameGroundContactPointMap()
