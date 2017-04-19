@@ -1,9 +1,13 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
+import java.util.Map;
+
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.NormOps;
 
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TLongArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Type;
@@ -18,6 +22,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolderReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion32;
@@ -77,6 +82,8 @@ public class KinematicsToolboxHelper
             joint.setQd(output.getDesiredJointVelocity(joint));
          }
       }
+
+      desiredRootJoint.getPredecessor().updateFramesRecursively();
    }
 
    static void setRobotStateFromRobotConfigurationData(RobotConfigurationData robotConfigurationData, FloatingInverseDynamicsJoint desiredRootJoint,
@@ -95,6 +102,45 @@ public class KinematicsToolboxHelper
       Quaternion32 orientation = robotConfigurationData.getPelvisOrientation();
       desiredRootJoint.setRotation(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
       desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+
+      desiredRootJoint.getPredecessor().updateFramesRecursively();
+   }
+
+   static void setRobotStateFromPrivilegedConfigurationData(KinematicsToolboxConfigurationCommand commandWithPrivilegedConfiguration,
+                                                           FloatingInverseDynamicsJoint desiredRootJoint, Map<Long, OneDoFJoint> jointNameBasedHashCodeMap)
+   {
+      boolean hasPrivilegedJointAngles = commandWithPrivilegedConfiguration.hasPrivilegedJointAngles();
+
+      if (hasPrivilegedJointAngles)
+      {
+         TLongArrayList jointNameBasedHashCode = commandWithPrivilegedConfiguration.getJointNameBasedHashCodes();
+         TFloatArrayList privilegedJointAngles = commandWithPrivilegedConfiguration.getPrivilegedJointAngles();
+
+         for (int i = 0; i < privilegedJointAngles.size(); i++)
+         {
+            OneDoFJoint joint = jointNameBasedHashCodeMap.get(jointNameBasedHashCode.get(i));
+            joint.setQ(privilegedJointAngles.get(i));
+            joint.setQd(0.0);
+         }
+      }
+
+      boolean hasPrivilegedRooJointPosition = commandWithPrivilegedConfiguration.hasPrivilegedRooJointPosition();
+
+      if (hasPrivilegedRooJointPosition)
+      {
+         desiredRootJoint.setPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
+         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+      }
+
+      boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRooJointOrientation();
+
+      if (hasPrivilegedRooJointOrientation)
+      {
+         desiredRootJoint.setRotation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
+         desiredRootJoint.setVelocity(new DenseMatrix64F(6, 1), 0);
+      }
+
+      desiredRootJoint.getPredecessor().updateFramesRecursively();
    }
 
    static double calculateSolutionQuality(FeedbackControlCommandList activeCommands, FeedbackControllerDataReadOnly feedbackControllerDataHolder)

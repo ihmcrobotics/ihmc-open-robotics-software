@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +82,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    private final FloatingInverseDynamicsJoint desiredRootJoint;
    private final OneDoFJoint[] oneDoFJoints;
+   private final Map<Long, OneDoFJoint> jointNameBasedHashCodeMap = new HashMap<>();
 
    private final SideDependentList<BooleanYoVariable> isFootInSupport = new SideDependentList<>();
    private final SideDependentList<YoFramePoseUsingQuaternions> initialFootPoses = new SideDependentList<>();
@@ -134,6 +136,8 @@ public class KinematicsToolboxController extends ToolboxController
       feedbackControllerDataHolder = controllerCore.getWholeBodyFeedbackControllerDataHolder();
 
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
+      Arrays.stream(oneDoFJoints).forEach(joint -> jointNameBasedHashCodeMap.put(joint.getNameBasedHashCode(), joint));
+
       inverseKinematicsSolution = new KinematicsToolboxOutputStatus(oneDoFJoints);
       inverseKinematicsSolution.setDestination(-1);
       gains.setProportionalGain(800.0);
@@ -259,25 +263,12 @@ public class KinematicsToolboxController extends ToolboxController
             isFootInSupport.get(robotside).set(capturabilityBasedStatus.isSupportFoot(robotside));
       }
 
-      updateTools();
-
-      initialCenterOfMassPosition.setFromReferenceFrame(referenceFrames.getCenterOfMassFrame());
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBody foot = desiredFullRobotModel.getFoot(robotSide);
-         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
-      }
+      updateCoMPositionAndFootPoses();
 
       holdSupportFootPose.set(true);
       holdCenterOfMassXYPosition.set(true);
 
-      PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
-      privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
-      privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
-      privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
-      privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
+      snapPrivilegedConfigurationToCurrent();
 
       return true;
    }
@@ -335,6 +326,9 @@ public class KinematicsToolboxController extends ToolboxController
          KinematicsToolboxConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxConfigurationCommand.class);
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          holdSupportFootPose.set(command.holdSupporFootPositions());
+         KinematicsToolboxHelper.setRobotStateFromPrivilegedConfigurationData(command, desiredRootJoint, jointNameBasedHashCodeMap);
+         updateCoMPositionAndFootPoses();
+         snapPrivilegedConfigurationToCurrent();
       }
 
       if (commandInputManager.isNewCommandAvailable(KinematicsToolboxCenterOfMassCommand.class))
@@ -465,6 +459,29 @@ public class KinematicsToolboxController extends ToolboxController
          else
             coordinateSystem.setOrientation(orientation);
       }
+   }
+
+   private void updateCoMPositionAndFootPoses()
+   {
+      updateTools();
+
+      initialCenterOfMassPosition.setFromReferenceFrame(referenceFrames.getCenterOfMassFrame());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RigidBody foot = desiredFullRobotModel.getFoot(robotSide);
+         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
+      }
+   }
+
+   private void snapPrivilegedConfigurationToCurrent()
+   {
+      PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
+      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationOption.AT_CURRENT);
+      privilegedConfigurationCommand.setDefaultWeight(privilegedWeight.getDoubleValue());
+      privilegedConfigurationCommand.setDefaultConfigurationGain(privilegedConfigurationGain.getDoubleValue());
+      privilegedConfigurationCommand.setDefaultMaxVelocity(privilegedMaxVelocity.getDoubleValue());
+      privilegedConfigurationCommandReference.set(privilegedConfigurationCommand);
    }
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
