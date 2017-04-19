@@ -6,8 +6,11 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.euclid.interfaces.EpsilonComparable;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.robotics.MathTools;
@@ -35,8 +38,8 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<KinematicsToolboxRigidBodyMessage>
 {
    /**
-    * This is the unique hash code of the end-effector to be solved for. It used on the solver side to
-    * retrieve the desired end-effector to be controlled.
+    * This is the unique hash code of the end-effector to be solved for. It used on the solver side
+    * to retrieve the desired end-effector to be controlled.
     */
    public long endEffectorNameBasedHashCode;
    /**
@@ -123,6 +126,9 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * For example, the priority of the task can be changed by changing the weight of this message, a
     * custom control frame can be specified.
     * </p>
+    * <p>
+    * Note that this constructor also sets up the selection matrix for linear control only.
+    * </p>
     * 
     * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
     * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
@@ -132,6 +138,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setDesiredPosition(desiredPosition);
+      setSelectionMatrixForLinearControl();
    }
 
    /**
@@ -140,6 +147,9 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * The new message is ready to be sent, but it can be further adjusted to provide more details.
     * For example, the priority of the task can be changed by changing the weight of this message, a
     * custom control frame can be specified.
+    * </p>
+    * <p>
+    * Note that this constructor also sets up the selection matrix for angular control only.
     * </p>
     * 
     * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
@@ -150,6 +160,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setDesiredOrientation(desiredOrientation);
+      setSelectionMatrixForAngularControl();
    }
 
    /**
@@ -170,6 +181,31 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    {
       endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
       setDesiredPose(desiredPosition, desiredOrientation);
+   }
+
+   /**
+    * Creates a new rigid-body message for the given end-effector.
+    * <p>
+    * The new message is ready to be sent, but it can be further adjusted to provide more details.
+    * For example, the priority of the task can be changed by changing the weight of this message, a
+    * custom control frame can be specified.
+    * </p>
+    * 
+    * @param endEffector the end-effector to solver for in the {@code KinematicsToolboxController}.
+    * @param controlFrame specifies the location and orientation of interest for controlling the
+    *           end-effector.
+    * @param desiredPosition the position that {@code endEffector.getBodyFixedFrame()}'s origin
+    *           should reach. The data is assumed to be expressed in world frame. Not modified.
+    * @param desiredOrientation the orientation that {@code endEffector.getBodyFixedFrame()} should
+    *           reach. The data is assumed to be expressed in world frame. Not modified.
+    */
+   public KinematicsToolboxRigidBodyMessage(RigidBody endEffector, ReferenceFrame controlFrame, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation)
+   {
+      endEffectorNameBasedHashCode = endEffector.getNameBasedHashCode();
+      setDesiredPose(desiredPosition, desiredOrientation);
+      RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
+      controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
+      setControlFramePose(transformToBodyFixedFrame.getTranslationVector(), transformToBodyFixedFrame.getRotationMatrix());
    }
 
    /**
@@ -383,6 +419,22 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    }
 
    /**
+    * Sets the selection matrix by setting individually which axis is to be controlled.
+    * 
+    * @param enableAxesControl array of 6 booleans specifying whether each axis is to be controlled,
+    *           in order: angularX, angularY, angularZ, linearX, linearY, linearZ. Not modified.
+    * @throws RuntimeException if the given array has length different than 6.
+    */
+   public void setSelectionMatrix(boolean[] enableAxesControl)
+   {
+      if (enableAxesControl.length != 6)
+         throw new RuntimeException("Unexpected size. Expected 6, was: " + enableAxesControl.length);
+      initializeSelectionMatrix();
+      for (int i = 0; i < 6; i++)
+         selectionMatrix[i] = enableAxesControl[i];
+   }
+
+   /**
     * Specifies whether the rotation about the x-axis of the control frame should be controlled or
     * not.
     * <p>
@@ -496,7 +548,7 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * @param controlFramePosition the position of the control frame's origin expressed in
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
     */
-   public void setControlFramePosition(Point3DReadOnly controlFramePosition)
+   public void setControlFramePosition(Tuple3DReadOnly controlFramePosition)
    {
       if (controlFramePositionInEndEffector == null)
          controlFramePositionInEndEffector = new Point3D32(controlFramePosition);
@@ -520,6 +572,21 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
    }
 
    /**
+    * Specifies the orientation of the control frame. The given quaternion is assumed to be
+    * expressed in {@code endEffector.getBodyFixedFrame()}.
+    * 
+    * @param controlFrameOrientation the orientation of the control frame expressed in
+    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
+    */
+   public void setControlFrameOrientation(RotationMatrixReadOnly controlFrameOrientation)
+   {
+      if (controlFrameOrientationInEndEffector == null)
+         controlFrameOrientationInEndEffector = new Quaternion32(controlFrameOrientation);
+      else
+         controlFrameOrientationInEndEffector.set(controlFrameOrientation);
+   }
+
+   /**
     * Specifies the pose of the control frame. The given point and quaternion are assumed to be
     * expressed in {@code endEffector.getBodyFixedFrame()}.
     * 
@@ -528,7 +595,22 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
     * @param controlFrameOrientation the orientation of the control frame expressed in
     *           {@code endEffector.getBodyFixedFrame()}. Not modified.
     */
-   public void setControlFramePose(Point3DReadOnly controlFramePosition, QuaternionReadOnly controlFrameOrientation)
+   public void setControlFramePose(Tuple3DReadOnly controlFramePosition, QuaternionReadOnly controlFrameOrientation)
+   {
+      setControlFramePosition(controlFramePosition);
+      setControlFrameOrientation(controlFrameOrientation);
+   }
+
+   /**
+    * Specifies the pose of the control frame. The given point and quaternion are assumed to be
+    * expressed in {@code endEffector.getBodyFixedFrame()}.
+    * 
+    * @param controlFramePosition the position of the control frame's origin expressed in
+    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
+    * @param controlFrameOrientation the orientation of the control frame expressed in
+    *           {@code endEffector.getBodyFixedFrame()}. Not modified.
+    */
+   public void setControlFramePose(Tuple3DReadOnly controlFramePosition, RotationMatrixReadOnly controlFrameOrientation)
    {
       setControlFramePosition(controlFramePosition);
       setControlFrameOrientation(controlFrameOrientation);
@@ -554,13 +636,23 @@ public class KinematicsToolboxRigidBodyMessage extends TrackablePacket<Kinematic
 
    public void getDesiredPose(FramePose desiredPoseToPack)
    {
-      desiredPoseToPack.setPoseIncludingFrame(ReferenceFrame.getWorldFrame(), desiredPositionInWorld, desiredOrientationInWorld);
+      desiredPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
+
+      if (desiredPositionInWorld != null)
+         desiredPoseToPack.setPosition(desiredPositionInWorld);
+      if (desiredOrientationInWorld != null)
+         desiredPoseToPack.setOrientation(desiredOrientationInWorld);
    }
 
    public void getControlFramePose(RigidBody endEffector, FramePose controlFramePoseToPack)
    {
       ReferenceFrame referenceFrame = endEffector == null ? null : endEffector.getBodyFixedFrame();
-      controlFramePoseToPack.setPoseIncludingFrame(referenceFrame, controlFramePositionInEndEffector, controlFrameOrientationInEndEffector);
+      controlFramePoseToPack.setToZero(referenceFrame);
+
+      if (controlFramePositionInEndEffector != null)
+         controlFramePoseToPack.setPosition(controlFramePositionInEndEffector);
+      if (controlFrameOrientationInEndEffector != null)
+         controlFramePoseToPack.setOrientation(controlFrameOrientationInEndEffector);
    }
 
    public void getSelectionMatrix(DenseMatrix64F selectionMatrixToPack)
