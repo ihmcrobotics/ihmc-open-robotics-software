@@ -57,6 +57,13 @@ public class SelectionMatrix6D
       linearPart.setSelectionFrame(linearSelectionFrame);
    }
 
+   public void setAngularAxisSelection(boolean xSelected, boolean ySelected, boolean zSelected)
+   {
+      selectAngularX(xSelected);
+      selectAngularY(ySelected);
+      selectAngularZ(zSelected);
+   }
+
    public void selectAngularX(boolean select)
    {
       angularPart.selectXAxis(select);
@@ -70,6 +77,13 @@ public class SelectionMatrix6D
    public void selectAngularZ(boolean select)
    {
       angularPart.selectZAxis(select);
+   }
+   
+   public void setLinearAxisSelection(boolean xSelected, boolean ySelected, boolean zSelected)
+   {
+      selectLinearX(xSelected);
+      selectLinearY(ySelected);
+      selectLinearZ(zSelected);
    }
 
    public void selectLinearX(boolean select)

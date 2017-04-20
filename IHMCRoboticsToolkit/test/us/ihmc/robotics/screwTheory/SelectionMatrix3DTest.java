@@ -9,8 +9,11 @@ import java.util.Random;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
+import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameMatrix3D;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.linearAlgebra.MatrixTools;
@@ -18,14 +21,20 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 
 public class SelectionMatrix3DTest
 {
+   private static final int ITERATIONS = 1000;
+
    @Test
    public void testSettersGetters() throws Exception
    {
       Random random = new Random(123423L);
 
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
+      assertNull(selectionMatrix3D.getSelectionFrame());
+      assertTrue(selectionMatrix3D.isXSelected());
+      assertTrue(selectionMatrix3D.isYSelected());
+      assertTrue(selectionMatrix3D.isZSelected());
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
          boolean xSelected = random.nextBoolean();
          boolean ySelected = random.nextBoolean();
@@ -81,63 +90,69 @@ public class SelectionMatrix3DTest
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
       FrameMatrix3D frameMatrix3D = new FrameMatrix3D();
 
-      DenseMatrix64F actualSelectionMatrix = new DenseMatrix64F(3, 3);
-      DenseMatrix64F expectedSelectionMatrix = new DenseMatrix64F(3, 3);
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
 
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop1", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
       referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop3", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
-         boolean xSelected = random.nextBoolean();
-         boolean ySelected = random.nextBoolean();
-         boolean zSelected = random.nextBoolean();
-         selectionMatrix3D.setAxisSelection(xSelected, ySelected, zSelected);
-         ReferenceFrame selectionFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
-         selectionMatrix3D.setSelectionFrame(selectionFrame);
+         for (ReferenceFrame selectionFrame : referenceFrames)
+         {
+            for (ReferenceFrame destinationFrame : referenceFrames.subList(1, referenceFrames.size()))
+            {
+               DenseMatrix64F actualSelectionMatrix = RandomMatrices.createRandom(3, 3, -1.0, 1.0, random);
+               DenseMatrix64F expectedSelectionMatrix = RandomMatrices.createRandom(3, 3, -1.0, 1.0, random);
 
-         frameMatrix3D.setToZero(selectionFrame);
-         frameMatrix3D.setM00(xSelected ? 1.0 : 0.0);
-         frameMatrix3D.setM11(ySelected ? 1.0 : 0.0);
-         frameMatrix3D.setM22(zSelected ? 1.0 : 0.0);
+               boolean xSelected = random.nextBoolean();
+               boolean ySelected = random.nextBoolean();
+               boolean zSelected = random.nextBoolean();
 
-         // Avoid the null frame
-         ReferenceFrame destinationFrame = referenceFrames.get(random.nextInt(referenceFrames.size() - 1) + 1);
-         selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
-         if (selectionFrame != null)
-            frameMatrix3D.changeFrame(destinationFrame);
-         frameMatrix3D.getDenseMatrix(expectedSelectionMatrix);
-         assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
+               selectionMatrix3D.setAxisSelection(xSelected, ySelected, zSelected);
+               selectionMatrix3D.setSelectionFrame(selectionFrame);
 
-         // Verifies that it has the intended application: Being able to apply the selection to any frame
-         DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(3, 1);
-         DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(3, 1);
+               frameMatrix3D.setToZero(selectionFrame);
+               frameMatrix3D.setM00(xSelected ? 1.0 : 0.0);
+               frameMatrix3D.setM11(ySelected ? 1.0 : 0.0);
+               frameMatrix3D.setM22(zSelected ? 1.0 : 0.0);
 
-         FrameVector randomVector = FrameVector.generateRandomFrameVector(random, destinationFrame);
-         DenseMatrix64F originalVector = new DenseMatrix64F(3, 1);
-         randomVector.get(originalVector);
-         selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, expectedSelectionMatrix);
-         CommonOps.mult(expectedSelectionMatrix, originalVector, actualSubspaceVector);
+               selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
+               if (selectionFrame != null)
+                  frameMatrix3D.changeFrame(destinationFrame);
+               frameMatrix3D.getDenseMatrix(expectedSelectionMatrix);
+               assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
 
-         if (selectionFrame != null)
-            randomVector.changeFrame(selectionFrame);
+               // Verifies that it has the intended application: Being able to apply the selection to any frame
+               DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(3, 1);
+               DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(3, 1);
 
-         if (!xSelected)
-            randomVector.setX(0.0);
-         if (!ySelected)
-            randomVector.setY(0.0);
-         if (!zSelected)
-            randomVector.setZ(0.0);
+               FrameVector randomVector = FrameVector.generateRandomFrameVector(random, destinationFrame);
+               DenseMatrix64F originalVector = new DenseMatrix64F(3, 1);
+               randomVector.get(originalVector);
+               selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, expectedSelectionMatrix);
+               CommonOps.mult(expectedSelectionMatrix, originalVector, actualSubspaceVector);
 
-         if (selectionFrame != null)
-            randomVector.changeFrame(destinationFrame);
-         randomVector.get(expectedSubspaceVector);
+               if (selectionFrame != null)
+                  randomVector.changeFrame(selectionFrame);
 
-         assertMatrixEquals(expectedSubspaceVector, actualSubspaceVector, 1.0e-12);
+               if (!xSelected)
+                  randomVector.setX(0.0);
+               if (!ySelected)
+                  randomVector.setY(0.0);
+               if (!zSelected)
+                  randomVector.setZ(0.0);
+
+               if (selectionFrame != null)
+                  randomVector.changeFrame(destinationFrame);
+               randomVector.get(expectedSubspaceVector);
+
+               assertMatrixEquals(expectedSubspaceVector, actualSubspaceVector, 1.0e-12);
+            }
+         }
       }
    }
 
@@ -147,30 +162,39 @@ public class SelectionMatrix3DTest
       Random random = new Random(456465L);
       SelectionMatrix3D selectionMatrix3D = new SelectionMatrix3D();
 
+      RigidBodyTransform randomTransform = EuclidCoreRandomTools.generateRandomRigidBodyTransform(random);
+
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop1", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
       referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
-      referenceFrames.add(ReferenceFrame.generateRandomReferenceFrame("blop3", random, ReferenceFrame.getWorldFrame()));
+      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < ITERATIONS; i++)
       {
-         DenseMatrix64F actualSelectionMatrix = new DenseMatrix64F(3, 3);
-         DenseMatrix64F expectedSelectionMatrix = new DenseMatrix64F(3, 3);
-         boolean xSelected = random.nextBoolean();
-         boolean ySelected = random.nextBoolean();
-         boolean zSelected = random.nextBoolean();
-         selectionMatrix3D.setAxisSelection(xSelected, ySelected, zSelected);
-         ReferenceFrame selectionFrame = referenceFrames.get(random.nextInt(referenceFrames.size()));
-         selectionMatrix3D.setSelectionFrame(selectionFrame);
+         for (ReferenceFrame selectionFrame : referenceFrames)
+         {
+            for (ReferenceFrame destinationFrame : referenceFrames.subList(1, referenceFrames.size()))
+            {
+               DenseMatrix64F actualSelectionMatrix = RandomMatrices.createRandom(3, 3, -1.0, 1.0, random);
+               DenseMatrix64F expectedSelectionMatrix = RandomMatrices.createRandom(3, 3, -1.0, 1.0, random);
 
-         // Avoid the null frame
-         ReferenceFrame destinationFrame = referenceFrames.get(random.nextInt(referenceFrames.size() - 1) + 1);
-         selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, expectedSelectionMatrix);
-         MatrixTools.removeZeroRows(expectedSelectionMatrix, 1.0e-7);
-         selectionMatrix3D.getEfficientSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
-         assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
+               boolean xSelected = random.nextBoolean();
+               boolean ySelected = random.nextBoolean();
+               boolean zSelected = random.nextBoolean();
+
+               selectionMatrix3D.setAxisSelection(xSelected, ySelected, zSelected);
+               selectionMatrix3D.setSelectionFrame(selectionFrame);
+
+               selectionMatrix3D.getFullSelectionMatrixInFrame(destinationFrame, expectedSelectionMatrix);
+               MatrixTools.removeZeroRows(expectedSelectionMatrix, 1.0e-7);
+
+               selectionMatrix3D.getEfficientSelectionMatrixInFrame(destinationFrame, actualSelectionMatrix);
+
+               assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
+            }
+         }
       }
    }
 
