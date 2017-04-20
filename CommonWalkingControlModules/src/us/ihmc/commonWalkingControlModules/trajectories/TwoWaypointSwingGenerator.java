@@ -36,7 +36,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final DoubleYoVariable maxSwingHeight;
    private final DoubleYoVariable minSwingHeight;
 
-   private final WaypointTrajectoryGenerator trajectory;
+   private final PositionOptimizedTrajectoryGenerator trajectory;
 
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector initialVelocity = new FrameVector();
