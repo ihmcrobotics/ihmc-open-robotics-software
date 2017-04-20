@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator
 
 import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.IntegerYoVariable;
+import us.ihmc.robotics.geometry.FrameLineSegment2d;
 import us.ihmc.robotics.geometry.FramePoint;
 import us.ihmc.robotics.geometry.FramePoint2d;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -28,6 +29,18 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
       currentCalculator.clear();
    }
 
+   public boolean getUseLineContact(RobotSide trailingLeg)
+   {
+      ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());
+      return currentCalculator.getUseLineContact(trailingLeg);
+   }
+
+   public void setUseLineContact(boolean useLineContact, RobotSide trailingLeg)
+   {
+      ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());
+      currentCalculator.setUseLineContact(useLineContact, trailingLeg);
+   }
+
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());
@@ -44,5 +57,17 @@ public class WrapperForMultipleToeOffCalculators implements ToeOffCalculator
    {
       ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());
       currentCalculator.getToeOffContactPoint(contactPointToPack, trailingLeg);
+   }
+
+   public void computeToeOffContactLine(FramePoint2d desiredCMP, RobotSide trailingLeg)
+   {
+      ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());
+      currentCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);
+   }
+
+   public void getToeOffContactLine(FrameLineSegment2d contactLineToPack, RobotSide trailingLeg)
+   {
+      ToeOffCalculator currentCalculator = toeOffCalculators.get(toeOffCalculatorIndex.getIntegerValue());
+      currentCalculator.getToeOffContactLine(contactLineToPack, trailingLeg);
    }
 }
