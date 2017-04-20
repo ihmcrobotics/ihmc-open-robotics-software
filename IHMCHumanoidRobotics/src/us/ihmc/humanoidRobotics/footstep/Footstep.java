@@ -29,6 +29,7 @@ public class Footstep
    private final FramePose footstepPose = new FramePose();
    
    private final FramePose tempPose = new FramePose();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final PoseReferenceFrame footstepSoleFrame;
 
    private final List<Point2D> predictedContactPoints = new ArrayList<>();
@@ -212,11 +213,6 @@ public class Footstep
    {
       return endEffector.getName() + "_" + counter++;
    }
-   
-   public FramePose getFootstepPose()
-   {
-      return footstepPose;
-   }
 
    public List<Point2D> getPredictedContactPoints()
    {
@@ -295,16 +291,6 @@ public class Footstep
       return trustHeight;
    }
 
-   public void getPose(FramePoint positionToPack, FrameOrientation orientationToPack)
-   {
-      footstepPose.getPoseIncludingFrame(positionToPack, orientationToPack);
-   }
-
-   public void getPose(FramePose poseToPack)
-   {
-      poseToPack.setIncludingFrame(footstepPose);
-   }
-
    public RigidBody getBody()
    {
       return endEffector;
@@ -318,6 +304,21 @@ public class Footstep
    public void setRobotSide(RobotSide robotSide)
    {
       this.robotSide = robotSide;
+   }
+   
+   public FramePose getFootstepPose()
+   {
+      return footstepPose;
+   }
+   
+   public void getPose(FramePose poseToPack)
+   {
+      poseToPack.setIncludingFrame(footstepPose);
+   }
+   
+   public void getPose(FramePoint positionToPack, FrameOrientation orientationToPack)
+   {
+      footstepPose.getPoseIncludingFrame(positionToPack, orientationToPack);
    }
 
    public void getPosition(FramePoint positionToPack)
@@ -383,5 +384,47 @@ public class Footstep
       tempPose.changeFrame(footstepSoleFrame.getParent());
       footstepSoleFrame.setPoseAndUpdate(tempPose);
       return footstepSoleFrame;
+   }
+
+   public void getAnklePose(FramePose poseToPack, RigidBodyTransform transformFromAnkleToSole)
+   {
+      tempTransform.setRotation(footstepPose.getOrientation());
+      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.multiply(transformFromAnkleToSole);
+      poseToPack.setPoseIncludingFrame(footstepPose.getReferenceFrame(), tempTransform);
+   }
+
+   public void getAnklePosition(FramePoint positionToPack, RigidBodyTransform transformFromAnkleToSole)
+   {
+      tempTransform.setRotation(footstepPose.getOrientation());
+      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.multiply(transformFromAnkleToSole);
+      positionToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getTranslationVector());
+   }
+
+   public void getAnklePosition2d(FramePoint2d position2dToPack, RigidBodyTransform transformFromAnkleToSole)
+   {
+      tempTransform.setRotation(footstepPose.getOrientation());
+      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.multiply(transformFromAnkleToSole);
+      double x = tempTransform.getTranslationVector().getX();
+      double y = tempTransform.getTranslationVector().getY();
+      position2dToPack.setIncludingFrame(footstepPose.getReferenceFrame(), x, y);
+   }
+
+   public void getAnkleOrientation(FrameOrientation orientationToPack, RigidBodyTransform transformFromAnkleToSole)
+   {
+      tempTransform.setRotation(footstepPose.getOrientation());
+      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.multiply(transformFromAnkleToSole);
+      orientationToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getRotationMatrix());
+   }
+
+   public void setFromAnklePose(FramePose anklePose, RigidBodyTransform transformFromAnkleToSole)
+   {
+      tempTransform.setRotation(anklePose.getOrientation());
+      tempTransform.setTranslation(anklePose.getPosition());
+      tempTransform.multiplyInvertOther(transformFromAnkleToSole);
+      footstepPose.setPoseIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }
 }

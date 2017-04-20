@@ -24,7 +24,7 @@ import us.ihmc.robotics.screwTheory.RigidBody;
 public class ScriptedFootstepGenerator
 {
    private final SideDependentList<ContactablePlaneBody> bipedFeet;
-   private final SideDependentList<RigidBodyTransform> transformsFromSoleToAnkle = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole = new SideDependentList<>();
 
    public ScriptedFootstepGenerator(HumanoidReferenceFrames referenceFrames, FullHumanoidRobotModel fullRobotModel, WalkingControllerParameters walkingControllerParameters)
    {
@@ -34,10 +34,10 @@ public class ScriptedFootstepGenerator
       {
          RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
          ReferenceFrame ankleFrame = foot.getParentJoint().getFrameAfterJoint();
-         RigidBodyTransform transformFromSoleToAnkle = new RigidBodyTransform();
+         RigidBodyTransform ankleToSole = new RigidBodyTransform();
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
-         soleFrame.getTransformToDesiredFrame(transformFromSoleToAnkle, ankleFrame);
-         transformsFromSoleToAnkle.put(robotSide, transformFromSoleToAnkle);
+         ankleFrame.getTransformToDesiredFrame(ankleToSole, soleFrame);
+         transformsFromAnkleToSole.put(robotSide, ankleToSole);
       }
    }
 
@@ -75,17 +75,16 @@ public class ScriptedFootstepGenerator
    private Footstep generateFootstepFromLocationAndOrientation(RobotSide robotSide, double[] positionArray, double[] orientationArray)
    {
       RigidBody foot = bipedFeet.get(robotSide).getRigidBody();
-      boolean trustHeight = true;
+      Footstep footstep = new Footstep(foot, robotSide);
+
       Point3D position = new Point3D(positionArray);
       Quaternion orientation = new Quaternion(orientationArray);
+      RigidBodyTransform anklePose = new RigidBodyTransform();
+      anklePose.setRotation(orientation);
+      anklePose.setTranslation(position);
+      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), anklePose);
       
-      RigidBodyTransform footstepPose = new RigidBodyTransform();
-      footstepPose.setRotation(orientation);
-      footstepPose.setTranslation(position);
-      footstepPose.multiply(transformsFromSoleToAnkle.get(robotSide));
-      
-      FramePose pose = new FramePose(ReferenceFrame.getWorldFrame(), footstepPose);
-      Footstep footstep = new Footstep(foot, robotSide, pose, trustHeight);
+      footstep.setFromAnklePose(pose, transformsFromAnkleToSole.get(robotSide));
 
       return footstep;
    }

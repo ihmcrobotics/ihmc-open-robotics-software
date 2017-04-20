@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFoot
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -82,7 +83,7 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
 
       Robot robot = new Robot("Dummy");
       DoubleYoVariable yoTime = robot.getYoTime();
-      SideDependentList<Point3D> anklePositionsInSoleFrame = new SideDependentList<>(new Point3D(), new Point3D());
+      SideDependentList<RigidBodyTransform> anklePositionsInSoleFrame = new SideDependentList<>(new RigidBodyTransform(), new RigidBodyTransform());
 
       setupStuff(yoGraphicsListRegistry, registry);
       LookAheadCoMHeightTrajectoryGenerator lookAheadCoMHeightTrajectoryGenerator = new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround, nominalHeightAboveGround,
