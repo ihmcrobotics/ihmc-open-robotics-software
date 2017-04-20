@@ -247,8 +247,8 @@ public class FootstepGeneratorsTest
       double endX = -3.0;
       double endY = 0.0;
 
-      // Visualization vis = Visualization.VISUALIZE;
-      Visualization vis = Visualization.NO_VISUALIZATION;
+       Visualization vis = Visualization.VISUALIZE;
+//      Visualization vis = Visualization.NO_VISUALIZATION;
 
       String testDescription = "Walk " + pathDirection.toString();
       testTurnStraightFootstepGenerator("RStance, turn staight, " + testDescription, startX, startY, startYaw, RobotSide.RIGHT, pathDirection, endX, endY, vis);
@@ -2251,7 +2251,7 @@ public class FootstepGeneratorsTest
       double eps = 1e-15;
       for (Footstep footstep : footSteps)
       {
-         assertEquals(message + " foot should be level and zero height.", zToAnkle, footstep.getZ(), eps);
+         assertEquals(message + " foot should be level and zero height.", 0.0, footstep.getZ(), eps);
       }
    }
 
