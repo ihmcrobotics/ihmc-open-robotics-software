@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator;
 
+import us.ihmc.robotics.dataStructures.listener.VariableChangedListener;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
-
 
 public interface ToeOffCalculator
 {
@@ -11,6 +11,8 @@ public interface ToeOffCalculator
    public boolean getUseLineContact(RobotSide trailingLeg);
 
    public void setUseLineContact(boolean useLineContact, RobotSide trailingLeg);
+
+   public void addListenerToUseLineContact(RobotSide robotSide, VariableChangedListener listener);
 
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg);
 
