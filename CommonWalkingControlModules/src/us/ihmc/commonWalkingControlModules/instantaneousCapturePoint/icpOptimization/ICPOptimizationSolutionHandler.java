@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.icpOptimization.multipliers.StateMultiplierCalculator;
 import us.ihmc.commonWalkingControlModules.instantaneousCapturePoint.smoothICPGenerator.CapturePointTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -21,6 +22,7 @@ import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.frames.YoFramePoint2d;
 import us.ihmc.robotics.math.frames.YoFrameVector2d;
 import us.ihmc.robotics.referenceFrames.ReferenceFrame;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class ICPOptimizationSolutionHandler
 {
@@ -51,13 +53,17 @@ public class ICPOptimizationSolutionHandler
 
    private final boolean debug;
    private final String yoNamePrefix;
+   
+   private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
 
    public ICPOptimizationSolutionHandler(ICPOptimizationParameters icpOptimizationParameters, StateMultiplierCalculator stateMultiplierCalculator,
-         boolean visualize, boolean debug, String yoNamePrefix, YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, boolean visualize, boolean debug, String yoNamePrefix,
+         YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.stateMultiplierCalculator = stateMultiplierCalculator;
       this.debug = debug;
       this.yoNamePrefix = yoNamePrefix;
+      this.transformsFromAnkleToSole = transformsFromAnkleToSole;
 
       actualEndingCornerPoint = new YoFramePoint2d(yoNamePrefix + "ActualEndingCornerPoint", worldFrame, registry);
 
@@ -158,14 +164,16 @@ public class ICPOptimizationSolutionHandler
    private final FramePoint2d upcomingFootstepLocation = new FramePoint2d();
 
    public void extractFootstepSolutions(ArrayList<YoFramePoint2d> footstepSolutionsToPack, ArrayList<FramePoint2d> unclippedFootstepSolutionsToPack,
-         ArrayList<YoFramePoint2d> referenceFootstepLocations, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider, ICPOptimizationSolver solver)
+         ArrayList<YoFramePoint2d> referenceFootstepLocations, ArrayList<Footstep> upcomingFootsteps, int numberOfFootstepsToConsider,
+         ICPOptimizationSolver solver)
    {
       boolean firstStepAdjusted = false;
       for (int i = 0; i < numberOfFootstepsToConsider; i++)
       {
          solver.getFootstepSolutionLocation(i, locationSolution);
 
-         upcomingFootsteps.get(i).getFootstepPose().getPosition2dIncludingFrame(upcomingFootstepLocation);
+         RigidBodyTransform ankleToSole = transformsFromAnkleToSole.get(upcomingFootsteps.get(i).getRobotSide());
+         upcomingFootsteps.get(i).getAnklePosition2d(upcomingFootstepLocation, ankleToSole);
          ReferenceFrame deadbandFrame = upcomingFootsteps.get(i).getSoleReferenceFrame();
 
          FramePoint2d referenceFootstepLocation = referenceFootstepLocations.get(i).getFrameTuple2d();
