@@ -30,7 +30,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrame;
 public class SelectionMatrix3D
 {
    /**
-    * When selecting the axes of interest, these axes refer to selection frame axes. This frame is
+    * When selecting the axes of interest, these axes refer to the selection frame axes. This frame is
     * optional. It is preferable to provide it when possible, but when it is absent, i.e. equal to
     * {@code null}, the selection matrix will then be generated assuming the destination frame is
     * the same as the selection frame.
