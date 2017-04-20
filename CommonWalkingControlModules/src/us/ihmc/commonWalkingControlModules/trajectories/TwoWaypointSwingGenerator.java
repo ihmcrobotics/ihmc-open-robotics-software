@@ -36,7 +36,7 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    private final DoubleYoVariable maxSwingHeight;
    private final DoubleYoVariable minSwingHeight;
 
-   private final WaypointTrajectoryGenerator trajectory;
+   private final PositionOptimizedTrajectoryGenerator trajectory;
 
    private final FramePoint initialPosition = new FramePoint();
    private final FrameVector initialVelocity = new FrameVector();
@@ -84,11 +84,6 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
       this.stepTime.set(stepTime);
    }
 
-   public void setMinimumSwingHeight(double minSwingHeight)
-   {
-//      this.minSwingHeight = minSwingHeight;
-   }
-
    public void setInitialConditions(FramePoint initialPosition, FrameVector initialVelocity)
    {
       this.initialPosition.setIncludingFrame(initialPosition);
@@ -110,16 +105,18 @@ public class TwoWaypointSwingGenerator implements PositionTrajectoryGenerator
    {
       if (trajectoryType == TrajectoryType.CUSTOM && waypoints == null)
       {
-         PrintTools.warn("Recieved no waypoints but trajectory type is custom. Using desault trajectory.");
+         PrintTools.warn("Recieved no waypoints but trajectory type is custom. Using default trajectory.");
          this.trajectoryType.set(TrajectoryType.DEFAULT);
       }
       else if (trajectoryType == TrajectoryType.CUSTOM && waypoints.size() != numberWaypoints)
       {
-         PrintTools.warn("Recieved too many waypoints. Using default trajectory.");
+         PrintTools.warn("Recieved unexpected amount of waypoints. Using default trajectory.");
          this.trajectoryType.set(TrajectoryType.DEFAULT);
       }
       else
+      {
          this.trajectoryType.set(trajectoryType);
+      }
 
       if (this.trajectoryType.getEnumValue() != TrajectoryType.CUSTOM)
          return;
