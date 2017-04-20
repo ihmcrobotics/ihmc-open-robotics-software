@@ -21,7 +21,6 @@ import us.ihmc.robotics.dataStructures.registry.YoVariableRegistry;
 import us.ihmc.robotics.dataStructures.variable.BooleanYoVariable;
 import us.ihmc.robotics.dataStructures.variable.DoubleYoVariable;
 import us.ihmc.robotics.dataStructures.variable.EnumYoVariable;
-import us.ihmc.robotics.geometry.FrameOrientation;
 import us.ihmc.robotics.geometry.FrameVector;
 import us.ihmc.robotics.geometry.FrameVector2d;
 import us.ihmc.robotics.math.trajectories.providers.YoVelocityProvider;
@@ -73,7 +72,6 @@ public class FootControlModule
    private final DoubleYoVariable footLoadThresholdToHoldPosition;
 
    private final FootControlHelper footControlHelper;
-   private final ToeOffHelper toeOffHelper;
 
    private final BooleanYoVariable requestExploration;
    private final BooleanYoVariable resetFootPolygon;
@@ -82,8 +80,6 @@ public class FootControlModule
          YoSE3PIDGainsInterface holdPositionFootControlGains, YoSE3PIDGainsInterface toeOffFootControlGains,
          YoSE3PIDGainsInterface edgeTouchdownFootControlGains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
    {
-      this.toeOffHelper = toeOffHelper;
-
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       controllerToolbox.setFootContactCoefficientOfFriction(robotSide, coefficientOfFriction);
       controllerToolbox.setFootContactStateFullyConstrained(robotSide);
@@ -423,14 +419,6 @@ public class FootControlModule
 
    public void setFootstep(Footstep footstep, double swingTime)
    {
-      // TODO Used to pass the desireds from the toe off state to swing state. Clean that up.
-      if (stateMachine.getCurrentStateEnum() == ConstraintType.TOES)
-      {
-         FrameOrientation initialOrientation = new FrameOrientation();
-         FrameVector initialAngularVelocity = new FrameVector();
-         onToesState.getDesireds(initialOrientation, initialAngularVelocity);
-         swingState.setInitialDesireds(initialOrientation, initialAngularVelocity);
-      }
       swingState.setFootstep(footstep, swingTime);
    }
 

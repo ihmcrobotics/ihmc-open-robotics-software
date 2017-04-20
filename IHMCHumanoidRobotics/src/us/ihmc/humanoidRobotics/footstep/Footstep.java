@@ -330,6 +330,11 @@ public class Footstep
    {
       footstepPose.getOrientationIncludingFrame(orientationToPack);
    }
+   
+   public ReferenceFrame getTrajectoryFrame()
+   {
+      return footstepPose.getReferenceFrame();
+   }
 
    public void setFootstepType(FootstepType footstepType)
    {
