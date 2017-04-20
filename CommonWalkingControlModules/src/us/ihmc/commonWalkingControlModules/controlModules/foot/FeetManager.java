@@ -308,6 +308,7 @@ public class FeetManager
     */
    public boolean checkIfToeOffSafeDoubleSupport(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
    {
+      toeOffCalculator.setUseLineContact(false, trailingLeg);
       walkOnTheEdgesManager.inDoubleSupport();
       walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
 
@@ -321,11 +322,23 @@ public class FeetManager
    public boolean checkIfToeOffSafeSingleSupport(Footstep nextFootstep, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d currentICP, FramePoint2d desiredICP)
    {
       RobotSide trailingLeg = nextFootstep.getRobotSide().getOppositeSide();
+      toeOffCalculator.setUseLineContact(true, trailingLeg);
       walkOnTheEdgesManager.inSingleSupport();
       walkOnTheEdgesManager.submitNextFootstep(nextFootstep);
       walkOnTheEdgesManager.updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
 
       return walkOnTheEdgesManager.doToeOff();
+   }
+
+   public boolean usingPointToeContact(RobotSide trailingLeg)
+   {
+      return !toeOffCalculator.getUseLineContact(trailingLeg);
+   }
+
+   public void switchToPointToeContactIfPossible(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   {
+      walkOnTheEdgesManager.inDoubleSupport();
+      walkOnTheEdgesManager.switchToContactPointIfPossible(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
    }
 
    public void requestToeOff(RobotSide trailingLeg)

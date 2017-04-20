@@ -55,7 +55,6 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          contactPoints.put(robotSide, contactStates.get(robotSide).getContactPoints());
 
          BooleanYoVariable useLineContact = new BooleanYoVariable(robotSide.getLowerCaseName() + namePrefix +  "UseLineToeOff", registry);
-         useLineContact.set(true);
          useLineContacts.put(robotSide, useLineContact);
       }
 
@@ -85,10 +84,6 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       this.useLineContacts.get(trailingLeg).set(useLineContact);
    }
 
-   public void addListenerToUseLineContact(RobotSide robotSide, VariableChangedListener listener)
-   {
-      useLineContacts.get(robotSide).addVariableChangedListener(listener);
-   }
 
    public void setExitCMP(FramePoint exitCMP, RobotSide trailingLeg)
    {

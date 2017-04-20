@@ -181,6 +181,15 @@ public class WalkOnTheEdgesManager
       isInSingleSupport.set(false);
    }
 
+   public void switchToContactPointIfPossible(RobotSide trailingLeg, FramePoint exitCMP, FramePoint2d desiredECMP, FramePoint2d desiredICP, FramePoint2d currentICP)
+   {
+      toeOffCalculator.setUseLineContact(false, trailingLeg);
+      updateToeOffStatus(trailingLeg, exitCMP, desiredECMP, desiredICP, currentICP);
+
+      if (!doToeOff.getBooleanValue())
+         toeOffCalculator.setUseLineContact(true, trailingLeg);
+   }
+
    /**
     * <p>
     * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link WalkOnTheEdgesManager#doToeOff} variable accordingly.
