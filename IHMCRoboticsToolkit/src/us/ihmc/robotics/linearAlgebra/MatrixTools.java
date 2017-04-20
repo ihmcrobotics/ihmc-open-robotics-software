@@ -1001,6 +1001,9 @@ public class MatrixTools
 
    public static void removeRow(DenseMatrix64F matrixToRemoveRowTo, int indexOfRowToRemove)
    {
+      if (indexOfRowToRemove >= matrixToRemoveRowTo.getNumRows())
+         throw new RuntimeException("The index indexOfRowToRemove was expected to be in [0, " + (matrixToRemoveRowTo.getNumRows() - 1) + "], but was: " + indexOfRowToRemove);
+
       for (int columnIndex = 0; columnIndex < matrixToRemoveRowTo.getNumCols(); columnIndex++)
       {
          for (int currentRowIndex = indexOfRowToRemove; currentRowIndex < matrixToRemoveRowTo.getNumRows() - 1; currentRowIndex++)
@@ -1051,9 +1054,9 @@ public class MatrixTools
       if (startRow > endRow)
          throw new IllegalArgumentException("The index startRow cannot be greater than endRow.");
       if (startRow < 0 || startRow >= matrixToModify.getNumRows())
-         throw new RuntimeException("The index startRow was expected to be in [0, " + (matrixToModify.getNumRows() - 1) + "[, but was: " + startRow);
+         throw new RuntimeException("The index startRow was expected to be in [0, " + (matrixToModify.getNumRows() - 1) + "], but was: " + startRow);
       if (endRow < 0 || endRow >= matrixToModify.getNumRows())
-         throw new RuntimeException("The index endRow was expected to be in [0, " + (matrixToModify.getNumRows() - 1) + "[, but was: " + endRow);
+         throw new RuntimeException("The index endRow was expected to be in [0, " + (matrixToModify.getNumRows() - 1) + "], but was: " + endRow);
 
       for (int rowIndex = endRow; rowIndex >= startRow; rowIndex--)
       {

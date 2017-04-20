@@ -92,7 +92,7 @@ public class SelectionMatrix3D
          }
          selectionMatrixToPack.set(startRow++, startColumn++, xSelected ? 1.0 : 0.0);
          selectionMatrixToPack.set(startRow++, startColumn++, ySelected ? 1.0 : 0.0);
-         selectionMatrixToPack.set(startRow++, startColumn++, zSelected ? 1.0 : 0.0);
+         selectionMatrixToPack.set(startRow, startColumn, zSelected ? 1.0 : 0.0);
       }
       else
       {
