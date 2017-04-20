@@ -13,6 +13,7 @@ import org.ejml.ops.RandomMatrices;
 import org.junit.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
+import us.ihmc.continuousIntegration.ContinuousIntegrationAnnotations.ContinuousIntegrationTest;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.FrameVector;
@@ -24,7 +25,8 @@ public class SelectionMatrix6DTest
 
    private static final int ITERATIONS = 500;
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.1)
+   @Test(timeout = 30000)
    public void testGettersSetters()
    {
       Random random = new Random(123423L);
@@ -138,7 +140,8 @@ public class SelectionMatrix6DTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.9)
+   @Test(timeout = 30000)
    public void testGetFullSelectionMatrixInFrame() throws Exception
    {
       Random random = new Random(456465L);
@@ -233,7 +236,8 @@ public class SelectionMatrix6DTest
       }
    }
 
-   @Test
+   @ContinuousIntegrationTest(estimatedDuration = 0.8)
+   @Test(timeout = 30000)
    public void testGetEfficientSelectionMatrixInFrame() throws Exception
    {
       Random random = new Random(456465L);
